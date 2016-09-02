@@ -79,7 +79,7 @@ You can change the behavior of GDB or LLDB by setting the following options.
 
 **MIMode**: Indicates the debugger that VS Code will connect to. Must be set to `gdb` or `lldb`.  This is pre-configured on a per-operating system basis and can be changed as needed.
 
-**miDebuggerPath**: The path to the debugger (such as gdb). When unspecified, it will search the operating system's PATH variable first for the debugger. default": "/usr/bin/gdb".
+**miDebuggerPath**: The path to the debugger (such as gdb). When unspecified, it will search the operating system's PATH variable for a debugger (GDB on Linux and Windows, LLDB on OS X).
 
 **stopAtEntry**: If set to true, the debugger should stop at the entrypoint of the target (ignored on attach). Default value is `false`.
 
@@ -122,7 +122,8 @@ The C/C++ extension enables debugging dump files on Windows and core dump files 
 
 **dumpPath**: If you want to debug a Windows dump file, set this to the path to the dump file to start debugging in the `launch` configuration.
 
-**coreDumpPath**: Full path to a core dump file to debug for the specified program.  Set this to the path to the core dump file to start debugging in the `launch` configureation. 
+**coreDumpPath**: Full path to a core dump file to debug for the specified program.  Set this to the path to the core dump file to start debugging in the `launch` configuration. 
+_Note: core dump debuging is not supported with MinGw._  
 
 ## Remote debugging or debugging with a local debugger server
 
