@@ -83,7 +83,7 @@ You can change the behavior of GDB or LLDB by setting the following options.
 
 **stopAtEntry**: If set to true, the debugger should stop at the entrypoint of the target (ignored on attach). Default value is `false`.
 
-**setupCommands**: JSON array of commands to execute in order to setup the GDB or LLDB. Example: `"customLaunchSetupCommands": [ { "text": "target-run", "description": "run target", "ignoreFailures": false }]`.
+**setupCommands**: JSON array of commands to execute in order to setup the GDB or LLDB. Example: `"setupCommands": [ { "text": "target-run", "description": "run target", "ignoreFailures": false }]`.
  
 **customLaunchSetupCommands**: If provided, this replaces the default commands used to launch a target with some other commands. For example, this can be "-target-attach" in order to attach to a target process. An empty command list replaces the launch commands with nothing, which can be useful if the debugger is being provided launch options as command line options. Example: `"customLaunchSetupCommands": [ { "text": "target-run", "description": "run target", "ignoreFailures": false }]`.
       
