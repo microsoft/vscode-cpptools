@@ -29,6 +29,7 @@ Set or change the following options to control VS Code's behavior during debuggi
   * **traceResponse**: Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.
 
 **visualizerFile**: .natvis file to be used when debugging. See [Natvis syntax reference](http://aka.ms/natvis#Anchor_8) for information on how to create natvis files.
+
 **showDisplayString**: When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.
 
 **Example:**
