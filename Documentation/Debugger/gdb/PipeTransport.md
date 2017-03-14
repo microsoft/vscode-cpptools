@@ -3,7 +3,7 @@ Pipe Transport allows communication through a pipe program to a remote shell. An
 
 ## How-To
 We have added `"pipeTransport"` as an option within the `launch.json` file. The structure looks as follows:
-```json
+```
     "pipeTransport": {
         "pipeCwd": "/usr/bin",
         "pipeProgram": "/usr/bin/ssh",
@@ -18,7 +18,7 @@ We have added `"pipeTransport"` as an option within the `launch.json` file. The 
 The `pipeArgs` can be any set of arguments necessary to setup and authenticate the pipe connection. In the example, a password is used but you can also use an ssh key.
 
 You may also need to add a `sourceFileMap` to map the path of where the code exists on the remote shell to where it is locally:
-```json
+```
     "sourceFileMap": {
         // "remote": "local"
         "/home/user/src": "/src/projectA/src"
@@ -32,7 +32,7 @@ You can also use the above `pipeTransport` block to attach to a remote process. 
 
 The `pipeTransport` can also be used to debug a process in a Docker container. For an attach, the `launch.json` will include:
 
-```json
+```
     "pipeTransport": {
         "pipeCwd": "${workspaceRoot}",
         "pipeProgram": "docker",
