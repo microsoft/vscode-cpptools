@@ -47,4 +47,4 @@ The `pipeTransport` can also be used to debug a process in a Docker container. F
     },
 ```
 
-Launching a process is accomplished by starting a container and then using the same `pipeTransport` launch additional processes in the container. See this `[launch.json](https://github.com/andyneff/hello-world-gdb/blob/master/.vscode/launch.json)` for a [full example](https://github.com/andyneff/hello-world-gdb/)
+Launching a process is accomplished by starting a container and then using the same `pipeTransport` launch additional processes in the container. See this [`launch.json`](https://github.com/andyneff/hello-world-gdb/blob/master/.vscode/launch.json) for a [full example](https://github.com/andyneff/hello-world-gdb/)
