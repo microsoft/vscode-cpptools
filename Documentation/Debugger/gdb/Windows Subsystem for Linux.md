@@ -11,7 +11,7 @@ Code can be written on Windows itself using VSCode and debugged through `bash.ex
 * [Visual Studio Code](https://code.visualstudio.com) + Microsoft C/C++ extension for VSCode.
 
 ## How-To
-To debug, commands will be routed from Windows through `bash.exe` to setup debugging. Because our extension runs as a 32-bit process, it will need to use the `C:\Windows\SysNative` folder to access the executable that is normally in `C:\Windows\System32`. We will be using the `"pipeTransport"` ability within the extension to do debugging and `"sourceFileMap"` to map the source from the subsystem's paths back to Windows path. 
+To debug, commands will be routed from Windows through `bash.exe` to setup debugging. Because our extension runs as a 32-bit process, it will need to use the `C:\Windows\SysNative` folder to access the `bash.exe` executable that is normally in `C:\Windows\System32`. We will be using the `"pipeTransport"` ability within the extension to do debugging and `"sourceFileMap"` to map the source from the subsystem's paths back to Windows path. 
 
 **NOTE: Applications will need to be compiled in the `Windows Subsystem for Linux (WSL)` prior to debugging.**
 
