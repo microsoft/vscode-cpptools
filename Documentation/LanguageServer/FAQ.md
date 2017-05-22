@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-[Why do I have red underlines everywhere after updating to the latest version](#why-do-i-have-red-underlines-everywhere-after-updating-to-the latest-version)?
+[Why do I have red underlines everywhere after updating to the latest version](#why-do-i-have-red-underlines-everywhere-after-updating-to-the-latest-version)?
 
 [What is the difference between "includePath" and "browse.path" in c\_cpp\_properties.json](#what-is-the-difference-between-includepath-and-browsepath-in-c_cpp_propertiesjson)?
 
