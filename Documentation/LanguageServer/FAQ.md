@@ -1,5 +1,31 @@
 # Frequently asked questions
 
+[Why do I have red underlines everywhere after updating to the latest version](#why-do-i-have-red-underlines-everywhere-after-updating-to-the latest-version)?
+
+[What is the difference between "includePath" and "browse.path" in c\_cpp\_properties.json](#what-is-the-difference-between-includepath-and-browsepath-in-c_cpp_propertiesjson)?
+
+## Why do I have red underlines everywhere after updating to the latest version?
+
+If you are using the VS Code Insider build with version 0.11.0 of the cpptools extension or any build of VS Code with version 0.11.1 or higher of the extension, then the extension will default to using the new IntelliSense engine for linting and providing quick info tooltips in your source files.
+
+For some users this may result in a large number of red underlines ("squiggles") appearing in your source files. There are a few things you can do to resolve this issue. Select the one that best meets your needs for your situation.
+
+1. Update your includePath and defines
+2. Disable the error squiggles
+3. Disable the new IntelliSense engine
+
+#### Update your includePath and defines
+
+If you haven't already created a c_cpp_properties.json file for your project, you can do so by selecting "C/Cpp: Edit Configurations" from the command palette. This will create and open the c_cpp_properties.json file for you. Add the necessary paths to your include files to the `"includePath"` array. The `${workspaceRoot}` variable is available to use to get a relative path to the folder you have opened. Also add any required symbols that need to be defined to the `"defines"` array. Both "\<var\>" and "\<var\>=\<value\>" syntax is accepted. When you edit and save this file, the IntelliSense engine will reset and reparse source your source files and headers with the new settings.
+
+#### Disable the error squiggles
+
+If you want to keep using the semantic-aware features that will be coming online via the new IntelliSense engine, but don't want to see the error squiggles in the editor, then you can disable the lint messages by adding `"errorSquiggles": "Disabled"` to your settings.json file.
+
+#### Disable the new IntelliSense engine
+
+If you were happy with the old behavior of the extension or want to wait to get the semantic-aware features until build system support arrives in the extension so that you don't have to manually configure a c_cpp_properties.json file, you can disable the new IntelliSense engine entirely by adding `"intelliSenseEngine": "Tag Parser"` to your settings.json file.
+
 ## What is the difference between "includePath" and "browse.path" in c\_cpp\_properties.json?
 
 Starting with version 0.11.0 of the cpptools extension, there are now two settings in the c\_cpp\_properties.json file. They are used by the different IntelliSense engines that we support and have slightly different meanings for the components that use them.
