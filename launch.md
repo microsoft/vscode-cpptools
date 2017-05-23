@@ -47,7 +47,7 @@ Set or change the following options to control VS Code's behavior during debuggi
        "trace": true
     },
    "visualizerFile": "${workspaceRoot}/my.natvis",
-   "showDisplayString": "true"
+   "showDisplayString": true
 }
 ```
 
