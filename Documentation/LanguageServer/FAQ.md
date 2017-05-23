@@ -22,11 +22,11 @@ If you haven't already created a c_cpp_properties.json file for your project, yo
 
 #### Disable the error squiggles
 
-If you want to keep using the semantic-aware features that will be coming online via the new IntelliSense engine, but don't want to see the error squiggles in the editor, then you can disable the lint messages by adding `"errorSquiggles": "Disabled"` to your settings.json file.
+If you want to keep using the semantic-aware features that will be coming online via the new IntelliSense engine, but don't want to see the error squiggles in the editor, then you can disable the lint messages by adding `"C_Cpp.errorSquiggles": "Disabled"` to your settings.json file.
 
 #### Disable the new IntelliSense engine
 
-If you were happy with the old behavior of the extension or want to wait to get the semantic-aware features until build system support arrives in the extension so that you don't have to manually configure a c_cpp_properties.json file, you can disable the new IntelliSense engine entirely by adding `"intelliSenseEngine": "Tag Parser"` to your settings.json file.
+If you were happy with the old behavior of the extension or want to wait to get the semantic-aware features until build system support arrives in the extension so that you don't have to manually configure a c_cpp_properties.json file, you can disable the new IntelliSense engine entirely by adding `"C_Cpp.intelliSenseEngine": "Tag Parser"` to your settings.json file.
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
@@ -38,7 +38,7 @@ You can, however, override the engine's configuration by changing the contents o
 
 Starting with version 0.11.0 of the cpptools extension, there are now two settings in the c\_cpp\_properties.json file. They are used by the different IntelliSense engines that we support and have slightly different meanings for the components that use them.
 
-The active IntelliSense engine is controlled via the `"intelliSenseEngine"` setting in your settings.json file. The valid values for this setting are:
+The active IntelliSense engine is controlled via the `"C_Cpp.intelliSenseEngine"` setting in your settings.json file. The valid values for this setting are:
 * `"Default"`
 * `"Tag Parser"`
 
