@@ -8,7 +8,7 @@
 
 ## Why do I have red underlines everywhere after updating to the latest version?
 
-If you are using the VS Code Insider build with version 0.11.0 of the cpptools extension or any build of VS Code with version 0.11.1 or higher of the extension, then the extension will default to using the new IntelliSense engine for linting and providing quick info tooltips in your source files.
+If you are using the VS Code Insider build with version 0.11.0 of the cpptools extension or any build of VS Code with version 0.11.1 of the extension, then the extension will default to using the new IntelliSense engine for linting and providing quick info tooltips in your source files.
 
 For some users this may result in a large number of red underlines ("squiggles") appearing in your source files. There are a few things you can do to resolve this issue. Select the one that best meets your needs for your situation.
 
