@@ -17,7 +17,8 @@ For developers using MinGW on Windows, we recommend you start with the following
             ],
             "defines": [
                 "_DEBUG",
-                "UNICODE"
+                "UNICODE",
+                "__GNUC__"
             ],
             "browse": {
                 "path": [
@@ -51,7 +52,8 @@ For C projects, simply remove the c++ lines:
             ],
             "defines": [
                 "_DEBUG",
-                "UNICODE"
+                "UNICODE",
+                "__GNUC__"
             ],
             "browse": {
                 "path": [
