@@ -30,9 +30,7 @@ If you were happy with the old behavior of the extension or want to wait to get 
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
-On Windows PCs, the new IntelliSense engine is configured to compile your source files in Microsoft mode. But since MinGW is a relative of GCC, Microsoft mode compilation doesn't work very well with it. While the IntelliSense engine supports compiling code in clang/gcc mode, the extension does not currently expose any settings that allow you to configure it.
-
-You can, however, override the engine's configuration by changing the contents of the  `%userprofile%\.vscode\extensions\ms-vscode.cpptools-0.11.1\bin\msvc.64.intel.json` file. In fact, copying `msvc.64.linux.json` over `msvc.64.intel.json` will reconfigure the engine to compile your source code in clang mode. The caveat is that making changes to the `msvc.64.intel.json` is not a permanent operation. The next time you upgrade the extension, your changes will be reverted. However, this workaround should be able to enable you to use the new IntelliSense engine with MinGW until we have time to expose a proper setting.
+Since MinGW is a relative of GCC, Microsoft mode compilation (which is the default on Windows) doesn't work very well with it. To use GCC/CLang mode, set the `"intelliSenseMode"` property in your **c_cpp_properties.json** file to `"clang-x64"`. An example **c_cpp_properties.json** [is shared here for your convenience](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/MinGW.md).
 
 ## What is the difference between "includePath" and "browse.path" in c\_cpp\_properties.json?
 
