@@ -16,7 +16,7 @@
             }
         }
     ],
-    "version": <int>
+    "version": 2
 }
 ```
 
