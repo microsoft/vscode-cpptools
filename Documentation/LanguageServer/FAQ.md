@@ -6,6 +6,8 @@
 
 [What is the difference between "includePath" and "browse.path" in c\_cpp\_properties.json](#what-is-the-difference-between-includepath-and-browsepath-in-c_cpp_propertiesjson)?
 
+[How do I re-create the IntelliSense database](#how-do-i-re-create-the-intellisense-database)?
+
 ## Why do I have red underlines everywhere after updating to the latest version?
 
 If you are using the VS Code Insider build with version 0.11.0 or higher of the cpptools extension or any build of VS Code with version 0.11.1 of the extension, then the extension will default to using the new IntelliSense engine for linting and providing quick info tooltips in your source files.
@@ -47,3 +49,17 @@ The paths that you specify for this setting are the same paths that you would se
 **browse.path**: This array of path strings is used by the "Tag Parser" (a.k.a. "browse engine"). This engine will _recursively_ enumerate all files under the paths specified and track them as potential includes while tag parsing your project folder. To disable recursive enumeration of a path, you can append a `/*` to the path string.
 
 The extension will also implicitly add `${workspaceRoot}` to the array of paths unless `"C_Cpp.addWorkspaceRootToIncludePath"` is explicitly set to `false` in your settings.json file.
+
+## How do I re-create the IntelliSense database?
+
+When you open a folder in VS Code, we will index and parse the files in your workspace and store the information in a database. If you suspect that something is wrong with the database and want to regenerate it, the easiest way to do this is to edit the `"browse.databaseFilename"` property in your **c_cpp_properties.json** file by just putting a new filename in there (e.g. `"mydatabase.db"`.
+
+By default, the database is stored in the following folder:
+
+```
+Windows: %APPDATA%\Code\User\workspaceStorage\<hash>\ms-vscode.cpptools\
+Linux:   ~/.config/Code/User/workspaceStorage/<hash>/ms-vscode.cpptools/
+Mac:     ~/Library/Application Support/Code/User/workspaceStorage/<hash>/ms-vscode.cpptools/
+```
+
+If you want to move the database into your workspace's .vscode folder, you can do this by setting `"browse.databaseFilename"` to `"$[workspaceRoot}/.vscode/.browse.VC.db"`.
