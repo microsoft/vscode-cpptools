@@ -1,6 +1,6 @@
 # How to enable logging in the extension
 
-If you are experiencing a problem that we are unable to diagnose based on information in your issue request, we might ask you to enable logging and send us your logs.
+If you are experiencing a problem that we are unable to diagnose based on information in your issue report, we might ask you to enable logging and send us your logs.
 
 Logging is controlled by environment variables and is disabled by default. To enable logging launch VS Code from an environment that contains the following variables:
 
