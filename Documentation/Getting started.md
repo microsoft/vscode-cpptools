@@ -2,7 +2,7 @@
 
 ## Configuring IntelliSense
 
-**Quick summary**: Open your settings file and add `"intelliSenseEngine": "Default"` to preview the new and improved IntelliSense. Then add the necessary include paths and preprocessor defines to your c_cpp_properties.json file so that IntelliSense can find your symbols.
+**Quick summary**: Open your settings file and add `"C_Cpp.intelliSenseEngine": "Default"` to preview the new and improved IntelliSense. Then add the necessary include paths and preprocessor defines to your c_cpp_properties.json file so that IntelliSense can find your symbols.
 
 #### The IntelliSense engines
 
