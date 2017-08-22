@@ -49,14 +49,4 @@ The extension will also implicitly add `${workspaceRoot}` to the array of paths 
 
 ## How do I re-create the IntelliSense database?
 
-When you open a folder in VS Code, we will index and parse the files in your workspace and store the information in a database. If you suspect that something is wrong with the database and want to regenerate it, the easiest way to do this is to edit the `"browse.databaseFilename"` property in your **c_cpp_properties.json** file by just putting a new filename in there (e.g. `"mydatabase.db"`.
-
-By default, the database is stored in the following folder:
-
-```
-Windows: %APPDATA%\Code\User\workspaceStorage\<hash>\ms-vscode.cpptools\
-Linux:   ~/.config/Code/User/workspaceStorage/<hash>/ms-vscode.cpptools/
-Mac:     ~/Library/Application Support/Code/User/workspaceStorage/<hash>/ms-vscode.cpptools/
-```
-
-If you want to move the database into your workspace's .vscode folder, you can do this by setting `"browse.databaseFilename"` to `"$[workspaceRoot}/.vscode/.browse.VC.db"`.
+Starting in version 0.12.3 of the extension, we added a command that will reset your IntelliSense database. Open the command palette and choose the "C/Cpp: Reset IntelliSense Database" command.
