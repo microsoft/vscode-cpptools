@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-[Why do I have red underlines everywhere after updating to the latest version](#why-do-i-have-red-underlines-everywhere-after-updating-to-the-latest-version)?
+[How do I get IntelliSense to work correctly](#how-do-i-get-intellisense-to-work-correctly)?
 
 [How do I get the new IntelliSense to work with MinGW on Windows](#how-do-i-get-the-new-intellisense-to-work-with-mingw-on-windows)?
 
@@ -8,27 +8,24 @@
 
 [How do I re-create the IntelliSense database](#how-do-i-re-create-the-intellisense-database)?
 
-## Why do I have red underlines everywhere after updating to the latest version?
+## How do I get IntelliSense to work correctly?
 
-If you are using the VS Code Insider build with version 0.11.0 or higher of the cpptools extension or any build of VS Code with version 0.11.1 of the extension, then the extension will default to using the new IntelliSense engine for linting and providing quick info tooltips in your source files.
+There are two IntelliSense engines present in the extension: the "fuzzy" engine (or Tag Parser), and the new "Default" engine. If you are using version 0.11.0 or higher of the cpptools extension, then you can preview our new IntelliSense engine which has more accurate auto-complete suggestions and tooltips. To use the new engine, you need to ensure that `"C_Cpp.intelliSenseEngine"` is set to `"Default"` in your settings. Since the engine is still in preview it is not on by default for everyone yet.
 
-For some users this may result in a large number of red underlines ("squiggles") appearing in your source files. There are a few things you can do to resolve this issue. Select the one that best meets your needs for your situation.
+After selecting the IntelliSense engine that you prefer, take a look at the Problems window in VS Code to see if you need to do any further configuration for your folder. For example, the Default engine will not provide squiggles and auto-complete suggestions for a translation unit (read: a source file and its dependencies) if the include path is not configured properly. You can select any of the problems in the window to navigate to the line when the problem was detected and a lightbulb will appear in the editor with some options to help you resolve the problem.
 
-1. Update your includePath and defines
-2. Disable the error squiggles
-3. Disable the new IntelliSense engine
+1. Update your includePath (and preprocessor defines)
+2. Force semantic IntelliSense
 
-#### Update your includePath and defines
+#### Update your includePath (and preprocessor defines)
 
-If you haven't already created a c_cpp_properties.json file for your project, you can do so by selecting "C/Cpp: Edit Configurations" from the command palette. This will create and open the c_cpp_properties.json file for you. Add the necessary paths to your include files to the `"includePath"` array. The `${workspaceRoot}` variable is available to use to get a relative path to the folder you have opened. Also add any required symbols that need to be defined to the `"defines"` array. Both "\<var\>" and "\<var\>=\<value\>" syntax is accepted. When you edit and save this file, the IntelliSense engine will reset and reparse source your source files and headers with the new settings.
+Selecting this option will open a file called c_cpp_properties.json. If you haven't created this file already, it will be created for you in the .vscode folder of your workspace.
 
-#### Disable the error squiggles
+Add the necessary paths to your include files to the `"includePath"` array. The `${workspaceRoot}` variable is available to use to get a relative path to the folder you have opened. Also add any required symbols that need to be defined to the `"defines"` array. Both "\<var\>" and "\<var\>=\<value\>" syntax is accepted. When you edit and save this file, the IntelliSense engine will reset and reparse source your source files and headers with the new settings.
 
-If you want to keep using the semantic-aware features that will be coming online via the new IntelliSense engine, but don't want to see the error squiggles in the editor, then you can disable the lint messages by adding `"C_Cpp.errorSquiggles": "Disabled"` to your settings.json file.
+#### Force semantic IntelliSense
 
-#### Disable the new IntelliSense engine
-
-If you were happy with the old behavior of the extension or want to wait to get the semantic-aware features until build system support arrives in the extension so that you don't have to manually configure a c_cpp_properties.json file, you can disable the new IntelliSense engine entirely by adding `"C_Cpp.intelliSenseEngine": "Tag Parser"` to your settings.json file.
+If you want IntelliSense to operate on your files even when all #include directives do not resolve, then you can choose the option to always use the new IntelliSense engine.
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
