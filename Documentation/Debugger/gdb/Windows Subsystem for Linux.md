@@ -3,7 +3,7 @@ With the release of Windows 10 Creators Update (Build 15063), you will now be ab
 
 Code can be written on Windows itself using VSCode and debugged through `bash.exe` to the Bash on Windows layer. 
 
-**NOTE: Creator's Update (Build 15063 or later) is required due to bugfixes within the subsystem that we rely on to provide debugging. Debugging using a previous version of WSL is unsupported and likely will not work. To check your Windows version, in a command prompt, enter `winver`.**
+**NOTE: Creator's Update (Build 15063 or later) is required due to bugfixes within the subsystem that we rely on to provide debugging. Debugging using a previous version of WSL is unsupported and likely will not work. To check your Windows version, enter `winver` in a command prompt.**
 
 ## Prerequisites
 * [Windows 10 Creators Update with Windows Subsystem for Linux and Bash](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) installed.
