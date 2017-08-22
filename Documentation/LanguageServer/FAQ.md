@@ -45,7 +45,7 @@ The paths that you specify for this setting are the same paths that you would se
 
 **browse.path**: This array of path strings is used by the "Tag Parser" (a.k.a. "browse engine"). This engine will _recursively_ enumerate all files under the paths specified and track them as potential includes while tag parsing your project folder. To disable recursive enumeration of a path, you can append a `/*` to the path string.
 
-The extension will also implicitly add `${workspaceRoot}` to the array of paths unless `"C_Cpp.addWorkspaceRootToIncludePath"` is explicitly set to `false` in your settings.json file.
+When you open a workspace for the first time, the extension adds `${workspaceRoot}` to both arrays. If this is undesirable, you can open your c_cpp_properties.json file and remove it.
 
 ## How do I re-create the IntelliSense database?
 
