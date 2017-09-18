@@ -12,7 +12,7 @@
 
 There are two IntelliSense engines present in the extension: the "fuzzy" engine (or Tag Parser), and the new "Default" engine. If you are using version 0.11.0 or higher of the cpptools extension, then you can preview our new IntelliSense engine which has more accurate auto-complete suggestions and tooltips. To use the new engine, you need to ensure that `"C_Cpp.intelliSenseEngine"` is set to `"Default"` in your settings. Since the engine is still in preview it is not on by default for everyone yet.
 
-After selecting the IntelliSense engine that you prefer, take a look at the Problems window in VS Code to see if you need to do any further configuration for your folder. For example, the Default engine will not provide squiggles and auto-complete suggestions for a translation unit (read: a source file and its dependencies) if the include path is not configured properly. You can select any of the problems in the window to navigate to the line when the problem was detected and a lightbulb will appear in the editor with some options to help you resolve the problem.
+After selecting the IntelliSense engine that you prefer, take a look at the Problems window in VS Code to see if you need to do any further configuration for your folder. For example, the Default engine will not provide squiggles and auto-complete suggestions for a translation unit (read: a source file and its dependencies) if the include path is not configured properly. You can select any of the problems in the window to navigate to the line when the problem was detected and a lightbulb will appear in the editor with some options (code actions) to help you resolve the problem.
 
 1. Update your includePath (and preprocessor defines)
 2. Force semantic IntelliSense
@@ -25,7 +25,7 @@ Add the necessary paths to your include files to the `"includePath"` array. The 
 
 #### Force semantic IntelliSense
 
-If you want IntelliSense to operate on your files even when all #include directives do not resolve, then you can choose the option to always use the new IntelliSense engine.
+If you want IntelliSense to operate on your files even when all #include directives do not resolve, then you can choose the `Force semantic IntelliSense` code action to always use the new IntelliSense engine. You can also set the `C_Cpp.intelliSenseEngineFallack` setting to `"Disabled"`.
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
