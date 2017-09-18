@@ -25,7 +25,7 @@ Add the necessary paths to your include files to the `"includePath"` array. The 
 
 #### Force semantic IntelliSense
 
-If you want IntelliSense to operate on your files even when all #include directives do not resolve, then you can choose the `Force semantic IntelliSense` code action to always use the new IntelliSense engine. You can also set the `C_Cpp.intelliSenseEngineFallack` setting to `"Disabled"`.
+If you want IntelliSense to operate on your files even when all #include directives do not resolve, then you can choose the `Force semantic IntelliSense` code action to always use the new IntelliSense engine. You can also set the `C_Cpp.intelliSenseEngineFallback` setting to `"Disabled"`.
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
