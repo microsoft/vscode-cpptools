@@ -1,6 +1,6 @@
 For developers using MinGW on Windows, we recommend you start with the following **c_cpp_properties.json** template.  Select "C/Cpp: Edit Configurations" from the command palette to create this file if you haven't already.
 
-Note that you may have to change the MinGW version number to match what you have installed. Eg. `C:/MinGW/lib/gcc/mingw32/5.3.0/` to `C:/MinGW/lib/gcc/mingw32/x.x.x/`.
+Note that you may have to change the MinGW version number to match what you have installed. Eg. `C:/MinGW/lib/gcc/mingw32/5.3.0/` instead of `C:/MinGW/lib/gcc/mingw32/6.3.0/`.
 
 ```
 {
