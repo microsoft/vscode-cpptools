@@ -20,7 +20,7 @@ Note that you may have to change the MinGW version number to match what you have
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "__GNUC__=5",
+                "__GNUC__=6",
                 "__cdecl=__attribute__((__cdecl__))"
             ],
             "browse": {
@@ -56,7 +56,7 @@ For C projects, simply remove the c++ lines:
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "__GNUC__=5",
+                "__GNUC__=6",
                 "__cdecl=__attribute__((__cdecl__))"
             ],
             "browse": {
