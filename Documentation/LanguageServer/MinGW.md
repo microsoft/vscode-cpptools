@@ -37,7 +37,7 @@ Note that you may have to change the MinGW version number to match what you have
 }
 ```
 
-The `includePath` above includes the system header paths that gcc uses in version 6.3.0 for C++ projects and matches the output of `gcc -v -E -x c++ -`. The `intelliSenseMode` should be set to **"clang-x64"** to get MinGW projects to work properly with IntelliSense. The `__GNUC__=#` define should match the major version of the toolchain in your installation (5 in this example).
+The `includePath` above includes the system header paths that gcc uses in version 6.3.0 for C++ projects and matches the output of `gcc -v -E -x c++ -`. The `intelliSenseMode` should be set to **"clang-x64"** to get MinGW projects to work properly with IntelliSense. The `__GNUC__=#` define should match the major version of the toolchain in your installation (6 in this example).
 
 For C projects, simply remove the c++ lines:
 
