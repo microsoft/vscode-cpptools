@@ -8,6 +8,7 @@
     * step-by-step instructions to reproduce the issue
     * A small code sample, zipped up project, or open source repo we can use to verify the bug
     * Relevant settings from your settings.json, c_cpp_properties.json, and/or launch.json files
+    * Any log messages present in the Output window (use "C_Cpp.loggingLevel": "Information" in settings.json)
 
   Please also take a look at our documentation, as we may already have answers for your questions:
     * https://github.com/Microsoft/vscode-cpptools/tree/master/Documentation
