@@ -4,6 +4,8 @@ If you are experiencing a problem that we are unable to diagnose based on inform
 
 As of version 0.14.0 of the extension, logging information is now delivered directly to the Output window in VSCode. To turn on full logging for an issue report, add `"C_Cpp.loggingLevel": "Information"` to your settings.json.
 
+![image](https://user-images.githubusercontent.com/12818240/31898313-b32ff284-b7cd-11e7-97f5-89df93b5d9de.png)
+
 #### Old information (it still works, but is no longer recommended):
 
 ~~Logging is controlled by environment variables and is disabled by default. To enable logging, launch VS Code from an environment that contains the following variables:~~
