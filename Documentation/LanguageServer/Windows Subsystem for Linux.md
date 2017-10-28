@@ -9,39 +9,38 @@ Select "C/Cpp: Edit Configurations" from the command palette to create the **c_c
 For developers using Ubuntu with the current version of WSL released with the Fall Creators Update, you can add the following configuration template to your **c_cpp_properties.json** file.  
 
 ```json
-        {
-            "name": "WSL",
-            "intelliSenseMode": "clang-x64",
-            "includePath": [
-                "${workspaceRoot}",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu/c++/5",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5/backward",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/local/include",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu",
-                "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include"
-            ],
-            "defines": [
-                "__linux__",
-                "__x86_64__"
-            ],
-            "browse": {
-                "path": [
-                    "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5",
-                    "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu/c++/5",
-                    "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-                    "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/local/include",
-                    "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-                    "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu",
-                    "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/*"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
-        }
-
+{
+    "name": "WSL",
+    "intelliSenseMode": "clang-x64",
+    "includePath": [
+        "${workspaceRoot}",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu/c++/5",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5/backward",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/local/include",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include"
+    ],
+    "defines": [
+        "__linux__",
+        "__x86_64__"
+    ],
+    "browse": {
+        "path": [
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu/c++/5",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/local/include",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/*"
+        ],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+    }
+}
 ```
 
 The `includePath` above includes the system header paths that gcc uses for C++ projects and matches the output of `gcc -v -E -x c++ - < /dev/null`. The intelliSenseMode should be set to **"clang-x64"** to get WSL projects to work properly with IntelliSense.
@@ -51,33 +50,33 @@ Note that `${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp
 For C projects, simply remove the c++ lines:
 
 ```json
-        {
-            "name": "WSL",
-            "intelliSenseMode": "clang-x64",
-            "includePath": [
-                "${workspaceRoot}",
-                "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-                "${localappdata}/lxss/rootfs/usr/local/include",
-                "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-                "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
-                "${localappdata}/lxss/rootfs/usr/include"
-            ],
-            "defines": [
-                "__linux__",
-                "__x86_64__"
-            ],
-            "browse": {
-                "path": [
-                    "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-                    "${localappdata}/lxss/rootfs/usr/local/include",
-                    "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-                    "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
-                    "${localappdata}/lxss/rootfs/usr/include/*"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
-        }
+{
+    "name": "WSL",
+    "intelliSenseMode": "clang-x64",
+    "includePath": [
+        "${workspaceRoot}",
+        "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+        "${localappdata}/lxss/rootfs/usr/local/include",
+        "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+        "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
+        "${localappdata}/lxss/rootfs/usr/include"
+    ],
+    "defines": [
+        "__linux__",
+        "__x86_64__"
+    ],
+    "browse": {
+        "path": [
+            "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+            "${localappdata}/lxss/rootfs/usr/local/include",
+            "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+            "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
+            "${localappdata}/lxss/rootfs/usr/include/*"
+        ],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+    }
+}
 ```
 
 ## Beta
@@ -85,39 +84,38 @@ For C projects, simply remove the c++ lines:
 For developers using Bash on Ubuntu on Windows with the beta version of WSL from before the Fall Creators Update, you can add the following configuration template to your **c_cpp_properties.json** file.
 
 ```json
-        {
-            "name": "WSL",
-            "intelliSenseMode": "clang-x64",
-            "includePath": [
-                "${workspaceRoot}",
-                "${localappdata}/lxss/rootfs/usr/include/c++/5",
-                "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu/c++/5",
-                "${localappdata}/lxss/rootfs/usr/include/c++/5/backward",
-                "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-                "${localappdata}/lxss/rootfs/usr/local/include",
-                "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-                "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
-                "${localappdata}/lxss/rootfs/usr/include"
-            ],
-            "defines": [
-                "__linux__",
-                "__x86_64__"
-            ],
-            "browse": {
-                "path": [
-                    "${localappdata}/lxss/rootfs/usr/include/c++/5",
-                    "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu/c++/5",
-                    "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-                    "${localappdata}/lxss/rootfs/usr/local/include",
-                    "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-                    "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
-                    "${localappdata}/lxss/rootfs/usr/include/*"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
-        }
-
+{
+    "name": "WSL (Beta)",
+    "intelliSenseMode": "clang-x64",
+    "includePath": [
+        "${workspaceRoot}",
+        "${localappdata}/lxss/rootfs/usr/include/c++/5",
+        "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu/c++/5",
+        "${localappdata}/lxss/rootfs/usr/include/c++/5/backward",
+        "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+        "${localappdata}/lxss/rootfs/usr/local/include",
+        "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+        "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
+        "${localappdata}/lxss/rootfs/usr/include"
+    ],
+    "defines": [
+        "__linux__",
+        "__x86_64__"
+    ],
+    "browse": {
+        "path": [
+            "${localappdata}/lxss/rootfs/usr/include/c++/5",
+            "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu/c++/5",
+            "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+            "${localappdata}/lxss/rootfs/usr/local/include",
+            "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+            "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
+            "${localappdata}/lxss/rootfs/usr/include/*"
+        ],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+    }
+}
 ```
 
 The `includePath` above includes the system header paths that gcc uses for C++ projects and matches the output of `gcc -v -E -x c++ - < /dev/null`. The intelliSenseMode should be set to **"clang-x64"** to get WSL projects to work properly with IntelliSense.
