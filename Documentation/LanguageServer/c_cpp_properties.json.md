@@ -9,7 +9,7 @@
             "intelliSenseMode": "msvc-x64",
             "includePath": [ "${workspaceRoot}" ],
             "defines": [ "FOO", "BAR=100" ],
-            "compileCommands": "/path/to/compile_commands.json"
+            "compileCommands": "/path/to/compile_commands.json",
             "browse": {
                 "path": [ "${workspaceRoot}" ],
                 "limitSymbolsToIncludedHeaders": true,
