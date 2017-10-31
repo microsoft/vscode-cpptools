@@ -45,7 +45,15 @@ For developers using Ubuntu with the current version of WSL released with the Fa
 
 The `includePath` above includes the system header paths that gcc uses for C++ projects and matches the output of `gcc -v -E -x c++ - < /dev/null`. The intelliSenseMode should be set to **"clang-x64"** to get WSL projects to work properly with IntelliSense.
 
-Note that `${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/` is the path to the root of the Ubuntu filesystem. This will be different if you are using a different distro.
+Note that `${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/` is the path to the root of the Ubuntu filesystem. This will be different if you are using a different distro. You can discover the paths to your distro's filesystem by using this handy Powershell command:
+
+```Powershell
+PS R:\> ($(get-appxpackage).PackageFamilyName | findstr /i 'SUSE Ubuntu') -replace '^', "$`{localappdata`}/Packages/"
+
+${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc
+${localappdata}/Packages/46932SUSE.openSUSELeap42.2_022rs5jcyhyac
+${localappdata}/Packages/46932SUSE.SUSELinuxEnterpriseServer12SP2_022rs5jcyhyac
+```
 
 For C projects, simply remove the c++ lines:
 
