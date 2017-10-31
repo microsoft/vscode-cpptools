@@ -55,11 +55,11 @@ For C projects, simply remove the c++ lines:
     "intelliSenseMode": "clang-x64",
     "includePath": [
         "${workspaceRoot}",
-        "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-        "${localappdata}/lxss/rootfs/usr/local/include",
-        "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-        "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
-        "${localappdata}/lxss/rootfs/usr/include"
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/local/include",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu",
+        "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include"
     ],
     "defines": [
         "__linux__",
@@ -67,11 +67,11 @@ For C projects, simply remove the c++ lines:
     ],
     "browse": {
         "path": [
-            "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
-            "${localappdata}/lxss/rootfs/usr/local/include",
-            "${localappdata}/lxss/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
-            "${localappdata}/lxss/rootfs/usr/include/x86_64-linux-gnu",
-            "${localappdata}/lxss/rootfs/usr/include/*"
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/local/include",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/x86_64-linux-gnu",
+            "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/*"
         ],
         "limitSymbolsToIncludedHeaders": true,
         "databaseFilename": ""
