@@ -1,12 +1,14 @@
 # Windows 10's Windows Subsystem for Linux
 With the release of Windows 10 Creators Update (Build 15063), you will now be able to use Visual Studio Code and the Microsoft C/C++ extension to debug your `Windows Subsystem for Linux (WSL)` [Bash on Ubuntu](https://msdn.microsoft.com/en-us/commandline/wsl/about) projects.
 
-Code can be written on Windows itself using VSCode and debugged through `bash.exe` to the Bash on Windows layer. 
+Code can be written on Windows itself using VSCode and debugged through `bash.exe` to the Bash on Windows layer.
+
+As of the Fall Creator's Update, you can have multiple distros installed, but `bash.exe` and `wsl.exe` use the default distro. Use [WSL Config](https://msdn.microsoft.com/en-us/commandline/wsl/wsl-config) to set your default distro.
 
 **NOTE: Creator's Update (Build 15063 or later) is required due to bugfixes within the subsystem that we rely on to provide debugging. Debugging using a previous version of WSL is unsupported and likely will not work. To check your Windows version, enter `winver` in a command prompt.**
 
 ## Prerequisites
-* [Windows 10 Creators Update with Windows Subsystem for Linux and Bash](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) installed.
+* [Windows 10 Creators Update or later with Windows Subsystem for Linux](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) installed.
 * Install g++/gcc and gdb within `WSL` to allow compiling and debugging. You can use the package manager to do this. For example, to install g++, you can run `sudo apt install g++` in the Bash window.
 * [Visual Studio Code](https://code.visualstudio.com) + Microsoft C/C++ extension for VSCode.
 
