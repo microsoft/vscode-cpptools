@@ -82,7 +82,7 @@ You can change the behavior of GDB or LLDB by setting the following options.
 
 **MIMode**: Indicates the debugger that VS Code will connect to. Must be set to `gdb` or `lldb`.  This is pre-configured on a per-operating system basis and can be changed as needed.
 
-**miDebuggerPath**: The path to the debugger (such as gdb). When unspecified, it will search the operating system's PATH variable for a debugger (GDB on Linux and Windows, LLDB on OS X).
+**miDebuggerPath**: The path to the debugger (such as gdb). When only the executable is specified, it will search the operating system's PATH variable for a debugger (GDB on Linux and Windows, LLDB on OS X).
 
 **stopAtEntry**: If set to true, the debugger should stop at the entrypoint of the target (ignored on attach). Default value is `false`.
 
