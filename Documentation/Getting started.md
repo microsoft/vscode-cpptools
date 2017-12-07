@@ -29,7 +29,7 @@ To figure out which headers you need to specify paths for, you can either hover 
 
 You can also leverage the lightbulb path suggestions lightbulb to auto-resolve the included file. When you open a folder, the extension will **recursively** search for potential include paths that match the header files your code is using based on the paths set by the `"browse.path"` setting in **c_cpp_properties.json**. Click on the green squiggles under #include statements and a lightbulb will appear and offer suggestions of paths that will allow IntelliSense to resolve the included file.
 
-![lightbulb suggestions](https://github.com/Microsoft/vscode-cpptools/raw/master/Images/lightbulb%20suggestions.png)
+![lightbulb suggestions](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/lightbulb%20suggestion.png)
 
 #### Verify the include paths are correctly resolved
 
