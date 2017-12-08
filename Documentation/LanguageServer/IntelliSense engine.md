@@ -1,4 +1,4 @@
-#### IntelliSense engines
+# IntelliSense engines
 
 There are two IntelliSense engines used to power the C/C++ IntelliSense experience in VS Code. 
 
