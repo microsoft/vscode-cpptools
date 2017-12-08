@@ -151,4 +151,4 @@ _Note: core dump debuging is not supported with MinGw._
 **type**: Indicates the underlying debugger being used. Must be `cppvsdbg` when using the Visual Studio Windows debugger, and `cppdbg` when using GDB or LLDB.  This is automatically set to the correct value when the 
 launch.json file is created.
 
-**sourceFileMap**: This allows mapping of the compile time paths for source to local source locations. It is an array of key/value pairs and will resolve the first string-matched path. (example: `"sourceFileMap": [ "/mnt/c": "c:\\" ]` will map any path returned by the debugger that begins with `/mnt/c` and convert it to `c:\\`)
+**sourceFileMap**: This allows mapping of the compile time paths for source to local source locations. It is an object of key/value pairs and will resolve the first string-matched path. (example: `"sourceFileMap": { "/mnt/c": "c:\\" }` will map any path returned by the debugger that begins with `/mnt/c` and convert it to `c:\\`. You can have multiple mappings in the object but they will be handled in the order provided.)
