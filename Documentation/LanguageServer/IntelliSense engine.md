@@ -29,7 +29,7 @@ The extension first tries to fully parse any opened file using the "Default" Int
 We recognize that resolving all #include’s may not be necessary for all projects and you may still want to experience the productivity benefits of using the "Default" sematic engine without customizing the default include path. For that, the “Force semantic IntelliSense” action can be chosen. When invoked, all unresolved #include squiggles will turn red and semantic member list and linting will be enabled in all files regardless of whether or not #include statements can be resolved.
 
 #### IntelliSense engine setting
-We recommend to use the "Default" engine for the best IntelliSense experience. However, it is possible to explicitly choose the IntelliSense engine by editing your [user or workspace settings](https://code.visualstudio.com/docs/getstarted/settings). The setting you should modify is `"C_Cpp.intelliSenseEngine"`. There are two values for this setting:
+We recommend using the "Default" engine for the best IntelliSense experience. However, it is possible to explicitly choose the IntelliSense engine by editing your [user or workspace settings](https://code.visualstudio.com/docs/getstarted/settings). The setting you should modify is `"C_Cpp.intelliSenseEngine"`. There are two values for this setting:
 
 * `"Default"` - use Visual Studio's IntelliSense engine 
 * `"Tag Parser"` - use the "fuzzy" IntelliSense engine
