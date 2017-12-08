@@ -26,10 +26,15 @@ The two IntelliSense engines use two differnt settings in the **c_cpp_properties
 
 The extension first tries to fully parse any opened file using the "Default" IntelliSense engine. If it discovers that it cannot find a header file or a dependency, it will fall back to the tag parser and provide the fuzzy IntelliSense behavior. The fallback affects a full translation unit (TU), not just a single open file. The Problems panel provides details about unresolved headers and dependencies. Other opened TUs will continue to use the "Default" IntelliSense engine provided that all #include dependencies are resolved. 
 
-We recognize that resolving all #include’s may not be necessary for all projects and you may still want to experience the productivity benefits of using the "Default" sematic engine without customizing the default include path. For that, the “Force semantic IntelliSense” action can be chosen. When invoked, all unresolved #include squiggles will turn red and semantic member list and linting will be enabled in all files regardless of whether or not #include statements can be resolved.
+We recognize that resolving all #include’s may not be necessary for all projects and you may still want to experience the productivity benefits of using the "Default" sematic engine without customizing the default include path. For that, the “Force semantic IntelliSense” action can be chosen. When invoked, all unresolved #include squiggles will turn red and semantic member list and linting will be enabled in all files regardless of whether or not #include statements can be resolved.
 
 #### IntelliSense engine setting
-We recommend to use the "Default" engine for the best IntelliSense experience. However, it is possible to explicitly choose the IntelliSense by editing your [user or workspace settings](https://code.visualstudio.com/docs/getstarted/settings). The setting you should modify is `"C_Cpp.intelliSenseEngine"`. There are two values for this setting:
+We recommend to use the "Default" engine for the best IntelliSense experience. However, it is possible to explicitly choose the IntelliSense engine by editing your [user or workspace settings](https://code.visualstudio.com/docs/getstarted/settings). The setting you should modify is `"C_Cpp.intelliSenseEngine"`. There are two values for this setting:
 
 * `"Default"` - use Visual Studio's IntelliSense engine 
 * `"Tag Parser"` - use the "fuzzy" IntelliSense engine
+
+#### See Also
+[Configuring includePath for better IntelliSense results](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/Getting%20started.md)
+
+[c_cpp_properties.json reference guide](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/LanguageServer/c_cpp_properties.json.md)
