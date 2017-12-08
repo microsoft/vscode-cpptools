@@ -12,7 +12,7 @@ You can create or open this file by either using the `"C/Cpp: Edit Configuration
 
 ![lightbulb menu "Edit "includePath" setting"](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/Lightbulb.png)
 
- When a folder is opened, the extension attempts to locate your system headers based on your operating system, but it does not know about any auxiliary libraries that your project depends on. You can hover over the green squiggles or open the Problems window to understand which headers the IntelliSense engine is unable to open.
+ When a folder is opened, the extension attempts to locate your system headers based on your operating system, but it does not know about any auxiliary libraries that your project depends on. You can hover over the green squiggles or open the Problems window to understand which headers the IntelliSense engine is unable to open - sometimes it's the dependent headers that can't be located.
 
 ![include error message](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/Include%20errors.png)
 
