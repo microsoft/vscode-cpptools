@@ -50,7 +50,7 @@ This indicates that the IntelliSense engine has got the include paths resolved s
 
 ## See Also
 
-[IntelliSense engines](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/LanguageServer/IntelliSense%20engine.md)
+[IntelliSense engines](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/IntelliSense%20engine.md)
 
-[c_cpp_properties.json reference guide](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/LanguageServer/c_cpp_properties.json.md)
+[c_cpp_properties.json reference guide](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/c_cpp_properties.json.md)
 
