@@ -1,23 +1,56 @@
-# Getting started
+# Configuring includePath for better IntelliSense results
 
-## Configuring IntelliSense
+This page describes how to configure include paths for folders containing C or C++ files to get the full IntelliSense experience. If you're seeing the following message when opening a folder in VS Code, it means the C++ IntelliSense engine needs additional information about the paths in which your include files are located.
 
-**Quick summary**: Open your settings file and add `"C_Cpp.intelliSenseEngine": "Default"` to preview the new and improved IntelliSense. Then add the necessary include paths and preprocessor defines to your c_cpp_properties.json file so that IntelliSense can find your symbols.
+![Configure includePath for better IntelliSense](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/configure%20includepath.jpg)
 
-#### The IntelliSense engines
+## Where are the include paths defined?
 
-When the extension was first released, we shipped an IntelliSense engine that provided quick, but "fuzzy" results for common operations like auto-complete, parameter help, quick info tooltips, and goto definition. This "tag parser" built up a database of symbols by parsing the most important "tags" from your source files, ignoring preprocessor blocks, local variables, and most errors. More recently, we have begun the process of porting the MSVC IntelliSense engine from Visual Studio to VS Code to provide more accurate results. 
+The include paths are defined in the `"includePath"` setting in a file called **c_cpp_properties.json** located in the .vscode directory in the opened folder.
 
-You can choose the engine that works best for your projects by editing your [user or workspace settings](https://code.visualstudio.com/docs/getstarted/settings). The setting you should modify is `"C_Cpp.intelliSenseEngine"`. There are two values for this setting:
+You can create or open this file by either using the `"C/Cpp: Edit Configurations"` command in the command palette or by selecting `"Edit "includePath" setting"` in the lightbulb menu (see the screenshot below). The quickiest way to locate a lightbulb is to scroll to the top of the source file and click on any green squiggle that shows up under a #include statement.
 
-* `"Default"` - use Visual Studio's IntelliSense engine (in preview, the default for VS Code Insiders)
-* `"Tag Parser"` - use the "fuzzy" IntelliSense engine (the default for users on the stable VS Code build)
+![lightbulb menu "Edit "includePath" setting"](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/Lightbulb.png)
 
-#### Include paths
+ When a folder is opened, the extension attempts to locate your system headers based on your operating system, but it does not know about any other libraries that your project depends on. You can hover over the green squiggles or open the Problems window to understand which headers the IntelliSense engine is unable to open - sometimes it's the dependent headers that can't be located.
 
-In order to get accurate IntelliSense results with either engine, the extension needs some information about your project.  When you open a folder, the extension will attempt to locate your system headers based on your operating system, but it does not know about any auxiliary libraries that your project depends on.  You can specify the remaining paths by using the `"C/Cpp: Edit Configurations"` command in the command palette.
+![include error message](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/Include%20errors.png)
 
-This command will create or open a file called **c_cpp_properties.json** in your workspace.  In this file, you can specify the paths to the headers that your project depends on.  There are two settings in this file that you should pay particular attention to: `"includePath"` and `"browse.path"`.  `"includePath"` is the setting used by the `"Default"` IntelliSense engine and `"browse.path"` is the setting used by the tag parser engine.  [More information about these settings is documented here](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/FAQ.md#what-is-the-difference-between-includepath-and-browsepath-in-c_cpp_propertiesjson).
+## How to specify the include paths?
 
-If your build system is able to produce a compile_commands.json file, the extension can get the information for the `"includePath"` and `"defines"` from that.  Set the `"compileCommands"` property to the full path to your compile_commands.json file and the extension will use that instead of the `"includePath"` and `"defines"` properties for IntelliSense. You should still set the `"browse.path"` property since code navigation uses that property.
+You can specify the remaining paths using one of the techniques described below. 
+
+#### 1. Use compile_commands.json file to supply includePaths and defines information
+
+The extension can get the information for `"includePath"` and `"defines"` from a compile_commands.json file, which can be auto-generated by many build systems such as CMake and Ninja. Look for the section where your current configuration is defined (by default there's one configuration per OS, such as "Win32 or "Mac"), and set the `"compileCommands"` property in **c_cpp_properties.json** to the full path to your compile_commands.json file and the extension will use that instead of the `"includes"` and `"defines"` properties for IntelliSense.
+
+![use compileCommands setting](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/compile_commands.png)
+
+#### 2. Use the lightbulb suggestions to auto-resolve includePath
+
+The first thing to try is to leverage the lightbulb path suggestions to auto-resolve the include paths. When you open a folder, the extension will **recursively** search for potential include paths that match the header files your code is using based on the paths set by the `"browse.path"` setting in **c_cpp_properties.json**. Click on the green squiggles under #include statements and you'll see a lightbulb offering suggestions of paths that will allow IntelliSense to resolve the included file.
+
+![lightbulb suggestions](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/lightbulb%20suggestion.png)
+
+If you don't see path suggestions in the lightbulb, try adding the root folder where the headers are likely located in to the `"browse.path"` setting in **c_cpp_properties.json**. This allows the extension to **recursively** search in these folders and offer more suggestions in the lightbulb as the search process goes on.
+
+#### 3. Manually add include paths
+If none of the above fully resolves the paths, you could manually specify the paths to the headers that your project depends on in the **c_cpp_properties.json** file.  Look for the section where your current configuration is defined (by default there's one configuration per OS, such as "Win32 or "Mac"), and add your paths in the `"includePath"` setting and defines in the `"defines"` setting. For example, the following screenshot shows a snippet of the file specifying path for the Mac configuration.
+
+![c_cpp_properties file snippet](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/c_cpp_properties%20file.PNG)
+
+## Verify the include paths are correctly resolved
+
+There are two ways to verify that the include paths are correctly resolved:
+
+1. The green squiggles in the source file are no longer showing
+2. Error messages are cleared in the Problems window
+
+This indicates that the IntelliSense engine has got the include paths resolved so you can start enjoying the full IntelliSense for your C or C++ code for the current translation unit. Note that you may still see errors on other files if they belong to a different translation unit that requires additional include paths to be configured.
+
+## See Also
+
+[IntelliSense engines](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/LanguageServer/IntelliSense%20engine.md)
+
+[c_cpp_properties.json reference guide](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/LanguageServer/c_cpp_properties.json.md)
 
