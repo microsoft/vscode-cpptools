@@ -1,6 +1,6 @@
 # Configuring includePath for better IntelliSense results
 
-This page describes how to configure include paths for folders containing C or C++ files to get the full IntelliSense experience. If you're seeing the following message when opening a folder in VS Code, it means the C++ IntelliSense engine needs additional information about the paths in which your symbols are located.
+This page describes how to configure include paths for folders containing C or C++ files to get the full IntelliSense experience. If you're seeing the following message when opening a folder in VS Code, it means the C++ IntelliSense engine needs additional information about the paths in which your include files are located.
 
 ![Configure includePath for better IntelliSense](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/configure%20includepath.jpg)
 
@@ -12,7 +12,7 @@ You can create or open this file by either using the `"C/Cpp: Edit Configuration
 
 ![lightbulb menu "Edit "includePath" setting"](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/Lightbulb.png)
 
- When a folder is opened, the extension attempts to locate your system headers based on your operating system, but it does not know about any auxiliary libraries that your project depends on. You can hover over the green squiggles or open the Problems window to understand which headers the IntelliSense engine is unable to open - sometimes it's the dependent headers that can't be located.
+ When a folder is opened, the extension attempts to locate your system headers based on your operating system, but it does not know about any other libraries that your project depends on. You can hover over the green squiggles or open the Problems window to understand which headers the IntelliSense engine is unable to open - sometimes it's the dependent headers that can't be located.
 
 ![include error message](https://github.com/Microsoft/vscode-cpptools/raw/ronglu-edit/Images/Include%20errors.png)
 
