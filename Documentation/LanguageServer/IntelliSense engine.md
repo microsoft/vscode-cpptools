@@ -35,6 +35,6 @@ We recommend using the "Default" engine for the best IntelliSense experience. Ho
 * `"Tag Parser"` - use the "fuzzy" IntelliSense engine
 
 #### See Also
-[Configuring includePath for better IntelliSense results](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/Getting%20started.md)
+[Configuring includePath for better IntelliSense results](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/Getting%20started.md)
 
-[c_cpp_properties.json reference guide](https://github.com/Microsoft/vscode-cpptools/blob/ronglu-edit/Documentation/LanguageServer/c_cpp_properties.json.md)
+[c_cpp_properties.json reference guide](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/c_cpp_properties.json.md)
