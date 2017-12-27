@@ -1,0 +1,9 @@
+  {
+    "defaults": [
+      "--clang",
+      "--pack_alignment",
+      "8",
+      "--framework_include_directory=/System/Library/Frameworks"
+    ],
+    "defaults_op" :  "merge"
+  }

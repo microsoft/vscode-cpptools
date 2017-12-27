@@ -1,0 +1,9 @@
+  {
+    "defaults": [
+      "--clang",
+      "--pack_alignment",
+      "8",
+      "-D__CHAR_BIT__=8"
+    ],
+    "defaults_op" :  "merge"
+  }

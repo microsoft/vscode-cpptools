@@ -1,0 +1,90 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "definitions": {
+        "configurations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Platform name. Mac, Linux, or Win32 are the defaults unless a custom platform is added.",
+                        "type": "string"
+                    },
+                    "compileCommands":{
+                        "description": "path to compile_commands.json file for the workspace",
+                        "type":"string"
+                    },
+                    "includePath": {
+                        "description": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "macFrameworkPath": {
+                        "description": "A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "defines": {
+                        "description": "A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use = to set a value, e.g. VERSION=1.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "intelliSenseMode": {
+                        "type": "string",
+                        "enum": [
+                            "msvc-x64",
+                            "clang-x64"
+                        ],
+                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64 and Linux/Mac default to clang-x64."
+                    },
+                    "browse": {
+                        "type": "object",
+                        "properties": {
+                            "limitSymbolsToIncludedHeaders": {
+                                "description": "true to process only those files directly or indirectly included as headers, false to process all files under the specified include paths",
+                                "type": "boolean"
+                            },
+                            "databaseFilename": {
+                                "description": "Path to the generated symbol database. If a relative path is specified, it will be made relative to the workspace's default storage location.",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "A list of paths for the tag parser to use while searching for included headers. Searching on these paths is recursive by default. Specify '*' to indicate non-recursive search. For example: '/usr/include' will search through all subdirectories while '/usr/include/*' will not.",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "version": {
+            "type": "integer",
+            "description": "Version of the configuration file. This property is managed by the extension. Please do not change it."
+        }
+    },
+    "properties": {
+        "configurations": {
+            "$ref": "#/definitions/configurations"
+        },
+        "version": {
+            "$ref": "#/definitions/version"
+        }
+    },
+    "required": [
+        "configurations",
+        "version"
+    ]
+}
