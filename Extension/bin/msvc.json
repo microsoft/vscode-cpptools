@@ -1,0 +1,39 @@
+  {
+    "defaults": [
+      "cpfe",
+      "--wchar_t_keyword",
+      "--no_warnings",
+      "--rtti",
+      "--edge",
+      "--exceptions",
+      "-D_EDG_COMPILER",
+      "-D_USE_DECLSPECS_FOR_SAL=1"
+    ],
+    "source_file_format": "-f %s",
+    "expressions": [
+      {
+        "match": "^/I(.*)",
+        "replace": "-I\n$1"
+      },
+      {
+        "match": "^/D(.*)",
+        "replace": "-D$1"
+      },
+      {
+        "match": "^/AI(.*)",
+        "replace": "--using_directory\n$1"
+      },
+      {
+        "match": "^/dE--header_only_fallback",
+        "replace": "--header_only_fallback"
+      },
+      {
+        "match": "^/lang_c_",
+        "replace": "--c\n--c11"
+      },
+      {
+        "match": "^/lang_cpp_",
+        "replace": "--c++17"
+      }
+    ]
+  }

@@ -1,0 +1,2228 @@
+// ATL / COM Property Map
+#define BEGIN_PROPERTY_MAP(theClass) @<
+#define BEGIN_PROP_MAP(theClass) @<
+#define PROP_ENTRY(szDesc, dispid, clsid) @=
+#define PROP_ENTRY_EX(szDesc, dispid, clsid, iidDispatch) @=
+#define PROP_PAGE(clsid) @=
+#define PROP_DATA_ENTRY(szDesc, member, vt) @=
+#define END_PROPERTY_MAP() @>
+#define END_PROP_MAP() @>
+
+// COM Map
+#define BEGIN_COM_MAP(x) @<
+#define DECLARE_GET_CONTROLLING_UNKNOWN()
+#define _ATL_IIDOF(x)
+#define COM_INTERFACE_ENTRY_BREAK(x) @=
+#define COM_INTERFACE_ENTRY_NOINTERFACE(x) @=
+#define COM_INTERFACE_ENTRY(x) @=
+#define COM_INTERFACE_ENTRY_IID(iid, x) @=
+#define COM_INTERFACE_ENTRY_IMPL(x) @=
+#define COM_INTERFACE_ENTRY_IMPL_IID(iid, x) @=
+#define COM_INTERFACE_ENTRY2(x, x2) @=
+#define COM_INTERFACE_ENTRY2_IID(iid, x, x2) @=
+#define COM_INTERFACE_ENTRY_FUNC(iid, dw, func) @=
+#define COM_INTERFACE_ENTRY_FUNC_BLIND(dw, func) @=
+#define COM_INTERFACE_ENTRY_TEAR_OFF(iid, x) @=
+#define COM_INTERFACE_ENTRY_CACHED_TEAR_OFF(iid, x, punk) @=
+#define COM_INTERFACE_ENTRY_AGGREGATE(iid, punk) @=
+#define COM_INTERFACE_ENTRY_AGGREGATE_BLIND(punk) @=
+#define COM_INTERFACE_ENTRY_AUTOAGGREGATE(iid, punk, clsid) @=
+#define COM_INTERFACE_ENTRY_AUTOAGGREGATE_BLIND(punk, clsid) @=
+#define COM_INTERFACE_ENTRY_CHAIN(classname) @=
+#define END_COM_MAP() @>
+
+#define BEGIN_CATEGORY_MAP(x) @<
+#define IMPLEMENTED_CATEGORY( catid ) @=
+#define REQUIRED_CATEGORY( catid ) @=
+#define END_CATEGORY_MAP() @>
+#define BEGIN_OBJECT_MAP(x)
+#define END_OBJECT_MAP()
+
+#define OBJECT_ENTRY(clsid, class)
+#define OBJECT_ENTRY_AUTO(clsid, class)
+#define OBJECT_ENTRY_NON_CREATEABLE(class)
+#define OBJECT_ENTRY_NON_CREATEABLE_EX(clsid, class)
+#define OBJECT_ENTRY_NON_CREATEABLE_EX_AUTO(clsid, class)
+#define OBJECT_ENTRY_PRAGMA(class)
+
+#define BEGIN_CONNECTION_POINT_MAP(x) @<
+#define CONNECTION_POINT_ENTRY(x) @=
+#define END_CONNECTION_POINT_MAP(x) @>
+
+#define DECLARE_CLASSFACTORY_SINGLETON(obj)
+#define DECLARE_OBJECT_DESCRIPTION(x)
+#define DECLARE_NO_REGISTRY()
+#define DECLARE_REGISTRY(class, pid, vpid, nid, flags)
+#define DECLARE_REGISTRY_RESOURCE(x)
+#define DECLARE_REGISTRY_RESOURCEID(x)
+#define DECLARE_STATIC_REGISTRY_RESOURCE(x)
+#define DECLARE_STATIC_REGISTRY_RESOURCEID(x)
+
+#define BEGIN_SERVICE_MAP(x) @<
+#define SERVICE_ENTRY(x) @=
+#define SERVICE_ENTRY_CHAIN(x) @=
+#define END_SERVICE_MAP() @>
+
+#define BEGIN_SINK_MAP(_class) @<
+#define SINK_ENTRY_INFO(id, iid, dispid, fn, info) @=
+#define SINK_ENTRY_EX(id, iid, dispid, fn) @=
+#define SINK_ENTRY(id, dispid, fn) @=
+#define END_SINK_MAP() @>
+
+// ATL OLEDB Map
+#define BEGIN_ACCESSOR_MAP(x, num)
+#define BEGIN_ACCESSOR(num, bAuto)
+#define END_ACCESSOR()
+#define END_ACCESSOR_MAP()
+#define BEGIN_COLUMN_MAP(x)
+#define END_COLUMN_MAP()
+#define COLUMN_ENTRY_EX(nOrdinal, wType, nLength, nPrecision, nScale, data, length, status)
+#define COLUMN_ENTRY_TYPE(nOrdinal, wType, data)
+#define COLUMN_ENTRY_TYPE_SIZE(nOrdinal, wType, nLength, data)
+#define COLUMN_ENTRY_TYPE_STATUS(nOrdinal, wType, status, data)
+#define COLUMN_ENTRY_TYPE_PS(nOrdinal, wType, nPrecision, nScale, data)
+#define COLUMN_ENTRY(nOrdinal, data)
+#define COLUMN_ENTRY_LENGTH(nOrdinal, data, length)
+#define COLUMN_ENTRY_STATUS(nOrdinal, data, status)
+#define COLUMN_ENTRY_LENGTH_STATUS(nOrdinal, data, length, status)
+#define COLUMN_ENTRY_PS(nOrdinal, nPrecision, nScale, data)
+#define COLUMN_ENTRY_PS_LENGTH(nOrdinal, nPrecision, nScale, data, length)
+#define COLUMN_ENTRY_PS_STATUS(nOrdinal, nPrecision, nScale, data, status)
+#define COLUMN_ENTRY_PS_LENGTH_STATUS(nOrdinal, nPrecision, nScale, data, length, status)
+#define COLUMN_NAME_EX(pszName, wType, nLength, nPrecision, nScale, data, length, status)
+#define COLUMN_NAME_TYPE(pszName, wType, data)
+#define COLUMN_NAME_TYPE_SIZE(pszName, wType, nLength, data)
+#define COLUMN_NAME_TYPE_STATUS(pszName, wType, status, data)
+#define COLUMN_NAME_TYPE_PS(pszName, wType, nPrecision, nScale, data)
+#define COLUMN_NAME(pszName, data)
+#define COLUMN_NAME_LENGTH(pszName, data, length)
+#define COLUMN_NAME_STATUS(pszName, data, status)
+#define COLUMN_NAME_LENGTH_STATUS(pszName, data, length, status)
+#define COLUMN_NAME_PS(pszName, nPrecision, nScale, data)
+#define COLUMN_NAME_PS_LENGTH(pszName, nPrecision, nScale, data, length)
+#define COLUMN_NAME_PS_STATUS(pszName, nPrecision, nScale, data, status)
+#define COLUMN_NAME_PS_LENGTH_STATUS(pszName, nPrecision, nScale, data, length, status)
+#define BOOKMARK_ENTRY(variable)
+#define BLOB_ENTRY(nOrdinal, IID, flags, data)
+#define BLOB_ENTRY_STATUS(nOrdinal, IID, flags, data, status)
+#define BLOB_ENTRY_LENGTH(nOrdinal, IID, flags, data, length)
+#define BLOB_ENTRY_LENGTH_STATUS(nOrdinal, IID, flags, data, length, status)
+#define BLOB_NAME(pszName, IID, flags, data)
+#define BLOB_NAME_STATUS(pszName, IID, flags, data, status)
+#define BLOB_NAME_LENGTH(pszName, IID, flags, data, length)
+#define BLOB_NAME_LENGTH_STATUS(pszName, IID, flags, data, length, status)
+#define BEGIN_PARAM_MAP(x)
+#define END_PARAM_MAP()
+#define SET_PARAM_TYPE(type)
+#define DEFINE_COMMAND(x, szCommand)
+#define DEFINE_COMMAND_EX(x, wszCommand)
+
+// ATL Message Map
+#define BEGIN_MSG_MAP(x) @<
+#define MESSAGE_HANDLER(msg, x) @=
+#define CHAIN_MSG_MAP(x) @=
+#define ALT_MSG_MAP(x) @=
+#define CHAIN_MSG_MAP_ALT(x, n) @=
+#define CHAIN_MSG_MAP_ALT_MEMBER(x, n) @=
+#define CHAIN_MSG_MAP_DYNAMIC(x) @=
+#define CHAIN_MSG_MAP_MEMBER(x) @=
+#define COMMAND_CODE_HANDLER(msg, x) @=
+#define COMMAND_HANDLER(id, msg, x) @=
+#define COMMAND_ID_HANDLER(id, x) @=
+#define COMMAND_RANGE_CODE_HANDLER(a, b, c, d) @=
+#define COMMAND_RANGE_HANDLER(ma, mb, x) @=
+#define DEFAULT_REFLECTION_HANDLER() @=
+#define FORWARD_NOTIFICATIONS() @=
+#define MESSAGE_RANGE_HANDLER(ma, mb, x) @=
+#define NOTIFY_CODE_HANDLER(msg, x) @=
+#define NOTIFY_HANDLER(id, msg, x) @=
+#define NOTIFY_ID_HANDLER(id, x) @=
+#define NOTIFY_RANGE_CODE_HANDLER(ida, idb, msg, x) @=
+#define NOTIFY_RANGE_HANDLER(ida, idb, x) @=
+#define REFLECT_NOTIFICATIONS() @=
+#define REFLECTED_COMMAND_CODE_HANDLER(msg, x) @=
+#define REFLECTED_COMMAND_HANDLER(id, msg, x) @=
+#define REFLECTED_COMMAND_ID_HANDLER(id, x) @=
+#define REFLECTED_COMMAND_RANGE_CODE_HANDLER(ida, idb, msg, x) @=
+#define REFLECTED_COMMAND_RANGE_HANDLER(ida, idb, x) @=
+#define REFLECTED_NOTIFY_CODE_HANDLER(msg, x) @=
+#define REFLECTED_NOTIFY_HANDLER(id, msg, x) @=
+#define REFLECTED_NOTIFY_ID_HANDLER(msg, x) @=
+#define REFLECTED_NOTIFY_RANGE_CODE_HANDLER(ida, idb, msg, x) @=
+#define REFLECTED_NOTIFY_RANGE_HANDLER(ida, idb, x) @=
+#define END_MSG_MAP() @>
+
+// ATL Registry Data Exchange Macros
+#define BEGIN_RDX_MAP() @<
+#define RDX_BINARY(a, b, c, d, e) @=
+#define RDX_CSTRING_TEXT(a, b, c, d, e) @=
+#define RDX_DWORD(a, b, c, d, e) @=
+#define RDX_TEXT(a, b, c, d, e) @=
+#define END_RDX_MAP() @>
+
+// ATL Snap-in Macros
+#define EXTENSION_SNAPIN_DATACLASS(x)
+#define BEGIN_EXTENSION_SNAPIN_NODEINFO_MAP(x) @<
+#define SNAPINMENUID(id) @=
+#define EXTENSION_SNAPIN_NODEINFO_ENTRY(x) @=
+#define END_EXTENSION_SNAPIN_NODEINFO_MAP() @>
+#define BEGIN_SNAPINTOOLBARID_MAP(x) @<
+#define SNAPINTOOLBARID_ENTRY(id) @=
+#define END_SNAPINTOOLBARID_MAP() @>
+
+// ATL Exceptions
+#define _ATLTRY try
+#define _ATLCATCH( e ) catch( CException* e )
+#define _ATLCATCHALL() catch( ... )
+#define _ATLDELETEEXCEPTION(e)
+#define _ATLRETHROW throw
+
+// MFC Connection Maps
+#define BEGIN_CONNECTION_PART(ctl, c) @<
+#define CONNECTION_IID(id) @=
+#define END_CONNECTION_PART(c) @>
+#define BEGIN_CONNECTION_MAP(ctl, c) @<
+#define CONNECTION_PART(ctl, iid, c) @=
+#define END_CONNECTION_MAP() @>
+
+// MFC DHTML Editing Command Maps
+#define BEGIN_DHTMLEDITING_CMDMAP(c) @<
+#define DHTMLEDITING_CMD_ENTRY(id, m) @=
+#define DHTMLEDITING_CMD_ENTRY_FUNC(id, m, f) @=
+#define DHTMLEDITING_CMD_ENTRY_TYPE(id, m, e) @=
+#define DHTMLEDITING_CMD_ENTRY_FUNC_TYPE(id, m, f, e) @=
+#define END_DHTMLEDITING_CMDMAP() @>
+
+// MFC DHTML Event Maps
+#define BEGIN_DHTML_EVENT_MAP(c) @<
+#define DHTML_EVENT(id,e,f) @=
+#define DHTML_EVENT_AXCONTROL(id,e,f) @=
+#define DHTML_EVENT_CLASS(id,e,f) @=
+#define DHTML_EVENT_ELEMENT(id,e,f) @=
+#define DHTML_EVENT_ONAFTERUPDATE(e,f) @=
+#define DHTML_EVENT_ONBEFOREUPDATE(e,f) @=
+#define DHTML_EVENT_ONBLUR(e,f) @=
+#define DHTML_EVENT_ONCHANGE(e,f) @=
+#define DHTML_EVENT_ONCLICK(e,f) @=
+#define DHTML_EVENT_ONDATAAVAILABLE(e,f) @=
+#define DHTML_EVENT_ONDATASETCHANGED(e,f) @=
+#define DHTML_EVENT_ONDATASETCOMPLETE(e,f) @=
+#define DHTML_EVENT_ONDBLCLICK(e,f) @=
+#define DHTML_EVENT_ONDRAGSTART(e,f) @=
+#define DHTML_EVENT_ONERRORUPDATE(e,f) @=
+#define DHTML_EVENT_ONFILTERCHANGE(e,f) @=
+#define DHTML_EVENT_ONFOCUS(e,f) @=
+#define DHTML_EVENT_ONHELP(e,f) @=
+#define END_DHTML_EVENT_MAP() @>
+
+#define BEGIN_DHTML_EVENT_MAP_INLINE(c) @<
+#define DHTML_EVENT_ONKEYDOWN(e,f) @=
+#define DHTML_EVENT_ONKEYPRESS(e,f) @=
+#define DHTML_EVENT_ONKEYUP(e,f) @=
+#define DHTML_EVENT_ONMOUSEDOWN(e,f) @=
+#define DHTML_EVENT_ONMOUSEMOVE(e,f) @=
+#define DHTML_EVENT_ONMOUSEOUT(e,f) @=
+#define DHTML_EVENT_ONMOUSEOVER(e,f) @=
+#define DHTML_EVENT_ONMOUSEUP(e,f) @=
+#define DHTML_EVENT_ONRESIZE(e,f) @=
+#define DHTML_EVENT_ONROWENTER(e,f) @=
+#define DHTML_EVENT_ONROWEXIT(e,f) @=
+#define DHTML_EVENT_ONSELECTSTART(e,f) @=
+#define DHTML_EVENT_TAG(id,e,f) @=
+#define END_DHTML_EVENT_MAP() @>
+
+// MFC Multipage DHTML/URL Event Maps
+#define BEGIN_DHTML_URL_EVENT_MAP(c) @<
+#define BEGIN_EMBED_DHTML_EVENT_MAP(c,p) @<
+#define END_EMBED_DHTML_EVENT_MAP() @>
+#define BEGIN_URL_ENTRIES(c) @<
+#define URL_EVENT_ENTRY(c,s,p) @=
+#define URL_EVENT_ENTRY(c,s,p) @=
+#define END_URL_ENTRIES() @>
+#define END_DHTML_URL_EVENT_MAP(c) @>
+
+// MFC Dispatch Maps
+#define BEGIN_DISPATCH_MAP(c,b) @<
+#define DISP_FUNCTION(c,s,x,va,vb) @=
+#define DISP_FUNCTION_ID(c,s,d,x,va,vb) @=
+#define DISP_PROPERTY(c,s,m,va) @=
+#define DISP_PROPERTY_ID(c,s,id,m,v) @=
+#define DISP_PROPERTY_EX(c,s,g,x,v) @=
+#define DISP_PROPERTY_EX_ID(c,s,id,gp,sp,v) @=
+#define DISP_PROPERTY_NOTIFY(c,s,p,x,v) @=
+#define DISP_PROPERTY_NOTIFY_ID(c,s,id,p,f,v) @=
+#define DISP_PROPERTY_PARAM(c,s,gp,sp,va,vb) @=
+#define DISP_PROPERTY_PARAM_ID(c,s,id,gp,sp,m,v) @=
+#define DISP_DEFVALUE(c,s) @=
+#define DISP_STOCKFUNC_DOCLICK() @=
+#define DISP_STOCKFUNC_REFRESH() @=
+#define DISP_STOCKPROP_APPEARANCE() @=
+#define DISP_STOCKPROP_BACKCOLOR() @=
+#define DISP_STOCKPROP_BORDERSTYLE() @=
+#define DISP_STOCKPROP_CAPTION() @=
+#define DISP_STOCKPROP_ENABLED() @=
+#define DISP_STOCKPROP_FONT() @=
+#define DISP_STOCKPROP_FORECOLOR() @=
+#define DISP_STOCKPROP_HWND() @=
+#define DISP_STOCKPROP_READYSTATE() @=
+#define DISP_STOCKPROP_TEXT() @=
+#define END_DISPATCH_MAP() @>
+
+// MFC Event Maps
+#define BEGIN_EVENT_MAP(c,b) @<
+#define EVENT_STOCK_CLICK() @=
+#define EVENT_STOCK_DBLCLICK() @=
+#define EVENT_STOCK_ERROREVENT() @=
+#define EVENT_STOCK_KEYDOWN() @=
+#define EVENT_STOCK_KEYPRESS() @=
+#define EVENT_STOCK_KEYUP() @=
+#define EVENT_STOCK_MOUSEDOWN() @=
+#define EVENT_STOCK_MOUSEMOVE() @=
+#define EVENT_STOCK_MOUSEUP() @=
+#define EVENT_STOCK_READYSTATECHANGE() @=
+#define EVENT_CUSTOM(s,f,v) @=
+#define EVENT_CUSTOM_ID(s,id,f,v) @=
+#define END_EVENT_MAP() @>
+
+// MFC Event Sink Maps
+#define BEGIN_EVENTSINK_MAP(c,b) @<
+#define ON_EVENT(c,id,i,f,v) @=
+#define ON_EVENT_RANGE(c,ida,idb,i,f,v) @=
+#define ON_EVENT_REFLECT(c,id,f,v) @=
+#define ON_PROPNOTIFY(c,id,disp,x,f) @=
+#define ON_PROPNOTIFY_RANGE(c,ida,idb,disp,x,f) @=
+#define ON_PROPNOTIFY_REFLECT(c,disp,x,f) @=
+#define END_EVENTSINK_MAP() @>
+
+// MFC Message Maps
+#define BEGIN_MESSAGE_MAP(c,b) @<
+#define ON_ACN_START(id,f) @=
+#define ON_ACN_STOP(id,f) @=
+#define ON_COMMAND(id,f) @=
+#define ON_COMMAND_EX(id,f) @=
+#define ON_COMMAND_RANGE(ida,idb,f) @=
+#define ON_COMMAND_EX_RANGE(ida,idb,f) @=
+#define ON_CONTROL_REFLECT(notifyCode,f) @=
+#define ON_CONTROL_REFLECT_EX(notifyCode,f) @=
+#define ON_CONTROL_RANGE(m,ida,idb,f) @=
+#define ON_WM_ACTIVATE() @=
+#define ON_WM_ACTIVATEAPP() @=
+#define ON_WM_APPCOMMAND() @=
+#define ON_WM_ASKCBFORMATNAME() @=
+#define ON_WM_CANCELMODE() @=
+#define ON_WM_CAPTURECHANGED() @=
+#define ON_WM_CHANGECBCHAIN() @=
+#define ON_WM_CHANGEUISTATE() @=
+#define ON_WM_CHAR() @=
+#define ON_WM_CHARTOITEM() @=
+#define ON_WM_CHARTOITEM_REFLECT() @=
+#define ON_WM_CHILDACTIVATE() @=
+#define ON_WM_CLIPBOARDUPDATE() @=
+#define ON_WM_CLOSE() @=
+#define ON_WM_COMPACTING() @=
+#define ON_WM_COMPAREITEM() @=
+#define ON_WM_COMPAREITEM_REFLECT() @=
+#define ON_WM_CONTEXTMENU() @=
+#define ON_WM_COPYDATA() @=
+#define ON_WM_CREATE() @=
+#define ON_WM_CTLCOLOR() @=
+#define ON_WM_CTLCOLOR_REFLECT() @=
+#define ON_WM_DEADCHAR() @=
+#define ON_WM_DELETEITEM() @=
+#define ON_WM_DELETEITEM_REFLECT() @=
+#define ON_WM_DESTROY() @=
+#define ON_WM_DESTROYCLIPBOARD() @=
+#define ON_WM_DEVICECHANGE() @=
+#define ON_WM_DEVMODECHANGE() @=
+#define ON_WM_DRAWCLIPBOARD() @=
+#define ON_WM_DRAWITEM() @=
+#define ON_WM_DRAWITEM_REFLECT() @=
+#define ON_WM_DROPFILES() @=
+#define ON_WM_DWMCOLORIZATIONCOLORCHANGED() @=
+#define ON_WM_DWMCOMPOSITIONCHANGED() @=
+#define ON_WM_DWMNCRENDERINGCHANGED() @=
+#define ON_WM_DWMWINDOWMAXIMIZEDCHANGE() @=
+#define ON_WM_ENABLE() @=
+#define ON_WM_ENDSESSION() @=
+#define ON_WM_ENTERIDLE() @=
+#define ON_WM_ENTERMENULOOP() @=
+#define ON_WM_ENTERSIZEMOVE() @=
+#define ON_WM_ERASEBKGND() @=
+#define ON_WM_EXITMENULOOP() @=
+#define ON_WM_EXITSIZEMOVE() @=
+#define ON_WM_FONTCHANGE() @=
+#define ON_WM_GETDLGCODE() @=
+#define ON_WM_GETMINMAXINFO() @=
+#define ON_WM_HELPINFO() @=
+#define ON_WM_HOTKEY() @=
+#define ON_WM_HSCROLL() @=
+#define ON_WM_HSCROLL_REFLECT() @=
+#define ON_WM_HSCROLLCLIPBOARD() @=
+#define ON_WM_ICONERASEBKGND() @=
+#define ON_WM_INITMENU() @=
+#define ON_WM_INITMENUPOPUP() @=
+#define ON_WM_INPUT() @=
+#define ON_WM_INPUT_DEVICE_CHANGE() @=
+#define ON_WM_INPUTLANGCHANGE() @=
+#define ON_WM_INPUTLANGCHANGEREQUEST() @=
+#define ON_WM_KEYDOWN() @=
+#define ON_WM_KEYUP() @=
+#define ON_WM_KILLFOCUS() @=
+#define ON_WM_LBUTTONDBLCLK() @=
+#define ON_WM_LBUTTONDOWN() @=
+#define ON_WM_LBUTTONUP() @=
+#define ON_WM_MBUTTONDBLCLK() @=
+#define ON_WM_MBUTTONDOWN() @=
+#define ON_WM_MBUTTONUP() @=
+#define ON_WM_MDIACTIVATE() @=
+#define ON_WM_MEASUREITEM() @=
+#define ON_WM_MEASUREITEM_REFLECT() @=
+#define ON_WM_MENUCHAR() @=
+#define ON_WM_MENUDRAG() @=
+#define ON_WM_MENUGETOBJECT() @=
+#define ON_WM_MENURBUTTONUP() @=
+#define ON_WM_MENUSELECT() @=
+#define ON_WM_MOUSEACTIVATE() @=
+#define ON_WM_MOUSEHOVER() @=
+#define ON_WM_MOUSEMOVE() @=
+#define ON_WM_MOUSELEAVE() @=
+#define ON_WM_MOUSEHWHEEL() @=
+#define ON_WM_MOUSEWHEEL() @=
+#define ON_WM_MOVE() @=
+#define ON_WM_MOVING() @=
+#define ON_WM_NCACTIVATE() @=
+#define ON_WM_NCCALCSIZE() @=
+#define ON_WM_NCCREATE() @=
+#define ON_WM_NCDESTROY() @=
+#define ON_WM_NCHITTEST() @=
+#define ON_WM_NCLBUTTONDBLCLK() @=
+#define ON_WM_NCLBUTTONDOWN() @=
+#define ON_WM_NCLBUTTONUP() @=
+#define ON_WM_NCMBUTTONDBLCLK() @=
+#define ON_WM_NCMBUTTONDOWN() @=
+#define ON_WM_NCMBUTTONUP() @=
+#define ON_WM_NCMOUSEHOVER() @=
+#define ON_WM_NCMOUSEMOVE() @=
+#define ON_WM_NCMOUSELEAVE() @=
+#define ON_WM_NCPAINT() @=
+#define ON_WM_NCRBUTTONDBLCLK() @=
+#define ON_WM_NCRBUTTONDOWN() @=
+#define ON_WM_NCRBUTTONUP() @=
+#define ON_WM_NCXBUTTONDBLCLK() @=
+#define ON_WM_NCXBUTTONDOWN() @=
+#define ON_WM_NCXBUTTONUP() @=
+#define ON_WM_NEXTMENU() @=
+#define ON_WM_NOTIFYFORMAT() @=
+#define ON_WM_PAINT() @=
+#define ON_WM_PAINTCLIPBOARD() @=
+#define ON_WM_PALETTECHANGED() @=
+#define ON_WM_PALETTEISCHANGING() @=
+#define ON_WM_PARENTNOTIFY() @=
+#define ON_WM_PARENTNOTIFY_REFLECT() @=
+#define ON_WM_POWERBROADCAST() @=
+#define ON_WM_QUERYDRAGICON() @=
+#define ON_WM_QUERYENDSESSION() @=
+#define ON_WM_QUERYNEWPALETTE() @=
+#define ON_WM_QUERYOPEN() @=
+#define ON_WM_QUERYUISTATE() @=
+#define ON_WM_RBUTTONDBLCLK() @=
+#define ON_WM_RBUTTONDOWN() @=
+#define ON_WM_RBUTTONUP() @=
+#define ON_WM_RENDERALLFORMATS() @=
+#define ON_WM_RENDERFORMAT() @=
+#define ON_WM_SETCURSOR() @=
+#define ON_WM_SETFOCUS() @=
+#define ON_WM_SETTINGCHANGE() @=
+#define ON_WM_SHOWWINDOW() @=
+#define ON_WM_SIZE() @=
+#define ON_WM_SIZECLIPBOARD() @=
+#define ON_WM_SIZING() @=
+#define ON_WM_SPOOLERSTATUS() @=
+#define ON_WM_STYLECHANGED() @=
+#define ON_WM_STYLECHANGING() @=
+#define ON_WM_SYNCPAINT() @=
+#define ON_WM_SYSCHAR() @=
+#define ON_WM_SYSCOLORCHANGE() @=
+#define ON_WM_SYSCOMMAND() @=
+#define ON_WM_SYSDEADCHAR() @=
+#define ON_WM_SYSKEYDOWN() @=
+#define ON_WM_SYSKEYUP() @=
+#define ON_WM_TCARD() @=
+#define ON_WM_THEMECHANGED() @=
+#define ON_WM_TIMECHANGE() @=
+#define ON_WM_TIMER() @=
+#define ON_WM_VKEYTOITEM() @=
+#define ON_WM_VKEYTOITEM_REFLECT() @=
+#define ON_WM_VSCROLL() @=
+#define ON_WM_VSCROLL_REFLECT() @=
+#define ON_WM_VSCROLLCLIPBOARD() @=
+#define ON_WM_UNICHAR() @=
+#define ON_WM_UNINITMENUPOPUP() @=
+#define ON_WM_UPDATEUISTATE() @=
+#define ON_WM_USERCHANGED() @=
+#define ON_WM_WINDOWPOSCHANGED() @=
+#define ON_WM_WINDOWPOSCHANGING() @=
+#define ON_WM_WININICHANGE() @=
+#define ON_WM_WTSSESSION_CHANGE() @=
+#define ON_WM_XBUTTONDBLCLK() @=
+#define ON_WM_XBUTTONDOWN() @=
+#define ON_WM_XBUTTONUP() @=
+#define ON_BN_CLICKED(id,f) @=
+#define ON_BN_DISABLE(id,f) @=
+#define ON_BN_DOUBLECLICKED(id,f) @=
+#define ON_BN_HILITE(id,f) @=
+#define ON_BN_KILLFOCUS(id,f) @=
+#define ON_BN_PAINT(id,f) @=
+#define ON_BN_SETFOCUS(id,f) @=
+#define ON_BN_UNHILITE(id,f) @=
+#define ON_CBN_CLOSEUP(id,f) @=
+#define ON_CBN_DBLCLK(id,f) @=
+#define ON_CBN_DROPDOWN(id,f) @=
+#define ON_CBN_EDITCHANGE(id,f) @=
+#define ON_CBN_EDITUPDATE(id,f) @=
+#define ON_CBN_ERRSPACE(id,f) @=
+#define ON_CBN_KILLFOCUS(id,f) @=
+#define ON_CBN_SELCHANGE(id,f) @=
+#define ON_CBN_SELENDCANCEL(id,f) @=
+#define ON_CBN_SELENDOK(id,f) @=
+#define ON_CBN_SETFOCUS(id,f) @=
+#define ON_CLBN_CHKCHANGE(id,f) @=
+#define ON_EN_ALIGN_LTR_EC(id,f) @=
+#define ON_EN_ALIGN_RTL_EC(id,f) @=
+#define ON_EN_ALIGNLTR(id,f) @=
+#define ON_EN_ALIGNRTL(id,f) @=
+#define ON_EN_CHANGE(id,f) @=
+#define ON_EN_ERRSPACE(id,f) @=
+#define ON_EN_HSCROLL(id,f) @=
+#define ON_EN_IMECHANGE(id,f) @=
+#define ON_EN_KILLFOCUS(id,f) @=
+#define ON_EN_MAXTEXT(id,f) @=
+#define ON_EN_SETFOCUS(id,f) @=
+#define ON_EN_UPDATE(id,f) @=
+#define ON_EN_VSCROLL(id,f) @=
+#define ON_LBN_DBLCLK(id,f) @=
+#define ON_LBN_ERRSPACE(id,f) @=
+#define ON_LBN_KILLFOCUS(id,f) @=
+#define ON_LBN_SELCANCEL(id,f) @=
+#define ON_LBN_SELCHANGE(id,f) @=
+#define ON_LBN_SETFOCUS(id,f) @=
+#define ON_MESSAGE(m,f) @=
+#define ON_NOTIFY(notifyCode,id,f) @=
+#define ON_NOTIFY_RANGE(notifyCode,id,idLast,f) @=
+#define ON_NOTIFY_EX(notifyCode,id,f) @=
+#define ON_NOTIFY_EX_RANGE(notifyCode,id,idLast,f) @=
+#define ON_NOTIFY_REFLECT(notifyCode,f) @=
+#define ON_NOTIFY_REFLECT_EX(notifyCode,f) @=
+#define ON_REGISTERED_MESSAGE(m,f) @=
+#define ON_THREAD_MESSAGE(m,f) @=
+#define ON_REGISTERED_THREAD_MESSAGE(m,f) @=
+#define ON_STN_CLICKED(id,f) @=
+#define ON_STN_DBLCLK(id,f) @=
+#define ON_STN_ENABLE(id,f) @=
+#define ON_STN_DISABLE(id,f) @=
+#define ON_OLECMD(p,c,id) @=
+#define ON_OLECMD_CLEARSELECTION() @= 
+#define ON_OLECMD_COPY() @= 
+#define ON_OLECMD_CUT() @= 
+#define ON_OLECMD_NEW() @= 
+#define ON_OLECMD_OPEN() @= 
+#define ON_OLECMD_PAGESETUP() @= 
+#define ON_OLECMD_PASTE() @= 
+#define ON_OLECMD_PASTESPECIAL() @= 
+#define ON_OLECMD_PRINT() @= 
+#define ON_OLECMD_PRINTPREVIEW() @= 
+#define ON_OLECMD_REDO() @= 
+#define ON_OLECMD_SAVE() @= 
+#define ON_OLECMD_SAVE_AS() @= 
+#define ON_OLECMD_SAVE_COPY_AS() @= 
+#define ON_OLECMD_SELECTALL() @= 
+#define ON_OLECMD_UNDO() @= 
+#define ON_OLEVERB(v,f) @=
+#define ON_STDOLEVERB(v,f) @=
+#define ON_UPDATE_COMMAND_UI_RANGE(ida,idb,f) @=
+#define ON_UPDATE_COMMAND_UI(id,f) @=
+#define ON_UPDATE_COMMAND_UI_REFLECT(f) @=
+#define END_MESSAGE_MAP() @>
+
+// MFC Parse Maps
+#define BEGIN_PARSE_MAP(c,b) @<
+#define DEFAULT_PARSE_COMMAND(f,c) @=
+#define ON_PARSE_COMMAND(f,c,v) @=
+#define ON_PARSE_COMMAND_PARAMS(s) @=
+#define ON_PARSE_COMMAND(f,c,v) @=
+#define ON_PARSE_COMMAND_PARAMS(s) @=
+#define END_PARSE_MAP(c) @>
+
+// MFC Interface Maps
+#define BEGIN_INTERFACE_MAP(c,b) @<
+#define INTERFACE_PART(c, iid, lc) @=
+#define INTERFACE_AGGREGATE(c, a) @=
+#define END_INTERFACE_MAP() @>
+
+// Miscellaneous
+#define __RPC_FAR
+#define CALLBACK
+#define EXPORT
+#define FAR
+#define far
+#define FASTCALL __fastcall	
+#define NEAR
+#define PASCAL
+#define SIZE_T_MAX  UINT_MAX
+#define UNALIGNED
+#define ATL_NO_VTABLE 
+#define ATLVARIANT_THROW()	throw()
+#define AFX_API_EXPORT
+#define AFX_API_IMPORT
+#define AFX_CDECL __cdecl
+#define AFX_CLASS_EXPORT 
+#define AFX_CLASS_IMPORT 
+#define AFX_COMDAT 
+#define AFX_CORE_DATA
+#define AFX_CORE_DATADEF
+#define AFX_DATA
+#define AFX_DATA_EXPORT 
+#define AFX_DATA_IMPORT 
+#define AFX_DATADEF
+#define AFX_DB_DATA
+#define AFX_DB_DATADEF
+#define AFX_EXPORT EXPORT
+#define AFX_EXT_API
+#define AFX_EXT_CLASS
+#define AFX_EXT_DATA
+#define AFX_EXT_DATADEF
+#define afx_msg
+#define AFX_NET_DATA
+#define AFX_NET_DATADEF
+#define AFX_NOVTABLE
+#define AFX_OLE_DATA
+#define AFX_OLE_DATADEF
+#define AFX_STATIC extern
+#define AFX_STATIC_DATA extern 
+#define AFXAPI __stdcall
+#define AFXOLEAPI __stdcall
+#define BASED_CODE
+#define BASED_DEBUG
+#define BASED_STACK
+#define BEGIN_DUAL_INTERFACE_PART(localClass, baseClass) class X##localClass : public baseClass { public: BEGIN_COM_MAP(X##localClass, localClass) COM_INTERFACE_ENTRY (baseClass) END_COM_MAP()
+#define BEGIN_INTERFACE_PART(localClass, baseClass) class X##localClass : public baseClass 	{ public: BEGIN_COM_MAP(X##localClass, localClass) COM_INTERFACE_ENTRY (baseClass) END_COM_MAP() public: virtual ULONG STDMETHODCALLTYPE AddRef(); virtual ULONG STDMETHODCALLTYPE Release(); virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void * * ppvObj);
+#define CDECL __cdecl
+#define DECLARE_AGGREGATABLE(x)
+#define DECLARE_CLASSFACTORY_EX(cf)
+#define DECLARE_CLASSFACTORY()
+#define DECLARE_CLASSFACTORY2(lic)
+#define DECLARE_CLASSFACTORY_AUTO_THREAD()
+#define DECLARE_CONNECTION_MAP()
+#define DECLARE_DISPATCH_MAP()
+#define DECLARE_DUAL_ERRORINFO() BEGIN_INTERFACE_PART(SupportErrorInfo, ISupportErrorInfo) STDMETHOD(InterfaceSupportsErrorInfo)(THIS_ REFIID riid); END_INTERFACE_PART(SupportErrorInfo)
+#define DECLARE_DYNAMIC(class_name)
+#define DECLARE_DYNCREATE(class_name)
+#define DECLARE_EMPTY_MSG_MAP()
+#define DECLARE_EVENT_MAP()
+#define DECLARE_EVENTSINK_MAP()
+#define DECLARE_HANDLE(x)
+#define DECLARE_HANDLE32(x)
+#define DECLARE_INTERFACE(iface)    __interface iface
+#define DECLARE_INTERFACE_(iface, baseiface)    __interface iface : public baseiface
+#define DECLARE_INTERFACE_MAP()
+#define DECLARE_MAPI_INTERFACE_(iface, baseiface)	__interface iface : public baseiface
+#define DECLARE_MAPI_INTERFACE_PTR(iface, piface)  typedef __interface iface iface, FAR * piface
+#define DECLARE_MESSAGE_MAP()
+#define DECLARE_NOT_AGGREGATABLE(x)
+#define DECLARE_OLECMD_MAP()
+#define DECLARE_OLECREATE(class_name)
+#define DECLARE_OLECREATE_EX(class_name)
+#define DECLARE_OLECTLTYPE(class_name)
+#define DECLARE_OLETYPELIB(class_name)
+#define DECLARE_ONLY_AGGREGATABLE(x)
+#define DECLARE_OPAQUE32(x)
+#define DECLARE_PARSE_MAP()
+#define DECLARE_POLY_AGGREGATABLE(x)
+#define DECLARE_PROPERTY_SUPPORT(class)
+#define DECLARE_PROPPAGEIDS(class_name)
+#define DECLARE_PROTECT_FINAL_CONSTRUCT()
+#define DECLARE_REGISTRY(class, pid, vpid, nid, flags)
+#define DECLARE_REGISTRY_RESOURCE(x)
+#define DECLARE_SERIAL(class_name)
+#define DECLARE_VIEW_STATUS(statusFlags)
+#define DECLARE_WND_CLASS(WndClassName)
+#define DECLARE_WND_SUPERCLASS(WndClassName, OrigWndClassName)
+#define DELEGATE_DUAL_INTERFACE(objectClass, dualClass)
+#define END_DUAL_INTERFACE_PART(localClass) 	} m_x##localClass; friend class X##localClass;
+#define END_INTERFACE_PART(localClass) 	} m_x##localClass; friend class X##localClass;
+#define END_INTERFACE_PART_STATIC(localClass)	END_INTERFACE_PART(localClass)
+#define END_INTERFACE_PART_OPTIONAL(localClass) }; CInterfacePlaceHolder m_x##localClass; friend class X##localClass;
+#define EXTERN_C extern
+#define EXTERN_PROCESS_LOCAL(class_name, ident_name) extern AFX_DATA AFX_DATADEF CProcessLocal<class_name> ident_name;
+#define IMPLEMENT_DUAL_ERRORINFO(objectClass, riidSource)
+#define IMPLEMENT_DYNAMIC(class_name, base_class_name)
+#define IMPLEMENT_DYNCREATE(class_name, base_class_name)
+#define IMPLEMENT_OLECREATE(class_name, external_name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8)
+#define IMPLEMENT_OLECREATE_EX(class_name, external_name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8)
+#define IMPLEMENT_OLECTLTYPE(class_name, idsUserTypeName, dwOleMisc)
+#define IMPLEMENT_OLETYPELIB(class_name, tlid, wVerMajor, wVerMinor)
+#define IMPLEMENT_SERIAL(class_name, base_class_name, wSchema)
+#define INIT_INTERFACE_PART(theClass, localClass)
+#define INLINE __inline
+#define MAPIMETHOD(method)   virtual HRESULT STDMETHODCALLTYPE method
+#define MAPIMETHOD_(type, method) virtual type STDMETHODCALLTYPE method
+#define MAPIMETHOD_DECLARE(type, method, prefix)  type STDMETHODCALLTYPE
+#define MIDL_INTERFACE(x)   struct
+#define MIDL_DEFINE_GUID(type,name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) GUID name
+#define interface __interface
+#define PROCESS_LOCAL(class_name, ident_name) AFX_DATADEF CProcessLocal<class_name> ident_name;
+#define PURE                    = 0
+#define STDMETHOD(method)       virtual HRESULT STDMETHODCALLTYPE method
+#define STDMETHOD_(type,method) virtual type STDMETHODCALLTYPE method
+#define STDMETHODCALLTYPE __stdcall
+#define STDMETHODIMP_(type)     type STDMETHODCALLTYPE
+#define STDMETHODIMP	HRESULT STDMETHODCALLTYPE
+#define SQLOLE_HELPID(id)
+#define THIS                    void
+#define THIS_
+#define TRY try {
+#define END_TRY }
+#define CATCH(class_name, e) } catch (class_name * e) {
+#define AND_CATCH(class_name, e) } catch (class_name * e) {
+#define END_CATCH }
+#define CATCH_ALL(e) } catch (CException* e) {
+#define AND_CATCH_ALL(e) } catch (CException* e) {
+#define END_CATCH_ALL }
+#define __T(name) name
+#define _T(name) name
+#define TEXT(name) name
+#define WINAPI __stdcall
+#define importlib(name)
+
+// C++ Standard Library
+#define _STD_BEGIN namespace std {
+#define _STD_END } ;
+#define _STD std::
+#define _TRY_BEGIN	try {
+#define _CATCH(x)	} catch (x) {
+#define _CATCH_ALL	} catch (...) {
+#define _CATCH_END	}
+#define _CATCH_IO_(x)
+#define _RAISE(x)	throw (x)
+#define _RERAISE	throw
+#define _THROW0()	throw ()
+#define _THROW1(x)	throw (x)
+#define _THROW(x, y)	throw x(y)
+#define _BITMASK(E, T) 	typedef int T
+#define _BITMASK_OPS(T)
+#define _TDEF(x)		= x
+#define _TDEF2(x, y)	= x, y
+#define _CNTSIZ(iter)	ptrdiff_t
+#define _STCONS(ty, name, val)	enum {name = val}
+#define _TRY_IO_BEGIN	
+#define _CATCH_IO_END	
+#define _CATCH_IO_(x)	 
+#define _NOEXCEPT
+
+// CRT
+#define __CRTDECL
+#define __CLR_OR_THIS_CALL
+#define __CLRCALL_OR_CDECL
+#define __CLRCALL_PURE_OR_CDECL
+#define _CRTIMP
+#define _CRTIMP2
+#define _CRTIMP2_PURE
+#define _CRTIMP2_NCEEPURE
+#define _CRT_NONSTDC_DEPRECATE(func)
+#define _CRT_INSECURE_DEPRECATE(func)
+#define _CONST_RETURN
+#define _WConst_return
+
+#define _CRT_ALIGN(n)
+#define _CRT_DEPRECATE_TEXT(text)
+#define _CRT_INSECURE_DEPRECATE_GLOBALS(func)
+#define _CRT_INSECURE_DEPRECATE_MEMORY(func)
+#define _CRT_JIT_INTRINSIC
+#define _CRTNOALIAS
+#define _CRTRESTRICT
+#define _CRT_OBSOLETE(func)
+#define _CRTIMP_ALTERNATIVE
+#define _MRTIMP
+#define _SWPRINTFS_DEPRECATED
+
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_0(_ReturnType, _FuncName, _DstType, _Dst) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size]);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_1(_ReturnType, _FuncName, _DstType, _Dst, _TType1, _TArg1) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size], _TType1 _TArg1);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_2(_ReturnType, _FuncName, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size], _TType1 _TArg1, _TType2 _TArg2);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_3(_ReturnType, _FuncName, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size], _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_4(_ReturnType, _FuncName, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3, _TType4, _TArg4) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size], _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3, _TType4 _TArg4);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_1_1(_ReturnType, _FuncName, _HType1, _HArg1, _DstType, _Dst, _TType1, _TArg1) template <size_t _Size> _ReturnType _FuncName(_HType1 _HArg1, _DstType (&_Dst)[_Size], _TType1 _TArg1);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_1_2(_ReturnType, _FuncName, _HType1, _HArg1, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) template <size_t _Size> _ReturnType _FuncName(_HType1 _HArg1, _DstType (&_Dst)[_Size], _TType1 _TArg1, _TType2 _TArg2);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_1_3(_ReturnType, _FuncName, _HType1, _HArg1, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3) template <size_t _Size> _ReturnType _FuncName(_HType1 _HArg1, _DstType (&_Dst)[_Size], _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_2_0(_ReturnType, _FuncName, _HType1, _HArg1, _HType2, _HArg2, _DstType, _Dst) template <size_t _Size> _ReturnType _FuncName(_HType1 _HArg1, _HType2 _HArg2, _DstType (&_Dst)[_Size]);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_1_ARGLIST(_ReturnType, _FuncName, _VFuncName, _DstType, _Dst, _TType1, _TArg1) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size], _TType1 _TArg1, ...);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_2_ARGLIST(_ReturnType, _FuncName, _VFuncName, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size], _TType1 _TArg1, _TType2 _TArg2, ...);
+#define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_SPLITPATH(_ReturnType, _FuncName, _DstType, _Src) template <size_t _DriveSize, size_t _DirSize, size_t _NameSize, size_t _ExtSize> _ReturnType _FuncName(_In_ const _DstType *_Src, _DstType (&_Drive)[_DriveSize], _DstType (&_Dir)[_DirSize], _DstType (&_Name)[_NameSize], _DstType (&_Ext)[_ExtSize]);
+
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_0_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SalAttributeDst, _DstType, _Dst) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_0_GETS(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _DstType, _Dst) _DeclSpec _ReturnType __cdecl _FuncName(_DstType *_Dst);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_1_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_2_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_3_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_4_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3, _TType4, _TArg4) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3, _TType4 _TArg4);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_1_1_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _HType1, _HArg1, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1) _DeclSpec _ReturnType __cdecl _FuncName(_HType1 _HArg1, _SalAttributeDst _DstType *_Dst, _TType1 _TArg1);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_2_0_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _HType1, _HArg1, _HType2, _HArg2, _SalAttributeDst, _DstType, _Dst) _DeclSpec _ReturnType __cdecl _FuncName(_HType1 _HArg1, _HType2 _HArg2, _SalAttributeDst _DstType *_Dst);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_1_ARGLIST_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName,_VFuncName, _SecureVFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, ...); _DeclSpec _ReturnType __cdecl _VFuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, va_list _Args);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_2_ARGLIST(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _VFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, ...); _DeclSpec _ReturnType __cdecl _VFuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, va_list _Args);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_2_ARGLIST_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _VFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) _DeclSpec _ReturnType __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, ...); _DeclSpec _ReturnType __cdecl _VFuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, va_list _Args);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_2_SIZE_EX(_DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) _DeclSpec size_t __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2);
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_3_SIZE_EX(_DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3) _DeclSpec size_t __cdecl _FuncName(_SalAttributeDst _DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3);
+#define __DECLARE_CPP_OVERLOAD_INLINE_NFUNC_0_0_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst) _ReturnType __CRTDECL _FuncName(_DstType *_Dst)
+#define __DEFINE_CPP_OVERLOAD_INLINE_NFUNC_0_0_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst)
+#define __DECLARE_CPP_OVERLOAD_INLINE_NFUNC_0_1_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1) _ReturnType __CRTDECL _FuncName(_DstType *_Dst, _TType1 _TArg1)
+#define __DEFINE_CPP_OVERLOAD_INLINE_NFUNC_0_1_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1)
+#define __DECLARE_CPP_OVERLOAD_INLINE_NFUNC_0_2_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2) _ReturnType __CRTDECL _FuncName(_DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2)
+#define __DEFINE_CPP_OVERLOAD_INLINE_NFUNC_0_2_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DECLARE_CPP_OVERLOAD_INLINE_NFUNC_0_3_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3) _ReturnType __CRTDECL _FuncName(_DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3)
+#define __DEFINE_CPP_OVERLOAD_INLINE_NFUNC_0_3_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+
+// Core Windows
+#define APIENTRY
+#define NTAPI
+#define WINGDIAPI
+#define STDMETHODVCALLTYPE
+#define STDAPICALLTYPE
+#define STDAPIVCALLTYPE         __cdecl
+#define FORCEINLINE __forceinline
+#define ISOLATION_AWARE_INLINE inline
+
+#define WINMMAPI
+#define WINADVAPI
+#define WINBASEAPI
+#define WINCOMMCTRLAPI
+#define WINCOMMDLGAPI
+#define WINCRYPT32API
+#define WINCRYPT32STRINGAPI
+#define WINSCARDAPI
+#define WINSCARDDATA
+#define WINUSERAPI
+
+#define __MACHINEI            __MACHINE
+#define __MACHINEX64          __MACHINE
+#define __MACHINEIA32         __MACHINE
+#define __MACHINEX86X_X64     __MACHINE
+#define __MACHINEX86X_IA64    __MACHINE
+#define __MACHINEIA64         __MACHINE
+#define __MACHINEW64          __MACHINE
+#define __MACHINEIW64         __MACHINE
+#define __MACHINESA           __MACHINE
+#define __MACHINEARMX         __MACHINE
+#define __MACHINECC           __MACHINE
+#define __MACHINECE           __MACHINE
+#define __MACHINE(X)          X;
+#define __MACHINEWVMPURE(X)   X;
+#define _INTERLOCKEDCALL      __cdecl
+
+// OLE
+#define BEGIN_INTERFACE
+#define END_INTERFACE
+#define CONST_VTBL const
+
+#define STDAPI HRESULT
+#define STDAPI_(type) type
+#define STDAPIV_(type) type
+#define STDMETHODIMPV_(type) type
+#define WINOLEAPI HRESULT
+#define WINOLEAPI_(type) type
+#define WINOLEAUTAPI        HRESULT 
+#define WINOLEAUTAPI_(type) type
+#define DEFINE_OLEGUID(name, x, y, z) GUID name
+#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) const GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+
+// RPC
+#define __RPC_API
+#define __RPC_USER
+#define __RPC_STUB
+#define  RPC_ENTRY
+
+#define __RPC__range(min,max)
+#define __RPC__in_range(min,max)
+#define __RPC__in
+#define __RPC__in_string
+#define __RPC__in_opt_string
+#define __RPC__in_ecount(size)
+#define __RPC__in_ecount_full(size)
+#define __RPC__in_ecount_full_string(size)
+#define __RPC__in_ecount_part(size, length)
+#define __RPC__in_ecount_full_opt(size)
+#define __RPC__in_ecount_full_opt_string(size)
+#define __RPC__inout_ecount_full_opt_string(size)
+#define __RPC__in_ecount_part_opt(size, length)
+#define __RPC__in_xcount(size)
+#define __RPC__in_xcount_full(size)
+#define __RPC__in_xcount_full_string(size)
+#define __RPC__in_xcount_part(size, length)
+#define __RPC__in_xcount_full_opt(size)
+#define __RPC__in_xcount_full_opt_string(size)
+#define __RPC__inout_xcount_full_opt_string(size)
+#define __RPC__in_xcount_part_opt(size, length)
+
+#define __RPC__deref_in
+#define __RPC__deref_in_string
+#define __RPC__deref_in_opt
+#define __RPC__deref_in_opt_string
+#define __RPC__deref_opt_in
+#define __RPC__deref_opt_in_string
+#define __RPC__deref_opt_in_opt
+#define __RPC__deref_opt_in_opt_string
+#define __RPC__deref_in_ecount(size) 
+#define __RPC__deref_in_ecount_part(size, length) 
+#define __RPC__deref_in_ecount_full(size)
+#define __RPC__deref_in_ecount_full_opt(size)
+#define __RPC__deref_in_ecount_full_string(size)
+#define __RPC__deref_in_ecount_full_opt_string(size)
+#define __RPC__deref_in_ecount_opt(size)
+#define __RPC__deref_in_ecount_opt_string(size)
+#define __RPC__deref_in_ecount_part_opt(size, length)
+#define __RPC__deref_in_xcount(size)
+#define __RPC__deref_in_xcount_part(size, length)
+#define __RPC__deref_in_xcount_full(size)
+#define __RPC__deref_in_xcount_full_opt(size)
+#define __RPC__deref_in_xcount_full_string(size)
+#define __RPC__deref_in_xcount_full_opt_string(size)
+#define __RPC__deref_in_xcount_opt(size)
+#define __RPC__deref_in_xcount_opt_string(size)
+#define __RPC__deref_in_xcount_part_opt(size, length)
+
+// [out]
+#define __RPC__out
+#define __RPC__out_ecount(size)
+#define __RPC__out_ecount_part(size, length)
+#define __RPC__out_ecount_full(size)
+#define __RPC__out_ecount_full_string(size)
+#define __RPC__out_xcount(size)
+#define __RPC__out_xcount_part(size, length)
+#define __RPC__out_xcount_full(size)
+#define __RPC__out_xcount_full_string(size)
+
+// [in,out] 
+#define __RPC__inout
+#define __RPC__inout_string
+#define __RPC__opt_inout
+#define __RPC__inout_ecount(size)
+#define __RPC__inout_ecount_part(size, length)
+#define __RPC__inout_ecount_full(size)
+#define __RPC__inout_ecount_full_string(size)
+#define __RPC__inout_xcount(size)
+#define __RPC__inout_xcount_part(size, length)
+#define __RPC__inout_xcount_full(size)
+#define __RPC__inout_xcount_full_string(size)
+
+// [in,unique]
+#define __RPC__in_opt
+#define __RPC__in_ecount_opt(size)
+#define __RPC__in_xcount_opt(size)
+
+// [in,out,unique]
+#define __RPC__inout_opt
+#define __RPC__inout_opt_string
+#define __RPC__inout_ecount_opt(size)
+#define __RPC__inout_ecount_part_opt(size, length)
+#define __RPC__inout_ecount_full_opt(size)
+#define __RPC__inout_ecount_full_string(size)
+#define __RPC__inout_xcount_opt(size)
+#define __RPC__inout_xcount_part_opt(size, length)
+#define __RPC__inout_xcount_full_opt(size)
+#define __RPC__inout_xcount_full_string(size)
+
+// [out] **
+#define __RPC__deref_out
+#define __RPC__deref_out_string
+#define __RPC__deref_out_opt
+#define __RPC__deref_out_opt_string
+#define __RPC__deref_out_ecount(size)
+#define __RPC__deref_out_ecount_part(size, length)
+#define __RPC__deref_out_ecount_full(size)
+#define __RPC__deref_out_ecount_full_string(size)
+#define __RPC__deref_out_xcount(size)
+#define __RPC__deref_out_xcount_part(size, length)
+#define __RPC__deref_out_xcount_full(size)
+#define __RPC__deref_out_xcount_full_string(size)
+
+// [in,out] **, second pointer decoration. 
+#define __RPC__deref_inout
+#define __RPC__deref_inout_string
+#define __RPC__deref_inout_opt
+#define __RPC__deref_inout_opt_string
+#define __RPC__deref_inout_ecount_full(size)
+#define __RPC__deref_inout_ecount_full_string(size)
+#define __RPC__deref_inout_ecount_opt(size)
+#define __RPC__deref_inout_ecount_part_opt(size, length)
+#define __RPC__deref_inout_ecount_full_opt(size)
+#define __RPC__deref_inout_ecount_full_opt_string(size)
+#define __RPC__deref_inout_xcount_full(size)
+#define __RPC__deref_inout_xcount_full_string(size)
+#define __RPC__deref_inout_xcount_opt(size)
+#define __RPC__deref_inout_xcount_part_opt(size, length)
+#define __RPC__deref_inout_xcount_full_opt(size)
+#define __RPC__deref_inout_xcount_full_opt_string(size)
+
+// [in,out,unique]
+#define __RPC__deref_opt_inout
+#define __RPC__deref_opt_inout_string
+#define __RPC__deref_opt_inout_ecount(size)
+#define __RPC__deref_opt_inout_ecount_part(size, length)
+#define __RPC__deref_opt_inout_ecount_full(size)
+#define __RPC__deref_opt_inout_ecount_full_string(size)
+#define __RPC__deref_opt_inout_xcount(size)
+#define __RPC__deref_opt_inout_xcount_part(size, length)
+#define __RPC__deref_opt_inout_xcount_full(size)
+#define __RPC__deref_opt_inout_xcount_full_string(size)
+
+#define __RPC__deref_out_ecount_opt(size)
+#define __RPC__deref_out_ecount_part_opt(size, length)
+#define __RPC__deref_out_ecount_full_opt(size)
+#define __RPC__deref_out_ecount_full_opt_string(size)
+#define __RPC__deref_out_xcount_opt(size)
+#define __RPC__deref_out_xcount_part_opt(size, length)
+#define __RPC__deref_out_xcount_full_opt(size)
+#define __RPC__deref_out_xcount_full_opt_string(size)
+
+#define __RPC__deref_opt_inout_opt
+#define __RPC__deref_opt_inout_opt_string
+#define __RPC__deref_opt_inout_ecount_opt(size)
+#define __RPC__deref_opt_inout_ecount_part_opt(size, length)
+#define __RPC__deref_opt_inout_ecount_full_opt(size)
+#define __RPC__deref_opt_inout_ecount_full_opt_string(size)
+#define __RPC__deref_opt_inout_xcount_opt(size)
+#define __RPC__deref_opt_inout_xcount_part_opt(size, length)
+#define __RPC__deref_opt_inout_xcount_full_opt(size)
+#define __RPC__deref_opt_inout_xcount_full_opt_string(size)
+
+#define __RPC_full_pointer
+#define __RPC_unique_pointer
+#define __RPC_ref_pointer
+#define __RPC_string
+#define _Result_nullonfailure_
+
+// Shell API
+#define SHSTDAPI_(type) type
+#define SHDOCAPI_(type) type
+#define SHSTDDOCAPI_(type) type
+#define BROWSEUIAPI_(type) type
+#define LWSTDAPI_(type) type
+#define LWSTDAPIV_(type) type
+
+// SAL Annotations
+#define _At_(target, annos)
+#define _At_buffer_(target,iter,bound,annos)
+#define _When_(expr, annos)
+#define _Group_(annos)
+#define _Use_decl_annotations_
+#define _Const_
+#define _Notref_
+#define _Reserved_
+#define _In_
+#define _In_opt_
+#define _In_z_
+#define _In_opt_z_
+#define _In_reads_(size)
+#define _In_reads_opt_(size)
+#define _In_reads_bytes_(size)
+#define _In_reads_bytes_opt_(size)
+#define _In_reads_z_(size)
+#define _In_reads_opt_z_(size)
+#define _In_reads_or_z_(size)
+#define _In_reads_to_ptr_(ptr)
+#define _In_reads_to_ptr_opt_(ptr)
+#define _In_reads_to_ptr_z_(ptr)
+#define _In_reads_to_ptr_opt_z_(ptr)
+#define _In_count_(size)
+#define _In_opt_count_(size)
+#define _In_bytecount_(size)
+#define _In_opt_bytecount_(size)
+#define _In_count_c_(size)
+#define _In_opt_count_c_(size)
+#define _In_bytecount_c_(size)
+#define _In_opt_bytecount_c_(size)
+#define _In_z_count_(size)
+#define _In_opt_z_count_(size)
+#define _In_z_bytecount_(size)
+#define _In_opt_z_bytecount_(size)
+#define _In_z_count_c_(size)
+#define _In_opt_z_count_c_(size)
+#define _In_z_bytecount_c_(size)
+#define _In_opt_z_bytecount_c_(size)
+#define _In_ptrdiff_count_(size)
+#define _In_opt_ptrdiff_count_(size)
+#define _In_count_x_(size)
+#define _In_opt_count_x_(size)
+#define _In_bytecount_x_(size)
+#define _In_opt_bytecount_x_(size)
+#define _Out_
+#define _Out_opt_
+#define _Out_writes_(size)
+#define _Out_writes_opt_(size)
+#define _Out_writes_bytes_(size)
+#define _Out_writes_bytes_opt_(size)
+#define _Out_writes_z_(size)
+#define _Out_writes_opt_z_(size)
+#define _Out_writes_to_(size,count)
+#define _Out_writes_to_opt_(size,count)
+#define _Out_writes_all_(size)
+#define _Out_writes_all_opt_(size)
+#define _Out_writes_bytes_to_(size,count)
+#define _Out_writes_bytes_to_opt_(size,count)
+#define _Out_writes_bytes_all_(size)
+#define _Out_writes_bytes_all_opt_(size)
+#define _Out_writes_to_ptr_(ptr)
+#define _Out_writes_to_ptr_opt_(ptr)
+#define _Out_writes_to_ptr_z_(ptr)
+#define _Out_writes_to_ptr_opt_z_(ptr)
+#define _Out_cap_(size)
+#define _Out_opt_cap_(size)
+#define _Out_bytecap_(size)
+#define _Out_opt_bytecap_(size)
+#define _Out_cap_c_(size)
+#define _Out_opt_cap_c_(size)
+#define _Out_bytecap_c_(size)
+#define _Out_opt_bytecap_c_(size)
+#define _Out_cap_m_(mult,size)
+#define _Out_opt_cap_m_(mult,size)
+#define _Out_z_cap_m_(mult,size)
+#define _Out_opt_z_cap_m_(mult,size)
+#define _Out_ptrdiff_cap_(size)
+#define _Out_opt_ptrdiff_cap_(size)
+#define _Out_cap_x_(size)
+#define _Out_opt_cap_x_(size)
+#define _Out_bytecap_x_(size)
+#define _Out_opt_bytecap_x_(size)
+#define _Out_z_cap_(size)
+#define _Out_opt_z_cap_(size)
+#define _Out_z_bytecap_(size)
+#define _Out_opt_z_bytecap_(size)
+#define _Out_z_cap_c_(size)
+#define _Out_opt_z_cap_c_(size)
+#define _Out_z_bytecap_c_(size)
+#define _Out_opt_z_bytecap_c_(size)
+#define _Out_z_cap_x_(size)
+#define _Out_opt_z_cap_x_(size)
+#define _Out_z_bytecap_x_(size)
+#define _Out_opt_z_bytecap_x_(size)
+#define _Out_cap_post_count_(cap,count)
+#define _Out_opt_cap_post_count_(cap,count)
+#define _Out_bytecap_post_bytecount_(cap,count)
+#define _Out_opt_bytecap_post_bytecount_(cap,count)
+#define _Out_z_cap_post_count_(cap,count)
+#define _Out_opt_z_cap_post_count_(cap,count)
+#define _Out_z_bytecap_post_bytecount_(cap,count)
+#define _Out_opt_z_bytecap_post_bytecount_(cap,count)
+#define _Out_capcount_(capcount)
+#define _Out_opt_capcount_(capcount)
+#define _Out_bytecapcount_(capcount)
+#define _Out_opt_bytecapcount_(capcount)
+#define _Out_capcount_x_(capcount)
+#define _Out_opt_capcount_x_(capcount)
+#define _Out_bytecapcount_x_(capcount)
+#define _Out_opt_bytecapcount_x_(capcount)
+#define _Out_z_capcount_(capcount)
+#define _Out_opt_z_capcount_(capcount)
+#define _Out_z_bytecapcount_(capcount)
+#define _Out_opt_z_bytecapcount_(capcount)
+#define _Inout_
+#define _Inout_opt_
+#define _Inout_z_
+#define _Inout_opt_z_
+#define _Inout_updates_(size)
+#define _Inout_updates_opt_(size)
+#define _Inout_updates_z_(size)
+#define _Inout_updates_opt_z_(size)
+#define _Inout_updates_to_(size,count)
+#define _Inout_updates_to_opt_(size,count)
+#define _Inout_updates_all_(size)
+#define _Inout_updates_all_opt_(size)
+#define _Inout_updates_bytes_(size)
+#define _Inout_updates_bytes_opt_(size)
+#define _Inout_updates_bytes_to_(size,count)
+#define _Inout_updates_bytes_to_opt_(size,count)
+#define _Inout_updates_bytes_all_(size)
+#define _Inout_updates_bytes_all_opt_(size)
+#define _Inout_count_(size)
+#define _Inout_opt_count_(size)
+#define _Inout_bytecount_(size)
+#define _Inout_opt_bytecount_(size)
+#define _Inout_count_c_(size)
+#define _Inout_opt_count_c_(size)
+#define _Inout_bytecount_c_(size)
+#define _Inout_opt_bytecount_c_(size)
+#define _Inout_z_count_(size)
+#define _Inout_opt_z_count_(size)
+#define _Inout_z_bytecount_(size)
+#define _Inout_opt_z_bytecount_(size)
+#define _Inout_z_count_c_(size)
+#define _Inout_opt_z_count_c_(size)
+#define _Inout_z_bytecount_c_(size)
+#define _Inout_opt_z_bytecount_c_(size)
+#define _Inout_ptrdiff_count_(size)
+#define _Inout_opt_ptrdiff_count_(size)
+#define _Inout_count_x_(size)
+#define _Inout_opt_count_x_(size)
+#define _Inout_bytecount_x_(size)
+#define _Inout_opt_bytecount_x_(size)
+#define _Inout_cap_(size)
+#define _Inout_opt_cap_(size)
+#define _Inout_bytecap_(size)
+#define _Inout_opt_bytecap_(size)
+#define _Inout_cap_c_(size)
+#define _Inout_opt_cap_c_(size)
+#define _Inout_bytecap_c_(size)
+#define _Inout_opt_bytecap_c_(size)
+#define _Inout_cap_x_(size)
+#define _Inout_opt_cap_x_(size)
+#define _Inout_bytecap_x_(size)
+#define _Inout_opt_bytecap_x_(size)
+#define _Inout_z_cap_(size)
+#define _Inout_opt_z_cap_(size)
+#define _Inout_z_bytecap_(size)
+#define _Inout_opt_z_bytecap_(size)
+#define _Inout_z_cap_c_(size)
+#define _Inout_opt_z_cap_c_(size)
+#define _Inout_z_bytecap_c_(size)
+#define _Inout_opt_z_bytecap_c_(size)
+#define _Inout_z_cap_x_(size)
+#define _Inout_opt_z_cap_x_(size)
+#define _Inout_z_bytecap_x_(size)
+#define _Inout_opt_z_bytecap_x_(size)
+#define _Ret_
+#define _Ret_opt_
+#define _Outptr_
+#define _Outptr_result_maybenull_
+#define _Outptr_opt_
+#define _Outptr_opt_result_maybenull_
+#define _Outptr_result_z_
+#define _Outptr_opt_result_z_
+#define _Outptr_result_maybenull_z_
+#define _Outptr_opt_result_maybenull_z_
+#define _Outptr_result_nullonfailure_
+#define _Outptr_opt_result_nullonfailure_
+#define _COM_Outptr_
+#define _COM_Outptr_result_maybenull_
+#define _COM_Outptr_opt_
+#define _COM_Outptr_opt_result_maybenull_
+#define _Outptr_result_buffer_(size)
+#define _Outptr_opt_result_buffer_(size)
+#define _Outptr_result_buffer_to_(size,count)
+#define _Outptr_opt_result_buffer_to_(size,count)
+#define _Outptr_result_buffer_all_(size)
+#define _Outptr_opt_result_buffer_all_(size)
+#define _Outptr_result_buffer_maybenull_(size)
+#define _Outptr_opt_result_buffer_maybenull_(size)
+#define _Outptr_result_buffer_to_maybenull_(size,count)
+#define _Outptr_opt_result_buffer_to_maybenull_(size,count)
+#define _Outptr_result_buffer_all_maybenull_(size)
+#define _Outptr_opt_result_buffer_all_maybenull_(size)
+#define _Outptr_result_bytebuffer_(size)
+#define _Outptr_opt_result_bytebuffer_(size)
+#define _Outptr_result_bytebuffer_to_(size,count)
+#define _Outptr_opt_result_bytebuffer_to_(size,count)
+#define _Outptr_result_bytebuffer_all_(size)
+#define _Outptr_opt_result_bytebuffer_all_(size)
+#define _Outptr_result_bytebuffer_maybenull_(size)
+#define _Outptr_opt_result_bytebuffer_maybenull_(size)
+#define _Outptr_result_bytebuffer_to_maybenull_(size,count)
+#define _Outptr_opt_result_bytebuffer_to_maybenull_(size,count)
+#define _Outptr_result_bytebuffer_all_maybenull_(size)
+#define _Outptr_opt_result_bytebuffer_all_maybenull_(size)
+#define _Outref_
+#define _Outref_result_maybenull_
+#define _Outref_result_buffer_(size)
+#define _Outref_result_bytebuffer_(size)
+#define _Outref_result_buffer_to_(size,count)
+#define _Outref_result_bytebuffer_to_(size,count)
+#define _Outref_result_buffer_all_(size)
+#define _Outref_result_bytebuffer_all_(size)
+#define _Outref_result_buffer_maybenull_(size)
+#define _Outref_result_bytebuffer_maybenull_(size)
+#define _Outref_result_buffer_to_maybenull_(size,count)
+#define _Outref_result_bytebuffer_to_maybenull_(size,count)
+#define _Outref_result_buffer_all_maybenull_(size)
+#define _Outref_result_bytebuffer_all_maybenull_(size)
+#define _Outref_result_nullonfailure_
+#define _Pre_defensive_
+#define _Post_defensive_
+#define _In_defensive_(annotes)
+#define _Out_defensive_(annotes)
+#define _Inout_defensive_(annotes)
+#define _Result_nullonfailure_
+#define _Result_zeroonfailure_
+#define _Points_to_data_
+#define _Literal_
+#define _Notliteral_
+#define _Deref_out_
+#define _Deref_out_opt_
+#define _Deref_opt_out_
+#define _Deref_opt_out_opt_
+#define _Deref_out_z_
+#define _Deref_out_opt_z_
+#define _Deref_opt_out_z_
+#define _Deref_opt_out_opt_z_
+#define _Check_return_
+#define _Must_inspect_result_
+#define _Printf_format_string_
+#define _Scanf_format_string_
+#define _Scanf_s_format_string_
+#define _Success_(expr)
+#define _Return_type_success_(expr)
+#define _On_failure_(annos)
+#define _Always_(annos)
+#define _In_bound_
+#define _Out_bound_
+#define _Ret_bound_
+#define _Deref_in_bound_
+#define _Deref_out_bound_
+#define _Deref_inout_bound_
+#define _Deref_ret_bound_
+#define _In_range_(lb,ub)
+#define _Out_range_(lb,ub)
+#define _Ret_range_(lb,ub)
+#define _Deref_in_range_(lb,ub)
+#define _Deref_out_range_(lb,ub)
+#define _Deref_ret_range_(lb,ub)
+#define _Pre_equal_to_(expr)
+#define _Post_equal_to_(expr)
+#define _Unchanged_(e)
+#define _Pre_satisfies_(cond)
+#define _Post_satisfies_(cond)
+#define _Field_size_(size)
+#define _Field_size_opt_(size)
+#define _Field_size_part_(size,count)
+#define _Field_size_part_opt_(size,count)
+#define _Field_size_full_(size)
+#define _Field_size_full_opt_(size)
+#define _Field_size_bytes_(size)
+#define _Field_size_bytes_opt_(size)
+#define _Field_size_bytes_part_(size,count)
+#define _Field_size_bytes_part_opt_(size,count)
+#define _Field_size_bytes_full_(size)
+#define _Field_size_bytes_full_opt_(size)
+#define _Field_z_
+#define _Field_range_(min,max)
+#define _Pre_
+#define _Post_
+#define _Valid_
+#define _Notvalid_
+#define _Maybevalid_
+#define _Readable_bytes_(size)
+#define _Readable_elements_(size)
+#define _Writable_bytes_(size)
+#define _Writable_elements_(size)
+#define _Null_terminated_
+#define _NullNull_terminated_
+#define _Pre_readable_size_(size)
+#define _Pre_writable_size_(size)
+#define _Pre_readable_byte_size_(size)
+#define _Pre_writable_byte_size_(size)
+#define _Post_readable_size_(size)
+#define _Post_writable_size_(size)
+#define _Post_readable_byte_size_(size)
+#define _Post_writable_byte_size_(size)
+#define _Null_
+#define _Notnull_
+#define _Maybenull_
+#define _Pre_z_
+#define _Pre_opt_z_
+#define _Pre_cap_(size)
+#define _Pre_opt_cap_(size)
+#define _Pre_bytecap_(size)
+#define _Pre_opt_bytecap_(size)
+#define _Pre_cap_c_(size)
+#define _Pre_opt_cap_c_(size)
+#define _Pre_bytecap_c_(size)
+#define _Pre_opt_bytecap_c_(size)
+#define _Pre_cap_c_one_
+#define _Pre_opt_cap_c_one_
+#define _Pre_cap_m_(mult,size)
+#define _Pre_opt_cap_m_(mult,size)
+#define _Pre_cap_for_(param)
+#define _Pre_opt_cap_for_(param)
+#define _Pre_cap_x_(size)
+#define _Pre_opt_cap_x_(size)
+#define _Pre_bytecap_x_(size)
+#define _Pre_opt_bytecap_x_(size)
+#define _Pre_ptrdiff_cap_(ptr)
+#define _Pre_opt_ptrdiff_cap_(ptr)
+#define _Pre_z_cap_(size)
+#define _Pre_opt_z_cap_(size)
+#define _Pre_z_bytecap_(size)
+#define _Pre_opt_z_bytecap_(size)
+#define _Pre_z_cap_c_(size)
+#define _Pre_opt_z_cap_c_(size)
+#define _Pre_z_bytecap_c_(size)
+#define _Pre_opt_z_bytecap_c_(size)
+#define _Pre_z_cap_x_(size)
+#define _Pre_opt_z_cap_x_(size)
+#define _Pre_z_bytecap_x_(size)
+#define _Pre_opt_z_bytecap_x_(size)
+#define _Pre_valid_cap_(size)
+#define _Pre_opt_valid_cap_(size)
+#define _Pre_valid_bytecap_(size)
+#define _Pre_opt_valid_bytecap_(size)
+#define _Pre_valid_cap_c_(size)
+#define _Pre_opt_valid_cap_c_(size)
+#define _Pre_valid_bytecap_c_(size)
+#define _Pre_opt_valid_bytecap_c_(size)
+#define _Pre_valid_cap_x_(size)
+#define _Pre_opt_valid_cap_x_(size)
+#define _Pre_valid_bytecap_x_(size)
+#define _Pre_opt_valid_bytecap_x_(size)
+#define _Pre_count_(size)
+#define _Pre_opt_count_(size)
+#define _Pre_bytecount_(size)
+#define _Pre_opt_bytecount_(size)
+#define _Pre_count_c_(size)
+#define _Pre_opt_count_c_(size)
+#define _Pre_bytecount_c_(size)
+#define _Pre_opt_bytecount_c_(size)
+#define _Pre_count_x_(size)
+#define _Pre_opt_count_x_(size)
+#define _Pre_bytecount_x_(size)
+#define _Pre_opt_bytecount_x_(size)
+#define _Pre_ptrdiff_count_(ptr)
+#define _Pre_opt_ptrdiff_count_(ptr)
+#define _Pre_valid_
+#define _Pre_opt_valid_
+#define _Pre_invalid_
+#define _Pre_notnull_
+#define _Pre_maybenull_
+#define _Pre_null_
+#define _Pre_readonly_
+#define _Pre_writeonly_
+#define _Post_z_
+#define _Post_maybez_
+#define _Post_cap_(size)
+#define _Post_bytecap_(size)
+#define _Post_count_(size)
+#define _Post_bytecount_(size)
+#define _Post_count_c_(size)
+#define _Post_bytecount_c_(size)
+#define _Post_count_x_(size)
+#define _Post_bytecount_x_(size)
+#define _Post_z_count_(size)
+#define _Post_z_bytecount_(size)
+#define _Post_z_count_c_(size)
+#define _Post_z_bytecount_c_(size)
+#define _Post_z_count_x_(size)
+#define _Post_z_bytecount_x_(size)
+#define _Post_ptr_invalid_
+#define _Post_valid_
+#define _Post_invalid_
+#define _Post_notnull_
+#define _Post_null_
+#define _Post_maybenull_
+#define _Ret_z_
+#define _Ret_maybenull_z_
+#define _Ret_notnull_
+#define _Ret_maybenull_
+#define _Ret_null_
+#define _Ret_writes_(size)
+#define _Ret_writes_z_(size)
+#define _Ret_writes_bytes_(size)
+#define _Ret_writes_to_(size,count)
+#define _Ret_writes_bytes_to_(size,count)
+#define _Ret_writes_maybenull_(size)
+#define _Ret_writes_maybenull_z_(size)
+#define _Ret_writes_bytes_maybenull_(size)
+#define _Ret_writes_to_maybenull_(size,count)
+#define _Ret_writes_bytes_to_maybenull_(size,count)
+#define _Ret_opt_z_
+#define _Ret_cap_(size)
+#define _Ret_opt_cap_(size)
+#define _Ret_bytecap_(size)
+#define _Ret_opt_bytecap_(size)
+#define _Ret_cap_c_(size)
+#define _Ret_opt_cap_c_(size)
+#define _Ret_bytecap_c_(size)
+#define _Ret_opt_bytecap_c_(size)
+#define _Ret_cap_x_(size)
+#define _Ret_opt_cap_x_(size)
+#define _Ret_bytecap_x_(size)
+#define _Ret_opt_bytecap_x_(size)
+#define _Ret_z_cap_(size)
+#define _Ret_opt_z_cap_(size)
+#define _Ret_z_bytecap_(size)
+#define _Ret_opt_z_bytecap_(size)
+#define _Ret_count_(size)
+#define _Ret_opt_count_(size)
+#define _Ret_bytecount_(size)
+#define _Ret_opt_bytecount_(size)
+#define _Ret_count_c_(size)
+#define _Ret_opt_count_c_(size)
+#define _Ret_bytecount_c_(size)
+#define _Ret_opt_bytecount_c_(size)
+#define _Ret_count_x_(size)
+#define _Ret_opt_count_x_(size)
+#define _Ret_bytecount_x_(size)
+#define _Ret_opt_bytecount_x_(size)
+#define _Ret_z_count_(size)
+#define _Ret_opt_z_count_(size)
+#define _Ret_z_bytecount_(size)
+#define _Ret_opt_z_bytecount_(size)
+#define _Ret_valid_
+#define _Ret_opt_valid_
+#define _Deref_pre_z_
+#define _Deref_pre_opt_z_
+#define _Deref_pre_cap_(size)
+#define _Deref_pre_opt_cap_(size)
+#define _Deref_pre_bytecap_(size)
+#define _Deref_pre_opt_bytecap_(size)
+#define _Deref_pre_cap_c_(size)
+#define _Deref_pre_opt_cap_c_(size)
+#define _Deref_pre_bytecap_c_(size)
+#define _Deref_pre_opt_bytecap_c_(size)
+#define _Deref_pre_cap_x_(size)
+#define _Deref_pre_opt_cap_x_(size)
+#define _Deref_pre_bytecap_x_(size)
+#define _Deref_pre_opt_bytecap_x_(size)
+#define _Deref_pre_z_cap_(size)
+#define _Deref_pre_opt_z_cap_(size)
+#define _Deref_pre_z_bytecap_(size)
+#define _Deref_pre_opt_z_bytecap_(size)
+#define _Deref_pre_z_cap_c_(size)
+#define _Deref_pre_opt_z_cap_c_(size)
+#define _Deref_pre_z_bytecap_c_(size)
+#define _Deref_pre_opt_z_bytecap_c_(size)
+#define _Deref_pre_z_cap_x_(size)
+#define _Deref_pre_opt_z_cap_x_(size)
+#define _Deref_pre_z_bytecap_x_(size)
+#define _Deref_pre_opt_z_bytecap_x_(size)
+#define _Deref_pre_valid_cap_(size)
+#define _Deref_pre_opt_valid_cap_(size)
+#define _Deref_pre_valid_bytecap_(size)
+#define _Deref_pre_opt_valid_bytecap_(size)
+#define _Deref_pre_valid_cap_c_(size)
+#define _Deref_pre_opt_valid_cap_c_(size)
+#define _Deref_pre_valid_bytecap_c_(size)
+#define _Deref_pre_opt_valid_bytecap_c_(size)
+#define _Deref_pre_valid_cap_x_(size)
+#define _Deref_pre_opt_valid_cap_x_(size)
+#define _Deref_pre_valid_bytecap_x_(size)
+#define _Deref_pre_opt_valid_bytecap_x_(size)
+#define _Deref_pre_count_(size)
+#define _Deref_pre_opt_count_(size)
+#define _Deref_pre_bytecount_(size)
+#define _Deref_pre_opt_bytecount_(size)
+#define _Deref_pre_count_c_(size)
+#define _Deref_pre_opt_count_c_(size)
+#define _Deref_pre_bytecount_c_(size)
+#define _Deref_pre_opt_bytecount_c_(size)
+#define _Deref_pre_count_x_(size)
+#define _Deref_pre_opt_count_x_(size)
+#define _Deref_pre_bytecount_x_(size)
+#define _Deref_pre_opt_bytecount_x_(size)
+#define _Deref_pre_valid_
+#define _Deref_pre_opt_valid_
+#define _Deref_pre_invalid_
+#define _Deref_pre_notnull_
+#define _Deref_pre_maybenull_
+#define _Deref_pre_null_
+#define _Deref_pre_readonly_
+#define _Deref_pre_writeonly_
+#define _Deref_post_z_
+#define _Deref_post_opt_z_
+#define _Deref_post_cap_(size)
+#define _Deref_post_opt_cap_(size)
+#define _Deref_post_bytecap_(size)
+#define _Deref_post_opt_bytecap_(size)
+#define _Deref_post_cap_c_(size)
+#define _Deref_post_opt_cap_c_(size)
+#define _Deref_post_bytecap_c_(size)
+#define _Deref_post_opt_bytecap_c_(size)
+#define _Deref_post_cap_x_(size)
+#define _Deref_post_opt_cap_x_(size)
+#define _Deref_post_bytecap_x_(size)
+#define _Deref_post_opt_bytecap_x_(size)
+#define _Deref_post_z_cap_(size)
+#define _Deref_post_opt_z_cap_(size)
+#define _Deref_post_z_bytecap_(size)
+#define _Deref_post_opt_z_bytecap_(size)
+#define _Deref_post_z_cap_c_(size)
+#define _Deref_post_opt_z_cap_c_(size)
+#define _Deref_post_z_bytecap_c_(size)
+#define _Deref_post_opt_z_bytecap_c_(size)
+#define _Deref_post_z_cap_x_(size)
+#define _Deref_post_opt_z_cap_x_(size)
+#define _Deref_post_z_bytecap_x_(size)
+#define _Deref_post_opt_z_bytecap_x_(size)
+#define _Deref_post_valid_cap_(size)
+#define _Deref_post_opt_valid_cap_(size)
+#define _Deref_post_valid_bytecap_(size)
+#define _Deref_post_opt_valid_bytecap_(size)
+#define _Deref_post_valid_cap_c_(size)
+#define _Deref_post_opt_valid_cap_c_(size)
+#define _Deref_post_valid_bytecap_c_(size)
+#define _Deref_post_opt_valid_bytecap_c_(size)
+#define _Deref_post_valid_cap_x_(size)
+#define _Deref_post_opt_valid_cap_x_(size)
+#define _Deref_post_valid_bytecap_x_(size)
+#define _Deref_post_opt_valid_bytecap_x_(size)
+#define _Deref_post_count_(size)
+#define _Deref_post_opt_count_(size)
+#define _Deref_post_bytecount_(size)
+#define _Deref_post_opt_bytecount_(size)
+#define _Deref_post_count_c_(size)
+#define _Deref_post_opt_count_c_(size)
+#define _Deref_post_bytecount_c_(size)
+#define _Deref_post_opt_bytecount_c_(size)
+#define _Deref_post_count_x_(size)
+#define _Deref_post_opt_count_x_(size)
+#define _Deref_post_bytecount_x_(size)
+#define _Deref_post_opt_bytecount_x_(size)
+#define _Deref_post_valid_
+#define _Deref_post_opt_valid_
+#define _Deref_post_notnull_
+#define _Deref_post_maybenull_
+#define _Deref_post_null_
+#define _Deref_ret_z_
+#define _Deref_ret_opt_z_
+#define _Deref2_pre_readonly_
+#define _Prepost_z_
+#define _Prepost_opt_z_
+#define _Prepost_count_(size)
+#define _Prepost_opt_count_(size)
+#define _Prepost_bytecount_(size)
+#define _Prepost_opt_bytecount_(size)
+#define _Prepost_count_c_(size)
+#define _Prepost_opt_count_c_(size)
+#define _Prepost_bytecount_c_(size)
+#define _Prepost_opt_bytecount_c_(size)
+#define _Prepost_count_x_(size)
+#define _Prepost_opt_count_x_(size)
+#define _Prepost_bytecount_x_(size)
+#define _Prepost_opt_bytecount_x_(size)
+#define _Prepost_valid_
+#define _Prepost_opt_valid_
+#define _Deref_prepost_z_
+#define _Deref_prepost_opt_z_
+#define _Deref_prepost_cap_(size)
+#define _Deref_prepost_opt_cap_(size)
+#define _Deref_prepost_bytecap_(size)
+#define _Deref_prepost_opt_bytecap_(size)
+#define _Deref_prepost_cap_x_(size)
+#define _Deref_prepost_opt_cap_x_(size)
+#define _Deref_prepost_bytecap_x_(size)
+#define _Deref_prepost_opt_bytecap_x_(size)
+#define _Deref_prepost_z_cap_(size)
+#define _Deref_prepost_opt_z_cap_(size)
+#define _Deref_prepost_z_bytecap_(size)
+#define _Deref_prepost_opt_z_bytecap_(size)
+#define _Deref_prepost_valid_cap_(size)
+#define _Deref_prepost_opt_valid_cap_(size)
+#define _Deref_prepost_valid_bytecap_(size)
+#define _Deref_prepost_opt_valid_bytecap_(size)
+#define _Deref_prepost_valid_cap_x_(size)
+#define _Deref_prepost_opt_valid_cap_x_(size)
+#define _Deref_prepost_valid_bytecap_x_(size)
+#define _Deref_prepost_opt_valid_bytecap_x_(size)
+#define _Deref_prepost_count_(size)
+#define _Deref_prepost_opt_count_(size)
+#define _Deref_prepost_bytecount_(size)
+#define _Deref_prepost_opt_bytecount_(size)
+#define _Deref_prepost_count_x_(size)
+#define _Deref_prepost_opt_count_x_(size)
+#define _Deref_prepost_bytecount_x_(size)
+#define _Deref_prepost_opt_bytecount_x_(size)
+#define _Deref_prepost_valid_
+#define _Deref_prepost_opt_valid_
+#define _Deref_out_z_cap_c_(size)
+#define _Deref_inout_z_cap_c_(size)
+#define _Deref_out_z_bytecap_c_(size)
+#define _Deref_inout_z_bytecap_c_(size)
+#define _Deref_inout_z_
+#define __ecount(size)
+#define __bcount(size)
+#define __field_bcount(size)
+#define __field_ecount(size)
+#define __struct_bcount(Size)
+#define __in
+#define __in_ecount(size)
+#define __in_bcount(size)
+#define __in_z
+#define __in_ecount_z(size)
+#define __in_bcount_z(size)
+#define __in_nz
+#define __in_ecount_nz(size)
+#define __in_bcount_nz(size)
+#define __out
+#define __out_ecount(size)
+#define __out_bcount(size)
+#define __out_ecount_part(size,length)
+#define __out_bcount_part(size,length)
+#define __out_ecount_full(size)
+#define __out_bcount_full(size)
+#define __out_z
+#define __out_z_opt
+#define __out_ecount_z(size)
+#define __out_bcount_z(size)
+#define __out_ecount_part_z(size,length)
+#define __out_bcount_part_z(size,length)
+#define __out_ecount_full_z(size)
+#define __out_bcount_full_z(size)
+#define __out_nz
+#define __out_nz_opt
+#define __out_ecount_nz(size)
+#define __out_bcount_nz(size)
+#define __inout
+#define __inout_ecount(size)
+#define __inout_bcount(size)
+#define __inout_ecount_part(size,length)
+#define __inout_bcount_part(size,length)
+#define __inout_ecount_full(size)
+#define __inout_bcount_full(size)
+#define __inout_z
+#define __inout_ecount_z(size)
+#define __inout_bcount_z(size)
+#define __inout_nz
+#define __inout_ecount_nz(size)
+#define __inout_bcount_nz(size)
+#define __ecount_opt(size)
+#define __bcount_opt(size)
+#define __in_opt
+#define __in_ecount_opt(size)
+#define __in_bcount_opt(size)
+#define __in_z_opt
+#define __in_ecount_z_opt(size)
+#define __in_bcount_z_opt(size)
+#define __in_nz_opt
+#define __in_ecount_nz_opt(size)
+#define __in_bcount_nz_opt(size)
+#define __out_opt
+#define __out_ecount_opt(size)
+#define __out_bcount_opt(size)
+#define __out_ecount_part_opt(size,length)
+#define __out_bcount_part_opt(size,length)
+#define __out_ecount_full_opt(size)
+#define __out_bcount_full_opt(size)
+#define __out_ecount_z_opt(size)
+#define __out_bcount_z_opt(size)
+#define __out_ecount_part_z_opt(size,length)
+#define __out_bcount_part_z_opt(size,length)
+#define __out_ecount_full_z_opt(size)
+#define __out_bcount_full_z_opt(size)
+#define __out_ecount_nz_opt(size)
+#define __out_bcount_nz_opt(size)
+#define __inout_opt
+#define __inout_ecount_opt(size)
+#define __inout_bcount_opt(size)
+#define __inout_ecount_part_opt(size,length)
+#define __inout_bcount_part_opt(size,length)
+#define __inout_ecount_full_opt(size)
+#define __inout_bcount_full_opt(size)
+#define __inout_z_opt
+#define __inout_ecount_z_opt(size)
+#define __inout_ecount_z_opt(size)
+#define __inout_bcount_z_opt(size)
+#define __inout_nz_opt
+#define __inout_ecount_nz_opt(size)
+#define __inout_bcount_nz_opt(size)
+#define __deref_ecount(size)
+#define __deref_bcount(size)
+#define __deref_out
+#define __deref_out_ecount(size)
+#define __deref_out_bcount(size)
+#define __deref_out_ecount_part(size,length)
+#define __deref_out_bcount_part(size,length)
+#define __deref_out_ecount_full(size)
+#define __deref_out_bcount_full(size)
+#define __deref_out_z
+#define __deref_out_ecount_z(size)
+#define __deref_out_bcount_z(size)
+#define __deref_out_nz
+#define __deref_out_ecount_nz(size)
+#define __deref_out_bcount_nz(size)
+#define __deref_inout
+#define __deref_inout_z
+#define __deref_inout_ecount(size)
+#define __deref_inout_bcount(size)
+#define __deref_inout_ecount_part(size,length)
+#define __deref_inout_bcount_part(size,length)
+#define __deref_inout_ecount_full(size)
+#define __deref_inout_bcount_full(size)
+#define __deref_inout_ecount_z(size)
+#define __deref_inout_bcount_z(size)
+#define __deref_inout_nz
+#define __deref_inout_ecount_nz(size)
+#define __deref_inout_bcount_nz(size)
+#define __deref_ecount_opt(size)
+#define __deref_bcount_opt(size)
+#define __deref_out_opt
+#define __deref_out_ecount_opt(size)
+#define __deref_out_bcount_opt(size)
+#define __deref_out_ecount_part_opt(size,length)
+#define __deref_out_bcount_part_opt(size,length)
+#define __deref_out_ecount_full_opt(size)
+#define __deref_out_bcount_full_opt(size)
+#define __deref_out_z_opt
+#define __deref_out_ecount_z_opt(size)
+#define __deref_out_bcount_z_opt(size)
+#define __deref_out_nz_opt
+#define __deref_out_ecount_nz_opt(size)
+#define __deref_out_bcount_nz_opt(size)
+#define __deref_inout_opt
+#define __deref_inout_ecount_opt(size)
+#define __deref_inout_bcount_opt(size)
+#define __deref_inout_ecount_part_opt(size,length)
+#define __deref_inout_bcount_part_opt(size,length)
+#define __deref_inout_ecount_full_opt(size)
+#define __deref_inout_bcount_full_opt(size)
+#define __deref_inout_z_opt
+#define __deref_inout_ecount_z_opt(size)
+#define __deref_inout_bcount_z_opt(size)
+#define __deref_inout_nz_opt
+#define __deref_inout_ecount_nz_opt(size)
+#define __deref_inout_bcount_nz_opt(size)
+#define __deref_opt_ecount(size)
+#define __deref_opt_bcount(size)
+#define __deref_opt_out
+#define __deref_opt_out_z
+#define __deref_opt_out_ecount(size)
+#define __deref_opt_out_bcount(size)
+#define __deref_opt_out_ecount_part(size,length)
+#define __deref_opt_out_bcount_part(size,length)
+#define __deref_opt_out_ecount_full(size)
+#define __deref_opt_out_bcount_full(size)
+#define __deref_opt_inout
+#define __deref_opt_inout_ecount(size)
+#define __deref_opt_inout_bcount(size)
+#define __deref_opt_inout_ecount_part(size,length)
+#define __deref_opt_inout_bcount_part(size,length)
+#define __deref_opt_inout_ecount_full(size)
+#define __deref_opt_inout_bcount_full(size)
+#define __deref_opt_inout_z
+#define __deref_opt_inout_ecount_z(size)
+#define __deref_opt_inout_bcount_z(size)
+#define __deref_opt_inout_nz
+#define __deref_opt_inout_ecount_nz(size)
+#define __deref_opt_inout_bcount_nz(size)
+#define __deref_opt_ecount_opt(size)
+#define __deref_opt_bcount_opt(size)
+#define __deref_opt_out_opt
+#define __deref_opt_out_ecount_opt(size)
+#define __deref_opt_out_bcount_opt(size)
+#define __deref_opt_out_ecount_part_opt(size,length)
+#define __deref_opt_out_bcount_part_opt(size,length)
+#define __deref_opt_out_ecount_full_opt(size)
+#define __deref_opt_out_bcount_full_opt(size)
+#define __deref_opt_out_z_opt
+#define __deref_opt_out_ecount_z_opt(size)
+#define __deref_opt_out_bcount_z_opt(size)
+#define __deref_opt_out_nz_opt
+#define __deref_opt_out_ecount_nz_opt(size)
+#define __deref_opt_out_bcount_nz_opt(size)
+#define __deref_opt_inout_opt
+#define __deref_opt_inout_ecount_opt(size)
+#define __deref_opt_inout_bcount_opt(size)
+#define __deref_opt_inout_ecount_part_opt(size,length)
+#define __deref_opt_inout_bcount_part_opt(size,length)
+#define __deref_opt_inout_ecount_full_opt(size)
+#define __deref_opt_inout_bcount_full_opt(size)
+#define __deref_opt_inout_z_opt
+#define __deref_opt_inout_ecount_z_opt(size)
+#define __deref_opt_inout_bcount_z_opt(size)
+#define __deref_opt_inout_nz_opt
+#define __deref_opt_inout_ecount_nz_opt(size)
+#define __deref_opt_inout_bcount_nz_opt(size)
+#define __success(expr)
+#define __nullterminated
+#define __nullnullterminated
+#define __reserved
+#define __checkReturn
+#define __typefix(ctype)
+#define __override
+#define __callback
+#define __format_string
+#define __blocksOn(resource)
+#define __control_entrypoint(category)
+#define __data_entrypoint(category)
+#define __useHeader
+#define __on_failure(annotes)
+#define __fallthrough
+#define _Check_return_opt_
+#define _Check_return_wat_
+
+// BOOST
+#define BOOST_TRY { try
+#define BOOST_CATCH(x) catch(x)
+#define BOOST_RETHROW throw;
+#define BOOST_CATCH_END }
+
+// C++ Unit Test Framework
+#define TEST_CLASS(className) class className : public ::Microsoft::VisualStudio::CppUnitTestFramework::TestClass<className>
+#define TEST_METHOD(methodName) void methodName() 
+#define TEST_MODULE_INITIALIZE(methodName) void __stdcall methodName()
+#define TEST_MODULE_CLEANUP(methodName) void __stdcall methodName()
+#define TEST_CLASS_INITIALIZE(methodName) static void __stdcall methodName()
+#define TEST_CLASS_CLEANUP(methodName) static void __stdcall methodName()
+#define TEST_METHOD_INITIALIZE(methodName) void  methodName()
+#define TEST_METHOD_CLEANUP(methodName) void  methodName()
+#define BEGIN_TEST_MODULE_ATTRIBUTE()
+#define TEST_MODULE_ATTRIBUTE(attributeName, attributeValue)
+#define END_TEST_MODULE_ATTRIBUTE()
+#define BEGIN_TEST_CLASS_ATTRIBUTE()
+#define TEST_CLASS_ATTRIBUTE(attributeName, attributeValue)
+#define END_TEST_CLASS_ATTRIBUTE()
+#define BEGIN_TEST_METHOD_ATTRIBUTE(methodName) 
+#define TEST_METHOD_ATTRIBUTE(attributeName, attributeValue)
+#define END_TEST_METHOD_ATTRIBUTE()
+
+// AMP Library
+#define __GPU
+#define __CPU_ONLY
+#define __GPU_ONLY
+#define CPP_AMP_VERIFY_RANK(_Rank, _Type_name)
+#define __DEPRECATED_ARRAY_VECTOR_CONSTRUCTOR
+#define __DEPRECATED_ARRAY_VECTOR_COPY_FUNCTION
+#define _AMPIMP
+
+// WTL Map
+#define BEGIN_DDX_MAP(thisClass) @<
+#define DDX_TEXT(nID, var) @=
+#define DDX_TEXT_LEN(nID, var, len) @=
+#define DDX_INT(nID, var) @=
+#define DDX_INT_RANGE(nID, var, min, max) @=
+#define DDX_UINT(nID, var) @=
+#define DDX_UINT_RANGE(nID, var, min, max) @=
+#define DDX_FLOAT(nID, var) @=
+#define DDX_FLOAT_RANGE(nID, var, min, max) @=
+#define DDX_FLOAT_P(nID, var, precision) @=
+#define DDX_FLOAT_P_RANGE(nID, var, min, max, precision) @=
+#define DDX_CONTROL(nID, obj) @=
+#define DDX_CONTROL_HANDLE(nID, obj) @=
+#define DDX_CHECK(nID, var) @=
+#define DDX_RADIO(nID, var) @=
+#define DDX_INDEX(CtrlClass, nID, var) @=
+#define DDX_TAB_INDEX(nID, var) @=
+#define DDX_COMBO_INDEX(nID, var) @=
+#define DDX_LISTBOX_INDEX(nID, var) @=
+#define DDX_LISTVIEW_INDEX(nID, var) @=
+#define END_DDX_MAP() @>
+#define BEGIN_CONTROLS_MAP() @<
+#define CONTROL_LTEXT(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_CTEXT(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_RTEXT(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_PUSHBUTTON(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_DEFPUSHBUTTON(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_PUSHBOX(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_STATE3(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_AUTO3STATE(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_CHECKBOX(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_AUTOCHECKBOX(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_RADIOBUTTON(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_AUTORADIOBUTTON(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_COMBOBOX(id, x, y, width, height, style, exStyle) @=
+#define CONTROL_EDITTEXT(id, x, y, width, height, style, exStyle) @=
+#define CONTROL_GROUPBOX(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_LISTBOX(id, x, y, width, height, style, exStyle) @=
+#define CONTROL_SCROLLBAR(id, x, y, width, height, style, exStyle) @=
+#define CONTROL_ICON(text, id, x, y, width, height, style, exStyle) @=
+#define CONTROL_CONTROL(text, id, className, style, x, y, width, height, exStyle) @=
+#define END_CONTROLS_MAP() @>
+#define BEGIN_UPDATE_UI_MAP(thisClass) @<
+#define UPDATE_ELEMENT(nID, wType) @=
+#define END_UPDATE_UI_MAP() @>
+#define BEGIN_DLGRESIZE_MAP(thisClass) @<
+#define DLGRESIZE_CONTROL(id, flags) @=
+#define BEGIN_DLGRESIZE_GROUP() @=
+#define END_DLGRESIZE_GROUP() @=
+#define END_DLGRESIZE_MAP() @>
+#define BEGIN_RIBBON_CONTROL_MAP(theClass) @<
+#define RIBBON_CONTROL(member) @=
+#define RIBBON_GALLERY_CONTROL_HANDLER(id, func) @=
+#define RIBBON_COMBO_CONTROL_HANDLER(id, func) @=
+#define RIBBON_FONT_CONTROL_HANDLER(id, func) @=
+#define RIBBON_COLOR_CONTROL_HANDLER(id, func) @=
+#define RIBBON_SPINNER_CONTROL_HANDLER(id, func) @=
+#define RIBBON_FLOATSPINNER_CONTROL_HANDLER(id, func) @=
+#define END_RIBBON_CONTROL_MAP() @>
+#define BEGIN_MSG_MAP_EX(theClass) <@
+#define MSG_WM_CREATE(func) @=
+#define MSG_WM_INITDIALOG(func) @=
+#define MSG_WM_COPYDATA(func) @=
+#define MSG_WM_DESTROY(func) @=
+#define MSG_WM_MOVE(func) @=
+#define MSG_WM_SIZE(func) @=
+#define MSG_WM_ACTIVATE(func) @=
+#define MSG_WM_SETFOCUS(func) @=
+#define MSG_WM_KILLFOCUS(func) @=
+#define MSG_WM_ENABLE(func) @=
+#define MSG_WM_PAINT(func) @=
+#define MSG_WM_CLOSE(func) @=
+#define MSG_WM_QUERYENDSESSION(func) @=
+#define MSG_WM_QUERYOPEN(func) @=
+#define MSG_WM_ERASEBKGND(func) @=
+#define MSG_WM_SYSCOLORCHANGE(func) @=
+#define MSG_WM_ENDSESSION(func) @=
+#define MSG_WM_SHOWWINDOW(func) @=
+#define MSG_WM_CTLCOLOREDIT(func) @=
+#define MSG_WM_CTLCOLORLISTBOX(func) @=
+#define MSG_WM_CTLCOLORBTN(func) @=
+#define MSG_WM_CTLCOLORDLG(func) @=
+#define MSG_WM_CTLCOLORSCROLLBAR(func) @=
+#define MSG_WM_CTLCOLORSTATIC(func) @=
+#define MSG_WM_SETTINGCHANGE(func) @=
+#define MSG_WM_DEVMODECHANGE(func) @=
+#define MSG_WM_ACTIVATEAPP(func) @=
+#define MSG_WM_FONTCHANGE(func) @=
+#define MSG_WM_TIMECHANGE(func) @=
+#define MSG_WM_CANCELMODE(func) @=
+#define MSG_WM_SETCURSOR(func) @=
+#define MSG_WM_MOUSEACTIVATE(func) @=
+#define MSG_WM_CHILDACTIVATE(func) @=
+#define MSG_WM_GETMINMAXINFO(func) @=
+#define MSG_WM_ICONERASEBKGND(func) @=
+#define MSG_WM_SPOOLERSTATUS(func) @=
+#define MSG_WM_DRAWITEM(func) @=
+#define MSG_WM_MEASUREITEM(func) @=
+#define MSG_WM_DELETEITEM(func) @=
+#define MSG_WM_CHARTOITEM(func) @=
+#define MSG_WM_VKEYTOITEM(func) @=
+#define MSG_WM_QUERYDRAGICON(func) @=
+#define MSG_WM_COMPAREITEM(func) @=
+#define MSG_WM_COMPACTING(func) @=
+#define MSG_WM_NCCREATE(func) @=
+#define MSG_WM_NCDESTROY(func) @=
+#define MSG_WM_NCCALCSIZE(func) @=
+#define MSG_WM_NCHITTEST(func) @=
+#define MSG_WM_NCPAINT(func) @=
+#define MSG_WM_NCACTIVATE(func) @=
+#define MSG_WM_GETDLGCODE(func) @=
+#define MSG_WM_NCMOUSEMOVE(func) @=
+#define MSG_WM_NCLBUTTONDOWN(func) @=
+#define MSG_WM_NCLBUTTONUP(func) @=
+#define MSG_WM_NCLBUTTONDBLCLK(func) @=
+#define MSG_WM_NCRBUTTONDOWN(func) @=
+#define MSG_WM_NCRBUTTONUP(func) @=
+#define MSG_WM_NCRBUTTONDBLCLK(func) @=
+#define MSG_WM_NCMBUTTONDOWN(func) @=
+#define MSG_WM_NCMBUTTONUP(func) @=
+#define MSG_WM_NCMBUTTONDBLCLK(func) @=
+#define MSG_WM_KEYDOWN(func) @=
+#define MSG_WM_KEYUP(func) @=
+#define MSG_WM_CHAR(func) @=
+#define MSG_WM_DEADCHAR(func) @=
+#define MSG_WM_SYSKEYDOWN(func) @=
+#define MSG_WM_SYSKEYUP(func) @=
+#define MSG_WM_SYSCHAR(func) @=
+#define MSG_WM_SYSDEADCHAR(func) @=
+#define MSG_WM_SYSCOMMAND(func) @=
+#define MSG_WM_TCARD(func) @=
+#define MSG_WM_TIMER(func) @=
+#define MSG_WM_HSCROLL(func) @=
+#define MSG_WM_VSCROLL(func) @=
+#define MSG_WM_INITMENU(func) @=
+#define MSG_WM_INITMENUPOPUP(func) @=
+#define MSG_WM_MENUSELECT(func) @=
+#define MSG_WM_MENUCHAR(func) @=
+#define MSG_WM_NOTIFY(func) @=
+#define MSG_WM_ENTERIDLE(func) @=
+#define MSG_WM_MOUSEMOVE(func) @=
+#define MSG_WM_MOUSEWHEEL(func) @=
+#define MSG_WM_LBUTTONDOWN(func) @=
+#define MSG_WM_LBUTTONUP(func) @=
+#define MSG_WM_LBUTTONDBLCLK(func) @=
+#define MSG_WM_RBUTTONDOWN(func) @=
+#define MSG_WM_RBUTTONUP(func) @=
+#define MSG_WM_RBUTTONDBLCLK(func) @=
+#define MSG_WM_MBUTTONDOWN(func) @=
+#define MSG_WM_MBUTTONUP(func) @=
+#define MSG_WM_MBUTTONDBLCLK(func) @=
+#define MSG_WM_PARENTNOTIFY(func) @=
+#define MSG_WM_MDIACTIVATE(func) @=
+#define MSG_WM_RENDERFORMAT(func) @=
+#define MSG_WM_RENDERALLFORMATS(func) @=
+#define MSG_WM_DESTROYCLIPBOARD(func) @=
+#define MSG_WM_DRAWCLIPBOARD(func) @=
+#define MSG_WM_PAINTCLIPBOARD(func) @=
+#define MSG_WM_VSCROLLCLIPBOARD(func) @=
+#define MSG_WM_CONTEXTMENU(func) @=
+#define MSG_WM_SIZECLIPBOARD(func) @=
+#define MSG_WM_ASKCBFORMATNAME(func) @=
+#define MSG_WM_CHANGECBCHAIN(func) @=
+#define MSG_WM_HSCROLLCLIPBOARD(func) @=
+#define MSG_WM_QUERYNEWPALETTE(func) @=
+#define MSG_WM_PALETTECHANGED(func) @=
+#define MSG_WM_PALETTEISCHANGING(func) @=
+#define MSG_WM_DROPFILES(func) @=
+#define MSG_WM_WINDOWPOSCHANGING(func) @=
+#define MSG_WM_WINDOWPOSCHANGED(func) @=
+#define MSG_WM_EXITMENULOOP(func) @=
+#define MSG_WM_ENTERMENULOOP(func) @=
+#define MSG_WM_STYLECHANGED(func) @=
+#define MSG_WM_STYLECHANGING(func) @=
+#define MSG_WM_SIZING(func) @=
+#define MSG_WM_MOVING(func) @=
+#define MSG_WM_CAPTURECHANGED(func) @=
+#define MSG_WM_DEVICECHANGE(func) @=
+#define MSG_WM_COMMAND(func) @=
+#define MSG_WM_DISPLAYCHANGE(func) @=
+#define MSG_WM_ENTERSIZEMOVE(func) @=
+#define MSG_WM_EXITSIZEMOVE(func) @=
+#define MSG_WM_GETFONT(func) @=
+#define MSG_WM_GETHOTKEY(func) @=
+#define MSG_WM_GETICON(func) @=
+#define MSG_WM_GETTEXT(func) @=
+#define MSG_WM_GETTEXTLENGTH(func) @=
+#define MSG_WM_HELP(func) @=
+#define MSG_WM_HOTKEY(func) @=
+#define MSG_WM_INPUTLANGCHANGE(func) @=
+#define MSG_WM_INPUTLANGCHANGEREQUEST(func) @=
+#define MSG_WM_NEXTDLGCTL(func) @=
+#define MSG_WM_NEXTMENU(func) @=
+#define MSG_WM_NOTIFYFORMAT(func) @=
+#define MSG_WM_POWERBROADCAST(func) @=
+#define MSG_WM_PRINT(func) @=
+#define MSG_WM_PRINTCLIENT(func) @=
+#define MSG_WM_RASDIALEVENT(func) @=
+#define MSG_WM_SETFONT(func) @=
+#define MSG_WM_SETHOTKEY(func) @=
+#define MSG_WM_SETICON(func) @=
+#define MSG_WM_SETREDRAW(func) @=
+#define MSG_WM_SETTEXT(func) @=
+#define MSG_WM_USERCHANGED(func) @=
+#define MSG_WM_MOUSEHOVER(func) @=
+#define MSG_WM_MOUSELEAVE(func) @=
+#define MSG_WM_MENURBUTTONUP(func) @=
+#define MSG_WM_MENUDRAG(func) @=
+#define MSG_WM_MENUGETOBJECT(func) @=
+#define MSG_WM_UNINITMENUPOPUP(func) @=
+#define MSG_WM_MENUCOMMAND(func) @=
+#define MSG_WM_APPCOMMAND(func) @=
+#define MSG_WM_NCXBUTTONDOWN(func) @=
+#define MSG_WM_NCXBUTTONUP(func) @=
+#define MSG_WM_NCXBUTTONDBLCLK(func) @=
+#define MSG_WM_XBUTTONDOWN(func) @=
+#define MSG_WM_XBUTTONUP(func) @=
+#define MSG_WM_XBUTTONDBLCLK(func) @=
+#define MSG_WM_CHANGEUISTATE(func) @=
+#define MSG_WM_UPDATEUISTATE(func) @=
+#define MSG_WM_QUERYUISTATE(func) @=
+#define MSG_WM_INPUT(func) @=
+#define MSG_WM_UNICHAR(func) @=
+#define MSG_WM_WTSSESSION_CHANGE(func) @=
+#define MSG_WM_THEMECHANGED(func) @=
+#define MSG_WM_FORWARDMSG(func) @=
+#define MSG_DM_GETDEFID(func) @=
+#define MSG_DM_SETDEFID(func) @=
+#define MSG_DM_REPOSITION(func) @=
+#define MSG_OCM_COMMAND(func) @=
+#define MSG_OCM_NOTIFY(func) @=
+#define MSG_OCM_PARENTNOTIFY(func) @=
+#define MSG_OCM_DRAWITEM(func) @=
+#define MSG_OCM_MEASUREITEM(func) @=
+#define MSG_OCM_COMPAREITEM(func) @=
+#define MSG_OCM_DELETEITEM(func) @=
+#define MSG_OCM_VKEYTOITEM(func) @=
+#define MSG_OCM_CHARTOITEM(func) @=
+#define MSG_OCM_HSCROLL(func) @=
+#define MSG_OCM_VSCROLL(func) @=
+#define MSG_OCM_CTLCOLOREDIT(func) @=
+#define MSG_OCM_CTLCOLORLISTBOX(func) @=
+#define MSG_OCM_CTLCOLORBTN(func) @=
+#define MSG_OCM_CTLCOLORDLG(func) @=
+#define MSG_OCM_CTLCOLORSCROLLBAR(func) @=
+#define MSG_OCM_CTLCOLORSTATIC(func) @=
+#define MSG_WM_CLEAR(func) @=
+#define MSG_WM_COPY(func) @=
+#define MSG_WM_CUT(func) @=
+#define MSG_WM_PASTE(func) @=
+#define MSG_WM_UNDO(func) @=
+#define MESSAGE_HANDLER_EX(msg, func) @=
+#define MESSAGE_RANGE_HANDLER_EX(msgFirst, msgLast, func) @=
+#define COMMAND_HANDLER_EX(id, code, func) @=
+#define COMMAND_ID_HANDLER_EX(id, func) @=
+#define COMMAND_CODE_HANDLER_EX(code, func) @=
+#define NOTIFY_HANDLER_EX(id, cd, func) @=
+#define NOTIFY_ID_HANDLER_EX(id, func) @=
+#define NOTIFY_CODE_HANDLER_EX(cd, func) @=
+#define COMMAND_RANGE_HANDLER_EX(idFirst, idLast, func) @=
+#define COMMAND_RANGE_CODE_HANDLER_EX(idFirst, idLast, code, func) @=
+#define NOTIFY_RANGE_HANDLER_EX(idFirst, idLast, func) @=
+#define NOTIFY_RANGE_CODE_HANDLER_EX(idFirst, idLast, cd, func) @=
+#define REFLECTED_COMMAND_HANDLER_EX(id, code, func) @=
+#define REFLECTED_COMMAND_ID_HANDLER_EX(id, func) @=
+#define REFLECTED_COMMAND_CODE_HANDLER_EX(code, func) @=
+#define REFLECTED_NOTIFY_HANDLER_EX(id, cd, func) @=
+#define REFLECTED_NOTIFY_ID_HANDLER_EX(id, func) @=
+#define REFLECTED_NOTIFY_CODE_HANDLER_EX(cd, func) @=
+#define REFLECTED_COMMAND_RANGE_HANDLER_EX(idFirst, idLast, func) @=
+#define REFLECTED_COMMAND_RANGE_CODE_HANDLER_EX(idFirst, idLast, code, func) @=
+#define REFLECTED_NOTIFY_RANGE_HANDLER_EX(idFirst, idLast, func) @=
+#define REFLECTED_NOTIFY_RANGE_CODE_HANDLER_EX(idFirst, idLast, cd, func) @=
+
+// ATL Server Map
+#define BEGIN_HANDLER_MAP() @<
+#define HANDLER_ENTRY(handlerName, className) @=
+#define HANDLER_ENTRY_EX(handlerName, className, classQName) @=
+#define HANDLER_ENTRY_SDL(handlerString, handlerClass, handlerQClass, sdlClassName) @=
+#define END_HANDLER_MAP() @>
+#define BEGIN_PERFREG_MAP() @<
+#define PERFREG_ENTRY(className) @=
+#define END_PERFREG_MAP() @>
+#define BEGIN_PERF_MAP(AppName) @<
+#define PERF_ENTRY_PRAGMA(class) @=
+#define END_PERF_MAP() @>
+#define BEGIN_COUNTER_MAP(categoryclass) @<
+#define CHAIN_PERF_CATEGORY(categoryclass) @=
+#define END_COUNTER_MAP() @>
+#define BEGIN_REPLACEMENT_METHOD_MAP(className) @<
+#define REPLACEMENT_METHOD_ENTRY(methodName, methodFunc) @=
+#define REPLACEMENT_METHOD_ENTRY_EX(methodName, methodFunc, paramType, parseFunc) @=
+#define REPLACEMENT_METHOD_ENTRY_EX_STR(methodName, methodFunc) @=
+#define END_REPLACEMENT_METHOD_MAP() @>
+#define BEGIN_ATTR_REPLACEMENT_METHOD_MAP(className) @<
+#define END_ATTR_REPLACEMENT_METHOD_MAP() @>
+#define EMPTY_XMLTAG_MAP() @<
+#define EMPTY_XMLATTR_MAP() @<
+#define BEGIN_XMLTAG_MAP() @<
+#define XMLTAG_ENTRY_EX(elementName, elementNamespace, elementFunc) @=
+#define XMLTAG_ENTRY(elementName, elementFunc) @=
+#define END_XMLTAG_MAP() @>
+#define BEGIN_XMLATTR_MAP() @<
+#define XMLATTR_ENTRY_EX(elementName, elementNamespace, elementFunc) @=
+#define XMLATTR_ENTRY_EX2(elementName, elementNamespace, elementFunc, required) @=
+#define XMLATTR_ENTRY(elementName, elementFunc) @=
+#define XMLATTR_ENTRY2(elementName, elementFunc, required) @=
+#define END_XMLATTR_MAP() @>
+
+// Linux stl
+#define _GLIBCXX_VISIBILITY(arg)
+
+// Mac stl
+#define _GLIBCXX_BEGIN_NAMESPACE(std) namespace std {
+#define _GLIBCXX_END_NAMESPACE }
+
+// Linux C lib
+#define __THROW
+#define __attribute_pure__
+#define __nonnull(arg)
+#define __wur
+#define __attribute__(arg)
+
+// Mac C lib
+#define __dead2
+#define __pure2
+#define __result_use_check
+#define __swift_unavailable(arg)
+#define __scanflike(arg)
+#define __printflike(arg)
+#define __WATCHOS_PROHIBITED
+#define __TVOS_PROHIBITED
+#define __DARWIN_ALIAS(arg)
+#define __DARWIN_ALIAS_C(arg)
+#define __DARWIN_ALIAS_STARTING(arg)
+#define __DARWIN_EXTSN(arg)
+#define __OSX_AVAILABLE_STARTING(arg)
+#define __OSX_AVAILABLE_BUT_DEPRECATED_MSG(arg)
+
+// QT
+#define Q_DECL_NOTHROW
+#define Q_REQUIRED_RESULT
+#define Q_ATTRIBUTE_FORMAT_PRINTF(arg1, arg2)
+
+// MinGW stl
+#define _GLIBCXX_NOEXCEPT
+
+// Make sure we end with a newline or there will be a warning

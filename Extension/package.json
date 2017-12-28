@@ -1,0 +1,1216 @@
+{
+  "name": "cpptools",
+  "displayName": "C/C++",
+  "description": "C/C++ IntelliSense, debugging, and code browsing.",
+  "version": "0.14.6",
+  "publisher": "ms-vscode",
+  "preview": true,
+  "icon": "LanguageCCPP_color_128x.png",
+  "readme": "README.md",
+  "author": {
+    "name": "Microsoft Corporation"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "engines": {
+    "vscode": "^1.17.0"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-cpptools/issues",
+    "email": "c_cpp_support@microsoft.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-cpptools.git"
+  },
+  "homepage": "https://github.com/Microsoft/vscode-cpptools",
+  "qna": "https://github.com/Microsoft/vscode-cpptools/issues",
+  "keywords": [
+    "C",
+    "C++",
+    "IntelliSense",
+    "Microsoft",
+    "multi-root ready"
+  ],
+  "categories": [
+    "Languages",
+    "Debuggers",
+    "Formatters",
+    "Linters"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/src/main",
+  "contributes": {
+    "problemMatchers": [
+      {
+        "name": "gcc",
+        "owner": "cpptools",
+        "fileLocation": [
+          "relative",
+          "${workspaceRoot}"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "C/C++ Configuration",
+      "properties": {
+        "C_Cpp.clang_format_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "The full path of the clang-format executable.",
+          "scope": "resource"
+        },
+        "C_Cpp.clang_format_style": {
+          "type": "string",
+          "default": "file",
+          "description": "Coding style, currently supports: Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit. Use \"file\" to load the style from a .clang-format file in the current or parent directory. Use \"{key: value, ...}\" to set specific parameters, e.g.: \"{ BasedOnStyle: LLVM, IndentWidth: 8 }\"",
+          "scope": "resource"
+        },
+        "C_Cpp.clang_format_fallbackStyle": {
+          "type": "string",
+          "default": "Visual Studio",
+          "description": "Name of the predefined style used as a fallback in case clang-format is invoked with style \"file\" but the .clang-format file is not found. Possible values are Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit, none, or use \"{key: value, ...}\" to set specific parameters, e.g.: \"{ BasedOnStyle: LLVM, IndentWidth: 8 }\"",
+          "scope": "resource"
+        },
+        "C_Cpp.clang_format_sortIncludes": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "enum": [
+            true,
+            false,
+            null
+          ],
+          "default": null,
+          "description": "If set, overrides the include sorting behavior determined by the SortIncludes parameter.",
+          "scope": "resource"
+        },
+        "C_Cpp.intelliSenseEngine": {
+          "type": "string",
+          "enum": [
+            "Default",
+            "Tag Parser"
+          ],
+          "default": "Default",
+          "description": "Controls the IntelliSense provider. \"Tag Parser\" provides \"fuzzy\" results that are not context-aware. \"Default\" provides context-aware results and is in preview mode - member list, hover tooltips, and error squiggles are currently implemented. Features not yet implemented in the new default engine will use the tag parser engine instead.",
+          "scope": "resource"
+        },
+        "C_Cpp.intelliSenseEngineFallback": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing #include errors.",
+          "scope": "resource"
+        },
+        "C_Cpp.autocomplete": {
+          "type": "string",
+          "enum": [
+            "Default",
+            "Disabled"
+          ],
+          "default": "Default",
+          "description": "Controls the auto-completion provider. \"Default\" uses the active IntelliSense engine. \"Disabled\" uses the word-based completion provided by Visual Studio Code.",
+          "scope": "resource"
+        },
+        "C_Cpp.errorSquiggles": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. Warnings about #includes that could not be located will always be reported to the editor. This setting is ignored by the Tag Parser engine.",
+          "scope": "resource"
+        },
+        "C_Cpp.formatting": {
+          "type": "string",
+          "enum": [
+            "Default",
+            "Disabled"
+          ],
+          "default": "Default",
+          "description": "\"Default\" enables code formatting. \"Disabled\" disables code formatting.",
+          "scope": "resource"
+        },
+        "C_Cpp.navigation.length": {
+          "type": "number",
+          "default": 60,
+          "description": "Maximum character length of the scope/navigation UI in the status bar. The UI may not appear if this value is too large.",
+          "scope": "resource"
+        },
+        "C_Cpp.loggingLevel": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Error",
+            "Warning",
+            "Information"
+          ],
+          "default": "Error",
+          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information.",
+          "scope": "resource"
+        },
+        "C_Cpp.files.associations.autoAdd": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",
+          "scope": "resource"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "C_Cpp.ConfigurationSelect",
+        "title": "Select a Configuration...",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ConfigurationEdit",
+        "title": "Edit Configurations...",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.GoToDeclaration",
+        "title": "Go to Declaration",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.PeekDeclaration",
+        "title": "Peek Declaration",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.SwitchHeaderSource",
+        "title": "Switch Header/Source",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.Navigate",
+        "title": "Navigate...",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ToggleErrorSquiggles",
+        "title": "Toggle Error Squiggles",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ToggleIncludeFallback",
+        "title": "Toggle IntelliSense Engine Fallback on Include Errors",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "workbench.action.gotoSymbol",
+        "title": "Go to Symbol in File..."
+      },
+      {
+        "command": "workbench.action.showAllSymbols",
+        "title": "Go to Symbol in Workspace..."
+      },
+      {
+        "command": "C_Cpp.ShowReleaseNotes",
+        "title": "Show Release Notes",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ResetDatabase",
+        "title": "Reset IntelliSense Database",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.PauseParsing",
+        "title": "Pause Parsing",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ResumeParsing",
+        "title": "Resume Parsing",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ShowParsingCommands",
+        "title": "Show Parsing Commands",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.TakeSurvey",
+        "title": "Take Survey",
+        "category": "C/Cpp"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "C_Cpp.GoToDeclaration",
+        "key": "Ctrl+F12",
+        "when": "editorTextFocus && editorLangId == 'cpp'"
+      },
+      {
+        "command": "C_Cpp.GoToDeclaration",
+        "key": "Ctrl+F12",
+        "when": "editorTextFocus && editorLangId == 'c'"
+      },
+      {
+        "command": "C_Cpp.PeekDeclaration",
+        "key": "Ctrl+Alt+F12",
+        "when": "editorTextFocus && editorLangId == 'cpp'"
+      },
+      {
+        "command": "C_Cpp.PeekDeclaration",
+        "key": "Ctrl+Alt+F12",
+        "when": "editorTextFocus && editorLangId == 'c'"
+      },
+      {
+        "command": "C_Cpp.SwitchHeaderSource",
+        "key": "Alt+O",
+        "when": "editorTextFocus && editorLangId == 'cpp'"
+      },
+      {
+        "command": "C_Cpp.SwitchHeaderSource",
+        "key": "Alt+O",
+        "when": "editorTextFocus && editorLangId == 'c'"
+      },
+      {
+        "command": "C_Cpp.Navigate",
+        "key": "Alt+N",
+        "when": "editorTextFocus && editorLangId == 'cpp'"
+      },
+      {
+        "command": "C_Cpp.Navigate",
+        "key": "Alt+N",
+        "when": "editorTextFocus && editorLangId == 'c'"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "cppdbg",
+        "label": "C++ (GDB/LLDB)",
+        "enableBreakpointsFor": {
+          "languageIds": [
+            "c",
+            "cpp"
+          ]
+        },
+        "runtime": "node",
+        "program": "./out/src/Debugger/Proxy/debugProxy.js",
+        "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
+        "variables": {
+          "pickProcess": "extension.pickNativeProcess",
+          "pickRemoteProcess": "extension.pickRemoteNativeProcess"
+        },
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Full path to program executable.",
+                "default": "${workspaceRoot}/a.out"
+              },
+              "args": {
+                "type": "array",
+                "description": "Command line arguments passed to the program.",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppdbg\".",
+                "default": "cppdbg"
+              },
+              "targetArchitecture": {
+                "type": "string",
+                "description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
+                "default": "x64"
+              },
+              "cwd": {
+                "type": "string",
+                "description": "The working directory of the target",
+                "default": "."
+              },
+              "setupCommands": {
+                "type": "array",
+                "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The debugger command to execute.",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description for the command.",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "default": "false"
+                    }
+                  }
+                },
+                "default": []
+              },
+              "customLaunchSetupCommands": {
+                "type": "array",
+                "description": "If provided, this replaces the default commands used to launch a target with some other commands. For example, this can be \"-target-attach\" in order to attach to a target process. An empty command list replaces the launch commands with nothing, which can be useful if the debugger is being provided launch options as command line options. Example: \"customLaunchSetupCommands\": [ { \"text\": \"target-run\", \"description\": \"run target\", \"ignoreFailures\": false }].",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The debugger command to execute.",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description for the command.",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "default": ""
+                    }
+                  }
+                },
+                "default": []
+              },
+              "launchCompleteCommand": {
+                "enum": [
+                  "exec-run",
+                  "exec-continue",
+                  "None"
+                ],
+                "description": "The command to execute after the debugger is fully setup in order to cause the target process to run. Allowed values are \"exec-run\", \"exec-continue\", \"None\". The default value is \"exec-run\".",
+                "default": "exec-run"
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process. This option is not compatible with GDB pretty printing. Please also see \"showDisplayString\" if using this setting.",
+                "default": ""
+              },
+              "showDisplayString": {
+                "type": "boolean",
+                "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
+                "default": "true"
+              },
+              "environment": {
+                "type": "array",
+                "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": "string",
+                    "value": "string"
+                  }
+                },
+                "default": []
+              },
+              "additionalSOLibSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "MIMode": {
+                "type": "string",
+                "description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
+                "default": "gdb"
+              },
+              "miDebuggerPath": {
+                "type": "string",
+                "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
+                "default": "/usr/bin/gdb"
+              },
+              "miDebuggerServerAddress": {
+                "type": "string",
+                "description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
+                "default": "serveraddress:port"
+              },
+              "stopAtEntry": {
+                "type": "boolean",
+                "description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
+                "default": false
+              },
+              "debugServerPath": {
+                "type": "string",
+                "description": "Optional full path to debug server to launch. Defaults to null.",
+                "default": ""
+              },
+              "debugServerArgs": {
+                "type": "string",
+                "description": "Optional debug server args. Defaults to null.",
+                "default": ""
+              },
+              "serverStarted": {
+                "type": "string",
+                "description": "Optional server-started pattern to look for in the debug server output. Defaults to null.",
+                "default": ""
+              },
+              "filterStdout": {
+                "type": "boolean",
+                "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
+                "default": "true"
+              },
+              "filterStderr": {
+                "type": "boolean",
+                "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
+                "default": "false"
+              },
+              "serverLaunchTimeout": {
+                "type": "integer",
+                "description": "Optional time, in milliseconds, for the debugger to wait for the debugServer to start up. Default is 10000.",
+                "default": "10000"
+              },
+              "coreDumpPath": {
+                "type": "string",
+                "description": "Optional full path to a core dump file for the specified program. Defaults to null.",
+                "default": ""
+              },
+              "externalConsole": {
+                "type": "boolean",
+                "description": "If true, a console is launched for the debuggee. If false, no console is launched. Note this option is ignored in some cases for technical reasons.",
+                "default": "false"
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "logging": {
+                "type": "object",
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "engineLogging": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic engine logs should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "trace": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "traceResponse": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              },
+              "pipeTransport": {
+                "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
+                "type": "object",
+                "default": {
+                  "pipeCwd": "${workspaceRoot}",
+                  "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
+                  "pipeArgs": [],
+                  "debuggerPath": "enter the path for the debugger on the target machine, for example /usr/bin/gdb"
+                },
+                "properties": {
+                  "pipeCwd": {
+                    "type": "string",
+                    "description": "The fully qualified path to the working directory for the pipe program.",
+                    "default": "/usr/bin"
+                  },
+                  "pipeProgram": {
+                    "type": "string",
+                    "description": "The fully qualified pipe command to execute.",
+                    "default": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'"
+                  },
+                  "pipeArgs": {
+                    "type": "array",
+                    "description": "Command line arguments passed to the pipe program to configure the connection.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "default": []
+                  },
+                  "debuggerPath": {
+                    "type": "string",
+                    "description": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
+                    "default": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                  },
+                  "pipeEnv": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Environment variables passed to the pipe program.",
+                    "default": {}
+                  }
+                }
+              }
+            }
+          },
+          "attach": {
+            "required": [
+              "program",
+              "processId"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Full path to program executable.",
+                "default": "${workspaceRoot}/a.out"
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppdbg\".",
+                "default": "cppdbg"
+              },
+              "targetArchitecture": {
+                "type": "string",
+                "description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
+                "default": "x64"
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process. This option is not compatible with GDB pretty printing. Please also see \"showDisplayString\" if using this setting.",
+                "default": ""
+              },
+              "showDisplayString": {
+                "type": "boolean",
+                "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
+                "default": "true"
+              },
+              "additionalSOLibSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "MIMode": {
+                "type": "string",
+                "description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
+                "default": "gdb"
+              },
+              "miDebuggerPath": {
+                "type": "string",
+                "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
+                "default": "/usr/bin/gdb"
+              },
+              "miDebuggerServerAddress": {
+                "type": "string",
+                "description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
+                "default": "serveraddress:port"
+              },
+              "processId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": "${command:pickProcess}"
+                  },
+                  {
+                    "type": "integer",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": 0
+                  }
+                ]
+              },
+              "filterStdout": {
+                "type": "boolean",
+                "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
+                "default": "true"
+              },
+              "filterStderr": {
+                "type": "boolean",
+                "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
+                "default": "false"
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "logging": {
+                "type": "object",
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "engineLogging": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic engine logs should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "trace": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  },
+                  "traceResponse": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              },
+              "pipeTransport": {
+                "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
+                "type": "object",
+                "default": {
+                  "pipeCwd": "${workspaceRoot}",
+                  "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
+                  "pipeArgs": [],
+                  "debuggerPath": "enter the path for the debugger on the target machine, for example /usr/bin/gdb"
+                },
+                "properties": {
+                  "pipeCwd": {
+                    "type": "string",
+                    "description": "The fully qualified path to the working directory for the pipe program.",
+                    "default": "/usr/bin"
+                  },
+                  "pipeProgram": {
+                    "type": "string",
+                    "description": "The fully qualified pipe command to execute.",
+                    "default": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'"
+                  },
+                  "pipeArgs": {
+                    "type": "array",
+                    "description": "Command line arguments passed to the pipe program to configure the connection.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "default": []
+                  },
+                  "debuggerPath": {
+                    "type": "string",
+                    "description": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
+                    "default": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                  },
+                  "pipeEnv": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Environment variables passed to the pipe program.",
+                    "default": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "cppvsdbg",
+        "label": "C++ (Windows)",
+        "enableBreakpointsFor": {
+          "languageIds": [
+            "c",
+            "cpp"
+          ]
+        },
+        "runtime": "node",
+        "program": "./out/src/Debugger/Proxy/debugProxy.js",
+        "args": [
+          "--interpreter=vscode"
+        ],
+        "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
+        "variables": {
+          "pickProcess": "extension.pickNativeProcess"
+        },
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program",
+              "cwd"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Full path to program executable.",
+                "default": "${workspaceRoot}/program.exe"
+              },
+              "args": {
+                "type": "array",
+                "description": "Command line arguments passed to the program.",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppvsdbg\".",
+                "default": "cppvsdbg"
+              },
+              "cwd": {
+                "type": "string",
+                "description": "The working directory of the target.",
+                "default": "${workspaceRoot}"
+              },
+              "environment": {
+                "type": "array",
+                "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": "string",
+                    "value": "string"
+                  }
+                },
+                "default": []
+              },
+              "symbolSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "stopAtEntry": {
+                "type": "boolean",
+                "description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
+                "default": false
+              },
+              "dumpPath": {
+                "type": "string",
+                "description": "Optional full path to a dump file for the specified program. Example: \"c:\\temp\\app.dmp\". Defaults to null.",
+                "default": ""
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process.",
+                "default": ""
+              },
+              "externalConsole": {
+                "type": "boolean",
+                "description": "If true, a console is launched for the debuggee. If false, no console is launched.",
+                "default": "false"
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "logging": {
+                "type": "object",
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "engineLogging": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              }
+            }
+          },
+          "attach": {
+            "required": [
+              "processId"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of the engine. Must be \"cppvsdbg\".",
+                "default": "cppvsdbg"
+              },
+              "symbolSearchPath": {
+                "type": "string",
+                "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
+                "default": ""
+              },
+              "processId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": "${command:pickProcess}"
+                  },
+                  {
+                    "type": "integer",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "default": 0
+                  }
+                ]
+              },
+              "visualizerFile": {
+                "type": "string",
+                "description": ".natvis file to be used when debugging this process.",
+                "default": ""
+              },
+              "sourceFileMap": {
+                "type": "object",
+                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "default": {
+                  "<source-path>": "<target-path>"
+                }
+              },
+              "logging": {
+                "type": "object",
+                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "default": {},
+                "properties": {
+                  "exceptions": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "moduleLoad": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "programOutput": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "default": true
+                  },
+                  "trace": {
+                    "type": "boolean",
+                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "default": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "c_cpp_properties.json",
+        "url": "./c_cpp_properties.schema.json"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == c",
+          "command": "C_Cpp.GoToDeclaration",
+          "group": "navigation@2"
+        },
+        {
+          "when": "editorLangId == cpp",
+          "command": "C_Cpp.GoToDeclaration",
+          "group": "navigation@2"
+        },
+        {
+          "when": "editorLangId == c",
+          "command": "C_Cpp.PeekDeclaration",
+          "group": "navigation@3"
+        },
+        {
+          "when": "editorLangId == cpp",
+          "command": "C_Cpp.PeekDeclaration",
+          "group": "navigation@3"
+        },
+        {
+          "when": "editorLangId == c",
+          "command": "C_Cpp.SwitchHeaderSource",
+          "group": "other@1"
+        },
+        {
+          "when": "editorLangId == cpp",
+          "command": "C_Cpp.SwitchHeaderSource",
+          "group": "other@1"
+        },
+        {
+          "when": "editorLangId == c",
+          "command": "C_Cpp.Navigate",
+          "group": "other@2"
+        },
+        {
+          "when": "editorLangId == cpp",
+          "command": "C_Cpp.Navigate",
+          "group": "other@2"
+        },
+        {
+          "when": "editorLangId == c",
+          "command": "workbench.action.gotoSymbol",
+          "group": "other@3"
+        },
+        {
+          "when": "editorLangId == cpp",
+          "command": "workbench.action.gotoSymbol",
+          "group": "other@3"
+        },
+        {
+          "when": "editorLangId == c",
+          "command": "workbench.action.showAllSymbols",
+          "group": "other@4"
+        },
+        {
+          "when": "editorLangId == cpp",
+          "command": "workbench.action.showAllSymbols",
+          "group": "other@4"
+        }
+      ]
+    },
+    "configurationDefaults": {
+      "[cpp]": {
+        "editor.autoIndent": false
+      },
+      "[c]": {
+        "editor.autoIndent": false
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./ && node ./out/src/Debugger/copyScript.js",
+    "pretest": "tsc -p ./",
+    "test": "mocha -u tdd ./out/test",
+    "compile": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "typescript": "^2.5.3",
+    "vscode": "^1.1.6",
+    "mocha": "^4.0.1",
+    "@types/node": "^8.0.46",
+    "@types/mocha": "^2.2.43"
+  },
+  "dependencies": {
+    "vscode-languageclient": "~3.4.5",
+    "vscode-extension-telemetry": "~0.0.8",
+    "http-proxy-agent": "~2.0.0",
+    "https-proxy-agent": "~2.1.0",
+    "tmp": "~0.0.33",
+    "yauzl": "~2.8.0",
+    "mkdirp": "~0.5.1",
+    "vscode-debugprotocol": "~1.24.0",
+    "vscode-debugadapter": "~1.24.0",
+    "minimatch": "~3.0.4"
+  },
+  "runtimeDependencies": [
+    {
+      "description": "C/C++ language components (Linux / x86_64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=865475",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "x86_64"
+      ],
+      "binaries": [
+        "./bin/Microsoft.VSCode.CPP.Extension.linux",
+        "./bin/Microsoft.VSCode.CPP.IntelliSense.Msvc.linux"
+      ]
+    },
+    {
+      "description": "C/C++ language components (Linux / x86)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=865476",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "x86",
+        "i686",
+        "i386"
+      ],
+      "binaries": [
+        "./bin/Microsoft.VSCode.CPP.Extension.linux",
+        "./bin/Microsoft.VSCode.CPP.IntelliSense.Msvc.linux"
+      ]
+    },
+    {
+      "description": "C/C++ language components (OS X)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=865477",
+      "platforms": [
+        "darwin"
+      ],
+      "binaries": [
+        "./bin/Microsoft.VSCode.CPP.Extension.darwin",
+        "./bin/Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin"
+      ]
+    },
+    {
+      "description": "C/C++ language components (Windows)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=865478",
+      "platforms": [
+        "win32"
+      ],
+      "binaries": []
+    },
+    {
+      "description": "ClangFormat (Linux / x86_64)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=848955",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "x86_64"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format"
+      ]
+    },
+    {
+      "description": "ClangFormat (Linux / x86)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=864640",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "x86",
+        "i686",
+        "i386"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format"
+      ]
+    },
+    {
+      "description": "ClangFormat (OS X)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=848956",
+      "platforms": [
+        "darwin"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format.darwin"
+      ]
+    },
+    {
+      "description": "ClangFormat (Windows)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=848957",
+      "platforms": [
+        "win32"
+      ],
+      "binaries": []
+    },
+    {
+      "description": "Mono Framework Assemblies",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=816539",
+      "platforms": [
+        "linux",
+        "darwin"
+      ],
+      "binaries": []
+    },
+    {
+      "description": "Mono Runtime (Linux / x86)",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=816540",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "x86",
+        "i686",
+        "i386"
+      ],
+      "binaries": [
+        "./debugAdapters/mono.linux-x86"
+      ]
+    },
+    {
+      "description": "Mono Runtime (Linux / x86_64)",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=816541",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "x86_64"
+      ],
+      "binaries": [
+        "./debugAdapters/mono.linux-x86_64"
+      ]
+    },
+    {
+      "description": "Mono Runtime (OS X)",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=816542",
+      "platforms": [
+        "darwin"
+      ],
+      "binaries": [
+        "./debugAdapters/mono.osx"
+      ]
+    },
+    {
+      "description": "LLDB 3.8.0 (OS X)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=817244",
+      "platforms": [
+        "darwin"
+      ],
+      "binaries": [
+        "./debugAdapters/lldb/bin/debugserver",
+        "./debugAdapters/lldb/bin/lldb-mi",
+        "./debugAdapters/lldb/bin/lldb-argdumper",
+        "./debugAdapters/lldb/bin/lldb-launcher"
+      ]
+    },
+    {
+      "description": "Visual Studio Windows Debugger",
+      "url": "https://go.microsoft.com/fwlink/?linkid=852926",
+      "platforms": [
+        "win32"
+      ],
+      "binaries": []
+    }
+  ]
+}

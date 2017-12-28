@@ -1,3 +1,19 @@
+## How to build and debug the Microsoft CppTools Extension
+
+These steps will allow you to debug the typescript code that is part of the Microsoft CppTools extension for Visual Studio Code.
+
+Prerequisite steps:
+  * Clone [this](https://github.com/Microsoft/msvscode-cpptools) repository.
+  * Install [npm](https://nodejs.org).
+  * From a command line, run the following commands from the Extension folder in the root of the repository:
+      * `npm install -g vsce`
+        * This will install `vsce` globally to create the vsix package.
+      * `npm install` will install the dependencies needed to build the extension.
+  * Set an environment variable `CPPTOOLS_DEV=1`.
+    * This enables the local developer workflow, copying dependencies from the `node_modules` folder.
+  * Open the Extension folder in Visual Studio Code and F5.
+  * [How to contribute changes](LanguageServer/How%20to%20Contribute%20Changes.md).
+
 # Configuring includePath for better IntelliSense results
 
 This page describes how to configure include paths for folders containing C or C++ files to get the full IntelliSense experience. If you're seeing the following message when opening a folder in VS Code, it means the C++ IntelliSense engine needs additional information about the paths in which your include files are located.
