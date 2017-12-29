@@ -110,6 +110,9 @@ export function activate(context: vscode.ExtensionContext) {
     // Activate Configuration Provider and Process Picker Commands.
     DebuggerExtension.activate();
 
+    // Activate Adapter Commands 
+    registerAdapterExecutableCommands();
+
     if (context.globalState.get<number>(userBucketString, -1) == -1) {
         let bucket = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
         context.globalState.update(userBucketString, bucket);
@@ -427,7 +430,7 @@ function checkDistro(channel: vscode.OutputChannel, platformInfo: PlatformInform
     }
 }
 
-function rewriteManifest(installBlob: InstallBlob): Promise<void> {
+function rewriteManifest(installBlob: InstallBlob): void {
     installBlob.stage = "rewriteManifest";
 
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
@@ -452,20 +455,57 @@ function rewriteManifest(installBlob: InstallBlob): Promise<void> {
         "onCommand:C_Cpp.TakeSurvey",
         "onDebug"
     ];
+}
 
-    // Remove the entry for cppdbg's proxy stub and replace it with the real debugger binary
-    util.packageJson.contributes.debuggers[0].runtime = undefined;
-    util.packageJson.contributes.debuggers[0].program = './debugAdapters/OpenDebugAD7';
-    util.packageJson.contributes.debuggers[0].windows = { "program": "./debugAdapters/bin/OpenDebugAD7.exe" };
+// Registers adapterExecutableCommands for cppdbg and cppvsdbg. If it is not ready, it will prompt waiting for the download.
+// 
+// Note: util.extensionContext.extensionPath is needed for the commands because VsCode does not support relative paths for adapterExecutableComand
+function registerAdapterExecutableCommands(): void {
+    vscode.commands.registerCommand('extension.cppdbgAdapterExecutableCommand', () => {
+        return util.checkInstallLockFile().then(ready => {
+            if (ready)
+            {
+                let command: string = path.join(util.extensionContext.extensionPath, '/debugAdapters/OpenDebugAD7');
 
-    // Remove the entry for cppvsdbg's proxy stub and replace it with the real debugger binary for Windows only.
-    if (os.platform() === 'win32') {
-        util.packageJson.contributes.debuggers[1].runtime = undefined;
-        util.packageJson.contributes.debuggers[1].program = './debugAdapters/vsdbg/bin/vsdbg.exe';
-    }
+                // Windows has the exe in debugAdapters/bin.
+                if (os.platform() === 'win32')
+                {
+                    command = path.join(util.extensionContext.extensionPath, "./debugAdapters/bin/OpenDebugAD7.exe");
+                }
 
-    if (util.packageJson.extensionFolderPath.includes(".vscode-insiders"))
-        util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
+                return {
+                    command: command
+                }
+            }
+            else {
+                util.showReloadOrWaitPromptOnce();
+                // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
+                return null;
+            }
+        })
+    });
 
-    return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
+    vscode.commands.registerCommand('extension.cppvsdbgAdapterExecutableCommand', () => {
+        if (os.platform() != 'win32')
+        {
+            vscode.window.showErrorMessage("Debugger type 'cppvsdbg' is not avaliable for non-Windows machines.");
+            return null;
+        }
+        else {
+            return util.checkInstallLockFile().then(ready => {
+                if (ready)
+                {
+                    return {
+                        command: path.join(util.extensionContext.extensionPath,'./debugAdapters/vsdbg/bin/vsdbg.exe'),
+                        args: ['--interpreter=vscode']
+                    }
+                }
+                else {
+                    util.showReloadOrWaitPromptOnce();
+                    // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
+                    return null;
+                }
+            });
+        }
+    });
 }
