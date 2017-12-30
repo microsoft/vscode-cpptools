@@ -9,8 +9,18 @@
  */
 
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
+
+//Change this to true to force a dev workflow.
+const EnableDevWorkflow: Boolean = false;
+
+const DebugAdapterPath = "./debugAdapters"
+const DebugAdapterBinPath = DebugAdapterPath + "/bin";
+
+var CpptoolsExtensionRoot: string = null;
+var SearchCompleted: Boolean = false;
 
 interface RootsHashtable {
     "miEngineRoot": string;
@@ -25,16 +35,46 @@ const internalBinaryRoots: RootsHashtable = {
 };
 
 const externalBinaryRoots: RootsHashtable = {
-    "miEngineRoot": "./node_modules/msvscode.cpptools.miengine",
-    "openDebugRoot": "./node_modules/msvscode.cpptools.opendebugad7",
-    "monoDeps": "./node_modules/msvscode.cpptools.monodeps"
+    "miEngineRoot": DebugAdapterBinPath,
+    "openDebugRoot": DebugAdapterBinPath,
+    "monoDeps": DebugAdapterPath
 };
 
-//Change this to true to force a dev workflow.
-const EnableDevWorkflow: Boolean = false;
+function findCppToolsExtensionDebugAdapterFolder(): string {
+    const vscodeFolderRegExp = new RegExp(/\.vscode-*[a-z]*$/);
+    const cpptoolsFolderRegExp = new RegExp(/ms\-vscode\.cpptools\-.*$/);
 
-const DebugAdapterPath = "./debugAdapters"
-const DebugAdapterBinPath = DebugAdapterPath + "/bin";
+    var dirPath: string = os.homedir();
+    if (fs.existsSync(dirPath)) {
+        var files = fs.readdirSync(dirPath);
+        for (var i = 0; i < files.length; i++) {
+            // Check to see if it starts with '.vscode'
+            if (vscodeFolderRegExp.test(files[i])) {
+                var extPath: string = path.join(dirPath, files[i], "extensions");
+                if (fs.existsSync(extPath)) {
+                    var extFiles = fs.readdirSync(extPath);
+                    for (var j = 0; j < extFiles.length; j++) {
+                        if (cpptoolsFolderRegExp.test(path.join(extFiles[j]))) {
+                            dirPath = path.join(extPath, extFiles[j]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (dirPath == os.homedir()) {
+            console.error("Could not find installed C/C++ extension.");
+            return null;
+        }
+
+        return dirPath;
+    }
+    else {
+        console.error("Unable to determine C/C++ extension installation location.")
+        return null;
+    }
+}
 
 function enableDevWorkflow(): Boolean {
     if (process.env.AGENT_ID) {
@@ -51,7 +91,22 @@ function copySourceDependencies(): void {
 
 function getRoot(rootKey: string): string {
     const internal = internalBinaryRoots[rootKey];
-    return internal ? internal : externalBinaryRoots[rootKey];
+    if (internal) {
+        return internal;
+    }
+
+    // Only search for the extension root once.
+    if (!CpptoolsExtensionRoot && !SearchCompleted) {
+        CpptoolsExtensionRoot = findCppToolsExtensionDebugAdapterFolder();
+        SearchCompleted = true;
+    }
+
+    if (CpptoolsExtensionRoot) {
+        return path.join(CpptoolsExtensionRoot, externalBinaryRoots[rootKey]);
+    }
+
+    console.error("Unable to determine internal/external location to copy from for root %s.", rootKey);
+    return null;
 }
 
 function copyBinaryDependencies(): void {
@@ -84,14 +139,26 @@ function copyMonoDependencies(): void {
 }
 
 function copy(root: string, target: string, file: string): void {
+    if (!root) {
+        console.error("Unknown root location. Copy Failed for %s.", file);
+        return;
+    }
+
     var source = path.join(root, file);
     var destination: string = path.join(target, file);
 
-    console.log('Creating directory %s', target);
-    makeDirectory(target);
+    if (!fs.existsSync(target)) {
+        console.log('Creating directory %s', target);
+        makeDirectory(target);
+    }
 
     console.log('copying %s to %s', source, destination);
-    fs.writeFileSync(destination, fs.readFileSync(source));
+    if (fs.existsSync(source)) {
+        fs.writeFileSync(destination, fs.readFileSync(source));
+    }
+    else {
+        console.error('ERR: could not find file %s', source);
+    }
 }
 
 function copyFolder(root: string, target: string): void {
