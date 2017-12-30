@@ -107,7 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
     Telemetry.activate();
     util.setProgress(0);
 
-    // Activate Configuration Provider, Process Picker and AdapterExecutable Commands.
+    // Initialize the DebuggerExtension and register the related commands and providers.
     DebuggerExtension.initialize();
 
     if (context.globalState.get<number>(userBucketString, -1) == -1) {
