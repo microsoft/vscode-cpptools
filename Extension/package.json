@@ -175,8 +175,8 @@
         },
         "C_Cpp.throttleWorkspaceParsing": {
           "type": "boolean",
-          "default": false,
-          "description": "Controls whether parsing of the workspace use sleeps to avoid using 100% CPU",
+          "default": true,
+          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU.",
           "scope": "resource"
         }
       }
