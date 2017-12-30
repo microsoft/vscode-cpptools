@@ -107,11 +107,8 @@ export function activate(context: vscode.ExtensionContext) {
     Telemetry.activate();
     util.setProgress(0);
 
-    // Activate Configuration Provider and Process Picker Commands.
-    DebuggerExtension.activate();
-
-    // Activate Adapter Commands 
-    registerAdapterExecutableCommands();
+    // Activate Configuration Provider, Process Picker and AdapterExecutable Commands.
+    DebuggerExtension.initialize();
 
     if (context.globalState.get<number>(userBucketString, -1) == -1) {
         let bucket = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
@@ -168,7 +165,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> {
-    DebuggerExtension.deactivate();
+    DebuggerExtension.dispose();
 
     tempCommands.forEach((command) => {
         command.dispose();
@@ -455,57 +452,4 @@ function rewriteManifest(installBlob: InstallBlob): void {
         "onCommand:C_Cpp.TakeSurvey",
         "onDebug"
     ];
-}
-
-// Registers adapterExecutableCommands for cppdbg and cppvsdbg. If it is not ready, it will prompt waiting for the download.
-// 
-// Note: util.extensionContext.extensionPath is needed for the commands because VsCode does not support relative paths for adapterExecutableComand
-function registerAdapterExecutableCommands(): void {
-    vscode.commands.registerCommand('extension.cppdbgAdapterExecutableCommand', () => {
-        return util.checkInstallLockFile().then(ready => {
-            if (ready)
-            {
-                let command: string = path.join(util.extensionContext.extensionPath, '/debugAdapters/OpenDebugAD7');
-
-                // Windows has the exe in debugAdapters/bin.
-                if (os.platform() === 'win32')
-                {
-                    command = path.join(util.extensionContext.extensionPath, "./debugAdapters/bin/OpenDebugAD7.exe");
-                }
-
-                return {
-                    command: command
-                }
-            }
-            else {
-                util.showReloadOrWaitPromptOnce();
-                // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
-                return null;
-            }
-        })
-    });
-
-    vscode.commands.registerCommand('extension.cppvsdbgAdapterExecutableCommand', () => {
-        if (os.platform() != 'win32')
-        {
-            vscode.window.showErrorMessage("Debugger type 'cppvsdbg' is not avaliable for non-Windows machines.");
-            return null;
-        }
-        else {
-            return util.checkInstallLockFile().then(ready => {
-                if (ready)
-                {
-                    return {
-                        command: path.join(util.extensionContext.extensionPath,'./debugAdapters/vsdbg/bin/vsdbg.exe'),
-                        args: ['--interpreter=vscode']
-                    }
-                }
-                else {
-                    util.showReloadOrWaitPromptOnce();
-                    // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
-                    return null;
-                }
-            });
-        }
-    });
 }
