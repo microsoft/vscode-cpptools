@@ -8,6 +8,7 @@
 * Fix extra reload message after installing with VS Code 1.19. [#1362](https://github.com/Microsoft/vscode-cpptools/issues/1362)
 * Fix incorrect "Warning: Expected file ... is missing" message after installing on Linux. [#1334](https://github.com/Microsoft/vscode-cpptools/issues/1334)
 * Fix "Include file not found" messages not re-appearing after settings changes. [#1363](https://github.com/Microsoft/vscode-cpptools/issues/1363)
+* Add `C_Cpp.throttleWorkspaceParsing` setting to avoid using 100% CPU during parsing of workspace files.
 
 ## Version 0.14.5: December 18, 2017
 * Fix for stackwalk `NullReferenceException`. [#1339](https://github.com/Microsoft/vscode-cpptools/issues/1339)

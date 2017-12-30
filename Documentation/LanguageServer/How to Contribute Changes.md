@@ -12,7 +12,7 @@
     * `processRuntimeDependencies` handles the downloading and installation of the OS-dependent files. Downloading code exists in [packageManager.ts](../../Extension/src/packageManager.ts).
     * `downloadCpptoolsJsonPkg` handles the `cpptools.json`, which can be used to enable changes to occur mid-update, such as turning the `intelliSenseEngine` to `"Default"` for a certain percentage of users.
   * The debugger code is in the [Debugger](https://github.com/Microsoft/vscode-cpptools/Extension/src/Debugger) folder.
-  * [LanguageServer/client.ts](../../Extension/src/LanguageServer/C_Cpp.ts) handles various language server functionality.
+  * [LanguageServer/client.ts](../../Extension/src/LanguageServer/client.ts) handles various language server functionality.
   * [LanguageServer/configurations.ts](../../Extension/src/LanguageServer/configurations.ts) handles functionality related to `c_cpp_properties.json`.
   * [telemetry.ts](../../Extension/src/telemetry.ts): Telemetry data gets sent to either `logLanguageServerEvent` or `logDebuggerEvent`.
   * The Tag Parser (symbol database) doesn't automatically expand macros, so the [cpp.hint](../../Extension/cpp.hint) file contains definitions of macros that should be expanded in order for symbols to be parsed correctly.

@@ -172,6 +172,12 @@
           "default": true,
           "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",
           "scope": "resource"
+        },
+        "C_Cpp.throttleWorkspaceParsing": {
+          "type": "boolean",
+          "default": false,
+          "description": "Controls whether parsing of the workspace use sleeps to avoid using 100% CPU",
+          "scope": "resource"
         }
       }
     },
