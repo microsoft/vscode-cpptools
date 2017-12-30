@@ -107,8 +107,8 @@ export function activate(context: vscode.ExtensionContext) {
     Telemetry.activate();
     util.setProgress(0);
 
-    // Activate Configuration Provider and Process Picker Commands.
-    DebuggerExtension.activate();
+    // Initialize the DebuggerExtension and register the related commands and providers.
+    DebuggerExtension.initialize();
 
     if (context.globalState.get<number>(userBucketString, -1) == -1) {
         let bucket = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
@@ -165,7 +165,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> {
-    DebuggerExtension.deactivate();
+    DebuggerExtension.dispose();
 
     tempCommands.forEach((command) => {
         command.dispose();
@@ -427,7 +427,7 @@ function checkDistro(channel: vscode.OutputChannel, platformInfo: PlatformInform
     }
 }
 
-function rewriteManifest(installBlob: InstallBlob): Promise<void> {
+function rewriteManifest(installBlob: InstallBlob): void {
     installBlob.stage = "rewriteManifest";
 
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
@@ -452,20 +452,4 @@ function rewriteManifest(installBlob: InstallBlob): Promise<void> {
         "onCommand:C_Cpp.TakeSurvey",
         "onDebug"
     ];
-
-    // Remove the entry for cppdbg's proxy stub and replace it with the real debugger binary
-    util.packageJson.contributes.debuggers[0].runtime = undefined;
-    util.packageJson.contributes.debuggers[0].program = './debugAdapters/OpenDebugAD7';
-    util.packageJson.contributes.debuggers[0].windows = { "program": "./debugAdapters/bin/OpenDebugAD7.exe" };
-
-    // Remove the entry for cppvsdbg's proxy stub and replace it with the real debugger binary for Windows only.
-    if (os.platform() === 'win32') {
-        util.packageJson.contributes.debuggers[1].runtime = undefined;
-        util.packageJson.contributes.debuggers[1].program = './debugAdapters/vsdbg/bin/vsdbg.exe';
-    }
-
-    if (util.packageJson.extensionFolderPath.includes(".vscode-insiders"))
-        util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
-
-    return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
 }
