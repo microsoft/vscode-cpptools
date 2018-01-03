@@ -1050,7 +1050,7 @@
   },
   "dependencies": {
     "vscode-languageclient": "~3.4.5",
-    "vscode-extension-telemetry": "~0.0.9",
+    "vscode-extension-telemetry": "~0.0.10",
     "http-proxy-agent": "~2.0.0",
     "https-proxy-agent": "~2.1.0",
     "tmp": "~0.0.33",
