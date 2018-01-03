@@ -31,26 +31,14 @@ function formatString(format: string, args: string[]) {
     return format;
 }
 
-// Initial configurations do not require escaping ${keyword}. If it is being used
-// as a configuration snippet, then ${keyword} will need to be escaped or VsCode will
-// try to evaluate it.
-function EnsureTokensEscapedInLaunchJsonMacro(keyword: string, isInitialConfiguration: boolean): string {
-    if (isInitialConfiguration) {
-        return "${" + keyword + "}";
-    }
-    else {
-        return "\\$\{" + keyword + "\}";
-    }
-}
-
 function CreateLaunchString(name: string, type: string, executable: string, isInitialConfiguration: boolean): string {
         return `"name": "${name}",
 "type": "${type}",
 "request": "launch",
-"program": "${"enter program name, for example " + EnsureTokensEscapedInLaunchJsonMacro("workspaceFolder", isInitialConfiguration) + "/" + executable}",
+"program": "${"enter program name, for example " + "$\{workspaceFolder\}" + "/" + executable}",
 "args": [],
 "stopAtEntry": false,
-"cwd": \"${EnsureTokensEscapedInLaunchJsonMacro("workspaceFolder", isInitialConfiguration)}\",
+"cwd": "$\{workspaceFolder\}",
 "environment": [],
 "externalConsole": true
 `
@@ -61,8 +49,8 @@ function CreateAttachString(name: string, type: string, executable: string): str
 "name": "${name}",
 "type": "${type}",
 "request": "attach",{0}
-"processId": \"\\$\{command:pickProcess\}\"
-`, [type === "cppdbg" ? `${os.EOL}"program": "${"enter program name, for example \\$\{workspaceFolder\}/" + executable}",` : ""]);
+"processId": "$\{command:pickProcess\}"
+`, [type === "cppdbg" ? `${os.EOL}"program": "${"enter program name, for example $\{workspaceFolder\}/" + executable}",` : ""]);
     }
 
 function CreateRemoteAttachString(name: string, type: string, executable: string): string {
@@ -70,8 +58,8 @@ function CreateRemoteAttachString(name: string, type: string, executable: string
 "name": "${name}",
 "type": "${type}",
 "request": "attach",
-"program": "${"enter program name, for example \\$\{workspaceFolder\}/" + executable}",
-"processId": \"\\$\{command:pickRemoteProcess\}\"
+"program": "${"enter program name, for example $\{workspaceFolder\}/" + executable}",
+"processId": "$\{command:pickRemoteProcess\}"
 `;
     }
 
@@ -229,7 +217,7 @@ export class WindowsConfigurations extends Configuration {
 }
 
 export class WSLConfigurations extends Configuration {
-    public bashPipeProgram = "C:\\\\\\\\Windows\\\\\\\\sysnative\\\\\\\\bash.exe";
+    public bashPipeProgram = "C:\\\\Windows\\\\sysnative\\\\bash.exe";
 
     public GetLaunchConfiguration(isInitialConfiguration: boolean): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Bash on Windows Launch`;

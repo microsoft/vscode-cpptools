@@ -6,9 +6,11 @@
  import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
+
 import * as vscode from 'vscode';
 import {indentJsonString, IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import * as util from '../common';
+import { parse } from 'jsonc-parser';
 
 abstract class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private type: DebuggerType;
@@ -54,7 +56,7 @@ export class CppDbgConfigurationProvider extends CppConfigurationProvider {
 
 export interface IConfigurationAssetProvider {
     getInitialConfigurations(debuggerType: DebuggerType): any;
-    getConfigurationSnippets(): string;
+    getConfigurationSnippets(): vscode.CompletionItem[];
 }
 
 export class ConfigurationAssetProviderFactory {
@@ -90,9 +92,8 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
         return initialConfigurations;
     }
 
-    // TODO: Update this function when VsCode enables an API for configuration snippet providers
-    public getConfigurationSnippets(): string {
-        if (util.packageJson.contributes.debuggers[0] && !util.packageJson.contributes.debuggers[0].configurationSnippets) {
+    public getConfigurationSnippets(): vscode.CompletionItem[] {
+        let completionItems: vscode.CompletionItem[] = [];
             let configurationSnippet: IConfigurationSnippet[] = [];
 
             this.configurations.forEach(configuration => {
@@ -100,20 +101,11 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
                 configurationSnippet.push(configuration.GetAttachConfiguration());
             });
 
-            util.packageJson.contributes.debuggers[0].configurationSnippets = configurationSnippet.map(snippet => {
-                // Remove internal fields
-                delete snippet.isInitialConfiguration;
-                delete snippet.debuggerType;
-
-                return snippet;
+            configurationSnippet.forEach(snippet => {
+                completionItems.push(convertConfigurationSnippetToCompetionItem(snippet));
             });
 
-            fs.writeFileSync(util.getPackageJsonPath(), util.getPackageJsonString());
-            util.enableReloadOrWaitPrompt();
-            util.touchExtensionFolder(); // Required to avoid package.json caching.
-        }
-
-        return ""; // TODO
+        return completionItems;
     }
 }
 
@@ -172,5 +164,50 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
             new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock), 
             new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
         ]
+    }
+}
+
+function convertConfigurationSnippetToCompetionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
+    var item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+
+    item.insertText = snippet.bodyText;
+
+    return item;
+}
+
+export class ConfigurationSnippetProvider implements vscode.CompletionItemProvider {
+    private provider: IConfigurationAssetProvider;
+    private snippets: vscode.CompletionItem[];
+
+    constructor(provider: IConfigurationAssetProvider) {
+        this.provider = provider;
+        this.snippets = this.provider.getConfigurationSnippets();
+    }
+    public resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): Thenable<vscode.CompletionItem> {
+        return Promise.resolve(item);
+    }
+
+    // This function will only provide completion items via the Add Configuration Button
+    // There are two cases, where the configuration array has nothing or has some items.
+    // 1. If it has nothing, insert a snippet the user selected.
+    // 2. If there are items, the Add Configuration button will append it to the start of the configuration array. This function inserts a comma at the end of the snippet.
+    public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Thenable<vscode.CompletionList> {
+        let items: vscode.CompletionItem[] = this.snippets;
+
+        const launch: any = parse(document.getText());
+        // Check to see if the array is empty.
+        if (launch.configurations.length !== 0)
+        {
+            items = [];
+
+            // Make a copy of each snippet since we are adding a comma to the end of the insertText.
+            this.snippets.forEach((item) => items.push(Object.assign({}, item)));
+
+            items.map((item) => {
+                item.insertText = item.insertText + ',' // Add comma 
+            });  
+        }
+
+        return Promise.resolve(new vscode.CompletionList(items, true));
     }
 }
