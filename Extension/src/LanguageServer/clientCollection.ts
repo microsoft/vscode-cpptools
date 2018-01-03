@@ -12,8 +12,8 @@ import * as cpptools from './client';
 const defaultClientKey = "@@default@@";
 export interface ClientKey
 {
-    name: string,
-    key: string
+    name: string;
+    key: string;
 }
 
 export class ClientCollection {
@@ -69,8 +69,9 @@ export class ClientCollection {
      * get a handle to a language client. returns null if the client was not found.
      */
     public get(key: string): cpptools.Client | null {
-        if (this.languageClients.has(key))
+        if (this.languageClients.has(key)) {
             return this.languageClients.get(key);
+        }
         console.assert("key not found");
         return null;
     }
@@ -98,7 +99,7 @@ export class ClientCollection {
      */
     public replace(client: cpptools.Client, transferFileOwnership: boolean): cpptools.Client {
         let key:string = undefined;
-        for (var pair of this.languageClients) {
+        for (let pair of this.languageClients) {
             if (pair[1] === client) {
                 key = pair[0];
                 break;

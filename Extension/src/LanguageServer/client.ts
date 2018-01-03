@@ -6,11 +6,9 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as os from 'os';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
-    RequestType, ErrorHandler, ErrorAction, CloseAction, DidOpenTextDocumentParams
+    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -31,8 +29,8 @@ interface NavigationPayload {
 
 interface TelemetryPayload {
     event: string;
-    properties?: { [key: string]: string },
-    metrics?: { [key: string]: number }
+    properties?: { [key: string]: string };
+    metrics?: { [key: string]: number };
 }
 
 interface OutputNotificationBody {
@@ -109,17 +107,20 @@ function collectSettings(filter: (key: string, val: string, settings: vscode.Wor
     let settings = vscode.workspace.getConfiguration("C_Cpp", resource);
     let result: { [key: string]: string } = {};
 
-    for (var key in settings) {
-        if (settings.inspect(key).defaultValue === undefined)
+    for (let key in settings) {
+        if (settings.inspect(key).defaultValue === undefined) {
             continue; // ignore methods and settings that don't exist
+        }
         let val = settings.get(key);
-        if (val instanceof Object)
+        if (val instanceof Object) {
             continue; // ignore settings that are objects since tostring on those is not useful (e.g. navigation.length)
+        }
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
             result[key] = (key == "clang_format_path") ? "..." : String(previousCppSettings[key]);
-            if (result[key].length > maxSettingLengthForTelemetry)
+            if (result[key].length > maxSettingLengthForTelemetry) {
                 result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
+            }
         }
     }
 
@@ -139,41 +140,41 @@ function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } 
 }
 
 interface ClientModel {
-    isTagParsing: DataBinding<boolean>,
-    isUpdatingIntelliSense: DataBinding<boolean>,
-    navigationLocation: DataBinding<string>,
-    tagParserStatus: DataBinding<string>,
-    activeConfigName: DataBinding<string>
+    isTagParsing: DataBinding<boolean>;
+    isUpdatingIntelliSense: DataBinding<boolean>;
+    navigationLocation: DataBinding<string>;
+    tagParserStatus: DataBinding<string>;
+    activeConfigName: DataBinding<string>;
 }
 
 export interface Client {
-    TagParsingChanged: vscode.Event<boolean>,
-    IntelliSenseParsingChanged: vscode.Event<boolean>,
-    NavigationLocationChanged: vscode.Event<string>,
-    TagParserStatusChanged: vscode.Event<string>,
-    ActiveConfigChanged: vscode.Event<string>,
-    RootPath: string,
-    RootUri: vscode.Uri,
-    Name: string,
-    TrackedDocuments: Set<vscode.TextDocument>,
-    onDidChangeSettings(): void,
-    takeOwnership(document: vscode.TextDocument): void,
-    requestGoToDeclaration(): Thenable<void>,
-    requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>,
-    requestNavigationList(document: vscode.TextDocument): Thenable<string>,
-    activeDocumentChanged(document: vscode.TextDocument): void,
-    activate(): void,
-    selectionChanged(selection: vscode.Position): void,
-    resetDatabase(): void,
-    deactivate(): void,
-    pauseParsing(): void,
-    resumeParsing(): void,
-    handleConfigurationSelectCommand(): void,
-    handleShowParsingCommands(): void,
-    handleConfigurationEditCommand(): void,
-    handleAddToIncludePathCommand(path: string): void,
-    onInterval(): void,
-    dispose(): Thenable<void>
+    TagParsingChanged: vscode.Event<boolean>;
+    IntelliSenseParsingChanged: vscode.Event<boolean>;
+    NavigationLocationChanged: vscode.Event<string>;
+    TagParserStatusChanged: vscode.Event<string>;
+    ActiveConfigChanged: vscode.Event<string>;
+    RootPath: string;
+    RootUri: vscode.Uri;
+    Name: string;
+    TrackedDocuments: Set<vscode.TextDocument>;
+    onDidChangeSettings(): void;
+    takeOwnership(document: vscode.TextDocument): void;
+    requestGoToDeclaration(): Thenable<void>;
+    requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
+    requestNavigationList(document: vscode.TextDocument): Thenable<string>;
+    activeDocumentChanged(document: vscode.TextDocument): void;
+    activate(): void;
+    selectionChanged(selection: vscode.Position): void;
+    resetDatabase(): void;
+    deactivate(): void;
+    pauseParsing(): void;
+    resumeParsing(): void;
+    handleConfigurationSelectCommand(): void;
+    handleShowParsingCommands(): void;
+    handleConfigurationEditCommand(): void;
+    handleAddToIncludePathCommand(path: string): void;
+    onInterval(): void;
+    dispose(): Thenable<void>;
 }
 
 export function createClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -204,10 +205,10 @@ class DefaultClient implements Client {
         navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
-    }
+    };
 
-    public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; };
-    public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; };
+    public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
+    public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
@@ -294,7 +295,7 @@ class DefaultClient implements Client {
         let serverOptions: ServerOptions = {
             run: { command: serverModule },
             debug: { command: serverModule, args: [ serverName ] }
-        }
+        };
         let settings = new CppSettings(workspaceFolder ? workspaceFolder.uri : null);
         let other = new OtherSettings(workspaceFolder ? workspaceFolder.uri : null);
 
@@ -358,7 +359,7 @@ class DefaultClient implements Client {
             }
 
             // TODO: should I set the output channel?  Does this sort output between servers?
-        }
+        };
 
         // Create the language client
         return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
@@ -373,8 +374,9 @@ class DefaultClient implements Client {
         };
         let changedSettings = collectSettings(filter, this.RootUri);
 
-        if (Object.keys(changedSettings).length > 0)
+        if (Object.keys(changedSettings).length > 0) {
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
+        }
     }
 
     /**
@@ -467,7 +469,7 @@ class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(DebugProtocolNotification, (output) => {
-            var outputEditorExist = vscode.window.visibleTextEditors.some((editor: vscode.TextEditor) => {
+            let outputEditorExist = vscode.window.visibleTextEditors.some((editor: vscode.TextEditor) => {
                 return editor.document.uri.scheme === "output";
             });
             if (!this.debugChannel) {
@@ -478,7 +480,7 @@ class DefaultClient implements Client {
                 this.debugChannel.show();
             }
             this.debugChannel.appendLine("");
-            this.debugChannel.appendLine("************************************************************************************************************************")
+            this.debugChannel.appendLine("************************************************************************************************************************");
             this.debugChannel.append(`${output}`);
         });
 
@@ -526,8 +528,9 @@ class DefaultClient implements Client {
         // The space available depends on the user's resolution and space taken up by other UI.
         let currentNavigation = payload.navigation;
         let maxLength = cppSettings.navigationLength;
-        if (currentNavigation.length > maxLength)
+        if (currentNavigation.length > maxLength) {
             currentNavigation = currentNavigation.substring(0, maxLength - 3).concat("...");
+        }
         this.model.navigationLocation.Value = currentNavigation;
     }
 
@@ -544,13 +547,15 @@ class DefaultClient implements Client {
             let fileAndPath = filesAndPaths[i].split("@");
             let file = fileAndPath[0];
             let filePath = fileAndPath[1];
-            if ((file in assocs) || (("**/" + file) in assocs))
+            if ((file in assocs) || (("**/" + file) in assocs)) {
                 continue; // File already has an association.
+            }
             let j = file.lastIndexOf('.');
             if (j != -1) {
                 let ext = file.substr(j);
-                if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs))
+                if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs)) {
                     continue; // Extension already has an association.
+                }
             }
             let foundGlobMatch = false;
             for (let assoc in assocs) {
@@ -559,13 +564,15 @@ class DefaultClient implements Client {
                     break; // Assoc matched a glob pattern.
                 }
             }
-            if (foundGlobMatch)
+            if (foundGlobMatch) {
                 continue;
+            }
             assocs[file] = is_c ? "c" : "cpp";
             foundNewAssociation = true;
         }
-        if (foundNewAssociation)
+        if (foundNewAssociation) {
             settings.filesAssociations = assocs;
+        }
     }
 
     private updateStatus(notificationBody: ReportStatusNotificationBody) {
@@ -593,8 +600,9 @@ class DefaultClient implements Client {
                             let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
                             vscode.commands.executeCommand('vscode.open', uri);
                             vscode.commands.getCommands(true).then((commands: string[]) => {
-                                if (commands.indexOf("workbench.action.problems.focus") >= 0)
+                                if (commands.indexOf("workbench.action.problems.focus") >= 0) {
                                     vscode.commands.executeCommand("workbench.action.problems.focus");
+                                }
                             });
                             break;
                         case dontShowAgain:
@@ -646,7 +654,7 @@ class DefaultClient implements Client {
      * enable UI updates from this client and resume tag parsing on the server.
      */
     public activate() {
-        for (var key in this.model) {
+        for (let key in this.model) {
             if (this.model.hasOwnProperty(key)) {
                 this.model[key].activate();
             }
@@ -666,7 +674,7 @@ class DefaultClient implements Client {
      * disable UI updates from this client and pause tag parsing on the server.
      */
     public deactivate(): void {
-        for (var key in this.model) {
+        for (let key in this.model) {
             if (this.model.hasOwnProperty(key)) {
                 this.model[key].deactivate();
             }
@@ -761,7 +769,7 @@ class DefaultClient implements Client {
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
 
-            for (var key in this.model) {
+            for (let key in this.model) {
                 if (this.model.hasOwnProperty(key)) {
                     this.model[key].dispose();
                 }

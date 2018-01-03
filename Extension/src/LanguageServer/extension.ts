@@ -60,7 +60,7 @@ const multilineCommentRules = {
  * activate: set up the extension for language services
  */
 export function activate(delayedCommandsToExecute: Set<string>): void {
-    console.log("activating extension")
+    console.log("activating extension");
 
     // Activate immediately if an activation event occurred in the previous workspace session.
     // If onActivationEvent doesn't occur, it won't auto-activate next time.
@@ -74,35 +74,40 @@ export function activate(delayedCommandsToExecute: Set<string>): void {
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
     // Check if an activation event has already occurred.
-    if (delayedCommandsToExecute.size > 0)
+    if (delayedCommandsToExecute.size > 0) {
         return onActivationEvent();
+    }
     
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0)
     {
-        for(var i = 0; i < vscode.workspace.textDocuments.length; ++i) {
+        for(let i = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-            if (document.languageId == "cpp" || document.languageId == "c")
+            if (document.languageId == "cpp" || document.languageId == "c") {
                 return onActivationEvent();
+            }
         }
     }
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
-    if (document.languageId === "c" || document.languageId === "cpp")
+    if (document.languageId === "c" || document.languageId === "cpp") {
         onActivationEvent();
+    }
 }
 
 function onActivationEvent(): void {
-    if (tempCommands.length == 0)
+    if (tempCommands.length == 0) {
         return;
+    }
 
     // Cancel all the temp commands that just look for activations.
     tempCommands.forEach((command) => {
         command.dispose();
     });
     tempCommands = [];
-    if (!realActivationOccurred)
+    if (!realActivationOccurred) {
         realActivation();
+    }
     activatedPreviously.Value = true;
 }
 
@@ -115,7 +120,7 @@ function realActivation(): void {
     // Check for files left open from the previous session. We won't get events for these until they gain focus,
     // so we manually activate the visible file.
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
-        onDidChangeActiveTextEditor(vscode.window.activeTextEditor)
+        onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
     }
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
@@ -141,8 +146,9 @@ function onDidChangeSettings() {
 
 let saveMessageShown = false;
 function onDidSaveTextDocument(doc: vscode.TextDocument): void {
-    if (!vscode.window.activeTextEditor || doc !== vscode.window.activeTextEditor.document || (doc.languageId !== "cpp" && doc.languageId !== "c"))
+    if (!vscode.window.activeTextEditor || doc !== vscode.window.activeTextEditor.document || (doc.languageId !== "cpp" && doc.languageId !== "c")) {
         return;
+    }
 
     if (!saveMessageShown && new CppSettings(doc.uri).clangFormatOnSave) {
         saveMessageShown = true;
@@ -153,14 +159,16 @@ function onDidSaveTextDocument(doc: vscode.TextDocument): void {
 function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
-    if (clients === undefined)
+    if (clients === undefined) {
         return;
+    }
 
     let activeEditor = vscode.window.activeTextEditor;
     if (!activeEditor || (activeEditor.document.languageId != "cpp" && activeEditor.document.languageId != "c")) {
         activeDocument = "";
-        if (util.getShowReloadPromptOnce() && activeEditor && activeEditor.document.fileName.endsWith(path.sep + "launch.json"))
+        if (util.getShowReloadPromptOnce() && activeEditor && activeEditor.document.fileName.endsWith(path.sep + "launch.json")) {
             util.showReloadOrWaitPromptOnce();
+        }
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
@@ -172,8 +180,9 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
     /* need to notify the affected client(s) */
     if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
-        (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c"))
+        (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c")) {
         return;
+        }
 
     if (activeDocument != event.textEditor.document.uri.toString()) {
         // For some strange (buggy?) reason we don't reliably get onDidChangeActiveTextEditor callbacks.
@@ -214,8 +223,9 @@ function registerCommands(): void {
 function onNavigate() {
     onActivationEvent();
     let activeEditor = vscode.window.activeTextEditor;
-    if (!activeEditor)
+    if (!activeEditor) {
         return;
+    }
 
     clients.ActiveClient.requestNavigationList(activeEditor.document).then((navigationList: string) => {
         ui.showNavigationOptions(navigationList);
@@ -246,8 +256,9 @@ function onSwitchHeaderSource() {
     let rootPath = clients.ActiveClient.RootPath;
     let fileName = activeEditor.document.fileName;
 
-    if (!rootPath)
+    if (!rootPath) {
         rootPath = path.dirname(fileName); // When switching without a folder open.
+    }
 
     clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName).then((targetFileName: string) => {
         vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
@@ -386,13 +397,16 @@ function reportMacCrashes() {
 
             // vscode.workspace.createFileSystemWatcher only works in workspace folders.
             fs.watch(crashFolder, (event, filename) => {
-                if (event !== "rename")
+                if (event !== "rename") {
                     return;
-                if (filename === prevCrashFile)
+                }
+                if (filename === prevCrashFile) {
                     return;
+                }
                 prevCrashFile = filename;
-                if (!filename.startsWith("Microsoft.VSCode.CPP."))
+                if (!filename.startsWith("Microsoft.VSCode.CPP.")) {
                     return;
+                }
                 // Wait 5 seconds to allow time for the crash log to finish being written.
                 setTimeout(() => {
                     fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
@@ -417,14 +431,17 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string) {
         return;
     }
     let startCrash = data.indexOf(" Crashed:");
-    if (startCrash < 0)
+    if (startCrash < 0) {
         startCrash = 0;
+    }
     let endCrash = data.indexOf("Thread ", startCrash);
-    if (endCrash < startCrash)
+    if (endCrash < startCrash) {
         endCrash = data.length - 1;
+    }
     data = data.substr(startCrash, endCrash - startCrash);
-    if (data.length > 16384)
+    if (data.length > 16384) {
         data = data.substr(0, 16384) + "...";
+    }
     crashObject["CrashingThreadCallStack"] = data;
     telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
 }

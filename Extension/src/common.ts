@@ -37,8 +37,9 @@ export function showReloadPrompt() {
     showReloadPromptOnce = false;
     let reload = "Reload";
     vscode.window.showInformationMessage("Reload the window to finish installing the C/C++ extension.", reload).then(value => {
-        if (value === reload)
+        if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
     });
 }
 
@@ -62,7 +63,7 @@ function showReloadOrWaitPromptImpl(once: boolean) {
 }
 
 export function showReloadOrWaitPrompt() { showReloadOrWaitPromptImpl(false); }
-export function showReloadOrWaitPromptOnce() { showReloadOrWaitPromptImpl(true) }
+export function showReloadOrWaitPromptOnce() { showReloadOrWaitPromptImpl(true); }
 
 // Warning: The methods involving getExtensionFilePath are duplicated in debugProxyUtils.ts,
 // because the extensionContext is not set in that context.
@@ -142,8 +143,9 @@ export function showReleaseNotes() {
 }
 
 export function resolveVariables(input: string) {
-    if (input === null)
+    if (input === null) {
         return "";
+    }
 
     // Replace environment variables. (support both ${env:VAR} and ${VAR} syntax)
     let regexp: RegExp = /\$\{(env:|env.)?(.*?)\}/g;
@@ -192,14 +194,16 @@ export function GetHttpsProxyAgent(): HttpsProxyAgent {
     let proxy = vscode.workspace.getConfiguration().get<string>('http.proxy');
     if (!proxy) {
         proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
-        if (!proxy)
+        if (!proxy) {
             return null; // No proxy
+        }
     }
 
     // Basic sanity checking on proxy url
     let proxyUrl = url.parse(proxy);
-    if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:")
+    if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:") {
         return null;
+    }
 
     let strictProxy = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
     let proxyOptions = {
@@ -261,7 +265,7 @@ export function checkFileExists(filePath: string): Promise<boolean> {
             else {
                 resolve(false);
             }
-        })
+        });
     });
 }
 
@@ -285,8 +289,8 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
                 return;
             }
 
-            resolve(data)
-        })
+            resolve(data);
+        });
     });
 }
 
@@ -300,7 +304,7 @@ export function writeFileText(filePath: string, content: string, encoding: strin
             }
 
             resolve();
-        })
+        });
     });
 }
 
@@ -330,7 +334,7 @@ export function getReadmeMessage(): string {
 
 /** Used for diagnostics only */
 export function logToFile(message: string): void {
-    var logFolder = getExtensionFilePath("extension.log");
+    const logFolder = getExtensionFilePath("extension.log");
     fs.writeFileSync(logFolder, `${message}${os.EOL}`, { flag: 'a' });
 }
 
@@ -400,11 +404,12 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     });
 }
 
-var outputChannel: vscode.OutputChannel;
+let outputChannel: vscode.OutputChannel;
 
 export function getOutputChannel(): vscode.OutputChannel {
-    if (outputChannel == undefined)
+    if (outputChannel == undefined) {
         outputChannel = vscode.window.createOutputChannel("C/C++");
+    }
     return outputChannel;
 }
 

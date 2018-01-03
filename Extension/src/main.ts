@@ -5,7 +5,6 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as util from './common';
@@ -30,8 +29,9 @@ function registerTempCommand(command: string) {
     tempCommands.push(vscode.commands.registerCommand(command, () => {
         delayedCommandsToExecute.add(command);
         util.checkInstallLockFile().then((installLockExists: boolean) => {
-            if (!installLockExists)
+            if (!installLockExists) {
                 util.showWaitForDownloadPrompt();
+            }
         });
     }));
 }
@@ -57,12 +57,13 @@ function downloadCpptoolsJson(urlString): Promise<void> {
                 }
                 return resolve(downloadCpptoolsJson(redirectUrl)); // Redirect - download from new location
             }
-            if (response.statusCode != 200)
+            if (response.statusCode != 200) {
                 return reject();
-            let downloadedBytes = 0;
+            }
+            let downloadedBytes = 0; // tslint:disable-line
             let cppToolsJsonFile: fs.WriteStream = fs.createWriteStream(util.getExtensionFilePath("cpptools.json"));
             response.on('data', (data) => { downloadedBytes += data.length; });
-            response.on('end', () => { cppToolsJsonFile.close() });
+            response.on('end', () => { cppToolsJsonFile.close(); });
             cppToolsJsonFile.on('close', () => { resolve(); });
             response.on('error', (error) => { reject(); });
             response.pipe(cppToolsJsonFile, { end: false });
@@ -97,8 +98,9 @@ function processCpptoolsJson(cpptoolsString: string) {
         } else {
             util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
         }
-        if (prevIntelliSenseEngineDefault != util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default)
+        if (prevIntelliSenseEngineDefault != util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
             return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
+        }
     }
 }
 
@@ -154,7 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.commands.executeCommand(command);
                     });
                     delayedCommandsToExecute.clear();
-                })
+                });
         });
     });
 
@@ -183,18 +185,18 @@ function removePotentialPII(str: string): string {
             result += word + " ";
         }
         else {
-            result += "? "
+            result += "? ";
         }
     }
     return result;
 }
 
 interface InstallBlob {
-    stage: string,
-    hasError: boolean,
-    telemetryProperties: { [key: string]: string },
-    info?: PlatformInformation,
-    packageManager?: PackageManager
+    stage: string;
+    hasError: boolean;
+    telemetryProperties: { [key: string]: string };
+    info?: PlatformInformation;
+    packageManager?: PackageManager;
 }
 
 // During activation, the C++ extension must perform the following steps:
@@ -211,8 +213,9 @@ interface InstallBlob {
 // 11. After reloading, the package.lock is written, which causes the reload prompt to no longer appear.
 function processRuntimeDependencies(activateExtensions: () => void) {
     util.checkPackageLockFile().then((packageLockExists: boolean) => {
-        if (packageLockExists)
+        if (packageLockExists) {
             return activateExtensions();
+        }
 
         util.checkInstallLockFile().then((installLockExists: boolean) => {
             let installBlob: InstallBlob = {
@@ -227,8 +230,9 @@ function processRuntimeDependencies(activateExtensions: () => void) {
 
                     // Need to watch for debugger.reload in case launch debugging is done.
                     fs.watch(extensionContext.extensionPath, (event: string, filename: string) => {
-                        if (filename == "debugger.reload")
+                        if (filename == "debugger.reload") {
                             util.showReloadPrompt();
+                        }
                     });
                     PlatformInformation.GetPlatformInformation()
                         .then((info) => {
@@ -313,10 +317,11 @@ function removeUnnecessaryFile(installBlob: InstallBlob): void {
     if (os.platform() !== 'win32') {
         installBlob.stage = "removeUnnecessaryFile";
         let sourcePath = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
-        if (fs.existsSync(sourcePath))
+        if (fs.existsSync(sourcePath)) {
             fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err) => {
                 util.getOutputChannel().appendLine("removeUnnecessaryFile: fs.rename failed: " + err.message);
             });
+        }
     }
 }
 
@@ -372,8 +377,9 @@ function handleError(installBlob: InstallBlob, error: any): void {
     }
 
     // Show the actual message and not the sanitized one
-    if (installBlob.stage == "downloadPackages")
+    if (installBlob.stage == "downloadPackages") {
         channel.appendLine("");
+    }
     channel.appendLine(`Failed at stage: ${installBlob.stage}`);
     channel.appendLine(errorMessage);
     channel.appendLine("");
@@ -410,11 +416,13 @@ function postInstall(installBlob: InstallBlob): Thenable<void> {
     Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
 
     // If there is a download failure, we shouldn't continue activating the extension in some broken state.
-    if (installBlob.hasError)
+    if (installBlob.hasError) {
         return Promise.reject<void>("");
+    }
 
-    if (util.getDebuggerReloadLater())
+    if (util.getDebuggerReloadLater()) {
         util.showReloadPrompt();
+    }
 
     return Promise.resolve();
 }

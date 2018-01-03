@@ -16,7 +16,7 @@ class Process {
             description: this.pid,
             detail: this.commandLine,
             id: this.pid
-        }
+        };
     }
 }
 
@@ -40,21 +40,24 @@ abstract class NativeAttachItemsProvider implements AttachItemsProvider {
             // We can change to localeCompare if this becomes an issue
             processEntries.sort((a, b) => {
                 if (a.name == undefined) {
-                    if (b.name == undefined)
+                    if (b.name == undefined) {
                         return 0;
+                    }
                     return 1;
                 }
-                if (b.name == undefined)
+                if (b.name == undefined) {
                     return -1;
+                }
                 let aLower = a.name.toLowerCase();
                 let bLower = b.name.toLowerCase();
-                if (aLower == bLower)
+                if (aLower == bLower) {
                     return 0;
+                }
                 return aLower < bLower ? -1 : 1;
             });
             let attachItems = processEntries.map(p => p.toAttachItem());
             return attachItems;
-        })
+        });
     }
 }
 
@@ -196,7 +199,7 @@ export class WmicAttachItemsProvider extends NativeAttachItemsProvider {
 
 export class WmicProcessParser {
     private static get wmicNameTitle() { return 'Name'; }
-    private static get wmicCommandLineTitle() { return 'CommandLine' };
+    private static get wmicCommandLineTitle() { return 'CommandLine'; }
     private static get wmicPidTitle() { return 'ProcessId'; }
 
     // Only public for tests.

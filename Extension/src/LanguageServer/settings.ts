@@ -6,8 +6,6 @@
 
 import * as vscode from 'vscode';
 
-let settings: Settings = undefined;
-
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
 }
@@ -55,8 +53,9 @@ export class OtherSettings {
     private resource: vscode.Uri;
 
     constructor(resource?: vscode.Uri) {
-        if (!resource)
+        if (!resource) {
             resource = null;
+        }
         this.resource = resource;
     }
 

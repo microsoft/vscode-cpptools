@@ -11,22 +11,21 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import * as child_process from 'child_process';
 
 //Change this to true to force a dev workflow.
 const EnableDevWorkflow: Boolean = false;
 
-const DebugAdapterPath = "./debugAdapters"
+const DebugAdapterPath = "./debugAdapters";
 const DebugAdapterBinPath = DebugAdapterPath + "/bin";
 
-var CpptoolsExtensionRoot: string = null;
-var SearchCompleted: Boolean = false;
+let CpptoolsExtensionRoot: string = null;
+let SearchCompleted: Boolean = false;
 
 interface RootsHashtable {
     "miEngineRoot": string;
     "openDebugRoot": string;
-    "monoDeps": string
-};
+    "monoDeps": string;
+}
 
 const internalBinaryRoots: RootsHashtable = {
     "miEngineRoot": process.env.CPPTOOLS_MIENGINE_ROOT,
@@ -44,16 +43,16 @@ function findCppToolsExtensionDebugAdapterFolder(): string {
     const vscodeFolderRegExp = new RegExp(/\.vscode-*[a-z]*$/);
     const cpptoolsFolderRegExp = new RegExp(/ms\-vscode\.cpptools\-.*$/);
 
-    var dirPath: string = os.homedir();
+    let dirPath: string = os.homedir();
     if (fs.existsSync(dirPath)) {
-        var files = fs.readdirSync(dirPath);
-        for (var i = 0; i < files.length; i++) {
+        let files = fs.readdirSync(dirPath);
+        for (let i = 0; i < files.length; i++) {
             // Check to see if it starts with '.vscode'
             if (vscodeFolderRegExp.test(files[i])) {
-                var extPath: string = path.join(dirPath, files[i], "extensions");
+                let extPath: string = path.join(dirPath, files[i], "extensions");
                 if (fs.existsSync(extPath)) {
-                    var extFiles = fs.readdirSync(extPath);
-                    for (var j = 0; j < extFiles.length; j++) {
+                    let extFiles = fs.readdirSync(extPath);
+                    for (let j = 0; j < extFiles.length; j++) {
                         if (cpptoolsFolderRegExp.test(path.join(extFiles[j]))) {
                             dirPath = path.join(extPath, extFiles[j]);
                             break;
@@ -71,7 +70,7 @@ function findCppToolsExtensionDebugAdapterFolder(): string {
         return dirPath;
     }
     else {
-        console.error("Unable to determine C/C++ extension installation location.")
+        console.error("Unable to determine C/C++ extension installation location.");
         return null;
     }
 }
@@ -144,8 +143,8 @@ function copy(root: string, target: string, file: string): void {
         return;
     }
 
-    var source = path.join(root, file);
-    var destination: string = path.join(target, file);
+    const source = path.join(root, file);
+    const destination: string = path.join(target, file);
 
     if (!fs.existsSync(target)) {
         console.log('Creating directory %s', target);
@@ -161,11 +160,13 @@ function copy(root: string, target: string, file: string): void {
     }
 }
 
+// unused functions: copyFolder and fileExists
+/* tslint:disable */
 function copyFolder(root: string, target: string): void {
-    var files: string[] = fs.readdirSync(root);
+    let files: string[] = fs.readdirSync(root);
 
-    for (var i = 0; i < files.length; i++) {
-        var fullPath: string = path.join(root, files[i]);
+    for (let i = 0; i < files.length; i++) {
+        let fullPath: string = path.join(root, files[i]);
 
         if (!isDirectory(fullPath)) {
             copy(root, target, files[i]);
@@ -176,19 +177,31 @@ function copyFolder(root: string, target: string): void {
     }
 }
 
+
+function fileExists(file: string): Boolean {
+    try {
+        return fs.statSync(file).isFile();
+    }
+    catch (e) {
+    }
+
+    return false;
+}
+/* tslint:enable */
+
 function removeFolder(root: string): void {
     if (!isDirectory(root)) {
         console.warn('Skipping deletion of %s; directory does not exist', root);
         return;
     }
 
-    var files: string[] = fs.readdirSync(root);
-    for (var i = 0; i < files.length; i++) {
-        var fullPath: string = path.join(root, files[i]);
+    let files: string[] = fs.readdirSync(root);
+    for (let i = 0; i < files.length; i++) {
+        let fullPath: string = path.join(root, files[i]);
         console.warn('Found entry %s', fullPath);
         if (!isDirectory(fullPath)) {
             console.warn('Deleting %s', fullPath);
-            fs.unlinkSync(fullPath)
+            fs.unlinkSync(fullPath);
         }
         else {
             removeFolder(fullPath);
@@ -208,16 +221,6 @@ function isDirectory(dir: string): Boolean {
     return false;
 }
 
-function fileExists(file: string): Boolean {
-    try {
-        return fs.statSync(file).isFile();
-    }
-    catch (e) {
-    }
-
-    return false;
-}
-
 function makeDirectory(dir: string): void {
     try {
         //Note: mkdir is limited to creating folders with one level of nesting. Creating "a/b" if 'a' doesn't exist will throw a ENOENT.
@@ -230,7 +233,7 @@ function makeDirectory(dir: string): void {
     }
 }
 
-var devWorkFlowMessage: string = '\nWARNING: If you are trying to build and run the extension locally, please set the environment variable CPPTOOLS_DEV=1 and try again.\n';
+let devWorkFlowMessage: string = '\nWARNING: If you are trying to build and run the extension locally, please set the environment variable CPPTOOLS_DEV=1 and try again.\n';
 
 if (enableDevWorkflow()) {
     removeFolder("./debugAdapters");

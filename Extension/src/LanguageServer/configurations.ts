@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
-import { PersistentState, PersistentFolderState } from './persistentState';
+import { PersistentFolderState } from './persistentState';
 const configVersion = 3;
 
 let defaultSettings = `{
@@ -81,29 +81,29 @@ let defaultSettings = `{
 `;
 
 export interface Browse {
-    path?: string[],
-    limitSymbolsToIncludedHeaders?: boolean,
-    databaseFilename?: string
+    path?: string[];
+    limitSymbolsToIncludedHeaders?: boolean;
+    databaseFilename?: string;
 }
 
 export interface Configuration {
-    name: string,
-    includePath?: string[],
-    macFrameworkPath?: string[],
-    defines?: string[],
-    intelliSenseMode?: string,
-    compileCommands?: string,
-    browse?: Browse
+    name: string;
+    includePath?: string[];
+    macFrameworkPath?: string[];
+    defines?: string[];
+    intelliSenseMode?: string;
+    compileCommands?: string;
+    browse?: Browse;
 }
 
 export interface DefaultPaths {
-    includes: string[],
-    frameworks: string[]
+    includes: string[];
+    frameworks: string[];
 }
 
 interface ConfigurationJson {
-    configurations: Configuration[],
-    version: number
+    configurations: Configuration[];
+    version: number;
 }
 
 export class CppProperties {
@@ -128,7 +128,7 @@ export class CppProperties {
 
     constructor(rootPath: string) {
         console.assert(rootPath !== undefined);
-        this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath)
+        this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
         this.resetToDefaultSettings(this.currentConfigurationIndex.Value === -1);
 
@@ -211,8 +211,9 @@ export class CppProperties {
     }
 
     private getConfigIndexForPlatform(config: any): number {
-        if (this.configurationJson.configurations.length > 3)
+        if (this.configurationJson.configurations.length > 3) {
             return this.configurationJson.configurations.length - 1; // Default to the last custom configuration.
+        }
         let nodePlatform = process.platform;
         let plat: string;
         if (nodePlatform == 'linux') {
@@ -306,7 +307,7 @@ export class CppProperties {
     public updateCompileCommandsFileWatchers() {
         this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
         this.compileCommandFileWatchers = []; //reset it
-        var filePaths: Set<string> = new Set<string>();
+        let filePaths: Set<string> = new Set<string>();
         this.configurationJson.configurations.forEach(c => {
             if (c.compileCommands !== undefined && fs.existsSync(c.compileCommands)) {
                 filePaths.add(c.compileCommands);
@@ -384,8 +385,9 @@ export class CppProperties {
     private parsePropertiesFile() {
         try {
             let readResults = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
-            if (readResults == "")
+            if (readResults == "") {
                 return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
+            }
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
@@ -414,8 +416,9 @@ export class CppProperties {
 
             if (this.configurationJson.version != configVersion) {
                 dirty = true;
-                if (this.configurationJson.version === undefined)
+                if (this.configurationJson.version === undefined) {
                     this.updateToVersion2();
+                }
 
                 if (this.configurationJson.version === 2) {
                     this.updateToVersion3();
@@ -425,8 +428,9 @@ export class CppProperties {
                 }
             }
 
-            if (dirty)
+            if (dirty) {
                 fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            }
         } catch (err) {
             vscode.window.showErrorMessage('Failed to parse "' + this.propertiesFile.fsPath + '": ' + err.message);
             throw err;
@@ -438,8 +442,9 @@ export class CppProperties {
         if (!this.includePathConverted()) {
             for (let i = 0; i < this.configurationJson.configurations.length; i++) {
                 let config = this.configurationJson.configurations[i];
-                if (config.browse === undefined)
+                if (config.browse === undefined) {
                     config.browse = {};
+                }
                 if (config.browse.path === undefined && (this.defaultIncludes !== undefined || config.includePath !== undefined)) {
                     config.browse.path = (config.includePath === undefined) ? this.defaultIncludes.slice(0) : config.includePath.slice(0);
                 }
@@ -474,8 +479,9 @@ export class CppProperties {
                     this.handleConfigurationChange();
                 }
             } else if (stats.mtime > this.configFileWatcherFallbackTime) {
-                if (this.propertiesFile == null)
+                if (this.propertiesFile == null) {
                     this.propertiesFile = vscode.Uri.file(propertiesFile); // File created.
+                }
                 this.handleConfigurationChange();
             }
         });

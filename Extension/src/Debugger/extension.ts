@@ -7,8 +7,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider } from './configurationProvider';
-import { DebuggerType } from './configurations';
+import { ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider } from './configurationProvider';
 import * as util from '../common';
 import * as path from 'path';
 
@@ -56,8 +55,9 @@ export function dispose(): void {
 }
 
 function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
-    if (util.getShowReloadPromptOnce() && editor && editor.document.fileName.endsWith(path.sep + "launch.json"))
+    if (util.getShowReloadPromptOnce() && editor && editor.document.fileName.endsWith(path.sep + "launch.json")) {
         util.showReloadOrWaitPromptOnce();
+    }
 }
 
 // Registers adapterExecutableCommands for cppdbg and cppvsdbg. If it is not ready, it will prompt waiting for the download.
@@ -78,7 +78,7 @@ function registerAdapterExecutableCommands(): void {
 
                 return {
                     command: command
-                }
+                };
             }
             else {
                 util.showReloadOrWaitPromptOnce();
@@ -101,7 +101,7 @@ function registerAdapterExecutableCommands(): void {
                     return {
                         command: path.join(util.extensionContext.extensionPath,'./debugAdapters/vsdbg/bin/vsdbg.exe'),
                         args: ['--interpreter=vscode']
-                    }
+                    };
                 }
                 else {
                     util.showReloadOrWaitPromptOnce();

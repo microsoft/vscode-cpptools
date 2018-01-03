@@ -32,7 +32,7 @@ export class PlatformInformation {
 
         return Promise.all<string | LinuxDistribution>([architecturePromise, distributionPromise])
             .then(([arch, distro]: [string, LinuxDistribution]) => {
-                return new PlatformInformation(platform, arch, distro)
+                return new PlatformInformation(platform, arch, distro);
             });
     }
 

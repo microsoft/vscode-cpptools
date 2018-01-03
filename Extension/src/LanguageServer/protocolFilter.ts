@@ -9,8 +9,8 @@ import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
-    let defaultHandler = (data, callback: (data) => void) => { if (clients.ActiveClient === me) callback(data); };
-    let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return callback(a); } return null; };
+    let defaultHandler = (data, callback: (data) => void) => { if (clients.ActiveClient === me) { callback(data); } };
+    let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return callback(a); } return null; }; // tslint:disable-line
     let invoke2 = (a, b, callback: (a, b) => any) => { if (clients.ActiveClient === me) { return callback(a, b); } return null; };
     let invoke3 = (a, b, c, callback: (a, b, c) => any) => { if (clients.ActiveClient === me)  { return callback(a, b, c); } return null; };
     let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => { if (clients.ActiveClient === me)  { return callback(a, b, c, d); } return null; };

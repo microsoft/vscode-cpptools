@@ -1,12 +1,12 @@
 /* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All Rights Reserved.
- * See 'LICENSE' in the project root for license information.
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * See LICENSE.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
 import * as assert from 'assert';
 import * as os from 'os';
-import { LinuxDistribution } from '../src/linuxDistribution';
-import { WmicProcessParser, PsProcessParser } from '../src/Debugger/nativeAttach';
+import { LinuxDistribution } from '../../src/linuxDistribution';
+import { WmicProcessParser, PsProcessParser } from '../../src/Debugger/nativeAttach';
 
 suite("LinuxDistro Tests", () => {
     test("Parse valid os-release file", () => {

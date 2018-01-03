@@ -36,15 +36,15 @@ export class UI {
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
         this.intelliSenseStatusBarItem.text = "";
-        this.intelliSenseStatusBarItem.tooltip = "Updating IntelliSense..."
+        this.intelliSenseStatusBarItem.tooltip = "Updating IntelliSense...";
         this.intelliSenseStatusBarItem.color = "Red";
         this.ShowFlameIcon = true;
 
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.browseEngineStatusBarItem.text = "";
-        this.browseEngineStatusBarItem.tooltip = "Discovering files..."
+        this.browseEngineStatusBarItem.tooltip = "Discovering files...";
         this.browseEngineStatusBarItem.color = "White";
-        this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands"
+        this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
     }
 
@@ -54,7 +54,7 @@ export class UI {
 
     private set ActiveConfig(label: string) {
         this.configStatusBarItem.text = label;
-    };
+    }
 
     private set TagParseStatus(label: string) {
         this.browseEngineStatusBarItem.tooltip = label;
@@ -136,7 +136,7 @@ export class UI {
             items.push({ label: navlist[i], description: "", index: Number(navlist[i + 1]) });
         }
 
-        let result = vscode.window.showQuickPick(items, options)
+        vscode.window.showQuickPick(items, options)
             .then(selection => {
                 if (!selection) {
                     return;
@@ -174,8 +174,9 @@ export class UI {
 
         return vscode.window.showQuickPick(items, options)
             .then(selection => {
-                if (!selection)
+                if (!selection) {
                     return "";
+                }
                 return selection.key;
             });
     }

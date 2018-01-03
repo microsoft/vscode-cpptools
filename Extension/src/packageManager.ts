@@ -57,7 +57,7 @@ export class PackageManagerWebResponseError extends PackageManagerError {
         public pkg: IPackage = null,
         public innerError: any = null,
         public errorCode: string = '') {
-        super(message, methodName, pkg, innerError, errorCode)
+        super(message, methodName, pkg, innerError, errorCode);
     }
 }
 
@@ -94,7 +94,7 @@ export class PackageManager {
 
         for (let item of items) {
             promiseChain = promiseChain.then(() => {
-                return promiseBuilder(item)
+                return promiseBuilder(item);
             });
         }
 
@@ -112,7 +112,7 @@ export class PackageManager {
                         if (pkg.binaries) {
                             pkg.binaries = pkg.binaries.map((value) => {
                                 return util.getExtensionFilePath(value);
-                            })
+                            });
                         }
                     }
 
@@ -139,7 +139,7 @@ export class PackageManager {
     }
 
     private DownloadPackage(pkg: IPackage): Promise<void> {
-        this.AppendChannel(`Downloading package '${pkg.description}' `)
+        this.AppendChannel(`Downloading package '${pkg.description}' `);
 
         this.SetStatusText("$(cloud-download) Downloading packages...");
         this.SetStatusTooltip(`Downloading package '${pkg.description}'...`);
@@ -150,7 +150,7 @@ export class PackageManager {
                     return reject(new PackageManagerError('Error from temp.file', 'DownloadPackage', pkg, err));
                 }
 
-                resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback })
+                resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
             });
         })
             .then((tmpResult) => {
@@ -158,7 +158,7 @@ export class PackageManager {
 
                 let lastError = null;
                 let retryCount = 0;
-                var handleDownloadFailure = (num, error) => {
+                let handleDownloadFailure = (num, error) => {
                     retryCount = num;
                     lastError = error;
                     this.AppendChannel(` Failed. Retrying...`);
@@ -170,7 +170,7 @@ export class PackageManager {
                 return this.DownloadFile(pkg.url, pkg, 3).catch((error) => { handleDownloadFailure(4, error);
                 return this.DownloadFile(pkg.url, pkg, 4).catch((error) => { handleDownloadFailure(5, error);
                 return this.DownloadFile(pkg.url, pkg, 5); // Last try, don't catch the error.
-                })})})})}).then(() => {
+                });});});});}).then(() => {
                     this.AppendLineChannel(" Done!");
                     if (retryCount != 0) {
                         // Log telemetry to see if retrying helps.
@@ -204,20 +204,22 @@ export class PackageManager {
             path: parsedUrl.path,
             agent: util.GetHttpsProxyAgent(),
             rejectUnauthorized: proxyStrictSSL
-        }
+        };
 
         return new Promise<void>((resolve, reject) => {
             let secondsDelay = Math.pow(2, delay);
-            if (secondsDelay == 1)
+            if (secondsDelay == 1) {
                 secondsDelay = 0;
-            if (secondsDelay > 4)
+            }
+            if (secondsDelay > 4) {
                 this.AppendChannel(`Waiting ${secondsDelay} seconds...`);
+            }
             setTimeout(() => {
                 if (!pkg.tmpFile || pkg.tmpFile.fd == 0) {
                     return reject(new PackageManagerError('Temporary Package file unavailable', 'DownloadFile', pkg));
                 }
 
-                var handleHttpResponse = (response: IncomingMessage) => {
+                let handleHttpResponse = (response: IncomingMessage) => {
                     if (response.statusCode == 301 || response.statusCode == 302) {
                         // Redirect - download from new location
                         let redirectUrl: string | string[];
@@ -247,7 +249,7 @@ export class PackageManager {
                         let dots = 0;
                         let tmpFile: fs.WriteStream = fs.createWriteStream(null, { fd: pkg.tmpFile.fd });
 
-                        this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `)
+                        this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `);
 
                         response.on('data', (data) => {
                             downloadedBytes += data.length;
@@ -293,7 +295,7 @@ export class PackageManager {
     }
 
     private InstallPackage(pkg: IPackage): Promise<void> {
-        this.AppendLineChannel(`Installing package '${pkg.description}'`)
+        this.AppendLineChannel(`Installing package '${pkg.description}'`);
 
         this.SetStatusText("$(desktop-download) Installing packages...");
         this.SetStatusTooltip(`Installing package '${pkg.description}'`);
@@ -352,8 +354,9 @@ export class PackageManager {
                             }
                             else {
                                 // Skip the message for text files, because there is a duplicate text file unzipped.
-                                if (path.extname(absoluteEntryPath) != ".txt")
+                                if (path.extname(absoluteEntryPath) != ".txt") {
                                     this.AppendLineChannel(`Warning: File '${absoluteEntryPath}' already exists and was not updated.`);
+                                }
                                 zipfile.readEntry();
                             }
                         });

@@ -1028,6 +1028,12 @@
     "typescript": "^2.5.3",
     "vscode": "^1.1.6",
     "mocha": "^4.0.1",
+    "gulp": "3.9.1",
+    "gulp-tslint": "8.1.2",
+    "gulp-mocha": "5.0.0",
+    "tslint": "5.8.0",
+    "tslint-microsoft-contrib": "5.0.1",
+    "tslint-no-unused-expression-chai": "0.0.3",
     "@types/node": "^8.0.46",
     "@types/mocha": "^2.2.43"
   },

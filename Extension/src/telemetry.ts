@@ -4,10 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as vscode from 'vscode';
-import * as fs from 'fs';
 import TelemetryReporter from 'vscode-extension-telemetry';
-import { NotificationType } from 'vscode-languageclient';
 import * as util from './common';
 
 interface IPackageInfo {
@@ -27,8 +24,9 @@ export function activate() {
 }
 
 export function deactivate() {
-    if (telemetryReporter)
+    if (telemetryReporter) {
         telemetryReporter.dispose();
+    }
 }
 
 export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): void {

@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import { execChildProcess } from '../common';
 import { PsProcessParser } from './nativeAttach';
-import * as os from 'os'
 import * as util from '../common';
 
 export interface AttachItem extends vscode.QuickPickItem {
@@ -111,16 +110,19 @@ export class RemoteAttachPicker {
                     return PsProcessParser.ParseProcessFromPsArray(processes)
                         .sort((a, b) => {
                             if (a.name == undefined) {
-                                if (b.name == undefined)
+                                if (b.name == undefined) {
                                     return 0;
+                                }
                                 return 1;
                             }
-                            if (b.name == undefined)
+                            if (b.name == undefined) {
                                 return -1;
+                            }
                             let aLower = a.name.toLowerCase();
                             let bLower = b.name.toLowerCase();
-                            if (aLower == bLower)
+                            if (aLower == bLower) {
                                 return 0;
+                            }
                             return aLower < bLower ? -1 : 1;
                         })
                         .map(p => p.toAttachItem());

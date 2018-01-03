@@ -4,11 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as os from 'os';
-import * as path from 'path';
-import * as fs from 'fs';
 import * as vscode from 'vscode';
-import {indentJsonString, IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
-import * as util from '../common';
+import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
 
 abstract class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
@@ -30,7 +27,7 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
     /**
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
-	resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         // Fail if cppvsdbg type is running on non-Windows
         if (config.type === 'cppvsdbg' && os.platform() !== 'win32') {
             vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
@@ -122,7 +119,7 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
             new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new WindowsConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new WSLConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
-        ]
+        ];
     }
 }
 
@@ -130,13 +127,13 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
 class OSXConfigurationProvider extends DefaultConfigurationProvider {
     private MIMode: string = 'lldb';
     private executable: string = "a.out";
-    private pipeProgram: string = "/usr/bin/ssh"
+    private pipeProgram: string = "/usr/bin/ssh";
 
     constructor() {
         super();
         this.configurations = [
             new MIConfigurations(this.MIMode, this.executable, this.pipeProgram), 
-        ]
+        ];
     }
 }
 
@@ -150,19 +147,19 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     }
 ]`;
     private executable: string = "a.out";
-    private pipeProgram: string = "/usr/bin/ssh"
+    private pipeProgram: string = "/usr/bin/ssh";
 
     constructor() {
         super();
         this.configurations = [
             new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock), 
             new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
-        ]
+        ];
     }
 }
 
 function convertConfigurationSnippetToCompetionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
-    var item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+    let item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
 
     item.insertText = snippet.bodyText;
 
@@ -198,7 +195,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
             this.snippets.forEach((item) => items.push(Object.assign({}, item)));
 
             items.map((item) => {
-                item.insertText = item.insertText + ',' // Add comma 
+                item.insertText = item.insertText + ','; // Add comma 
             });  
         }
 
