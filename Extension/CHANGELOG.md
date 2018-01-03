@@ -9,6 +9,7 @@
 * Fix incorrect "Warning: Expected file ... is missing" message after installing on Linux. [#1334](https://github.com/Microsoft/vscode-cpptools/issues/1334)
 * Fix "Include file not found" messages not re-appearing after settings changes. [#1363](https://github.com/Microsoft/vscode-cpptools/issues/1363)
 * Performance improvements when no files need to be parsed, and stop showing "Parsing files" when there's no actual parsing. [#1393](https://github.com/Microsoft/vscode-cpptools/issues/1393)
+* Fix crash when settings with the wrong type are used. [#1396](https://github.com/Microsoft/vscode-cpptools/issues/1396)
 * Add `C_Cpp.throttleWorkspaceParsing` setting to avoid using 100% CPU during parsing of workspace files.
 * Add `C_Cpp.files.exclude.onlyCheckFolders` default to `true` to avoid expensive `files.exclude` checking on every file.
 
