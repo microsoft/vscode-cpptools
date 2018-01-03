@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.14.6: Janurary 2, 2017
+## Version 0.14.6: Janurary 4, 2017
 * Fix tag parser failing (and continuing to fail after edits) when it shouldn't. [#1367](https://github.com/Microsoft/vscode-cpptools/issues/1367)
 * Fix tag parser taking too long due to redundant processing. [#1288](https://github.com/Microsoft/vscode-cpptools/issues/1288)
 * Fix debugging silently failing the 1st time if a C/C++ file isn't opened. [#1366](https://github.com/Microsoft/vscode-cpptools/issues/1366)
@@ -8,7 +8,9 @@
 * Fix extra reload message after installing with VS Code 1.19. [#1362](https://github.com/Microsoft/vscode-cpptools/issues/1362)
 * Fix incorrect "Warning: Expected file ... is missing" message after installing on Linux. [#1334](https://github.com/Microsoft/vscode-cpptools/issues/1334)
 * Fix "Include file not found" messages not re-appearing after settings changes. [#1363](https://github.com/Microsoft/vscode-cpptools/issues/1363)
+* Performance improvements when no files need to be parsed, and stop showing "Parsing files" when there's no actual parsing. [#1393](https://github.com/Microsoft/vscode-cpptools/issues/1393)
 * Add `C_Cpp.throttleWorkspaceParsing` setting to avoid using 100% CPU during parsing of workspace files.
+* Add `C_Cpp.files.exclude.onlyCheckFolders` default to `true` to avoid expensive `files.exclude` checking on every file.
 
 ## Version 0.14.5: December 18, 2017
 * Fix for stackwalk `NullReferenceException`. [#1339](https://github.com/Microsoft/vscode-cpptools/issues/1339)

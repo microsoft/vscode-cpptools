@@ -178,6 +178,12 @@
           "default": true,
           "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU.",
           "scope": "resource"
+        },
+        "C_Cpp.files.exclude.onlyCheckFolders": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether files.exclude filters are checked only for folders (recommended due to the performance impact) or for files as well.",
+          "scope": "resource"
         }
       }
     },
