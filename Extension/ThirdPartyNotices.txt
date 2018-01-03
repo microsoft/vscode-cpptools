@@ -15,31 +15,32 @@ Microsoft C/C++ Extension for Visual Studio Code incorporates components from th
 9.	Guidelines Support Library (https://github.com/Microsoft/GSL)
 10.	http-proxy-agent (https://github.com/TooTallNate/node-http-proxy-agent)
 11.	https-proxy-agent (https://github.com/TooTallNate/node-https-proxy-agent)
-12.	libc++ (https://libcxx.llvm.org/index.html)
-13.	LLDB (https://lldb.llvm.org/)
-14.	LLVM (http://llvm.org/)
-15.	MI Debug Engine (https://github.com/Microsoft/MIEngine)
-16.	Minimatch (https://github.com/isaacs/minimatch)
-17.	minimist (https://github.com/substack/minimist)
-18.	mkdirp (https://github.com/substack/node-mkdirp)
-19.	Mono (https://github.com/mono/mono)
-20.	ms (https://github.com/rauchg/ms.js)
-21.	msgpack for C/C++ (https://github.com/msgpack/msgpack-c)
-22.	node-http-proxy-agent (https://github.com/TooTallNate/node-https-proxy-agent)
-23.	node-https-proxy-agent (https://github.com/TooTallNate/node-https-proxy-agent)
-24.	os-tmpdir (https://github.com/sindresorhus/os-tmpdir)
-25.	Pend (https://github.com/andrewrk/node-pend)
-26.	pevents (https://github.com/neosmart/pevents)
-27.	RapidJSON (https://github.com/miloyip/rapidjson)
-28.	semver (https://github.com/npm/node-semver)
-29.	SQLite (https://www.sqlite.org/)
+12.	jsonc-parser (https://github.com/Microsoft/node-jsonc-parser)
+13.	libc++ (https://libcxx.llvm.org/index.html)
+14.	LLDB (https://lldb.llvm.org/)
+15.	LLVM (http://llvm.org/)
+16.	MI Debug Engine (https://github.com/Microsoft/MIEngine)
+17.	Minimatch (https://github.com/isaacs/minimatch)
+18.	minimist (https://github.com/substack/minimist)
+19.	mkdirp (https://github.com/substack/node-mkdirp)
+20.	Mono (https://github.com/mono/mono)
+21.	ms (https://github.com/rauchg/ms.js)
+22.	msgpack for C/C++ (https://github.com/msgpack/msgpack-c)
+23.	node-http-proxy-agent (https://github.com/TooTallNate/node-https-proxy-agent)
+24.	node-https-proxy-agent (https://github.com/TooTallNate/node-https-proxy-agent)
+25.	os-tmpdir (https://github.com/sindresorhus/os-tmpdir)
+26.	Pend (https://github.com/andrewrk/node-pend)
+27.	pevents (https://github.com/neosmart/pevents)
+28.	RapidJSON (https://github.com/miloyip/rapidjson)
+29.	semver (https://github.com/npm/node-semver)
+30.	SQLite (https://www.sqlite.org/)
 		Includes:functions (from fossil) (https://fossil-scm.org)
-30.	Tmp (https://github.com/raszi/node-tmp)
+31.	Tmp (https://github.com/raszi/node-tmp)
 		Includes:sample code (https://blog.tompawlak.org/generate-random-values-nodejs-javascript)
-31.	vscode-debugadapter (https://github.com/Microsoft/vscode-debugadapter-node)
-32.	vscode-extension-telemetry (https://github.com/Microsoft/vscode-extension-telemetry)
-33.	vscode-languageserver-node (https://github.com/Microsoft/vscode-languageserver-node)
-34.	yauzl (https://github.com/thejoshwolfe/yauzl)
+32.	vscode-debugadapter (https://github.com/Microsoft/vscode-debugadapter-node)
+33.	vscode-extension-telemetry (https://github.com/Microsoft/vscode-extension-telemetry)
+34.	vscode-languageserver-node (https://github.com/Microsoft/vscode-languageserver-node)
+35.	yauzl (https://github.com/thejoshwolfe/yauzl)
 
 
 %% agent-base NOTICES AND INFORMATION BEGIN HERE
@@ -499,6 +500,32 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 =========================================
 END OF https-proxy-agent NOTICES AND INFORMATION
+
+%% jsonc-parser NOTICES AND INFORMATION BEGIN HERE
+=========================================
+(MIT License)
+
+Copyright 2016, Microsoft
+
+ermission is hereby granted, free of charge, to any person obtaining a copy  
+of this software and associated documentation files (the "Software"), to deal  
+in the Software without restriction, including without limitation the rights  
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies  
+of the Software, and to permit persons to whom the Software is furnished to do  
+so, subject to the following conditions:  
+ 
+The above copyright notice and this permission notice shall be included in all  
+copies or substantial portions of the Software.   
+ 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN  
+THE SOFTWARE.  
+=========================================
+END OF jsonc-parser NOTICES AND INFORMATION
 
 %% libc++ NOTICES AND INFORMATION BEGIN HERE
 =========================================

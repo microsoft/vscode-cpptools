@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider } from './configurationProvider';
+import { ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider } from './configurationProvider';
 import { DebuggerType } from './configurations';
 import * as util from '../common';
 import * as path from 'path';
@@ -35,11 +35,20 @@ export function initialize() {
 
     configurationProvider.getConfigurationSnippets();
 
+    const launchJsonDocumentSelector: vscode.DocumentSelector = [{
+        language: 'jsonc',
+        pattern: '**/launch.json'
+    }];
+    // ConfigurationSnippetProvider needs to be initiallized after configurationProvider calls getConfigurationSnippets.
+    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(configurationProvider)));
+
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
 
-     // Activate Adapter Commands 
-     registerAdapterExecutableCommands();
+    // Activate Adapter Commands 
+    registerAdapterExecutableCommands();
+
+    vscode.Disposable.from(...disposables);
 }
 
 export function dispose(): void {

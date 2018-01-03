@@ -1032,6 +1032,7 @@
     "@types/mocha": "^2.2.43"
   },
   "dependencies": {
+    "jsonc-parser": "^1.0.0",
     "vscode-languageclient": "~3.4.5",
     "vscode-extension-telemetry": "~0.0.8",
     "http-proxy-agent": "~2.0.0",
