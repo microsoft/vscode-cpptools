@@ -3,10 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
- import * as os from 'os';
+import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
-
 import * as vscode from 'vscode';
 import {indentJsonString, IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import * as util from '../common';
@@ -82,7 +81,7 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
         
         // Only launch configurations are initial configurations
         this.configurations.forEach(configuration => {
-            configurationSnippet.push(configuration.GetLaunchConfiguration(true)); 
+            configurationSnippet.push(configuration.GetLaunchConfiguration()); 
         });
         
         let initialConfigurations = configurationSnippet.filter(snippet => snippet.debuggerType == debuggerType && snippet.isInitialConfiguration)
@@ -94,16 +93,11 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
 
     public getConfigurationSnippets(): vscode.CompletionItem[] {
         let completionItems: vscode.CompletionItem[] = [];
-            let configurationSnippet: IConfigurationSnippet[] = [];
 
-            this.configurations.forEach(configuration => {
-                configurationSnippet.push(configuration.GetLaunchConfiguration(false));
-                configurationSnippet.push(configuration.GetAttachConfiguration());
-            });
-
-            configurationSnippet.forEach(snippet => {
-                completionItems.push(convertConfigurationSnippetToCompetionItem(snippet));
-            });
+        this.configurations.forEach(configuration => {
+            completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetLaunchConfiguration()));
+            completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetAttachConfiguration()));
+        });
 
         return completionItems;
     }
@@ -188,14 +182,14 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
     }
 
     // This function will only provide completion items via the Add Configuration Button
-    // There are two cases, where the configuration array has nothing or has some items.
+    // There are two cases where the configuration array has nothing or has some items.
     // 1. If it has nothing, insert a snippet the user selected.
     // 2. If there are items, the Add Configuration button will append it to the start of the configuration array. This function inserts a comma at the end of the snippet.
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Thenable<vscode.CompletionList> {
         let items: vscode.CompletionItem[] = this.snippets;
 
         const launch: any = parse(document.getText());
-        // Check to see if the array is empty.
+        // Check to see if the array is empty, so any additional inserted snippets will need commas.
         if (launch.configurations.length !== 0)
         {
             items = [];

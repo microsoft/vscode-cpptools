@@ -35,19 +35,18 @@ export function initialize() {
 
     configurationProvider.getConfigurationSnippets();
 
-    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
-
-
-    // Activate Adapter Commands 
-    registerAdapterExecutableCommands();
-
-    const documentSelector: vscode.DocumentSelector = [{
+    const launchJsonDocumentSelector: vscode.DocumentSelector = [{
         language: 'jsonc',
         pattern: '**/launch.json'
     }];
+    // ConfigurationSnippetProvider needs to be initiallized after configurationProvider calls getConfigurationSnippets.
+    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(configurationProvider)));
 
-    disposables.push(vscode.languages.registerCompletionItemProvider(documentSelector, new ConfigurationSnippetProvider(configurationProvider)));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
+    onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
+
+    // Activate Adapter Commands 
+    registerAdapterExecutableCommands();
 
     vscode.Disposable.from(...disposables);
 }

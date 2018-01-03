@@ -31,7 +31,7 @@ function formatString(format: string, args: string[]) {
     return format;
 }
 
-function CreateLaunchString(name: string, type: string, executable: string, isInitialConfiguration: boolean): string {
+function CreateLaunchString(name: string, type: string, executable: string): string {
         return `"name": "${name}",
 "type": "${type}",
 "request": "launch",
@@ -74,7 +74,7 @@ function CreateRemoteAttachString(name: string, type: string, executable: string
     }
 
 export interface IConfiguration {
-    GetLaunchConfiguration(isInitialConfiguration: boolean): IConfigurationSnippet;
+    GetLaunchConfiguration(): IConfigurationSnippet;
     GetAttachConfiguration(): IConfigurationSnippet;
 }
 
@@ -96,17 +96,17 @@ abstract class Configuration implements IConfiguration {
         this.additionalProperties = additionalProperties;
     }
 
-    abstract GetLaunchConfiguration(isInitialConfiguration: boolean): IConfigurationSnippet;
+    abstract GetLaunchConfiguration(): IConfigurationSnippet;
     abstract GetAttachConfiguration(): IConfigurationSnippet;
 }
 
 export class MIConfigurations extends Configuration {
 
-    public GetLaunchConfiguration(isInitialConfiguration: boolean): IConfigurationSnippet {
+    public GetLaunchConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Launch`;
 
         let body: string = formatString(`{
-\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable, isInitialConfiguration))},
+\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "", 
 this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
@@ -140,12 +140,12 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
 
 export class PipeTransportConfigurations extends Configuration {
 
-    public GetLaunchConfiguration(isInitialConfiguration: boolean): IConfigurationSnippet {
+    public GetLaunchConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Pipe Launch`;
 
         let body: string = formatString(`
 {
-\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable, isInitialConfiguration))},
+\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable))},
 \t${indentJsonString(CreatePipeTransportString(this.pipeProgram, this.MIMode))},
 \t"MIMode": "${this.MIMode}"{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
@@ -180,12 +180,12 @@ export class PipeTransportConfigurations extends Configuration {
 
 export class WindowsConfigurations extends Configuration {
 
-    public GetLaunchConfiguration(isInitialConfiguration: boolean): IConfigurationSnippet {
+    public GetLaunchConfiguration(): IConfigurationSnippet {
         let name = "(Windows) Launch";
 
         let body: string = `
 {
-\t${indentJsonString(CreateLaunchString(name, this.windowsDebugger, this.executable, isInitialConfiguration))}
+\t${indentJsonString(CreateLaunchString(name, this.windowsDebugger, this.executable))}
 }`;
 
         return {
@@ -219,12 +219,12 @@ export class WindowsConfigurations extends Configuration {
 export class WSLConfigurations extends Configuration {
     public bashPipeProgram = "C:\\\\Windows\\\\sysnative\\\\bash.exe";
 
-    public GetLaunchConfiguration(isInitialConfiguration: boolean): IConfigurationSnippet {
+    public GetLaunchConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Bash on Windows Launch`;
 
         let body: string = formatString(`
 {
-\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable, isInitialConfiguration))},
+\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable))},
 \t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode))}{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
