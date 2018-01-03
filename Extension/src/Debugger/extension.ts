@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider } from './configurationProvider';
+import { ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider } from './configurationProvider';
 import * as util from '../common';
 import * as path from 'path';
 
