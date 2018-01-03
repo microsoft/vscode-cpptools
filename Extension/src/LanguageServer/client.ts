@@ -329,7 +329,7 @@ class DefaultClient implements Client {
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
                 loggingLevel: settings.loggingLevel,
-                throttleWorkspaceParsing: settings.throttleWorkspaceParsing
+                throttleWorkspaceParsing: settings.throttleWorkspaceParsing,
                 files_exclude_onlyCheckFolders: settings.filesExcludeOnlyCheckFolders
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
