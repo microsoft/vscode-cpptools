@@ -1,0 +1,37 @@
+language: node_js
+
+node_js:
+- "8"
+
+env:
+- CODE_VERSION=1.18.0
+
+before_install:
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then
+      export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
+      sh -e /etc/init.d/xvfb start;
+      sleep 3;
+    fi
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - sourceline: 'deb https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main'
+        key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
+    packages:
+      - g++-4.9
+      - libsecret-1-dev
+
+install:
+- npm install
+- npm run pretest
+
+script:
+  - npm run test
+
+after_failure:
+  - ./.travis/printLogs.sh
+
+after_success:
+  - ./.travis/printLogs.sh
