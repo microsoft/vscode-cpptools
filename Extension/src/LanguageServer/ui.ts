@@ -108,7 +108,7 @@ export class UI {
         }
     }
 
-    public activeDocumentChanged() {
+    public activeDocumentChanged(): void {
         let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
         let show: boolean = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
@@ -118,7 +118,7 @@ export class UI {
         this.ShowNavigation = show;
     }
 
-    public bind(client: Client) {
+    public bind(client: Client): void {
         client.TagParsingChanged(value => { this.IsTagParsing = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
         client.NavigationLocationChanged(value => { this.NavigationLocation = value; });
@@ -126,7 +126,7 @@ export class UI {
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
     }
 
-    public showNavigationOptions(navigationList: string) {
+    public showNavigationOptions(navigationList: string): void {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select where to navigate to";
 
@@ -181,7 +181,7 @@ export class UI {
             });
     }
 
-    public showParsingCommands() {
+    public showParsingCommands(): Thenable<number> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select a parsing command...";
 
@@ -202,7 +202,7 @@ export class UI {
             });
     }
 
-    public dispose() {
+    public dispose(): void {
         this.configStatusBarItem.dispose();
         this.browseEngineStatusBarItem.dispose();
         this.intelliSenseStatusBarItem.dispose();

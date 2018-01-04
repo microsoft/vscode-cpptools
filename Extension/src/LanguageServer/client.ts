@@ -127,7 +127,7 @@ function collectSettings(filter: (key: string, val: string, settings: vscode.Wor
     return result;
 }
 
-function initializeSettingsCache(resource: vscode.Uri) {
+function initializeSettingsCache(resource: vscode.Uri): void {
     collectSettings(() => true, resource);
 }
 
@@ -365,7 +365,7 @@ class DefaultClient implements Client {
         return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
     }
 
-    public onDidChangeSettings() {
+    public onDidChangeSettings(): void {
         // This relies on getNonDefaultSettings being called first.
         console.assert(Object.keys(previousCppSettings).length > 0);
 
@@ -533,7 +533,7 @@ class DefaultClient implements Client {
         this.model.navigationLocation.Value = currentNavigation;
     }
 
-    private addFileAssociations(fileAssociations: string) {
+    private addFileAssociations(fileAssociations: string): void {
         let settings: OtherSettings = new OtherSettings(this.RootUri);
         let assocs: any = settings.filesAssociations;
         let is_c: boolean = fileAssociations.startsWith("c");
@@ -574,7 +574,7 @@ class DefaultClient implements Client {
         }
     }
 
-    private updateStatus(notificationBody: ReportStatusNotificationBody) {
+    private updateStatus(notificationBody: ReportStatusNotificationBody): void {
         let message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
         if (message.endsWith("Indexing...")) {
@@ -613,7 +613,7 @@ class DefaultClient implements Client {
         }
     }
 
-    private updateTagParseStatus(notificationBody: ReportStatusNotificationBody) {
+    private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
@@ -643,7 +643,7 @@ class DefaultClient implements Client {
      * notifications to the language server
      *********************************************/
 
-    public activeDocumentChanged(document: vscode.TextDocument) {
+    public activeDocumentChanged(document: vscode.TextDocument): void {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
@@ -652,7 +652,7 @@ class DefaultClient implements Client {
     /**
      * enable UI updates from this client and resume tag parsing on the server.
      */
-    public activate() {
+    public activate(): void {
         for (let key in this.model) {
             if (this.model.hasOwnProperty(key)) {
                 this.model[key].activate();
@@ -661,7 +661,7 @@ class DefaultClient implements Client {
         this.resumeParsing();
     }
 
-    public selectionChanged(selection: vscode.Position) {
+    public selectionChanged(selection: vscode.Position): void {
         this.notifyWhenReady(() => this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection));
     }
 
@@ -689,7 +689,7 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
     }
 
-    private onConfigurationsChanged(configurations: configs.Configuration[]) {
+    private onConfigurationsChanged(configurations: configs.Configuration[]): void {
         let params: FolderSettingsParams = {
             configurations: configurations,
             currentConfiguration: this.configuration.CurrentConfiguration
@@ -700,7 +700,7 @@ class DefaultClient implements Client {
         });
     }
 
-    private onSelectedConfigurationChanged(index: number) {
+    private onSelectedConfigurationChanged(index: number): void {
         let params: FolderSelectedSettingParams = {
             currentConfiguration: index
         };
@@ -710,7 +710,7 @@ class DefaultClient implements Client {
         });
     }
 
-    private onCompileCommandsChanged(path: string) {
+    private onCompileCommandsChanged(path: string): void {
         let params: FileChangedParams = {
             uri: path
         };
@@ -720,7 +720,7 @@ class DefaultClient implements Client {
     /*********************************************
      * command handlers
      *********************************************/
-    public handleConfigurationSelectCommand() {
+    public handleConfigurationSelectCommand(): void {
         this.notifyWhenReady(() => {
             ui.showConfigurations(this.configuration.ConfigurationNames)
                 .then((index: number) => {
@@ -732,7 +732,7 @@ class DefaultClient implements Client {
         });
     }
 
-    public handleShowParsingCommands() {
+    public handleShowParsingCommands(): void {
         this.notifyWhenReady(() => {
             ui.showParsingCommands()
                 .then((index: number) => {
@@ -745,15 +745,15 @@ class DefaultClient implements Client {
         });
     }
 
-    public handleConfigurationEditCommand() {
+    public handleConfigurationEditCommand(): void {
         this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
     }
 
-    public handleAddToIncludePathCommand(path: string) {
+    public handleAddToIncludePathCommand(path: string): void {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
-    public onInterval() {
+    public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
         if (this.languageClient !== undefined && this.configuration !== undefined) {

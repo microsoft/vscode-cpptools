@@ -13,7 +13,7 @@ import HttpsProxyAgent = require('https-proxy-agent');
 import * as url from 'url';
 
 export let extensionContext: vscode.ExtensionContext;
-export function setExtensionContext(context: vscode.ExtensionContext) {
+export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
 }
 
@@ -25,15 +25,15 @@ let showWaitForDownloadPromptOnce: boolean = false;
 
 let showReloadPromptAlways: boolean = false; // Used to show wait/reload in the launch/attach debug scenarios.
 
-export function enableReloadOrWaitPrompt() {
+export function enableReloadOrWaitPrompt(): void {
     showReloadPromptOnce = showReloadPromptAlways = showWaitForDownloadPromptOnce = true;
 }
 
 export function getShowReloadPromptOnce(): boolean { return showReloadPromptOnce; }
 export function getShowReloadPrompt(): boolean { return showReloadPromptAlways; }
-export function getShowWaitForDownloadPromptOnce() { return showWaitForDownloadPromptOnce; }
+export function getShowWaitForDownloadPromptOnce(): boolean { return showWaitForDownloadPromptOnce; }
 
-export function showReloadPrompt() {
+export function showReloadPrompt(): void {
     showReloadPromptOnce = false;
     let reload: string = "Reload";
     vscode.window.showInformationMessage("Reload the window to finish installing the C/C++ extension.", reload).then(value => {
@@ -43,13 +43,13 @@ export function showReloadPrompt() {
     });
 }
 
-export function showWaitForDownloadPrompt() {
+export function showWaitForDownloadPrompt(): void {
     showWaitForDownloadPromptOnce = false;
     getOutputChannel().show();
     vscode.window.showInformationMessage("Please wait for the C/C++ extension dependencies to finish downloading and installing.");
 }
 
-function showReloadOrWaitPromptImpl(once: boolean) {
+function showReloadOrWaitPromptImpl(once: boolean): void {
     checkInstallLockFile().then((installLockExists: boolean) => {
         if (installLockExists) {
             showReloadPrompt();
@@ -62,8 +62,8 @@ function showReloadOrWaitPromptImpl(once: boolean) {
     });
 }
 
-export function showReloadOrWaitPrompt() { showReloadOrWaitPromptImpl(false); }
-export function showReloadOrWaitPromptOnce() { showReloadOrWaitPromptImpl(true); }
+export function showReloadOrWaitPrompt(): void { showReloadOrWaitPromptImpl(false); }
+export function showReloadOrWaitPromptOnce(): void { showReloadOrWaitPromptImpl(true); }
 
 // Warning: The methods involving getExtensionFilePath are duplicated in debugProxyUtils.ts,
 // because the extensionContext is not set in that context.
@@ -119,7 +119,7 @@ export function setProgress(progress: number): void {
     }
 }
 
-export function setIntelliSenseProgress(progress: number) {
+export function setIntelliSenseProgress(progress: number): void {
     if (getIntelliSenseProgress() < progress) {
         extensionContext.globalState.update(intelliSenseProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
@@ -138,11 +138,11 @@ export function getProgressExecutableSuccess(): number { return progressExecutab
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
-export function showReleaseNotes() {
+export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
-export function resolveVariables(input: string) {
+export function resolveVariables(input: string): string {
     if (input === null) {
         return "";
     }
@@ -217,7 +217,7 @@ export function GetHttpsProxyAgent(): HttpsProxyAgent {
 }
 
 let reloadLater: boolean = false;
-export function setDebuggerReloadLater() { reloadLater = true; }
+export function setDebuggerReloadLater(): void { reloadLater = true; }
 export function getDebuggerReloadLater(): boolean { return reloadLater; }
 
 /** Creates the lock file if it doesn't exist */
@@ -381,7 +381,7 @@ export function execChildProcess(process: string, workingDirectory: string, chan
 export function spawnChildProcess(process: string, args: string[], workingDirectory: string,
     dataCallback: (stdout: string) => void, errorCallback: (stderr: string) => void): Promise<void> {
 
-    return new Promise<void>(function (resolve, reject) {
+    return new Promise<void>(function (resolve, reject): void {
         const child: child_process.ChildProcess = child_process.spawn(process, args, { cwd: workingDirectory });
 
         child.stdout.on('data', (data) => {

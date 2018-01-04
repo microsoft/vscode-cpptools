@@ -14,7 +14,7 @@ import * as path from 'path';
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
 let disposables: vscode.Disposable[] = [];
 
-export function initialize() {
+export function initialize(): void {
     // Activate Process Picker Commands
     let attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
     let attacher: AttachPicker = new AttachPicker(attachItemsProvider);

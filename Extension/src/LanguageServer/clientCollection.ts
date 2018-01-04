@@ -75,7 +75,7 @@ export class ClientCollection {
         return null;
     }
 
-    public forEach(callback: (client: cpptools.Client) => void) {
+    public forEach(callback: (client: cpptools.Client) => void): void {
         this.languageClients.forEach(callback);
     }
 
@@ -134,7 +134,7 @@ export class ClientCollection {
      * Remove folders that were closed. We don't check the e.added property because we will
      * add new clients on-demand as files are opened.
      */
-    private onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent) {
+    private onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent): void {
         let folderCount: number = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0;
         if (folderCount > 1) {
             telemetry.logLanguageServerEvent("workspaceFoldersChange", { "count": folderCount.toString() });
@@ -166,7 +166,7 @@ export class ClientCollection {
         }
     }
 
-    private transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client) {
+    private transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client): void {
         let newOwner: cpptools.Client = this.getClientFor(document.uri);
         console.assert(newOwner !== oldOwner, "'oldOwner' should not be in the list of clients to consider");
         newOwner.takeOwnership(document);

@@ -104,7 +104,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
 }
 
 export class PsProcessParser {
-    private static get secondColumnCharacters() { return 50; }
+    private static get secondColumnCharacters(): number { return 50; }
     private static get commColumnTitle(): string { return Array(PsProcessParser.secondColumnCharacters).join("a"); }
     // the BSD version of ps uses '-c' to have 'comm' only output the executable name and not
     // the full path. The Linux version of ps has 'comm' to only display the name of the executable
@@ -197,9 +197,9 @@ export class WmicAttachItemsProvider extends NativeAttachItemsProvider {
 }
 
 export class WmicProcessParser {
-    private static get wmicNameTitle() { return 'Name'; }
-    private static get wmicCommandLineTitle() { return 'CommandLine'; }
-    private static get wmicPidTitle() { return 'ProcessId'; }
+    private static get wmicNameTitle(): string { return 'Name'; }
+    private static get wmicCommandLineTitle(): string { return 'CommandLine'; }
+    private static get wmicPidTitle(): string { return 'ProcessId'; }
 
     // Only public for tests.
     public static ParseProcessFromWmic(processes: string): Process[] {
@@ -225,7 +225,7 @@ export class WmicProcessParser {
         return processEntries;
     }
 
-    private static parseLineFromWmic(line: string, process: Process) {
+    private static parseLineFromWmic(line: string, process: Process): void {
         let splitter: number = line.indexOf('=');
         if (splitter >= 0) {
             let key: string = line.slice(0, line.indexOf('=')).trim();

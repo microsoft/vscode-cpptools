@@ -138,7 +138,7 @@ function realActivation(): void {
  * workspace events
  *********************************************/
 
-function onDidChangeSettings() {
+function onDidChangeSettings(): void {
     clients.forEach(client => client.onDidChangeSettings());
 }
 
@@ -191,7 +191,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(event.selections[0].start);
 }
 
-function onInterval() {
+function onInterval(): void {
     // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
     clients.ActiveClient.onInterval();
 }
@@ -218,7 +218,7 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
 }
 
-function onNavigate() {
+function onNavigate(): void {
     onActivationEvent();
     let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
@@ -230,7 +230,7 @@ function onNavigate() {
     });
 }
 
-function onGoToDeclaration() {
+function onGoToDeclaration(): void {
     onActivationEvent();
     clients.ActiveClient.requestGoToDeclaration().then(() => vscode.commands.executeCommand("editor.action.goToDeclaration"));
 }
@@ -240,7 +240,7 @@ function onPeekDeclaration(): void {
     clients.ActiveClient.requestGoToDeclaration().then(() => vscode.commands.executeCommand("editor.action.previewDeclaration"));
 }
 
-function onSwitchHeaderSource() {
+function onSwitchHeaderSource(): void {
     onActivationEvent();
     let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
@@ -339,14 +339,14 @@ function onAddToIncludePath(path: string): void {
     }
 }
 
-function onToggleSquiggles() {
+function onToggleSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
 }
 
-function onToggleIncludeFallback() {
+function onToggleIncludeFallback(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
@@ -380,7 +380,7 @@ function onTakeSurvey(): void {
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
-function reportMacCrashes() {
+function reportMacCrashes(): void {
     if (process.platform == "darwin") {
         prevCrashFile = "";
         let crashFolder: string = path.resolve(process.env.HOME, "Library/Logs/DiagnosticReports");
@@ -421,7 +421,7 @@ function reportMacCrashes() {
     }
 }
 
-function handleCrashFileRead(err: NodeJS.ErrnoException, data: string) {
+function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     let crashObject: { [key: string]: string } = {};
     if (err) {
         crashObject["readFile: err.code"] = err.code;

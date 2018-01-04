@@ -178,19 +178,19 @@ export class CppProperties {
         this.handleConfigurationChange();
     }
 
-    private onConfigurationsChanged() {
+    private onConfigurationsChanged(): void {
         this.configurationsChanged.fire(this.Configurations);
     }
 
-    private onSelectionChanged() {
+    private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfiguration);
     }
 
-    private onCompileCommandsChanged(path: string) {
+    private onCompileCommandsChanged(path: string): void {
         this.compileCommandsChanged.fire(path);
     }
 
-    private resetToDefaultSettings(resetIndex: boolean) {
+    private resetToDefaultSettings(resetIndex: boolean): void {
         this.configurationJson = JSON.parse(defaultSettings);
         if (resetIndex || this.CurrentConfiguration < 0 ||
             this.CurrentConfiguration >= this.configurationJson.configurations.length) {
@@ -199,7 +199,7 @@ export class CppProperties {
         this.configurationIncomplete = true;
     }
 
-    private applyDefaultIncludePathsAndFrameworks() {
+    private applyDefaultIncludePathsAndFrameworks(): void {
         if (this.configurationIncomplete && this.defaultIncludes !== undefined && this.defaultFrameworks !== undefined) {
             this.configurationJson.configurations[this.CurrentConfiguration].includePath = this.defaultIncludes;
             this.configurationJson.configurations[this.CurrentConfiguration].browse.path = this.defaultIncludes;
@@ -256,7 +256,7 @@ export class CppProperties {
         return true;
     }
 
-    public addToIncludePathCommand(path: string) {
+    public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             config.includePath.splice(config.includePath.length, 0, path);
@@ -274,7 +274,7 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private updateServerOnFolderSettingsChange() {
+    private updateServerOnFolderSettingsChange(): void {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             if (this.configurationJson.configurations[i].includePath !== undefined) {
                 for (let j: number = 0; j < this.configurationJson.configurations[i].includePath.length; j++) {
@@ -304,7 +304,7 @@ export class CppProperties {
 
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
     // paths are expected to have variables resolved already
-    public updateCompileCommandsFileWatchers() {
+    public updateCompileCommandsFileWatchers(): void {
         this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
         this.compileCommandFileWatchers = []; //reset it
         let filePaths: Set<string> = new Set<string>();
@@ -322,7 +322,7 @@ export class CppProperties {
         });
     }
 
-    public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void) {
+    public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
         if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
             vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
                 onSuccess(document);
@@ -359,7 +359,7 @@ export class CppProperties {
         }
     }
 
-    private handleConfigurationChange() {
+    private handleConfigurationChange(): void {
         this.configFileWatcherFallbackTime = new Date();
         if (this.propertiesFile) {
             this.parsePropertiesFile();
@@ -382,7 +382,7 @@ export class CppProperties {
         this.updateServerOnFolderSettingsChange();
     }
 
-    private parsePropertiesFile() {
+    private parsePropertiesFile(): void {
         try {
             let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
             if (readResults == "") {
@@ -437,7 +437,7 @@ export class CppProperties {
         }
     }
 
-    private updateToVersion2() {
+    private updateToVersion2(): void {
         this.configurationJson.version = 2;
         if (!this.includePathConverted()) {
             for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
@@ -452,7 +452,7 @@ export class CppProperties {
         }
     }
 
-    private updateToVersion3() {
+    private updateToVersion3(): void {
         this.configurationJson.version = 3;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let config: Configuration = this.configurationJson.configurations[i];
@@ -468,7 +468,7 @@ export class CppProperties {
         }
     }
 
-    public checkCppProperties() {
+    public checkCppProperties(): void {
         // Check for change properties in case of file watcher failure.
         let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {

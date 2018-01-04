@@ -26,7 +26,7 @@ const userBucketMax: number = 100;
 let delayedCommandsToExecute: Set<string>;
 let tempCommands: vscode.Disposable[]; // Need to save this to unregister/dispose the temporary commands.
 
-function registerTempCommand(command: string) {
+function registerTempCommand(command: string): void {
     tempCommands.push(vscode.commands.registerCommand(command, () => {
         delayedCommandsToExecute.add(command);
         util.checkInstallLockFile().then((installLockExists: boolean) => {
@@ -88,7 +88,7 @@ function downloadCpptoolsJsonPkg(): Promise<void> {
         });
 }
 
-function processCpptoolsJson(cpptoolsString: string) {
+function processCpptoolsJson(cpptoolsString: string): Promise<void> {
     let cpptoolsObject: any = JSON.parse(cpptoolsString);
     let intelliSenseEnginePercentage: number = cpptoolsObject.intelliSenseEngine_default_percentage;
 
@@ -105,7 +105,7 @@ function processCpptoolsJson(cpptoolsString: string) {
     }
 }
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
     util.setExtensionContext(context);
     Telemetry.activate();
     util.setProgress(0);
@@ -211,7 +211,7 @@ interface InstallBlob {
 //  9. After the install is finished, show a reload prompt if a debug attach/launch occurrs or launch.json is opened.
 // 10. We also download a cpptool.json in case we want to use the data in it to alter the behavior post-shipping (i.e. a/b testing).
 // 11. After reloading, the package.lock is written, which causes the reload prompt to no longer appear.
-function processRuntimeDependencies(activateExtensions: () => void) {
+function processRuntimeDependencies(activateExtensions: () => void): void {
     util.checkPackageLockFile().then((packageLockExists: boolean) => {
         if (packageLockExists) {
             return activateExtensions();

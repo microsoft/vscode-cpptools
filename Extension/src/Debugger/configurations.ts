@@ -24,7 +24,7 @@ export function indentJsonString(json: string, numTabs: number = 1): string {
     return json.split('\n').map(line => '\t'.repeat(numTabs) + line).join('\n').trim();
 }
 
-function formatString(format: string, args: string[]) {
+function formatString(format: string, args: string[]): string {
     for (let arg in args) {
         format = format.replace("{" + arg + "}", args[arg]);
     }

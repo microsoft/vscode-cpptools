@@ -15,7 +15,7 @@ interface IPackageInfo {
 
 let telemetryReporter: TelemetryReporter;
 
-export function activate() {
+export function activate(): void {
     try {
         telemetryReporter = createReporter();
     } catch (e) {
@@ -23,7 +23,7 @@ export function activate() {
     }
 }
 
-export function deactivate() {
+export function deactivate(): void {
     if (telemetryReporter) {
         telemetryReporter.dispose();
     }
