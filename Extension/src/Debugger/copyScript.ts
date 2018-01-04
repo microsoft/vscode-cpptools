@@ -68,8 +68,7 @@ function findCppToolsExtensionDebugAdapterFolder(): string {
         }
 
         return dirPath;
-    }
-    else {
+    } else {
         console.error("Unable to determine C/C++ extension installation location.");
         return null;
     }
@@ -154,8 +153,7 @@ function copy(root: string, target: string, file: string): void {
     console.log('copying %s to %s', source, destination);
     if (fs.existsSync(source)) {
         fs.writeFileSync(destination, fs.readFileSync(source));
-    }
-    else {
+    } else {
         console.error('ERR: could not find file %s', source);
     }
 }
@@ -173,8 +171,7 @@ function removeFolder(root: string): void {
         if (!isDirectory(fullPath)) {
             console.warn('Deleting %s', fullPath);
             fs.unlinkSync(fullPath);
-        }
-        else {
+        } else {
             removeFolder(fullPath);
         }
     }
@@ -186,8 +183,7 @@ function removeFolder(root: string): void {
 function isDirectory(dir: string): Boolean {
     try {
         return fs.statSync(dir).isDirectory();
-    }
-    catch (e) {
+    } catch (e) {
     }
     return false;
 }
@@ -196,8 +192,7 @@ function makeDirectory(dir: string): void {
     try {
         //Note: mkdir is limited to creating folders with one level of nesting. Creating "a/b" if 'a' doesn't exist will throw a ENOENT.
         fs.mkdirSync(dir);
-    }
-    catch (e) {
+    } catch (e) {
         if ((<NodeJS.ErrnoException>e).code !== "EEXIST") {
             throw e;
         }
@@ -216,7 +211,6 @@ copySourceDependencies();
 if (enableDevWorkflow()) {
     copyMonoDependencies();
     copyBinaryDependencies();
-}
-else {
+} else {
     console.warn(devWorkFlowMessage);
 }

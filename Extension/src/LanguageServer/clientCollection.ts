@@ -10,8 +10,7 @@ import * as telemetry from '../telemetry';
 import * as cpptools from './client';
 
 const defaultClientKey: string = "@@default@@";
-export interface ClientKey
-{
+export interface ClientKey {
     name: string;
     key: string;
 }

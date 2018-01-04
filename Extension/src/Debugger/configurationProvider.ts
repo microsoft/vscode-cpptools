@@ -186,8 +186,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
 
         const launch: any = parse(document.getText());
         // Check to see if the array is empty, so any additional inserted snippets will need commas.
-        if (launch.configurations.length !== 0)
-        {
+        if (launch.configurations.length !== 0) {
             items = [];
 
             // Make a copy of each snippet since we are adding a comma to the end of the insertText.

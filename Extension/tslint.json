@@ -10,6 +10,7 @@
         "no-unused-expression-chai": true,
         "no-unused-variable": true,
         "no-var-keyword": true,
+        "one-line": [true, "check-catch", "check-finally", "check-else", "check-open-brace", "check-whitespace"],
         "promise-must-complete": true,
         "semicolon": true,
         "typedef": [true, "variable-declaration"],

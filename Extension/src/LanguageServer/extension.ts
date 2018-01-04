@@ -65,8 +65,7 @@ export function activate(delayedCommandsToExecute: Set<string>): void {
     // Activate immediately if an activation event occurred in the previous workspace session.
     // If onActivationEvent doesn't occur, it won't auto-activate next time.
     activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
-    if (activatedPreviously.Value)
-    {
+    if (activatedPreviously.Value) {
         activatedPreviously.Value = false;
         realActivation();
     }
@@ -78,8 +77,7 @@ export function activate(delayedCommandsToExecute: Set<string>): void {
         return onActivationEvent();
     }
     
-    if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0)
-    {
+    if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
             if (document.languageId == "cpp" || document.languageId == "c") {

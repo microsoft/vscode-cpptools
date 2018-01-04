@@ -56,8 +56,7 @@ export class LinuxDistribution {
             if (keyValue.length == 2) {
                 if (keyValue[0] === idKey) {
                     distroName = keyValue[1];
-                }
-                else if (keyValue[0] === versionKey) {
+                } else if (keyValue[0] === versionKey) {
                     distroVersion = keyValue[1];
                 }
             }

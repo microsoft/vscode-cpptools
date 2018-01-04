@@ -24,8 +24,7 @@ export class NativeAttachItemsProviderFactory {
     static Get(): AttachItemsProvider {
         if (os.platform() === 'win32') {
             return new WmicAttachItemsProvider();
-        }
-        else {
+        } else {
             return new PsAttachItemsProvider();
         }
     }
@@ -233,11 +232,9 @@ export class WmicProcessParser {
             let value: string = line.slice(line.indexOf('=') + 1).trim();
             if (key === WmicProcessParser.wmicNameTitle) {
                 process.name = value;
-            }
-            else if (key === WmicProcessParser.wmicPidTitle) {
+            } else if (key === WmicProcessParser.wmicPidTitle) {
                 process.pid = value;
-            }
-            else if (key === WmicProcessParser.wmicCommandLineTitle) {
+            } else if (key === WmicProcessParser.wmicCommandLineTitle) {
                 const extendedLengthPath: string = '\\??\\';
                 if (value.lastIndexOf(extendedLengthPath, 0) === 0) {
                     value = value.slice(extendedLengthPath.length);

@@ -94,8 +94,7 @@ export class RemoteAttachPicker {
 
             if (lines.length == 0) {
                 return Promise.reject<AttachItem[]>(new Error("Pipe transport failed to get OS and processes."));
-            }
-            else {
+            } else {
                 let remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
                 if (remoteOS != "Linux" && remoteOS != "Darwin") {

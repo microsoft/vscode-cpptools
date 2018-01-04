@@ -117,12 +117,10 @@ export class PackageManager {
                     }
 
                     resolve(this.allPackages);
-                }
-                else {
+                } else {
                     reject(new PackageManagerError('Package manifest does not exist', 'GetPackageList'));
                 }
-            }
-            else {
+            } else {
                 resolve(this.allPackages);
             }
         });
@@ -238,13 +236,11 @@ export class PackageManager {
                             redirectUrl = response.headers.location[0];
                         }
                         return resolve(this.DownloadFile(redirectUrl, pkg, 0));
-                    }
-                    else if (response.statusCode != 200) {
+                    } else if (response.statusCode != 200) {
                         // Download failed - print error message
                         let errorMessage: string = `failed (error code '${response.statusCode}')`;
                         return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
-                    }
-                    else {
+                    } else {
                         // Downloading - hook up events
                         let contentLength: any = response.headers['content-length'];
                         if (typeof response.headers['content-length'] === "string") {
@@ -333,8 +329,7 @@ export class PackageManager {
 
                             zipfile.readEntry();
                         });
-                    }
-                    else {
+                    } else {
                         util.checkFileExists(absoluteEntryPath).then((exists: boolean) => {
                             if (!exists) {
                                 // File - extract it
@@ -360,8 +355,7 @@ export class PackageManager {
                                         });
                                     });
                                 });
-                            }
-                            else {
+                            } else {
                                 // Skip the message for text files, because there is a duplicate text file unzipped.
                                 if (path.extname(absoluteEntryPath) != ".txt") {
                                     this.AppendLineChannel(`Warning: File '${absoluteEntryPath}' already exists and was not updated.`);

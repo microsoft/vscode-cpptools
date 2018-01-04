@@ -49,8 +49,7 @@ export class PlatformInformation {
                         // Note: This string can be localized. So, we'll just check to see if it contains 32 or 64.
                         if (arch.indexOf('64') >= 0) {
                             return "x86_64";
-                        }
-                        else if (arch.indexOf('32') >= 0) {
+                        } else if (arch.indexOf('32') >= 0) {
                             return "x86";
                         }
                     }

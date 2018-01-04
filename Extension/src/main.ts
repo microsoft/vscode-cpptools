@@ -184,8 +184,7 @@ function removePotentialPII(str: string): string {
     for (let word of words) {
         if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
             result += word + " ";
-        }
-        else {
+        } else {
             result += "? ";
         }
     }
@@ -371,8 +370,7 @@ function handleError(installBlob: InstallBlob, error: any): void {
         if (packageError.errorCode) {
             installBlob.telemetryProperties['error.errorCode'] = removePotentialPII(packageError.errorCode);
         }
-    }
-    else {
+    } else {
         errorMessage = error.toString();
         installBlob.telemetryProperties['error.toString'] = removePotentialPII(errorMessage);
     }

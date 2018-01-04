@@ -261,8 +261,7 @@ export function checkFileExists(filePath: string): Promise<boolean> {
         fs.stat(filePath, (err, stats) => {
             if (stats && stats.isFile()) {
                 resolve(true);
-            }
-            else {
+            } else {
                 resolve(false);
             }
         });
@@ -396,8 +395,7 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
         child.on('exit', (code: number) => {
             if (code !== 0) {
                 reject(new Error(`${process} exited with error code ${code}`));
-            }
-            else {
+            } else {
                 resolve();
             }
         });
@@ -425,15 +423,13 @@ export function allowExecution(file: string): Promise<void> {
                         }
                         resolve();
                     });
-                }
-                else {
+                } else {
                     getOutputChannel().appendLine("");
                     getOutputChannel().appendLine(`Warning: Expected file ${file} is missing.`);
                     resolve();
                 }
             });
-        }
-        else {
+        } else {
             resolve();
         }
     });

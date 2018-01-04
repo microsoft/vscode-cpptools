@@ -26,8 +26,7 @@ export function initialize() {
     let configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
-    if (os.platform() === 'win32')
-    {
+    if (os.platform() === 'win32') {
         disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new CppVsDbgConfigurationProvider(configurationProvider)));
     }
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new CppDbgConfigurationProvider(configurationProvider)));
@@ -66,21 +65,18 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
 function registerAdapterExecutableCommands(): void {
     disposables.push(vscode.commands.registerCommand('extension.cppdbgAdapterExecutableCommand', () => {
         return util.checkInstallLockFile().then(ready => {
-            if (ready)
-            {
+            if (ready) {
                 let command: string = path.join(util.extensionContext.extensionPath, './debugAdapters/OpenDebugAD7');
 
                 // Windows has the exe in debugAdapters/bin.
-                if (os.platform() === 'win32')
-                {
+                if (os.platform() === 'win32') {
                     command = path.join(util.extensionContext.extensionPath, "./debugAdapters/bin/OpenDebugAD7.exe");
                 }
 
                 return {
                     command: command
                 };
-            }
-            else {
+            } else {
                 util.showReloadOrWaitPromptOnce();
                 // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
                 return null;
@@ -89,21 +85,17 @@ function registerAdapterExecutableCommands(): void {
     }));
 
     disposables.push(vscode.commands.registerCommand('extension.cppvsdbgAdapterExecutableCommand', () => {
-        if (os.platform() != 'win32')
-        {
+        if (os.platform() != 'win32') {
             vscode.window.showErrorMessage("Debugger type 'cppvsdbg' is not avaliable for non-Windows machines.");
             return null;
-        }
-        else {
+        } else {
             return util.checkInstallLockFile().then(ready => {
-                if (ready)
-                {
+                if (ready) {
                     return {
                         command: path.join(util.extensionContext.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
                         args: ['--interpreter=vscode']
                     };
-                }
-                else {
+                } else {
                     util.showReloadOrWaitPromptOnce();
                     // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
                     return null;
