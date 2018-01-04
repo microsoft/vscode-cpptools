@@ -17,6 +17,7 @@ import { PersistentState } from './LanguageServer/persistentState';
 import * as url from 'url';
 import * as https from 'https';
 import { extensionContext } from './common';
+import { ClientRequest } from 'http';
 
 const releaseNotesVersion: number = 3;
 const userBucketMax: number = 100;
@@ -36,13 +37,13 @@ function registerTempCommand(command: string) {
     }));
 }
 
-const userBucketString = "CPP.UserBucket";
+const userBucketString: string = "CPP.UserBucket";
 
 // NOTE: Code is copied from DownloadPackage in packageManager.ts, but with ~75% fewer lines.
 function downloadCpptoolsJson(urlString): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let parsedUrl: url.Url = url.parse(urlString);
-        let request = https.request({
+        let request: ClientRequest = https.request({
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: util.GetHttpsProxyAgent(),
@@ -88,11 +89,11 @@ function downloadCpptoolsJsonPkg(): Promise<void> {
 }
 
 function processCpptoolsJson(cpptoolsString: string) {
-    let cpptoolsObject = JSON.parse(cpptoolsString);
+    let cpptoolsObject: any = JSON.parse(cpptoolsString);
     let intelliSenseEnginePercentage: number = cpptoolsObject.intelliSenseEngine_default_percentage;
 
     if (!util.packageJson.extensionFolderPath.includes(".vscode-insiders")) {
-        let prevIntelliSenseEngineDefault = util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
+        let prevIntelliSenseEngineDefault: any = util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (util.extensionContext.globalState.get<number>(userBucketString, userBucketMax + 1) <= intelliSenseEnginePercentage) {
             util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
         } else {
@@ -113,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
     DebuggerExtension.initialize();
 
     if (context.globalState.get<number>(userBucketString, -1) == -1) {
-        let bucket = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
+        let bucket: number = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
         context.globalState.update(userBucketString, bucket);
     }
 
@@ -178,8 +179,8 @@ export function deactivate(): Thenable<void> {
 }
 
 function removePotentialPII(str: string): string {
-    let words = str.split(" ");
-    let result = "";
+    let words: string[] = str.split(" ");
+    let result: string = "";
     for (let word of words) {
         if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
             result += word + " ";
@@ -263,7 +264,7 @@ function processRuntimeDependencies(activateExtensions: () => void) {
                         });
                     }
                 });
-                let channel = util.getOutputChannel();
+                let channel: vscode.OutputChannel = util.getOutputChannel();
                 channel.appendLine("Updating C/C++ dependencies...");
 
                 let statusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
@@ -316,7 +317,7 @@ function makeOfflineBinariesExecutable(installBlob: InstallBlob): Thenable<void>
 function removeUnnecessaryFile(installBlob: InstallBlob): void {
     if (os.platform() !== 'win32') {
         installBlob.stage = "removeUnnecessaryFile";
-        let sourcePath = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
+        let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
             fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err) => {
                 util.getOutputChannel().appendLine("removeUnnecessaryFile: fs.rename failed: " + err.message);
@@ -336,14 +337,14 @@ function handleError(installBlob: InstallBlob, error: any): void {
     installBlob.hasError = true;
     installBlob.telemetryProperties['stage'] = installBlob.stage;
     let errorMessage: string;
-    let channel = util.getOutputChannel();
+    let channel: vscode.OutputChannel = util.getOutputChannel();
 
     if (error instanceof PackageManagerError) {
         // If this is a WebResponse error, log the IP that it resolved from the package URL
         if (error instanceof PackageManagerWebResponseError) {
             let webRequestPackageError: PackageManagerWebResponseError = error;
             if (webRequestPackageError.socket) {
-                let address = webRequestPackageError.socket.address();
+                let address: any = webRequestPackageError.socket.address();
                 if (address) {
                     installBlob.telemetryProperties['error.targetIP'] = address.address + ':' + address.port;
                 }
@@ -388,7 +389,7 @@ function handleError(installBlob: InstallBlob, error: any): void {
 }
 
 function postInstall(installBlob: InstallBlob): Thenable<void> {
-    let channel = util.getOutputChannel();
+    let channel: vscode.OutputChannel = util.getOutputChannel();
 
     channel.appendLine("");
     channel.appendLine("Finished installing dependencies");
@@ -404,7 +405,7 @@ function postInstall(installBlob: InstallBlob): Thenable<void> {
 
     if (!installBlob.hasError) {
         util.setProgress(util.getProgressInstallSuccess());
-        let versionShown = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
+        let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
         if (versionShown.Value < releaseNotesVersion) {
             util.showReleaseNotes();
             versionShown.Value = releaseNotesVersion;

@@ -25,7 +25,7 @@ export function indentJsonString(json: string, numTabs: number = 1): string {
 }
 
 function formatString(format: string, args: string[]) {
-    for(let arg in args) {
+    for (let arg in args) {
         format = format.replace("{" + arg + "}", args[arg]);
     }
     return format;
@@ -181,7 +181,7 @@ export class PipeTransportConfigurations extends Configuration {
 export class WindowsConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name = "(Windows) Launch";
+        let name: string = "(Windows) Launch";
 
         let body: string = `
 {

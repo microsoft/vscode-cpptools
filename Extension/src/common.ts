@@ -17,7 +17,7 @@ export function setExtensionContext(context: vscode.ExtensionContext) {
     extensionContext = context;
 }
 
-export let packageJson = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
+export let packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
 
 // Used to show a one-time wait/reload popup when launch.json becomes active.
 let showReloadPromptOnce: boolean = false;
@@ -35,7 +35,7 @@ export function getShowWaitForDownloadPromptOnce() { return showWaitForDownloadP
 
 export function showReloadPrompt() {
     showReloadPromptOnce = false;
-    let reload = "Reload";
+    let reload: string = "Reload";
     vscode.window.showInformationMessage("Reload the window to finish installing the C/C++ extension.", reload).then(value => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
@@ -83,16 +83,16 @@ export function getPackageJsonString(): string {
 // Users start with a progress of 0 and it increases as they get further along in using the tool.
 // This eliminates noise/problems due to re-installs, terminated installs that don't send errors,
 // errors followed by workarounds that lead to success, etc.
-const progressInstallSuccess = 100;
-const progressExecutableStarted = 150;
-const progressExecutableSuccess = 200;
-const progressParseRootSuccess = 300;
-const progressIntelliSenseNoSquiggles = 1000;
+const progressInstallSuccess: number = 100;
+const progressExecutableStarted: number = 150;
+const progressExecutableSuccess: number = 200;
+const progressParseRootSuccess: number = 300;
+const progressIntelliSenseNoSquiggles: number = 1000;
 // Might add more IntelliSense progress measurements later.
 // IntelliSense progress is separate from the install progress, because parse root can occur afterwards.
 
-let installProgressStr = "CPP." + packageJson.version + ".Progress";
-let intelliSenseProgressStr = "CPP." + packageJson.version + ".IntelliSenseProgress";
+let installProgressStr: string = "CPP." + packageJson.version + ".Progress";
+let intelliSenseProgressStr: string = "CPP." + packageJson.version + ".IntelliSenseProgress";
 
 export function getProgress(): number {
     return extensionContext.globalState.get<number>(installProgressStr, -1);
@@ -107,7 +107,7 @@ export function setProgress(progress: number): void {
         extensionContext.globalState.update(installProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
-        switch(progress) {
+        switch (progress) {
             case 0: progressName = "install started"; break;
             case progressInstallSuccess: progressName = "install succeeded"; break;
             case progressExecutableStarted: progressName = "executable started"; break;
@@ -124,7 +124,7 @@ export function setIntelliSenseProgress(progress: number) {
         extensionContext.globalState.update(intelliSenseProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
-        switch(progress) {
+        switch (progress) {
             case progressIntelliSenseNoSquiggles: progressName = "IntelliSense no squiggles"; break;
         }
         telemetryProperties['progress'] = progressName;
@@ -149,15 +149,15 @@ export function resolveVariables(input: string) {
 
     // Replace environment variables. (support both ${env:VAR} and ${VAR} syntax)
     let regexp: RegExp = /\$\{(env:|env.)?(.*?)\}/g;
-    let ret = input.replace(regexp, (match: string, ignored: string, name: string) => {
-        let newValue = process.env[name];
+    let ret: string = input.replace(regexp, (match: string, ignored: string, name: string) => {
+        let newValue: string = process.env[name];
         return (newValue != null) ? newValue : match;
     });
 
     // Resolve '~' at the start of the path.
     regexp = /^\~/g;
     ret = ret.replace(regexp, (match: string, name: string) => {
-        let newValue = process.env.HOME;
+        let newValue: string = process.env.HOME;
         return (newValue != null) ? newValue : match;
     });
 
@@ -165,7 +165,7 @@ export function resolveVariables(input: string) {
 }
 
 export function asFolder(uri: vscode.Uri): string {
-    let result = uri.toString();
+    let result: string = uri.toString();
     if (result.charAt(result.length - 1) !== '/') {
         result += '/';
     }
@@ -191,7 +191,7 @@ export function getDebugAdaptersPath(file: string): string {
 }
 
 export function GetHttpsProxyAgent(): HttpsProxyAgent {
-    let proxy = vscode.workspace.getConfiguration().get<string>('http.proxy');
+    let proxy: string = vscode.workspace.getConfiguration().get<string>('http.proxy');
     if (!proxy) {
         proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
         if (!proxy) {
@@ -200,13 +200,13 @@ export function GetHttpsProxyAgent(): HttpsProxyAgent {
     }
 
     // Basic sanity checking on proxy url
-    let proxyUrl = url.parse(proxy);
+    let proxyUrl: any = url.parse(proxy);
     if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:") {
         return null;
     }
 
-    let strictProxy = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
-    let proxyOptions = {
+    let strictProxy: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
+    let proxyOptions: any = {
         host: proxyUrl.hostname,
         port: parseInt(proxyUrl.port, 10),
         auth: proxyUrl.auth,
@@ -334,7 +334,7 @@ export function getReadmeMessage(): string {
 
 /** Used for diagnostics only */
 export function logToFile(message: string): void {
-    const logFolder = getExtensionFilePath("extension.log");
+    const logFolder: string = getExtensionFilePath("extension.log");
     fs.writeFileSync(logFolder, `${message}${os.EOL}`, { flag: 'a' });
 }
 
@@ -383,7 +383,7 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     dataCallback: (stdout: string) => void, errorCallback: (stderr: string) => void): Promise<void> {
 
     return new Promise<void>(function (resolve, reject) {
-        const child = child_process.spawn(process, args, { cwd: workingDirectory });
+        const child: child_process.ChildProcess = child_process.spawn(process, args, { cwd: workingDirectory });
 
         child.stdout.on('data', (data) => {
             dataCallback(`${data}`);

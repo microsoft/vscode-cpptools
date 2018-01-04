@@ -62,7 +62,7 @@ export class RemoteAttachPicker {
             let pipeProgram: string = pipeTransport.pipeProgram;
             let pipeArgs: string[] = pipeTransport.pipeArgs;
 
-            let argList = RemoteAttachPicker.createArgumentList(pipeArgs);
+            let argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
 
             let pipeCmd: string = `"${pipeProgram}" ${argList}`;
 
@@ -84,19 +84,19 @@ export class RemoteAttachPicker {
 
     private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
         // Commands to get OS and processes
-        const command = `bash -c 'uname && if [ $(uname) == "Linux" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) == "Darwin" ] ; ` +
+        const command: string = `bash -c 'uname && if [ $(uname) == "Linux" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) == "Darwin" ] ; ` +
             `then ${PsProcessParser.psDarwinCommand}; fi'`;
 
         return execChildProcess(`${pipeCmd} "${command}"`, null, this._channel).then(output => {
             // OS will be on first line
             // Processess will follow if listed
-            let lines = output.split(/\r?\n/);
+            let lines: string[] = output.split(/\r?\n/);
 
             if (lines.length == 0) {
                 return Promise.reject<AttachItem[]>(new Error("Pipe transport failed to get OS and processes."));
             }
             else {
-                let remoteOS = lines[0].replace(/[\r\n]+/g, '');
+                let remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
                 if (remoteOS != "Linux" && remoteOS != "Darwin") {
                     return Promise.reject<AttachItem[]>(new Error(`Operating system "${remoteOS}" not supported.`));
@@ -106,7 +106,7 @@ export class RemoteAttachPicker {
                 if (lines.length == 1) {
                     return Promise.reject<AttachItem[]>(new Error("Transport attach could not obtain processes list."));
                 } else {
-                    let processes = lines.slice(1);
+                    let processes: string[] = lines.slice(1);
                     return PsProcessParser.ParseProcessFromPsArray(processes)
                         .sort((a, b) => {
                             if (a.name == undefined) {
@@ -118,8 +118,8 @@ export class RemoteAttachPicker {
                             if (b.name == undefined) {
                                 return -1;
                             }
-                            let aLower = a.name.toLowerCase();
-                            let bLower = b.name.toLowerCase();
+                            let aLower: string = a.name.toLowerCase();
+                            let bLower: string = b.name.toLowerCase();
                             if (aLower == bLower) {
                                 return 0;
                             }

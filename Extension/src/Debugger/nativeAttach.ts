@@ -48,14 +48,14 @@ abstract class NativeAttachItemsProvider implements AttachItemsProvider {
                 if (b.name == undefined) {
                     return -1;
                 }
-                let aLower = a.name.toLowerCase();
-                let bLower = b.name.toLowerCase();
+                let aLower: string = a.name.toLowerCase();
+                let bLower: string = b.name.toLowerCase();
                 if (aLower == bLower) {
                     return 0;
                 }
                 return aLower < bLower ? -1 : 1;
             });
-            let attachItems = processEntries.map(p => p.toAttachItem());
+            let attachItems: AttachItem[] = processEntries.map(p => p.toAttachItem());
             return attachItems;
         });
     }
@@ -117,7 +117,7 @@ export class PsProcessParser {
 
     // Only public for tests.
     public static ParseProcessFromPs(processes: string): Process[] {
-        let lines = processes.split(os.EOL);
+        let lines: string[] = processes.split(os.EOL);
         return PsProcessParser.ParseProcessFromPsArray(lines);
     }
 
@@ -125,13 +125,13 @@ export class PsProcessParser {
         let processEntries: Process[] = [];
 
         // lines[0] is the header of the table
-        for (let i = 1; i < processArray.length; i++) {
-            let line = processArray[i];
+        for (let i: number = 1; i < processArray.length; i++) {
+            let line: string = processArray[i];
             if (!line) {
                 continue;
             }
 
-            let processEntry = PsProcessParser.parseLineFromPs(line);
+            let processEntry: Process = PsProcessParser.parseLineFromPs(line);
             processEntries.push(processEntry);
         }
 
@@ -147,12 +147,12 @@ export class PsProcessParser {
         //     for the whitespace separator
         //   - whitespace
         //   - args (might be empty)
-        const psEntry = new RegExp(`^\\s*([0-9]+)\\s+(.{${PsProcessParser.secondColumnCharacters - 1}})\\s+(.*)$`);
-        const matches = psEntry.exec(line);
+        const psEntry: RegExp = new RegExp(`^\\s*([0-9]+)\\s+(.{${PsProcessParser.secondColumnCharacters - 1}})\\s+(.*)$`);
+        const matches: RegExpExecArray = psEntry.exec(line);
         if (matches && matches.length === 4) {
-            const pid = matches[1].trim();
-            const executable = matches[2].trim();
-            const cmdline = matches[3].trim();
+            const pid: string = matches[1].trim();
+            const executable: string = matches[2].trim();
+            const cmdline: string = matches[3].trim();
             return new Process(executable, pid, cmdline);
         }
     }
@@ -190,7 +190,7 @@ export class WmicAttachItemsProvider extends NativeAttachItemsProvider {
     // |           1308 |      1132 |
 
     protected getInternalProcessEntries(): Promise<Process[]> {
-        const wmicCommand = 'wmic process get Name,ProcessId,CommandLine /FORMAT:list';
+        const wmicCommand: string = 'wmic process get Name,ProcessId,CommandLine /FORMAT:list';
         return execChildProcess(wmicCommand, null).then(processes => {
             return WmicProcessParser.ParseProcessFromWmic(processes);
         });
@@ -204,12 +204,12 @@ export class WmicProcessParser {
 
     // Only public for tests.
     public static ParseProcessFromWmic(processes: string): Process[] {
-        let lines = processes.split(os.EOL);
+        let lines: string[] = processes.split(os.EOL);
         let currentProcess: Process = new Process(null, null, null);
         let processEntries: Process[] = [];
 
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
+        for (let i: number = 0; i < lines.length; i++) {
+            let line: string = lines[i];
             if (!line) {
                 continue;
             }
@@ -227,10 +227,10 @@ export class WmicProcessParser {
     }
 
     private static parseLineFromWmic(line: string, process: Process) {
-        let splitter = line.indexOf('=');
+        let splitter: number = line.indexOf('=');
         if (splitter >= 0) {
-            let key = line.slice(0, line.indexOf('=')).trim();
-            let value = line.slice(line.indexOf('=') + 1).trim();
+            let key: string = line.slice(0, line.indexOf('=')).trim();
+            let value: string = line.slice(line.indexOf('=') + 1).trim();
             if (key === WmicProcessParser.wmicNameTitle) {
                 process.name = value;
             }
@@ -238,7 +238,7 @@ export class WmicProcessParser {
                 process.pid = value;
             }
             else if (key === WmicProcessParser.wmicCommandLineTitle) {
-                const extendedLengthPath = '\\??\\';
+                const extendedLengthPath: string = '\\??\\';
                 if (value.lastIndexOf(extendedLengthPath, 0) === 0) {
                     value = value.slice(extendedLengthPath.length);
                 }

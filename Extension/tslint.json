@@ -8,7 +8,9 @@
         "curly": true,
         "semicolon": true,
         "indent": [true, "spaces", 4],
-        "file-header": [true, ".*"]
+        "file-header": [true, ".*"],
+        "whitespace": [true, "check-branch", "check-operator", "check-separator", "check-preblock", "check-type"],
+        "typedef": [true, "variable-declaration"]
     },
     "rulesDirectory": ["node_modules/tslint-microsoft-contrib", "node_modules/tslint-no-unused-expression-chai/rules"]
 }

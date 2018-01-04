@@ -17,7 +17,7 @@ class Settings {
      * create the Settings object.
      * @param resource The path to a resource to which the settings should apply, or undefined if global settings are desired
      */
-    constructor(section:string, resource?: vscode.Uri) {
+    constructor(section: string, resource?: vscode.Uri) {
         this.settings = vscode.workspace.getConfiguration(section, resource ? resource : null);
     }
 
@@ -44,7 +44,7 @@ export class CppSettings extends Settings {
     public get filesAssociationsAutoAdd() { return super.Section.get<boolean>("files.associations.autoAdd"); }
 
     public toggleSetting(name: string, value1: string, value2: string) {
-        let value = super.Section.get<string>(name);
+        let value: string = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
     }
 }

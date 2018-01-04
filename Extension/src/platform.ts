@@ -44,7 +44,7 @@ export class PlatformInformation {
                 if (architecture) {
                     let archArray: string[] = architecture.split(os.EOL);
                     if (archArray.length >= 2) {
-                        let arch = archArray[1].trim();
+                        let arch: string = archArray[1].trim();
 
                         // Note: This string can be localized. So, we'll just check to see if it contains 32 or 64.
                         if (arch.indexOf('64') >= 0) {

@@ -13,13 +13,13 @@ import * as os from 'os';
 import * as path from 'path';
 
 //Change this to true to force a dev workflow.
-const EnableDevWorkflow: Boolean = false;
+const EnableDevWorkflow: boolean = false;
 
-const DebugAdapterPath = "./debugAdapters";
-const DebugAdapterBinPath = DebugAdapterPath + "/bin";
+const DebugAdapterPath: string = "./debugAdapters";
+const DebugAdapterBinPath: string = DebugAdapterPath + "/bin";
 
 let CpptoolsExtensionRoot: string = null;
-let SearchCompleted: Boolean = false;
+let SearchCompleted: boolean = false;
 
 interface RootsHashtable {
     "miEngineRoot": string;
@@ -40,19 +40,19 @@ const externalBinaryRoots: RootsHashtable = {
 };
 
 function findCppToolsExtensionDebugAdapterFolder(): string {
-    const vscodeFolderRegExp = new RegExp(/\.vscode-*[a-z]*$/);
-    const cpptoolsFolderRegExp = new RegExp(/ms\-vscode\.cpptools\-.*$/);
+    const vscodeFolderRegExp: RegExp = new RegExp(/\.vscode-*[a-z]*$/);
+    const cpptoolsFolderRegExp: RegExp = new RegExp(/ms\-vscode\.cpptools\-.*$/);
 
     let dirPath: string = os.homedir();
     if (fs.existsSync(dirPath)) {
-        let files = fs.readdirSync(dirPath);
-        for (let i = 0; i < files.length; i++) {
+        let files: string[] = fs.readdirSync(dirPath);
+        for (let i: number = 0; i < files.length; i++) {
             // Check to see if it starts with '.vscode'
             if (vscodeFolderRegExp.test(files[i])) {
                 let extPath: string = path.join(dirPath, files[i], "extensions");
                 if (fs.existsSync(extPath)) {
-                    let extFiles = fs.readdirSync(extPath);
-                    for (let j = 0; j < extFiles.length; j++) {
+                    let extFiles: string[] = fs.readdirSync(extPath);
+                    for (let j: number = 0; j < extFiles.length; j++) {
                         if (cpptoolsFolderRegExp.test(path.join(extFiles[j]))) {
                             dirPath = path.join(extPath, extFiles[j]);
                             break;
@@ -89,7 +89,7 @@ function copySourceDependencies(): void {
 }
 
 function getRoot(rootKey: string): string {
-    const internal = internalBinaryRoots[rootKey];
+    const internal: string = internalBinaryRoots[rootKey];
     if (internal) {
         return internal;
     }
@@ -109,8 +109,8 @@ function getRoot(rootKey: string): string {
 }
 
 function copyBinaryDependencies(): void {
-    const miEngineRoot = getRoot("miEngineRoot");
-    const openDebugRoot = getRoot("openDebugRoot");
+    const miEngineRoot: string = getRoot("miEngineRoot");
+    const openDebugRoot: string = getRoot("openDebugRoot");
 
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MICore.dll");
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MICore.dll.mdb");
@@ -132,7 +132,7 @@ function copyBinaryDependencies(): void {
 }
 
 function copyMonoDependencies(): void {
-    const monoDeps = getRoot("monoDeps");
+    const monoDeps: string = getRoot("monoDeps");
 
     copy(monoDeps, DebugAdapterPath, "OpenDebugAD7");
 }
@@ -143,7 +143,7 @@ function copy(root: string, target: string, file: string): void {
         return;
     }
 
-    const source = path.join(root, file);
+    const source: string = path.join(root, file);
     const destination: string = path.join(target, file);
 
     if (!fs.existsSync(target)) {
@@ -160,35 +160,6 @@ function copy(root: string, target: string, file: string): void {
     }
 }
 
-// unused functions: copyFolder and fileExists
-/* tslint:disable */
-function copyFolder(root: string, target: string): void {
-    let files: string[] = fs.readdirSync(root);
-
-    for (let i = 0; i < files.length; i++) {
-        let fullPath: string = path.join(root, files[i]);
-
-        if (!isDirectory(fullPath)) {
-            copy(root, target, files[i]);
-        }
-        else {
-            copyFolder(fullPath, path.join(target, files[i]));
-        }
-    }
-}
-
-
-function fileExists(file: string): Boolean {
-    try {
-        return fs.statSync(file).isFile();
-    }
-    catch (e) {
-    }
-
-    return false;
-}
-/* tslint:enable */
-
 function removeFolder(root: string): void {
     if (!isDirectory(root)) {
         console.warn('Skipping deletion of %s; directory does not exist', root);
@@ -196,7 +167,7 @@ function removeFolder(root: string): void {
     }
 
     let files: string[] = fs.readdirSync(root);
-    for (let i = 0; i < files.length; i++) {
+    for (let i: number = 0; i < files.length; i++) {
         let fullPath: string = path.join(root, files[i]);
         console.warn('Found entry %s', fullPath);
         if (!isDirectory(fullPath)) {

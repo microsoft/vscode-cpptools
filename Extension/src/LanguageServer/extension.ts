@@ -28,7 +28,7 @@ let activatedPreviously: PersistentWorkspaceState<boolean>;
 
     // Add ' * ' on new lines after multiline comment with '/**' started
 // Copied from vscode/extensions/typescript/src/typescriptMain.ts
-const multilineCommentRules = {
+const multilineCommentRules: any = {
     onEnterRules: [
         {
             // e.g. /** | */
@@ -80,7 +80,7 @@ export function activate(delayedCommandsToExecute: Set<string>): void {
     
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0)
     {
-        for(let i = 0; i < vscode.workspace.textDocuments.length; ++i) {
+        for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
             if (document.languageId == "cpp" || document.languageId == "c") {
                 return onActivationEvent();
@@ -144,7 +144,7 @@ function onDidChangeSettings() {
     clients.forEach(client => client.onDidChangeSettings());
 }
 
-let saveMessageShown = false;
+let saveMessageShown: boolean = false;
 function onDidSaveTextDocument(doc: vscode.TextDocument): void {
     if (!vscode.window.activeTextEditor || doc !== vscode.window.activeTextEditor.document || (doc.languageId !== "cpp" && doc.languageId !== "c")) {
         return;
@@ -163,7 +163,7 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
         return;
     }
 
-    let activeEditor = vscode.window.activeTextEditor;
+    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor || (activeEditor.document.languageId != "cpp" && activeEditor.document.languageId != "c")) {
         activeDocument = "";
         if (util.getShowReloadPromptOnce() && activeEditor && activeEditor.document.fileName.endsWith(path.sep + "launch.json")) {
@@ -222,7 +222,7 @@ function registerCommands(): void {
 
 function onNavigate() {
     onActivationEvent();
-    let activeEditor = vscode.window.activeTextEditor;
+    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
         return;
     }
@@ -244,7 +244,7 @@ function onPeekDeclaration(): void {
 
 function onSwitchHeaderSource() {
     onActivationEvent();
-    let activeEditor = vscode.window.activeTextEditor;
+    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
         return;
     }
@@ -253,8 +253,8 @@ function onSwitchHeaderSource() {
         return;
     }
 
-    let rootPath = clients.ActiveClient.RootPath;
-    let fileName = activeEditor.document.fileName;
+    let rootPath: string = clients.ActiveClient.RootPath;
+    let fileName: string = activeEditor.document.fileName;
 
     if (!rootPath) {
         rootPath = path.dirname(fileName); // When switching without a folder open.
@@ -262,7 +262,7 @@ function onSwitchHeaderSource() {
 
     clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName).then((targetFileName: string) => {
         vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
-            let foundEditor = false;
+            let foundEditor: boolean = false;
             // If the document is already visible in another column, open it there.
             vscode.window.visibleTextEditors.forEach((editor, index, array) => {
                 if (editor.document === document && !foundEditor) {
@@ -293,7 +293,7 @@ function selectClient(): Thenable<Client> {
     } else {
         return ui.showWorkspaces(clients.Names).then(key => {
             if (key !== "") {
-                let client = clients.get(key);
+                let client: Client = clients.get(key);
                 if (client) {
                     return client;
                 } else {
@@ -344,14 +344,14 @@ function onAddToIncludePath(path: string): void {
 function onToggleSquiggles() {
     onActivationEvent();
     // This only applies to the active client.
-    let settings = new CppSettings(clients.ActiveClient.RootUri);
+    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
 }
 
 function onToggleIncludeFallback() {
     onActivationEvent();
     // This only applies to the active client.
-    let settings = new CppSettings(clients.ActiveClient.RootUri);
+    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
 }
 
@@ -385,7 +385,7 @@ function onTakeSurvey(): void {
 function reportMacCrashes() {
     if (process.platform == "darwin") {
         prevCrashFile = "";
-        let crashFolder = path.resolve(process.env.HOME, "Library/Logs/DiagnosticReports");
+        let crashFolder: string = path.resolve(process.env.HOME, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
             let crashObject: { [key: string]: string } = {};
             if (err) {
@@ -430,11 +430,11 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string) {
         telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
         return;
     }
-    let startCrash = data.indexOf(" Crashed:");
+    let startCrash: number = data.indexOf(" Crashed:");
     if (startCrash < 0) {
         startCrash = 0;
     }
-    let endCrash = data.indexOf("Thread ", startCrash);
+    let endCrash: number = data.indexOf("Thread ", startCrash);
     if (endCrash < startCrash) {
         endCrash = data.length - 1;
     }

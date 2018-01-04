@@ -47,12 +47,12 @@ export class LinuxDistribution {
     public static getDistroInformation(data: string): LinuxDistribution {
         const idKey: string = 'ID';
         const versionKey: string = 'VERSION_ID';
-        let distroName = 'unknown';
-        let distroVersion = 'unknown';
+        let distroName: string = 'unknown';
+        let distroVersion: string = 'unknown';
 
         let keyValues: string[] = data.split(os.EOL);
-        for (let i = 0; i < keyValues.length; i++) {
-            let keyValue = keyValues[i].split('=');
+        for (let i: number = 0; i < keyValues.length; i++) {
+            let keyValue: string[] = keyValues[i].split('=');
             if (keyValue.length == 2) {
                 if (keyValue[0] === idKey) {
                     distroName = keyValue[1];

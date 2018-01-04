@@ -16,7 +16,7 @@ import * as mkdirp from 'mkdirp';
 import * as util from './common';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
-import { IncomingMessage } from 'http';
+import { IncomingMessage, ClientRequest } from 'http';
 
 export interface IPackage {
     // Description of the package
@@ -156,21 +156,30 @@ export class PackageManager {
             .then((tmpResult) => {
                 pkg.tmpFile = tmpResult;
 
-                let lastError = null;
-                let retryCount = 0;
-                let handleDownloadFailure = (num, error) => {
+                let lastError: any = null;
+                let retryCount: number = 0;
+                let handleDownloadFailure: (num: any, error: any) => void = (num, error) => {
                     retryCount = num;
                     lastError = error;
                     this.AppendChannel(` Failed. Retrying...`);
                 };
                 // Retry the download at most 5 times with 2-32 seconds delay.
-                return this.DownloadFile(pkg.url, pkg, 0).catch((error) => { handleDownloadFailure(1, error);
-                return this.DownloadFile(pkg.url, pkg, 1).catch((error) => { handleDownloadFailure(2, error);
-                return this.DownloadFile(pkg.url, pkg, 2).catch((error) => { handleDownloadFailure(3, error);
-                return this.DownloadFile(pkg.url, pkg, 3).catch((error) => { handleDownloadFailure(4, error);
-                return this.DownloadFile(pkg.url, pkg, 4).catch((error) => { handleDownloadFailure(5, error);
-                return this.DownloadFile(pkg.url, pkg, 5); // Last try, don't catch the error.
-                });});});});}).then(() => {
+                return this.DownloadFile(pkg.url, pkg, 0).catch((error) => { 
+                    handleDownloadFailure(1, error);
+                    return this.DownloadFile(pkg.url, pkg, 1).catch((error) => { 
+                        handleDownloadFailure(2, error);
+                        return this.DownloadFile(pkg.url, pkg, 2).catch((error) => { 
+                            handleDownloadFailure(3, error);
+                            return this.DownloadFile(pkg.url, pkg, 3).catch((error) => { 
+                                handleDownloadFailure(4, error);
+                                return this.DownloadFile(pkg.url, pkg, 4).catch((error) => { 
+                                    handleDownloadFailure(5, error);
+                                    return this.DownloadFile(pkg.url, pkg, 5); // Last try, don't catch the error.
+                                });
+                            });
+                        });
+                    });
+                }).then(() => {
                     this.AppendLineChannel(" Done!");
                     if (retryCount != 0) {
                         // Log telemetry to see if retrying helps.
@@ -197,7 +206,7 @@ export class PackageManager {
     // reloadCpptoolsJson in main.ts uses ~25% of this function.
     private DownloadFile(urlString: any, pkg: IPackage, delay: number): Promise<void> {
         let parsedUrl: url.Url = url.parse(urlString);
-        let proxyStrictSSL = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
+        let proxyStrictSSL: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
 
         let options: https.RequestOptions = {
             host: parsedUrl.host,
@@ -207,7 +216,7 @@ export class PackageManager {
         };
 
         return new Promise<void>((resolve, reject) => {
-            let secondsDelay = Math.pow(2, delay);
+            let secondsDelay: number = Math.pow(2, delay);
             if (secondsDelay == 1) {
                 secondsDelay = 0;
             }
@@ -219,7 +228,7 @@ export class PackageManager {
                     return reject(new PackageManagerError('Temporary Package file unavailable', 'DownloadFile', pkg));
                 }
 
-                let handleHttpResponse = (response: IncomingMessage) => {
+                let handleHttpResponse: (response: IncomingMessage) => void = (response: IncomingMessage) => {
                     if (response.statusCode == 301 || response.statusCode == 302) {
                         // Redirect - download from new location
                         let redirectUrl: string | string[];
@@ -243,10 +252,10 @@ export class PackageManager {
                         } else {
                             contentLength = response.headers['content-length'][0];
                         }
-                        let packageSize = parseInt(contentLength, 10);
-                        let downloadedBytes = 0;
-                        let downloadPercentage = 0;
-                        let dots = 0;
+                        let packageSize: number = parseInt(contentLength, 10);
+                        let downloadedBytes: number = 0;
+                        let downloadPercentage: number = 0;
+                        let dots: number = 0;
                         let tmpFile: fs.WriteStream = fs.createWriteStream(null, { fd: pkg.tmpFile.fd });
 
                         this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `);
@@ -255,14 +264,14 @@ export class PackageManager {
                             downloadedBytes += data.length;
 
                             // Update status bar item with percentage
-                            let newPercentage = Math.ceil(100 * (downloadedBytes / packageSize));
+                            let newPercentage: number = Math.ceil(100 * (downloadedBytes / packageSize));
                             if (newPercentage !== downloadPercentage) {
                                 this.SetStatusTooltip(`Downloading package '${pkg.description}'... ${downloadPercentage}%`);
                                 downloadPercentage = newPercentage;
                             }
 
                             // Update dots after package name in output console
-                            let newDots = Math.ceil(downloadPercentage / 5);
+                            let newDots: number = Math.ceil(downloadPercentage / 5);
                             if (newDots > dots) {
                                 this.AppendChannel(".".repeat(newDots - dots));
                                 dots = newDots;
@@ -282,7 +291,7 @@ export class PackageManager {
                     }
                 };
 
-                let request = https.request(options, handleHttpResponse);
+                let request: ClientRequest = https.request(options, handleHttpResponse);
 
                 request.on('error', (error) => {
                     reject(new PackageManagerError('HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
@@ -340,9 +349,9 @@ export class PackageManager {
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
-                                        let fileMode = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        let fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
 
-                                        let writeStream = fs.createWriteStream(absoluteEntryPath, { mode: fileMode });
+                                        let writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryPath, { mode: fileMode });
                                         readStream.pipe(writeStream);
                                         writeStream.on('close', () => {
                                             // Wait till output is done writing before reading the next zip entry.

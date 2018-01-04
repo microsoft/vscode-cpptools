@@ -9,9 +9,9 @@ import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
 import { PersistentFolderState } from './persistentState';
-const configVersion = 3;
+const configVersion: number = 3;
 
-let defaultSettings = `{
+let defaultSettings: string = `{
     "configurations": [
         {
             "name": "Mac",
@@ -132,7 +132,7 @@ export class CppProperties {
         this.configFolder = path.join(rootPath, ".vscode");
         this.resetToDefaultSettings(this.currentConfigurationIndex.Value === -1);
 
-        let configFilePath = path.join(this.configFolder, "c_cpp_properties.json");
+        let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
         if (fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
         }
@@ -164,7 +164,7 @@ export class CppProperties {
     public get CurrentConfiguration(): number { return this.currentConfigurationIndex.Value; }
 
     public get ConfigurationNames(): string[] {
-        let result = [];
+        let result: string[] = [];
         this.configurationJson.configurations.forEach((config: Configuration) => result.push(config.name));
         return result;
     }
@@ -214,7 +214,7 @@ export class CppProperties {
         if (this.configurationJson.configurations.length > 3) {
             return this.configurationJson.configurations.length - 1; // Default to the last custom configuration.
         }
-        let nodePlatform = process.platform;
+        let nodePlatform: NodeJS.Platform = process.platform;
         let plat: string;
         if (nodePlatform == 'linux') {
             plat = "Linux";
@@ -223,7 +223,7 @@ export class CppProperties {
         } else if (nodePlatform == 'win32') {
             plat = "Win32";
         }
-        for (let i = 0; i < this.configurationJson.configurations.length; i++) {
+        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             if (config.configurations[i].name == plat) {
                 return i;
             }
@@ -239,7 +239,7 @@ export class CppProperties {
             return "msvc-x64";
         } else {
             // Custom configs default to the OS's preference.
-            let nodePlatform = process.platform;
+            let nodePlatform: NodeJS.Platform = process.platform;
             if (nodePlatform == 'linux' || nodePlatform == 'darwin') {
                 return "clang-x64";
             }
@@ -248,7 +248,7 @@ export class CppProperties {
     }
 
     private includePathConverted(): boolean {
-        for (let i = 0; i < this.configurationJson.configurations.length; i++) {
+        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             if (this.configurationJson.configurations[i].browse === undefined || this.configurationJson.configurations[i].browse.path === undefined) {
                 return false;
             }
@@ -258,7 +258,7 @@ export class CppProperties {
 
     public addToIncludePathCommand(path: string) {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-            let config = this.configurationJson.configurations[this.CurrentConfiguration];
+            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             config.includePath.splice(config.includePath.length, 0, path);
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
             this.updateServerOnFolderSettingsChange();
@@ -275,19 +275,19 @@ export class CppProperties {
     }
 
     private updateServerOnFolderSettingsChange() {
-        for (let i = 0; i < this.configurationJson.configurations.length; i++) {
+        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             if (this.configurationJson.configurations[i].includePath !== undefined) {
-                for (let j = 0; j < this.configurationJson.configurations[i].includePath.length; j++) {
+                for (let j: number = 0; j < this.configurationJson.configurations[i].includePath.length; j++) {
                     this.configurationJson.configurations[i].includePath[j] = util.resolveVariables(this.configurationJson.configurations[i].includePath[j]);
                 }
             }
             if (this.configurationJson.configurations[i].browse !== undefined && this.configurationJson.configurations[i].browse.path !== undefined) {
-                for (let j = 0; j < this.configurationJson.configurations[i].browse.path.length; j++) {
+                for (let j: number = 0; j < this.configurationJson.configurations[i].browse.path.length; j++) {
                     this.configurationJson.configurations[i].browse.path[j] = util.resolveVariables(this.configurationJson.configurations[i].browse.path[j]);
                 }
             }
             if (this.configurationJson.configurations[i].macFrameworkPath !== undefined) {
-                for (let j = 0; j < this.configurationJson.configurations[i].macFrameworkPath.length; j++) {
+                for (let j: number = 0; j < this.configurationJson.configurations[i].macFrameworkPath.length; j++) {
                     this.configurationJson.configurations[i].macFrameworkPath[j] = util.resolveVariables(this.configurationJson.configurations[i].macFrameworkPath[j]);
                 }
             }
@@ -330,11 +330,11 @@ export class CppProperties {
         } else {
             fs.mkdir(this.configFolder, (e: NodeJS.ErrnoException) => {
                 if (!e || e.code === 'EEXIST') {
-                    let dirPathEscaped = this.configFolder.replace("#", "%23");
-                    let fullPathToFile = path.join(dirPathEscaped, "c_cpp_properties.json");
-                    let filePath = vscode.Uri.parse("untitled:" + fullPathToFile);
+                    let dirPathEscaped: string = this.configFolder.replace("#", "%23");
+                    let fullPathToFile: string = path.join(dirPathEscaped, "c_cpp_properties.json");
+                    let filePath: vscode.Uri = vscode.Uri.parse("untitled:" + fullPathToFile);
                     vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
-                        let edit = new vscode.WorkspaceEdit;
+                        let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit;
                         if (this.configurationJson === undefined) {
                             this.resetToDefaultSettings(true);
                         }
@@ -384,7 +384,7 @@ export class CppProperties {
 
     private parsePropertiesFile() {
         try {
-            let readResults = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
+            let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
             if (readResults == "") {
                 return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
             }
@@ -392,7 +392,7 @@ export class CppProperties {
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!this.configurationIncomplete && newJson.configurations && this.configurationJson) {
-                for (let i = 0; i < newJson.configurations.length; i++) {
+                for (let i: number = 0; i < newJson.configurations.length; i++) {
                     if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
                         this.currentConfigurationIndex.Value = i;
                         break;
@@ -405,9 +405,9 @@ export class CppProperties {
             // the system includes were available.
             this.configurationIncomplete = false;
 
-            let dirty = false;
-            for (let i = 0; i < this.configurationJson.configurations.length; i++) {
-                let config = this.configurationJson.configurations[i];
+            let dirty: boolean = false;
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                let config: Configuration = this.configurationJson.configurations[i];
                 if (config.intelliSenseMode === undefined) {
                     dirty = true;
                     config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
@@ -440,8 +440,8 @@ export class CppProperties {
     private updateToVersion2() {
         this.configurationJson.version = 2;
         if (!this.includePathConverted()) {
-            for (let i = 0; i < this.configurationJson.configurations.length; i++) {
-                let config = this.configurationJson.configurations[i];
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                let config: Configuration = this.configurationJson.configurations[i];
                 if (config.browse === undefined) {
                     config.browse = {};
                 }
@@ -454,8 +454,8 @@ export class CppProperties {
 
     private updateToVersion3() {
         this.configurationJson.version = 3;
-        for (let i = 0; i < this.configurationJson.configurations.length; i++) {
-            let config = this.configurationJson.configurations[i];
+        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+            let config: Configuration = this.configurationJson.configurations[i];
             // Look for Mac configs and extra configs on Mac systems
             if (config.name === "Mac" || (process.platform === "darwin" && config.name !== "Win32" && config.name !== "Linux")) {
                 if (config.macFrameworkPath === undefined) {
@@ -470,7 +470,7 @@ export class CppProperties {
 
     public checkCppProperties() {
         // Check for change properties in case of file watcher failure.
-        let propertiesFile = path.join(this.configFolder, "c_cpp_properties.json");
+        let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
                 if (this.propertiesFile != null) {

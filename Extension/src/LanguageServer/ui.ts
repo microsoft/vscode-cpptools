@@ -109,8 +109,8 @@ export class UI {
     }
 
     public activeDocumentChanged() {
-        let activeEditor = vscode.window.activeTextEditor;
-        let show = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
+        let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
+        let show: boolean = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
         this.ShowConfiguration = show;
         this.ShowDBIcon = show;
@@ -131,8 +131,8 @@ export class UI {
         options.placeHolder = "Select where to navigate to";
 
         let items: IndexableQuickPickItem[] = [];
-        let navlist = navigationList.split(";");
-        for (let i = 0; i < navlist.length - 1; i += 2) {
+        let navlist: string[] = navigationList.split(";");
+        for (let i: number = 0; i < navlist.length - 1; i += 2) {
             items.push({ label: navlist[i], description: "", index: Number(navlist[i + 1]) });
         }
 
@@ -151,7 +151,7 @@ export class UI {
         options.placeHolder = "Select a Configuration...";
 
         let items: IndexableQuickPickItem[] = [];
-        for (let i = 0; i < configurationNames.length; i++) {
+        for (let i: number = 0; i < configurationNames.length; i++) {
             items.push({ label: configurationNames[i], description: "", index: i });
         }
         items.push({ label: "Edit Configurations...", description: "", index: configurationNames.length });
