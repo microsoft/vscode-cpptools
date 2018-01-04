@@ -35,3 +35,4 @@ after_failure:
 
 after_success:
   - ./.travis/printLogs.sh
+  
