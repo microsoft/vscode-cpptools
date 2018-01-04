@@ -334,7 +334,7 @@ export class CppProperties {
                     let fullPathToFile: string = path.join(dirPathEscaped, "c_cpp_properties.json");
                     let filePath: vscode.Uri = vscode.Uri.parse("untitled:" + fullPathToFile);
                     vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
-                        let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit;
+                        let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         if (this.configurationJson === undefined) {
                             this.resetToDefaultSettings(true);
                         }

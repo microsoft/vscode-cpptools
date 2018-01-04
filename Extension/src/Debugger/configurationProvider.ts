@@ -123,7 +123,6 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
     }
 }
 
-
 class OSXConfigurationProvider extends DefaultConfigurationProvider {
     private MIMode: string = 'lldb';
     private executable: string = "a.out";

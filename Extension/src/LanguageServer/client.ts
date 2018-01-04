@@ -484,7 +484,6 @@ class DefaultClient implements Client {
             this.debugChannel.append(`${output}`);
         });
 
-
         this.languageClient.onNotification(DebugLogNotification, (output) => {
             if (!this.outputChannel) {
                 if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {

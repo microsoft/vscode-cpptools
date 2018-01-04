@@ -1,16 +1,19 @@
 {
     "rules": {
+        "curly": true,
+        "file-header": [true, ".*"],
+        "indent": [true, "spaces", 4],
+        "new-parens": true,
+        "no-consecutive-blank-lines": true,
+        "no-construct": true,
+        "no-duplicate-variable": true,
         "no-unused-expression-chai": true,
         "no-unused-variable": true,
-        "no-duplicate-variable": true,
         "no-var-keyword": true,
         "promise-must-complete": true,
-        "curly": true,
         "semicolon": true,
-        "indent": [true, "spaces", 4],
-        "file-header": [true, ".*"],
-        "whitespace": [true, "check-branch", "check-operator", "check-separator", "check-preblock", "check-type"],
-        "typedef": [true, "variable-declaration"]
+        "typedef": [true, "variable-declaration"],
+        "whitespace": [true, "check-branch", "check-operator", "check-separator", "check-preblock", "check-type"]
     },
     "rulesDirectory": ["node_modules/tslint-microsoft-contrib", "node_modules/tslint-no-unused-expression-chai/rules"]
 }
