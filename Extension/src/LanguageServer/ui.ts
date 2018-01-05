@@ -36,15 +36,15 @@ export class UI {
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
         this.intelliSenseStatusBarItem.text = "";
-        this.intelliSenseStatusBarItem.tooltip = "Updating IntelliSense..."
+        this.intelliSenseStatusBarItem.tooltip = "Updating IntelliSense...";
         this.intelliSenseStatusBarItem.color = "Red";
         this.ShowFlameIcon = true;
 
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.browseEngineStatusBarItem.text = "";
-        this.browseEngineStatusBarItem.tooltip = "Discovering files..."
+        this.browseEngineStatusBarItem.tooltip = "Discovering files...";
         this.browseEngineStatusBarItem.color = "White";
-        this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands"
+        this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
     }
 
@@ -54,7 +54,7 @@ export class UI {
 
     private set ActiveConfig(label: string) {
         this.configStatusBarItem.text = label;
-    };
+    }
 
     private set TagParseStatus(label: string) {
         this.browseEngineStatusBarItem.tooltip = label;
@@ -108,9 +108,9 @@ export class UI {
         }
     }
 
-    public activeDocumentChanged() {
-        let activeEditor = vscode.window.activeTextEditor;
-        let show = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
+    public activeDocumentChanged(): void {
+        let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
+        let show: boolean = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
         this.ShowConfiguration = show;
         this.ShowDBIcon = show;
@@ -118,7 +118,7 @@ export class UI {
         this.ShowNavigation = show;
     }
 
-    public bind(client: Client) {
+    public bind(client: Client): void {
         client.TagParsingChanged(value => { this.IsTagParsing = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
         client.NavigationLocationChanged(value => { this.NavigationLocation = value; });
@@ -126,17 +126,17 @@ export class UI {
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
     }
 
-    public showNavigationOptions(navigationList: string) {
+    public showNavigationOptions(navigationList: string): void {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select where to navigate to";
 
         let items: IndexableQuickPickItem[] = [];
-        let navlist = navigationList.split(";");
-        for (let i = 0; i < navlist.length - 1; i += 2) {
+        let navlist: string[] = navigationList.split(";");
+        for (let i: number = 0; i < navlist.length - 1; i += 2) {
             items.push({ label: navlist[i], description: "", index: Number(navlist[i + 1]) });
         }
 
-        let result = vscode.window.showQuickPick(items, options)
+        vscode.window.showQuickPick(items, options)
             .then(selection => {
                 if (!selection) {
                     return;
@@ -151,7 +151,7 @@ export class UI {
         options.placeHolder = "Select a Configuration...";
 
         let items: IndexableQuickPickItem[] = [];
-        for (let i = 0; i < configurationNames.length; i++) {
+        for (let i: number = 0; i < configurationNames.length; i++) {
             items.push({ label: configurationNames[i], description: "", index: i });
         }
         items.push({ label: "Edit Configurations...", description: "", index: configurationNames.length });
@@ -174,13 +174,14 @@ export class UI {
 
         return vscode.window.showQuickPick(items, options)
             .then(selection => {
-                if (!selection)
+                if (!selection) {
                     return "";
+                }
                 return selection.key;
             });
     }
 
-    public showParsingCommands() {
+    public showParsingCommands(): Thenable<number> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select a parsing command...";
 
@@ -201,7 +202,7 @@ export class UI {
             });
     }
 
-    public dispose() {
+    public dispose(): void {
         this.configStatusBarItem.dispose();
         this.browseEngineStatusBarItem.dispose();
         this.intelliSenseStatusBarItem.dispose();

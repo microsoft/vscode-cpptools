@@ -16,7 +16,7 @@ import * as mkdirp from 'mkdirp';
 import * as util from './common';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
-import { IncomingMessage } from 'http';
+import { IncomingMessage, ClientRequest } from 'http';
 
 export interface IPackage {
     // Description of the package
@@ -57,7 +57,7 @@ export class PackageManagerWebResponseError extends PackageManagerError {
         public pkg: IPackage = null,
         public innerError: any = null,
         public errorCode: string = '') {
-        super(message, methodName, pkg, innerError, errorCode)
+        super(message, methodName, pkg, innerError, errorCode);
     }
 }
 
@@ -94,7 +94,7 @@ export class PackageManager {
 
         for (let item of items) {
             promiseChain = promiseChain.then(() => {
-                return promiseBuilder(item)
+                return promiseBuilder(item);
             });
         }
 
@@ -112,17 +112,15 @@ export class PackageManager {
                         if (pkg.binaries) {
                             pkg.binaries = pkg.binaries.map((value) => {
                                 return util.getExtensionFilePath(value);
-                            })
+                            });
                         }
                     }
 
                     resolve(this.allPackages);
-                }
-                else {
+                } else {
                     reject(new PackageManagerError('Package manifest does not exist', 'GetPackageList'));
                 }
-            }
-            else {
+            } else {
                 resolve(this.allPackages);
             }
         });
@@ -139,7 +137,7 @@ export class PackageManager {
     }
 
     private DownloadPackage(pkg: IPackage): Promise<void> {
-        this.AppendChannel(`Downloading package '${pkg.description}' `)
+        this.AppendChannel(`Downloading package '${pkg.description}' `);
 
         this.SetStatusText("$(cloud-download) Downloading packages...");
         this.SetStatusTooltip(`Downloading package '${pkg.description}'...`);
@@ -150,27 +148,36 @@ export class PackageManager {
                     return reject(new PackageManagerError('Error from temp.file', 'DownloadPackage', pkg, err));
                 }
 
-                resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback })
+                resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
             });
         })
             .then((tmpResult) => {
                 pkg.tmpFile = tmpResult;
 
-                let lastError = null;
-                let retryCount = 0;
-                var handleDownloadFailure = (num, error) => {
+                let lastError: any = null;
+                let retryCount: number = 0;
+                let handleDownloadFailure: (num: any, error: any) => void = (num, error) => {
                     retryCount = num;
                     lastError = error;
                     this.AppendChannel(` Failed. Retrying...`);
                 };
                 // Retry the download at most 5 times with 2-32 seconds delay.
-                return this.DownloadFile(pkg.url, pkg, 0).catch((error) => { handleDownloadFailure(1, error);
-                return this.DownloadFile(pkg.url, pkg, 1).catch((error) => { handleDownloadFailure(2, error);
-                return this.DownloadFile(pkg.url, pkg, 2).catch((error) => { handleDownloadFailure(3, error);
-                return this.DownloadFile(pkg.url, pkg, 3).catch((error) => { handleDownloadFailure(4, error);
-                return this.DownloadFile(pkg.url, pkg, 4).catch((error) => { handleDownloadFailure(5, error);
-                return this.DownloadFile(pkg.url, pkg, 5); // Last try, don't catch the error.
-                })})})})}).then(() => {
+                return this.DownloadFile(pkg.url, pkg, 0).catch((error) => { 
+                    handleDownloadFailure(1, error);
+                    return this.DownloadFile(pkg.url, pkg, 1).catch((error) => { 
+                        handleDownloadFailure(2, error);
+                        return this.DownloadFile(pkg.url, pkg, 2).catch((error) => { 
+                            handleDownloadFailure(3, error);
+                            return this.DownloadFile(pkg.url, pkg, 3).catch((error) => { 
+                                handleDownloadFailure(4, error);
+                                return this.DownloadFile(pkg.url, pkg, 4).catch((error) => { 
+                                    handleDownloadFailure(5, error);
+                                    return this.DownloadFile(pkg.url, pkg, 5); // Last try, don't catch the error.
+                                });
+                            });
+                        });
+                    });
+                }).then(() => {
                     this.AppendLineChannel(" Done!");
                     if (retryCount != 0) {
                         // Log telemetry to see if retrying helps.
@@ -197,27 +204,29 @@ export class PackageManager {
     // reloadCpptoolsJson in main.ts uses ~25% of this function.
     private DownloadFile(urlString: any, pkg: IPackage, delay: number): Promise<void> {
         let parsedUrl: url.Url = url.parse(urlString);
-        let proxyStrictSSL = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
+        let proxyStrictSSL: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
 
         let options: https.RequestOptions = {
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: util.GetHttpsProxyAgent(),
             rejectUnauthorized: proxyStrictSSL
-        }
+        };
 
         return new Promise<void>((resolve, reject) => {
-            let secondsDelay = Math.pow(2, delay);
-            if (secondsDelay == 1)
+            let secondsDelay: number = Math.pow(2, delay);
+            if (secondsDelay == 1) {
                 secondsDelay = 0;
-            if (secondsDelay > 4)
+            }
+            if (secondsDelay > 4) {
                 this.AppendChannel(`Waiting ${secondsDelay} seconds...`);
+            }
             setTimeout(() => {
                 if (!pkg.tmpFile || pkg.tmpFile.fd == 0) {
                     return reject(new PackageManagerError('Temporary Package file unavailable', 'DownloadFile', pkg));
                 }
 
-                var handleHttpResponse = (response: IncomingMessage) => {
+                let handleHttpResponse: (response: IncomingMessage) => void = (response: IncomingMessage) => {
                     if (response.statusCode == 301 || response.statusCode == 302) {
                         // Redirect - download from new location
                         let redirectUrl: string | string[];
@@ -227,13 +236,11 @@ export class PackageManager {
                             redirectUrl = response.headers.location[0];
                         }
                         return resolve(this.DownloadFile(redirectUrl, pkg, 0));
-                    }
-                    else if (response.statusCode != 200) {
+                    } else if (response.statusCode != 200) {
                         // Download failed - print error message
                         let errorMessage: string = `failed (error code '${response.statusCode}')`;
                         return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
-                    }
-                    else {
+                    } else {
                         // Downloading - hook up events
                         let contentLength: any = response.headers['content-length'];
                         if (typeof response.headers['content-length'] === "string") {
@@ -241,26 +248,26 @@ export class PackageManager {
                         } else {
                             contentLength = response.headers['content-length'][0];
                         }
-                        let packageSize = parseInt(contentLength, 10);
-                        let downloadedBytes = 0;
-                        let downloadPercentage = 0;
-                        let dots = 0;
+                        let packageSize: number = parseInt(contentLength, 10);
+                        let downloadedBytes: number = 0;
+                        let downloadPercentage: number = 0;
+                        let dots: number = 0;
                         let tmpFile: fs.WriteStream = fs.createWriteStream(null, { fd: pkg.tmpFile.fd });
 
-                        this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `)
+                        this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `);
 
                         response.on('data', (data) => {
                             downloadedBytes += data.length;
 
                             // Update status bar item with percentage
-                            let newPercentage = Math.ceil(100 * (downloadedBytes / packageSize));
+                            let newPercentage: number = Math.ceil(100 * (downloadedBytes / packageSize));
                             if (newPercentage !== downloadPercentage) {
                                 this.SetStatusTooltip(`Downloading package '${pkg.description}'... ${downloadPercentage}%`);
                                 downloadPercentage = newPercentage;
                             }
 
                             // Update dots after package name in output console
-                            let newDots = Math.ceil(downloadPercentage / 5);
+                            let newDots: number = Math.ceil(downloadPercentage / 5);
                             if (newDots > dots) {
                                 this.AppendChannel(".".repeat(newDots - dots));
                                 dots = newDots;
@@ -280,7 +287,7 @@ export class PackageManager {
                     }
                 };
 
-                let request = https.request(options, handleHttpResponse);
+                let request: ClientRequest = https.request(options, handleHttpResponse);
 
                 request.on('error', (error) => {
                     reject(new PackageManagerError('HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
@@ -293,7 +300,7 @@ export class PackageManager {
     }
 
     private InstallPackage(pkg: IPackage): Promise<void> {
-        this.AppendLineChannel(`Installing package '${pkg.description}'`)
+        this.AppendLineChannel(`Installing package '${pkg.description}'`);
 
         this.SetStatusText("$(desktop-download) Installing packages...");
         this.SetStatusTooltip(`Installing package '${pkg.description}'`);
@@ -322,8 +329,7 @@ export class PackageManager {
 
                             zipfile.readEntry();
                         });
-                    }
-                    else {
+                    } else {
                         util.checkFileExists(absoluteEntryPath).then((exists: boolean) => {
                             if (!exists) {
                                 // File - extract it
@@ -338,9 +344,9 @@ export class PackageManager {
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
-                                        let fileMode = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        let fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
 
-                                        let writeStream = fs.createWriteStream(absoluteEntryPath, { mode: fileMode });
+                                        let writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryPath, { mode: fileMode });
                                         readStream.pipe(writeStream);
                                         writeStream.on('close', () => {
                                             // Wait till output is done writing before reading the next zip entry.
@@ -349,11 +355,11 @@ export class PackageManager {
                                         });
                                     });
                                 });
-                            }
-                            else {
+                            } else {
                                 // Skip the message for text files, because there is a duplicate text file unzipped.
-                                if (path.extname(absoluteEntryPath) != ".txt")
+                                if (path.extname(absoluteEntryPath) != ".txt") {
                                     this.AppendLineChannel(`Warning: File '${absoluteEntryPath}' already exists and was not updated.`);
+                                }
                                 zipfile.readEntry();
                             }
                         });

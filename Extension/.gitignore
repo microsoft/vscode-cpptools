@@ -1,5 +1,17 @@
-out
-server
+# ignore dependency packages
 node_modules
+
+# ignore compliled typescript
+out
+
+# ignore downloaded extension files and folders
+server
 debugAdapters
+LLVM
+bin/Microsoft.VSCode.CPP.*
+
+# ignore lock files
+install.lock
+
+# ignore generated packages
 *.vsix
