@@ -179,10 +179,14 @@
           "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU.",
           "scope": "resource"
         },
-        "C_Cpp.files.exclude.onlyCheckFolders": {
-          "type": "boolean",
-          "default": true,
-          "description": "Controls whether files.exclude filters are checked only for folders (recommended due to the performance impact) or for files as well.",
+        "C_Cpp.exclusionPolicy": {
+          "type": "string",
+          "enum": [
+            "checkFolders",
+            "checkFilesAndFolders"
+          ],
+          "default": "checkFolders",
+          "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (all children of the folder are excluded). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
           "scope": "resource"
         }
       }

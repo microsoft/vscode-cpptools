@@ -330,7 +330,7 @@ class DefaultClient implements Client {
                 errorSquiggles: settings.errorSquiggles,
                 loggingLevel: settings.loggingLevel,
                 throttleWorkspaceParsing: settings.throttleWorkspaceParsing,
-                files_exclude_onlyCheckFolders: settings.filesExcludeOnlyCheckFolders
+                exclusionPolicy: settings.exclusionPolicy
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {
