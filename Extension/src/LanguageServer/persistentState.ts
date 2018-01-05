@@ -19,7 +19,7 @@ class PersistentStateBase<T> {
         this.state = state;
     }
 
-    public get Value() {
+    public get Value(): T {
          return this.state.get<T>(this.key, this.defaultvalue);
     }
 
@@ -43,7 +43,7 @@ export class PersistentWorkspaceState<T> extends PersistentStateBase<T> {
 
 export class PersistentFolderState<T> extends PersistentWorkspaceState<T> {
     constructor(key: string, defaultValue: T, folder: string) {
-        let newKey = key + (folder ? `-${path.basename(folder)}` : "-untitled");
+        let newKey: string = key + (folder ? `-${path.basename(folder)}` : "-untitled");
         super(newKey, defaultValue);
     }
 }

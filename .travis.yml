@@ -13,6 +13,7 @@ addons:
 script:
   - cd Extension
   - npm install
+  - npm run tslint
   - npm run pretest
   - npm run test
 

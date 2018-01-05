@@ -24,8 +24,8 @@ export function indentJsonString(json: string, numTabs: number = 1): string {
     return json.split('\n').map(line => '\t'.repeat(numTabs) + line).join('\n').trim();
 }
 
-function formatString(format: string, args: string[]) {
-    for( var arg in args) {
+function formatString(format: string, args: string[]): string {
+    for (let arg in args) {
         format = format.replace("{" + arg + "}", args[arg]);
     }
     return format;
@@ -41,7 +41,7 @@ function CreateLaunchString(name: string, type: string, executable: string): str
 "cwd": "$\{workspaceFolder\}",
 "environment": [],
 "externalConsole": true
-`
+`;
     }
 
 function CreateAttachString(name: string, type: string, executable: string): string {
@@ -79,7 +79,7 @@ export interface IConfiguration {
 }
 
 abstract class Configuration implements IConfiguration {
-    public snippetPrefix = "C/C++: "
+    public snippetPrefix = "C/C++: ";
 
     public executable: string;
     public pipeProgram: string;
@@ -117,7 +117,7 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
             "bodyText": body.trim(),
             "isInitialConfiguration": true,
             "debuggerType": DebuggerType.cppdbg
-        }
+        };
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
@@ -181,7 +181,7 @@ export class PipeTransportConfigurations extends Configuration {
 export class WindowsConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name = "(Windows) Launch";
+        let name: string = "(Windows) Launch";
 
         let body: string = `
 {

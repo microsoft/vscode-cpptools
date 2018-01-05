@@ -32,7 +32,7 @@ export class PlatformInformation {
 
         return Promise.all<string | LinuxDistribution>([architecturePromise, distributionPromise])
             .then(([arch, distro]: [string, LinuxDistribution]) => {
-                return new PlatformInformation(platform, arch, distro)
+                return new PlatformInformation(platform, arch, distro);
             });
     }
 
@@ -44,13 +44,12 @@ export class PlatformInformation {
                 if (architecture) {
                     let archArray: string[] = architecture.split(os.EOL);
                     if (archArray.length >= 2) {
-                        let arch = archArray[1].trim();
+                        let arch: string = archArray[1].trim();
 
                         // Note: This string can be localized. So, we'll just check to see if it contains 32 or 64.
                         if (arch.indexOf('64') >= 0) {
                             return "x86_64";
-                        }
-                        else if (arch.indexOf('32') >= 0) {
+                        } else if (arch.indexOf('32') >= 0) {
                             return "x86";
                         }
                     }
