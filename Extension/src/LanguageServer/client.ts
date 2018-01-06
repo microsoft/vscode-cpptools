@@ -6,11 +6,9 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as os from 'os';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
-    RequestType, ErrorHandler, ErrorAction, CloseAction, DidOpenTextDocumentParams
+    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -31,8 +29,8 @@ interface NavigationPayload {
 
 interface TelemetryPayload {
     event: string;
-    properties?: { [key: string]: string },
-    metrics?: { [key: string]: number }
+    properties?: { [key: string]: string };
+    metrics?: { [key: string]: number };
 }
 
 interface OutputNotificationBody {
@@ -71,33 +69,33 @@ interface OutputNotificationBody {
 }
 
 // Requests
-const NavigationListRequest = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
-const GoToDeclarationRequest = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
-const QueryDefaultPathsRequest = new RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void>('cpptools/queryDefaultPaths');
-const SwitchHeaderSourceRequest = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
+const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
+const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
+const QueryDefaultPathsRequest: RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void> = new RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void>('cpptools/queryDefaultPaths');
+const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 
 // Notifications to the server
-const DidOpenNotification = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
-const FileCreatedNotification = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
-const FileDeletedNotification = new NotificationType<FileChangedParams, void>('cpptools/fileDeleted');
-const ResetDatabaseNotification = new NotificationType<void, void>('cpptools/resetDatabase');
-const PauseParsingNotification = new NotificationType<void, void>('cpptools/pauseParsing');
-const ResumeParsingNotification = new NotificationType<void, void>('cpptools/resumeParsing');
-const ActiveDocumentChangeNotification = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
-const TextEditorSelectionChangeNotification = new NotificationType<vscode.Position, void>('cpptools/textEditorSelectionChange');
-const ChangeFolderSettingsNotification = new NotificationType<FolderSettingsParams, void>('cpptools/didChangeFolderSettings');
-const ChangeCompileCommandsNotification = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
-const ChangeSelectedSettingNotification = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
-const IntervalTimerNotification = new NotificationType<void, void>('cpptools/onIntervalTimer');
+const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
+const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
+const FileDeletedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileDeleted');
+const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
+const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
+const ResumeParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeParsing');
+const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
+const TextEditorSelectionChangeNotification: NotificationType<vscode.Position, void> = new NotificationType<vscode.Position, void>('cpptools/textEditorSelectionChange');
+const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, void> = new NotificationType<FolderSettingsParams, void>('cpptools/didChangeFolderSettings');
+const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
+const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
+const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
 
 // Notifications from the server
-const ReloadWindowNotification = new NotificationType<void, void>('cpptools/reloadWindow');
-const LogTelemetryNotification = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
-const ReportNavigationNotification = new NotificationType<NavigationPayload, void>('cpptools/reportNavigation');
-const ReportTagParseStatusNotification = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportTagParseStatus');
-const ReportStatusNotification = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
-const DebugProtocolNotification = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
-const DebugLogNotification = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
+const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
+const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
+const ReportNavigationNotification: NotificationType<NavigationPayload, void> = new NotificationType<NavigationPayload, void>('cpptools/reportNavigation');
+const ReportTagParseStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportTagParseStatus');
+const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
+const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
+const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 
 const maxSettingLengthForTelemetry: number = 50;
 let previousCppSettings: { [key: string]: any } = {};
@@ -106,32 +104,35 @@ let previousCppSettings: { [key: string]: any } = {};
  * track settings changes for telemetry
  */
 function collectSettings(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
-    let settings = vscode.workspace.getConfiguration("C_Cpp", resource);
+    let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
     let result: { [key: string]: string } = {};
 
-    for (var key in settings) {
-        if (settings.inspect(key).defaultValue === undefined)
+    for (let key in settings) {
+        if (settings.inspect(key).defaultValue === undefined) {
             continue; // ignore methods and settings that don't exist
-        let val = settings.get(key);
-        if (val instanceof Object)
+        }
+        let val: any = settings.get(key);
+        if (val instanceof Object) {
             continue; // ignore settings that are objects since tostring on those is not useful (e.g. navigation.length)
+        }
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
             result[key] = (key == "clang_format_path") ? "..." : String(previousCppSettings[key]);
-            if (result[key].length > maxSettingLengthForTelemetry)
+            if (result[key].length > maxSettingLengthForTelemetry) {
                 result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
+            }
         }
     }
 
     return result;
 }
 
-function initializeSettingsCache(resource: vscode.Uri) {
+function initializeSettingsCache(resource: vscode.Uri): void {
     collectSettings(() => true, resource);
 }
 
 function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } {
-    let filter = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
+    let filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
         return val !== settings.inspect(key).defaultValue;
     };
     initializeSettingsCache(resource);
@@ -139,41 +140,41 @@ function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } 
 }
 
 interface ClientModel {
-    isTagParsing: DataBinding<boolean>,
-    isUpdatingIntelliSense: DataBinding<boolean>,
-    navigationLocation: DataBinding<string>,
-    tagParserStatus: DataBinding<string>,
-    activeConfigName: DataBinding<string>
+    isTagParsing: DataBinding<boolean>;
+    isUpdatingIntelliSense: DataBinding<boolean>;
+    navigationLocation: DataBinding<string>;
+    tagParserStatus: DataBinding<string>;
+    activeConfigName: DataBinding<string>;
 }
 
 export interface Client {
-    TagParsingChanged: vscode.Event<boolean>,
-    IntelliSenseParsingChanged: vscode.Event<boolean>,
-    NavigationLocationChanged: vscode.Event<string>,
-    TagParserStatusChanged: vscode.Event<string>,
-    ActiveConfigChanged: vscode.Event<string>,
-    RootPath: string,
-    RootUri: vscode.Uri,
-    Name: string,
-    TrackedDocuments: Set<vscode.TextDocument>,
-    onDidChangeSettings(): void,
-    takeOwnership(document: vscode.TextDocument): void,
-    requestGoToDeclaration(): Thenable<void>,
-    requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>,
-    requestNavigationList(document: vscode.TextDocument): Thenable<string>,
-    activeDocumentChanged(document: vscode.TextDocument): void,
-    activate(): void,
-    selectionChanged(selection: vscode.Position): void,
-    resetDatabase(): void,
-    deactivate(): void,
-    pauseParsing(): void,
-    resumeParsing(): void,
-    handleConfigurationSelectCommand(): void,
-    handleShowParsingCommands(): void,
-    handleConfigurationEditCommand(): void,
-    handleAddToIncludePathCommand(path: string): void,
-    onInterval(): void,
-    dispose(): Thenable<void>
+    TagParsingChanged: vscode.Event<boolean>;
+    IntelliSenseParsingChanged: vscode.Event<boolean>;
+    NavigationLocationChanged: vscode.Event<string>;
+    TagParserStatusChanged: vscode.Event<string>;
+    ActiveConfigChanged: vscode.Event<string>;
+    RootPath: string;
+    RootUri: vscode.Uri;
+    Name: string;
+    TrackedDocuments: Set<vscode.TextDocument>;
+    onDidChangeSettings(): void;
+    takeOwnership(document: vscode.TextDocument): void;
+    requestGoToDeclaration(): Thenable<void>;
+    requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
+    requestNavigationList(document: vscode.TextDocument): Thenable<string>;
+    activeDocumentChanged(document: vscode.TextDocument): void;
+    activate(): void;
+    selectionChanged(selection: vscode.Position): void;
+    resetDatabase(): void;
+    deactivate(): void;
+    pauseParsing(): void;
+    resumeParsing(): void;
+    handleConfigurationSelectCommand(): void;
+    handleShowParsingCommands(): void;
+    handleConfigurationEditCommand(): void;
+    handleAddToIncludePathCommand(path: string): void;
+    onInterval(): void;
+    dispose(): Thenable<void>;
 }
 
 export function createClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -204,10 +205,10 @@ class DefaultClient implements Client {
         navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
-    }
+    };
 
-    public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; };
-    public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; };
+    public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
+    public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
@@ -242,7 +243,7 @@ class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         try {
-            let languageClient = this.createLanguageClient(allClients, workspaceFolder);
+            let languageClient: LanguageClient = this.createLanguageClient(allClients, workspaceFolder);
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
             util.setProgress(util.getProgressExecutableStarted());
@@ -288,17 +289,17 @@ class DefaultClient implements Client {
     }
 
     private createLanguageClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): LanguageClient {
-        let serverModule = getLanguageServerFileName();
-        let serverName = this.getName(workspaceFolder);
+        let serverModule: string = getLanguageServerFileName();
+        let serverName: string = this.getName(workspaceFolder);
 
         let serverOptions: ServerOptions = {
             run: { command: serverModule },
             debug: { command: serverModule, args: [ serverName ] }
-        }
-        let settings = new CppSettings(workspaceFolder ? workspaceFolder.uri : null);
-        let other = new OtherSettings(workspaceFolder ? workspaceFolder.uri : null);
+        };
+        let settings: CppSettings = new CppSettings(workspaceFolder ? workspaceFolder.uri : null);
+        let other: OtherSettings = new OtherSettings(workspaceFolder ? workspaceFolder.uri : null);
 
-        let storagePath = util.extensionContext.storagePath;
+        let storagePath: string = util.extensionContext.storagePath;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             storagePath = path.join(storagePath, serverName);
         }
@@ -341,7 +342,7 @@ class DefaultClient implements Client {
                             let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
                             newClient.crashTimes = this.crashTimes;
                         } else {
-                            let elapsed = this.crashTimes[this.crashTimes.length-1] - this.crashTimes[0];
+                            let elapsed: number = this.crashTimes[this.crashTimes.length - 1] - this.crashTimes[0];
                             if (elapsed <= 3 * 60 * 1000) {
                                 if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
                                     vscode.window.showErrorMessage(`The language server for '${serverName}' crashed 5 times in the last 3 minutes. It will not be restarted.`);
@@ -360,23 +361,24 @@ class DefaultClient implements Client {
             }
 
             // TODO: should I set the output channel?  Does this sort output between servers?
-        }
+        };
 
         // Create the language client
         return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
     }
 
-    public onDidChangeSettings() {
+    public onDidChangeSettings(): void {
         // This relies on getNonDefaultSettings being called first.
         console.assert(Object.keys(previousCppSettings).length > 0);
 
-        let filter = (key: string, val: string) => {
+        let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
             return !(key in previousCppSettings) || val !== previousCppSettings[key];
         };
-        let changedSettings = collectSettings(filter, this.RootUri);
+        let changedSettings: any = collectSettings(filter, this.RootUri);
 
-        if (Object.keys(changedSettings).length > 0)
+        if (Object.keys(changedSettings).length > 0) {
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
+        }
     }
 
     /**
@@ -469,7 +471,7 @@ class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(DebugProtocolNotification, (output) => {
-            var outputEditorExist = vscode.window.visibleTextEditors.some((editor: vscode.TextEditor) => {
+            let outputEditorExist: boolean = vscode.window.visibleTextEditors.some((editor: vscode.TextEditor) => {
                 return editor.document.uri.scheme === "output";
             });
             if (!this.debugChannel) {
@@ -480,10 +482,9 @@ class DefaultClient implements Client {
                 this.debugChannel.show();
             }
             this.debugChannel.appendLine("");
-            this.debugChannel.appendLine("************************************************************************************************************************")
+            this.debugChannel.appendLine("************************************************************************************************************************");
             this.debugChannel.append(`${output}`);
         });
-
 
         this.languageClient.onNotification(DebugLogNotification, (output) => {
             if (!this.outputChannel) {
@@ -503,7 +504,7 @@ class DefaultClient implements Client {
      *******************************************************/
 
     private reloadWindow(): void {
-        let reload = "Reload";
+        let reload: string = "Reload";
         vscode.window.showInformationMessage("Reload the workspace for the settings change to take effect.", reload).then((value: string) => {
             if (value === reload) {
                 vscode.commands.executeCommand("workbench.action.reloadWindow");
@@ -516,7 +517,7 @@ class DefaultClient implements Client {
     }
 
     private navigate(payload: NavigationPayload): void {
-        let cppSettings = new CppSettings(this.RootUri);
+        let cppSettings: CppSettings = new CppSettings(this.RootUri);
 
         // TODO: Move this code to a different place?
         if (cppSettings.filesAssociationsAutoAdd && payload.navigation.startsWith("<def")) {
@@ -526,52 +527,57 @@ class DefaultClient implements Client {
 
         // If it's too big, it doesn't appear.
         // The space available depends on the user's resolution and space taken up by other UI.
-        let currentNavigation = payload.navigation;
-        let maxLength = cppSettings.navigationLength;
-        if (currentNavigation.length > maxLength)
+        let currentNavigation: string = payload.navigation;
+        let maxLength: number = cppSettings.navigationLength;
+        if (currentNavigation.length > maxLength) {
             currentNavigation = currentNavigation.substring(0, maxLength - 3).concat("...");
+        }
         this.model.navigationLocation.Value = currentNavigation;
     }
 
-    private addFileAssociations(fileAssociations: string) {
-        let settings = new OtherSettings(this.RootUri);
-        let assocs = settings.filesAssociations;
-        let is_c = fileAssociations.startsWith("c");
+    private addFileAssociations(fileAssociations: string): void {
+        let settings: OtherSettings = new OtherSettings(this.RootUri);
+        let assocs: any = settings.filesAssociations;
+        let is_c: boolean = fileAssociations.startsWith("c");
 
         // Skip over rest of header: c>; or >;
         fileAssociations = fileAssociations.substr(is_c ? 3 : 2);
-        let filesAndPaths = fileAssociations.split(";");
-        let foundNewAssociation = false;
-        for (let i = 0; i < filesAndPaths.length - 1; ++i) {
-            let fileAndPath = filesAndPaths[i].split("@");
-            let file = fileAndPath[0];
-            let filePath = fileAndPath[1];
-            if ((file in assocs) || (("**/" + file) in assocs))
+        let filesAndPaths: string[] = fileAssociations.split(";");
+        let foundNewAssociation: boolean = false;
+        for (let i: number = 0; i < filesAndPaths.length - 1; ++i) {
+            let fileAndPath: string[] = filesAndPaths[i].split("@");
+            let file: string = fileAndPath[0];
+            let filePath: string = fileAndPath[1];
+            if ((file in assocs) || (("**/" + file) in assocs)) {
                 continue; // File already has an association.
-            let j = file.lastIndexOf('.');
-            if (j != -1) {
-                let ext = file.substr(j);
-                if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs))
-                    continue; // Extension already has an association.
             }
-            let foundGlobMatch = false;
+            let j: number = file.lastIndexOf('.');
+            if (j != -1) {
+                let ext: string = file.substr(j);
+                if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs)) {
+                    continue; // Extension already has an association.
+                }
+            }
+            let foundGlobMatch: boolean = false;
             for (let assoc in assocs) {
                 if (minimatch(filePath, assoc)) {
                     foundGlobMatch = true;
                     break; // Assoc matched a glob pattern.
                 }
             }
-            if (foundGlobMatch)
+            if (foundGlobMatch) {
                 continue;
+            }
             assocs[file] = is_c ? "c" : "cpp";
             foundNewAssociation = true;
         }
-        if (foundNewAssociation)
+        if (foundNewAssociation) {
             settings.filesAssociations = assocs;
+        }
     }
 
-    private updateStatus(notificationBody: ReportStatusNotificationBody) {
-        let message = notificationBody.status;
+    private updateStatus(notificationBody: ReportStatusNotificationBody): void {
+        let message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
         if (message.endsWith("Indexing...")) {
             this.model.isTagParsing.Value = true;
@@ -585,18 +591,19 @@ class DefaultClient implements Client {
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
         } else if (message.endsWith("IntelliSense Fallback")) {
-            let showIntelliSenseFallbackMessage = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
+            let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
-                let learnMorePanel = "Learn More";
-                let dontShowAgain = "Don't Show Again";
+                let learnMorePanel: string = "Learn More";
+                let dontShowAgain: string = "Don't Show Again";
                 vscode.window.showInformationMessage("Configure includePath for better IntelliSense results.", learnMorePanel, dontShowAgain).then((value) => {
                     switch (value) {
                         case learnMorePanel:
                             let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
                             vscode.commands.executeCommand('vscode.open', uri);
                             vscode.commands.getCommands(true).then((commands: string[]) => {
-                                if (commands.indexOf("workbench.action.problems.focus") >= 0)
+                                if (commands.indexOf("workbench.action.problems.focus") >= 0) {
                                     vscode.commands.executeCommand("workbench.action.problems.focus");
+                                }
                             });
                             break;
                         case dontShowAgain:
@@ -608,7 +615,7 @@ class DefaultClient implements Client {
         }
     }
 
-    private updateTagParseStatus(notificationBody: ReportStatusNotificationBody) {
+    private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
@@ -638,7 +645,7 @@ class DefaultClient implements Client {
      * notifications to the language server
      *********************************************/
 
-    public activeDocumentChanged(document: vscode.TextDocument) {
+    public activeDocumentChanged(document: vscode.TextDocument): void {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
@@ -647,8 +654,8 @@ class DefaultClient implements Client {
     /**
      * enable UI updates from this client and resume tag parsing on the server.
      */
-    public activate() {
-        for (var key in this.model) {
+    public activate(): void {
+        for (let key in this.model) {
             if (this.model.hasOwnProperty(key)) {
                 this.model[key].activate();
             }
@@ -656,7 +663,7 @@ class DefaultClient implements Client {
         this.resumeParsing();
     }
 
-    public selectionChanged(selection: vscode.Position) {
+    public selectionChanged(selection: vscode.Position): void {
         this.notifyWhenReady(() => this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection));
     }
 
@@ -668,7 +675,7 @@ class DefaultClient implements Client {
      * disable UI updates from this client and pause tag parsing on the server.
      */
     public deactivate(): void {
-        for (var key in this.model) {
+        for (let key in this.model) {
             if (this.model.hasOwnProperty(key)) {
                 this.model[key].deactivate();
             }
@@ -684,7 +691,7 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
     }
 
-    private onConfigurationsChanged(configurations: configs.Configuration[]) {
+    private onConfigurationsChanged(configurations: configs.Configuration[]): void {
         let params: FolderSettingsParams = {
             configurations: configurations,
             currentConfiguration: this.configuration.CurrentConfiguration
@@ -695,7 +702,7 @@ class DefaultClient implements Client {
         });
     }
 
-    private onSelectedConfigurationChanged(index: number) {
+    private onSelectedConfigurationChanged(index: number): void {
         let params: FolderSelectedSettingParams = {
             currentConfiguration: index
         };
@@ -705,7 +712,7 @@ class DefaultClient implements Client {
         });
     }
 
-    private onCompileCommandsChanged(path: string) {
+    private onCompileCommandsChanged(path: string): void {
         let params: FileChangedParams = {
             uri: path
         };
@@ -715,7 +722,7 @@ class DefaultClient implements Client {
     /*********************************************
      * command handlers
      *********************************************/
-    public handleConfigurationSelectCommand() {
+    public handleConfigurationSelectCommand(): void {
         this.notifyWhenReady(() => {
             ui.showConfigurations(this.configuration.ConfigurationNames)
                 .then((index: number) => {
@@ -727,7 +734,7 @@ class DefaultClient implements Client {
         });
     }
 
-    public handleShowParsingCommands() {
+    public handleShowParsingCommands(): void {
         this.notifyWhenReady(() => {
             ui.showParsingCommands()
                 .then((index: number) => {
@@ -740,15 +747,15 @@ class DefaultClient implements Client {
         });
     }
 
-    public handleConfigurationEditCommand() {
+    public handleConfigurationEditCommand(): void {
         this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
     }
 
-    public handleAddToIncludePathCommand(path: string) {
+    public handleAddToIncludePathCommand(path: string): void {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
-    public onInterval() {
+    public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
         if (this.languageClient !== undefined && this.configuration !== undefined) {
@@ -758,12 +765,12 @@ class DefaultClient implements Client {
     }
 
     public dispose(): Thenable<void> {
-        let promise = (this.languageClient) ? this.languageClient.stop() : Promise.resolve();
+        let promise: Thenable<void> = (this.languageClient) ? this.languageClient.stop() : Promise.resolve();
         return promise.then(() => {
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
 
-            for (var key in this.model) {
+            for (let key in this.model) {
                 if (this.model.hasOwnProperty(key)) {
                     this.model[key].dispose();
                 }
@@ -773,8 +780,8 @@ class DefaultClient implements Client {
 }
 
 function getLanguageServerFileName(): string {
-    let extensionProcessName = 'Microsoft.VSCode.CPP.Extension';
-    let plat = process.platform;
+    let extensionProcessName: string = 'Microsoft.VSCode.CPP.Extension';
+    let plat: NodeJS.Platform = process.platform;
     if (plat == 'linux') {
         extensionProcessName += '.linux';
     } else if (plat == 'darwin') {

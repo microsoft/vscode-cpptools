@@ -5,7 +5,6 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as util from './common';
@@ -18,6 +17,7 @@ import { PersistentState } from './LanguageServer/persistentState';
 import * as url from 'url';
 import * as https from 'https';
 import { extensionContext } from './common';
+import { ClientRequest } from 'http';
 
 const releaseNotesVersion: number = 3;
 const userBucketMax: number = 100;
@@ -26,23 +26,24 @@ const userBucketMax: number = 100;
 let delayedCommandsToExecute: Set<string>;
 let tempCommands: vscode.Disposable[]; // Need to save this to unregister/dispose the temporary commands.
 
-function registerTempCommand(command: string) {
+function registerTempCommand(command: string): void {
     tempCommands.push(vscode.commands.registerCommand(command, () => {
         delayedCommandsToExecute.add(command);
         util.checkInstallLockFile().then((installLockExists: boolean) => {
-            if (!installLockExists)
+            if (!installLockExists) {
                 util.showWaitForDownloadPrompt();
+            }
         });
     }));
 }
 
-const userBucketString = "CPP.UserBucket";
+const userBucketString: string = "CPP.UserBucket";
 
 // NOTE: Code is copied from DownloadPackage in packageManager.ts, but with ~75% fewer lines.
 function downloadCpptoolsJson(urlString): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let parsedUrl: url.Url = url.parse(urlString);
-        let request = https.request({
+        let request: ClientRequest = https.request({
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: util.GetHttpsProxyAgent(),
@@ -57,12 +58,13 @@ function downloadCpptoolsJson(urlString): Promise<void> {
                 }
                 return resolve(downloadCpptoolsJson(redirectUrl)); // Redirect - download from new location
             }
-            if (response.statusCode != 200)
+            if (response.statusCode != 200) {
                 return reject();
-            let downloadedBytes = 0;
+            }
+            let downloadedBytes = 0; // tslint:disable-line
             let cppToolsJsonFile: fs.WriteStream = fs.createWriteStream(util.getExtensionFilePath("cpptools.json"));
             response.on('data', (data) => { downloadedBytes += data.length; });
-            response.on('end', () => { cppToolsJsonFile.close() });
+            response.on('end', () => { cppToolsJsonFile.close(); });
             cppToolsJsonFile.on('close', () => { resolve(); });
             response.on('error', (error) => { reject(); });
             response.pipe(cppToolsJsonFile, { end: false });
@@ -86,32 +88,33 @@ function downloadCpptoolsJsonPkg(): Promise<void> {
         });
 }
 
-function processCpptoolsJson(cpptoolsString: string) {
-    let cpptoolsObject = JSON.parse(cpptoolsString);
+function processCpptoolsJson(cpptoolsString: string): Promise<void> {
+    let cpptoolsObject: any = JSON.parse(cpptoolsString);
     let intelliSenseEnginePercentage: number = cpptoolsObject.intelliSenseEngine_default_percentage;
 
     if (!util.packageJson.extensionFolderPath.includes(".vscode-insiders")) {
-        let prevIntelliSenseEngineDefault = util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
+        let prevIntelliSenseEngineDefault: any = util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (util.extensionContext.globalState.get<number>(userBucketString, userBucketMax + 1) <= intelliSenseEnginePercentage) {
             util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
         } else {
             util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
         }
-        if (prevIntelliSenseEngineDefault != util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default)
+        if (prevIntelliSenseEngineDefault != util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
             return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
+        }
     }
 }
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
     util.setExtensionContext(context);
     Telemetry.activate();
     util.setProgress(0);
 
-    // Activate Configuration Provider and Process Picker Commands.
-    DebuggerExtension.activate();
+    // Initialize the DebuggerExtension and register the related commands and providers.
+    DebuggerExtension.initialize();
 
     if (context.globalState.get<number>(userBucketString, -1) == -1) {
-        let bucket = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
+        let bucket: number = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
         context.globalState.update(userBucketString, bucket);
     }
 
@@ -154,7 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.commands.executeCommand(command);
                     });
                     delayedCommandsToExecute.clear();
-                })
+                });
         });
     });
 
@@ -165,7 +168,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> {
-    DebuggerExtension.deactivate();
+    DebuggerExtension.dispose();
 
     tempCommands.forEach((command) => {
         command.dispose();
@@ -176,25 +179,24 @@ export function deactivate(): Thenable<void> {
 }
 
 function removePotentialPII(str: string): string {
-    let words = str.split(" ");
-    let result = "";
+    let words: string[] = str.split(" ");
+    let result: string = "";
     for (let word of words) {
         if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
             result += word + " ";
-        }
-        else {
-            result += "? "
+        } else {
+            result += "? ";
         }
     }
     return result;
 }
 
 interface InstallBlob {
-    stage: string,
-    hasError: boolean,
-    telemetryProperties: { [key: string]: string },
-    info?: PlatformInformation,
-    packageManager?: PackageManager
+    stage: string;
+    hasError: boolean;
+    telemetryProperties: { [key: string]: string };
+    info?: PlatformInformation;
+    packageManager?: PackageManager;
 }
 
 // During activation, the C++ extension must perform the following steps:
@@ -209,10 +211,11 @@ interface InstallBlob {
 //  9. After the install is finished, show a reload prompt if a debug attach/launch occurrs or launch.json is opened.
 // 10. We also download a cpptool.json in case we want to use the data in it to alter the behavior post-shipping (i.e. a/b testing).
 // 11. After reloading, the package.lock is written, which causes the reload prompt to no longer appear.
-function processRuntimeDependencies(activateExtensions: () => void) {
+function processRuntimeDependencies(activateExtensions: () => void): void {
     util.checkPackageLockFile().then((packageLockExists: boolean) => {
-        if (packageLockExists)
+        if (packageLockExists) {
             return activateExtensions();
+        }
 
         util.checkInstallLockFile().then((installLockExists: boolean) => {
             let installBlob: InstallBlob = {
@@ -227,8 +230,9 @@ function processRuntimeDependencies(activateExtensions: () => void) {
 
                     // Need to watch for debugger.reload in case launch debugging is done.
                     fs.watch(extensionContext.extensionPath, (event: string, filename: string) => {
-                        if (filename == "debugger.reload")
+                        if (filename == "debugger.reload") {
                             util.showReloadPrompt();
+                        }
                     });
                     PlatformInformation.GetPlatformInformation()
                         .then((info) => {
@@ -259,7 +263,7 @@ function processRuntimeDependencies(activateExtensions: () => void) {
                         });
                     }
                 });
-                let channel = util.getOutputChannel();
+                let channel: vscode.OutputChannel = util.getOutputChannel();
                 channel.appendLine("Updating C/C++ dependencies...");
 
                 let statusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
@@ -312,11 +316,12 @@ function makeOfflineBinariesExecutable(installBlob: InstallBlob): Thenable<void>
 function removeUnnecessaryFile(installBlob: InstallBlob): void {
     if (os.platform() !== 'win32') {
         installBlob.stage = "removeUnnecessaryFile";
-        let sourcePath = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
-        if (fs.existsSync(sourcePath))
+        let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
+        if (fs.existsSync(sourcePath)) {
             fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err) => {
                 util.getOutputChannel().appendLine("removeUnnecessaryFile: fs.rename failed: " + err.message);
             });
+        }
     }
 }
 
@@ -331,14 +336,14 @@ function handleError(installBlob: InstallBlob, error: any): void {
     installBlob.hasError = true;
     installBlob.telemetryProperties['stage'] = installBlob.stage;
     let errorMessage: string;
-    let channel = util.getOutputChannel();
+    let channel: vscode.OutputChannel = util.getOutputChannel();
 
     if (error instanceof PackageManagerError) {
         // If this is a WebResponse error, log the IP that it resolved from the package URL
         if (error instanceof PackageManagerWebResponseError) {
             let webRequestPackageError: PackageManagerWebResponseError = error;
             if (webRequestPackageError.socket) {
-                let address = webRequestPackageError.socket.address();
+                let address: any = webRequestPackageError.socket.address();
                 if (address) {
                     installBlob.telemetryProperties['error.targetIP'] = address.address + ':' + address.port;
                 }
@@ -365,15 +370,15 @@ function handleError(installBlob: InstallBlob, error: any): void {
         if (packageError.errorCode) {
             installBlob.telemetryProperties['error.errorCode'] = removePotentialPII(packageError.errorCode);
         }
-    }
-    else {
+    } else {
         errorMessage = error.toString();
         installBlob.telemetryProperties['error.toString'] = removePotentialPII(errorMessage);
     }
 
     // Show the actual message and not the sanitized one
-    if (installBlob.stage == "downloadPackages")
+    if (installBlob.stage == "downloadPackages") {
         channel.appendLine("");
+    }
     channel.appendLine(`Failed at stage: ${installBlob.stage}`);
     channel.appendLine(errorMessage);
     channel.appendLine("");
@@ -382,7 +387,7 @@ function handleError(installBlob: InstallBlob, error: any): void {
 }
 
 function postInstall(installBlob: InstallBlob): Thenable<void> {
-    let channel = util.getOutputChannel();
+    let channel: vscode.OutputChannel = util.getOutputChannel();
 
     channel.appendLine("");
     channel.appendLine("Finished installing dependencies");
@@ -398,7 +403,7 @@ function postInstall(installBlob: InstallBlob): Thenable<void> {
 
     if (!installBlob.hasError) {
         util.setProgress(util.getProgressInstallSuccess());
-        let versionShown = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
+        let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
         if (versionShown.Value < releaseNotesVersion) {
             util.showReleaseNotes();
             versionShown.Value = releaseNotesVersion;
@@ -410,11 +415,13 @@ function postInstall(installBlob: InstallBlob): Thenable<void> {
     Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
 
     // If there is a download failure, we shouldn't continue activating the extension in some broken state.
-    if (installBlob.hasError)
+    if (installBlob.hasError) {
         return Promise.reject<void>("");
+    }
 
-    if (util.getDebuggerReloadLater())
+    if (util.getDebuggerReloadLater()) {
         util.showReloadPrompt();
+    }
 
     return Promise.resolve();
 }
@@ -427,7 +434,7 @@ function checkDistro(channel: vscode.OutputChannel, platformInfo: PlatformInform
     }
 }
 
-function rewriteManifest(installBlob: InstallBlob): Promise<void> {
+function rewriteManifest(installBlob: InstallBlob): void {
     installBlob.stage = "rewriteManifest";
 
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
@@ -452,20 +459,4 @@ function rewriteManifest(installBlob: InstallBlob): Promise<void> {
         "onCommand:C_Cpp.TakeSurvey",
         "onDebug"
     ];
-
-    // Remove the entry for cppdbg's proxy stub and replace it with the real debugger binary
-    util.packageJson.contributes.debuggers[0].runtime = undefined;
-    util.packageJson.contributes.debuggers[0].program = './debugAdapters/OpenDebugAD7';
-    util.packageJson.contributes.debuggers[0].windows = { "program": "./debugAdapters/bin/OpenDebugAD7.exe" };
-
-    // Remove the entry for cppvsdbg's proxy stub and replace it with the real debugger binary for Windows only.
-    if (os.platform() === 'win32') {
-        util.packageJson.contributes.debuggers[1].runtime = undefined;
-        util.packageJson.contributes.debuggers[1].program = './debugAdapters/vsdbg/bin/vsdbg.exe';
-    }
-
-    if (util.packageJson.extensionFolderPath.includes(".vscode-insiders"))
-        util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
-
-    return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
 }

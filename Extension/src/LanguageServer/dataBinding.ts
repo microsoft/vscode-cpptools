@@ -31,12 +31,12 @@ export class DataBinding<T> {
         return this.valueChanged.event;
     }
 
-    public activate() {
+    public activate(): void {
         this.isActive = true;
         this.valueChanged.fire(this.value);
     }
 
-    public deactivate() {
+    public deactivate(): void {
         this.isActive = false;
     }
 
