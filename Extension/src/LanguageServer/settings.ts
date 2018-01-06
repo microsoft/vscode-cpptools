@@ -44,7 +44,7 @@ export class CppSettings extends Settings {
     public get loggingLevel() { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength() { return super.Section.get<number>("navigation.length", 60); }
     public get filesAssociationsAutoAdd() { return super.Section.get<boolean>("files.associations.autoAdd"); }
-    public get throttleWorkspaceParsing() { return super.Section.get<boolean>("throttleWorkspaceParsing"); }
+    public get workspaceParsingPriority() { return super.Section.get<boolean>("workspaceParsingPriority"); }
     public get exclusionPolicy() { return super.Section.get<boolean>("exclusionPolicy"); }
 
     public toggleSetting(name: string, value1: string, value2: string) {

@@ -173,10 +173,16 @@
           "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",
           "scope": "resource"
         },
-        "C_Cpp.throttleWorkspaceParsing": {
-          "type": "boolean",
-          "default": true,
-          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU.",
+        "C_Cpp.workspaceParsingPriority": {
+          "type": "string",
+          "enum": [
+            "highest",
+            "high",
+            "normal",
+            "low"
+          ],
+          "default": "normal",
+          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/normal/low correspond to approximately 100/75/50/25% CPU usage.",
           "scope": "resource"
         },
         "C_Cpp.exclusionPolicy": {
