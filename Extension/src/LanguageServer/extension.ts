@@ -59,7 +59,7 @@ const multilineCommentRules: any = {
 /**
  * activate: set up the extension for language services
  */
-export function activate(delayedCommandsToExecute: Set<string>): void {
+export function activate(activationEventOccurred: boolean): void {
     console.log("activating extension");
 
     // Activate immediately if an activation event occurred in the previous workspace session.
@@ -69,11 +69,12 @@ export function activate(delayedCommandsToExecute: Set<string>): void {
         activatedPreviously.Value = false;
         realActivation();
     }
+    
     registerCommands();
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
     // Check if an activation event has already occurred.
-    if (delayedCommandsToExecute.size > 0) {
+    if (activationEventOccurred) {
         return onActivationEvent();
     }
     
@@ -164,9 +165,6 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor || (activeEditor.document.languageId != "cpp" && activeEditor.document.languageId != "c")) {
         activeDocument = "";
-        if (util.getShowReloadPromptOnce() && activeEditor && activeEditor.document.fileName.endsWith(path.sep + "launch.json")) {
-            util.showReloadOrWaitPromptOnce();
-        }
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);

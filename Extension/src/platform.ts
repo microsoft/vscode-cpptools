@@ -6,11 +6,13 @@
 import * as os from 'os';
 import * as util from './common';
 import { LinuxDistribution } from './linuxDistribution';
+import { setInstallBlobStage, InstallBlobStage } from './extensionActivationInformation';
 
 export class PlatformInformation {
     constructor(public platform: string, public architecture: string, public distribution: LinuxDistribution) { }
 
     public static GetPlatformInformation(): Promise<PlatformInformation> {
+        setInstallBlobStage(InstallBlobStage.getPlatformInfo);
         let platform: string = os.platform();
         let architecturePromise: Promise<string>;
         let distributionPromise: Promise<LinuxDistribution> = Promise.resolve<LinuxDistribution>(null);

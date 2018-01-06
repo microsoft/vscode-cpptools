@@ -20,23 +20,25 @@ export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
     public ShowAttachEntries(): Promise<string> {
-        if (util.getShowReloadPrompt()) {
-            util.showReloadOrWaitPrompt();
-        } else {
-            return this.attachItemsProvider.getAttachItems()
-                .then(processEntries => {
-                    let attachPickOptions: vscode.QuickPickOptions = {
-                        matchOnDescription: true,
-                        matchOnDetail: true,
-                        placeHolder: "Select the process to attach to"
-                    };
+        return util.isExtensionReady().then(ready => {
+            if (ready) {
+                util.displayExtensionNotReadyPrompt();
+            } else {
+                return this.attachItemsProvider.getAttachItems()
+                    .then(processEntries => {
+                        let attachPickOptions: vscode.QuickPickOptions = {
+                            matchOnDescription: true,
+                            matchOnDetail: true,
+                            placeHolder: "Select the process to attach to"
+                        };
 
-                    return vscode.window.showQuickPick(processEntries, attachPickOptions)
-                        .then(chosenProcess => {
-                            return chosenProcess ? chosenProcess.id : Promise.reject<string>(new Error("Process not selected."));
-                        });
-                });
-        }
+                        return vscode.window.showQuickPick(processEntries, attachPickOptions)
+                            .then(chosenProcess => {
+                                return chosenProcess ? chosenProcess.id : Promise.reject<string>(new Error("Process not selected."));
+                            });
+                    });
+            }
+        });
     }
 }
 
@@ -48,38 +50,39 @@ export class RemoteAttachPicker {
     private _channel: vscode.OutputChannel = null;
 
     public ShowAttachEntries(args: any): Promise<string> {
-        if (util.getShowReloadPrompt()) {
-            util.showReloadOrWaitPrompt();
-        } else {
-            this._channel.clear();
+        return util.isExtensionReady().then(ready => {
+            if (ready) {
+                util.displayExtensionNotReadyPrompt();
+            } else {
+                this._channel.clear();
 
-            let pipeTransport: any = args ? args.pipeTransport : null;
+                let pipeTransport: any = args ? args.pipeTransport : null;
 
-            if (pipeTransport === null) {
-                return Promise.reject<string>(new Error("Chosen debug configuration does not contain pipeTransport"));
+                if (pipeTransport === null) {
+                    return Promise.reject<string>(new Error("Chosen debug configuration does not contain pipeTransport"));
+                }
+
+                let pipeProgram: string = pipeTransport.pipeProgram;
+                let pipeArgs: string[] = pipeTransport.pipeArgs;
+
+                let argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
+
+                let pipeCmd: string = `"${pipeProgram}" ${argList}`;
+
+                return this.getRemoteOSAndProcesses(pipeCmd).then(processes => {
+                        let attachPickOptions: vscode.QuickPickOptions = {
+                            matchOnDetail: true,
+                            matchOnDescription: true,
+                            placeHolder: "Select the process to attach to"
+                        };
+
+                        return vscode.window.showQuickPick(processes, attachPickOptions)
+                            .then(item => {
+                                return item ? item.id : Promise.reject<string>(new Error("Process not selected."));
+                            });
+                    });
             }
-
-            let pipeProgram: string = pipeTransport.pipeProgram;
-            let pipeArgs: string[] = pipeTransport.pipeArgs;
-
-            let argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
-
-            let pipeCmd: string = `"${pipeProgram}" ${argList}`;
-
-            return this.getRemoteOSAndProcesses(pipeCmd)
-                .then(processes => {
-                    let attachPickOptions: vscode.QuickPickOptions = {
-                        matchOnDetail: true,
-                        matchOnDescription: true,
-                        placeHolder: "Select the process to attach to"
-                    };
-
-                    return vscode.window.showQuickPick(processes, attachPickOptions)
-                        .then(item => {
-                            return item ? item.id : Promise.reject<string>(new Error("Process not selected."));
-                        });
-                });
-        }
+        });
     }
 
     private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
