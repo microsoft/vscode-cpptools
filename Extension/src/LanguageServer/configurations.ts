@@ -274,25 +274,29 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
+    private resolveAndSplit(paths: string[]): string[] {
+        let result: string[] = [];
+        paths.forEach(entry => {
+            let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
+            result = result.concat(entries);
+        });
+        return result;
+    }
+
     private updateServerOnFolderSettingsChange(): void {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            if (this.configurationJson.configurations[i].includePath !== undefined) {
-                for (let j: number = 0; j < this.configurationJson.configurations[i].includePath.length; j++) {
-                    this.configurationJson.configurations[i].includePath[j] = util.resolveVariables(this.configurationJson.configurations[i].includePath[j]);
-                }
+            let configuration: Configuration = this.configurationJson.configurations[i];
+            if (configuration.includePath !== undefined) {
+                configuration.includePath = this.resolveAndSplit(configuration.includePath);
             }
-            if (this.configurationJson.configurations[i].browse !== undefined && this.configurationJson.configurations[i].browse.path !== undefined) {
-                for (let j: number = 0; j < this.configurationJson.configurations[i].browse.path.length; j++) {
-                    this.configurationJson.configurations[i].browse.path[j] = util.resolveVariables(this.configurationJson.configurations[i].browse.path[j]);
-                }
+            if (configuration.browse !== undefined && configuration.browse.path !== undefined) {
+                configuration.browse.path = this.resolveAndSplit(configuration.browse.path);
             }
-            if (this.configurationJson.configurations[i].macFrameworkPath !== undefined) {
-                for (let j: number = 0; j < this.configurationJson.configurations[i].macFrameworkPath.length; j++) {
-                    this.configurationJson.configurations[i].macFrameworkPath[j] = util.resolveVariables(this.configurationJson.configurations[i].macFrameworkPath[j]);
-                }
+            if (configuration.macFrameworkPath !== undefined) {
+                configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
             }
-            if (this.configurationJson.configurations[i].compileCommands !== undefined) {
-                this.configurationJson.configurations[i].compileCommands = util.resolveVariables(this.configurationJson.configurations[i].compileCommands);
+            if (configuration.compileCommands !== undefined) {
+                configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
             }
         }
 
