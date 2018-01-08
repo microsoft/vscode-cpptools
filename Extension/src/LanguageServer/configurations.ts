@@ -277,7 +277,7 @@ export class CppProperties {
     private resolveAndSplit(paths: string[]): string[] {
         let result: string[] = [];
         paths.forEach(entry => {
-            let entries = util.resolveVariables(entry).split(";").filter(e => e);
+            let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
             result = result.concat(entries);
         });
         return result;
