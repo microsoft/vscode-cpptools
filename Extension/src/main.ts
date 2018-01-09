@@ -306,7 +306,7 @@ function makeOfflineBinariesExecutable(installBlob: InstallBlob): Thenable<void>
     packages.forEach(p => {
         if (p.binaries && p.binaries.length > 0 &&
             p.platforms.findIndex(plat => plat === installBlob.info.platform) !== -1 &&
-            (p.architectures == undefined || p.architectures.findIndex(arch => arch === installBlob.info.architecture) !== - 1)) {
+            (p.architectures === undefined || p.architectures.findIndex(arch => arch === installBlob.info.architecture) !== - 1)) {
             p.binaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
         }
     });
