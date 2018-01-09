@@ -30,10 +30,8 @@ export function getPackageJsonString(): string {
     return JSON.stringify(packageJson, null, 2);
 }
 
-export async function isExtensionReady(): Promise<boolean> {
-    const installLock: boolean = await checkInstallLockFile();
-
-    return installLock;
+export function isExtensionReady(): Promise<boolean> {
+    return checkInstallLockFile();
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
