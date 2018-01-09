@@ -329,7 +329,9 @@ class DefaultClient implements Client {
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
-                loggingLevel: settings.loggingLevel
+                loggingLevel: settings.loggingLevel,
+                workspaceParsingPriority: settings.workspaceParsingPriority,
+                exclusionPolicy: settings.exclusionPolicy
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {

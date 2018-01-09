@@ -172,6 +172,28 @@
           "default": true,
           "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",
           "scope": "resource"
+        },
+        "C_Cpp.workspaceParsingPriority": {
+          "type": "string",
+          "enum": [
+            "highest",
+            "high",
+            "normal",
+            "low"
+          ],
+          "default": "normal",
+          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/normal/low correspond to approximately 100/75/50/25% CPU usage.",
+          "scope": "resource"
+        },
+        "C_Cpp.exclusionPolicy": {
+          "type": "string",
+          "enum": [
+            "checkFolders",
+            "checkFilesAndFolders"
+          ],
+          "default": "checkFolders",
+          "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
+          "scope": "resource"
         }
       }
     },
@@ -1048,7 +1070,7 @@
     "tmp": "~0.0.33",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
-    "vscode-extension-telemetry": "~0.0.8",
+    "vscode-extension-telemetry": "~0.0.10",
     "vscode-languageclient": "~3.4.5",
     "yauzl": "~2.8.0"
   },

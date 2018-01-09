@@ -28,7 +28,7 @@ export class CppSettings extends Settings {
     constructor(resource?: vscode.Uri) {
         super("C_Cpp", resource);
     }
-
+  
     public get clangFormatPath(): string { return super.Section.get<string>("clang_format_path"); }
     public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string { return super.Section.get<string>("clang_format_fallbackStyle"); }
@@ -42,6 +42,8 @@ export class CppSettings extends Settings {
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }
     public get filesAssociationsAutoAdd(): boolean { return super.Section.get<boolean>("files.associations.autoAdd"); }
+    public get workspaceParsingPriority(): boolean { return super.Section.get<boolean>("workspaceParsingPriority"); }
+    public get exclusionPolicy(): boolean { return super.Section.get<boolean>("exclusionPolicy"); }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);
