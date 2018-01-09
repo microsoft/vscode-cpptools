@@ -434,7 +434,7 @@ function checkDistro(channel: vscode.OutputChannel, platformInfo: PlatformInform
     }
 }
 
-function rewriteManifest(installBlob: InstallBlob): void {
+function rewriteManifest(installBlob: InstallBlob): Promise<void> {
     installBlob.stage = "rewriteManifest";
 
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
@@ -459,4 +459,6 @@ function rewriteManifest(installBlob: InstallBlob): void {
         "onCommand:C_Cpp.TakeSurvey",
         "onDebug"
     ];
+
+    return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
 }
