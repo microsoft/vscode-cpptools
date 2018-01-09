@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 import * as Telemetry from './telemetry';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as url from 'url';
+import { PlatformInformation } from './platform';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -30,8 +31,12 @@ export function getPackageJsonString(): string {
     return JSON.stringify(packageJson, null, 2);
 }
 
-export function isExtensionReady(): Promise<boolean> {
-    return checkInstallLockFile();
+// Extension is ready if install.lock exists and debugAdapters folder exist.
+export async function isExtensionReady(): Promise<boolean> {
+    const doesDebugAdapterFolderExist: boolean = await checkFileExists(getExtensionFilePath("debugAdapters"));
+    const doesInstallLockFileExist: boolean = await checkInstallLockFile();
+
+    return doesDebugAdapterFolderExist && doesInstallLockFileExist;
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
@@ -373,4 +378,25 @@ export function allowExecution(file: string): Promise<void> {
             resolve();
         }
     });
+}
+
+export function removePotentialPII(str: string): string {
+    let words: string[] = str.split(" ");
+    let result: string = "";
+    for (let word of words) {
+        if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
+            result += word + " ";
+        } else {
+            result += "? ";
+        }
+    }
+    return result;
+}
+
+export function checkDistro(platformInfo: PlatformInformation): void {
+    if (platformInfo.platform != 'win32' && platformInfo.platform != 'linux' && platformInfo.platform != 'darwin') {
+        // this should never happen because VSCode doesn't run on FreeBSD
+        // or SunOS (the other platforms supported by node)
+        outputChannel.appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
+    }
 }

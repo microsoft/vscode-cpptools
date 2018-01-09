@@ -21,7 +21,7 @@ import * as cpptoolsJsonUtils from './cpptoolsJsonUtils';
 let tempCommandRegistrar: commands.TemporaryCommandRegistrar;
 const releaseNotesVersion: number = 3;
 
-export function activate(context: vscode.ExtensionContext): Promise<void> {
+export function activate(context: vscode.ExtensionContext): void | Promise<void> {
     tempCommandRegistrar = new commands.TemporaryCommandRegistrar();
     util.setExtensionContext(context);
     Telemetry.activate();
@@ -41,19 +41,6 @@ export function deactivate(): Thenable<void> {
     return LanguageServer.deactivate();
 }
 
-function removePotentialPII(str: string): string {
-    let words: string[] = str.split(" ");
-    let result: string = "";
-    for (let word of words) {
-        if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
-            result += word + " ";
-        } else {
-            result += "? ";
-        }
-    }
-    return result;
-}
-
 async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
@@ -62,27 +49,38 @@ async function processRuntimeDependencies(): Promise<void> {
 
         // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
         if (installLockExists && util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
-            let makeBinariesExecutablePromise: Promise<void> = makeBinariesExecutable();
-            let makeOfflineBinariesExecutablePromise: Promise<void> = makeOfflineBinariesExecutable(info);
-            let rewriteManifestPromise: Promise<void> = rewriteManifest();
-
-            await Promise.all([makeBinariesExecutablePromise, makeOfflineBinariesExecutablePromise, rewriteManifestPromise]);
-            await postInstall(info);
+            await offlineInstallation(info);
         // No lock file, need to download and install dependencies.
         } else if (!installLockExists) {
-            await downloadAndInstallPackages(info);
-
-            let makeBinariesExecutablePromise: Promise<void> = makeBinariesExecutable();
-            let removeUnnecessaryFilePromise: Promise<void> = removeUnnecessaryFile();
-            let rewriteManifestPromise: Promise<void> = rewriteManifest();
-            let touchInstallLockFilePromise: Promise<void> = touchInstallLockFile(info);
-
-            await Promise.all([makeBinariesExecutablePromise, removeUnnecessaryFilePromise, rewriteManifestPromise, touchInstallLockFilePromise]);
-            await postInstall(info);
+            await onlineInstallation(info);
         }
+    // Catches all errors from all promises within this block.
     } catch (error) {
         handleError(error);
     }
+}
+
+async function offlineInstallation(info: PlatformInformation): Promise<void> {
+    let makeBinariesExecutablePromise: Promise<void> = makeBinariesExecutable();
+    let makeOfflineBinariesExecutablePromise: Promise<void> = makeOfflineBinariesExecutable(info);
+    let rewriteManifestPromise: Promise<void> = rewriteManifest();
+
+    await Promise.all([makeBinariesExecutablePromise, makeOfflineBinariesExecutablePromise, rewriteManifestPromise]);
+
+    await postInstall(info);
+}
+
+async function onlineInstallation(info: PlatformInformation): Promise<void> {
+    await downloadAndInstallPackages(info);
+
+    let makeBinariesExecutablePromise: Promise<void> = makeBinariesExecutable();
+    let removeUnnecessaryFilePromise: Promise<void> = removeUnnecessaryFile();
+    let rewriteManifestPromise: Promise<void> = rewriteManifest();
+    let touchInstallLockFilePromise: Promise<void> = touchInstallLockFile(info);
+
+    await Promise.all([makeBinariesExecutablePromise, removeUnnecessaryFilePromise, rewriteManifestPromise, touchInstallLockFilePromise]);
+
+    await postInstall(info);
 }
 
 async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
@@ -135,15 +133,13 @@ function removeUnnecessaryFile(): Promise<void> {
 function touchInstallLockFile(info: PlatformInformation): Promise<void> {
     setInstallBlobStage(InstallBlobStage.touchInstallLockFile);
 
-    checkDistro(util.getOutputChannel(), info);
-
     return util.touchInstallLockFile();
 }
 
 function handleError(error: any): void {
     let installBlob: InstallBlob = getInstallBlob();
     installBlob.hasError = true;
-    installBlob.telemetryProperties['stage'] = installBlob.stage.toString();
+    installBlob.telemetryProperties['stage'] = InstallBlobStage[installBlob.stage];
     let errorMessage: string;
     let channel: vscode.OutputChannel = util.getOutputChannel();
 
@@ -166,7 +162,7 @@ function handleError(error: any): void {
 
         if (packageError.innerError) {
             errorMessage = packageError.innerError.toString();
-            installBlob.telemetryProperties['error.innerError'] = removePotentialPII(errorMessage);
+            installBlob.telemetryProperties['error.innerError'] = util.removePotentialPII(errorMessage);
         } else {
             errorMessage = packageError.message;
         }
@@ -177,18 +173,18 @@ function handleError(error: any): void {
         }
 
         if (packageError.errorCode) {
-            installBlob.telemetryProperties['error.errorCode'] = removePotentialPII(packageError.errorCode);
+            installBlob.telemetryProperties['error.errorCode'] = util.removePotentialPII(packageError.errorCode);
         }
     } else {
         errorMessage = error.toString();
-        installBlob.telemetryProperties['error.toString'] = removePotentialPII(errorMessage);
+        installBlob.telemetryProperties['error.toString'] = util.removePotentialPII(errorMessage);
     }
 
     // Show the actual message and not the sanitized one
     if (installBlob.stage == InstallBlobStage.downloadPackages) {
         channel.appendLine("");
     }
-    channel.appendLine(`Failed at stage: ${installBlob.stage.toString()}`);
+    channel.appendLine(`Failed at stage: ${InstallBlobStage[installBlob.stage]}`);
     channel.appendLine(errorMessage);
     channel.appendLine("");
     channel.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
@@ -241,15 +237,9 @@ function postInstall(info: PlatformInformation): Thenable<void> {
             // Redownload cpptools.json after activation so it's not blocked.
             // It'll be used after the extension reloads.
             cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
-        });
-}
 
-function checkDistro(channel: vscode.OutputChannel, platformInfo: PlatformInformation): void {
-    if (platformInfo.platform != 'win32' && platformInfo.platform != 'linux' && platformInfo.platform != 'darwin') {
-        // this should never happen because VSCode doesn't run on FreeBSD
-        // or SunOS (the other platforms supported by node)
-        channel.appendLine(`Warning: Debugging has not been tested for this platform. ${util.getReadmeMessage()}`);
-    }
+            util.checkDistro(info);
+        });
 }
 
 function rewriteManifest(): Promise<void> {
