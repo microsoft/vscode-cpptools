@@ -2,6 +2,8 @@
 
 [How do I get IntelliSense to work correctly](#how-do-i-get-intellisense-to-work-correctly)?
 
+[Why do I see red squiggles under Standard Library types](#why-do-i-see-red-squiggles-under-standard-library-types)?
+
 [How do I get the new IntelliSense to work with MinGW on Windows](#how-do-i-get-the-new-intellisense-to-work-with-mingw-on-windows)?
 
 [What is the difference between "includePath" and "browse.path" in c\_cpp\_properties.json](#what-is-the-difference-between-includepath-and-browsepath-in-c_cpp_propertiesjson)?
@@ -26,6 +28,10 @@ Add the necessary paths to your include files to the `"includePath"` array. The 
 #### Force semantic IntelliSense
 
 If you want IntelliSense to operate on your files even when all #include directives do not resolve, then you can choose the `Force semantic IntelliSense` code action to always use the new IntelliSense engine. You can also set the `C_Cpp.intelliSenseEngineFallback` setting to `"Disabled"`.
+
+## Why do I see red squiggles under Standard Library types?
+
+The most common reason for this is missing or sorted include paths. If you are using a compiler in the GCC family, the system includes that you add to your `"includePath"` in **c_cpp_properties.json** should match the output of the following command: `gcc -Wp,-v -E -xc -x c++ /dev/null` (replace 'gcc' with whichever compiler you are using). GCC and its relatives require the paths to be in a specific order too, so sorting the paths for aesthetics will likely result in incorrect IntelliSense results.
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
