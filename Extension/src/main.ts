@@ -208,22 +208,18 @@ function handleError(error: any): void {
     channel.show();
 }
 
-function postInstall(info: PlatformInformation): Thenable<void> {
-    let channel: vscode.OutputChannel = util.getOutputChannel();
-
-    channel.appendLine("");
-    channel.appendLine("Finished installing dependencies");
-    channel.appendLine("");
-
+function sendTelemetry(info: PlatformInformation): boolean {
     let installBlob: InstallBlob = getInstallBlob();
-    installBlob.telemetryProperties['success'] = (!installBlob.hasError).toString();
+    const success: boolean = !installBlob.hasError;
+
+    installBlob.telemetryProperties['success'] = success.toString();
 
     if (info.distribution) {
         installBlob.telemetryProperties['linuxDistroName'] = info.distribution.name;
         installBlob.telemetryProperties['linuxDistroVersion'] = info.distribution.version;
     }
 
-    if (!installBlob.hasError) {
+    if (success) {
         util.setProgress(util.getProgressInstallSuccess());
         let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
         if (versionShown.Value < releaseNotesVersion) {
@@ -236,26 +232,39 @@ function postInstall(info: PlatformInformation): Thenable<void> {
 
     Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
 
-    // If there is a download failure, we shouldn't continue activating the extension in some broken state.
-    if (installBlob.hasError) {
-        return Promise.reject<void>("");
-    }
+    return success;
+}
 
-    return util.readFileText(util.getExtensionFilePath("cpptools.json"))
-        .then((cpptoolsString) => {
-            cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
-        })
-        .catch((error) => {
-            // We already log telemetry if cpptools.json fails to download.
-        })
-        .then(() => {
-            // Redownload cpptools.json after activation so it's not blocked.
-            // It'll be used after the extension reloads.
-            cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
-            tempCommandRegistrar.activateLanguageServer();
-            // Notify user's if debugging may not be supported on their OS.
-            util.checkDistro(info);
-        });
+async function postInstall(info: PlatformInformation): Promise<void> {
+    let channel: vscode.OutputChannel = util.getOutputChannel();
+
+    channel.appendLine("");
+    channel.appendLine("Finished installing dependencies");
+    channel.appendLine("");
+
+    const installSuccess: boolean = sendTelemetry(info);
+
+    // If there is a download failure, we shouldn't continue activating the extension in some broken state.
+    if (!installSuccess) {
+        return Promise.reject<void>("");
+    } else {
+        const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
+
+        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
+        if (exists) {
+            const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
+            await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
+        }
+
+        tempCommandRegistrar.activateLanguageServer();
+        
+        // Notify user's if debugging may not be supported on their OS.
+        util.checkDistro(info);
+
+        // Redownload cpptools.json after activation so it's not blocked.
+        // It'll be used after the extension reloads.
+        return cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
+    }
 }
 
 function rewriteManifest(): Promise<void> {
