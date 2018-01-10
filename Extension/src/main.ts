@@ -250,14 +250,18 @@ async function postInstall(info: PlatformInformation): Promise<void> {
     } else {
         const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
 
-        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
-        if (exists) {
-            const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
-            await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
+        try {
+            const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
+            if (exists) {
+                const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
+                await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
+            }
+        } catch (error) {
+            // Ignore any cpptoolsJsonFile errors
         }
 
         tempCommandRegistrar.activateLanguageServer();
-        
+
         // Notify user's if debugging may not be supported on their OS.
         util.checkDistro(info);
 
