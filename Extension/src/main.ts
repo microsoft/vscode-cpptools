@@ -15,7 +15,7 @@ import * as commands from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import {initializeInstallBlob, getInstallBlob, InstallBlobStage, InstallBlob, setInstallBlobStage } from './extensionActivationInformation';
+import {initializeInstallBlob, getInstallBlob, InstallationStage, InstallBlob, setInstallationStage } from './extensionActivationInformation';
 import * as cpptoolsJsonUtils from './cpptoolsJsonUtils';
 
 let tempCommandRegistrar: commands.TemporaryCommandRegistrar;
@@ -98,12 +98,12 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
 }
 
 function makeBinariesExecutable(): Promise<void> {
-    setInstallBlobStage(InstallBlobStage.makeBinariesExecutable);
+    setInstallationStage(InstallationStage.makeBinariesExecutable);
     return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
 function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
-    setInstallBlobStage(InstallBlobStage.makeOfflineBinariesExecutable);
+    setInstallationStage(InstallationStage.makeOfflineBinariesExecutable);
     let promises: Thenable<void>[] = [];
     let packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
@@ -117,7 +117,7 @@ function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void>
 }
 
 function removeUnnecessaryFile(): Promise<void> {
-    setInstallBlobStage(InstallBlobStage.removeUnnecessaryFile);
+    setInstallationStage(InstallationStage.removeUnnecessaryFile);
     if (os.platform() !== 'win32') {
         let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
@@ -131,7 +131,7 @@ function removeUnnecessaryFile(): Promise<void> {
 }
 
 function touchInstallLockFile(): Promise<void> {
-    setInstallBlobStage(InstallBlobStage.touchInstallLockFile);
+    setInstallationStage(InstallationStage.touchInstallLockFile);
 
     return util.touchInstallLockFile();
 }
@@ -139,7 +139,7 @@ function touchInstallLockFile(): Promise<void> {
 function handleError(error: any): void {
     let installBlob: InstallBlob = getInstallBlob();
     installBlob.hasError = true;
-    installBlob.telemetryProperties['stage'] = InstallBlobStage[installBlob.stage];
+    installBlob.telemetryProperties['stage'] = InstallationStage[installBlob.stage];
     let errorMessage: string;
     let channel: vscode.OutputChannel = util.getOutputChannel();
 
@@ -181,10 +181,10 @@ function handleError(error: any): void {
     }
 
     // Show the actual message and not the sanitized one
-    if (installBlob.stage == InstallBlobStage.downloadPackages) {
+    if (installBlob.stage == InstallationStage.downloadPackages) {
         channel.appendLine("");
     }
-    channel.appendLine(`Failed at stage: ${InstallBlobStage[installBlob.stage]}`);
+    channel.appendLine(`Failed at stage: ${InstallationStage[installBlob.stage]}`);
     channel.appendLine(errorMessage);
     channel.appendLine("");
     channel.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
@@ -192,7 +192,7 @@ function handleError(error: any): void {
 }
 
 function postInstall(info: PlatformInformation): Thenable<void> {
-    setInstallBlobStage(InstallBlobStage.postInstall);
+    setInstallationStage(InstallationStage.postInstall);
     let channel: vscode.OutputChannel = util.getOutputChannel();
 
     channel.appendLine("");
@@ -243,7 +243,7 @@ function postInstall(info: PlatformInformation): Thenable<void> {
 }
 
 function rewriteManifest(): Promise<void> {
-    setInstallBlobStage(InstallBlobStage.rewriteManifest);
+    setInstallationStage(InstallationStage.rewriteManifest);
 
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
     util.packageJson.activationEvents = [

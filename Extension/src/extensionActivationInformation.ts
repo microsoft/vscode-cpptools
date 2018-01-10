@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-export enum InstallBlobStage {
+export enum InstallationStage {
     getPlatformInfo,
     downloadPackages,
     installPackages,
@@ -16,7 +16,7 @@ export enum InstallBlobStage {
 }
 
 export class InstallBlob {
-    stage: InstallBlobStage;
+    stage: InstallationStage;
     hasError: boolean;
     telemetryProperties: { [key: string]: string };
 
@@ -36,7 +36,7 @@ export function getInstallBlob(): InstallBlob {
     return installBlob;
 }
 
-export function setInstallBlobStage(stage: InstallBlobStage): void {
+export function setInstallationStage(stage: InstallationStage): void {
     if (!installBlob) {
         initializeInstallBlob();
     }

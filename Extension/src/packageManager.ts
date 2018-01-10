@@ -17,7 +17,7 @@ import * as util from './common';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
 import { IncomingMessage, ClientRequest } from 'http';
-import { setInstallBlobStage, InstallBlobStage } from './extensionActivationInformation';
+import { setInstallationStage, InstallationStage } from './extensionActivationInformation';
 
 export interface IPackage {
     // Description of the package
@@ -74,7 +74,7 @@ export class PackageManager {
     }
 
     public DownloadPackages(): Promise<void> {
-        setInstallBlobStage(InstallBlobStage.downloadPackages);
+        setInstallationStage(InstallationStage.downloadPackages);
         return this.GetPackages()
             .then((packages) => {
                 return this.BuildPromiseChain(packages, (pkg) => this.DownloadPackage(pkg));
@@ -82,7 +82,7 @@ export class PackageManager {
     }
 
     public InstallPackages(): Promise<void> {
-        setInstallBlobStage(InstallBlobStage.installPackages);
+        setInstallationStage(InstallationStage.installPackages);
         return this.GetPackages()
             .then((packages) => {
                 return this.BuildPromiseChain(packages, (pkg) => this.InstallPackage(pkg));
