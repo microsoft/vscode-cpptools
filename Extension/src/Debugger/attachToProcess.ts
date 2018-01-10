@@ -21,7 +21,7 @@ export class AttachPicker {
 
     public ShowAttachEntries(): Promise<string> {
         return util.isExtensionReady().then(ready => {
-            if (ready) {
+            if (!ready) {
                 util.displayExtensionNotReadyPrompt();
             } else {
                 return this.attachItemsProvider.getAttachItems()
@@ -51,7 +51,7 @@ export class RemoteAttachPicker {
 
     public ShowAttachEntries(args: any): Promise<string> {
         return util.isExtensionReady().then(ready => {
-            if (ready) {
+            if (!ready) {
                 util.displayExtensionNotReadyPrompt();
             } else {
                 this._channel.clear();
