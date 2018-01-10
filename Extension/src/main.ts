@@ -15,8 +15,8 @@ import * as commands from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import {initializeInstallBlob, getInstallBlob, InstallationStage, InstallBlob, setInstallationStage } from './extensionActivationInformation';
-import * as cpptoolsJsonUtils from './cpptoolsJsonUtils';
+import {initializeInstallBlob, getInstallBlob, InstallBlob, setInstallationStage } from './installationInformation';
+import * as cpptoolsJsonUtils from './abTesting';
 
 let tempCommandRegistrar: commands.TemporaryCommandRegistrar;
 const releaseNotesVersion: number = 3;
@@ -44,66 +44,86 @@ export function deactivate(): Thenable<void> {
 async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
-    try {
-        const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-
-        // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
-        if (installLockExists && util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
-            await offlineInstallation(info);
-        // No lock file, need to download and install dependencies.
-        } else if (!installLockExists) {
-            await onlineInstallation(info);
+    // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
+    if (installLockExists && util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
+        try {
+            await offlineInstallation();
+        } catch (error) {
+            vscode.window.showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
+            util.getOutputChannel().show();
         }
-    // Catches all errors from all promises within this block.
-    } catch (error) {
-        handleError(error);
+    // No lock file, need to download and install dependencies.
+    } else if (!installLockExists) {
+        try {
+            await onlineInstallation();
+        } catch (error) {
+            handleError(error);
+        }
     }
 }
 
-async function offlineInstallation(info: PlatformInformation): Promise<void> {
-    let makeBinariesExecutablePromise: Promise<void> = makeBinariesExecutable();
-    let makeOfflineBinariesExecutablePromise: Promise<void> = makeOfflineBinariesExecutable(info);
-    let rewriteManifestPromise: Promise<void> = rewriteManifest();
+async function offlineInstallation(): Promise<void> {
+    setInstallationStage('getPlatformInfo');
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    
+    setInstallationStage('makeBinariesExecutable');
+    await makeBinariesExecutable();
 
-    await Promise.all([makeBinariesExecutablePromise, makeOfflineBinariesExecutablePromise, rewriteManifestPromise]);
+    setInstallationStage('makeOfflineBinariesExecutable');
+    await makeOfflineBinariesExecutable(info);
 
+    setInstallationStage('rewriteManifest');
+    await rewriteManifest();
+
+    setInstallationStage('postInstall');
     await postInstall(info);
 }
 
-async function onlineInstallation(info: PlatformInformation): Promise<void> {
+async function onlineInstallation(): Promise<void> {
+    setInstallationStage('getPlatformInfo');
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    
     await downloadAndInstallPackages(info);
 
-    let makeBinariesExecutablePromise: Promise<void> = makeBinariesExecutable();
-    let removeUnnecessaryFilePromise: Promise<void> = removeUnnecessaryFile();
-    let rewriteManifestPromise: Promise<void> = rewriteManifest();
+    setInstallationStage('makeBinariesExecutable');
+    await makeBinariesExecutable();
 
-    await Promise.all([makeBinariesExecutablePromise, removeUnnecessaryFilePromise, rewriteManifestPromise]);
+    setInstallationStage('removeUnnecessaryFile');
+    await removeUnnecessaryFile();
+
+    setInstallationStage('rewriteManifest');
+    await rewriteManifest();
+
+    setInstallationStage('touchInstallLockFile');
     await touchInstallLockFile();
 
+    setInstallationStage('postInstall');
     await postInstall(info);
 }
 
 async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
     let channel: vscode.OutputChannel = util.getOutputChannel();
     channel.appendLine("Updating C/C++ dependencies...");
-    channel.appendLine('');
 
     let statusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     let packageManager: PackageManager = new PackageManager(info, channel, statusItem);
 
-    return packageManager.DownloadPackages().then(() => { 
-        channel.appendLine('');
-        return packageManager.InstallPackages();
-    }).then(() => statusItem.dispose());
+    channel.appendLine('');
+    setInstallationStage('downloadPackages');
+    await packageManager.DownloadPackages();
+
+    channel.appendLine('');
+    setInstallationStage('installPackages');
+    await packageManager.InstallPackages();
+
+    statusItem.dispose();
 }
 
 function makeBinariesExecutable(): Promise<void> {
-    setInstallationStage(InstallationStage.makeBinariesExecutable);
     return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
 function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
-    setInstallationStage(InstallationStage.makeOfflineBinariesExecutable);
     let promises: Thenable<void>[] = [];
     let packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
@@ -117,7 +137,6 @@ function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void>
 }
 
 function removeUnnecessaryFile(): Promise<void> {
-    setInstallationStage(InstallationStage.removeUnnecessaryFile);
     if (os.platform() !== 'win32') {
         let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
@@ -131,15 +150,13 @@ function removeUnnecessaryFile(): Promise<void> {
 }
 
 function touchInstallLockFile(): Promise<void> {
-    setInstallationStage(InstallationStage.touchInstallLockFile);
-
     return util.touchInstallLockFile();
 }
 
 function handleError(error: any): void {
     let installBlob: InstallBlob = getInstallBlob();
     installBlob.hasError = true;
-    installBlob.telemetryProperties['stage'] = InstallationStage[installBlob.stage];
+    installBlob.telemetryProperties['stage'] = installBlob.stage;
     let errorMessage: string;
     let channel: vscode.OutputChannel = util.getOutputChannel();
 
@@ -181,10 +198,10 @@ function handleError(error: any): void {
     }
 
     // Show the actual message and not the sanitized one
-    if (installBlob.stage == InstallationStage.downloadPackages) {
+    if (installBlob.stage == 'downloadPackages') {
         channel.appendLine("");
     }
-    channel.appendLine(`Failed at stage: ${InstallationStage[installBlob.stage]}`);
+    channel.appendLine(`Failed at stage: ${installBlob.stage}`);
     channel.appendLine(errorMessage);
     channel.appendLine("");
     channel.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
@@ -192,7 +209,6 @@ function handleError(error: any): void {
 }
 
 function postInstall(info: PlatformInformation): Thenable<void> {
-    setInstallationStage(InstallationStage.postInstall);
     let channel: vscode.OutputChannel = util.getOutputChannel();
 
     channel.appendLine("");
@@ -243,8 +259,6 @@ function postInstall(info: PlatformInformation): Thenable<void> {
 }
 
 function rewriteManifest(): Promise<void> {
-    setInstallationStage(InstallationStage.rewriteManifest);
-
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
     util.packageJson.activationEvents = [
         "onLanguage:cpp",
