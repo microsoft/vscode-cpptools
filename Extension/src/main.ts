@@ -76,9 +76,9 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
     let makeBinariesExecutablePromise: Promise<void> = makeBinariesExecutable();
     let removeUnnecessaryFilePromise: Promise<void> = removeUnnecessaryFile();
     let rewriteManifestPromise: Promise<void> = rewriteManifest();
-    let touchInstallLockFilePromise: Promise<void> = touchInstallLockFile(info);
 
-    await Promise.all([makeBinariesExecutablePromise, removeUnnecessaryFilePromise, rewriteManifestPromise, touchInstallLockFilePromise]);
+    await Promise.all([makeBinariesExecutablePromise, removeUnnecessaryFilePromise, rewriteManifestPromise]);
+    await touchInstallLockFile();
 
     await postInstall(info);
 }
@@ -130,7 +130,7 @@ function removeUnnecessaryFile(): Promise<void> {
     return Promise.resolve();
 }
 
-function touchInstallLockFile(info: PlatformInformation): Promise<void> {
+function touchInstallLockFile(): Promise<void> {
     setInstallBlobStage(InstallBlobStage.touchInstallLockFile);
 
     return util.touchInstallLockFile();
@@ -233,11 +233,11 @@ function postInstall(info: PlatformInformation): Thenable<void> {
             // We already log telemetry if cpptools.json fails to download.
         })
         .then(() => {
-            tempCommandRegistrar.dispose();
             // Redownload cpptools.json after activation so it's not blocked.
             // It'll be used after the extension reloads.
             cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
-
+            tempCommandRegistrar.activateLanguageServer();
+            // Notify user's if debugging may not be supported on their OS.
             util.checkDistro(info);
         });
 }

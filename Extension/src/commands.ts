@@ -45,7 +45,7 @@ export class TemporaryCommandRegistrar {
         }));
     }
 
-    public dispose(): void {
+    public activateLanguageServer(): void {
         // Main activation code.
         this.tempCommands.forEach((command) => {
             command.dispose();
