@@ -138,27 +138,30 @@ export function activate(context: vscode.ExtensionContext): void {
     registerTempCommand("C_Cpp.TakeSurvey");
 
     processRuntimeDependencies(() => {
-        downloadCpptoolsJsonPkg().then(() => {
-            util.readFileText(util.getExtensionFilePath("cpptools.json"))
-                .then((cpptoolsString) => {
-                    processCpptoolsJson(cpptoolsString);
-                })
-                .catch((error) => {
-                    // We already log telemetry if cpptools.json fails to download.
-                })
-                .then(() => {
-                    // Main activation code.
-                    tempCommands.forEach((command) => {
-                        command.dispose();
-                    });
-                    tempCommands = [];
-                    LanguageServer.activate(delayedCommandsToExecute);
-                    delayedCommandsToExecute.forEach((command) => {
-                        vscode.commands.executeCommand(command);
-                    });
-                    delayedCommandsToExecute.clear();
+        util.readFileText(util.getExtensionFilePath("cpptools.json"))
+            .then((cpptoolsString) => {
+                processCpptoolsJson(cpptoolsString);
+            })
+            .catch((error) => {
+                // We already log telemetry if cpptools.json fails to download.
+            })
+            .then(() => {
+                // Main activation code.
+                tempCommands.forEach((command) => {
+                    command.dispose();
                 });
-        });
+                tempCommands = [];
+                LanguageServer.activate(delayedCommandsToExecute);
+                delayedCommandsToExecute.forEach((command) => {
+                    vscode.commands.executeCommand(command);
+                });
+                delayedCommandsToExecute.clear();
+            })
+            .then(() => {
+                // Redownload cpptools.json after activation so it's not blocked.
+                // It'll be used after the extension reloads.
+                downloadCpptoolsJsonPkg();
+            });
     });
 
     setInterval(() => {
