@@ -55,8 +55,7 @@ async function processRuntimeDependencies(): Promise<void> {
             }
         // The extension have been installed and activated before.
         } else {
-            const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-            await finalizeExtensionActivation(info);
+            await finalizeExtensionActivation();
         }
     // No lock file, need to download and install dependencies.
     } else {
@@ -257,11 +256,11 @@ async function postInstall(info: PlatformInformation): Promise<void> {
         // Notify user's if debugging may not be supported on their OS.
         util.checkDistro(info);
 
-        return finalizeExtensionActivation(info);
+        return finalizeExtensionActivation();
     }
 }
 
-async function finalizeExtensionActivation(info: PlatformInformation): Promise<void> {
+async function finalizeExtensionActivation(): Promise<void> {
     const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
 
     try {
