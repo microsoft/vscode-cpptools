@@ -108,6 +108,7 @@ interface ConfigurationJson {
 
 export class CppProperties {
     private propertiesFile: vscode.Uri = null;
+    private workspaceRoot: string;
     private readonly configFolder: string;
     private configurationJson: ConfigurationJson = null;
     private currentConfigurationIndex: PersistentFolderState<number>;
@@ -130,6 +131,7 @@ export class CppProperties {
         console.assert(rootPath !== undefined);
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
+        this.workspaceRoot = rootPath;
         this.resetToDefaultSettings(this.currentConfigurationIndex.Value === -1);
 
         let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
@@ -274,26 +276,61 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveAndSplit(paths: string[]): string[] {
+    private expandPath(path1: string): Promise<string[]> {
+        return new Promise<string[]>((resolve, reject) => { 
+            let index: number = path1.indexOf("/*/");
+            if (index >= 0) {
+                let paths: string[] = [];
+                let basePath: string = path1.substr(0, index).replace("${workspaceRoot}", this.workspaceRoot);
+                let remainingPath: string = path1.substr(index + 3);
+                try {
+                    let items: string[] = fs.readdirSync(basePath);
+                    items.forEach(directory => {
+                        let potentialPath: string = path.join(basePath, directory, remainingPath);
+                        try {
+                            let stats: fs.Stats = fs.statSync(potentialPath.endsWith("*") ? potentialPath.substr(0, potentialPath.length - 1) : potentialPath);
+                            if (stats && stats.isDirectory()) {
+                                paths.push(potentialPath.replace(this.workspaceRoot, "${workspaceRoot}"));
+                            }
+                        } catch {
+                            // potentialPath is not a valid path. Ignore it.
+                        }
+                    });
+                } catch {
+                    // basePath is not a valid path. Ignore it.
+                }
+                resolve(paths);
+            } else {
+                resolve([path1]);
+            }
+        });
+    }
+
+    private resolveAndSplit(paths: string[]): Promise<string[]> {
+        let promises: Promise<void>[] = [];
         let result: string[] = [];
         paths.forEach(entry => {
             let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
-            result = result.concat(entries);
+            entries.forEach(path => {
+                promises.push(this.expandPath(path).then(paths => {
+                    result = result.concat(paths);
+                }));
+            });
         });
-        return result;
+        return Promise.all(promises).then(() => result);
     }
 
-    private updateServerOnFolderSettingsChange(): void {
+    private async updateServerOnFolderSettingsChange(): Promise<void> {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let configuration: Configuration = this.configurationJson.configurations[i];
             if (configuration.includePath !== undefined) {
-                configuration.includePath = this.resolveAndSplit(configuration.includePath);
+                configuration.includePath = await this.resolveAndSplit(configuration.includePath);
             }
             if (configuration.browse !== undefined && configuration.browse.path !== undefined) {
-                configuration.browse.path = this.resolveAndSplit(configuration.browse.path);
+                configuration.browse.path = await this.resolveAndSplit(configuration.browse.path);
             }
             if (configuration.macFrameworkPath !== undefined) {
-                configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
+                configuration.macFrameworkPath = await this.resolveAndSplit(configuration.macFrameworkPath);
             }
             if (configuration.compileCommands !== undefined) {
                 configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
