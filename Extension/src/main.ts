@@ -44,8 +44,8 @@ export function deactivate(): Thenable<void> {
 async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
-    // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
-    if (installLockExists) {
+   if (installLockExists) {
+        // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
         if (util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
             try {
                 await offlineInstallation();
@@ -53,6 +53,10 @@ async function processRuntimeDependencies(): Promise<void> {
                 vscode.window.showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
                 util.getOutputChannel().show();
             }
+        // The extension have been installed and activated before.
+        } else {
+            const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+            await finalizeExtensionActivation(info);
         }
     // No lock file, need to download and install dependencies.
     } else {
@@ -250,27 +254,31 @@ async function postInstall(info: PlatformInformation): Promise<void> {
     if (!installSuccess) {
         return Promise.reject<void>("");
     } else {
-        const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
-
-        try {
-            const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
-            if (exists) {
-                const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
-                await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
-            }
-        } catch (error) {
-            // Ignore any cpptoolsJsonFile errors
-        }
-
-        geTemporaryCommandRegistrarInstance().activateLanguageServer();
-
-        // Notify user's if debugging may not be supported on their OS.
-        util.checkDistro(info);
-
-        // Redownload cpptools.json after activation so it's not blocked.
-        // It'll be used after the extension reloads.
-        return cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
+        return finalizeExtensionActivation(info);
     }
+}
+
+async function finalizeExtensionActivation(info: PlatformInformation): Promise<void> {
+    const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
+
+    try {
+        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
+        if (exists) {
+            const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
+            await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
+        }
+    } catch (error) {
+        // Ignore any cpptoolsJsonFile errors
+    }
+
+    geTemporaryCommandRegistrarInstance().activateLanguageServer();
+
+    // Notify user's if debugging may not be supported on their OS.
+    util.checkDistro(info);
+
+    // Redownload cpptools.json after activation so it's not blocked.
+    // It'll be used after the extension reloads.
+    return cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
 }
 
 function rewriteManifest(): Promise<void> {
