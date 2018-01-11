@@ -40,9 +40,6 @@ export function initialize(): void {
     // ConfigurationSnippetProvider needs to be initiallized after configurationProvider calls getConfigurationSnippets.
     disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(configurationProvider)));
 
-    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
-
     // Activate Adapter Commands 
     registerAdapterExecutableCommands();
 
@@ -53,18 +50,12 @@ export function dispose(): void {
     disposables.forEach(d => d.dispose());
 }
 
-function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
-    if (util.getShowReloadPromptOnce() && editor && editor.document.fileName.endsWith(path.sep + "launch.json")) {
-        util.showReloadOrWaitPromptOnce();
-    }
-}
-
 // Registers adapterExecutableCommands for cppdbg and cppvsdbg. If it is not ready, it will prompt waiting for the download.
 // 
 // Note: util.extensionContext.extensionPath is needed for the commands because VsCode does not support relative paths for adapterExecutableComand
 function registerAdapterExecutableCommands(): void {
     disposables.push(vscode.commands.registerCommand('extension.cppdbgAdapterExecutableCommand', () => {
-        return util.checkInstallLockFile().then(ready => {
+        return util.isExtensionReady().then(ready => {
             if (ready) {
                 let command: string = path.join(util.extensionContext.extensionPath, './debugAdapters/OpenDebugAD7');
 
@@ -77,9 +68,7 @@ function registerAdapterExecutableCommands(): void {
                     command: command
                 };
             } else {
-                util.showReloadOrWaitPromptOnce();
-                // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
-                return null;
+                throw new Error(util.extensionNotReadyString);
             }
         });
     }));
@@ -89,16 +78,14 @@ function registerAdapterExecutableCommands(): void {
             vscode.window.showErrorMessage("Debugger type 'cppvsdbg' is not avaliable for non-Windows machines.");
             return null;
         } else {
-            return util.checkInstallLockFile().then(ready => {
+            return util.isExtensionReady().then(ready => {
                 if (ready) {
                     return {
                         command: path.join(util.extensionContext.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
                         args: ['--interpreter=vscode']
                     };
                 } else {
-                    util.showReloadOrWaitPromptOnce();
-                    // TODO: VsCode displays null return as "Cannot find executable 'null'". Fix if they have a way to not display their prompt.
-                    return null;
+                    throw new Error(util.extensionNotReadyString);
                 }
             });
         }

@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 import * as Telemetry from './telemetry';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as url from 'url';
+import { PlatformInformation } from './platform';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -18,55 +19,6 @@ export function setExtensionContext(context: vscode.ExtensionContext): void {
 }
 
 export let packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
-
-// Used to show a one-time wait/reload popup when launch.json becomes active.
-let showReloadPromptOnce: boolean = false;
-let showWaitForDownloadPromptOnce: boolean = false; 
-
-let showReloadPromptAlways: boolean = false; // Used to show wait/reload in the launch/attach debug scenarios.
-
-export function enableReloadOrWaitPrompt(): void {
-    showReloadPromptOnce = showReloadPromptAlways = showWaitForDownloadPromptOnce = true;
-}
-
-export function getShowReloadPromptOnce(): boolean { return showReloadPromptOnce; }
-export function getShowReloadPrompt(): boolean { return showReloadPromptAlways; }
-export function getShowWaitForDownloadPromptOnce(): boolean { return showWaitForDownloadPromptOnce; }
-
-export function showReloadPrompt(): void {
-    showReloadPromptOnce = false;
-    let reload: string = "Reload";
-    vscode.window.showInformationMessage("Reload the window to finish installing the C/C++ extension.", reload).then(value => {
-        if (value === reload) {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-    });
-}
-
-export function showWaitForDownloadPrompt(): void {
-    showWaitForDownloadPromptOnce = false;
-    getOutputChannel().show();
-    vscode.window.showInformationMessage("Please wait for the C/C++ extension dependencies to finish downloading and installing.");
-}
-
-function showReloadOrWaitPromptImpl(once: boolean): void {
-    checkInstallLockFile().then((installLockExists: boolean) => {
-        if (installLockExists) {
-            showReloadPrompt();
-        } else {
-            if (!once || getShowWaitForDownloadPromptOnce()) {
-                setDebuggerReloadLater();
-                showWaitForDownloadPrompt();
-            }
-        }
-    });
-}
-
-export function showReloadOrWaitPrompt(): void { showReloadOrWaitPromptImpl(false); }
-export function showReloadOrWaitPromptOnce(): void { showReloadOrWaitPromptImpl(true); }
-
-// Warning: The methods involving getExtensionFilePath are duplicated in debugProxyUtils.ts,
-// because the extensionContext is not set in that context.
 
 export function getExtensionFilePath(extensionfile: string): string {
     return path.resolve(extensionContext.extensionPath, extensionfile);
@@ -77,6 +29,29 @@ export function getPackageJsonPath(): string {
 export function getPackageJsonString(): string {
     packageJson.main = "./out/src/main"; // Needs to be reset, because the relative path is removed by VS Code.
     return JSON.stringify(packageJson, null, 2);
+}
+
+// Extension is ready if install.lock exists and debugAdapters folder exist.
+export async function isExtensionReady(): Promise<boolean> {
+    const doesInstallLockFileExist: boolean = await checkInstallLockFile();
+
+    return doesInstallLockFileExist;
+}
+
+let isExtensionNotReadyPromptDisplayed: boolean = false;
+export const extensionNotReadyString: string = 'The C/C++ extension is still installing. See the output window for more information.';
+
+export function displayExtensionNotReadyPrompt(): void {
+
+    if (!isExtensionNotReadyPromptDisplayed) {
+        isExtensionNotReadyPromptDisplayed = true; 
+        outputChannel.show();
+
+        vscode.window.showInformationMessage(extensionNotReadyString).then(
+            () => { isExtensionNotReadyPromptDisplayed = false; },
+            () => { isExtensionNotReadyPromptDisplayed = false; }
+        );
+    }
 }
 
 // This Progress global state tracks how far users are able to get before getting blocked.
@@ -185,7 +160,6 @@ export function getOpenCommand(): string {
     }
 }
 
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
@@ -216,12 +190,7 @@ export function GetHttpsProxyAgent(): HttpsProxyAgent {
     return new HttpsProxyAgent(proxyOptions);
 }
 
-let reloadLater: boolean = false;
-export function setDebuggerReloadLater(): void { reloadLater = true; }
-export function getDebuggerReloadLater(): boolean { return reloadLater; }
-
-/** Creates the lock file if it doesn't exist */
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
+/** Creates a file if it doesn't exist */
 function touchFile(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.writeFile(file, "", (err) => {
@@ -238,10 +207,6 @@ export function touchInstallLockFile(): Promise<void> {
     return touchFile(getInstallLockPath());
 }
 
-export function touchPackageLockFile(): Promise<void> {
-    return touchFile(getPackageLockPath());
-}
-
 export function touchExtensionFolder(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.utimes(path.resolve(extensionContext.extensionPath, ".."), new Date(Date.now()), new Date(Date.now()), (err) => {
@@ -255,7 +220,6 @@ export function touchExtensionFolder(): Promise<void> {
 }
 
 /** Test whether a file exists */
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function checkFileExists(filePath: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         fs.stat(filePath, (err, stats) => {
@@ -269,14 +233,8 @@ export function checkFileExists(filePath: string): Promise<boolean> {
 }
 
 /** Test whether the lock file exists.*/
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());
-}
-
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
-export function checkPackageLockFile(): Promise<boolean> {
-    return checkFileExists(getPackageLockPath());
 }
 
 /** Reads the content of a text file */
@@ -308,21 +266,8 @@ export function writeFileText(filePath: string, content: string, encoding: strin
 }
 
 // Get the path of the lock file. This is used to indicate that the platform-specific dependencies have been downloaded.
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function getInstallLockPath(): string {
     return getExtensionFilePath("install.lock");
-}
-
-// This 2nd lock is needed for the debugger launch scenario to detect if a reload has been done yet.
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
-export function getPackageLockPath(): string {
-    return getExtensionFilePath("package.lock");
-}
-
-// Used to communicate from the debugProxy to the extension code.
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
-export function getDebuggerReloadPath(): string {
-    return getExtensionFilePath(`debugger.reload`);
 }
 
 export function getReadmeMessage(): string {
@@ -433,4 +378,25 @@ export function allowExecution(file: string): Promise<void> {
             resolve();
         }
     });
+}
+
+export function removePotentialPII(str: string): string {
+    let words: string[] = str.split(" ");
+    let result: string = "";
+    for (let word of words) {
+        if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
+            result += word + " ";
+        } else {
+            result += "? ";
+        }
+    }
+    return result;
+}
+
+export function checkDistro(platformInfo: PlatformInformation): void {
+    if (platformInfo.platform != 'win32' && platformInfo.platform != 'linux' && platformInfo.platform != 'darwin') {
+        // this should never happen because VSCode doesn't run on FreeBSD
+        // or SunOS (the other platforms supported by node)
+        outputChannel.appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
+    }
 }
