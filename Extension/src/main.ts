@@ -13,11 +13,11 @@ import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
 
-import { geTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar} from './commands';
+import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation , setInstallationStage } from './installationInformation';
+import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
 
 const releaseNotesVersion: number = 3;
 
@@ -44,7 +44,7 @@ export function deactivate(): Thenable<void> {
 async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
-   if (installLockExists) {
+    if (installLockExists) {
         // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
         if (util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
             try {
@@ -71,7 +71,7 @@ async function processRuntimeDependencies(): Promise<void> {
 async function offlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    
+
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
 
@@ -88,7 +88,7 @@ async function offlineInstallation(): Promise<void> {
 async function onlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    
+
     await downloadAndInstallPackages(info);
 
     setInstallationStage('makeBinariesExecutable');
@@ -160,7 +160,7 @@ function touchInstallLockFile(): Promise<void> {
 }
 
 function handleError(error: any): void {
-    let installationInformation: InstallationInformation  = getInstallationInformationInstance();
+    let installationInformation: InstallationInformation = getInstallationInformationInstance();
     installationInformation.hasError = true;
     installationInformation.telemetryProperties['stage'] = installationInformation.stage;
     let errorMessage: string;
@@ -215,7 +215,7 @@ function handleError(error: any): void {
 }
 
 function sendTelemetry(info: PlatformInformation): boolean {
-    let installBlob: InstallationInformation  = getInstallationInformationInstance();
+    let installBlob: InstallationInformation = getInstallationInformationInstance();
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
@@ -254,6 +254,9 @@ async function postInstall(info: PlatformInformation): Promise<void> {
     if (!installSuccess) {
         return Promise.reject<void>("");
     } else {
+        // Notify user's if debugging may not be supported on their OS.
+        util.checkDistro(info);
+
         return finalizeExtensionActivation(info);
     }
 }
@@ -271,10 +274,7 @@ async function finalizeExtensionActivation(info: PlatformInformation): Promise<v
         // Ignore any cpptoolsJsonFile errors
     }
 
-    geTemporaryCommandRegistrarInstance().activateLanguageServer();
-
-    // Notify user's if debugging may not be supported on their OS.
-    util.checkDistro(info);
+    getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
     // Redownload cpptools.json after activation so it's not blocked.
     // It'll be used after the extension reloads.

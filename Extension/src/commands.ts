@@ -67,6 +67,6 @@ export function initializeTemporaryCommandRegistrar(): void {
     tempCommandRegistrar = new TemporaryCommandRegistrar();
 }
 
-export function geTemporaryCommandRegistrarInstance(): TemporaryCommandRegistrar {
+export function getTemporaryCommandRegistrarInstance(): TemporaryCommandRegistrar {
     return tempCommandRegistrar;
 }
