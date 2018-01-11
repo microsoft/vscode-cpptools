@@ -33,10 +33,9 @@ export function getPackageJsonString(): string {
 
 // Extension is ready if install.lock exists and debugAdapters folder exist.
 export async function isExtensionReady(): Promise<boolean> {
-    const doesDebugAdapterFolderExist: boolean = await checkFolderExists(getExtensionFilePath("debugAdapters"));
     const doesInstallLockFileExist: boolean = await checkInstallLockFile();
 
-    return doesDebugAdapterFolderExist && doesInstallLockFileExist;
+    return doesInstallLockFileExist;
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
@@ -46,6 +45,7 @@ export function displayExtensionNotReadyPrompt(): void {
 
     if (!isExtensionNotReadyPromptDisplayed) {
         isExtensionNotReadyPromptDisplayed = true; 
+        outputChannel.show();
 
         vscode.window.showInformationMessage(extensionNotReadyString).then(
             () => { isExtensionNotReadyPromptDisplayed = false; },
@@ -224,19 +224,6 @@ export function checkFileExists(filePath: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         fs.stat(filePath, (err, stats) => {
             if (stats && stats.isFile()) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-    });
-}
-
-/** Test whether a folder exists */
-export function checkFolderExists(filePath: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        fs.stat(filePath, (err, stats) => {
-            if (stats && stats.isDirectory()) {
                 resolve(true);
             } else {
                 resolve(false);

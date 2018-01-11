@@ -4,30 +4,30 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as vscode from 'vscode';
-import * as os from 'os';
-import * as fs from 'fs';
-import * as util from './common';
-import * as Telemetry from './telemetry';
-import * as LanguageServer from './LanguageServer/extension';
+import * as cpptoolsJsonUtils from './abTesting';
 import * as DebuggerExtension from './Debugger/extension';
-import * as commands from './commands';
+import * as fs from 'fs';
+import * as LanguageServer from './LanguageServer/extension';
+import * as os from 'os';
+import * as Telemetry from './telemetry';
+import * as util from './common';
+import * as vscode from 'vscode';
+
+import { geTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar} from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import {initializeInstallBlob, getInstallBlob, InstallBlob, setInstallationStage } from './installationInformation';
-import * as cpptoolsJsonUtils from './abTesting';
+import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation , setInstallationStage } from './installationInformation';
 
-let tempCommandRegistrar: commands.TemporaryCommandRegistrar;
 const releaseNotesVersion: number = 3;
 
 export function activate(context: vscode.ExtensionContext): void | Promise<void> {
-    tempCommandRegistrar = new commands.TemporaryCommandRegistrar();
+    initializeTemporaryCommandRegistrar();
     util.setExtensionContext(context);
     Telemetry.activate();
     util.setProgress(0);
     cpptoolsJsonUtils.activate(context);
-    initializeInstallBlob();
+    initializeInstallationInformation();
 
     // Initialize the DebuggerExtension and register the related commands and providers.
     DebuggerExtension.initialize();
@@ -45,15 +45,17 @@ async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
     // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
-    if (installLockExists && util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
-        try {
-            await offlineInstallation();
-        } catch (error) {
-            vscode.window.showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
-            util.getOutputChannel().show();
+    if (installLockExists) {
+        if (util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
+            try {
+                await offlineInstallation();
+            } catch (error) {
+                vscode.window.showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
+                util.getOutputChannel().show();
+            }
         }
     // No lock file, need to download and install dependencies.
-    } else if (!installLockExists) {
+    } else {
         try {
             await onlineInstallation();
         } catch (error) {
@@ -154,9 +156,9 @@ function touchInstallLockFile(): Promise<void> {
 }
 
 function handleError(error: any): void {
-    let installBlob: InstallBlob = getInstallBlob();
-    installBlob.hasError = true;
-    installBlob.telemetryProperties['stage'] = installBlob.stage;
+    let installationInformation: InstallationInformation  = getInstallationInformationInstance();
+    installationInformation.hasError = true;
+    installationInformation.telemetryProperties['stage'] = installationInformation.stage;
     let errorMessage: string;
     let channel: vscode.OutputChannel = util.getOutputChannel();
 
@@ -167,41 +169,41 @@ function handleError(error: any): void {
             if (webRequestPackageError.socket) {
                 let address: any = webRequestPackageError.socket.address();
                 if (address) {
-                    installBlob.telemetryProperties['error.targetIP'] = address.address + ':' + address.port;
+                    installationInformation.telemetryProperties['error.targetIP'] = address.address + ':' + address.port;
                 }
             }
         }
 
         let packageError: PackageManagerError = error;
 
-        installBlob.telemetryProperties['error.methodName'] = packageError.methodName;
-        installBlob.telemetryProperties['error.message'] = packageError.message;
+        installationInformation.telemetryProperties['error.methodName'] = packageError.methodName;
+        installationInformation.telemetryProperties['error.message'] = packageError.message;
 
         if (packageError.innerError) {
             errorMessage = packageError.innerError.toString();
-            installBlob.telemetryProperties['error.innerError'] = util.removePotentialPII(errorMessage);
+            installationInformation.telemetryProperties['error.innerError'] = util.removePotentialPII(errorMessage);
         } else {
             errorMessage = packageError.message;
         }
 
         if (packageError.pkg) {
-            installBlob.telemetryProperties['error.packageName'] = packageError.pkg.description;
-            installBlob.telemetryProperties['error.packageUrl'] = packageError.pkg.url;
+            installationInformation.telemetryProperties['error.packageName'] = packageError.pkg.description;
+            installationInformation.telemetryProperties['error.packageUrl'] = packageError.pkg.url;
         }
 
         if (packageError.errorCode) {
-            installBlob.telemetryProperties['error.errorCode'] = util.removePotentialPII(packageError.errorCode);
+            installationInformation.telemetryProperties['error.errorCode'] = util.removePotentialPII(packageError.errorCode);
         }
     } else {
         errorMessage = error.toString();
-        installBlob.telemetryProperties['error.toString'] = util.removePotentialPII(errorMessage);
+        installationInformation.telemetryProperties['error.toString'] = util.removePotentialPII(errorMessage);
     }
 
-    // Show the actual message and not the sanitized one
-    if (installBlob.stage == 'downloadPackages') {
+    if (installationInformation.stage == 'downloadPackages') {
         channel.appendLine("");
     }
-    channel.appendLine(`Failed at stage: ${installBlob.stage}`);
+    // Show the actual message and not the sanitized one
+    channel.appendLine(`Failed at stage: ${installationInformation.stage}`);
     channel.appendLine(errorMessage);
     channel.appendLine("");
     channel.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
@@ -209,7 +211,7 @@ function handleError(error: any): void {
 }
 
 function sendTelemetry(info: PlatformInformation): boolean {
-    let installBlob: InstallBlob = getInstallBlob();
+    let installBlob: InstallationInformation  = getInstallationInformationInstance();
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
@@ -260,7 +262,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
             // Ignore any cpptoolsJsonFile errors
         }
 
-        tempCommandRegistrar.activateLanguageServer();
+        geTemporaryCommandRegistrarInstance().activateLanguageServer();
 
         // Notify user's if debugging may not be supported on their OS.
         util.checkDistro(info);

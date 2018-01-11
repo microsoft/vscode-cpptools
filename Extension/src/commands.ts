@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import * as LanguageServer from './LanguageServer/extension';
 
-export class TemporaryCommandRegistrar {
+class TemporaryCommandRegistrar {
     // Used to save/re-execute commands used before the extension has activated (e.g. delayed by dependency downloading).
     private delayedCommandsToExecute: Set<string>;
     private tempCommands: vscode.Disposable[]; // Need to save this to unregister/dispose the temporary commands.
@@ -59,4 +59,14 @@ export class TemporaryCommandRegistrar {
         });
         this.delayedCommandsToExecute.clear();
     }
+}
+
+let tempCommandRegistrar: TemporaryCommandRegistrar;
+
+export function initializeTemporaryCommandRegistrar(): void {
+    tempCommandRegistrar = new TemporaryCommandRegistrar();
+}
+
+export function geTemporaryCommandRegistrarInstance(): TemporaryCommandRegistrar {
+    return tempCommandRegistrar;
 }

@@ -69,7 +69,8 @@ export class RemoteAttachPicker {
 
                 let pipeCmd: string = `"${pipeProgram}" ${argList}`;
 
-                return this.getRemoteOSAndProcesses(pipeCmd).then(processes => {
+                return this.getRemoteOSAndProcesses(pipeCmd)
+                    .then(processes => {
                         let attachPickOptions: vscode.QuickPickOptions = {
                             matchOnDetail: true,
                             matchOnDescription: true,

@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-export class InstallBlob {
+export class InstallationInformation  {
     stage: string;
     hasError: boolean;
     telemetryProperties: { [key: string]: string };
@@ -14,19 +14,19 @@ export class InstallBlob {
     }
 }
 
-let installBlob: InstallBlob;
+let installBlob: InstallationInformation ;
 
-export function initializeInstallBlob(): void {
-    installBlob = new InstallBlob();
+export function initializeInstallationInformation(): void {
+    installBlob = new InstallationInformation ();
 }
 
-export function getInstallBlob(): InstallBlob {
+export function getInstallationInformationInstance(): InstallationInformation  {
     return installBlob;
 }
 
 export function setInstallationStage(stage: string): void {
     if (!installBlob) {
-        initializeInstallBlob();
+        initializeInstallationInformation();
     }
     installBlob.stage = stage;
 }
