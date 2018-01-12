@@ -1,0 +1,16 @@
+{
+    "version": "0.1.0",
+	"tasks": [
+        {
+            "taskName": "build",
+			"command": "g++",
+			"isShellCommand": true,
+			"args": ["main.cpp", "-g", "-o", "program"],
+			"showOutput": "always",
+			"isBuildCommand": true,
+			"windows": {
+				"command": "C:\\MinGW\\bin\\g++.exe"
+			}
+        }
+    ]
+}

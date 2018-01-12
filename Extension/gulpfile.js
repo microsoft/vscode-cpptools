@@ -6,15 +6,45 @@
 'use strict';
 
 const gulp = require('gulp');
+const env = require('gulp-env')
 const tslint = require('gulp-tslint');
 const mocha = require('gulp-mocha');
 
-gulp.task('unitTest', () => {
+gulp.task('allTests', () => {
+    gulp.start('unitTests');
+    gulp.start('integrationTests');
+});
+
+gulp.task('unitTests', () => {
     gulp.src('./out/test/unitTests', {read: false}).pipe(
         mocha({
             ui: "tdd"
         })
+    ).once('error', err => {
+        process.exit(1);
+    })
+    .once('end', () => {
+        process.exit();
+    })
+});
+
+gulp.task('integrationTests', () => {
+    env.set({
+            CODE_TESTS_PATH: "./out/test/integrationTests",
+            CODE_TESTS_WORKSPACE: "./test/integrationTests/testAssets/SimpleCppProject"
+        }
     );
+    gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false}).pipe(
+        mocha({
+            ui: "tdd",
+            delay: true
+        })
+    ).once('error', err => {
+        process.exit(1);
+    })
+    .once('end', () => {
+        process.exit();
+    })
 });
 
 /// Misc Tasks

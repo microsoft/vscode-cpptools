@@ -1,0 +1,76 @@
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
+'use strict';
+
+import * as vscode from 'vscode';
+import * as os from 'os';
+
+// This is used for testing purposes
+let Subscriber: (message: string) => void;
+export function SubscribeToAllLoggers(subscriber: (message: string) => void): void {
+    Subscriber = subscriber;
+}
+
+export class Logger {
+    private writer: (message: string) => void;
+
+    constructor(writer: (message: string) => void) {
+        this.writer = writer;
+    }
+
+    public append(message: string): void {
+        this.writer(message);
+        if (Subscriber) {
+            Subscriber(message);
+        }
+    }
+
+    public appendLine(message: string): void {
+        this.writer(message + os.EOL);
+        if (Subscriber) {
+            Subscriber(message + os.EOL);
+        }
+    }
+
+    public showInformationMessage(message: string, items?: string[]): Thenable<string> {
+        this.appendLine(message);
+        
+        return vscode.window.showInformationMessage(message, ...items);
+    }
+
+    public showWarningMessage(message: string, items?: string[]): Thenable<string> {
+        this.appendLine(message);
+        
+        return vscode.window.showWarningMessage(message, ...items);
+    }
+
+    public showErrorMessage(message: string, items?: string[]): Thenable<string> {
+        this.appendLine(message);
+
+        return vscode.window.showErrorMessage(message, ...items);
+    }
+}
+
+let outputChannel: vscode.OutputChannel;
+
+export function getOutputChannel(): vscode.OutputChannel {
+    if (outputChannel == undefined) {
+        outputChannel = vscode.window.createOutputChannel("C/C++");
+    }
+    return outputChannel;
+}
+
+export function showOutputChannel(): void {
+    getOutputChannel().show();
+}
+
+let outputChannelLogger: Logger;
+
+export function getOutputChannelLogger(): Logger {
+    if (!outputChannelLogger) {
+        outputChannelLogger = new Logger(message => getOutputChannel().append(message));
+    }
+    return outputChannelLogger;
+}
