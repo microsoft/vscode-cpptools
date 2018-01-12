@@ -7,7 +7,7 @@
 import * as fs from "fs";
 import * as path from 'path';
 
-import { SubscribeToAllLoggers } from "../../src/logger";
+import { subscribeToAllLoggers } from "../../src/logger";
 
 // 
 // PLEASE DO NOT MODIFY / DELETE UNLESS YOU KNOW WHAT YOU ARE DOING  
@@ -37,6 +37,6 @@ if (!fs.existsSync(logFolder)) {
     fs.mkdirSync(logFolder);
 }
 const logFilePath = path.join(logFolder, "integrationTests.log");
-SubscribeToAllLoggers(message => fs.appendFileSync(logFilePath, message));
+subscribeToAllLoggers(message => fs.appendFileSync(logFilePath, message));
 
 module.exports = testRunner;

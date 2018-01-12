@@ -18,7 +18,7 @@ import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
 import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
-import { getOutputChannelLogger, showOutputChannel } from './logger';
+import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 
 const releaseNotesVersion: number = 3;
 
@@ -108,16 +108,17 @@ async function onlineInstallation(): Promise<void> {
 }
 
 async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
-    getOutputChannelLogger().appendLine("Updating C/C++ dependencies...");
+    let outputChannelLogger: Logger = getOutputChannelLogger();
+    outputChannelLogger.appendLine("Updating C/C++ dependencies...");
 
     let statusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
-    let packageManager: PackageManager = new PackageManager(info, getOutputChannelLogger(), statusItem);
+    let packageManager: PackageManager = new PackageManager(info, outputChannelLogger, statusItem);
 
-    getOutputChannelLogger().appendLine('');
+    outputChannelLogger.appendLine('');
     setInstallationStage('downloadPackages');
     await packageManager.DownloadPackages();
 
-    getOutputChannelLogger().appendLine('');
+    outputChannelLogger.appendLine('');
     setInstallationStage('installPackages');
     await packageManager.InstallPackages();
 
@@ -201,14 +202,15 @@ function handleError(error: any): void {
         installationInformation.telemetryProperties['error.toString'] = util.removePotentialPII(errorMessage);
     }
 
+    let outputChannelLogger: Logger = getOutputChannelLogger();
     if (installationInformation.stage == 'downloadPackages') {
-        getOutputChannelLogger().appendLine("");
+        outputChannelLogger.appendLine("");
     }
     // Show the actual message and not the sanitized one
-    getOutputChannelLogger().appendLine(`Failed at stage: ${installationInformation.stage}`);
-    getOutputChannelLogger().appendLine(errorMessage);
-    getOutputChannelLogger().appendLine("");
-    getOutputChannelLogger().appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
+    outputChannelLogger.appendLine(`Failed at stage: ${installationInformation.stage}`);
+    outputChannelLogger.appendLine(errorMessage);
+    outputChannelLogger.appendLine("");
+    outputChannelLogger.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
     showOutputChannel();
 }
 
@@ -240,9 +242,10 @@ function sendTelemetry(info: PlatformInformation): boolean {
 }
 
 async function postInstall(info: PlatformInformation): Promise<void> {
-    getOutputChannelLogger().appendLine("");
-    getOutputChannelLogger().appendLine("Finished installing dependencies");
-    getOutputChannelLogger().appendLine("");
+    let outputChannelLogger: Logger = getOutputChannelLogger();
+    outputChannelLogger.appendLine("");
+    outputChannelLogger.appendLine("Finished installing dependencies");
+    outputChannelLogger.appendLine("");
 
     const installSuccess: boolean = sendTelemetry(info);
 

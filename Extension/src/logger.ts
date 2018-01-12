@@ -9,7 +9,7 @@ import * as os from 'os';
 
 // This is used for testing purposes
 let Subscriber: (message: string) => void;
-export function SubscribeToAllLoggers(subscriber: (message: string) => void): void {
+export function subscribeToAllLoggers(subscriber: (message: string) => void): void {
     Subscriber = subscriber;
 }
 
