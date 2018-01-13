@@ -17,6 +17,7 @@ import * as util from './common';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
 import { IncomingMessage, ClientRequest } from 'http';
+import { Logger } from './logger';
 
 export interface IPackage {
     // Description of the package
@@ -66,7 +67,7 @@ export class PackageManager {
 
     public constructor(
         private platformInfo: PlatformInformation,
-        private outputChannel?: vscode.OutputChannel,
+        private outputChannel?: Logger,
         private statusItem?: vscode.StatusBarItem) {
         // Ensure our temp files get cleaned up in case of error
         tmp.setGracefulCleanup();

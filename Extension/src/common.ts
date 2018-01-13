@@ -12,6 +12,7 @@ import * as Telemetry from './telemetry';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as url from 'url';
 import { PlatformInformation } from './platform';
+import { getOutputChannelLogger, showOutputChannel } from './logger';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -45,9 +46,9 @@ export function displayExtensionNotReadyPrompt(): void {
 
     if (!isExtensionNotReadyPromptDisplayed) {
         isExtensionNotReadyPromptDisplayed = true; 
-        outputChannel.show();
+        showOutputChannel();
 
-        vscode.window.showInformationMessage(extensionNotReadyString).then(
+        getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
             () => { isExtensionNotReadyPromptDisplayed = false; },
             () => { isExtensionNotReadyPromptDisplayed = false; }
         );
@@ -347,15 +348,6 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     });
 }
 
-let outputChannel: vscode.OutputChannel;
-
-export function getOutputChannel(): vscode.OutputChannel {
-    if (outputChannel == undefined) {
-        outputChannel = vscode.window.createOutputChannel("C/C++");
-    }
-    return outputChannel;
-}
-
 export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         if (process.platform != 'win32') {
@@ -369,8 +361,8 @@ export function allowExecution(file: string): Promise<void> {
                         resolve();
                     });
                 } else {
-                    getOutputChannel().appendLine("");
-                    getOutputChannel().appendLine(`Warning: Expected file ${file} is missing.`);
+                    getOutputChannelLogger().appendLine("");
+                    getOutputChannelLogger().appendLine(`Warning: Expected file ${file} is missing.`);
                     resolve();
                 }
             });
@@ -397,6 +389,6 @@ export function checkDistro(platformInfo: PlatformInformation): void {
     if (platformInfo.platform != 'win32' && platformInfo.platform != 'linux' && platformInfo.platform != 'darwin') {
         // this should never happen because VSCode doesn't run on FreeBSD
         // or SunOS (the other platforms supported by node)
-        outputChannel.appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
+        getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
     }
 }

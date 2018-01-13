@@ -29,6 +29,22 @@
 			"type": "node",
 			"request": "attach",
 			"port": 5858
-		}
+		},
+		{
+            "name": "Launch Integration Tests",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "${workspaceRoot}/test/integrationTests/testAssets/SimpleCppProject",
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "--extensionTestsPath=${workspaceRoot}/out/test/integrationTests"
+            ],
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/out/test/**/*.js"
+            ]
+        },
 	]
 }

@@ -20,6 +20,7 @@ import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
+import * as logger from '../logger';
 
 let ui: UI;
 
@@ -491,7 +492,7 @@ class DefaultClient implements Client {
                 if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
                     this.outputChannel = vscode.window.createOutputChannel(`C/C++: ${this.Name}`);
                 } else {
-                    this.outputChannel = util.getOutputChannel();
+                    this.outputChannel = logger.getOutputChannel();
                 }
                 this.disposables.push(this.outputChannel);
             }
