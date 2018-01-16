@@ -41,7 +41,7 @@ export class CppSettings extends Settings {
     public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }
-    public get filesAssociationsAutoAdd(): boolean { return super.Section.get<boolean>("files.associations.autoAdd"); }
+    public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): boolean { return super.Section.get<boolean>("workspaceParsingPriority"); }
     public get exclusionPolicy(): boolean { return super.Section.get<boolean>("exclusionPolicy"); }
 

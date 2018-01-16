@@ -167,7 +167,7 @@
           "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information.",
           "scope": "resource"
         },
-        "C_Cpp.files.associations.autoAdd": {
+        "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
           "default": true,
           "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",

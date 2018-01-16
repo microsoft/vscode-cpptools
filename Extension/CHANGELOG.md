@@ -4,7 +4,7 @@
 * Fix tag parser failing (and continuing to fail after edits) when it shouldn't. [#1367](https://github.com/Microsoft/vscode-cpptools/issues/1367)
 * Fix tag parser taking too long due to redundant processing. [#1288](https://github.com/Microsoft/vscode-cpptools/issues/1288)
 * Fix debugging silently failing the 1st time if a C/C++ file isn't opened. [#1366](https://github.com/Microsoft/vscode-cpptools/issues/1366)
-* Skip automatically adding to `files.associations` if it matches an existing glob pattern or if `C_Cpp.files.associations.autoAdd` is `false`. [#722](https://github.com/Microsoft/vscode-cpptools/issues/722)
+* Skip automatically adding to `files.associations` if it matches an existing glob pattern or if `C_Cpp.autoAddFileAssociations` is `false`. [#722](https://github.com/Microsoft/vscode-cpptools/issues/722)
 * Fix extra reload message after installing with VS Code 1.19. [#1362](https://github.com/Microsoft/vscode-cpptools/issues/1362)
 * Fix incorrect "Warning: Expected file ... is missing" message after installing on Linux. [#1334](https://github.com/Microsoft/vscode-cpptools/issues/1334)
 * Fix "Include file not found" messages not re-appearing after settings changes. [#1363](https://github.com/Microsoft/vscode-cpptools/issues/1363)
