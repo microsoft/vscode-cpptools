@@ -521,7 +521,7 @@ class DefaultClient implements Client {
         let cppSettings: CppSettings = new CppSettings(this.RootUri);
 
         // TODO: Move this code to a different place?
-        if (cppSettings.filesAssociationsAutoAdd && payload.navigation.startsWith("<def")) {
+        if (cppSettings.autoAddFileAssociations && payload.navigation.startsWith("<def")) {
             this.addFileAssociations(payload.navigation.substr(4));
             return;
         }
