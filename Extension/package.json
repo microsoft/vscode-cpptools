@@ -182,7 +182,7 @@
             "low"
           ],
           "default": "highest",
-          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/normal/low correspond to approximately 100/75/50/25% CPU usage.",
+          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/medium/low correspond to approximately 100/75/50/25% CPU usage.",
           "scope": "resource"
         },
         "C_Cpp.exclusionPolicy": {
