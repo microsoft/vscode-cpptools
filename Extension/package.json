@@ -167,10 +167,32 @@
           "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information.",
           "scope": "resource"
         },
-        "C_Cpp.files.associations.autoAdd": {
+        "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
           "default": true,
           "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",
+          "scope": "resource"
+        },
+        "C_Cpp.workspaceParsingPriority": {
+          "type": "string",
+          "enum": [
+            "highest",
+            "high",
+            "medium",
+            "low"
+          ],
+          "default": "highest",
+          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/medium/low correspond to approximately 100/75/50/25% CPU usage.",
+          "scope": "resource"
+        },
+        "C_Cpp.exclusionPolicy": {
+          "type": "string",
+          "enum": [
+            "checkFolders",
+            "checkFilesAndFolders"
+          ],
+          "default": "checkFolders",
+          "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
           "scope": "resource"
         }
       }
@@ -307,8 +329,7 @@
             "cpp"
           ]
         },
-        "runtime": "node",
-        "program": "./out/src/Debugger/Proxy/debugProxy.js",
+        "adapterExecutableCommand": "extension.cppdbgAdapterExecutableCommand",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
@@ -758,11 +779,7 @@
             "cpp"
           ]
         },
-        "runtime": "node",
-        "program": "./out/src/Debugger/Proxy/debugProxy.js",
-        "args": [
-          "--interpreter=vscode"
-        ],
+        "adapterExecutableCommand": "extension.cppvsdbgAdapterExecutableCommand",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
@@ -1023,30 +1040,42 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "tsc -p ./ && node ./out/src/Debugger/copyScript.js",
+    "compile": "npm run vscode:prepublish && tsc -p ./",
+    "integrationTests": "gulp integrationTests",
+    "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p ./",
-    "test": "mocha -u tdd ./out/test",
-    "compile": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "test": "gulp allTests",
+    "tslint": "gulp tslint",
+    "unitTests": "gulp unitTests",
+    "vscode:prepublish": "npm install && tsc -p ./ && node ./out/src/Debugger/copyScript.js",
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "typescript": "^2.5.3",
-    "vscode": "^1.1.6",
-    "mocha": "^4.0.1",
+    "@types/mocha": "^2.2.43",
     "@types/node": "^8.0.46",
-    "@types/mocha": "^2.2.43"
+    "gulp-env": "0.4.0",
+    "gulp-mocha": "5.0.0",
+    "gulp-tslint": "8.1.2",
+    "gulp": "3.9.1",
+    "mocha": "^4.0.1",
+    "tslint-microsoft-contrib": "5.0.1",
+    "tslint-no-unused-expression-chai": "0.0.3",
+    "tslint": "5.8.0",
+    "typescript": "^2.5.3",
+    "vscode": "^1.1.6"
   },
   "dependencies": {
-    "vscode-languageclient": "~3.4.5",
-    "vscode-extension-telemetry": "~0.0.8",
     "http-proxy-agent": "~2.0.0",
     "https-proxy-agent": "~2.1.0",
-    "tmp": "~0.0.33",
-    "yauzl": "~2.8.0",
+    "jsonc-parser": "^1.0.0",
+    "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
-    "vscode-debugprotocol": "~1.24.0",
+    "tmp": "~0.0.33",
     "vscode-debugadapter": "~1.24.0",
-    "minimatch": "~3.0.4"
+    "vscode-debugprotocol": "~1.24.0",
+    "vscode-extension-telemetry": "~0.0.10",
+    "vscode-languageclient": "~3.4.5",
+    "yauzl": "~2.8.0"
   },
   "runtimeDependencies": [
     {

@@ -9,14 +9,23 @@
  */
 
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
-import * as child_process from 'child_process';
+
+//Change this to true to force a dev workflow.
+const EnableDevWorkflow: boolean = false;
+
+const DebugAdapterPath: string = "./debugAdapters";
+const DebugAdapterBinPath: string = DebugAdapterPath + "/bin";
+
+let CpptoolsExtensionRoot: string = null;
+let SearchCompleted: boolean = false;
 
 interface RootsHashtable {
     "miEngineRoot": string;
     "openDebugRoot": string;
-    "monoDeps": string
-};
+    "monoDeps": string;
+}
 
 const internalBinaryRoots: RootsHashtable = {
     "miEngineRoot": process.env.CPPTOOLS_MIENGINE_ROOT,
@@ -25,16 +34,45 @@ const internalBinaryRoots: RootsHashtable = {
 };
 
 const externalBinaryRoots: RootsHashtable = {
-    "miEngineRoot": "./node_modules/msvscode.cpptools.miengine",
-    "openDebugRoot": "./node_modules/msvscode.cpptools.opendebugad7",
-    "monoDeps": "./node_modules/msvscode.cpptools.monodeps"
+    "miEngineRoot": DebugAdapterBinPath,
+    "openDebugRoot": DebugAdapterBinPath,
+    "monoDeps": DebugAdapterPath
 };
 
-//Change this to true to force a dev workflow.
-const EnableDevWorkflow: Boolean = false;
+function findCppToolsExtensionDebugAdapterFolder(): string {
+    const vscodeFolderRegExp: RegExp = new RegExp(/\.vscode-*[a-z]*$/);
+    const cpptoolsFolderRegExp: RegExp = new RegExp(/ms\-vscode\.cpptools\-.*$/);
 
-const DebugAdapterPath = "./debugAdapters"
-const DebugAdapterBinPath = DebugAdapterPath + "/bin";
+    let dirPath: string = os.homedir();
+    if (fs.existsSync(dirPath)) {
+        let files: string[] = fs.readdirSync(dirPath);
+        for (let i: number = 0; i < files.length; i++) {
+            // Check to see if it starts with '.vscode'
+            if (vscodeFolderRegExp.test(files[i])) {
+                let extPath: string = path.join(dirPath, files[i], "extensions");
+                if (fs.existsSync(extPath)) {
+                    let extFiles: string[] = fs.readdirSync(extPath);
+                    for (let j: number = 0; j < extFiles.length; j++) {
+                        if (cpptoolsFolderRegExp.test(path.join(extFiles[j]))) {
+                            dirPath = path.join(extPath, extFiles[j]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (dirPath == os.homedir()) {
+            console.error("Could not find installed C/C++ extension.");
+            return null;
+        }
+
+        return dirPath;
+    } else {
+        console.error("Unable to determine C/C++ extension installation location.");
+        return null;
+    }
+}
 
 function enableDevWorkflow(): Boolean {
     if (process.env.AGENT_ID) {
@@ -50,13 +88,28 @@ function copySourceDependencies(): void {
 }
 
 function getRoot(rootKey: string): string {
-    const internal = internalBinaryRoots[rootKey];
-    return internal ? internal : externalBinaryRoots[rootKey];
+    const internal: string = internalBinaryRoots[rootKey];
+    if (internal) {
+        return internal;
+    }
+
+    // Only search for the extension root once.
+    if (!CpptoolsExtensionRoot && !SearchCompleted) {
+        CpptoolsExtensionRoot = findCppToolsExtensionDebugAdapterFolder();
+        SearchCompleted = true;
+    }
+
+    if (CpptoolsExtensionRoot) {
+        return path.join(CpptoolsExtensionRoot, externalBinaryRoots[rootKey]);
+    }
+
+    console.error("Unable to determine internal/external location to copy from for root %s.", rootKey);
+    return null;
 }
 
 function copyBinaryDependencies(): void {
-    const miEngineRoot = getRoot("miEngineRoot");
-    const openDebugRoot = getRoot("openDebugRoot");
+    const miEngineRoot: string = getRoot("miEngineRoot");
+    const openDebugRoot: string = getRoot("openDebugRoot");
 
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MICore.dll");
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MICore.dll.mdb");
@@ -78,34 +131,30 @@ function copyBinaryDependencies(): void {
 }
 
 function copyMonoDependencies(): void {
-    const monoDeps = getRoot("monoDeps");
+    const monoDeps: string = getRoot("monoDeps");
 
     copy(monoDeps, DebugAdapterPath, "OpenDebugAD7");
 }
 
 function copy(root: string, target: string, file: string): void {
-    var source = path.join(root, file);
-    var destination: string = path.join(target, file);
+    if (!root) {
+        console.error("Unknown root location. Copy Failed for %s.", file);
+        return;
+    }
 
-    console.log('Creating directory %s', target);
-    makeDirectory(target);
+    const source: string = path.join(root, file);
+    const destination: string = path.join(target, file);
+
+    if (!fs.existsSync(target)) {
+        console.log('Creating directory %s', target);
+        makeDirectory(target);
+    }
 
     console.log('copying %s to %s', source, destination);
-    fs.writeFileSync(destination, fs.readFileSync(source));
-}
-
-function copyFolder(root: string, target: string): void {
-    var files: string[] = fs.readdirSync(root);
-
-    for (var i = 0; i < files.length; i++) {
-        var fullPath: string = path.join(root, files[i]);
-
-        if (!isDirectory(fullPath)) {
-            copy(root, target, files[i]);
-        }
-        else {
-            copyFolder(fullPath, path.join(target, files[i]));
-        }
+    if (fs.existsSync(source)) {
+        fs.writeFileSync(destination, fs.readFileSync(source));
+    } else {
+        console.error('ERR: could not find file %s', source);
     }
 }
 
@@ -115,15 +164,14 @@ function removeFolder(root: string): void {
         return;
     }
 
-    var files: string[] = fs.readdirSync(root);
-    for (var i = 0; i < files.length; i++) {
-        var fullPath: string = path.join(root, files[i]);
+    let files: string[] = fs.readdirSync(root);
+    for (let i: number = 0; i < files.length; i++) {
+        let fullPath: string = path.join(root, files[i]);
         console.warn('Found entry %s', fullPath);
         if (!isDirectory(fullPath)) {
             console.warn('Deleting %s', fullPath);
-            fs.unlinkSync(fullPath)
-        }
-        else {
+            fs.unlinkSync(fullPath);
+        } else {
             removeFolder(fullPath);
         }
     }
@@ -135,19 +183,8 @@ function removeFolder(root: string): void {
 function isDirectory(dir: string): Boolean {
     try {
         return fs.statSync(dir).isDirectory();
+    } catch (e) {
     }
-    catch (e) {
-    }
-    return false;
-}
-
-function fileExists(file: string): Boolean {
-    try {
-        return fs.statSync(file).isFile();
-    }
-    catch (e) {
-    }
-
     return false;
 }
 
@@ -155,15 +192,14 @@ function makeDirectory(dir: string): void {
     try {
         //Note: mkdir is limited to creating folders with one level of nesting. Creating "a/b" if 'a' doesn't exist will throw a ENOENT.
         fs.mkdirSync(dir);
-    }
-    catch (e) {
+    } catch (e) {
         if ((<NodeJS.ErrnoException>e).code !== "EEXIST") {
             throw e;
         }
     }
 }
 
-var devWorkFlowMessage: string = '\nWARNING: If you are trying to build and run the extension locally, please set the environment variable CPPTOOLS_DEV=1 and try again.\n';
+let devWorkFlowMessage: string = '\nWARNING: If you are trying to build and run the extension locally, please set the environment variable CPPTOOLS_DEV=1 and try again.\n';
 
 if (enableDevWorkflow()) {
     removeFolder("./debugAdapters");
@@ -175,7 +211,6 @@ copySourceDependencies();
 if (enableDevWorkflow()) {
     copyMonoDependencies();
     copyBinaryDependencies();
-}
-else {
+} else {
     console.warn(devWorkFlowMessage);
 }

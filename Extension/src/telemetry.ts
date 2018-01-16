@@ -4,10 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as vscode from 'vscode';
-import * as fs from 'fs';
 import TelemetryReporter from 'vscode-extension-telemetry';
-import { NotificationType } from 'vscode-languageclient';
 import * as util from './common';
 
 interface IPackageInfo {
@@ -18,7 +15,7 @@ interface IPackageInfo {
 
 let telemetryReporter: TelemetryReporter;
 
-export function activate() {
+export function activate(): void {
     try {
         telemetryReporter = createReporter();
     } catch (e) {
@@ -26,27 +23,28 @@ export function activate() {
     }
 }
 
-export function deactivate() {
-    if (telemetryReporter)
+export function deactivate(): void {
+    if (telemetryReporter) {
         telemetryReporter.dispose();
+    }
 }
 
 export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): void {
-    const eventNamePrefix = "cppdbg/VS/Diagnostics/Debugger/";
+    const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
     if (telemetryReporter) {
         telemetryReporter.sendTelemetryEvent(eventNamePrefix + eventName, properties);
     }
 }
 
 export function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
-    const eventNamePrefix = "C_Cpp/LanguageServer/";
+    const eventNamePrefix: string = "C_Cpp/LanguageServer/";
     if (telemetryReporter) {
         telemetryReporter.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
     }
 }
 
 function createReporter(): TelemetryReporter {
-    let packageInfo = getPackageInfo();
+    let packageInfo: IPackageInfo = getPackageInfo();
     if (packageInfo && packageInfo.aiKey) {
         return new TelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey);
     }

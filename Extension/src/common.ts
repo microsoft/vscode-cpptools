@@ -11,61 +11,15 @@ import * as vscode from 'vscode';
 import * as Telemetry from './telemetry';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as url from 'url';
+import { PlatformInformation } from './platform';
+import { getOutputChannelLogger, showOutputChannel } from './logger';
 
 export let extensionContext: vscode.ExtensionContext;
-export function setExtensionContext(context: vscode.ExtensionContext) {
+export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
 }
 
-export let packageJson = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
-
-// Used to show a one-time wait/reload popup when launch.json becomes active.
-let showReloadPromptOnce: boolean = false;
-let showWaitForDownloadPromptOnce: boolean = false; 
-
-let showReloadPromptAlways: boolean = false; // Used to show wait/reload in the launch/attach debug scenarios.
-
-export function enableReloadOrWaitPrompt() {
-    showReloadPromptOnce = showReloadPromptAlways = showWaitForDownloadPromptOnce = true;
-}
-
-export function getShowReloadPromptOnce(): boolean { return showReloadPromptOnce; }
-export function getShowReloadPrompt(): boolean { return showReloadPromptAlways; }
-export function getShowWaitForDownloadPromptOnce() { return showWaitForDownloadPromptOnce; }
-
-export function showReloadPrompt() {
-    showReloadPromptOnce = false;
-    let reload = "Reload";
-    vscode.window.showInformationMessage("Reload the window to finish installing the C/C++ extension.", reload).then(value => {
-        if (value === reload)
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
-    });
-}
-
-export function showWaitForDownloadPrompt() {
-    showWaitForDownloadPromptOnce = false;
-    getOutputChannel().show();
-    vscode.window.showInformationMessage("Please wait for the C/C++ extension dependencies to finish downloading and installing.");
-}
-
-function showReloadOrWaitPromptImpl(once: boolean) {
-    checkInstallLockFile().then((installLockExists: boolean) => {
-        if (installLockExists) {
-            showReloadPrompt();
-        } else {
-            if (!once || getShowWaitForDownloadPromptOnce()) {
-                setDebuggerReloadLater();
-                showWaitForDownloadPrompt();
-            }
-        }
-    });
-}
-
-export function showReloadOrWaitPrompt() { showReloadOrWaitPromptImpl(false); }
-export function showReloadOrWaitPromptOnce() { showReloadOrWaitPromptImpl(true) }
-
-// Warning: The methods involving getExtensionFilePath are duplicated in debugProxyUtils.ts,
-// because the extensionContext is not set in that context.
+export let packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
 
 export function getExtensionFilePath(extensionfile: string): string {
     return path.resolve(extensionContext.extensionPath, extensionfile);
@@ -78,20 +32,43 @@ export function getPackageJsonString(): string {
     return JSON.stringify(packageJson, null, 2);
 }
 
+// Extension is ready if install.lock exists and debugAdapters folder exist.
+export async function isExtensionReady(): Promise<boolean> {
+    const doesInstallLockFileExist: boolean = await checkInstallLockFile();
+
+    return doesInstallLockFileExist;
+}
+
+let isExtensionNotReadyPromptDisplayed: boolean = false;
+export const extensionNotReadyString: string = 'The C/C++ extension is still installing. See the output window for more information.';
+
+export function displayExtensionNotReadyPrompt(): void {
+
+    if (!isExtensionNotReadyPromptDisplayed) {
+        isExtensionNotReadyPromptDisplayed = true; 
+        showOutputChannel();
+
+        getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
+            () => { isExtensionNotReadyPromptDisplayed = false; },
+            () => { isExtensionNotReadyPromptDisplayed = false; }
+        );
+    }
+}
+
 // This Progress global state tracks how far users are able to get before getting blocked.
 // Users start with a progress of 0 and it increases as they get further along in using the tool.
 // This eliminates noise/problems due to re-installs, terminated installs that don't send errors,
 // errors followed by workarounds that lead to success, etc.
-const progressInstallSuccess = 100;
-const progressExecutableStarted = 150;
-const progressExecutableSuccess = 200;
-const progressParseRootSuccess = 300;
-const progressIntelliSenseNoSquiggles = 1000;
+const progressInstallSuccess: number = 100;
+const progressExecutableStarted: number = 150;
+const progressExecutableSuccess: number = 200;
+const progressParseRootSuccess: number = 300;
+const progressIntelliSenseNoSquiggles: number = 1000;
 // Might add more IntelliSense progress measurements later.
 // IntelliSense progress is separate from the install progress, because parse root can occur afterwards.
 
-let installProgressStr = "CPP." + packageJson.version + ".Progress";
-let intelliSenseProgressStr = "CPP." + packageJson.version + ".IntelliSenseProgress";
+let installProgressStr: string = "CPP." + packageJson.version + ".Progress";
+let intelliSenseProgressStr: string = "CPP." + packageJson.version + ".IntelliSenseProgress";
 
 export function getProgress(): number {
     return extensionContext.globalState.get<number>(installProgressStr, -1);
@@ -106,7 +83,7 @@ export function setProgress(progress: number): void {
         extensionContext.globalState.update(installProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
-        switch(progress) {
+        switch (progress) {
             case 0: progressName = "install started"; break;
             case progressInstallSuccess: progressName = "install succeeded"; break;
             case progressExecutableStarted: progressName = "executable started"; break;
@@ -118,12 +95,12 @@ export function setProgress(progress: number): void {
     }
 }
 
-export function setIntelliSenseProgress(progress: number) {
+export function setIntelliSenseProgress(progress: number): void {
     if (getIntelliSenseProgress() < progress) {
         extensionContext.globalState.update(intelliSenseProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
-        switch(progress) {
+        switch (progress) {
             case progressIntelliSenseNoSquiggles: progressName = "IntelliSense no squiggles"; break;
         }
         telemetryProperties['progress'] = progressName;
@@ -137,25 +114,26 @@ export function getProgressExecutableSuccess(): number { return progressExecutab
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
-export function showReleaseNotes() {
+export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
-export function resolveVariables(input: string) {
-    if (input === null)
+export function resolveVariables(input: string): string {
+    if (input === null) {
         return "";
+    }
 
     // Replace environment variables. (support both ${env:VAR} and ${VAR} syntax)
     let regexp: RegExp = /\$\{(env:|env.)?(.*?)\}/g;
-    let ret = input.replace(regexp, (match: string, ignored: string, name: string) => {
-        let newValue = process.env[name];
+    let ret: string = input.replace(regexp, (match: string, ignored: string, name: string) => {
+        let newValue: string = process.env[name];
         return (newValue != null) ? newValue : match;
     });
 
     // Resolve '~' at the start of the path.
     regexp = /^\~/g;
     ret = ret.replace(regexp, (match: string, name: string) => {
-        let newValue = process.env.HOME;
+        let newValue: string = process.env.HOME;
         return (newValue != null) ? newValue : match;
     });
 
@@ -163,7 +141,7 @@ export function resolveVariables(input: string) {
 }
 
 export function asFolder(uri: vscode.Uri): string {
-    let result = uri.toString();
+    let result: string = uri.toString();
     if (result.charAt(result.length - 1) !== '/') {
         result += '/';
     }
@@ -183,26 +161,27 @@ export function getOpenCommand(): string {
     }
 }
 
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
 
 export function GetHttpsProxyAgent(): HttpsProxyAgent {
-    let proxy = vscode.workspace.getConfiguration().get<string>('http.proxy');
+    let proxy: string = vscode.workspace.getConfiguration().get<string>('http.proxy');
     if (!proxy) {
         proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
-        if (!proxy)
+        if (!proxy) {
             return null; // No proxy
+        }
     }
 
     // Basic sanity checking on proxy url
-    let proxyUrl = url.parse(proxy);
-    if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:")
+    let proxyUrl: any = url.parse(proxy);
+    if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:") {
         return null;
+    }
 
-    let strictProxy = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
-    let proxyOptions = {
+    let strictProxy: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
+    let proxyOptions: any = {
         host: proxyUrl.hostname,
         port: parseInt(proxyUrl.port, 10),
         auth: proxyUrl.auth,
@@ -212,12 +191,7 @@ export function GetHttpsProxyAgent(): HttpsProxyAgent {
     return new HttpsProxyAgent(proxyOptions);
 }
 
-let reloadLater: boolean = false;
-export function setDebuggerReloadLater() { reloadLater = true; }
-export function getDebuggerReloadLater(): boolean { return reloadLater; }
-
-/** Creates the lock file if it doesn't exist */
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
+/** Creates a file if it doesn't exist */
 function touchFile(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.writeFile(file, "", (err) => {
@@ -234,10 +208,6 @@ export function touchInstallLockFile(): Promise<void> {
     return touchFile(getInstallLockPath());
 }
 
-export function touchPackageLockFile(): Promise<void> {
-    return touchFile(getPackageLockPath());
-}
-
 export function touchExtensionFolder(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.utimes(path.resolve(extensionContext.extensionPath, ".."), new Date(Date.now()), new Date(Date.now()), (err) => {
@@ -251,29 +221,21 @@ export function touchExtensionFolder(): Promise<void> {
 }
 
 /** Test whether a file exists */
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function checkFileExists(filePath: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         fs.stat(filePath, (err, stats) => {
             if (stats && stats.isFile()) {
                 resolve(true);
-            }
-            else {
+            } else {
                 resolve(false);
             }
-        })
+        });
     });
 }
 
 /** Test whether the lock file exists.*/
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());
-}
-
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
-export function checkPackageLockFile(): Promise<boolean> {
-    return checkFileExists(getPackageLockPath());
 }
 
 /** Reads the content of a text file */
@@ -285,8 +247,8 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
                 return;
             }
 
-            resolve(data)
-        })
+            resolve(data);
+        });
     });
 }
 
@@ -300,26 +262,13 @@ export function writeFileText(filePath: string, content: string, encoding: strin
             }
 
             resolve();
-        })
+        });
     });
 }
 
 // Get the path of the lock file. This is used to indicate that the platform-specific dependencies have been downloaded.
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
 export function getInstallLockPath(): string {
     return getExtensionFilePath("install.lock");
-}
-
-// This 2nd lock is needed for the debugger launch scenario to detect if a reload has been done yet.
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
-export function getPackageLockPath(): string {
-    return getExtensionFilePath("package.lock");
-}
-
-// Used to communicate from the debugProxy to the extension code.
-// NOTE: This function is duplicated in debugProxyUtils.ts because common.ts cannot be imported by debugProxy.ts.
-export function getDebuggerReloadPath(): string {
-    return getExtensionFilePath(`debugger.reload`);
 }
 
 export function getReadmeMessage(): string {
@@ -330,7 +279,7 @@ export function getReadmeMessage(): string {
 
 /** Used for diagnostics only */
 export function logToFile(message: string): void {
-    var logFolder = getExtensionFilePath("extension.log");
+    const logFolder: string = getExtensionFilePath("extension.log");
     fs.writeFileSync(logFolder, `${message}${os.EOL}`, { flag: 'a' });
 }
 
@@ -378,8 +327,8 @@ export function execChildProcess(process: string, workingDirectory: string, chan
 export function spawnChildProcess(process: string, args: string[], workingDirectory: string,
     dataCallback: (stdout: string) => void, errorCallback: (stderr: string) => void): Promise<void> {
 
-    return new Promise<void>(function (resolve, reject) {
-        const child = child_process.spawn(process, args, { cwd: workingDirectory });
+    return new Promise<void>(function (resolve, reject): void {
+        const child: child_process.ChildProcess = child_process.spawn(process, args, { cwd: workingDirectory });
 
         child.stdout.on('data', (data) => {
             dataCallback(`${data}`);
@@ -392,20 +341,11 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
         child.on('exit', (code: number) => {
             if (code !== 0) {
                 reject(new Error(`${process} exited with error code ${code}`));
-            }
-            else {
+            } else {
                 resolve();
             }
         });
     });
-}
-
-var outputChannel: vscode.OutputChannel;
-
-export function getOutputChannel(): vscode.OutputChannel {
-    if (outputChannel == undefined)
-        outputChannel = vscode.window.createOutputChannel("C/C++");
-    return outputChannel;
 }
 
 export function allowExecution(file: string): Promise<void> {
@@ -420,16 +360,35 @@ export function allowExecution(file: string): Promise<void> {
                         }
                         resolve();
                     });
-                }
-                else {
-                    getOutputChannel().appendLine("");
-                    getOutputChannel().appendLine(`Warning: Expected file ${file} is missing.`);
+                } else {
+                    getOutputChannelLogger().appendLine("");
+                    getOutputChannelLogger().appendLine(`Warning: Expected file ${file} is missing.`);
                     resolve();
                 }
             });
-        }
-        else {
+        } else {
             resolve();
         }
     });
+}
+
+export function removePotentialPII(str: string): string {
+    let words: string[] = str.split(" ");
+    let result: string = "";
+    for (let word of words) {
+        if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
+            result += word + " ";
+        } else {
+            result += "? ";
+        }
+    }
+    return result;
+}
+
+export function checkDistro(platformInfo: PlatformInformation): void {
+    if (platformInfo.platform != 'win32' && platformInfo.platform != 'linux' && platformInfo.platform != 'darwin') {
+        // this should never happen because VSCode doesn't run on FreeBSD
+        // or SunOS (the other platforms supported by node)
+        getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
+    }
 }
