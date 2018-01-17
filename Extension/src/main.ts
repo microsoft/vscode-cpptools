@@ -78,6 +78,9 @@ async function offlineInstallation(): Promise<void> {
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
 
+    setInstallationStage('removeUnnecessaryFile');
+    await removeUnnecessaryFile();
+
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
 
@@ -147,7 +150,9 @@ function removeUnnecessaryFile(): Promise<void> {
         let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
             fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException) => {
-                getOutputChannelLogger().appendLine("removeUnnecessaryFile: fs.rename failed");
+                if (err) {
+                    getOutputChannelLogger().appendLine(`ERROR: fs.rename failed with "${err.message}". Delete ${sourcePath} manually.`);
+                }
             });
         }
     }
