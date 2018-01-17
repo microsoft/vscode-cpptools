@@ -2,6 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
+'use strict';
 
 /**
  * This file is used for packaging the application and should not be referenced
