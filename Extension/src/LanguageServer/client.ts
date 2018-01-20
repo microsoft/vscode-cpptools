@@ -69,6 +69,11 @@ interface OutputNotificationBody {
     output: string;
 }
 
+interface InactiveRegionParams {
+    uri: string;
+    ranges: vscode.Range[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -97,6 +102,7 @@ const ReportTagParseStatusNotification: NotificationType<ReportStatusNotificatio
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
+const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 
 const maxSettingLengthForTelemetry: number = 50;
 let previousCppSettings: { [key: string]: any } = {};
@@ -434,6 +440,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportNavigationNotification, (e) => this.navigate(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
+        this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.setupOutputHandlers();
     }
 
@@ -618,6 +625,16 @@ class DefaultClient implements Client {
 
     private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
+    }
+
+    private updateInactiveRegions(params: InactiveRegionParams): void {
+        let renderOptions: vscode.DecorationRenderOptions = {
+            color: "rgba(255,0,255,0.5)"
+        };
+        let textEditorDecoration = vscode.window.createTextEditorDecorationType(renderOptions);
+        
+        let editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() == params.uri); // document.uri == params.uri
+        editor.setDecorations(textEditorDecoration, params.ranges);
     }
 
     /*********************************************
