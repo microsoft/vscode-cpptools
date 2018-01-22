@@ -127,14 +127,14 @@ export function resolveVariables(input: string): string {
     let regexp: RegExp = /\$\{(env:|env.)?(.*?)\}/g;
     let ret: string = input.replace(regexp, (match: string, ignored: string, name: string) => {
         let newValue: string = process.env[name];
-        return (newValue != null) ? newValue : match;
+        return (newValue !== null) ? newValue : match;
     });
 
     // Resolve '~' at the start of the path.
     regexp = /^\~/g;
     ret = ret.replace(regexp, (match: string, name: string) => {
         let newValue: string = process.env.HOME;
-        return (newValue != null) ? newValue : match;
+        return (newValue !== null) ? newValue : match;
     });
 
     return ret;
@@ -152,9 +152,9 @@ export function asFolder(uri: vscode.Uri): string {
  * get the default open command for the current platform
  */
 export function getOpenCommand(): string {
-    if (os.platform() == 'win32') {
+    if (os.platform() === 'win32') {
         return 'explorer';
-    } else if (os.platform() == 'darwin') {
+    } else if (os.platform() === 'darwin') {
         return '/usr/bin/open';
     } else {
         return '/usr/bin/xdg-open';
@@ -350,7 +350,7 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
 
 export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        if (process.platform != 'win32') {
+        if (process.platform !== 'win32') {
             checkFileExists(file).then((exists: boolean) => {
                 if (exists) {
                     fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
@@ -376,7 +376,7 @@ export function removePotentialPII(str: string): string {
     let words: string[] = str.split(" ");
     let result: string = "";
     for (let word of words) {
-        if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
+        if (word.indexOf(".") === -1 && word.indexOf("/") === -1 && word.indexOf("\\") === -1 && word.indexOf(":") === -1) {
             result += word + " ";
         } else {
             result += "? ";
@@ -386,7 +386,7 @@ export function removePotentialPII(str: string): string {
 }
 
 export function checkDistro(platformInfo: PlatformInformation): void {
-    if (platformInfo.platform != 'win32' && platformInfo.platform != 'linux' && platformInfo.platform != 'darwin') {
+    if (platformInfo.platform !== 'win32' && platformInfo.platform !== 'linux' && platformInfo.platform !== 'darwin') {
         // this should never happen because VSCode doesn't run on FreeBSD
         // or SunOS (the other platforms supported by node)
         getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);

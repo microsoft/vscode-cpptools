@@ -56,7 +56,7 @@ export class Logger {
 let outputChannel: vscode.OutputChannel;
 
 export function getOutputChannel(): vscode.OutputChannel {
-    if (outputChannel == undefined) {
+    if (outputChannel === undefined) {
         outputChannel = vscode.window.createOutputChannel("C/C++");
     }
     return outputChannel;

@@ -118,7 +118,7 @@ function collectSettings(filter: (key: string, val: string, settings: vscode.Wor
         }
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
-            result[key] = (key == "clang_format_path") ? "..." : String(previousCppSettings[key]);
+            result[key] = (key === "clang_format_path") ? "..." : String(previousCppSettings[key]);
             if (result[key].length > maxSettingLengthForTelemetry) {
                 result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
             }
@@ -553,7 +553,7 @@ class DefaultClient implements Client {
                 continue; // File already has an association.
             }
             let j: number = file.lastIndexOf('.');
-            if (j != -1) {
+            if (j !== -1) {
                 let ext: string = file.substr(j);
                 if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs)) {
                     continue; // Extension already has an association.
@@ -739,9 +739,9 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => {
             ui.showParsingCommands()
                 .then((index: number) => {
-                    if (index == 0) {
+                    if (index === 0) {
                         this.pauseParsing();
-                    } else if (index == 1) {
+                    } else if (index === 1) {
                         this.resumeParsing();
                     }
                 });
@@ -783,11 +783,11 @@ class DefaultClient implements Client {
 function getLanguageServerFileName(): string {
     let extensionProcessName: string = 'Microsoft.VSCode.CPP.Extension';
     let plat: NodeJS.Platform = process.platform;
-    if (plat == 'linux') {
+    if (plat === 'linux') {
         extensionProcessName += '.linux';
-    } else if (plat == 'darwin') {
+    } else if (plat === 'darwin') {
         extensionProcessName += '.darwin';
-    } else if (plat == 'win32') {
+    } else if (plat === 'win32') {
         extensionProcessName += '.exe';
     } else {
         throw "Invalid Platform";

@@ -81,7 +81,7 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
             configurationSnippet.push(configuration.GetLaunchConfiguration()); 
         });
         
-        let initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType == debuggerType && snippet.isInitialConfiguration)
+        let initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
             .map(snippet => JSON.parse(snippet.bodyText));
 
         // If configurations is empty, then it will only have an empty configurations array in launch.json. Users can still add snippets.

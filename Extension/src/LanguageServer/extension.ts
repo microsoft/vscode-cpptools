@@ -81,7 +81,7 @@ export function activate(activationEventOccurred: boolean): void {
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-            if (document.languageId == "cpp" || document.languageId == "c") {
+            if (document.languageId === "cpp" || document.languageId === "c") {
                 return onActivationEvent();
             }
         }
@@ -95,7 +95,7 @@ function onDidOpenTextDocument(document: vscode.TextDocument): void {
 }
 
 function onActivationEvent(): void {
-    if (tempCommands.length == 0) {
+    if (tempCommands.length === 0) {
         return;
     }
 
@@ -163,7 +163,7 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     }
 
     let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-    if (!activeEditor || (activeEditor.document.languageId != "cpp" && activeEditor.document.languageId != "c")) {
+    if (!activeEditor || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();
@@ -180,7 +180,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         return;
         }
 
-    if (activeDocument != event.textEditor.document.uri.toString()) {
+    if (activeDocument !== event.textEditor.document.uri.toString()) {
         // For some strange (buggy?) reason we don't reliably get onDidChangeActiveTextEditor callbacks.
         activeDocument = event.textEditor.document.uri.toString();
         clients.activeDocumentChanged(event.textEditor.document);
@@ -245,7 +245,7 @@ function onSwitchHeaderSource(): void {
         return;
     }
 
-    if (activeEditor.document.languageId != "cpp" && activeEditor.document.languageId != "c") {
+    if (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c") {
         return;
     }
 
@@ -379,7 +379,7 @@ function onTakeSurvey(): void {
 }
 
 function reportMacCrashes(): void {
-    if (process.platform == "darwin") {
+    if (process.platform === "darwin") {
         prevCrashFile = "";
         let crashFolder: string = path.resolve(process.env.HOME, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
