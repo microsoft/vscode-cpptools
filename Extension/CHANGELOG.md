@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.14.6: Janurary 17, 2017
+## Version 0.14.6: January 17, 2018
 * Fix tag parser failing (and continuing to fail after edits) when it shouldn't. [#1367](https://github.com/Microsoft/vscode-cpptools/issues/1367)
 * Fix tag parser taking too long due to redundant processing. [#1288](https://github.com/Microsoft/vscode-cpptools/issues/1288)
 * Fix debugging silently failing the 1st time if a C/C++ file isn't opened. [#1366](https://github.com/Microsoft/vscode-cpptools/issues/1366)
@@ -52,7 +52,7 @@
 
 ## Version 0.14.1: November 9, 2017
 * Add support for multi-root workspaces. [#1070](https://github.com/Microsoft/vscode-cpptools/issues/1070)
-* Fix files temporarly being unsavable after Save As and other scenarios on Windows. [Microsoft/vscode#27329](https://github.com/Microsoft/vscode/issues/27329)
+* Fix files temporarily being unsavable after Save As and other scenarios on Windows. [Microsoft/vscode#27329](https://github.com/Microsoft/vscode/issues/27329)
 * Fix files "permanently" being unsavable if the IntelliSense process launches during tag parsing of the file. [#1040](https://github.com/Microsoft/vscode-cpptools/issues/1040)
 * Show pause and resume parsing commands after clicking the database icon. [#1141](https://github.com/Microsoft/vscode-cpptools/issues/1141)
 * Don't show the install output unless an error occurs. [#1160](https://github.com/Microsoft/vscode-cpptools/issues/1160)
@@ -75,7 +75,7 @@
 * Fix `limitSymbolsToIncludedHeaders` not working with single files. [#1109](https://github.com/Microsoft/vscode-cpptools/issues/1109)
 * Add logging to Output window. Errors will be logged by default. Verbosity is controlled by the `"C_Cpp.loggingLevel"` setting.
 * Add new database status bar icon for "Indexing" or "Parsing" with progress numbers, and the previous flame icon is now just for "Updating IntelliSense".
-* Stop showing `(Global Scope)` if there's actually an error in identifiying the correct scope.
+* Stop showing `(Global Scope)` if there's actually an error in identifying the correct scope.
 * Fix crash with the IntelliSense process when parsing certain template code (the most frequently hit crash).
 * Fix main thread being blocked while searching for files to remove after changing `files.exclude`.
 * Fix incorrect code action include path suggestion when a folder comes after "..".
@@ -266,7 +266,7 @@
 * Debugging for Visual C++ applications on Windows (Program Database files) is now available.
 * `clang-format` is now automatically installed as a part of the extension and formats code as you type.
 * `clang-format` options have been moved from c_cpp_properties.json file to settings.json (File->Preferences->User settings).
-* `clang-format` fall-back style is now set to 'Visual Studio'.
+* `clang-format` fallback style is now set to 'Visual Studio'.
 * Attach now requires a request type of `attach` instead of `launch`.
 * Support for additional console logging using the keyword `logging` inside `launch.json`.
 * Bug fixes.
@@ -300,7 +300,7 @@
 * Support for debugging with GDB on Cygwin.
 * Debugging on 32-bit Linux now enabled.
 * Format code using clang-format.
-* Experimental fuzzy autocompletion.
+* Experimental fuzzy auto-completion.
 * Bug fixes.
 
 ## Version 0.5.0: April 14, 2016
