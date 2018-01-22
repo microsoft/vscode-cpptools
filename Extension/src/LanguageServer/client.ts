@@ -633,7 +633,7 @@ class DefaultClient implements Client {
         };
         let textEditorDecoration = vscode.window.createTextEditorDecorationType(renderOptions);
         
-        let editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() == params.uri); // document.uri == params.uri
+        let editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() == params.uri); // TODO change to document.uri == params.uri
         editor.setDecorations(textEditorDecoration, params.ranges);
     }
 
