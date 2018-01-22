@@ -187,7 +187,7 @@ export class UI {
 
         let items: IndexableQuickPickItem[];
         items = [];
-        if (this.browseEngineStatusBarItem.tooltip == "Parsing paused") {
+        if (this.browseEngineStatusBarItem.tooltip === "Parsing paused") {
             items.push({ label: "Resume Parsing", description: "", index: 1 });
         } else {
             items.push({ label: "Pause Parsing", description: "", index: 0 });

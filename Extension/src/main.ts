@@ -47,7 +47,7 @@ async function processRuntimeDependencies(): Promise<void> {
 
     if (installLockExists) {
         // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
-        if (util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
+        if (util.packageJson.activationEvents && util.packageJson.activationEvents.length === 1) {
             try {
                 await offlineInstallation();
             } catch (error) {
@@ -208,7 +208,7 @@ function handleError(error: any): void {
     }
 
     let outputChannelLogger: Logger = getOutputChannelLogger();
-    if (installationInformation.stage == 'downloadPackages') {
+    if (installationInformation.stage === 'downloadPackages') {
         outputChannelLogger.appendLine("");
     }
     // Show the actual message and not the sanitized one

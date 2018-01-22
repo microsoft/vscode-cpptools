@@ -13,6 +13,7 @@
         "one-line": [true, "check-catch", "check-finally", "check-else", "check-open-brace", "check-whitespace"],
         "promise-must-complete": true,
         "semicolon": true,
+        "triple-equals": true,
         "typedef": [true, "variable-declaration", "call-signature"],
         "whitespace": [true, "check-branch", "check-operator", "check-separator", "check-preblock", "check-type"]
     },
