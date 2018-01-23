@@ -74,7 +74,7 @@ function registerAdapterExecutableCommands(): void {
     }));
 
     disposables.push(vscode.commands.registerCommand('extension.cppvsdbgAdapterExecutableCommand', () => {
-        if (os.platform() != 'win32') {
+        if (os.platform() !== 'win32') {
             vscode.window.showErrorMessage("Debugger type 'cppvsdbg' is not avaliable for non-Windows machines.");
             return null;
         } else {

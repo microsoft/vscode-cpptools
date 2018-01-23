@@ -53,7 +53,7 @@ export class LinuxDistribution {
         let keyValues: string[] = data.split(os.EOL);
         for (let i: number = 0; i < keyValues.length; i++) {
             let keyValue: string[] = keyValues[i].split('=');
-            if (keyValue.length == 2) {
+            if (keyValue.length === 2) {
                 if (keyValue[0] === idKey) {
                     distroName = keyValue[1];
                 } else if (keyValue[0] === versionKey) {
