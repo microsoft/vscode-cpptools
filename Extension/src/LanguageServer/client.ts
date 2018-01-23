@@ -627,14 +627,24 @@ class DefaultClient implements Client {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
+    private decoration : vscode.TextEditorDecorationType;
     private updateInactiveRegions(params: InactiveRegionParams): void {
         let renderOptions: vscode.DecorationRenderOptions = {
-            color: "rgba(255,0,255,0.5)"
+            light: { color: "rgba(125,125,125,0.0)" },
+            dark: { color: "rgba(155,155,155,0.0)" }
         };
-        let textEditorDecoration = vscode.window.createTextEditorDecorationType(renderOptions);
-        
-        let editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() == params.uri); // TODO change to document.uri == params.uri
-        editor.setDecorations(textEditorDecoration, params.ranges);
+
+        // Recycle the active text decorations when we receive a new set of inactive regions
+        if (this.decoration !== undefined) {
+            this.decoration.dispose();
+        }
+        this.decoration = vscode.window.createTextEditorDecorationType(renderOptions);
+
+        // Apply the decorations to all relevant editors
+        let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
+        for (let e of editors) {
+            e.setDecorations(this.decoration, params.ranges);
+        }
     }
 
     /*********************************************
