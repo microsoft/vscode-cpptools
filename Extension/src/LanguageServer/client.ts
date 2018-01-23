@@ -204,6 +204,7 @@ class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
+    private inactiveRegionsDecoration : vscode.TextEditorDecorationType;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -627,23 +628,22 @@ class DefaultClient implements Client {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
-    private decoration : vscode.TextEditorDecorationType;
     private updateInactiveRegions(params: InactiveRegionParams): void {
         let renderOptions: vscode.DecorationRenderOptions = {
-            light: { color: "rgba(125,125,125,0.0)" },
-            dark: { color: "rgba(155,155,155,0.0)" }
+            light: { color: "rgba(125,125,125,1.0)" },
+            dark: { color: "rgba(155,155,155,1.0)" }
         };
 
         // Recycle the active text decorations when we receive a new set of inactive regions
-        if (this.decoration !== undefined) {
-            this.decoration.dispose();
+        if (this.inactiveRegionsDecoration !== undefined) {
+            this.inactiveRegionsDecoration.dispose();
         }
-        this.decoration = vscode.window.createTextEditorDecorationType(renderOptions);
+        this.inactiveRegionsDecoration = vscode.window.createTextEditorDecorationType(renderOptions);
 
         // Apply the decorations to all relevant editors
         let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
         for (let e of editors) {
-            e.setDecorations(this.decoration, params.ranges);
+            e.setDecorations(this.inactiveRegionsDecoration, params.ranges);
         }
     }
 
