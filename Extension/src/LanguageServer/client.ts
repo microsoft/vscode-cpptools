@@ -75,6 +75,11 @@ interface InactiveRegionParams {
     ranges: vscode.Range[];
 }
 
+interface DecorationRangesPair {
+    decoration: vscode.TextEditorDecorationType;
+    ranges: vscode.Range[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -194,11 +199,6 @@ export function createNullClient(): Client {
     return new NullClient();
 }
 
-interface decorationRangesPair {
-    decoration: vscode.TextEditorDecorationType;
-    ranges: vscode.Range[];
-}
-
 class DefaultClient implements Client {
     private languageClient: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
@@ -211,7 +211,7 @@ class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
-    private inactiveRegionsDecorations = new Map<string, decorationRangesPair>();
+    private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -399,7 +399,7 @@ class DefaultClient implements Client {
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
         //Apply text decorations to inactive regions
         for (let e of editors) {
-            let valuePair: decorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+            let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
             //if (valuePair !== undefined) {
                 e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
             //}
@@ -653,7 +653,7 @@ class DefaultClient implements Client {
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
 
         // Recycle the active text decorations when we receive a new set of inactive regions
-        let valuePair: decorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
+        let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
         if (valuePair !== undefined) {
             // Disposing of and resetting the decoration will undo previously applied text decorations
             valuePair.decoration.dispose();
@@ -661,7 +661,7 @@ class DefaultClient implements Client {
 
             valuePair.ranges = params.ranges; // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
         } else { // The entry does not exist. Make a new one
-            let toInsert: decorationRangesPair = {
+            let toInsert: DecorationRangesPair = {
                 decoration: decoration,
                 ranges: params.ranges
             };
