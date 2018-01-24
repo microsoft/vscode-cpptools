@@ -390,6 +390,14 @@ class DefaultClient implements Client {
         }
     }
 
+    public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+        //Apply text decorations to inactive regions
+        for (let e of editors) {
+            let value: [vscode.TextEditorDecorationType, vscode.Range[]] = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+            e.setDecorations(value[0], value[1]);
+        }
+    }
+
     /**
      * Take ownership of a document that was previously serviced by another client.
      * This process involves sending a textDocument/didOpen message to the server so
@@ -634,25 +642,24 @@ class DefaultClient implements Client {
             light: { color: "rgba(125,125,125,1.0)" },
             dark: { color: "rgba(155,155,155,1.0)" }
         };
+        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
 
         // Recycle the active text decorations when we receive a new set of inactive regions
-        if (this.inactiveRegionsDecorations.has(params.uri)) {
-            this.inactiveRegionsDecorations.get(params.uri)[0].dispose();
-        }
-        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
-        this.inactiveRegionsDecorations.set(params.uri, [decoration, params.ranges]);
+        let valuePair: [vscode.TextEditorDecorationType, vscode.Range[]] = this.inactiveRegionsDecorations.get(params.uri);
+        if (valuePair !== undefined) {
+            // Disposing of and resetting the decoration will undo previously applied text decorations
+            valuePair[0].dispose();
+            valuePair[0] = decoration;
 
-        // Apply the decorations to all relevant editors
+            valuePair[1] = params.ranges; // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range when another editor become visible
+        } else { // The entry does not exist. Make a new one
+            this.inactiveRegionsDecorations.set(params.uri, [decoration, params.ranges]);
+        }
+
+        // Apply the decorations to all *visible* text editors
         let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
         for (let e of editors) {
-            e.setDecorations(this.inactiveRegionsDecorations.get(params.uri)[0], params.ranges);
-        }
-    }
-
-    public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
-        for (let e of editors) {
-            let value: [vscode.TextEditorDecorationType, vscode.Range[]] = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-            e.setDecorations(value[0], value[1]);
+            e.setDecorations(decoration, params.ranges);
         }
     }
 
