@@ -127,14 +127,14 @@ export function resolveVariables(input: string): string {
     let regexp: RegExp = /\$\{(env:|env.)?(.*?)\}/g;
     let ret: string = input.replace(regexp, (match: string, ignored: string, name: string) => {
         let newValue: string = process.env[name];
-        return (newValue !== null) ? newValue : match;
+        return (newValue) ? newValue : match;
     });
 
     // Resolve '~' at the start of the path.
     regexp = /^\~/g;
     ret = ret.replace(regexp, (match: string, name: string) => {
         let newValue: string = process.env.HOME;
-        return (newValue !== null) ? newValue : match;
+        return (newValue) ? newValue : match;
     });
 
     return ret;
