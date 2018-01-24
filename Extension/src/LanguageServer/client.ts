@@ -165,6 +165,7 @@ export interface Client {
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
     requestGoToDeclaration(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
@@ -204,7 +205,7 @@ class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
-    private inactiveRegionsDecoration : vscode.TextEditorDecorationType;
+    private inactiveRegionsDecorations = new Map<string, [vscode.TextEditorDecorationType, vscode.Range[]]>();
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -635,15 +636,23 @@ class DefaultClient implements Client {
         };
 
         // Recycle the active text decorations when we receive a new set of inactive regions
-        if (this.inactiveRegionsDecoration !== undefined) {
-            this.inactiveRegionsDecoration.dispose();
+        if (this.inactiveRegionsDecorations.has(params.uri)) {
+            this.inactiveRegionsDecorations.get(params.uri)[0].dispose();
         }
-        this.inactiveRegionsDecoration = vscode.window.createTextEditorDecorationType(renderOptions);
+        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
+        this.inactiveRegionsDecorations.set(params.uri, [decoration, params.ranges]);
 
         // Apply the decorations to all relevant editors
         let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
         for (let e of editors) {
-            e.setDecorations(this.inactiveRegionsDecoration, params.ranges);
+            e.setDecorations(this.inactiveRegionsDecorations.get(params.uri)[0], params.ranges);
+        }
+    }
+
+    public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+        for (let e of editors) {
+            let value: [vscode.TextEditorDecorationType, vscode.Range[]] = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+            e.setDecorations(value[0], value[1]);
         }
     }
 
@@ -836,6 +845,7 @@ class NullClient implements Client {
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
