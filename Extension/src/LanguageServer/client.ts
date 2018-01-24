@@ -651,7 +651,7 @@ class DefaultClient implements Client {
             valuePair[0].dispose();
             valuePair[0] = decoration;
 
-            valuePair[1] = params.ranges; // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range when another editor become visible
+            valuePair[1] = params.ranges; // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
         } else { // The entry does not exist. Make a new one
             this.inactiveRegionsDecorations.set(params.uri, [decoration, params.ranges]);
         }
