@@ -399,7 +399,7 @@ class DefaultClient implements Client {
         //Apply text decorations to inactive regions
         for (let e of editors) {
             let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-            if (valuePair !== undefined) {
+            if (valuePair) {
                 e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
             }
         }
@@ -653,7 +653,7 @@ class DefaultClient implements Client {
 
         // Recycle the active text decorations when we receive a new set of inactive regions
         let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
-        if (valuePair !== undefined) {
+        if (valuePair) {
             // Disposing of and resetting the decoration will undo previously applied text decorations
             valuePair.decoration.dispose();
             valuePair.decoration = decoration;
