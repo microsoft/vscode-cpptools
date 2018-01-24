@@ -21,7 +21,6 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { deactivate } from './extension';
 
 let ui: UI;
 
@@ -400,9 +399,9 @@ class DefaultClient implements Client {
         //Apply text decorations to inactive regions
         for (let e of editors) {
             let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-            //if (valuePair !== undefined) {
+            if (valuePair !== undefined) {
                 e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
-            //}
+            }
         }
     }
 
@@ -659,7 +658,8 @@ class DefaultClient implements Client {
             valuePair.decoration.dispose();
             valuePair.decoration = decoration;
 
-            valuePair.ranges = params.ranges; // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
+            // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
+            valuePair.ranges = params.ranges;
         } else { // The entry does not exist. Make a new one
             let toInsert: DecorationRangesPair = {
                 decoration: decoration,
