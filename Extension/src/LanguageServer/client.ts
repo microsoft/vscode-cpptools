@@ -393,8 +393,8 @@ class DefaultClient implements Client {
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
         //Apply text decorations to inactive regions
         for (let e of editors) {
-            let value: [vscode.TextEditorDecorationType, vscode.Range[]] = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-            e.setDecorations(value[0], value[1]);
+            let valuePair: [vscode.TextEditorDecorationType, vscode.Range[]] = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+            e.setDecorations(valuePair[0], valuePair[1]); // VSCode clears the decorations when the text editor becomes invisible
         }
     }
 
