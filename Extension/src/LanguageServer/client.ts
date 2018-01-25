@@ -654,12 +654,15 @@ class DefaultClient implements Client {
         // Recycle the active text decorations when we receive a new set of inactive regions
         let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
         if (valuePair) {
-            // Disposing of and resetting the decoration will undo previously applied text decorations
-            valuePair.decoration.dispose();
-            valuePair.decoration = decoration;
+            // The language server will send notifications regardless of whether the ranges have changed. Unfortunately we must check for changes ourselves
+            if (this.isRangesEqual(valuePair.ranges, params.ranges)) {
+                // Disposing of and resetting the decoration will undo previously applied text decorations
+                valuePair.decoration.dispose();
+                valuePair.decoration = decoration;
 
-            // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
-            valuePair.ranges = params.ranges;
+                // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
+                valuePair.ranges = params.ranges;
+            }
         } else { // The entry does not exist. Make a new one
             let toInsert: DecorationRangesPair = {
                 decoration: decoration,
@@ -672,6 +675,21 @@ class DefaultClient implements Client {
         let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
         for (let e of editors) {
             e.setDecorations(decoration, params.ranges);
+        }
+    }
+
+    // Helper method to compare two ranges for equality
+    private isRangesEqual(r1: vscode.Range[], r2: vscode.Range[]): boolean {
+        if (r1.length !== r2.length) {
+            return false;
+        }
+
+        for (let e1 of r1) {
+            for (let e2 of r2) {
+                if (e1 !== e2) {
+                    return false;
+                }
+            }
         }
     }
 
