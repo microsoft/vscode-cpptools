@@ -69,6 +69,16 @@ interface OutputNotificationBody {
     output: string;
 }
 
+interface InactiveRegionParams {
+    uri: string;
+    ranges: vscode.Range[];
+}
+
+interface DecorationRangesPair {
+    decoration: vscode.TextEditorDecorationType;
+    ranges: vscode.Range[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -97,6 +107,7 @@ const ReportTagParseStatusNotification: NotificationType<ReportStatusNotificatio
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
+const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 
 const maxSettingLengthForTelemetry: number = 50;
 let previousCppSettings: { [key: string]: any } = {};
@@ -159,6 +170,7 @@ export interface Client {
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
     requestGoToDeclaration(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
@@ -198,6 +210,7 @@ class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
+    private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -382,6 +395,16 @@ class DefaultClient implements Client {
         }
     }
 
+    public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+        //Apply text decorations to inactive regions
+        for (let e of editors) {
+            let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+            if (valuePair) {
+                e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
+            }
+        }
+    }
+
     /**
      * Take ownership of a document that was previously serviced by another client.
      * This process involves sending a textDocument/didOpen message to the server so
@@ -434,6 +457,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportNavigationNotification, (e) => this.navigate(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
+        this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.setupOutputHandlers();
     }
 
@@ -618,6 +642,55 @@ class DefaultClient implements Client {
 
     private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
+    }
+
+    private updateInactiveRegions(params: InactiveRegionParams): void {
+        let renderOptions: vscode.DecorationRenderOptions = {
+            light: { color: "rgba(175,175,175,1.0)" },
+            dark: { color: "rgba(155,155,155,1.0)" }
+        };
+        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
+
+        // Recycle the active text decorations when we receive a new set of inactive regions
+        let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
+        if (valuePair) {
+            // The language server will send notifications regardless of whether the ranges have changed
+            if (!this.areRangesEqual(valuePair.ranges, params.ranges)) {
+                // Disposing of and resetting the decoration will undo previously applied text decorations
+                valuePair.decoration.dispose();
+                valuePair.decoration = decoration;
+
+                // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
+                valuePair.ranges = params.ranges;
+            }
+        } else { // The entry does not exist. Make a new one
+            let toInsert: DecorationRangesPair = {
+                decoration: decoration,
+                ranges: params.ranges
+            };
+            this.inactiveRegionsDecorations.set(params.uri, toInsert);
+        }
+
+        // Apply the decorations to all *visible* text editors
+        let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
+        for (let e of editors) {
+            e.setDecorations(decoration, params.ranges);
+        }
+    }
+
+    // Helper method to compare two ranges arrays for equality
+    private areRangesEqual(r1: vscode.Range[], r2: vscode.Range[]): boolean {
+        if (r1.length !== r2.length) {
+            return false;
+        }
+
+        for (let i: number = 0; i < r1.length; ++i) {
+            if (!r1[i].isEqual(r2[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /*********************************************
@@ -809,6 +882,7 @@ class NullClient implements Client {
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }

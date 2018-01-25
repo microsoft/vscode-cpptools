@@ -2,8 +2,7 @@
     "defaults": [
       "--clang",
       "--pack_alignment",
-      "8",
-      "--framework_include_directory=/System/Library/Frameworks"
+      "8"
     ],
     "defaults_op" :  "merge"
   }
