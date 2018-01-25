@@ -655,7 +655,7 @@ class DefaultClient implements Client {
         let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
         if (valuePair) {
             // The language server will send notifications regardless of whether the ranges have changed. Unfortunately we must check for changes ourselves
-            if (this.isRangesEqual(valuePair.ranges, params.ranges)) {
+            if (!this.isRangesEqual(valuePair.ranges, params.ranges)) {
                 // Disposing of and resetting the decoration will undo previously applied text decorations
                 valuePair.decoration.dispose();
                 valuePair.decoration = decoration;
