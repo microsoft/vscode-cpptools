@@ -691,6 +691,8 @@ class DefaultClient implements Client {
                 }
             }
         }
+
+        return true;
     }
 
     /*********************************************
