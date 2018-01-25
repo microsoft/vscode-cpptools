@@ -654,8 +654,8 @@ class DefaultClient implements Client {
         // Recycle the active text decorations when we receive a new set of inactive regions
         let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
         if (valuePair) {
-            // The language server will send notifications regardless of whether the ranges have changed. Unfortunately we must check for changes ourselves
-            if (!this.isRangesEqual(valuePair.ranges, params.ranges)) {
+            // The language server will send notifications regardless of whether the ranges have changed
+            if (!this.areRangesEqual(valuePair.ranges, params.ranges)) {
                 // Disposing of and resetting the decoration will undo previously applied text decorations
                 valuePair.decoration.dispose();
                 valuePair.decoration = decoration;
@@ -678,17 +678,15 @@ class DefaultClient implements Client {
         }
     }
 
-    // Helper method to compare two ranges for equality
-    private isRangesEqual(r1: vscode.Range[], r2: vscode.Range[]): boolean {
+    // Helper method to compare two ranges arrays for equality
+    private areRangesEqual(r1: vscode.Range[], r2: vscode.Range[]): boolean {
         if (r1.length !== r2.length) {
             return false;
         }
 
-        for (let e1 of r1) {
-            for (let e2 of r2) {
-                if (!e1.isEqual(e2)) {
-                    return false;
-                }
+        for (let i: number = 0; i < r1.length; ++i) {
+            if (!r1[i].isEqual(r2[i])) {
+                return false;
             }
         }
 
