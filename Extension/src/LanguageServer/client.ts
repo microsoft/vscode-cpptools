@@ -686,7 +686,7 @@ class DefaultClient implements Client {
 
         for (let e1 of r1) {
             for (let e2 of r2) {
-                if (e1 !== e2) {
+                if (!e1.isEqual(e2)) {
                     return false;
                 }
             }
