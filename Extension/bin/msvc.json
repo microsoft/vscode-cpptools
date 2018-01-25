@@ -7,7 +7,7 @@
       "--edge",
       "--exceptions",
       "--error_limit",
-      "2147483647",
+      "25000",
       "-D_EDG_COMPILER",
       "-D_USE_DECLSPECS_FOR_SAL=1"
     ],
