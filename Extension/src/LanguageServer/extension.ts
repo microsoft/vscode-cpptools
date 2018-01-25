@@ -126,6 +126,7 @@ function realActivation(): void {
     disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
     disposables.push(vscode.languages.setLanguageConfiguration('c', multilineCommentRules));
     disposables.push(vscode.languages.setLanguageConfiguration('cpp', multilineCommentRules));
@@ -187,6 +188,10 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         ui.activeDocumentChanged();
     }
     clients.ActiveClient.selectionChanged(event.selections[0].start);
+}
+
+function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+    clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
 function onInterval(): void {
