@@ -136,44 +136,52 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
             previousCppSettings[key] = val;
             switch (key.toLowerCase()) {
                 case "clang_format_path": {
-                    switch (val.toLowerCase()) {
-                        case "/usr/bin/clang-format":
-                        case "/usr/local/bin/clang-format": {
-                            result[key] = String(previousCppSettings[key]);
-                        }
-                        default: {
-                            if (val.endsWith("clang-format.exe")) {
-                                result[key] = "clang-format.exe";
-                            } else if (val.endsWith("clang-format")) {
-                                result[key] = "clang-format";
-                            } else {
-                                result[key] = "...";
+                    if (val) {
+                        switch (val.toLowerCase()) {
+                            case "/usr/bin/clang-format":
+                            case "/usr/local/bin/clang-format": {
+                                result[key] = String(previousCppSettings[key]);
                             }
-                            break;
+                            default: {
+                                if (val.endsWith("clang-format.exe")) {
+                                    result[key] = "clang-format.exe";
+                                } else if (val.endsWith("clang-format")) {
+                                    result[key] = "clang-format";
+                                } else {
+                                    result[key] = "...";
+                                }
+                                break;
+                            }
                         }
+                    } else {
+                        result[key] = "null";
                     }
                 }
                 case "clang_format_style":
                 case "clang_format_fallbackstyle": {
-                    switch (val.toLowerCase()) {
-                        case "visual studio":
-                        case "llvm":
-                        case "google":
-                        case "chromium":
-                        case "mozilla":
-                        case "webkit":
-                        case "file":
-                        case "none": {
-                            result[key] = String(previousCppSettings[key]);
-                        }
-                        default: {
-                            if (val.startsWith("{") && val.endsWith("}")) {
-                                result[key] = "{...}";
-                            } else {
-                                result[key] = "...";
+                    if (val) {
+                        switch (val.toLowerCase()) {
+                            case "visual studio":
+                            case "llvm":
+                            case "google":
+                            case "chromium":
+                            case "mozilla":
+                            case "webkit":
+                            case "file":
+                            case "none": {
+                                result[key] = String(previousCppSettings[key]);
                             }
-                            break;
+                            default: {
+                                if (val.startsWith("{") && val.endsWith("}")) {
+                                    result[key] = "{...}";
+                                } else {
+                                    result[key] = "...";
+                                }
+                                break;
+                            }
                         }
+                    } else {
+                        result[key] = "null";
                     }
                     break;
                 }
