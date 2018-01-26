@@ -120,7 +120,7 @@ let previousCppSettings: { [key: string]: any } = {};
 /**
  * track settings changes for telemetry
  */
-function collectSettings(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
+function collectSettingsForTelemetry(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
     let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
     let result: { [key: string]: string } = {};
 
@@ -134,7 +134,54 @@ function collectSettings(filter: (key: string, val: string, settings: vscode.Wor
         }
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
-            result[key] = (key === "clang_format_path") ? "..." : String(previousCppSettings[key]);
+            switch (key.toLowerCase()) {
+                case "clang_format_path": {
+                    switch (val.toLowerCase()) {
+                        case "/usr/bin/clang-format":
+                        case "/usr/local/bin/clang-format": {
+                            result[key] = String(previousCppSettings[key]);
+                        }
+                        default: {
+                            if (val.endsWith("clang-format.exe")) {
+                                result[key] = "clang-format.exe";
+                            } else if (val.endsWith("clang-format")) {
+                                result[key] = "clang-format";
+                            } else {
+                                result[key] = "...";
+                            }
+                            break;
+                        }
+                    }
+                }
+                case "clang_format_style":
+                case "clang_format_fallbackstyle": {
+                    switch (val.toLowerCase()) {
+                        case "visual studio":
+                        case "llvm":
+                        case "google":
+                        case "chromium":
+                        case "mozilla":
+                        case "webkit":
+                        case "file":
+                        case "none": {
+                            result[key] = String(previousCppSettings[key]);
+                        }
+                        default: {
+                            if (val.startsWith("{") && val.endsWith("}")) {
+                                result[key] = "{...}";
+                            } else {
+                                result[key] = "...";
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+                default: {
+                    result[key] = String(previousCppSettings[key]);
+                    break;
+                }
+            }
             if (result[key].length > maxSettingLengthForTelemetry) {
                 result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
             }
@@ -145,7 +192,7 @@ function collectSettings(filter: (key: string, val: string, settings: vscode.Wor
 }
 
 function initializeSettingsCache(resource: vscode.Uri): void {
-    collectSettings(() => true, resource);
+    collectSettingsForTelemetry(() => true, resource);
 }
 
 function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } {
@@ -153,7 +200,7 @@ function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } 
         return val !== settings.inspect(key).defaultValue;
     };
     initializeSettingsCache(resource);
-    return collectSettings(filter, resource);
+    return collectSettingsForTelemetry(filter, resource);
 }
 
 interface ClientModel {
@@ -393,7 +440,7 @@ class DefaultClient implements Client {
         let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
             return !(key in previousCppSettings) || val !== previousCppSettings[key];
         };
-        let changedSettings: any = collectSettings(filter, this.RootUri);
+        let changedSettings: any = collectSettingsForTelemetry(filter, this.RootUri);
 
         if (Object.keys(changedSettings).length > 0) {
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
