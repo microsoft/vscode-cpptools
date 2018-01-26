@@ -71,7 +71,12 @@ interface OutputNotificationBody {
 
 interface InactiveRegionParams {
     uri: string;
-    ranges: vscode.Range[];
+    ranges: InputRange[];
+}
+
+interface InputRange {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
 }
 
 interface DecorationRangesPair {
@@ -651,22 +656,28 @@ class DefaultClient implements Client {
         };
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
 
+        // As InactiveRegionParams.ranges is deserialized as POD, we must convert to vscode.Ranges in order to make use of the API's
+        let ranges: vscode.Range[] = [];
+        params.ranges.forEach(element => {
+            ranges.push(new vscode.Range(element.start.line, element.start.character, element.end.line, element.end.character));
+        });
+
         // Recycle the active text decorations when we receive a new set of inactive regions
         let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
         if (valuePair) {
-            // The language server will send notifications regardless of whether the ranges have changed
-            if (!this.areRangesEqual(valuePair.ranges, params.ranges)) {
+            // The language server will send notifications regardless of whether the ranges have changed, so we must check to see if the new data reflects a change
+            if (!this.areRangesEqual(valuePair.ranges, ranges)) {
                 // Disposing of and resetting the decoration will undo previously applied text decorations
                 valuePair.decoration.dispose();
                 valuePair.decoration = decoration;
 
                 // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
-                valuePair.ranges = params.ranges;
+                valuePair.ranges = ranges;
             }
         } else { // The entry does not exist. Make a new one
             let toInsert: DecorationRangesPair = {
                 decoration: decoration,
-                ranges: params.ranges
+                ranges: ranges
             };
             this.inactiveRegionsDecorations.set(params.uri, toInsert);
         }
@@ -674,7 +685,7 @@ class DefaultClient implements Client {
         // Apply the decorations to all *visible* text editors
         let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
         for (let e of editors) {
-            e.setDecorations(decoration, params.ranges);
+            e.setDecorations(decoration, ranges);
         }
     }
 
