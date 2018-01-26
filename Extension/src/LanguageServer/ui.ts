@@ -165,7 +165,7 @@ export class UI {
             });
     }
 
-    public showWorkspaces(workspaceNames: { name: string, key: string }[]): Thenable<string> {
+    public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select a Workspace...";
 
