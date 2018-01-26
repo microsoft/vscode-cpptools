@@ -141,6 +141,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                             case "/usr/bin/clang-format":
                             case "/usr/local/bin/clang-format": {
                                 result[key] = String(previousCppSettings[key]);
+                                break;
                             }
                             default: {
                                 if (val.endsWith("clang-format.exe")) {
@@ -156,6 +157,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                     } else {
                         result[key] = "null";
                     }
+                    break;
                 }
                 case "clang_format_style":
                 case "clang_format_fallbackstyle": {
@@ -170,6 +172,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                             case "file":
                             case "none": {
                                 result[key] = String(previousCppSettings[key]);
+                                break;
                             }
                             default: {
                                 if (val.startsWith("{") && val.endsWith("}")) {
