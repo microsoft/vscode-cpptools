@@ -75,8 +75,8 @@ interface InactiveRegionParams {
 }
 
 interface InputRange {
-    start: { line: number, character: number };
-    end: { line: number, character: number };
+    start: { line: number; character: number };
+    end: { line: number; character: number };
 }
 
 interface DecorationRangesPair {
