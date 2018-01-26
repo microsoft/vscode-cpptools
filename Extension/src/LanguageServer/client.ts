@@ -134,35 +134,16 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
         }
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
-            switch (key.toLowerCase()) {
+            switch (String(key).toLowerCase()) {
                 case "clang_format_path": {
-                    if (val) {
-                        switch (val.toLowerCase()) {
-                            case "/usr/bin/clang-format":
-                            case "/usr/local/bin/clang-format": {
-                                result[key] = String(previousCppSettings[key]);
-                                break;
-                            }
-                            default: {
-                                if (val.endsWith("clang-format.exe")) {
-                                    result[key] = "clang-format.exe";
-                                } else if (val.endsWith("clang-format")) {
-                                    result[key] = "clang-format";
-                                } else {
-                                    result[key] = "...";
-                                }
-                                break;
-                            }
-                        }
-                    } else {
-                        result[key] = "null";
-                    }
+                    result[key] = "...";
                     break;
                 }
                 case "clang_format_style":
                 case "clang_format_fallbackstyle": {
+                    let newKey: string = String(key) + "2";
                     if (val) {
-                        switch (val.toLowerCase()) {
+                        switch (String(val).toLowerCase()) {
                             case "visual studio":
                             case "llvm":
                             case "google":
@@ -171,20 +152,16 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                             case "webkit":
                             case "file":
                             case "none": {
-                                result[key] = String(previousCppSettings[key]);
+                                result[newKey] = String(previousCppSettings[key]);
                                 break;
                             }
                             default: {
-                                if (val.startsWith("{") && val.endsWith("}")) {
-                                    result[key] = "{...}";
-                                } else {
-                                    result[key] = "...";
-                                }
+                                result[newKey] = "...";
                                 break;
                             }
                         }
                     } else {
-                        result[key] = "null";
+                        result[newKey] = "null";
                     }
                     break;
                 }
