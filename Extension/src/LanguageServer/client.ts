@@ -136,8 +136,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
             previousCppSettings[key] = val;
             switch (String(key).toLowerCase()) {
                 case "clang_format_path": {
-                    result[key] = "...";
-                    break;
+                    continue;
                 }
                 case "clang_format_style":
                 case "clang_format_fallbackstyle": {
