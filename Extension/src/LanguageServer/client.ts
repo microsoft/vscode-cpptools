@@ -71,12 +71,12 @@ interface OutputNotificationBody {
 
 interface InactiveRegionParams {
     uri: string;
-    ranges: InputRange[];
+    regions: InputRegion[];
 }
 
-interface InputRange {
-    start: { line: number; character: number };
-    end: { line: number; character: number };
+interface InputRegion {
+    startLine: number;
+    endLine: number;
 }
 
 interface DecorationRangesPair {
@@ -655,27 +655,17 @@ class DefaultClient implements Client {
             dark: { color: "rgba(155,155,155,1.0)" }
         };
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
-        // // Handle edge case where file is emptied of text
-        // if (params.ranges.length === 0) {
-        //     valuePair.decoration.dispose();
-        //     this.inactiveRegionsDecorations.delete(params.uri);
-        //     return;
-        // }
 
-        // As InactiveRegionParams.ranges is deserialized as POD, we must convert to vscode.Ranges in order to make use of the API's
+        // As InactiveRegionParams.regions is deserialized as POD, we must convert to vscode.Ranges in order to make use of the API's
         let ranges: vscode.Range[] = [];
-        params.ranges.forEach(element => {
-            ranges.push(new vscode.Range(element.start.line, element.start.character, element.end.line, element.end.character));
+        params.regions.forEach(element => {
+            let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+            ranges.push(newRange);
         });
 
         // Find entry for cached file and act accordingly
         let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
         if (valuePair) {
-            // // Check to see if the new data reflects a change, as the language server will send notifications that we may not want to act upon
-            // if (this.areRangesEqual(valuePair.ranges, ranges)) {
-            //     return;
-            // }
-
             // Disposing of and resetting the decoration will undo previously applied text decorations
             valuePair.decoration.dispose();
             valuePair.decoration = decoration;
@@ -695,21 +685,6 @@ class DefaultClient implements Client {
         for (let e of editors) {
             e.setDecorations(decoration, ranges);
         }
-    }
-
-    // Helper method to compare two ranges arrays for equality
-    private areRangesEqual(r1: vscode.Range[], r2: vscode.Range[]): boolean {
-        if (r1.length !== r2.length) {
-            return false;
-        }
-
-        for (let i: number = 0; i < r1.length; ++i) {
-            if (!r1[i].isEqual(r2[i])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /*********************************************
