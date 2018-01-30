@@ -132,6 +132,15 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
         if (val instanceof Object) {
             continue; // ignore settings that are objects since tostring on those is not useful (e.g. navigation.length)
         }
+
+        // Skip values that don't match the setting's enum.
+        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+        if (curSetting) {
+            let curEnum: any[] = curSetting["enum"];
+            if (curEnum && curEnum.indexOf(val) === -1)
+                continue;
+        }
+
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
             switch (String(key).toLowerCase()) {
