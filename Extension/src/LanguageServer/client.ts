@@ -656,7 +656,7 @@ class DefaultClient implements Client {
         };
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
 
-        // As InactiveRegionParams.regions is deserialized as POD, we must convert to vscode.Ranges in order to make use of the API's
+        // We must convert to vscode.Ranges in order to make use of the API's
         let ranges: vscode.Range[] = [];
         params.regions.forEach(element => {
             let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
