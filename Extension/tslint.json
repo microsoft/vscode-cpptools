@@ -14,6 +14,7 @@
         "promise-must-complete": true,
         "semicolon": true,
         "triple-equals": true,
+        "type-literal-delimiter": true,
         "typedef": [true, "variable-declaration", "call-signature"],
         "whitespace": [true, "check-branch", "check-operator", "check-separator", "check-preblock", "check-type"]
     },
