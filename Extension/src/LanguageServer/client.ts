@@ -172,6 +172,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                     } else {
                         result[newKey] = "null";
                     }
+                    key = newKey;
                     break;
                 }
                 default: {
