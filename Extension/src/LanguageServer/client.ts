@@ -71,12 +71,12 @@ interface OutputNotificationBody {
 
 interface InactiveRegionParams {
     uri: string;
-    ranges: InputRange[];
+    regions: InputRegion[];
 }
 
-interface InputRange {
-    start: { line: number; character: number };
-    end: { line: number; character: number };
+interface InputRegion {
+    startLine: number;
+    endLine: number;
 }
 
 interface DecorationRangesPair {
@@ -137,8 +137,9 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
         let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
         if (curSetting) {
             let curEnum: any[] = curSetting["enum"];
-            if (curEnum && curEnum.indexOf(val) === -1)
+            if (curEnum && curEnum.indexOf(val) === -1) {
                 continue;
+            }
         }
 
         if (filter(key, val, settings)) {
@@ -699,24 +700,22 @@ class DefaultClient implements Client {
         };
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
 
-        // As InactiveRegionParams.ranges is deserialized as POD, we must convert to vscode.Ranges in order to make use of the API's
+        // We must convert to vscode.Ranges in order to make use of the API's
         let ranges: vscode.Range[] = [];
-        params.ranges.forEach(element => {
-            ranges.push(new vscode.Range(element.start.line, element.start.character, element.end.line, element.end.character));
+        params.regions.forEach(element => {
+            let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+            ranges.push(newRange);
         });
 
-        // Recycle the active text decorations when we receive a new set of inactive regions
+        // Find entry for cached file and act accordingly
         let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
         if (valuePair) {
-            // The language server will send notifications regardless of whether the ranges have changed, so we must check to see if the new data reflects a change
-            if (!this.areRangesEqual(valuePair.ranges, ranges)) {
-                // Disposing of and resetting the decoration will undo previously applied text decorations
-                valuePair.decoration.dispose();
-                valuePair.decoration = decoration;
+            // Disposing of and resetting the decoration will undo previously applied text decorations
+            valuePair.decoration.dispose();
+            valuePair.decoration = decoration;
 
-                // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
-                valuePair.ranges = ranges;
-            }
+            // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
+            valuePair.ranges = ranges;
         } else { // The entry does not exist. Make a new one
             let toInsert: DecorationRangesPair = {
                 decoration: decoration,
@@ -730,21 +729,6 @@ class DefaultClient implements Client {
         for (let e of editors) {
             e.setDecorations(decoration, ranges);
         }
-    }
-
-    // Helper method to compare two ranges arrays for equality
-    private areRangesEqual(r1: vscode.Range[], r2: vscode.Range[]): boolean {
-        if (r1.length !== r2.length) {
-            return false;
-        }
-
-        for (let i: number = 0; i < r1.length; ++i) {
-            if (!r1[i].isEqual(r2[i])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /*********************************************
