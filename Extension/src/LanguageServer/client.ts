@@ -137,8 +137,9 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
         let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
         if (curSetting) {
             let curEnum: any[] = curSetting["enum"];
-            if (curEnum && curEnum.indexOf(val) === -1)
+            if (curEnum && curEnum.indexOf(val) === -1) {
                 continue;
+            }
         }
 
         if (filter(key, val, settings)) {
