@@ -150,7 +150,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                 }
                 case "clang_format_style":
                 case "clang_format_fallbackstyle": {
-                    key = String(key) + "2";
+                    let newKey: string = String(key) + "2";
                     if (val) {
                         switch (String(val).toLowerCase()) {
                             case "visual studio":
@@ -161,17 +161,18 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                             case "webkit":
                             case "file":
                             case "none": {
-                                result[key] = String(previousCppSettings[key]);
+                                result[newKey] = String(previousCppSettings[key]);
                                 break;
                             }
                             default: {
-                                result[key] = "...";
+                                result[newKey] = "...";
                                 break;
                             }
                         }
                     } else {
-                        result[key] = "null";
+                        result[newKey] = "null";
                     }
+                    key = newKey;
                     break;
                 }
                 default: {
