@@ -13,6 +13,7 @@ import HttpsProxyAgent = require('https-proxy-agent');
 import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
+import * as assert from 'assert';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -45,7 +46,7 @@ export const extensionNotReadyString: string = 'The C/C++ extension is still ins
 export function displayExtensionNotReadyPrompt(): void {
 
     if (!isExtensionNotReadyPromptDisplayed) {
-        isExtensionNotReadyPromptDisplayed = true; 
+        isExtensionNotReadyPromptDisplayed = true;
         showOutputChannel();
 
         getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
@@ -123,10 +124,24 @@ export function resolveVariables(input: string): string {
         return "";
     }
 
-    // Replace environment variables. (support both ${env:VAR} and ${VAR} syntax)
-    let regexp: RegExp = /\$\{(env:|env.)?(.*?)\}/g;
-    let ret: string = input.replace(regexp, (match: string, ignored: string, name: string) => {
-        let newValue: string = process.env[name];
+    // Replace environment and configuration variables.
+    let regexp: RegExp = /\$\{((env|config)(.|:))?(.*?)\}/g;
+    let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
+        // Historically, if the variable didn't have anything before the "." or ":"
+        // it was assumed to be an environment variable
+        if (varType === undefined) { varType = "env"; }
+        let newValue: string = undefined;
+        switch (varType) {
+            case "env": { newValue = process.env[name]; break; }
+            case "config": {
+                let config = vscode.workspace.getConfiguration();
+                let keys: string[] = name.split('.');
+                keys.forEach((key:string) => { config = (config) ? config.get(key) : config; });
+                newValue = (config) ? config.toString() : undefined;
+                break;
+            }
+            default: { assert.fail("unknown varType matched"); }
+        }
         return (newValue) ? newValue : match;
     });
 
