@@ -8,6 +8,7 @@
 * Fix duplicate `cannot open source file` errors. [#1469](https://github.com/Microsoft/vscode-cpptools/issues/1469)
 * Fix error popup appearing with non-workspace files when using `compile_commands.json`. [#1475](https://github.com/Microsoft/vscode-cpptools/issues/1475)
 * Add more macros to `cpp.hint` (fixing missing symbols).
+* Added support for config variables to `c_cpp_properties.json` [#314](https://github.com/Microsoft/vscode-cpptools/issues/314)
 
 ## Version 0.14.6: January 17, 2018
 * Fix tag parser failing (and continuing to fail after edits) when it shouldn't. [#1367](https://github.com/Microsoft/vscode-cpptools/issues/1367)
