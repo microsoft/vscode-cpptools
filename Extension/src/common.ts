@@ -129,14 +129,16 @@ export function resolveVariables(input: string): string {
     let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
         // Historically, if the variable didn't have anything before the "." or ":"
         // it was assumed to be an environment variable
-        if (varType === undefined) { varType = "env"; }
+        if (varType === undefined) {
+            varType = "env";
+        }
         let newValue: string = undefined;
         switch (varType) {
             case "env": { newValue = process.env[name]; break; }
             case "config": {
-                let config = vscode.workspace.getConfiguration();
+                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
                 let keys: string[] = name.split('.');
-                keys.forEach((key:string) => { config = (config) ? config.get(key) : config; });
+                keys.forEach((key: string) => { config = (config) ? config.get(key) : config; });
                 newValue = (config) ? config.toString() : undefined;
                 break;
             }
