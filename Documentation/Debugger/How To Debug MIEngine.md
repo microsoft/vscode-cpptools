@@ -1,8 +1,7 @@
 # How To Debug MIEngine (Work in Progress)
-
 *This is a work in progress. Please create a pull request with updates if there is anything wrong with it.*
 
-MIEngine is one of the components used to enable the C/C++ debugging scenario with the Microsoft C/C++ extension with VS Code. This document is to help enable users who want to debug and contribute to MIEngine to fix issues or extend functionality. MIEngine is used to communicate with `gdb`/`lldb` using the MI protocol. 
+MIEngine is one of the components used to enable the C/C++ debugging scenario with the Microsoft C/C++ extension with VS Code. This document is to help enable users who want to debug and contribute to MIEngine to fix issues or extend functionality. MIEngine is used to communicate with `gdb/lldb` using the MI protocol. 
 
 **Repository:** https://github.com/Microsoft/MIEngine
 
@@ -10,7 +9,7 @@ MIEngine is one of the components used to enable the C/C++ debugging scenario wi
 
 To build MIEngine, you will either need Visual Studio 2015+ installed or at the very least [MSBuild](https://github.com/Microsoft/msbuild) installed. The configuration you want to build is `Desktop.Debug`.
 
-You can open the solution file **MIDebugEngine.sln** located under **src** and change the configuration and build. You will want to look in the **bin\Desktop.Debug** folder for the compiled bits. You will need to copy the following files to your **.vscode\extensions\ms-vscode.cpptools-\<version\>\debugadapters\bin** folder in your users/home folder:
+You can open the solution file `MIDebugEngine.sln` located under `src` and change the configuration and build. You will want to look in the `bin\Desktop.Debug` folder for the compiled bits. You will need to copy the following files to your `.vscode\extensions\ms-vscode.cpptools-<version>\debugadapters\bin` folder in your users/home folder:
 
 * Microsoft.MICore.dll
 * Microsoft.MICore.XmlSerializers.dll
@@ -28,7 +27,7 @@ The symbol files are as follows:
 
 ### Debugging On Windows
 
-On Windows, the easiest way to debug is to use Visual Studio. Locate the **package.json** file in the **Extension** folder and open it in an editor.
+On Windows, the easiest way to debug is to use Visual Studio. Locate the `package.json` file in the extension folder and open it in an editor.
 
 Locate the following line: 
 ```json
@@ -50,32 +49,29 @@ On Linux and Mac OS X, we use `mono` as our framework. You can download Xamarin 
 2. Install [Xamarin Studio v5.10.1.6](http://download.xamarin.com/studio/Windows/XamarinStudio-5.10.1.6-0.msi)
 
 Remote attach functionality behind a flag.  You can run it like this:
-```PowerShell
-cd "\Program Files (x86)\MonoDevelop\bin"
-set MONODEVELOP_SDB_TEST=1
-MonoDevelop.exe
+```
+    cd "\Program Files (x86)\MonoDevelop\bin"
+    set MONODEVELOP_SDB_TEST=1
+    MonoDevelop.exe
 ```
 
 #### Create an empty project for attaching (one-time setup)
-
 1. Launch MonoDevelop
 2. File -> New Solution
 3. Misc/Generic Project
 4. Name project and hit "Create"
 5. Right-click the project node (blue square) and do "Options"
-6. Under Run -> Custom Commands, select "Execute" in the lower dropdown and choose a command (I use `c:\windows\notepad.exe` - it doesn't matter what the command is, but MonoDevelop requires it to exist before it'll light up the Run menu).
+6. Under Run -> Custom Commands, select "Execute" in the lower dropdown and choose a command (I use c:\windows\notepad.exe - it doesn't matter what the command is, but MonoDevelop requires it to exist before it'll light up the Run menu).
 
 #### Configure the extension to enable remote debugging
-
-Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/OpenDebugAD7** file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from Xamarin Studio. 
+Open the `~/.vscode/extensions/ms-vscode.cpptools-<version>/debugAdapters/OpenDebugAD7` file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from Xamarin Studio. 
 
 #### Attach the remote debugger
-
 In MonoDevelop: Run -> Run With -> Custom Command Mono Soft Debugger
 Fill in the IP and port of the Linux/Mac OS X machine and hit "Connect" to start debugging
 
-After you've done this once, you can hit the MonoDevelop "Play" button or <kbd>F5</kbd> to bring up the connect dialog again.
+After you've done this once, you can hit the MonoDevelop "Play" button or F5 to bring up the connect dialog again.
 
 Note: If you are debugging to CentOS, you will need to make an exception in the firewall
-* `sudo firewall-cmd --zone=public --add-port=1234/tcp --permanent`
-* `sudo firewall-cmd --reload`
+* sudo firewall-cmd --zone=public --add-port=1234/tcp --permanent
+* sudo firewall-cmd --reload

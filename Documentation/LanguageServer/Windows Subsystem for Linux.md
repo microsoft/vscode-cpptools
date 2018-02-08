@@ -6,7 +6,7 @@ Select "C/Cpp: Edit Configurations" from the command palette to create the **c_c
 
 ## Release
 
-For developers using Ubuntu with the current version of WSL released with the Fall Creators Update, you can add the following configuration template to your **c_cpp_properties.json** file.
+For developers using Ubuntu with the current version of WSL released with the Fall Creators Update, you can add the following configuration template to your **c_cpp_properties.json** file.  
 
 ```json
 {
@@ -45,7 +45,7 @@ For developers using Ubuntu with the current version of WSL released with the Fa
 
 The `includePath` above includes the system header paths that gcc uses for C++ projects and matches the output of `gcc -v -E -x c++ - < /dev/null`. The intelliSenseMode should be set to **"clang-x64"** to get WSL projects to work properly with IntelliSense.
 
-Note that `${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/` is the path to the root of the Ubuntu filesystem. This will be different if you are using a different distro. You can discover the paths to your distro's filesystem by using this handy PowerShell command:
+Note that `${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/` is the path to the root of the Ubuntu filesystem. This will be different if you are using a different distro. You can discover the paths to your distro's filesystem by using this handy Powershell command:
 
 ```Powershell
 PS R:\> ($(get-appxpackage).PackageFamilyName | findstr /i 'SUSE Ubuntu') -replace '^', "$`{localappdata`}/Packages/"
@@ -55,7 +55,7 @@ ${localappdata}/Packages/46932SUSE.openSUSELeap42.2_022rs5jcyhyac
 ${localappdata}/Packages/46932SUSE.SUSELinuxEnterpriseServer12SP2_022rs5jcyhyac
 ```
 
-For C projects, simply remove the C++ lines:
+For C projects, simply remove the c++ lines:
 
 ```json
 {
@@ -130,10 +130,10 @@ The `includePath` above includes the system header paths that gcc uses for C++ p
 
 Note that `${localappdata}/lxss/rootfs/` is the path to the root of the filesystem for Bash on Ubuntu on Windows.
 
-For C projects, simply remove the C++ lines as in the previous example.
+For C projects, simply remove the c++ lines as in the previous example.
 
 ---
 
 With these configurations, you should be all set up to use the new IntelliSense engine for linting, memberlist autocomplete, and quick info (tooltips).  Add `"C_Cpp.intelliSenseEngine": "Default"` to your **settings.json** file to try out the new IntelliSense engine.
 
-And remember to [heed the warnings of the Windows team about not creating or editing Linux files from a Windows app](https://blogs.msdn.microsoft.com/commandline/2016/11/17/do-not-change-linux-files-using-windows-apps-and-tools/)!
+And remember to [heed the warnings of the Windows team about not creating or editing Linux files from a Windows app](https://blogs.msdn.microsoft.com/commandline/2016/11/17/do-not-change-linux-files-using-windows-apps-and-tools/)! 

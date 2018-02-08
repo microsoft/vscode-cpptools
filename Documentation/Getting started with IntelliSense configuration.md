@@ -1,3 +1,5 @@
+<<<<<<< HEAD:Documentation/Getting started with IntelliSense configuration.md
+=======
 ## How to build and debug the Microsoft CppTools Extension
 
 These steps will allow you to debug the TypeScript code that is part of the Microsoft CppTools extension for Visual Studio Code.
@@ -12,6 +14,7 @@ Prerequisite steps:
     * This enables the local developer workflow, copying dependencies from the **node_modules** folder.
   * Open the **Extension** folder in Visual Studio Code and F5.
   * Read the [contributing guidelines](https://github.com/Microsoft/vscode-cpptools/blob/master/CONTRIBUTING.md).
+>>>>>>> d5af9a1b457062ade676d39340987e8f7d05feca:Documentation/Getting started.md
 
 # Configuring includePath for better IntelliSense results
 
