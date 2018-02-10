@@ -98,7 +98,8 @@ export interface Configuration {
     browse?: Browse;
 }
 
-export interface DefaultPaths {
+export interface CompilerDefaults {
+    compilerPath: string;
     includes: string[];
     frameworks: string[];
 }
@@ -116,6 +117,7 @@ export class CppProperties {
     private configFileWatcher: vscode.FileSystemWatcher = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandFileWatchers: fs.FSWatcher[] = [];
+    private defaultCompilerPath: string = null;
     private defaultIncludes: string[] = null;
     private defaultFrameworks: string[] = null;
     private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
@@ -171,9 +173,10 @@ export class CppProperties {
         return result;
     }
 
-    public set DefaultPaths(paths: DefaultPaths) {
-        this.defaultIncludes = paths.includes;
-        this.defaultFrameworks = paths.frameworks;
+    public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
+        this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.defaultIncludes = compilerDefaults.includes;
+        this.defaultFrameworks = compilerDefaults.frameworks;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.

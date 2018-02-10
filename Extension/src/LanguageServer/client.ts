@@ -43,7 +43,7 @@ interface ReportStatusNotificationBody {
     status: string;
 }
 
-interface QueryDefaultPathsParams {
+interface QueryCompilerDefaultsParams {
 }
 
 interface FolderSettingsParams {
@@ -87,7 +87,7 @@ interface DecorationRangesPair {
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
-const QueryDefaultPathsRequest: RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void> = new RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void>('cpptools/queryDefaultPaths');
+const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 
 // Notifications to the server
@@ -324,8 +324,8 @@ class DefaultClient implements Client {
 
                 // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                 // The event handlers must be set before this happens.
-                languageClient.sendRequest(QueryDefaultPathsRequest, {}).then((paths: configs.DefaultPaths) => {
-                    this.configuration.DefaultPaths = paths;
+                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                    this.configuration.CompilerDefaults = compilerDefaults;
                 });
 
                 // Once this is set, we don't defer any more callbacks.
