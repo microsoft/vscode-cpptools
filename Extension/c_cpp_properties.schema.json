@@ -14,7 +14,11 @@
                         "description": "Platform name. Mac, Linux, or Win32 are the defaults unless a custom platform is added.",
                         "type": "string"
                     },
-                    "compileCommands":{
+                    "compilerPath": {
+                        "description": "Full path name of the compiler being used, e.g. /usr/bin/gcc, to enable more accurate IntelliSense.",
+                        "type": "string"
+                    },
+                    "compileCommands": {
                         "description": "path to compile_commands.json file for the workspace",
                         "type":"string"
                     },

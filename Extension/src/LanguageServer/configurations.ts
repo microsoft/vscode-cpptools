@@ -89,6 +89,7 @@ export interface Browse {
 
 export interface Configuration {
     name: string;
+    compilerPath: string;
     includePath?: string[];
     macFrameworkPath?: string[];
     defines?: string[];
@@ -298,6 +299,9 @@ export class CppProperties {
             }
             if (configuration.compileCommands !== undefined) {
                 configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
+            }
+            if (configuration.compilerPath !== undefined) {
+                configuration.compilerPath = util.resolveVariables(configuration.compilerPath);
             }
         }
 
