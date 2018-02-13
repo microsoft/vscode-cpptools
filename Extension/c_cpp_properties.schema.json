@@ -18,24 +18,6 @@
                         "description": "Full path name of the compiler being used, e.g. /usr/bin/gcc, to enable more accurate IntelliSense.",
                         "type": "string"
                     },
-                    "stdVersion": {
-                        "description": "Version of the C or C++ language standard to use for IntelliSense.",
-                        "type": "string",
-                        "enum": [
-                            "c89",
-                            "c90",
-                            "c99",
-                            "c11",
-                            "c++98",
-                            "c++03",
-                            "c++0x",
-                            "c++11",
-                            "c++1y",
-                            "c++14",
-                            "c++1z",
-                            "c++17"
-                        ]
-                    },
                     "compileCommands": {
                         "description": "path to compile_commands.json file for the workspace",
                         "type":"string"
