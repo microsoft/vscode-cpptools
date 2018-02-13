@@ -89,7 +89,7 @@ export interface Browse {
 
 export interface Configuration {
     name: string;
-    compilerPath: string;
+    compilerPath?: string;
     includePath?: string[];
     macFrameworkPath?: string[];
     defines?: string[];
