@@ -1047,7 +1047,7 @@
     "test": "gulp allTests",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "node ./src/Support/update.js && npm install && tsc -p ./ && node ./out/src/Support/copyScript.js",
+    "vscode:prepublish": "node ./src/Support/update.js && npm install && tsc -p ./ && node ./out/src/Support/copyDebuggerDependencies.js",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
