@@ -211,6 +211,7 @@ export class CppProperties {
             if (process.platform === 'darwin') {
                 this.configurationJson.configurations[this.CurrentConfiguration].macFrameworkPath = this.defaultFrameworks;
             }
+            this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCompilerPath;
             this.configurationIncomplete = false;
         }
     }
