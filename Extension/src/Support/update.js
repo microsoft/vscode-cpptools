@@ -10,7 +10,7 @@
  */
 
 const fs = require("fs");
-if (fs.existsSync('./node_modules')) {
+if (!process.env.CPPTOOLS_DEV && fs.existsSync('./node_modules')) {
     console.log("Skipping prepublish steps since they appear to have been executed already.");
     process.exit(1);
 }
