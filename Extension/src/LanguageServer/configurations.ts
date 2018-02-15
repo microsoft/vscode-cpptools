@@ -63,7 +63,8 @@ let defaultSettings: string = `{
             ],
             "defines": [
                 "_DEBUG",
-                "UNICODE"
+                "UNICODE",
+                "_UNICODE"
             ],
             "intelliSenseMode": "msvc-x64",
             "browse": {
@@ -203,7 +204,7 @@ export class CppProperties {
         if (this.configurationIncomplete && this.defaultIncludes !== undefined && this.defaultFrameworks !== undefined) {
             this.configurationJson.configurations[this.CurrentConfiguration].includePath = this.defaultIncludes;
             this.configurationJson.configurations[this.CurrentConfiguration].browse.path = this.defaultIncludes;
-            if (process.platform == 'darwin') {
+            if (process.platform === 'darwin') {
                 this.configurationJson.configurations[this.CurrentConfiguration].macFrameworkPath = this.defaultFrameworks;
             }
             this.configurationIncomplete = false;
@@ -216,15 +217,15 @@ export class CppProperties {
         }
         let nodePlatform: NodeJS.Platform = process.platform;
         let plat: string;
-        if (nodePlatform == 'linux') {
+        if (nodePlatform === 'linux') {
             plat = "Linux";
-        } else if (nodePlatform == 'darwin') {
+        } else if (nodePlatform === 'darwin') {
             plat = "Mac";
-        } else if (nodePlatform == 'win32') {
+        } else if (nodePlatform === 'win32') {
             plat = "Win32";
         }
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            if (config.configurations[i].name == plat) {
+            if (config.configurations[i].name === plat) {
                 return i;
             }
         }
@@ -233,14 +234,14 @@ export class CppProperties {
 
     private getIntelliSenseModeForPlatform(name: string): string {
         // Do the built-in configs first.
-        if (name == "Linux" || name == "Mac") {
+        if (name === "Linux" || name === "Mac") {
             return "clang-x64";
-        } else if (name == "Win32") {
+        } else if (name === "Win32") {
             return "msvc-x64";
         } else {
             // Custom configs default to the OS's preference.
             let nodePlatform: NodeJS.Platform = process.platform;
-            if (nodePlatform == 'linux' || nodePlatform == 'darwin') {
+            if (nodePlatform === 'linux' || nodePlatform === 'darwin') {
                 return "clang-x64";
             }
         }
@@ -266,7 +267,7 @@ export class CppProperties {
     }
 
     public select(index: number): Configuration {
-        if (index == this.configurationJson.configurations.length) {
+        if (index === this.configurationJson.configurations.length) {
             this.handleConfigurationEditCommand(vscode.window.showTextDocument);
             return;
         }
@@ -319,7 +320,7 @@ export class CppProperties {
         });
         filePaths.forEach((path: string) => {
             this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                if (event != "rename") {
+                if (event !== "rename") {
                     this.onCompileCommandsChanged(path);
                 }
             }));
@@ -389,7 +390,7 @@ export class CppProperties {
     private parsePropertiesFile(): void {
         try {
             let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
-            if (readResults == "") {
+            if (readResults === "") {
                 return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
             }
 
@@ -418,7 +419,7 @@ export class CppProperties {
                 }
             }
 
-            if (this.configurationJson.version != configVersion) {
+            if (this.configurationJson.version !== configVersion) {
                 dirty = true;
                 if (this.configurationJson.version === undefined) {
                     this.updateToVersion2();
@@ -477,13 +478,13 @@ export class CppProperties {
         let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
-                if (this.propertiesFile != null) {
+                if (this.propertiesFile !== null) {
                     this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
                 }
             } else if (stats.mtime > this.configFileWatcherFallbackTime) {
-                if (this.propertiesFile == null) {
+                if (this.propertiesFile === null) {
                     this.propertiesFile = vscode.Uri.file(propertiesFile); // File created.
                 }
                 this.handleConfigurationChange();

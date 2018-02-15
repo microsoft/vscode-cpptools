@@ -1,6 +1,22 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.14.6: Janurary 17, 2017
+## Version 0.15.0: February 15, 2018
+* Add colorization for inactive regions. [#1466](https://github.com/Microsoft/vscode-cpptools/issues/1466)
+* Fix 3 highest hitting crashes. [#1137](https://github.com/Microsoft/vscode-cpptools/issues/1137), [#1337](https://github.com/Microsoft/vscode-cpptools/issues/1337), [#1497](https://github.com/Microsoft/vscode-cpptools/issues/1497)
+* Update IntelliSense compiler (bug fixes and more C++17 support). [#1067](https://github.com/Microsoft/vscode-cpptools/issues/1067), [#1313](https://github.com/Microsoft/vscode-cpptools/issues/1313), [#1461](https://github.com/Microsoft/vscode-cpptools/issues/1461)
+* Fix duplicate `cannot open source file` errors. [#1469](https://github.com/Microsoft/vscode-cpptools/issues/1469)
+* Fix `Go to Symbol in File...` being slow for large workspaces. [#1472](https://github.com/Microsoft/vscode-cpptools/issues/1472)
+* Fix stuck processes during shutdown. [#1474](https://github.com/Microsoft/vscode-cpptools/issues/1474)
+* Fix error popup appearing with non-workspace files when using `compile_commands.json`. [#1475](https://github.com/Microsoft/vscode-cpptools/issues/1475)
+* Fix snippet completions being blocked after `#`. [#1531](https://github.com/Microsoft/vscode-cpptools/issues/1531)
+* Add more macros to `cpp.hint` (fixing missing symbols).
+* Add `__CHAR_BIT__=8` to default defines on Mac. [#1510](https://github.com/Microsoft/vscode-cpptools/issues/1510)
+* Added support for config variables to `c_cpp_properties.json`. [#314](https://github.com/Microsoft/vscode-cpptools/issues/314)
+  * Joshua Cannon (@thejcannon) [PR #1529](https://github.com/Microsoft/vscode-cpptools/pull/1529)
+* Define `_UNICODE` by default on Windows platforms. [#1538](https://github.com/Microsoft/vscode-cpptools/issues/1538)
+  * Charles Milette (@sylveon) [PR #1540](https://github.com/Microsoft/vscode-cpptools/pull/1540)
+
+## Version 0.14.6: January 17, 2018
 * Fix tag parser failing (and continuing to fail after edits) when it shouldn't. [#1367](https://github.com/Microsoft/vscode-cpptools/issues/1367)
 * Fix tag parser taking too long due to redundant processing. [#1288](https://github.com/Microsoft/vscode-cpptools/issues/1288)
 * Fix debugging silently failing the 1st time if a C/C++ file isn't opened. [#1366](https://github.com/Microsoft/vscode-cpptools/issues/1366)
@@ -52,7 +68,7 @@
 
 ## Version 0.14.1: November 9, 2017
 * Add support for multi-root workspaces. [#1070](https://github.com/Microsoft/vscode-cpptools/issues/1070)
-* Fix files temporarly being unsavable after Save As and other scenarios on Windows. [Microsoft/vscode#27329](https://github.com/Microsoft/vscode/issues/27329)
+* Fix files temporarily being unsavable after Save As and other scenarios on Windows. [Microsoft/vscode#27329](https://github.com/Microsoft/vscode/issues/27329)
 * Fix files "permanently" being unsavable if the IntelliSense process launches during tag parsing of the file. [#1040](https://github.com/Microsoft/vscode-cpptools/issues/1040)
 * Show pause and resume parsing commands after clicking the database icon. [#1141](https://github.com/Microsoft/vscode-cpptools/issues/1141)
 * Don't show the install output unless an error occurs. [#1160](https://github.com/Microsoft/vscode-cpptools/issues/1160)
@@ -75,7 +91,7 @@
 * Fix `limitSymbolsToIncludedHeaders` not working with single files. [#1109](https://github.com/Microsoft/vscode-cpptools/issues/1109)
 * Add logging to Output window. Errors will be logged by default. Verbosity is controlled by the `"C_Cpp.loggingLevel"` setting.
 * Add new database status bar icon for "Indexing" or "Parsing" with progress numbers, and the previous flame icon is now just for "Updating IntelliSense".
-* Stop showing `(Global Scope)` if there's actually an error in identifiying the correct scope.
+* Stop showing `(Global Scope)` if there's actually an error in identifying the correct scope.
 * Fix crash with the IntelliSense process when parsing certain template code (the most frequently hit crash).
 * Fix main thread being blocked while searching for files to remove after changing `files.exclude`.
 * Fix incorrect code action include path suggestion when a folder comes after "..".
@@ -266,7 +282,7 @@
 * Debugging for Visual C++ applications on Windows (Program Database files) is now available.
 * `clang-format` is now automatically installed as a part of the extension and formats code as you type.
 * `clang-format` options have been moved from c_cpp_properties.json file to settings.json (File->Preferences->User settings).
-* `clang-format` fall-back style is now set to 'Visual Studio'.
+* `clang-format` fallback style is now set to 'Visual Studio'.
 * Attach now requires a request type of `attach` instead of `launch`.
 * Support for additional console logging using the keyword `logging` inside `launch.json`.
 * Bug fixes.
@@ -300,7 +316,7 @@
 * Support for debugging with GDB on Cygwin.
 * Debugging on 32-bit Linux now enabled.
 * Format code using clang-format.
-* Experimental fuzzy autocompletion.
+* Experimental fuzzy auto-completion.
 * Bug fixes.
 
 ## Version 0.5.0: April 14, 2016

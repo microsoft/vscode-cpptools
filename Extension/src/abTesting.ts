@@ -17,7 +17,7 @@ const userBucketMax: number = 100;
 const userBucketString: string = "CPP.UserBucket";
 
 export function activate(context: vscode.ExtensionContext): void {
-    if (context.globalState.get<number>(userBucketString, -1) == -1) {
+    if (context.globalState.get<number>(userBucketString, -1) === -1) {
         let bucket: number = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
         context.globalState.update(userBucketString, bucket);
     }
@@ -38,7 +38,7 @@ function downloadCpptoolsJson(urlString): Promise<void> {
             agent: util.GetHttpsProxyAgent(),
             rejectUnauthorized: vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true)
         }, (response) => {
-            if (response.statusCode == 301 || response.statusCode == 302) {
+            if (response.statusCode === 301 || response.statusCode === 302) {
                 let redirectUrl: string | string[];
                 if (typeof response.headers.location === "string") {
                     redirectUrl = response.headers.location;
@@ -47,7 +47,7 @@ function downloadCpptoolsJson(urlString): Promise<void> {
                 }
                 return resolve(downloadCpptoolsJson(redirectUrl)); // Redirect - download from new location
             }
-            if (response.statusCode != 200) {
+            if (response.statusCode !== 200) {
                 return reject();
             }
             let downloadedBytes = 0; // tslint:disable-line
@@ -88,7 +88,7 @@ export function processCpptoolsJson(cpptoolsString: string): Promise<void> {
         } else {
             util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
         }
-        if (prevIntelliSenseEngineDefault != util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
+        if (prevIntelliSenseEngineDefault !== util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
             return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
         }
     }

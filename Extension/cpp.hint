@@ -561,12 +561,14 @@
 
 // Miscellaneous
 #define __RPC_FAR
+#define CONST const
 #define CALLBACK
 #define EXPORT
 #define FAR
 #define far
 #define FASTCALL __fastcall	
 #define NEAR
+#define near
 #define PASCAL
 #define SIZE_T_MAX  UINT_MAX
 #define UNALIGNED
@@ -674,6 +676,8 @@
 #define PURE                    = 0
 #define STDMETHOD(method)       virtual HRESULT STDMETHODCALLTYPE method
 #define STDMETHOD_(type,method) virtual type STDMETHODCALLTYPE method
+#define STDMETHODV(method) HRESULT  (STDMETHODVCALLTYPE * method)
+#define STDMETHODV_(type,method)    type (STDMETHODVCALLTYPE * method)
 #define STDMETHODCALLTYPE __stdcall
 #define STDMETHODIMP_(type)     type STDMETHODCALLTYPE
 #define STDMETHODIMP	HRESULT STDMETHODCALLTYPE
@@ -693,11 +697,39 @@
 #define TEXT(name) name
 #define WINAPI __stdcall
 #define importlib(name)
+#define DECLSPEC_IMPORT
+#define DECLSPEC_NORETURN
+#define DECLSPEC_NOTHROW
+#define DECLSPEC_ALIGN(x)
+#define DECLSPEC_UUID(x)
+#define DECLSPEC_NOVTABLE
+#define DECLSPEC_SELECTANY
+#define DECLSPEC_ADDRSAFE
+#define DECLSPEC_CACHEALIGN
+#define DECLSPEC_SAFEBUFFERS
+#define DECLSPEC_NOINLINE
+#define DECLSPEC_GUARDNOCF
+#define DECLSPEC_GUARD_SUPPRESS
+#define DECLSPEC_CHPE_GUEST
+#define DECLSPEC_CHPE_PATCHABLE
+#define DECLSPEC_DEPRECATED
+#define DECLSPEC_DEPRECATED_DDK
+#define __allowed(p)
+#define __in_data_source(src_sym)
+#define __out_data_source(src_sym)
+#define __field_data_source(src_sym)
+#define __this_out_data_source(src_syn)
+#define _VARIANT_BOOL
+#define RPCNSAPI
 
 // C++ Standard Library
-#define _STD_BEGIN namespace std {
-#define _STD_END } ;
-#define _STD std::
+#define _STD_BEGIN	namespace std {
+#define _STD_END	}
+#define _STD	::std::
+#define _STDEXT_BEGIN	namespace stdext {
+#define _STDEXT_END		}
+#define _STDEXT			::stdext::
+#define _CSTD	::
 #define _TRY_BEGIN	try {
 #define _CATCH(x)	} catch (x) {
 #define _CATCH_ALL	} catch (...) {
@@ -718,6 +750,51 @@
 #define _CATCH_IO_END	
 #define _CATCH_IO_(x)	 
 #define _NOEXCEPT
+
+#define _W64
+#define _ADVSIMD_ALIGN(x)
+#define IVEC_LOGICALS(vect,element)
+#define IVEC_ADD_SUB(vect,element,opsize)
+#define IVEC_SELECT(vect12,vect34,element,selop)
+#define IVEC128_LOGICALS(vect,element)
+#define IVEC128_ADD_SUB(vect,element,opsize)
+#define IVEC128_SELECT(vect12,vect34,element,selop) 
+#define F64vec2_COMP(op)
+#define F64vec2_COMI(op)
+#define F64vec2_SELECT(op)
+#define F64vec2_UCOMI(op)
+#define Fvec32s4_SELECT(op)
+#define Fvec32s4_COMP(op)
+#define Fvec32s1_SELECT(op)
+#define Fvec32s1_COMP(op)
+#define _FS_DLL
+#define _CMPLX(T)	complex<T >
+#define _CTR(T)	_Ctraits<T >
+#define _TMPLT(T)	template<class T >
+#define _OMPIMP
+#define _RTCINTERNAL_DEPRECATED
+#define _NON_MEMBER_CALL(FUNC, CV_OPT, REF_OPT, NOEXCEPT_OPT)
+#define _NON_MEMBER_CALL_CV(FUNC, REF_OPT, NOEXCEPT_OPT)
+#define _NON_MEMBER_CALL_CV_REF(FUNC, NOEXCEPT_OPT)
+#define _NON_MEMBER_CALL_CV_REF_NOEXCEPT(FUNC)
+#define _CLASS_DEFINE_CV_REF_NOEXCEPT(CLASS)
+#define _GENERIC_MATH1R(FUN, RET, CRTTYPE)
+#define _GENERIC_MATH1(FUN, CRTTYPE)
+#define _GENERIC_MATH1X(FUN, ARG2, CRTTYPE)
+#define _GENERIC_MATH2_CALL(FUN, CRTTYPE, CALL_OPT)
+#define _GENERIC_MATH2(FUN, CRTTYPE)
+#define _IMPLEMENT_INVOKE(NAME_PREFIX, CONSTEXPR)
+#define _GENERIC_MATHC0X(FUN, VAL)
+#define _GENERIC_MATHC1X(FUN, VAL)
+#define _MEMBER_CALL(FUNC, CV_OPT, REF_OPT, NOEXCEPT_OPT)
+#define _MEMBER_CALL_CV(FUNC, REF_OPT, NOEXCEPT_OPT)
+#define _MEMBER_CALL_CV_REF(FUNC, NOEXCEPT_OPT)
+#define _MEMBER_CALL_CV_REF_NOEXCEPT(FUNC)
+#define _CLASS_DEFINE_CONST(CLASS)
+#define _CLASS_DEFINE_CV(CLASS)
+#define _CLASS_DEFINE_CV_REF_NOEXCEPT(CLASS)
+#define _COLLECTION_ATTRIBUTES
+#define _COLLECTION_TRANSLATE           } catch (const ::std::bad_alloc&) { throw ref new OutOfMemoryException; } catch (const ::std::exception&) { throw ref new FailureException; }
 
 // CRT
 #define __CRTDECL
@@ -744,6 +821,62 @@
 #define _CRTIMP_ALTERNATIVE
 #define _MRTIMP
 #define _SWPRINTFS_DEPRECATED
+
+#define _ACRTIMP
+#define _ACRTIMP_ALT
+#define _CRTALLOCATOR
+#define _CRT_BEGIN_C_HEADER
+#define _CRT_END_C_HEADER
+#define _CRT_STDIO_INLINE
+#define _CRT_UNUSED(x)
+#define _DCRTIMP
+#define _NO_CRT_STDIO_INLINE
+#define _WCSTOK_DEPRECATED
+#define _CONCRTIMP
+#define _MRTIMP2
+#define _MRTIMP2_NPURE
+#define _MRTIMP2_PURE_NPURE
+#define _CRT_GUARDOVERFLOW
+#define _CRT_HYBRIDPATCHABLE 
+#define _CRT_MANAGED_FP_DEPRECATE
+#define _BEGIN_PRAGMA_OPTIMIZE_ENABLE(flags, bug, reason)
+#define _BEGIN_PRAGMA_OPTIMIZE_DISABLE(flags, bug, reason)
+#define _END_PRAGMA_OPTIMIZE()
+#define _PGLOBAL
+#define RPCRTAPI
+
+// yvals
+#define _INLINE_VAR
+#define _CONSTEXPR17
+#define _NOEXCEPT_COND(...)
+#define _NOEXCEPT_OPER(...)
+#define _EXTERN_C			extern "C" {
+#define _END_EXTERN_C		}
+#define _CRTIMP2_PURE_IMPORT
+#define _CRTDATA2_IMPORT
+#define _CRTIMP2_NCEEPURE_IMPORT
+#define _NODISCARD
+#define _DECLSPEC_ALLOCATOR
+#define _DEPRECATE_TR1_NAMESPACE
+#define _DEPRECATE_TR2_SYS_NAMESPACE
+#define _DEPRECATE_IDENTITY_STRUCT
+#define _CXX17_DEPRECATE_C_HEADER
+#define _CXX17_DEPRECATE_STRSTREAM
+#define _CXX17_DEPRECATE_UNCAUGHT_EXCEPTION
+#define _CXX17_DEPRECATE_ADAPTOR_TYPEDEFS
+#define _CXX17_DEPRECATE_NEGATORS
+#define _CXX17_DEPRECATE_ALLOCATOR_VOID
+#define _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS
+#define _CXX17_DEPRECATE_RAW_STORAGE_ITERATOR
+#define _CXX17_DEPRECATE_TEMPORARY_BUFFER
+#define _CXX17_DEPRECATE_IS_LITERAL_TYPE
+#define _CXX17_DEPRECATE_RESULT_OF
+#define _CXX17_DEPRECATE_ITERATOR_BASE_CLASS
+#define _CXX17_DEPRECATE_SHARED_PTR_UNIQUE
+#define _CXX17_DEPRECATE_CODECVT_HEADER
+#define _EXPERIMENTAL_PARALLEL_ALGORITHMS
+#define __PURE_APPDOMAIN_GLOBAL
+#define _SCL_INSECURE_DEPRECATE_FN(_Func)
 
 #define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_0(_ReturnType, _FuncName, _DstType, _Dst) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size]);
 #define __DEFINE_CPP_OVERLOAD_SECURE_FUNC_0_1(_ReturnType, _FuncName, _DstType, _Dst, _TType1, _TArg1) template <size_t _Size> _ReturnType _FuncName(_DstType (&_Dst)[_Size], _TType1 _TArg1);
@@ -779,6 +912,57 @@
 #define __DEFINE_CPP_OVERLOAD_INLINE_NFUNC_0_2_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
 #define __DECLARE_CPP_OVERLOAD_INLINE_NFUNC_0_3_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3) _ReturnType __CRTDECL _FuncName(_DstType *_Dst, _TType1 _TArg1, _TType2 _TArg2, _TType3 _TArg3)
 #define __DEFINE_CPP_OVERLOAD_INLINE_NFUNC_0_3_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_0(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst) 
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_1(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_2(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_3(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_4(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3, _TType4, _TArg4)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_1_1(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _HType1, _HArg1, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_2_0(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _HType1, _HArg1, _HType2, _HArg2, _SalAttributeDst, _DstType, _Dst)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_1_ARGLIST(_ReturnType, _ReturnPolicy, _DeclSpec, _CC, _FuncName, _VFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_2_ARGLIST(_ReturnType, _ReturnPolicy, _DeclSpec, _CC, _FuncName, _VFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_2_SIZE(_DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_3_SIZE(_DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_0(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_1(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_2(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_3(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_4(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3, _TType4, _TArg4)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_1_1(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _HType1, _HArg1, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_2_0(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _HType1, _HArg1, _HType2, _HArg2, _SalAttributeDst, _DstType, _Dst)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_1_ARGLIST(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _VFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_2_SIZE(_DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_NFUNC_0_3_SIZE(_DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+
+#define __DECLARE_CPP_OVERLOAD_INLINE_FUNC_0_0_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst)
+#define __DEFINE_CPP_OVERLOAD_INLINE_FUNC_0_0_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst)
+#define __DECLARE_CPP_OVERLOAD_INLINE_FUNC_0_1_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_INLINE_FUNC_0_1_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1)
+#define __DECLARE_CPP_OVERLOAD_INLINE_FUNC_0_2_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_INLINE_FUNC_0_2_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DECLARE_CPP_OVERLOAD_INLINE_FUNC_0_3_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+#define __DEFINE_CPP_OVERLOAD_INLINE_FUNC_0_3_EX(_ReturnType, _ReturnPolicy, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_0_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SalAttributeDst, _DstType, _Dst)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_0_CGETS(_ReturnType, _DeclSpec, _FuncName, _SalAttributeDst, _DstType, _Dst)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_1_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_2_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_3_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_4_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3, _TType4, _TArg4)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_1_1_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _HType1, _HArg1, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_2_0_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _FuncName, _SecureFuncName, _HType1, _HArg1, _HType2, _HArg2, _SalAttributeDst, _DstType, _Dst)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_1_ARGLIST_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _CC, _FuncName, _SecureFuncName, _VFuncName, _SecureVFuncName, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_2_ARGLIST_EX(_ReturnType, _ReturnPolicy, _DeclSpec, _CC, _FuncName, _VFuncName, _SecureVFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_2_SIZE_EX(_DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2)
+#define __DEFINE_CPP_OVERLOAD_STANDARD_FUNC_0_3_SIZE_EX(_DeclSpec, _FuncName, _SecureFuncName, _SecureDstType, _SalAttributeDst, _DstType, _Dst, _TType1, _TArg1, _TType2, _TArg2, _TType3, _TArg3)
+
+// VCRuntime
+#define _VCRTIMP
+#define _VCRT_ALLOCATOR
+#define _VCRT_ALIGN(x)
+#define _CRT_DEPRECATE_TEXT(_Text)
 
 // Core Windows
 #define APIENTRY
@@ -816,6 +1000,37 @@
 #define __MACHINE(X)          X;
 #define __MACHINEWVMPURE(X)   X;
 #define _INTERLOCKEDCALL      __cdecl
+#define __MACHINEX86          __MACHINE
+#define __MACHINEX86_X64      __MACHINE
+#define __MACHINEARM          __MACHINE
+#define __MACHINEARM64         __MACHINE
+#define __MACHINEARM_ARM64     __MACHINE
+#define __MACHINEARM_ARM64_X64 __MACHINE
+#define __MACHINEARM64_X64     __MACHINE
+#define __MACHINECHPEX86ARM64  __MACHINE
+
+#define CFORCEINLINE
+#define STKFORCEINLINE
+#define PFORCEINLINE
+#define WINCRYPT_DWORD_CPP_ONLY
+#define DECLARE_INTERFACE_IID(iface, iid) interface DECLSPEC_UUID(iid) DECLSPEC_NOVTABLE iface
+#define DECLARE_INTERFACE_IID_(iface, baseiface, iid) interface DECLSPEC_UUID(iid) DECLSPEC_NOVTABLE iface : public baseiface
+#define WINGDIAPI
+#define WINSPOOLAPI
+#define WINOLECTLAPI_
+#define WINOLECTLAPI_(type)
+#define WINNORMALIZEAPI
+#define PROPSHEETPAGEA_V1_FIELDS
+#define PROPSHEETHEADERA_V1_FIELDS
+#define PROPSHEETPAGEW_V1_FIELDS
+#define PROPSHEETHEADERW_V1_FIELDS
+#define __WRAPPED__
+#define DEPRECATED(x)
+#define DEFINE_ENUM_FLAG_OPERATORS(ENUMTYPE)
+#define _ENUM_FLAG_CONSTEXPR
+
+// WinRT
+#define ROAPI
 
 // OLE
 #define BEGIN_INTERFACE
@@ -1842,6 +2057,137 @@
 #define __fallthrough
 #define _Check_return_opt_
 #define _Check_return_wat_
+
+#define __ANNOTATION(fun)
+#define __inner_fallthrough
+#define __inner_fallthrough_dec
+#define __PRIMOP(type, fun)
+#define __QUALIFIER(fun)
+#define _In_function_class_(x)
+#define _Called_from_function_class_(x)
+#define _Function_class_(x)
+#define _Enum_is_bitflag_
+#define _Strict_type_match_
+#define _Maybe_raises_SEH_exception_
+#define _Raises_SEH_exception_
+#define __nothrow
+#define _Struct_size_bytes_(size)
+#define _SAL1_Source_(Name, args, annotes)
+#define _SAL1_1_Source_(Name, args, annotes)
+#define _SAL1_2_Source_(Name, args, annotes)
+#define _SAL2_Source_(Name, args, annotes)
+#define _SAL_L_Source_(Name, args, annotes)
+#define _SA_annotes0(n)
+#define _SA_annotes1(n,pp1)
+#define _SA_annotes2(n,pp1,pp2)
+#define _SA_annotes3(n,pp1,pp2,pp3)
+#define _Translates_Win32_to_HRESULT_(errorCode)
+#define __RETURN_POLICY_SAME(_FunctionCall)
+#define __RETURN_POLICY_DST(_FunctionCall)
+#define __RETURN_POLICY_VOID(_FunctionCall)
+#define __EMPTY_DECLSPEC
+#define __drv_allocatesMem(kind) 
+#define __drv_freesMem(kind)
+#define __drv_preferredFunction(func,why)
+#define _Analysis_noreturn_
+#define _Guarded_by_(lock)
+#define _Write_guarded_by_(lock)
+#define _Interlocked_
+#define _Requires_lock_held_(lock)
+#define _Requires_exclusive_lock_held_(lock)
+#define _Requires_shared_lock_held_(lock)
+#define _Requires_lock_not_held_(lock)
+#define _Requires_no_locks_held_
+#define _Acquires_lock_(lock)
+#define _Acquires_exclusive_lock_(lock)
+#define _Acquires_shared_lock_(lock)
+#define _Releases_lock_(lock)
+#define _Releases_exclusive_lock_(lock)
+#define _Releases_shared_lock_(lock)
+#define _Acquires_nonreentrant_lock_(lock)
+#define _Releases_nonreentrant_lock_(lock)
+#define _Post_same_lock_(lock1,lock2)
+#define _Internal_set_lock_count_(lock, count)
+#define _Create_lock_level_(level)
+#define _Has_lock_level_(level)
+#define _Internal_lock_level_order_(a,b)
+#define _Csalcat1_(x,y)
+#define _Csalcat2_(x,y)
+#define _Lock_level_order_(a,b)
+#define _No_competing_thread_
+#define _Analysis_assume_lock_acquired_(lock)
+#define _Analysis_assume_lock_released_(lock)
+#define _Analysis_assume_lock_held_(lock)
+#define _Analysis_assume_lock_not_held_(lock)
+#define _Analysis_assume_same_lock_(lock1, lock2)
+#define _Function_ignore_lock_checking_(lock)
+#define _Analysis_suppress_lock_checking_(lock)
+#define _Benign_race_begin_ __pragma(warning(push))
+#define _Benign_race_end_ __pragma(warning(pop))
+#define _No_competing_thread_begin_
+#define _No_competing_thread_end_
+#define _Has_lock_kind_(kind)
+#define _Analysis_assume_
+#define _Analysis_assume_nullterminated_(s)
+#define _Analysis_mode_(m)
+#define _Function_class_(n)
+#define _Interlocked_operand_
+#define _IRQL_raises_(i)
+#define _IRQL_requires_(i)
+#define _IRQL_requires_max_(i)
+#define _IRQL_requires_min_(i)
+#define _IRQL_saves_
+#define _IRQL_saves_global_(k,s)
+#define _IRQL_restores_
+#define _IRQL_restores_global_(k,s)
+#define _IRQL_always_function_min_(i)
+#define _IRQL_always_function_max_(i)
+#define _IRQL_requires_same_
+#define _IRQL_uses_cancel_
+#define _IRQL_is_cancel_
+#define _Kernel_float_saved_
+#define _Kernel_float_restored_
+#define _Kernel_float_used_
+#define _Kernel_acquires_resource_(k)
+#define _Kernel_releases_resource_(k)
+#define _Kernel_requires_resource_held_(k)
+#define _Kernel_requires_resource_not_held_(k)
+#define _Kernel_clear_do_init_(yn)
+#define _Kernel_IoGetDmaAdapter_
+#define _Outref_result_buffer_(s)
+#define _Outref_result_bytebuffer_(s)
+#define _Outref_result_buffer_to_(s,c)
+#define _Outref_result_bytebuffer_to_(s,c)
+#define _Outref_result_buffer_all_(s)
+#define _Outref_result_bytebuffer_all_(s)
+#define _Outref_result_buffer_maybenull_(s)
+#define _Outref_result_bytebuffer_maybenull_(s)
+#define _Outref_result_buffer_to_maybenull_(s,c)
+#define _Outref_result_bytebuffer_to_maybenull_(s,c)
+#define _Outref_result_buffer_all_maybenull_(s)
+#define _Outref_result_bytebuffer_all_maybenull_(s)
+#define _In_defensive_(a)
+#define _Out_defensive_(a)
+#define _Inout_defensive_(a)
+#define _Acquires_nonreentrant_lock_(e)
+#define _Releases_nonreentrant_lock_(e)
+#define _Function_ignore_lock_checking_(e)
+#define _Analysis_suppress_lock_checking_(e)
+#define _Pre_readable_size_(s)
+#define _Pre_writable_size_(s)
+#define _Pre_readable_byte_size_(s)
+#define _Pre_writable_byte_size_(s)
+#define _Post_readable_size_(s)
+#define _Post_writable_size_(s)
+#define _Post_readable_byte_size_(s)
+#define _Post_writable_byte_size_(s)
+#define _Internal_create_CSAL_identifier_(id)
+#define _Reallocation_function_(after, before, size) 
+#define _Ret_reallocated_bytes_(before, size)
+
+// Code Analysis
+#define SA( id ) id
+#define REPEATABLE [repeatable]
 
 // BOOST
 #define BOOST_TRY { try

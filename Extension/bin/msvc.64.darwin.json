@@ -3,7 +3,7 @@
       "--clang",
       "--pack_alignment",
       "8",
-      "--framework_include_directory=/System/Library/Frameworks"
+      "-D__CHAR_BIT__=8"
     ],
     "defaults_op" :  "merge"
   }
