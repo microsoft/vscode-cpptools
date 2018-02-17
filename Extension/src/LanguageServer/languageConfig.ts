@@ -6,10 +6,10 @@
 
 import * as vscode from 'vscode';
 import { CppSettings } from './settings';
+import { getOutputChannel } from '../logger';
 
 export interface CommentPattern {
     begin: string;
-    end: string;
     continue: string;
 }
 
@@ -45,7 +45,8 @@ function getMLSplitAfterPattern(): string {
 function getMLContinuePattern(insert: string): string | undefined {
     if (insert) {
         let match: string = escape(insert.trimRight());
-        return `^(\\t|(\\ \\ ))*${match}([^\\*]|\\*(?!\\/))*$`;
+        let right: string = escape(insert.substr(insert.trimRight().length));
+        return `^(\\t|(\\ \\ ))*${match}(${right}([^\\*]|\\*(?!\\/))*)?$`;
     }
     return undefined;
 }
@@ -70,6 +71,34 @@ function getMLEmptyEndPattern(insert: string): string | undefined {
         }
         let match: string = escape(insert.trimRight());
         return `^(\\t|(\\ \\ ))*${match}\\*\\/\\s*$`;
+    }
+    return undefined;
+}
+
+function getSLBeginPattern(insert: string): string | undefined {
+    if (insert) {
+        let match: string = escape(insert.trimRight());
+        return `^(\\t|(\\ \\ ))*${match}.*$`;
+    }
+    return undefined;
+}
+
+function getSLContinuePattern(insert: string): string | undefined {
+    if (insert) {
+        let match: string = escape(insert.trimRight());
+        return `^(\\t|(\\ \\ ))*${match}.+$`;
+    }
+    return undefined;
+}
+
+function getSLEndPattern(insert: string): string | undefined {
+    if (insert) {
+        let match: string = escape(insert);
+        let trimmed: string = escape(insert.trimRight());
+        if (match !== trimmed) {
+            match = `(${match}|${trimmed})`;
+        }
+        return `^(\\t|(\\ \\ ))*${match}$`;
     }
     return undefined;
 }
@@ -160,31 +189,119 @@ function getMLEmptyEndRule(comment: CommentPattern): vscode.OnEnterRule | undefi
     return undefined;
 }
 
-export function getLanguageConfig(resource?: vscode.Uri): vscode.LanguageConfiguration {
-    let settings: CppSettings = new CppSettings(resource);
-    let comments: CommentPattern[] = settings.multilineCommentPatterns; // TODO: support both string and CommentPattern in the array.
-    let rules: vscode.OnEnterRule[] = [];
-    comments.forEach(comment => {
-        let r: vscode.OnEnterRule[] = constructCommentRules(comment);
-        if (r && r.length > 0) {
-            rules = rules.concat(r);
+function getSLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
+    if (comment) {
+        let continuePattern: string = getSLBeginPattern(comment.begin);
+        if (continuePattern) {
+            return {
+                beforeText: new RegExp(continuePattern),
+                action: {
+                    indentAction: vscode.IndentAction.None,
+                    appendText: comment.continue.trimLeft()
+                }
+            };
         }
-    });
-    return { onEnterRules: rules };
+    }
+    return undefined;
 }
 
-function constructCommentRules(comment: CommentPattern): vscode.OnEnterRule[] {
-    let rules: vscode.OnEnterRule[] = [];
-    if (comment && comment.begin && comment.begin.startsWith('/*')) {
-        rules = [
-            getMLSplitRule(comment),    // TODO: think about ordering of rules when multiple CommentPatterns are specified.
-            getMLFirstLineRule(comment),
-            getMLContinuationRule(comment), // TODO: there is a bug in this rule or the EmptyEndRule because Enter after '^\s*\*\/$' is not working.
-            getMLEmptyEndRule(comment),  // TODO: look for/remove duplicates?
-            getMLEndRule(comment)
-        ];
-    } else if (comment && comment.begin && comment.begin.startsWith('//')) {
-        // TODO: construct rules for single line comments
+function getSLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
+    if (comment) {
+        let continuePattern: string = getSLContinuePattern(comment.continue);
+        if (continuePattern) {
+            return {
+                beforeText: new RegExp(continuePattern),
+                action: {
+                    indentAction: vscode.IndentAction.None,
+                    appendText: comment.continue.trimLeft()
+                }
+            };
+        }
     }
-    return rules;
+    return undefined;
+}
+
+function getSLEndRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
+    if (comment) {
+        let endPattern: string = getSLEndPattern(comment.continue);
+        if (endPattern) {
+            return {
+                beforeText: new RegExp(endPattern),
+                action: {
+                    indentAction: vscode.IndentAction.None,
+                    removeText: comment.continue.length - comment.continue.trimLeft().length
+                }
+            };
+        }
+    }
+    return undefined;
+}
+
+interface Rules {
+    begin: vscode.OnEnterRule[];
+    continue: vscode.OnEnterRule[];
+    end: vscode.OnEnterRule[];
+}
+
+export function getLanguageConfig(languageId: string, resource?: vscode.Uri): vscode.LanguageConfiguration {
+    let settings: CppSettings = new CppSettings(resource);
+    let comments: (string | CommentPattern)[] = settings.multilineCommentPatterns;
+    let beginPatterns: string[] = [];       // avoid duplicate rules
+    let continuePatterns: string[] = [];    // avoid duplicate rules
+    let duplicates: boolean = false;
+    let beginRules: vscode.OnEnterRule[] = [];
+    let continueRules: vscode.OnEnterRule[] = [];
+    let endRules: vscode.OnEnterRule[] = [];
+    comments.forEach(comment => {
+        let c: CommentPattern = (typeof comment === "string") ? { begin: comment, continue: comment.startsWith('/*') ? " * " : comment } : <CommentPattern>comment;
+        let r: Rules = constructCommentRules(c, languageId);
+        if (beginPatterns.indexOf(c.begin) < 0) {
+            if (r.begin && r.begin.length > 0) {
+                beginRules = beginRules.concat(r.begin);
+            }
+            beginPatterns.push(c.begin);
+        } else {
+            duplicates = true;
+        }
+        if (continuePatterns.indexOf(c.continue) < 0) {
+            if (r.continue && r.continue.length > 0) {
+                continueRules = continueRules.concat(r.continue);
+            }
+            if (r.end && r.end.length > 0) {
+                endRules = endRules.concat(r.end);
+            }
+            continuePatterns.push(c.continue);
+        }
+    });
+    if (duplicates) {
+        getOutputChannel().appendLine("Duplicate multiline comment patterns detected.");
+    }
+    return { onEnterRules: beginRules.concat(continueRules).concat(endRules).filter(e => (e)) };    // Remove any 'undefined' entries
+}
+
+function constructCommentRules(comment: CommentPattern, languageId: string): Rules {
+    if (comment && comment.begin && comment.begin.startsWith('/*') && (languageId === 'c' || languageId === 'cpp')) {
+        return {
+            begin: [
+                getMLSplitRule(comment),
+                getMLFirstLineRule(comment)
+            ],
+            continue: [ getMLContinuationRule(comment) ],
+            end: [
+                getMLEmptyEndRule(comment),
+                getMLEndRule(comment)
+            ]
+        };
+    } else if (comment && comment.begin && comment.begin.startsWith('//') && languageId === 'cpp') {
+        return {
+            begin: (comment.begin === comment.continue) ? [] : [ getSLFirstLineRule(comment) ],
+            continue: [ getSLContinuationRule(comment) ],
+            end: [ getSLEndRule(comment) ]
+        };
+    }
+    return {
+        begin: [],
+        continue: [],
+        end: []
+    };
 }

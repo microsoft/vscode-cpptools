@@ -22,6 +22,7 @@ let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
 let disposables: vscode.Disposable[] = [];
+let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
@@ -99,14 +100,18 @@ function realActivation(): void {
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
-    // TODO: need different configs for c vs c++ (e.g. remove single line comment support from c)
-    // TODO: need to update the language config if the user setting changes.
-    disposables.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig(clients.ActiveClient.RootUri)));
-    disposables.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig(clients.ActiveClient.RootUri)));
+    updateLanguageConfigurations();
 
     reportMacCrashes();
 
     intervalTimer = setInterval(onInterval, 2500);
+}
+
+export function updateLanguageConfigurations(): void {
+    languageConfigurations.forEach(d => d.dispose());
+
+    disposables.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
+    disposables.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
 }
 
 /*********************************************
@@ -425,6 +430,7 @@ export function deactivate(): Thenable<void> {
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
     disposables.forEach(d => d.dispose());
+    languageConfigurations.forEach(d => d.dispose());
     ui.dispose();
     return clients.dispose();
 }
