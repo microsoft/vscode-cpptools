@@ -109,9 +109,10 @@ function realActivation(): void {
 
 export function updateLanguageConfigurations(): void {
     languageConfigurations.forEach(d => d.dispose());
+    languageConfigurations = [];
 
-    disposables.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
-    disposables.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
 }
 
 /*********************************************
