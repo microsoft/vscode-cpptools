@@ -27,16 +27,16 @@ suite("multiline comment setting tests", function() {
             action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
         }, {
             // e.g.  * ...|
-            beforeText: /^(\t|(\ \ ))*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
+            beforeText: /^\s*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
             action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
         }, {
             // e.g.  */|
-            beforeText: /^(\t|(\ \ ))*\ \*\/\s*$/,
+            beforeText: /^\s*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         },
         {
             // e.g.  *-----*/|
-            beforeText: /^(\t|(\ \ ))*\ \*[^/]*\*\/\s*$/,
+            beforeText: /^\s*\*[^/]*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         }
     ];

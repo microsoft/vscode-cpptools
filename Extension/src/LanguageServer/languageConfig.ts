@@ -46,7 +46,7 @@ function getMLContinuePattern(insert: string): string | undefined {
     if (insert) {
         let match: string = escape(insert.trimRight());
         let right: string = escape(insert.substr(insert.trimRight().length));
-        return `^(\\t|(\\ \\ ))*${match}(${right}([^\\*]|\\*(?!\\/))*)?$`;
+        return `^\\s*${match}(${right}([^\\*]|\\*(?!\\/))*)?$`;
     }
     return undefined;
 }
@@ -58,7 +58,7 @@ function getMLEndPattern(insert: string): string | undefined {
             insert = insert.substr(0, insert.length - 1);
         }
         let match: string = escape(insert.trimRight());
-        return `^(\\t|(\\ \\ ))*${match}[^/]*\\*\\/\\s*$`;
+        return `^\\s*${match}[^/]*\\*\\/\\s*$`;
     }
     return undefined;
 }
@@ -70,7 +70,7 @@ function getMLEmptyEndPattern(insert: string): string | undefined {
             insert = insert.substr(0, insert.length - 1);
         }
         let match: string = escape(insert.trimRight());
-        return `^(\\t|(\\ \\ ))*${match}\\*\\/\\s*$`;
+        return `^\\s*${match}\\*\\/\\s*$`;
     }
     return undefined;
 }
