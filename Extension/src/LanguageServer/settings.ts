@@ -5,7 +5,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { CommentPattern } from './languageConfig'
+import { CommentPattern } from './languageConfig';
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;

@@ -245,15 +245,19 @@ interface Rules {
 
 export function getLanguageConfig(languageId: string, resource?: vscode.Uri): vscode.LanguageConfiguration {
     let settings: CppSettings = new CppSettings(resource);
-    let comments: (string | CommentPattern)[] = settings.multilineCommentPatterns;
+    let patterns: (string | CommentPattern)[] = settings.multilineCommentPatterns;
+    return getLanguageConfigFromPatterns(languageId, patterns);
+}
+
+export function getLanguageConfigFromPatterns(languageId: string, patterns: (string | CommentPattern)[]): vscode.LanguageConfiguration {
     let beginPatterns: string[] = [];       // avoid duplicate rules
     let continuePatterns: string[] = [];    // avoid duplicate rules
     let duplicates: boolean = false;
     let beginRules: vscode.OnEnterRule[] = [];
     let continueRules: vscode.OnEnterRule[] = [];
     let endRules: vscode.OnEnterRule[] = [];
-    comments.forEach(comment => {
-        let c: CommentPattern = (typeof comment === "string") ? { begin: comment, continue: comment.startsWith('/*') ? " * " : comment } : <CommentPattern>comment;
+    patterns.forEach(pattern => {
+        let c: CommentPattern = (typeof pattern === "string") ? { begin: pattern, continue: pattern.startsWith('/*') ? " * " : pattern } : <CommentPattern>pattern;
         let r: Rules = constructCommentRules(c, languageId);
         if (beginPatterns.indexOf(c.begin) < 0) {
             if (r.begin && r.begin.length > 0) {
