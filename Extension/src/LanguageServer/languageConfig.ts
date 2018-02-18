@@ -13,7 +13,7 @@ export interface CommentPattern {
     continue: string;
 }
 
-const escapeChars: RegExp = /[\\\^\$\*\+\?\{\}\(\)\.\!\=\|\[\]\ ]/;  // characters that should be escaped.
+const escapeChars: RegExp = /[\\\^\$\*\+\?\{\}\(\)\.\!\=\|\[\]\ \/]/;  // characters that should be escaped.
 
 // Insert '\\' in front of regexp escape chars.
 function escape(chars: string): string {
@@ -53,11 +53,7 @@ function getMLContinuePattern(insert: string): string | undefined {
 
 function getMLEndPattern(insert: string): string | undefined {
     if (insert) {
-        insert = insert.trimRight();
-        if (insert.endsWith('*')) {
-            insert = insert.substr(0, insert.length - 1);
-        }
-        let match: string = escape(insert.trimRight());
+        let match: string = escape(insert.trimRight().trimLeft());
         return `^\\s*${match}[^/]*\\*\\/\\s*$`;
     }
     return undefined;
@@ -78,7 +74,7 @@ function getMLEmptyEndPattern(insert: string): string | undefined {
 function getSLBeginPattern(insert: string): string | undefined {
     if (insert) {
         let match: string = escape(insert.trimRight());
-        return `^(\\t|(\\ \\ ))*${match}.*$`;
+        return `^\\s*${match}.*$`;
     }
     return undefined;
 }
@@ -86,7 +82,7 @@ function getSLBeginPattern(insert: string): string | undefined {
 function getSLContinuePattern(insert: string): string | undefined {
     if (insert) {
         let match: string = escape(insert.trimRight());
-        return `^(\\t|(\\ \\ ))*${match}.+$`;
+        return `^\\s*${match}.+$`;
     }
     return undefined;
 }
@@ -98,7 +94,7 @@ function getSLEndPattern(insert: string): string | undefined {
         if (match !== trimmed) {
             match = `(${match}|${trimmed})`;
         }
-        return `^(\\t|(\\ \\ ))*${match}$`;
+        return `^\\s*${match}$`;
     }
     return undefined;
 }
@@ -109,7 +105,7 @@ function getMLSplitRule(comment: CommentPattern): vscode.OnEnterRule | undefined
         let beforePattern: string | undefined = getMLBeginPattern(comment.begin);
         if (beforePattern) {
             return {
-                beforeText: new RegExp(beforePattern), // '^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$'
+                beforeText: new RegExp(beforePattern),
                 afterText: new RegExp(getMLSplitAfterPattern()),
                 action: {
                     indentAction: vscode.IndentAction.IndentOutdent,
@@ -144,7 +140,7 @@ function getMLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | un
         let continuePattern: string = getMLContinuePattern(comment.continue);
         if (continuePattern) {
             return {
-                beforeText: new RegExp(continuePattern),    // '^(\t|(\ \ ))*\ \*(\ ([^\*]|\*(?!\/))*)?$'
+                beforeText: new RegExp(continuePattern),
                 action: {
                     indentAction: vscode.IndentAction.None,
                     appendText: comment.continue.trimLeft()
@@ -161,7 +157,7 @@ function getMLEndRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
         let endPattern: string = getMLEndPattern(comment.continue);
         if (endPattern) {
             return {
-                beforeText: new RegExp(endPattern),     // '^(\t|(\ \ ))*\ \*[^/]*\*\/\s*$'
+                beforeText: new RegExp(endPattern),
                 action: {
                     indentAction: vscode.IndentAction.None,
                     removeText: comment.continue.length - comment.continue.trimLeft().length
@@ -178,7 +174,7 @@ function getMLEmptyEndRule(comment: CommentPattern): vscode.OnEnterRule | undefi
         let endPattern: string = getMLEmptyEndPattern(comment.continue);
         if (endPattern) {
             return {
-                beforeText: new RegExp(endPattern),     // '^(\t|(\ \ ))*\ \*\/\s*$'
+                beforeText: new RegExp(endPattern),
                 action: {
                     indentAction: vscode.IndentAction.None,
                     removeText: comment.continue.length - comment.continue.trimLeft().length
@@ -189,6 +185,7 @@ function getMLEmptyEndRule(comment: CommentPattern): vscode.OnEnterRule | undefi
     return undefined;
 }
 
+// When the continue rule is different than the begin rule for single line comments
 function getSLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
     if (comment) {
         let continuePattern: string = getSLBeginPattern(comment.begin);
@@ -205,6 +202,7 @@ function getSLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule | undef
     return undefined;
 }
 
+// When Enter is pressed while the cursor is after the continuation pattern plus at least one other character.
 function getSLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
     if (comment) {
         let continuePattern: string = getSLContinuePattern(comment.continue);
@@ -221,6 +219,7 @@ function getSLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | un
     return undefined;
 }
 
+// When Enter is pressed while the cursor is immediately after the continuation pattern
 function getSLEndRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
     if (comment) {
         let endPattern: string = getSLEndPattern(comment.continue);
@@ -245,7 +244,7 @@ interface Rules {
 
 export function getLanguageConfig(languageId: string, resource?: vscode.Uri): vscode.LanguageConfiguration {
     let settings: CppSettings = new CppSettings(resource);
-    let patterns: (string | CommentPattern)[] = settings.multilineCommentPatterns;
+    let patterns: (string | CommentPattern)[] = settings.commentContinuationPatterns;
     return getLanguageConfigFromPatterns(languageId, patterns);
 }
 

@@ -442,7 +442,7 @@ class DefaultClient implements Client {
         let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
 
         if (Object.keys(changedSettings).length > 0) {
-            if (changedSettings["multilineCommentPatterns"]) {
+            if (changedSettings["commentContinuationPatterns"]) {
                 updateLanguageConfigurations();
             }
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);

@@ -195,10 +195,33 @@
           "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
           "scope": "resource"
         },
-        "C_Cpp.multilineCommentPatterns": {
+        "C_Cpp.commentContinuationPatterns": {
           "type": "array",
-          "default": [{ "begin": "/**", "continue": " * " }],
-          "description": "Define the editor behavior for when the Enter key is pressed inside of a multiline comment block.",
+          "default": [
+            "/**"
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "The pattern that begins a multiline or single line comment block. The continuation pattern defaults to ' * ' for multiline comment blocks or this string for single line comment blocks."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "begin": {
+                    "type": "string",
+                    "description": "The pattern that begins a multiline or single line comment block"
+                  },
+                  "continue": {
+                    "type": "string",
+                    "description": "The text that will be inserted on the next line when Enter is pressed inside a multiline comment block"
+                  }
+                }
+              }
+            ]
+          },
+          "description": "Defines the editor behavior for when the Enter key is pressed inside of a multiline comment block.",
           "scope": "resource"
         }
       }
@@ -1053,7 +1076,7 @@
     "test": "gulp allTests",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "node ./src/Support/update.js && tsc -p ./ && node ./out/src/Support/copyDebuggerDependencies.js",
+    "vscode:prepublish": "node ./src/Support/prepublish.js",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
