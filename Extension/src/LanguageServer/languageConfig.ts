@@ -45,8 +45,11 @@ function getMLSplitAfterPattern(): string {
 function getMLContinuePattern(insert: string): string | undefined {
     if (insert) {
         let match: string = escape(insert.trimRight());
-        let right: string = escape(insert.substr(insert.trimRight().length));
-        return `^\\s*${match}(${right}([^\\*]|\\*(?!\\/))*)?$`;
+        if (match) {
+            let right: string = escape(insert.substr(insert.trimRight().length));
+            return `^\\s*${match}(${right}([^\\*]|\\*(?!\\/))*)?$`;
+        }
+        // else: if the continuation is just whitespace, vscode already does indentation preservation.
     }
     return undefined;
 }
@@ -54,7 +57,11 @@ function getMLContinuePattern(insert: string): string | undefined {
 function getMLEndPattern(insert: string): string | undefined {
     if (insert) {
         let match: string = escape(insert.trimRight().trimLeft());
-        return `^\\s*${match}[^/]*\\*\\/\\s*$`;
+        if (match) {
+            return `^\\s*${match}[^/]*\\*\\/\\s*$`;
+        }
+        // else: if the continuation is just whitespace, don't mess with indentation
+        // since we don't know if this is a continuation line or not.
     }
     return undefined;
 }
@@ -62,11 +69,15 @@ function getMLEndPattern(insert: string): string | undefined {
 function getMLEmptyEndPattern(insert: string): string | undefined {
     if (insert) {
         insert = insert.trimRight();
-        if (insert.endsWith('*')) {
-            insert = insert.substr(0, insert.length - 1);
+        if (insert) {
+            if (insert.endsWith('*')) {
+                insert = insert.substr(0, insert.length - 1);
+            }
+            let match: string = escape(insert.trimRight());
+            return `^\\s*${match}\\*\\/\\s*$`;
         }
-        let match: string = escape(insert.trimRight());
-        return `^\\s*${match}\\*\\/\\s*$`;
+        // else: if the continuation is just whitespace, don't mess with indentation
+        // since we don't know if this is a continuation line or not.
     }
     return undefined;
 }
