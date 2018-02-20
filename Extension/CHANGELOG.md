@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.15.1: March 2018
-* Support additional multiline comment patterns. #[1100](https://github.com/Microsoft/vscode-cpptools/issues/1100),#[1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
+* Support additional multiline comment patterns. [#1100](https://github.com/Microsoft/vscode-cpptools/issues/1100),[#1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
   * Added new setting: `C_Cpp.commentContinuationPatterns`
 
 ## Version 0.15.0: February 15, 2018
