@@ -125,8 +125,9 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
 
         let body: string = formatString(`{ 
 \t${indentJsonString(CreateAttachString(name, this.miDebugger, this.executable))},
-\t"MIMode": "${this.MIMode}"{0}
-}`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : ""]);
+\t"MIMode": "${this.MIMode}"{0}{1}
+}`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
+this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
             "label": this.snippetPrefix + name,
@@ -162,12 +163,12 @@ export class PipeTransportConfigurations extends Configuration {
     public GetAttachConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Pipe Attach`;
 
-        let body: string = `
+        let body: string = formatString(`
 {
 \t${indentJsonString(CreateRemoteAttachString(name, this.miDebugger, this.executable))},
 \t${indentJsonString(CreatePipeTransportString(this.pipeProgram, this.MIMode))},
-\t"MIMode": "${this.MIMode}"
-}`;
+\t"MIMode": "${this.MIMode}"{0}
+}`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
         return {
             "label": this.snippetPrefix + name,
             "description": `Pipe Attach with ${this.MIMode}.`,
@@ -239,11 +240,11 @@ export class WSLConfigurations extends Configuration {
     public GetAttachConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Bash on Windows Attach`;
 
-        let body: string = `
+        let body: string = formatString(`
 {
 \t${indentJsonString(CreateAttachString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode))}
-}`;
+\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode))}{0}
+}`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
             "label": this.snippetPrefix + name,

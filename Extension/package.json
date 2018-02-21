@@ -794,6 +794,31 @@
                     "default": {}
                   }
                 }
+              },
+              "setupCommands": {
+                "type": "array",
+                "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The debugger command to execute.",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description for the command.",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "default": "false"
+                    }
+                  }
+                },
+                "default": []
               }
             }
           }
