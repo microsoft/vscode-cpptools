@@ -11,7 +11,6 @@ For developers using Ubuntu with the current version of WSL released with the Fa
 ```json
 {
     "name": "WSL",
-    "intelliSenseMode": "clang-x64",
     "includePath": [
         "${workspaceRoot}",
         "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5",
@@ -27,6 +26,7 @@ For developers using Ubuntu with the current version of WSL released with the Fa
         "__linux__",
         "__x86_64__"
     ],
+    "intelliSenseMode": "clang-x64",
     "browse": {
         "path": [
             "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/include/c++/5",
@@ -60,7 +60,6 @@ For C projects, simply remove the C++ lines:
 ```json
 {
     "name": "WSL",
-    "intelliSenseMode": "clang-x64",
     "includePath": [
         "${workspaceRoot}",
         "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
@@ -73,6 +72,7 @@ For C projects, simply remove the C++ lines:
         "__linux__",
         "__x86_64__"
     ],
+    "intelliSenseMode": "clang-x64",
     "browse": {
         "path": [
             "${localappdata}/Packages/CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc/LocalState/rootfs/usr/lib/gcc/x86_64-linux-gnu/5/include",
