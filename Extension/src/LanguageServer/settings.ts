@@ -5,6 +5,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { CommentPattern } from './languageConfig';
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
@@ -44,6 +45,7 @@ export class CppSettings extends Settings {
     public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): boolean { return super.Section.get<boolean>("workspaceParsingPriority"); }
     public get exclusionPolicy(): boolean { return super.Section.get<boolean>("exclusionPolicy"); }
+    public get commentContinuationPatterns(): (string | CommentPattern)[] { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);

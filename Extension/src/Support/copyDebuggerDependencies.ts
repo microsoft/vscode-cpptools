@@ -81,7 +81,7 @@ function enableDevWorkflow(): Boolean {
         return false;
     }
 
-    return (EnableDevWorkflow || (process.env.CPPTOOLS_DEV !== null));
+    return (EnableDevWorkflow || (process.env.CPPTOOLS_DEV !== undefined));
 }
 
 function copySourceDependencies(): void {

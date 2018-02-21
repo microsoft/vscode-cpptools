@@ -21,6 +21,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
+import { updateLanguageConfigurations } from './extension';
 
 let ui: UI;
 
@@ -130,7 +131,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
         }
         let val: any = settings.get(key);
         if (val instanceof Object) {
-            continue; // ignore settings that are objects since tostring on those is not useful (e.g. navigation.length)
+            val = JSON.stringify(val, null, 2);
         }
 
         // Skip values that don't match the setting's enum.
@@ -438,9 +439,12 @@ class DefaultClient implements Client {
         let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
             return !(key in previousCppSettings) || val !== previousCppSettings[key];
         };
-        let changedSettings: any = collectSettingsForTelemetry(filter, this.RootUri);
+        let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
 
         if (Object.keys(changedSettings).length > 0) {
+            if (changedSettings["commentContinuationPatterns"]) {
+                updateLanguageConfigurations();
+            }
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
         }
     }
