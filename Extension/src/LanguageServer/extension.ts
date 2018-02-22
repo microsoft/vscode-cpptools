@@ -14,6 +14,7 @@ import { Client } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
+import { getLanguageConfig } from './languageConfig';
 import * as os from 'os';
 
 let prevCrashFile: string;
@@ -21,40 +22,11 @@ let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
 let disposables: vscode.Disposable[] = [];
+let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-
-    // Add ' * ' on new lines after multiline comment with '/**' started
-// Copied from vscode/extensions/typescript/src/typescriptMain.ts
-const multilineCommentRules: any = {
-    onEnterRules: [
-        {
-            // e.g. /** | */
-            beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
-            afterText: /^\s*\*\/$/,
-            action: { indentAction: vscode.IndentAction.IndentOutdent, appendText: ' * ' }
-        }, {
-            // e.g. /** ...|
-            beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
-            action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
-        }, {
-            // e.g.  * ...|
-            beforeText: /^(\t|(\ \ ))*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
-            action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
-        }, {
-            // e.g.  */|
-            beforeText: /^(\t|(\ \ ))*\ \*\/\s*$/,
-            action: { indentAction: vscode.IndentAction.None, removeText: 1 }
-        },
-        {
-            // e.g.  *-----*/|
-            beforeText: /^(\t|(\ \ ))*\ \*[^/]*\*\/\s*$/,
-            action: { indentAction: vscode.IndentAction.None, removeText: 1 }
-        }
-    ]
-};
 
 /**
  * activate: set up the extension for language services
@@ -128,12 +100,19 @@ function realActivation(): void {
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
-    disposables.push(vscode.languages.setLanguageConfiguration('c', multilineCommentRules));
-    disposables.push(vscode.languages.setLanguageConfiguration('cpp', multilineCommentRules));
+    updateLanguageConfigurations();
 
     reportMacCrashes();
 
     intervalTimer = setInterval(onInterval, 2500);
+}
+
+export function updateLanguageConfigurations(): void {
+    languageConfigurations.forEach(d => d.dispose());
+    languageConfigurations = [];
+
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
 }
 
 /*********************************************
@@ -452,6 +431,7 @@ export function deactivate(): Thenable<void> {
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
     disposables.forEach(d => d.dispose());
+    languageConfigurations.forEach(d => d.dispose());
     ui.dispose();
     return clients.dispose();
 }

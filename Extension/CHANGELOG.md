@@ -1,6 +1,8 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.16.0: March 15, 2018
+* Support additional multiline comment patterns. [#1100](https://github.com/Microsoft/vscode-cpptools/issues/1100), [#1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
+  * Add new setting: `C_Cpp.commentContinuationPatterns`.
 * Add `C_Cpp.compilerPath` setting, and query gcc/clang-based compilers for default defines. [#1293](https://github.com/Microsoft/vscode-cpptools/issues/1293), [#1251](https://github.com/Microsoft/vscode-cpptools/issues/1251), [#1448](https://github.com/Microsoft/vscode-cpptools/issues/1448), [#1465](https://github.com/Microsoft/vscode-cpptools/issues/1465), [#1484](https://github.com/Microsoft/vscode-cpptools/issues/1484)
 
 ## Version 0.15.0: February 15, 2018
