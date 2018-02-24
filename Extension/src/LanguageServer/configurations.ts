@@ -90,6 +90,8 @@ export interface Browse {
 export interface Configuration {
     name: string;
     compilerPath?: string;
+    cStandard?: string;
+    cppStandard?: string;
     includePath?: string[];
     macFrameworkPath?: string[];
     defines?: string[];
@@ -100,6 +102,8 @@ export interface Configuration {
 
 export interface CompilerDefaults {
     compilerPath: string;
+    cStandard: string;
+    cppStandard: string;
     includes: string[];
     frameworks: string[];
 }
@@ -118,6 +122,8 @@ export class CppProperties {
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandFileWatchers: fs.FSWatcher[] = [];
     private defaultCompilerPath: string = null;
+    private defaultCStandard: string = null;
+    private defaultCppStandard: string = null;
     private defaultIncludes: string[] = null;
     private defaultFrameworks: string[] = null;
     private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
@@ -175,6 +181,8 @@ export class CppProperties {
 
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
         this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.defaultCStandard = compilerDefaults.cStandard;
+        this.defaultCppStandard = compilerDefaults.cppStandard;
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
 
