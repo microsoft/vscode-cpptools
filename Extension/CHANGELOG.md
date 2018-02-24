@@ -1,8 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.15.1: March 2018
+* Enable autocomplete for local and global scopes. [#13](https://github.com/Microsoft/vscode-cpptools/issues/13)
 * Support additional multiline comment patterns. [#1100](https://github.com/Microsoft/vscode-cpptools/issues/1100),[#1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
   * Added new setting: `C_Cpp.commentContinuationPatterns`
+* Add a setting to disable inactive region highlighting. [#1592](https://github.com/Microsoft/vscode-cpptools/issues/1592)
 
 ## Version 0.15.0: February 15, 2018
 * Add colorization for inactive regions. [#1466](https://github.com/Microsoft/vscode-cpptools/issues/1466)

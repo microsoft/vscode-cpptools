@@ -139,6 +139,12 @@
           "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. Warnings about #includes that could not be located will always be reported to the editor. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
         },
+        "C_Cpp.dimInactiveRegions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting is ignored by the Tag Parser engine.",
+          "scope": "resource"
+        },
         "C_Cpp.formatting": {
           "type": "string",
           "enum": [
@@ -265,6 +271,11 @@
       {
         "command": "C_Cpp.ToggleIncludeFallback",
         "title": "Toggle IntelliSense Engine Fallback on Include Errors",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ToggleDimInactiveRegions",
+        "title": "Toggle Inactive Region Colorization",
         "category": "C/Cpp"
       },
       {
