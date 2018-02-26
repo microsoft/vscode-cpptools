@@ -394,6 +394,7 @@ class DefaultClient implements Client {
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
+                dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
                 exclusionPolicy: settings.exclusionPolicy
@@ -450,11 +451,14 @@ class DefaultClient implements Client {
     }
 
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
-        //Apply text decorations to inactive regions
-        for (let e of editors) {
-            let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-            if (valuePair) {
-                e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        if (settings.dimInactiveRegions) {
+            //Apply text decorations to inactive regions
+            for (let e of editors) {
+                let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+                if (valuePair) {
+                    e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
+                }
             }
         }
     }
@@ -729,10 +733,13 @@ class DefaultClient implements Client {
             this.inactiveRegionsDecorations.set(params.uri, toInsert);
         }
 
-        // Apply the decorations to all *visible* text editors
-        let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
-        for (let e of editors) {
-            e.setDecorations(decoration, ranges);
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        if (settings.dimInactiveRegions) {
+            // Apply the decorations to all *visible* text editors
+            let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
+            for (let e of editors) {
+                e.setDecorations(decoration, ranges);
+            }
         }
     }
 

@@ -39,6 +39,7 @@ export class CppSettings extends Settings {
     public get intelliSenseEngine(): string { return super.Section.get<string>("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
+    public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }
@@ -50,6 +51,9 @@ export class CppSettings extends Settings {
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
+    }
+    public update<T>(name: string, value: T): void {
+        super.Section.update(name, value);
     }
 }
 
