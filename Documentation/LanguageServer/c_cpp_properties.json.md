@@ -9,6 +9,7 @@
             "name": "Win32",
             "intelliSenseMode": "msvc-x64",
             "includePath": [ "${workspaceRoot}" ],
+            "macFrameworkPath": [ "/System/Library/Frameworks" ],
             "defines": [ "FOO", "BAR=100" ],
             "compileCommands": "/path/to/compile_commands.json",
             "browse": {
@@ -18,7 +19,7 @@
             }
         }
     ],
-    "version": 2
+    "version": 3
 }
 ```
 
@@ -40,6 +41,9 @@
 
 * #### `includePath`
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-I` switch; the IntelliSense engine will not do a recursive search in these paths for includes.
+
+* #### `macFrameworkPath`
+  If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for framework headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-F` switch; the IntelliSense engine will not do a recursive search in these paths for includes.
 
 * #### `defines`
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of preprocessor symbols will be used by IntelliSense during the compilation of your source files. This is basically the same as the list of symbols you pass to your compiler with the `-D` switch.
