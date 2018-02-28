@@ -16,9 +16,10 @@ if (!process.env.CPPTOOLS_DEV && fs.existsSync('./node_modules')) {
 } else {
     console.log(">> npm install");
     cp.execSync("npm install", {stdio:[0, 1, 2]});
-    console.log(">> tsc -p ./");
-    cp.execSync("tsc -p ./", {stdio:[0, 1, 2]});
 }
+
+console.log(">> tsc -p ./");
+cp.execSync("tsc -p ./", {stdio:[0, 1, 2]});
 // Required for nightly builds. Nightly builds do not enable CPPTOOLS_DEV.
 console.log(">> node ./out/src/Support/copyDebuggerDependencies.js");
 cp.execSync("node ./out/src/Support/copyDebuggerDependencies.js", {stdio:[0, 1, 2]});
