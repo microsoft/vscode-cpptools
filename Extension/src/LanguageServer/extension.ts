@@ -193,6 +193,7 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
@@ -333,6 +334,13 @@ function onToggleIncludeFallback(): void {
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
+}
+
+function onToggleDimInactiveRegions(): void {
+    onActivationEvent();
+    // This only applies to the active client.
+    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
 }
 
 function onShowReleaseNotes(): void {
