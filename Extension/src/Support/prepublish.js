@@ -25,7 +25,7 @@ if (process.env.CPPTOOLS_DEV || !fs.existsSync('./debugAdapters/bin/cpptools.ad7
     const copyDebuggerDependenciesJSFile = path.join(outDir, 'copyDebuggerDependencies.js');
     if (!fs.existsSync('./out/src/Support/copyDebuggerDependencies.js'))
     {
-        console.log(">> tsc ./src/Support/copyDebuggerDependencies.ts");
+        console.log(">> tsc ./src/Support/copyDebuggerDependencies.ts -- outDir" + outDir);
         cp.execSync("tsc ./src/Support/copyDebuggerDependencies.ts --outDir " + outDir, { stdio: [0, 1, 2] });
     }
 
