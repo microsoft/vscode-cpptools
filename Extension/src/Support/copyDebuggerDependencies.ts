@@ -200,8 +200,6 @@ function makeDirectory(dir: string): void {
     }
 }
 
-let devWorkFlowMessage: string = '\nWARNING: If you are trying to build and run the extension locally, please set the environment variable CPPTOOLS_DEV=1 and try again.\n';
-
 if (enableDevWorkflow()) {
     removeFolder("./debugAdapters");
 }
@@ -213,5 +211,6 @@ if (enableDevWorkflow()) {
     copyMonoDependencies();
     copyBinaryDependencies();
 } else {
-    console.warn(devWorkFlowMessage);
+    console.warn('WARNING: Debugger dependencies are missing.');
+    console.log('If you are trying to build and run the extension from source and need the debugger dependencies, set the environment variable CPPTOOLS_DEV=1 and try again.');
 }
