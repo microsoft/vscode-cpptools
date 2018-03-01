@@ -561,9 +561,6 @@ class DefaultClient implements Client {
                 this.debugChannel = vscode.window.createOutputChannel(`C/C++ Debug Protocol: ${this.Name}`);
                 this.disposables.push(this.debugChannel);
             }
-            if (!outputEditorExist) {
-                this.debugChannel.show();
-            }
             this.debugChannel.appendLine("");
             this.debugChannel.appendLine("************************************************************************************************************************");
             this.debugChannel.append(`${output}`);

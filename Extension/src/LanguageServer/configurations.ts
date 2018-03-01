@@ -186,13 +186,23 @@ export class CppProperties {
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
 
-        if (this.defaultCompilerPath && this.defaultCompilerPath.length > 0) {
-            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
-            if (!config.compilerPath || config.compilerPath.length === 0)
-            {
-                config.compilerPath = this.defaultCompilerPath; // Update the compilerPath with the default being used.
-                fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-            }
+        // Update the compilerPath, cStandard, and cppStandard with the default being used.
+        let doUpdate: boolean = false;
+        let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+        if (this.defaultCompilerPath && this.defaultCompilerPath.length > 0 && (!config.compilerPath || config.compilerPath.length === 0)) {
+            config.compilerPath = this.defaultCompilerPath;
+            doUpdate = true;
+        }
+        if (this.defaultCStandard && this.defaultCStandard.length > 0 && (!config.cStandard || config.cStandard.length === 0)) {
+            config.cStandard = this.defaultCStandard;
+            doUpdate = true;
+        }
+        if (this.defaultCppStandard && this.defaultCppStandard.length > 0 && (!config.cppStandard || config.cppStandard.length === 0)) {
+            config.cppStandard = this.defaultCppStandard;
+            doUpdate = true;
+        }
+        if (doUpdate) {
+            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
         }
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
@@ -228,8 +238,15 @@ export class CppProperties {
             if (process.platform === 'darwin') {
                 this.configurationJson.configurations[this.CurrentConfiguration].macFrameworkPath = this.defaultFrameworks;
             }
-            if (this.defaultCompilerPath)
+            if (this.defaultCompilerPath) {
                 this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCompilerPath;
+            }
+            if (this.defaultCStandard) {
+                this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCStandard;
+            }
+            if (this.defaultCppStandard) {
+                this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCppStandard;
+            }
             this.configurationIncomplete = false;
         }
     }
