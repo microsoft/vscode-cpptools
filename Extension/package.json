@@ -1105,7 +1105,7 @@
     }
   },
   "scripts": {
-    "compile": "npm run vscode:prepublish && tsc -p ./",
+    "compile": "npm run vscode:prepublish",
     "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p ./",
