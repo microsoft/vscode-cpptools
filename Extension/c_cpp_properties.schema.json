@@ -47,6 +47,13 @@
                         ],
                         "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64 and Linux/Mac default to clang-x64."
                     },
+                    "forceIncludes": {
+                        "description": "A list of files that should be included before any include file in a translation unit",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "browse": {
                         "type": "object",
                         "properties": {

@@ -94,6 +94,7 @@ export interface Configuration {
     defines?: string[];
     intelliSenseMode?: string;
     compileCommands?: string;
+    forceIncludes?: string[];
     browse?: Browse;
 }
 
@@ -275,30 +276,27 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveAndSplit(paths: string[]): string[] {
+    private resolveAndSplit(paths: string[] | undefined): string[] {
         let result: string[] = [];
-        paths.forEach(entry => {
-            let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
-            result = result.concat(entries);
-        });
+        if (paths) {
+            paths.forEach(entry => {
+                let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
+                result = result.concat(entries);
+            });
+        }
         return result;
     }
 
     private updateServerOnFolderSettingsChange(): void {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let configuration: Configuration = this.configurationJson.configurations[i];
-            if (configuration.includePath !== undefined) {
-                configuration.includePath = this.resolveAndSplit(configuration.includePath);
-            }
-            if (configuration.browse !== undefined && configuration.browse.path !== undefined) {
+            configuration.includePath = this.resolveAndSplit(configuration.includePath);
+            if (configuration.browse) {
                 configuration.browse.path = this.resolveAndSplit(configuration.browse.path);
             }
-            if (configuration.macFrameworkPath !== undefined) {
-                configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
-            }
-            if (configuration.compileCommands !== undefined) {
-                configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
-            }
+            configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
+            configuration.forceIncludes = this.resolveAndSplit(configuration.forceIncludes);
+            configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
         }
 
         this.updateCompileCommandsFileWatchers();
