@@ -97,6 +97,7 @@ export interface Configuration {
     defines?: string[];
     intelliSenseMode?: string;
     compileCommands?: string;
+    forcedInclude?: string[];
     browse?: Browse;
 }
 
@@ -315,12 +316,14 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveAndSplit(paths: string[]): string[] {
+    private resolveAndSplit(paths: string[] | undefined): string[] {
         let result: string[] = [];
-        paths.forEach(entry => {
-            let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
-            result = result.concat(entries);
-        });
+        if (paths) {
+            paths.forEach(entry => {
+                let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
+                result = result.concat(entries);
+            });
+        }
         return result;
     }
 
@@ -335,6 +338,9 @@ export class CppProperties {
             }
             if (configuration.macFrameworkPath) {
                 configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
+            }
+            if (configuration.forcedInclude) {
+                configuration.forcedInclude = this.resolveAndSplit(configuration.forcedInclude);
             }
             if (configuration.compileCommands) {
                 configuration.compileCommands = util.resolveVariables(configuration.compileCommands);

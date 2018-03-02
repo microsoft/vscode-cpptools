@@ -120,7 +120,7 @@ export function showReleaseNotes(): void {
 }
 
 export function resolveVariables(input: string): string {
-    if (input === null) {
+    if (!input) {
         return "";
     }
 
