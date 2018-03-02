@@ -290,13 +290,21 @@ export class CppProperties {
     private updateServerOnFolderSettingsChange(): void {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let configuration: Configuration = this.configurationJson.configurations[i];
-            configuration.includePath = this.resolveAndSplit(configuration.includePath);
+            if (configuration.includePath) {
+                configuration.includePath = this.resolveAndSplit(configuration.includePath);
+            }
             if (configuration.browse) {
                 configuration.browse.path = this.resolveAndSplit(configuration.browse.path);
             }
-            configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
-            configuration.forcedInclude = this.resolveAndSplit(configuration.forcedInclude);
-            configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
+            if (configuration.macFrameworkPath) {
+                configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
+            }
+            if (configuration.forcedInclude) {
+                configuration.forcedInclude = this.resolveAndSplit(configuration.forcedInclude);
+            }
+            if (configuration.compileCommands) {
+                configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
+            }
         }
 
         this.updateCompileCommandsFileWatchers();
