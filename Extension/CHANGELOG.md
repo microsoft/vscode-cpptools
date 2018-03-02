@@ -5,6 +5,7 @@
 * Support additional multiline comment patterns. [#1100](https://github.com/Microsoft/vscode-cpptools/issues/1100),[#1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
   * Added new setting: `C_Cpp.commentContinuationPatterns`
 * Add a setting to disable inactive region highlighting. [#1592](https://github.com/Microsoft/vscode-cpptools/issues/1592)
+* Add support for forced includes. [#852](https://github.com/Microsoft/vscode-cpptools/issues/852)
 
 ## Version 0.15.0: February 15, 2018
 * Add colorization for inactive regions. [#1466](https://github.com/Microsoft/vscode-cpptools/issues/1466)
