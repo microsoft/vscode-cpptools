@@ -242,10 +242,10 @@ export class CppProperties {
                 this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCompilerPath;
             }
             if (this.defaultCStandard) {
-                this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCStandard;
+                this.configurationJson.configurations[this.CurrentConfiguration].cStandard = this.defaultCStandard;
             }
             if (this.defaultCppStandard) {
-                this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCppStandard;
+                this.configurationJson.configurations[this.CurrentConfiguration].cppStandard = this.defaultCppStandard;
             }
             this.configurationIncomplete = false;
         }
