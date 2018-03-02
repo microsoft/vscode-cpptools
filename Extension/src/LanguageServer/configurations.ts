@@ -94,7 +94,7 @@ export interface Configuration {
     defines?: string[];
     intelliSenseMode?: string;
     compileCommands?: string;
-    forceIncludes?: string[];
+    forcedInclude?: string[];
     browse?: Browse;
 }
 
@@ -295,7 +295,7 @@ export class CppProperties {
                 configuration.browse.path = this.resolveAndSplit(configuration.browse.path);
             }
             configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
-            configuration.forceIncludes = this.resolveAndSplit(configuration.forceIncludes);
+            configuration.forcedInclude = this.resolveAndSplit(configuration.forcedInclude);
             configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
         }
 
