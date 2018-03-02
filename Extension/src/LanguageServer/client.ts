@@ -554,9 +554,6 @@ class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(DebugProtocolNotification, (output) => {
-            let outputEditorExist: boolean = vscode.window.visibleTextEditors.some((editor: vscode.TextEditor) => {
-                return editor.document.uri.scheme === "output";
-            });
             if (!this.debugChannel) {
                 this.debugChannel = vscode.window.createOutputChannel(`C/C++ Debug Protocol: ${this.Name}`);
                 this.disposables.push(this.debugChannel);
