@@ -1,16 +1,18 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.15.1: March 2018
+## Version 0.16.0: March 15, 2018
 * Enable autocomplete for local and global scopes. [#13](https://github.com/Microsoft/vscode-cpptools/issues/13)
-* Support additional multiline comment patterns. [#1100](https://github.com/Microsoft/vscode-cpptools/issues/1100),[#1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
-  * Added new setting: `C_Cpp.commentContinuationPatterns`
+* Support additional multiline comment patterns. [#1100](https://github.com/Microsoft/vscode-cpptools/issues/1100), [#1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
+  * Add new setting: `C_Cpp.commentContinuationPatterns`.
 * Add a setting to disable inactive region highlighting. [#1592](https://github.com/Microsoft/vscode-cpptools/issues/1592)
 * Add support for forced includes. [#852](https://github.com/Microsoft/vscode-cpptools/issues/852)
+* Add `compilerPath`, `cStandard`, and `cppStandard` configuration settings, and query gcc/clang-based compilers for default defines. [#1293](https://github.com/Microsoft/vscode-cpptools/issues/1293), [#1251](https://github.com/Microsoft/vscode-cpptools/issues/1251), [#1448](https://github.com/Microsoft/vscode-cpptools/issues/1448), [#1465](https://github.com/Microsoft/vscode-cpptools/issues/1465), [#1484](https://github.com/Microsoft/vscode-cpptools/issues/1484)
+* Fix text being temporarily gray when an inactive region is deleted. [Microsoft/vscode#44872](https://github.com/Microsoft/vscode/issues/44872)
 
 ## Version 0.15.0: February 15, 2018
 * Add colorization for inactive regions. [#1466](https://github.com/Microsoft/vscode-cpptools/issues/1466)
 * Fix 3 highest hitting crashes. [#1137](https://github.com/Microsoft/vscode-cpptools/issues/1137), [#1337](https://github.com/Microsoft/vscode-cpptools/issues/1337), [#1497](https://github.com/Microsoft/vscode-cpptools/issues/1497)
-* Update IntelliSense compiler (bug fixes and more C++17 support). [#1067](https://github.com/Microsoft/vscode-cpptools/issues/1067), [#1313](https://github.com/Microsoft/vscode-cpptools/issues/1313), [#1461](https://github.com/Microsoft/vscode-cpptools/issues/1461)
+* Update IntelliSense compiler (bug fixes and more C++17 support). [#1067](https://github.com/Microsoft/vscode-cpptools/issues/1067), [#1313](https://github.com/Microsoft/vscode-cpptools/issues/1313)
 * Fix duplicate `cannot open source file` errors. [#1469](https://github.com/Microsoft/vscode-cpptools/issues/1469)
 * Fix `Go to Symbol in File...` being slow for large workspaces. [#1472](https://github.com/Microsoft/vscode-cpptools/issues/1472)
 * Fix stuck processes during shutdown. [#1474](https://github.com/Microsoft/vscode-cpptools/issues/1474)
