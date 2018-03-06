@@ -18,7 +18,7 @@ let defaultSettings: string = `{
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "$\{workspaceRoot\}"
+                "$\{workspaceFolder\}"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -26,7 +26,7 @@ let defaultSettings: string = `{
                 "path": [
                     "/usr/include",
                     "/usr/local/include",
-                    "$\{workspaceRoot\}"
+                    "$\{workspaceFolder\}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -41,7 +41,7 @@ let defaultSettings: string = `{
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "$\{workspaceRoot\}"
+                "$\{workspaceFolder\}"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -49,7 +49,7 @@ let defaultSettings: string = `{
                 "path": [
                     "/usr/include",
                     "/usr/local/include",
-                    "$\{workspaceRoot\}"
+                    "$\{workspaceFolder\}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -59,7 +59,7 @@ let defaultSettings: string = `{
             "name": "Win32",
             "includePath": [
                 "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
-                "$\{workspaceRoot\}"
+                "$\{workspaceFolder\}"
             ],
             "defines": [
                 "_DEBUG",
@@ -70,7 +70,7 @@ let defaultSettings: string = `{
             "browse": {
                 "path": [
                     "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
-                    "$\{workspaceRoot\}"
+                    "$\{workspaceFolder\}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
