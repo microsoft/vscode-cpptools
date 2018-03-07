@@ -254,7 +254,7 @@ class DefaultClient implements Client {
     private disposables: vscode.Disposable[] = [];
     private configuration: configs.CppProperties;
     private rootPathFileWatcher: vscode.FileSystemWatcher;
-    private workspaceRoot: vscode.WorkspaceFolder | undefined;
+    private rootFolder: vscode.WorkspaceFolder | undefined;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
@@ -279,16 +279,16 @@ class DefaultClient implements Client {
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
 
     /**
-     * don't use this.workspaceRoot directly since it can be undefined
+     * don't use this.rootFolder directly since it can be undefined
      */
     public get RootPath(): string {
-        return (this.workspaceRoot) ? this.workspaceRoot.uri.fsPath : "";
+        return (this.rootFolder) ? this.rootFolder.uri.fsPath : "";
     }
     public get RootUri(): vscode.Uri {
-        return (this.workspaceRoot) ? this.workspaceRoot.uri : null;
+        return (this.rootFolder) ? this.rootFolder.uri : null;
     }
     public get Name(): string {
-        return this.getName(this.workspaceRoot);
+        return this.getName(this.rootFolder);
     }
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
@@ -312,7 +312,7 @@ class DefaultClient implements Client {
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
             util.setProgress(util.getProgressExecutableStarted());
-            this.workspaceRoot = workspaceFolder;
+            this.rootFolder = workspaceFolder;
             ui = getUI();
             ui.bind(this);
 
@@ -520,12 +520,12 @@ class DefaultClient implements Client {
     }
 
     /**
-     * listen for file created/deleted events under the ${workspaceRoot} folder
+     * listen for file created/deleted events under the ${workspaceFolder} folder
      */
     private registerFileWatcher(): void {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-        if (this.workspaceRoot) {
+        if (this.rootFolder) {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
                 path.join(this.RootPath, "*"),
