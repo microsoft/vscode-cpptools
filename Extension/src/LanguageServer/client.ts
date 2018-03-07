@@ -21,6 +21,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
+import { updateLanguageConfigurations } from './extension';
 
 let ui: UI;
 
@@ -43,7 +44,7 @@ interface ReportStatusNotificationBody {
     status: string;
 }
 
-interface QueryDefaultPathsParams {
+interface QueryCompilerDefaultsParams {
 }
 
 interface FolderSettingsParams {
@@ -87,7 +88,7 @@ interface DecorationRangesPair {
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
-const QueryDefaultPathsRequest: RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void> = new RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void>('cpptools/queryDefaultPaths');
+const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 
 // Notifications to the server
@@ -130,7 +131,7 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
         }
         let val: any = settings.get(key);
         if (val instanceof Object) {
-            continue; // ignore settings that are objects since tostring on those is not useful (e.g. navigation.length)
+            val = JSON.stringify(val, null, 2);
         }
 
         // Skip values that don't match the setting's enum.
@@ -253,7 +254,7 @@ class DefaultClient implements Client {
     private disposables: vscode.Disposable[] = [];
     private configuration: configs.CppProperties;
     private rootPathFileWatcher: vscode.FileSystemWatcher;
-    private workspaceRoot: vscode.WorkspaceFolder | undefined;
+    private rootFolder: vscode.WorkspaceFolder | undefined;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
@@ -278,16 +279,16 @@ class DefaultClient implements Client {
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
 
     /**
-     * don't use this.workspaceRoot directly since it can be undefined
+     * don't use this.rootFolder directly since it can be undefined
      */
     public get RootPath(): string {
-        return (this.workspaceRoot) ? this.workspaceRoot.uri.fsPath : "";
+        return (this.rootFolder) ? this.rootFolder.uri.fsPath : "";
     }
     public get RootUri(): vscode.Uri {
-        return (this.workspaceRoot) ? this.workspaceRoot.uri : null;
+        return (this.rootFolder) ? this.rootFolder.uri : null;
     }
     public get Name(): string {
-        return this.getName(this.workspaceRoot);
+        return this.getName(this.rootFolder);
     }
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
@@ -311,7 +312,7 @@ class DefaultClient implements Client {
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
             util.setProgress(util.getProgressExecutableStarted());
-            this.workspaceRoot = workspaceFolder;
+            this.rootFolder = workspaceFolder;
             ui = getUI();
             ui.bind(this);
 
@@ -324,8 +325,8 @@ class DefaultClient implements Client {
 
                 // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                 // The event handlers must be set before this happens.
-                languageClient.sendRequest(QueryDefaultPathsRequest, {}).then((paths: configs.DefaultPaths) => {
-                    this.configuration.DefaultPaths = paths;
+                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                    this.configuration.CompilerDefaults = compilerDefaults;
                 });
 
                 // Once this is set, we don't defer any more callbacks.
@@ -393,6 +394,7 @@ class DefaultClient implements Client {
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
+                dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
                 exclusionPolicy: settings.exclusionPolicy
@@ -438,19 +440,25 @@ class DefaultClient implements Client {
         let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
             return !(key in previousCppSettings) || val !== previousCppSettings[key];
         };
-        let changedSettings: any = collectSettingsForTelemetry(filter, this.RootUri);
+        let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
 
         if (Object.keys(changedSettings).length > 0) {
+            if (changedSettings["commentContinuationPatterns"]) {
+                updateLanguageConfigurations();
+            }
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
         }
     }
 
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
-        //Apply text decorations to inactive regions
-        for (let e of editors) {
-            let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-            if (valuePair) {
-                e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        if (settings.dimInactiveRegions) {
+            //Apply text decorations to inactive regions
+            for (let e of editors) {
+                let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+                if (valuePair) {
+                    e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
+                }
             }
         }
     }
@@ -512,12 +520,12 @@ class DefaultClient implements Client {
     }
 
     /**
-     * listen for file created/deleted events under the ${workspaceRoot} folder
+     * listen for file created/deleted events under the ${workspaceFolder} folder
      */
     private registerFileWatcher(): void {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-        if (this.workspaceRoot) {
+        if (this.rootFolder) {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
                 path.join(this.RootPath, "*"),
@@ -546,15 +554,9 @@ class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(DebugProtocolNotification, (output) => {
-            let outputEditorExist: boolean = vscode.window.visibleTextEditors.some((editor: vscode.TextEditor) => {
-                return editor.document.uri.scheme === "output";
-            });
             if (!this.debugChannel) {
                 this.debugChannel = vscode.window.createOutputChannel(`C/C++ Debug Protocol: ${this.Name}`);
                 this.disposables.push(this.debugChannel);
-            }
-            if (!outputEditorExist) {
-                this.debugChannel.show();
             }
             this.debugChannel.appendLine("");
             this.debugChannel.appendLine("************************************************************************************************************************");
@@ -697,7 +699,8 @@ class DefaultClient implements Client {
     private updateInactiveRegions(params: InactiveRegionParams): void {
         let renderOptions: vscode.DecorationRenderOptions = {
             light: { color: "rgba(175,175,175,1.0)" },
-            dark: { color: "rgba(155,155,155,1.0)" }
+            dark: { color: "rgba(155,155,155,1.0)" },
+            rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
         };
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
 
@@ -725,10 +728,13 @@ class DefaultClient implements Client {
             this.inactiveRegionsDecorations.set(params.uri, toInsert);
         }
 
-        // Apply the decorations to all *visible* text editors
-        let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
-        for (let e of editors) {
-            e.setDecorations(decoration, ranges);
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        if (settings.dimInactiveRegions) {
+            // Apply the decorations to all *visible* text editors
+            let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
+            for (let e of editors) {
+                e.setDecorations(decoration, ranges);
+            }
         }
     }
 
