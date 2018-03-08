@@ -56,7 +56,7 @@ async function processRuntimeDependencies(): Promise<void> {
             }
         // The extension have been installed and activated before.
         } else {
-            await finalizeExtensionActivation();
+            finalizeExtensionActivation();
         }
     // No lock file, need to download and install dependencies.
     } else {
