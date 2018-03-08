@@ -463,7 +463,7 @@ export class CppProperties {
 
             // Update the compilerPath, cStandard, and cppStandard with the default if they're missing.
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
-            if (!config.compilerPath) {
+            if (config.compilerPath === undefined) {
                 config.compilerPath = this.defaultCompilerPath;
                 dirty = true;
             }
