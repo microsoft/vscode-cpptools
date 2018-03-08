@@ -202,7 +202,7 @@ export class CppProperties {
             config.cppStandard = this.defaultCppStandard;
             doUpdate = true;
         }
-        if (doUpdate) {
+        if (doUpdate && this.propertiesFile) {
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
         }
 
