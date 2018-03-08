@@ -56,7 +56,7 @@ async function processRuntimeDependencies(): Promise<void> {
             }
         // The extension have been installed and activated before.
         } else {
-            finalizeExtensionActivation();
+            await finalizeExtensionActivation();
         }
     // No lock file, need to download and install dependencies.
     } else {
@@ -282,7 +282,7 @@ async function finalizeExtensionActivation(): Promise<void> {
 
     // Redownload cpptools.json after activation so it's not blocked.
     // It'll be used after the extension reloads.
-    return cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
+    cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
 }
 
 function rewriteManifest(): Promise<void> {
