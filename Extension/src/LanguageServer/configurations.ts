@@ -187,25 +187,6 @@ export class CppProperties {
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
 
-        // Update the compilerPath, cStandard, and cppStandard with the default being used.
-        let doUpdate: boolean = false;
-        let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
-        if (this.defaultCompilerPath && this.defaultCompilerPath.length > 0 && (!config.compilerPath || config.compilerPath.length === 0)) {
-            config.compilerPath = this.defaultCompilerPath;
-            doUpdate = true;
-        }
-        if (this.defaultCStandard && this.defaultCStandard.length > 0 && (!config.cStandard || config.cStandard.length === 0)) {
-            config.cStandard = this.defaultCStandard;
-            doUpdate = true;
-        }
-        if (this.defaultCppStandard && this.defaultCppStandard.length > 0 && (!config.cppStandard || config.cppStandard.length === 0)) {
-            config.cppStandard = this.defaultCppStandard;
-            doUpdate = true;
-        }
-        if (doUpdate && this.propertiesFile) {
-            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-        }
-
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
         this.handleConfigurationChange();
@@ -239,9 +220,7 @@ export class CppProperties {
             if (process.platform === 'darwin') {
                 this.configurationJson.configurations[this.CurrentConfiguration].macFrameworkPath = this.defaultFrameworks;
             }
-            if (this.defaultCompilerPath) {
-                this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCompilerPath;
-            }
+            this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCompilerPath;
             if (this.defaultCStandard) {
                 this.configurationJson.configurations[this.CurrentConfiguration].cStandard = this.defaultCStandard;
             }
@@ -480,6 +459,21 @@ export class CppProperties {
                     this.configurationJson.version = configVersion;
                     vscode.window.showErrorMessage('Unknown version number found in c_cpp_properties.json. Some features may not work as expected.');
                 }
+            }
+
+            // Update the compilerPath, cStandard, and cppStandard with the default if they're missing.
+            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            if (!config.compilerPath) {
+                config.compilerPath = this.defaultCompilerPath;
+                dirty = true;
+            }
+            if (!config.cStandard) {
+                config.cStandard = this.defaultCStandard;
+                dirty = true;
+            }
+            if (!config.cppStandard) {
+                config.cppStandard = this.defaultCppStandard;
+                dirty = true;
             }
 
             if (dirty) {
