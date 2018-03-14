@@ -424,6 +424,9 @@ export class CppProperties {
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
+            if (newJson.configurations.length === 0) {
+                throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
+            }
             if (!this.configurationIncomplete && newJson.configurations && this.configurationJson) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
                     if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
@@ -433,6 +436,9 @@ export class CppProperties {
                 }
             }
             this.configurationJson = newJson;
+            if (this.CurrentConfiguration >= newJson.configurations.length) {
+                this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
+            }
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
             // the system includes were available.
