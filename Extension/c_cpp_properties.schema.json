@@ -15,7 +15,7 @@
                         "type": "string"
                     },
                     "compilerPath": {
-                        "description": "Full path name of the compiler being used, e.g. /usr/bin/gcc, to enable more accurate IntelliSense. Args can be added to modify the includes/defines used, e.g. -nostdinc++ or -m32.",
+                        "description": "Full path name of the compiler being used, e.g. /usr/bin/gcc, to enable more accurate IntelliSense. Args can be added to modify the includes/defines used, e.g. -nostdinc++, -m32, etc., but paths with spaces must be surrounded with \\\" if args are used.",
                         "type": "string"
                     },
                     "cStandard": {
