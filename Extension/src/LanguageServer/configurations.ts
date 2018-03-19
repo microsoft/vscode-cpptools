@@ -424,10 +424,11 @@ export class CppProperties {
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
-            if (newJson.configurations.length === 0) {
+            if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
                 throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
             }
-            if (!this.configurationIncomplete && newJson.configurations && this.configurationJson) {
+            if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
+                this.CurrentConfiguration < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
                     if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
                         this.currentConfigurationIndex.Value = i;
