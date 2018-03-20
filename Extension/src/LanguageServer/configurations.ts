@@ -354,7 +354,7 @@ export class CppProperties {
                     }
                 }));
             });
-        } catch(e) {
+        } catch (e) {
             // The file watcher limit is hit.
             // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
         }
