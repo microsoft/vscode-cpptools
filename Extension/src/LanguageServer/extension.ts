@@ -384,29 +384,33 @@ function reportMacCrashes(): void {
             }
 
             // vscode.workspace.createFileSystemWatcher only works in workspace folders.
-            fs.watch(crashFolder, (event, filename) => {
-                if (event !== "rename") {
-                    return;
-                }
-                if (filename === prevCrashFile) {
-                    return;
-                }
-                prevCrashFile = filename;
-                if (!filename.startsWith("Microsoft.VSCode.CPP.")) {
-                    return;
-                }
-                // Wait 5 seconds to allow time for the crash log to finish being written.
-                setTimeout(() => {
-                    fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
-                        if (err) {
-                            // Try again?
-                            fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleCrashFileRead);
-                            return;
-                        }
-                        handleCrashFileRead(err, data);
-                    });
-                }, 5000);
-            });
+            try {
+                fs.watch(crashFolder, (event, filename) => {
+                    if (event !== "rename") {
+                        return;
+                    }
+                    if (filename === prevCrashFile) {
+                        return;
+                    }
+                    prevCrashFile = filename;
+                    if (!filename.startsWith("Microsoft.VSCode.CPP.")) {
+                        return;
+                    }
+                    // Wait 5 seconds to allow time for the crash log to finish being written.
+                    setTimeout(() => {
+                        fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
+                            if (err) {
+                                // Try again?
+                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleCrashFileRead);
+                                return;
+                            }
+                            handleCrashFileRead(err, data);
+                        });
+                    }, 5000);
+                });
+            } catch(e) {
+                // The file watcher limit is hit (may not be possible on Mac, but just in case).
+            }
         });
     }
 }
