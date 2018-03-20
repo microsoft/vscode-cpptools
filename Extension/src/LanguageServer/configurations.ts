@@ -346,13 +346,18 @@ export class CppProperties {
                 filePaths.add(c.compileCommands);
             }
         });
-        filePaths.forEach((path: string) => {
-            this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                if (event !== "rename") {
-                    this.onCompileCommandsChanged(path);
-                }
-            }));
-        });
+        try {
+            filePaths.forEach((path: string) => {
+                this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
+                    if (event !== "rename") {
+                        this.onCompileCommandsChanged(path);
+                    }
+                }));
+            });
+        } catch (e) {
+            // The file watcher limit is hit.
+            // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
+        }
     }
 
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
