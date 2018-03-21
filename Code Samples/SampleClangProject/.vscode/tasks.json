@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "taskName": "clang++",
+            "label": "clang++",
             "command": "clang++ --debug -o main.exe main.cpp",
                 // "--debug" enables debugging symbols
                 // "-o main.exe" specifies the output executable
