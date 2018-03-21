@@ -43,7 +43,7 @@ export class UI {
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = "Discovering files...";
-        this.browseEngineStatusBarItem.color = "White";
+        this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
     }
