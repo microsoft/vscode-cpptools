@@ -11,11 +11,11 @@
                 ],
                 "properties": {
                     "name": {
-                        "description": "Platform name. Mac, Linux, or Win32 are the defaults unless a custom platform is added.",
+                        "description": "Configuration identifier. Mac, Linux, or Win32 are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.",
                         "type": "string"
                     },
                     "compilerPath": {
-                        "description": "Full path name of the compiler being used, e.g. /usr/bin/gcc, to enable more accurate IntelliSense. Args can be added to modify the includes/defines used, e.g. -nostdinc++, -m32, etc., but paths with spaces must be surrounded with \\\" if args are used.",
+                        "description": "Full path of the compiler being used, e.g. /usr/bin/gcc, to enable more accurate IntelliSense. Args can be added to modify the includes/defines used, e.g. -nostdinc++, -m32, etc., but paths with spaces must be surrounded with \\\" if args are used.",
                         "type": "string"
                     },
                     "cStandard": {
@@ -39,7 +39,7 @@
                         ]
                     },
                     "compileCommands": {
-                        "description": "path to compile_commands.json file for the workspace",
+                        "description": "Full path to compile_commands.json file for the workspace.",
                         "type": "string"
                     },
                     "includePath": {
@@ -82,7 +82,7 @@
                         "type": "object",
                         "properties": {
                             "limitSymbolsToIncludedHeaders": {
-                                "description": "true to process only those files directly or indirectly included as headers, false to process all files under the specified include paths",
+                                "description": "true to process only those files directly or indirectly included as headers, false to process all files under the specified include paths.",
                                 "type": "boolean"
                             },
                             "databaseFilename": {
