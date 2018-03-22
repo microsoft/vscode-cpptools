@@ -14,6 +14,7 @@ import { Client } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
+import { getLanguageConfig } from './languageConfig';
 import * as os from 'os';
 
 let prevCrashFile: string;
@@ -21,40 +22,11 @@ let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
 let disposables: vscode.Disposable[] = [];
+let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-
-    // Add ' * ' on new lines after multiline comment with '/**' started
-// Copied from vscode/extensions/typescript/src/typescriptMain.ts
-const multilineCommentRules: any = {
-    onEnterRules: [
-        {
-            // e.g. /** | */
-            beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
-            afterText: /^\s*\*\/$/,
-            action: { indentAction: vscode.IndentAction.IndentOutdent, appendText: ' * ' }
-        }, {
-            // e.g. /** ...|
-            beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
-            action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
-        }, {
-            // e.g.  * ...|
-            beforeText: /^(\t|(\ \ ))*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
-            action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
-        }, {
-            // e.g.  */|
-            beforeText: /^(\t|(\ \ ))*\ \*\/\s*$/,
-            action: { indentAction: vscode.IndentAction.None, removeText: 1 }
-        },
-        {
-            // e.g.  *-----*/|
-            beforeText: /^(\t|(\ \ ))*\ \*[^/]*\*\/\s*$/,
-            action: { indentAction: vscode.IndentAction.None, removeText: 1 }
-        }
-    ]
-};
 
 /**
  * activate: set up the extension for language services
@@ -128,12 +100,19 @@ function realActivation(): void {
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
-    disposables.push(vscode.languages.setLanguageConfiguration('c', multilineCommentRules));
-    disposables.push(vscode.languages.setLanguageConfiguration('cpp', multilineCommentRules));
+    updateLanguageConfigurations();
 
     reportMacCrashes();
 
     intervalTimer = setInterval(onInterval, 2500);
+}
+
+export function updateLanguageConfigurations(): void {
+    languageConfigurations.forEach(d => d.dispose());
+    languageConfigurations = [];
+
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
 }
 
 /*********************************************
@@ -214,6 +193,7 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
@@ -356,6 +336,13 @@ function onToggleIncludeFallback(): void {
     settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
 }
 
+function onToggleDimInactiveRegions(): void {
+    onActivationEvent();
+    // This only applies to the active client.
+    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
+}
+
 function onShowReleaseNotes(): void {
     onActivationEvent();
     util.showReleaseNotes();
@@ -397,29 +384,33 @@ function reportMacCrashes(): void {
             }
 
             // vscode.workspace.createFileSystemWatcher only works in workspace folders.
-            fs.watch(crashFolder, (event, filename) => {
-                if (event !== "rename") {
-                    return;
-                }
-                if (filename === prevCrashFile) {
-                    return;
-                }
-                prevCrashFile = filename;
-                if (!filename.startsWith("Microsoft.VSCode.CPP.")) {
-                    return;
-                }
-                // Wait 5 seconds to allow time for the crash log to finish being written.
-                setTimeout(() => {
-                    fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
-                        if (err) {
-                            // Try again?
-                            fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleCrashFileRead);
-                            return;
-                        }
-                        handleCrashFileRead(err, data);
-                    });
-                }, 5000);
-            });
+            try {
+                fs.watch(crashFolder, (event, filename) => {
+                    if (event !== "rename") {
+                        return;
+                    }
+                    if (filename === prevCrashFile) {
+                        return;
+                    }
+                    prevCrashFile = filename;
+                    if (!filename.startsWith("Microsoft.VSCode.CPP.")) {
+                        return;
+                    }
+                    // Wait 5 seconds to allow time for the crash log to finish being written.
+                    setTimeout(() => {
+                        fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
+                            if (err) {
+                                // Try again?
+                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleCrashFileRead);
+                                return;
+                            }
+                            handleCrashFileRead(err, data);
+                        });
+                    }, 5000);
+                });
+            } catch (e) {
+                // The file watcher limit is hit (may not be possible on Mac, but just in case).
+            }
         });
     }
 }
@@ -452,6 +443,7 @@ export function deactivate(): Thenable<void> {
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
     disposables.forEach(d => d.dispose());
+    languageConfigurations.forEach(d => d.dispose());
     ui.dispose();
     return clients.dispose();
 }

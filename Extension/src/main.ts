@@ -282,7 +282,7 @@ async function finalizeExtensionActivation(): Promise<void> {
 
     // Redownload cpptools.json after activation so it's not blocked.
     // It'll be used after the extension reloads.
-    return cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
+    cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
 }
 
 function rewriteManifest(): Promise<void> {
@@ -300,6 +300,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.PeekDeclaration",
         "onCommand:C_Cpp.ToggleErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
+        "onCommand:C_Cpp.ToggleDimInactiveRegions",
         "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
         "onCommand:C_Cpp.PauseParsing",

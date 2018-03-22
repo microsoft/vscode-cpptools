@@ -18,7 +18,7 @@ let defaultSettings: string = `{
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "$\{workspaceRoot\}"
+                "$\{workspaceFolder\}"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -26,7 +26,7 @@ let defaultSettings: string = `{
                 "path": [
                     "/usr/include",
                     "/usr/local/include",
-                    "$\{workspaceRoot\}"
+                    "$\{workspaceFolder\}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -41,7 +41,7 @@ let defaultSettings: string = `{
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "$\{workspaceRoot\}"
+                "$\{workspaceFolder\}"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -49,7 +49,7 @@ let defaultSettings: string = `{
                 "path": [
                     "/usr/include",
                     "/usr/local/include",
-                    "$\{workspaceRoot\}"
+                    "$\{workspaceFolder\}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -59,7 +59,7 @@ let defaultSettings: string = `{
             "name": "Win32",
             "includePath": [
                 "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
-                "$\{workspaceRoot\}"
+                "$\{workspaceFolder\}"
             ],
             "defines": [
                 "_DEBUG",
@@ -70,7 +70,7 @@ let defaultSettings: string = `{
             "browse": {
                 "path": [
                     "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
-                    "$\{workspaceRoot\}"
+                    "$\{workspaceFolder\}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -89,15 +89,22 @@ export interface Browse {
 
 export interface Configuration {
     name: string;
+    compilerPath?: string;
+    cStandard?: string;
+    cppStandard?: string;
     includePath?: string[];
     macFrameworkPath?: string[];
     defines?: string[];
     intelliSenseMode?: string;
     compileCommands?: string;
+    forcedInclude?: string[];
     browse?: Browse;
 }
 
-export interface DefaultPaths {
+export interface CompilerDefaults {
+    compilerPath: string;
+    cStandard: string;
+    cppStandard: string;
     includes: string[];
     frameworks: string[];
 }
@@ -115,6 +122,9 @@ export class CppProperties {
     private configFileWatcher: vscode.FileSystemWatcher = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandFileWatchers: fs.FSWatcher[] = [];
+    private defaultCompilerPath: string = null;
+    private defaultCStandard: string = null;
+    private defaultCppStandard: string = null;
     private defaultIncludes: string[] = null;
     private defaultFrameworks: string[] = null;
     private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
@@ -170,9 +180,12 @@ export class CppProperties {
         return result;
     }
 
-    public set DefaultPaths(paths: DefaultPaths) {
-        this.defaultIncludes = paths.includes;
-        this.defaultFrameworks = paths.frameworks;
+    public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
+        this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.defaultCStandard = compilerDefaults.cStandard;
+        this.defaultCppStandard = compilerDefaults.cppStandard;
+        this.defaultIncludes = compilerDefaults.includes;
+        this.defaultFrameworks = compilerDefaults.frameworks;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
@@ -201,11 +214,18 @@ export class CppProperties {
     }
 
     private applyDefaultIncludePathsAndFrameworks(): void {
-        if (this.configurationIncomplete && this.defaultIncludes !== undefined && this.defaultFrameworks !== undefined) {
+        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks) {
             this.configurationJson.configurations[this.CurrentConfiguration].includePath = this.defaultIncludes;
             this.configurationJson.configurations[this.CurrentConfiguration].browse.path = this.defaultIncludes;
             if (process.platform === 'darwin') {
                 this.configurationJson.configurations[this.CurrentConfiguration].macFrameworkPath = this.defaultFrameworks;
+            }
+            this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCompilerPath;
+            if (this.defaultCStandard) {
+                this.configurationJson.configurations[this.CurrentConfiguration].cStandard = this.defaultCStandard;
+            }
+            if (this.defaultCppStandard) {
+                this.configurationJson.configurations[this.CurrentConfiguration].cppStandard = this.defaultCppStandard;
             }
             this.configurationIncomplete = false;
         }
@@ -275,29 +295,37 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveAndSplit(paths: string[]): string[] {
+    private resolveAndSplit(paths: string[] | undefined): string[] {
         let result: string[] = [];
-        paths.forEach(entry => {
-            let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
-            result = result.concat(entries);
-        });
+        if (paths) {
+            paths.forEach(entry => {
+                let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
+                result = result.concat(entries);
+            });
+        }
         return result;
     }
 
     private updateServerOnFolderSettingsChange(): void {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let configuration: Configuration = this.configurationJson.configurations[i];
-            if (configuration.includePath !== undefined) {
+            if (configuration.includePath) {
                 configuration.includePath = this.resolveAndSplit(configuration.includePath);
             }
-            if (configuration.browse !== undefined && configuration.browse.path !== undefined) {
+            if (configuration.browse && configuration.browse.path) {
                 configuration.browse.path = this.resolveAndSplit(configuration.browse.path);
             }
-            if (configuration.macFrameworkPath !== undefined) {
+            if (configuration.macFrameworkPath) {
                 configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
             }
-            if (configuration.compileCommands !== undefined) {
+            if (configuration.forcedInclude) {
+                configuration.forcedInclude = this.resolveAndSplit(configuration.forcedInclude);
+            }
+            if (configuration.compileCommands) {
                 configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
+            }
+            if (configuration.compilerPath) {
+                configuration.compilerPath = util.resolveVariables(configuration.compilerPath);
             }
         }
 
@@ -318,13 +346,18 @@ export class CppProperties {
                 filePaths.add(c.compileCommands);
             }
         });
-        filePaths.forEach((path: string) => {
-            this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                if (event !== "rename") {
-                    this.onCompileCommandsChanged(path);
-                }
-            }));
-        });
+        try {
+            filePaths.forEach((path: string) => {
+                this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
+                    if (event !== "rename") {
+                        this.onCompileCommandsChanged(path);
+                    }
+                }));
+            });
+        } catch (e) {
+            // The file watcher limit is hit.
+            // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
+        }
     }
 
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
@@ -396,7 +429,11 @@ export class CppProperties {
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
-            if (!this.configurationIncomplete && newJson.configurations && this.configurationJson) {
+            if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
+                throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
+            }
+            if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
+                this.CurrentConfiguration < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
                     if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
                         this.currentConfigurationIndex.Value = i;
@@ -405,6 +442,9 @@ export class CppProperties {
                 }
             }
             this.configurationJson = newJson;
+            if (this.CurrentConfiguration >= newJson.configurations.length) {
+                this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
+            }
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
             // the system includes were available.
@@ -431,6 +471,21 @@ export class CppProperties {
                     this.configurationJson.version = configVersion;
                     vscode.window.showErrorMessage('Unknown version number found in c_cpp_properties.json. Some features may not work as expected.');
                 }
+            }
+
+            // Update the compilerPath, cStandard, and cppStandard with the default if they're missing.
+            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            if (config.compilerPath === undefined) {
+                config.compilerPath = this.defaultCompilerPath;
+                dirty = true;
+            }
+            if (!config.cStandard) {
+                config.cStandard = this.defaultCStandard;
+                dirty = true;
+            }
+            if (!config.cppStandard) {
+                config.cppStandard = this.defaultCppStandard;
+                dirty = true;
             }
 
             if (dirty) {
