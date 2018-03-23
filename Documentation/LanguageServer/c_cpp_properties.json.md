@@ -8,12 +8,16 @@
         {
             "name": "Win32",
             "intelliSenseMode": "msvc-x64",
-            "includePath": [ "${workspaceRoot}" ],
+            "includePath": [ "${workspaceFolder}" ],
             "macFrameworkPath": [ "/System/Library/Frameworks" ],
             "defines": [ "FOO", "BAR=100" ],
+            "forcedInclude": [ "${workspaceFolder}/include/config.h" ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
             "compileCommands": "/path/to/compile_commands.json",
             "browse": {
-                "path": [ "${workspaceRoot}" ],
+                "path": [ "${workspaceFolder}" ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
             }
@@ -40,7 +44,7 @@
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this property determines which mode the IntelliSense engine will run in. `"msvc-x64"` maps to Visual Studio mode with 64-bit pointer sizes. `"clang-x64"` maps to GCC/CLang mode with 64-bit pointer sizes. Windows uses `"msvc-x64"` by default and Linux/Mac use `"clang-x64"` by default.
 
 * #### `includePath`
-  If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-I` switch; the IntelliSense engine will not do a recursive search in these paths for includes.
+  If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-I` switch; the IntelliSense engine will not do a recursive search in these paths for includes. If a GCC/CLang compiler is specified in the `compilerPath` setting, it is not necessary to list the system include paths in this list.
 
 * #### `macFrameworkPath`
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for framework headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-F` switch; the IntelliSense engine will not do a recursive search in these paths for includes.
@@ -48,10 +52,22 @@
 * #### `defines`
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of preprocessor symbols will be used by IntelliSense during the compilation of your source files. This is basically the same as the list of symbols you pass to your compiler with the `-D` switch.
 
+* #### `forcedInclude` (optional)
+  A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.
+
+* #### `compilerPath` (optional)
+  The absolute path to the compiler you use to build your project. The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense. Args can be added to modify the includes/defines used, e.g. `-nostdinc++`, `-m32`, etc., but paths with spaces must be surrounded by double quotes (`"`) if args are used.
+
+* #### `cStandard`
+  The C standard revision to use for IntelliSense in your project.
+
+* #### `cppStandard`
+  The C++ standard revision to use for IntelliSense in your project.
+
 * #### `compileCommands` (optional)
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, the includes and defines discovered in this file will be used instead of the values set for `includePath` and `defines`. If the compile commands database does not contain an entry for the translation unit that corresponds to the file you opened in the editor, then a warning message will appear and the extension will use the `includePath` and `defines` settings instead.
 
-*For more information about the file format, see the [Clang documentation](https://clang.llvm.org/docs/JSONCompilationDatabase.html). Some build systems, such as CMake, [simplify generating this file](https://cmake.org/cmake/help/v3.5/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html).*
+  *For more information about the file format, see the [Clang documentation](https://clang.llvm.org/docs/JSONCompilationDatabase.html). Some build systems, such as CMake, [simplify generating this file](https://cmake.org/cmake/help/v3.5/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html).*
 
 * #### `browse`
   The set of properties used when `"C_Cpp.intelliSenseEngine"` is set to `"Tag Parser"` (also referred to as "fuzzy" IntelliSense, or the "browse" engine). These properties are also used by the Go To Definition/Declaration features, or when the "Default" IntelliSense engine is unable to resolve the #includes in your source files.

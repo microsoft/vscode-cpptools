@@ -63,12 +63,12 @@ function CreateRemoteAttachString(name: string, type: string, executable: string
 `;
     }
 
- function CreatePipeTransportString(pipeProgram: string, debuggerProgram: string): string {
+ function CreatePipeTransportString(pipeProgram: string, debuggerProgram: string, pipeArgs: string[] = []): string {
         return `
 "pipeTransport": {
 \t"debuggerPath": "/usr/bin/${debuggerProgram}",
 \t"pipeProgram": "${pipeProgram}",
-\t"pipeArgs": [],
+\t"pipeArgs": ${JSON.stringify(pipeArgs)},
 \t"pipeCwd": ""
 }`;
     }
@@ -226,7 +226,7 @@ export class WSLConfigurations extends Configuration {
         let body: string = formatString(`
 {
 \t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode))}{0}
+\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
@@ -242,8 +242,8 @@ export class WSLConfigurations extends Configuration {
 
         let body: string = formatString(`
 {
-\t${indentJsonString(CreateAttachString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode))}{0}
+\t${indentJsonString(CreateRemoteAttachString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
