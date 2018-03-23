@@ -428,7 +428,7 @@
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "If true, failures from the command should be ignored. Default value is false.",
-                      "default": "false"
+                      "default": false
                     }
                   }
                 },
@@ -453,7 +453,7 @@
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "If true, failures from the command should be ignored. Default value is false.",
-                      "default": ""
+                      "default": false
                     }
                   }
                 },
@@ -476,7 +476,7 @@
               "showDisplayString": {
                 "type": "boolean",
                 "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
-                "default": "true"
+                "default": true
               },
               "environment": {
                 "type": "array",
@@ -533,12 +533,12 @@
               "filterStdout": {
                 "type": "boolean",
                 "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
-                "default": "true"
+                "default": true
               },
               "filterStderr": {
                 "type": "boolean",
                 "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
-                "default": "false"
+                "default": false
               },
               "serverLaunchTimeout": {
                 "type": "integer",
@@ -553,7 +553,7 @@
               "externalConsole": {
                 "type": "boolean",
                 "description": "If true, a console is launched for the debuggee. If false, no console is launched. Note this option is ignored in some cases for technical reasons.",
-                "default": "false"
+                "default": false
               },
               "sourceFileMap": {
                 "type": "object",
@@ -673,7 +673,7 @@
               "showDisplayString": {
                 "type": "boolean",
                 "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
-                "default": "true"
+                "default": true
               },
               "additionalSOLibSearchPath": {
                 "type": "string",
@@ -712,12 +712,12 @@
               "filterStdout": {
                 "type": "boolean",
                 "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
-                "default": "true"
+                "default": true
               },
               "filterStderr": {
                 "type": "boolean",
                 "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
-                "default": "false"
+                "default": false
               },
               "sourceFileMap": {
                 "type": "object",
@@ -825,7 +825,7 @@
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "If true, failures from the command should be ignored. Default value is false.",
-                      "default": "false"
+                      "default": false
                     }
                   }
                 },
@@ -914,7 +914,7 @@
               "externalConsole": {
                 "type": "boolean",
                 "description": "If true, a console is launched for the debuggee. If false, no console is launched.",
-                "default": "false"
+                "default": false
               },
               "sourceFileMap": {
                 "type": "object",
