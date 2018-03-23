@@ -43,7 +43,7 @@ export class UI {
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = "Discovering files...";
-        this.browseEngineStatusBarItem.color = "White";
+        this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
     }
@@ -165,7 +165,7 @@ export class UI {
             });
     }
 
-    public showWorkspaces(workspaceNames: { name: string, key: string }[]): Thenable<string> {
+    public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select a Workspace...";
 
@@ -187,7 +187,7 @@ export class UI {
 
         let items: IndexableQuickPickItem[];
         items = [];
-        if (this.browseEngineStatusBarItem.tooltip == "Parsing paused") {
+        if (this.browseEngineStatusBarItem.tooltip === "Parsing paused") {
             items.push({ label: "Resume Parsing", description: "", index: 1 });
         } else {
             items.push({ label: "Pause Parsing", description: "", index: 0 });

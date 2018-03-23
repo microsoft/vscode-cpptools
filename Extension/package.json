@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.14.6",
+  "version": "0.16.0",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -48,7 +48,7 @@
         "owner": "cpptools",
         "fileLocation": [
           "relative",
-          "${workspaceRoot}"
+          "${workspaceFolder}"
         ],
         "pattern": {
           "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
@@ -139,6 +139,12 @@
           "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. Warnings about #includes that could not be located will always be reported to the editor. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
         },
+        "C_Cpp.dimInactiveRegions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting is ignored by the Tag Parser engine.",
+          "scope": "resource"
+        },
         "C_Cpp.formatting": {
           "type": "string",
           "enum": [
@@ -167,7 +173,7 @@
           "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information.",
           "scope": "resource"
         },
-        "C_Cpp.files.associations.autoAdd": {
+        "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
           "default": true,
           "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",
@@ -182,7 +188,7 @@
             "low"
           ],
           "default": "highest",
-          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/normal/low correspond to approximately 100/75/50/25% CPU usage.",
+          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/medium/low correspond to approximately 100/75/50/25% CPU usage.",
           "scope": "resource"
         },
         "C_Cpp.exclusionPolicy": {
@@ -193,6 +199,35 @@
           ],
           "default": "checkFolders",
           "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
+          "scope": "resource"
+        },
+        "C_Cpp.commentContinuationPatterns": {
+          "type": "array",
+          "default": [
+            "/**"
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "The pattern that begins a multiline or single line comment block. The continuation pattern defaults to ' * ' for multiline comment blocks or this string for single line comment blocks."
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "begin": {
+                    "type": "string",
+                    "description": "The pattern that begins a multiline or single line comment block."
+                  },
+                  "continue": {
+                    "type": "string",
+                    "description": "The text that will be inserted on the next line when Enter is pressed inside a multiline or single line comment block."
+                  }
+                }
+              }
+            ]
+          },
+          "description": "Defines the editor behavior for when the Enter key is pressed inside a multiline or single line comment block.",
           "scope": "resource"
         }
       }
@@ -236,6 +271,11 @@
       {
         "command": "C_Cpp.ToggleIncludeFallback",
         "title": "Toggle IntelliSense Engine Fallback on Include Errors",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ToggleDimInactiveRegions",
+        "title": "Toggle Inactive Region Colorization",
         "category": "C/Cpp"
       },
       {
@@ -765,6 +805,31 @@
                     "default": {}
                   }
                 }
+              },
+              "setupCommands": {
+                "type": "array",
+                "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The debugger command to execute.",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description for the command.",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "default": "false"
+                    }
+                  }
+                },
+                "default": []
               }
             }
           }
@@ -1040,17 +1105,20 @@
     }
   },
   "scripts": {
-    "compile": "npm run vscode:prepublish && tsc -p ./",
+    "compile": "npm run vscode:prepublish",
+    "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p ./",
-    "test": "gulp unitTest",
+    "test": "gulp allTests",
     "tslint": "gulp tslint",
-    "vscode:prepublish": "npm install && tsc -p ./ && node ./out/src/Debugger/copyScript.js",
+    "unitTests": "gulp unitTests",
+    "vscode:prepublish": "node ./src/Support/prepublish.js",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.43",
     "@types/node": "^8.0.46",
+    "gulp-env": "0.4.0",
     "gulp-mocha": "5.0.0",
     "gulp-tslint": "8.1.2",
     "gulp": "3.9.1",
@@ -1070,14 +1138,14 @@
     "tmp": "~0.0.33",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
-    "vscode-extension-telemetry": "~0.0.10",
+    "vscode-extension-telemetry": "~0.0.11",
     "vscode-languageclient": "~3.4.5",
     "yauzl": "~2.8.0"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=865475",
+      "url": "https://go.microsoft.com/fwlink/?linkid=867977",
       "platforms": [
         "linux"
       ],
@@ -1091,7 +1159,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=865476",
+      "url": "https://go.microsoft.com/fwlink/?linkid=867978",
       "platforms": [
         "linux"
       ],
@@ -1107,7 +1175,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=865477",
+      "url": "https://go.microsoft.com/fwlink/?linkid=867979",
       "platforms": [
         "darwin"
       ],
@@ -1118,7 +1186,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=865478",
+      "url": "https://go.microsoft.com/fwlink/?linkid=867980",
       "platforms": [
         "win32"
       ],

@@ -13,11 +13,12 @@ import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
 
-import { geTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar} from './commands';
+import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation , setInstallationStage } from './installationInformation';
+import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
+import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 
 const releaseNotesVersion: number = 3;
 
@@ -44,15 +45,18 @@ export function deactivate(): Thenable<void> {
 async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
-    // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
     if (installLockExists) {
-        if (util.packageJson.activationEvents && util.packageJson.activationEvents.length == 1) {
+        // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
+        if (util.packageJson.activationEvents && util.packageJson.activationEvents.length === 1) {
             try {
                 await offlineInstallation();
             } catch (error) {
-                vscode.window.showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
-                util.getOutputChannel().show();
+                getOutputChannelLogger().showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
+                showOutputChannel();
             }
+        // The extension have been installed and activated before.
+        } else {
+            await finalizeExtensionActivation();
         }
     // No lock file, need to download and install dependencies.
     } else {
@@ -67,12 +71,15 @@ async function processRuntimeDependencies(): Promise<void> {
 async function offlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    
+
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
 
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
+
+    setInstallationStage('removeUnnecessaryFile');
+    await removeUnnecessaryFile();
 
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
@@ -84,7 +91,7 @@ async function offlineInstallation(): Promise<void> {
 async function onlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    
+
     await downloadAndInstallPackages(info);
 
     setInstallationStage('makeBinariesExecutable');
@@ -104,17 +111,17 @@ async function onlineInstallation(): Promise<void> {
 }
 
 async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
-    let channel: vscode.OutputChannel = util.getOutputChannel();
-    channel.appendLine("Updating C/C++ dependencies...");
+    let outputChannelLogger: Logger = getOutputChannelLogger();
+    outputChannelLogger.appendLine("Updating C/C++ dependencies...");
 
     let statusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
-    let packageManager: PackageManager = new PackageManager(info, channel, statusItem);
+    let packageManager: PackageManager = new PackageManager(info, outputChannelLogger, statusItem);
 
-    channel.appendLine('');
+    outputChannelLogger.appendLine('');
     setInstallationStage('downloadPackages');
     await packageManager.DownloadPackages();
 
-    channel.appendLine('');
+    outputChannelLogger.appendLine('');
     setInstallationStage('installPackages');
     await packageManager.InstallPackages();
 
@@ -142,8 +149,10 @@ function removeUnnecessaryFile(): Promise<void> {
     if (os.platform() !== 'win32') {
         let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err) => {
-                util.getOutputChannel().appendLine("removeUnnecessaryFile: fs.rename failed: " + err.message);
+            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException) => {
+                if (err) {
+                    getOutputChannelLogger().appendLine(`ERROR: fs.rename failed with "${err.message}". Delete ${sourcePath} manually to enable debugging.`);
+                }
             });
         }
     }
@@ -156,11 +165,10 @@ function touchInstallLockFile(): Promise<void> {
 }
 
 function handleError(error: any): void {
-    let installationInformation: InstallationInformation  = getInstallationInformationInstance();
+    let installationInformation: InstallationInformation = getInstallationInformationInstance();
     installationInformation.hasError = true;
     installationInformation.telemetryProperties['stage'] = installationInformation.stage;
     let errorMessage: string;
-    let channel: vscode.OutputChannel = util.getOutputChannel();
 
     if (error instanceof PackageManagerError) {
         // If this is a WebResponse error, log the IP that it resolved from the package URL
@@ -199,19 +207,20 @@ function handleError(error: any): void {
         installationInformation.telemetryProperties['error.toString'] = util.removePotentialPII(errorMessage);
     }
 
-    if (installationInformation.stage == 'downloadPackages') {
-        channel.appendLine("");
+    let outputChannelLogger: Logger = getOutputChannelLogger();
+    if (installationInformation.stage === 'downloadPackages') {
+        outputChannelLogger.appendLine("");
     }
     // Show the actual message and not the sanitized one
-    channel.appendLine(`Failed at stage: ${installationInformation.stage}`);
-    channel.appendLine(errorMessage);
-    channel.appendLine("");
-    channel.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
-    channel.show();
+    outputChannelLogger.appendLine(`Failed at stage: ${installationInformation.stage}`);
+    outputChannelLogger.appendLine(errorMessage);
+    outputChannelLogger.appendLine("");
+    outputChannelLogger.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
+    showOutputChannel();
 }
 
 function sendTelemetry(info: PlatformInformation): boolean {
-    let installBlob: InstallationInformation  = getInstallationInformationInstance();
+    let installBlob: InstallationInformation = getInstallationInformationInstance();
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
@@ -238,11 +247,10 @@ function sendTelemetry(info: PlatformInformation): boolean {
 }
 
 async function postInstall(info: PlatformInformation): Promise<void> {
-    let channel: vscode.OutputChannel = util.getOutputChannel();
-
-    channel.appendLine("");
-    channel.appendLine("Finished installing dependencies");
-    channel.appendLine("");
+    let outputChannelLogger: Logger = getOutputChannelLogger();
+    outputChannelLogger.appendLine("");
+    outputChannelLogger.appendLine("Finished installing dependencies");
+    outputChannelLogger.appendLine("");
 
     const installSuccess: boolean = sendTelemetry(info);
 
@@ -250,27 +258,31 @@ async function postInstall(info: PlatformInformation): Promise<void> {
     if (!installSuccess) {
         return Promise.reject<void>("");
     } else {
-        const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
-
-        try {
-            const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
-            if (exists) {
-                const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
-                await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
-            }
-        } catch (error) {
-            // Ignore any cpptoolsJsonFile errors
-        }
-
-        geTemporaryCommandRegistrarInstance().activateLanguageServer();
-
         // Notify user's if debugging may not be supported on their OS.
         util.checkDistro(info);
 
-        // Redownload cpptools.json after activation so it's not blocked.
-        // It'll be used after the extension reloads.
-        return cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
+        return finalizeExtensionActivation();
     }
+}
+
+async function finalizeExtensionActivation(): Promise<void> {
+    const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
+
+    try {
+        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
+        if (exists) {
+            const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
+            await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
+        }
+    } catch (error) {
+        // Ignore any cpptoolsJsonFile errors
+    }
+
+    getTemporaryCommandRegistrarInstance().activateLanguageServer();
+
+    // Redownload cpptools.json after activation so it's not blocked.
+    // It'll be used after the extension reloads.
+    cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
 }
 
 function rewriteManifest(): Promise<void> {
@@ -288,6 +300,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.PeekDeclaration",
         "onCommand:C_Cpp.ToggleErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
+        "onCommand:C_Cpp.ToggleDimInactiveRegions",
         "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
         "onCommand:C_Cpp.PauseParsing",

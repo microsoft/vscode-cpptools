@@ -2,6 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
+'use strict';
 
 /**
  * This file is used for packaging the application and should not be referenced
@@ -62,7 +63,7 @@ function findCppToolsExtensionDebugAdapterFolder(): string {
             }
         }
 
-        if (dirPath == os.homedir()) {
+        if (dirPath === os.homedir()) {
             console.error("Could not find installed C/C++ extension.");
             return null;
         }
@@ -80,7 +81,7 @@ function enableDevWorkflow(): Boolean {
         return false;
     }
 
-    return (EnableDevWorkflow || (process.env.CPPTOOLS_DEV != null));
+    return (EnableDevWorkflow || (process.env.CPPTOOLS_DEV !== undefined));
 }
 
 function copySourceDependencies(): void {
@@ -199,8 +200,6 @@ function makeDirectory(dir: string): void {
     }
 }
 
-let devWorkFlowMessage: string = '\nWARNING: If you are trying to build and run the extension locally, please set the environment variable CPPTOOLS_DEV=1 and try again.\n';
-
 if (enableDevWorkflow()) {
     removeFolder("./debugAdapters");
 }
@@ -212,5 +211,6 @@ if (enableDevWorkflow()) {
     copyMonoDependencies();
     copyBinaryDependencies();
 } else {
-    console.warn(devWorkFlowMessage);
+    console.warn('WARNING: Debugger dependencies are missing.');
+    console.log('If you are trying to build and run the extension from source and need the debugger dependencies, set the environment variable CPPTOOLS_DEV=1 and try again.');
 }

@@ -11,12 +11,36 @@
                 ],
                 "properties": {
                     "name": {
-                        "description": "Platform name. Mac, Linux, or Win32 are the defaults unless a custom platform is added.",
+                        "description": "Configuration identifier. Mac, Linux, or Win32 are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.",
                         "type": "string"
                     },
-                    "compileCommands":{
-                        "description": "path to compile_commands.json file for the workspace",
-                        "type":"string"
+                    "compilerPath": {
+                        "description": "Full path of the compiler being used, e.g. /usr/bin/gcc, to enable more accurate IntelliSense. Args can be added to modify the includes/defines used, e.g. -nostdinc++, -m32, etc., but paths with spaces must be surrounded with \\\" if args are used.",
+                        "type": "string"
+                    },
+                    "cStandard": {
+                        "description": "Version of the C language standard to use for IntelliSense.",
+                        "type": "string",
+                        "enum": [
+                            "c89",
+                            "c99",
+                            "c11"
+                        ]
+                    },
+                    "cppStandard": {
+                        "description": "Version of the C++ language standard to use for IntelliSense.",
+                        "type": "string",
+                        "enum": [
+                            "c++98",
+                            "c++03",
+                            "c++11",
+                            "c++14",
+                            "c++17"
+                        ]
+                    },
+                    "compileCommands": {
+                        "description": "Full path to compile_commands.json file for the workspace.",
+                        "type": "string"
                     },
                     "includePath": {
                         "description": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive.",
@@ -47,11 +71,18 @@
                         ],
                         "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64 and Linux/Mac default to clang-x64."
                     },
+                    "forcedInclude": {
+                        "description": "A list of files that should be included before any include file in a translation unit.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "browse": {
                         "type": "object",
                         "properties": {
                             "limitSymbolsToIncludedHeaders": {
-                                "description": "true to process only those files directly or indirectly included as headers, false to process all files under the specified include paths",
+                                "description": "true to process only those files directly or indirectly included as headers, false to process all files under the specified include paths.",
                                 "type": "boolean"
                             },
                             "databaseFilename": {

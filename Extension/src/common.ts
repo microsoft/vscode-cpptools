@@ -12,6 +12,8 @@ import * as Telemetry from './telemetry';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as url from 'url';
 import { PlatformInformation } from './platform';
+import { getOutputChannelLogger, showOutputChannel } from './logger';
+import * as assert from 'assert';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -44,10 +46,10 @@ export const extensionNotReadyString: string = 'The C/C++ extension is still ins
 export function displayExtensionNotReadyPrompt(): void {
 
     if (!isExtensionNotReadyPromptDisplayed) {
-        isExtensionNotReadyPromptDisplayed = true; 
-        outputChannel.show();
+        isExtensionNotReadyPromptDisplayed = true;
+        showOutputChannel();
 
-        vscode.window.showInformationMessage(extensionNotReadyString).then(
+        getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
             () => { isExtensionNotReadyPromptDisplayed = false; },
             () => { isExtensionNotReadyPromptDisplayed = false; }
         );
@@ -118,22 +120,38 @@ export function showReleaseNotes(): void {
 }
 
 export function resolveVariables(input: string): string {
-    if (input === null) {
+    if (!input) {
         return "";
     }
 
-    // Replace environment variables. (support both ${env:VAR} and ${VAR} syntax)
-    let regexp: RegExp = /\$\{(env:|env.)?(.*?)\}/g;
-    let ret: string = input.replace(regexp, (match: string, ignored: string, name: string) => {
-        let newValue: string = process.env[name];
-        return (newValue != null) ? newValue : match;
+    // Replace environment and configuration variables.
+    let regexp: RegExp = /\$\{((env|config)(.|:))?(.*?)\}/g;
+    let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
+        // Historically, if the variable didn't have anything before the "." or ":"
+        // it was assumed to be an environment variable
+        if (varType === undefined) {
+            varType = "env";
+        }
+        let newValue: string = undefined;
+        switch (varType) {
+            case "env": { newValue = process.env[name]; break; }
+            case "config": {
+                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+                let keys: string[] = name.split('.');
+                keys.forEach((key: string) => { config = (config) ? config.get(key) : config; });
+                newValue = (config) ? config.toString() : undefined;
+                break;
+            }
+            default: { assert.fail("unknown varType matched"); }
+        }
+        return (newValue) ? newValue : match;
     });
 
     // Resolve '~' at the start of the path.
     regexp = /^\~/g;
     ret = ret.replace(regexp, (match: string, name: string) => {
         let newValue: string = process.env.HOME;
-        return (newValue != null) ? newValue : match;
+        return (newValue) ? newValue : match;
     });
 
     return ret;
@@ -151,9 +169,9 @@ export function asFolder(uri: vscode.Uri): string {
  * get the default open command for the current platform
  */
 export function getOpenCommand(): string {
-    if (os.platform() == 'win32') {
+    if (os.platform() === 'win32') {
         return 'explorer';
-    } else if (os.platform() == 'darwin') {
+    } else if (os.platform() === 'darwin') {
         return '/usr/bin/open';
     } else {
         return '/usr/bin/xdg-open';
@@ -347,18 +365,9 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     });
 }
 
-let outputChannel: vscode.OutputChannel;
-
-export function getOutputChannel(): vscode.OutputChannel {
-    if (outputChannel == undefined) {
-        outputChannel = vscode.window.createOutputChannel("C/C++");
-    }
-    return outputChannel;
-}
-
 export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        if (process.platform != 'win32') {
+        if (process.platform !== 'win32') {
             checkFileExists(file).then((exists: boolean) => {
                 if (exists) {
                     fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
@@ -369,8 +378,8 @@ export function allowExecution(file: string): Promise<void> {
                         resolve();
                     });
                 } else {
-                    getOutputChannel().appendLine("");
-                    getOutputChannel().appendLine(`Warning: Expected file ${file} is missing.`);
+                    getOutputChannelLogger().appendLine("");
+                    getOutputChannelLogger().appendLine(`Warning: Expected file ${file} is missing.`);
                     resolve();
                 }
             });
@@ -384,7 +393,7 @@ export function removePotentialPII(str: string): string {
     let words: string[] = str.split(" ");
     let result: string = "";
     for (let word of words) {
-        if (word.indexOf(".") == -1 && word.indexOf("/") == -1 && word.indexOf("\\") == -1 && word.indexOf(":") == -1) {
+        if (word.indexOf(".") === -1 && word.indexOf("/") === -1 && word.indexOf("\\") === -1 && word.indexOf(":") === -1) {
             result += word + " ";
         } else {
             result += "? ";
@@ -394,9 +403,9 @@ export function removePotentialPII(str: string): string {
 }
 
 export function checkDistro(platformInfo: PlatformInformation): void {
-    if (platformInfo.platform != 'win32' && platformInfo.platform != 'linux' && platformInfo.platform != 'darwin') {
+    if (platformInfo.platform !== 'win32' && platformInfo.platform !== 'linux' && platformInfo.platform !== 'darwin') {
         // this should never happen because VSCode doesn't run on FreeBSD
         // or SunOS (the other platforms supported by node)
-        outputChannel.appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
+        getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
     }
 }

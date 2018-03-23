@@ -20,6 +20,8 @@ import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
+import * as logger from '../logger';
+import { updateLanguageConfigurations } from './extension';
 
 let ui: UI;
 
@@ -42,7 +44,7 @@ interface ReportStatusNotificationBody {
     status: string;
 }
 
-interface QueryDefaultPathsParams {
+interface QueryCompilerDefaultsParams {
 }
 
 interface FolderSettingsParams {
@@ -68,10 +70,25 @@ interface OutputNotificationBody {
     output: string;
 }
 
+interface InactiveRegionParams {
+    uri: string;
+    regions: InputRegion[];
+}
+
+interface InputRegion {
+    startLine: number;
+    endLine: number;
+}
+
+interface DecorationRangesPair {
+    decoration: vscode.TextEditorDecorationType;
+    ranges: vscode.Range[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
-const QueryDefaultPathsRequest: RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void> = new RequestType<QueryDefaultPathsParams, configs.DefaultPaths, void, void>('cpptools/queryDefaultPaths');
+const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 
 // Notifications to the server
@@ -96,6 +113,7 @@ const ReportTagParseStatusNotification: NotificationType<ReportStatusNotificatio
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
+const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 
 const maxSettingLengthForTelemetry: number = 50;
 let previousCppSettings: { [key: string]: any } = {};
@@ -103,7 +121,7 @@ let previousCppSettings: { [key: string]: any } = {};
 /**
  * track settings changes for telemetry
  */
-function collectSettings(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
+function collectSettingsForTelemetry(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
     let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
     let result: { [key: string]: string } = {};
 
@@ -113,11 +131,56 @@ function collectSettings(filter: (key: string, val: string, settings: vscode.Wor
         }
         let val: any = settings.get(key);
         if (val instanceof Object) {
-            continue; // ignore settings that are objects since tostring on those is not useful (e.g. navigation.length)
+            val = JSON.stringify(val, null, 2);
         }
+
+        // Skip values that don't match the setting's enum.
+        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+        if (curSetting) {
+            let curEnum: any[] = curSetting["enum"];
+            if (curEnum && curEnum.indexOf(val) === -1) {
+                continue;
+            }
+        }
+
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
-            result[key] = (key == "clang_format_path") ? "..." : String(previousCppSettings[key]);
+            switch (String(key).toLowerCase()) {
+                case "clang_format_path": {
+                    continue;
+                }
+                case "clang_format_style":
+                case "clang_format_fallbackstyle": {
+                    let newKey: string = String(key) + "2";
+                    if (val) {
+                        switch (String(val).toLowerCase()) {
+                            case "visual studio":
+                            case "llvm":
+                            case "google":
+                            case "chromium":
+                            case "mozilla":
+                            case "webkit":
+                            case "file":
+                            case "none": {
+                                result[newKey] = String(previousCppSettings[key]);
+                                break;
+                            }
+                            default: {
+                                result[newKey] = "...";
+                                break;
+                            }
+                        }
+                    } else {
+                        result[newKey] = "null";
+                    }
+                    key = newKey;
+                    break;
+                }
+                default: {
+                    result[key] = String(previousCppSettings[key]);
+                    break;
+                }
+            }
             if (result[key].length > maxSettingLengthForTelemetry) {
                 result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
             }
@@ -128,7 +191,7 @@ function collectSettings(filter: (key: string, val: string, settings: vscode.Wor
 }
 
 function initializeSettingsCache(resource: vscode.Uri): void {
-    collectSettings(() => true, resource);
+    collectSettingsForTelemetry(() => true, resource);
 }
 
 function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } {
@@ -136,7 +199,7 @@ function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } 
         return val !== settings.inspect(key).defaultValue;
     };
     initializeSettingsCache(resource);
-    return collectSettings(filter, resource);
+    return collectSettingsForTelemetry(filter, resource);
 }
 
 interface ClientModel {
@@ -158,6 +221,7 @@ export interface Client {
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
     requestGoToDeclaration(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
@@ -190,13 +254,14 @@ class DefaultClient implements Client {
     private disposables: vscode.Disposable[] = [];
     private configuration: configs.CppProperties;
     private rootPathFileWatcher: vscode.FileSystemWatcher;
-    private workspaceRoot: vscode.WorkspaceFolder | undefined;
+    private rootFolder: vscode.WorkspaceFolder | undefined;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
+    private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -214,16 +279,16 @@ class DefaultClient implements Client {
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
 
     /**
-     * don't use this.workspaceRoot directly since it can be undefined
+     * don't use this.rootFolder directly since it can be undefined
      */
     public get RootPath(): string {
-        return (this.workspaceRoot) ? this.workspaceRoot.uri.fsPath : "";
+        return (this.rootFolder) ? this.rootFolder.uri.fsPath : "";
     }
     public get RootUri(): vscode.Uri {
-        return (this.workspaceRoot) ? this.workspaceRoot.uri : null;
+        return (this.rootFolder) ? this.rootFolder.uri : null;
     }
     public get Name(): string {
-        return this.getName(this.workspaceRoot);
+        return this.getName(this.rootFolder);
     }
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
@@ -247,7 +312,7 @@ class DefaultClient implements Client {
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
             util.setProgress(util.getProgressExecutableStarted());
-            this.workspaceRoot = workspaceFolder;
+            this.rootFolder = workspaceFolder;
             ui = getUI();
             ui.bind(this);
 
@@ -260,8 +325,8 @@ class DefaultClient implements Client {
 
                 // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                 // The event handlers must be set before this happens.
-                languageClient.sendRequest(QueryDefaultPathsRequest, {}).then((paths: configs.DefaultPaths) => {
-                    this.configuration.DefaultPaths = paths;
+                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                    this.configuration.CompilerDefaults = compilerDefaults;
                 });
 
                 // Once this is set, we don't defer any more callbacks.
@@ -329,6 +394,7 @@ class DefaultClient implements Client {
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
+                dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
                 exclusionPolicy: settings.exclusionPolicy
@@ -374,10 +440,26 @@ class DefaultClient implements Client {
         let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
             return !(key in previousCppSettings) || val !== previousCppSettings[key];
         };
-        let changedSettings: any = collectSettings(filter, this.RootUri);
+        let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
 
         if (Object.keys(changedSettings).length > 0) {
+            if (changedSettings["commentContinuationPatterns"]) {
+                updateLanguageConfigurations();
+            }
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
+        }
+    }
+
+    public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        if (settings.dimInactiveRegions) {
+            //Apply text decorations to inactive regions
+            for (let e of editors) {
+                let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+                if (valuePair) {
+                    e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
+                }
+            }
         }
     }
 
@@ -433,16 +515,17 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportNavigationNotification, (e) => this.navigate(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
+        this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.setupOutputHandlers();
     }
 
     /**
-     * listen for file created/deleted events under the ${workspaceRoot} folder
+     * listen for file created/deleted events under the ${workspaceFolder} folder
      */
     private registerFileWatcher(): void {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-        if (this.workspaceRoot) {
+        if (this.rootFolder) {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
                 path.join(this.RootPath, "*"),
@@ -471,15 +554,9 @@ class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(DebugProtocolNotification, (output) => {
-            let outputEditorExist: boolean = vscode.window.visibleTextEditors.some((editor: vscode.TextEditor) => {
-                return editor.document.uri.scheme === "output";
-            });
             if (!this.debugChannel) {
                 this.debugChannel = vscode.window.createOutputChannel(`C/C++ Debug Protocol: ${this.Name}`);
                 this.disposables.push(this.debugChannel);
-            }
-            if (!outputEditorExist) {
-                this.debugChannel.show();
             }
             this.debugChannel.appendLine("");
             this.debugChannel.appendLine("************************************************************************************************************************");
@@ -491,7 +568,7 @@ class DefaultClient implements Client {
                 if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
                     this.outputChannel = vscode.window.createOutputChannel(`C/C++: ${this.Name}`);
                 } else {
-                    this.outputChannel = util.getOutputChannel();
+                    this.outputChannel = logger.getOutputChannel();
                 }
                 this.disposables.push(this.outputChannel);
             }
@@ -520,7 +597,7 @@ class DefaultClient implements Client {
         let cppSettings: CppSettings = new CppSettings(this.RootUri);
 
         // TODO: Move this code to a different place?
-        if (cppSettings.filesAssociationsAutoAdd && payload.navigation.startsWith("<def")) {
+        if (cppSettings.autoAddFileAssociations && payload.navigation.startsWith("<def")) {
             this.addFileAssociations(payload.navigation.substr(4));
             return;
         }
@@ -552,7 +629,7 @@ class DefaultClient implements Client {
                 continue; // File already has an association.
             }
             let j: number = file.lastIndexOf('.');
-            if (j != -1) {
+            if (j !== -1) {
                 let ext: string = file.substr(j);
                 if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs)) {
                     continue; // Extension already has an association.
@@ -617,6 +694,48 @@ class DefaultClient implements Client {
 
     private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
+    }
+
+    private updateInactiveRegions(params: InactiveRegionParams): void {
+        let renderOptions: vscode.DecorationRenderOptions = {
+            light: { color: "rgba(175,175,175,1.0)" },
+            dark: { color: "rgba(155,155,155,1.0)" },
+            rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
+        };
+        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
+
+        // We must convert to vscode.Ranges in order to make use of the API's
+        let ranges: vscode.Range[] = [];
+        params.regions.forEach(element => {
+            let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+            ranges.push(newRange);
+        });
+
+        // Find entry for cached file and act accordingly
+        let valuePair: DecorationRangesPair = this.inactiveRegionsDecorations.get(params.uri);
+        if (valuePair) {
+            // Disposing of and resetting the decoration will undo previously applied text decorations
+            valuePair.decoration.dispose();
+            valuePair.decoration = decoration;
+
+            // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
+            valuePair.ranges = ranges;
+        } else { // The entry does not exist. Make a new one
+            let toInsert: DecorationRangesPair = {
+                decoration: decoration,
+                ranges: ranges
+            };
+            this.inactiveRegionsDecorations.set(params.uri, toInsert);
+        }
+
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        if (settings.dimInactiveRegions) {
+            // Apply the decorations to all *visible* text editors
+            let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
+            for (let e of editors) {
+                e.setDecorations(decoration, ranges);
+            }
+        }
     }
 
     /*********************************************
@@ -738,9 +857,9 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => {
             ui.showParsingCommands()
                 .then((index: number) => {
-                    if (index == 0) {
+                    if (index === 0) {
                         this.pauseParsing();
-                    } else if (index == 1) {
+                    } else if (index === 1) {
                         this.resumeParsing();
                     }
                 });
@@ -782,11 +901,11 @@ class DefaultClient implements Client {
 function getLanguageServerFileName(): string {
     let extensionProcessName: string = 'Microsoft.VSCode.CPP.Extension';
     let plat: NodeJS.Platform = process.platform;
-    if (plat == 'linux') {
+    if (plat === 'linux') {
         extensionProcessName += '.linux';
-    } else if (plat == 'darwin') {
+    } else if (plat === 'darwin') {
         extensionProcessName += '.darwin';
-    } else if (plat == 'win32') {
+    } else if (plat === 'win32') {
         extensionProcessName += '.exe';
     } else {
         throw "Invalid Platform";
@@ -808,6 +927,7 @@ class NullClient implements Client {
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }

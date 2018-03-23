@@ -17,6 +17,7 @@ import * as util from './common';
 import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
 import { IncomingMessage, ClientRequest } from 'http';
+import { Logger } from './logger';
 
 export interface IPackage {
     // Description of the package
@@ -66,7 +67,7 @@ export class PackageManager {
 
     public constructor(
         private platformInfo: PlatformInformation,
-        private outputChannel?: vscode.OutputChannel,
+        private outputChannel?: Logger,
         private statusItem?: vscode.StatusBarItem) {
         // Ensure our temp files get cleaned up in case of error
         tmp.setGracefulCleanup();
@@ -179,7 +180,7 @@ export class PackageManager {
                     });
                 }).then(() => {
                     this.AppendLineChannel(" Done!");
-                    if (retryCount != 0) {
+                    if (retryCount !== 0) {
                         // Log telemetry to see if retrying helps.
                         let telemetryProperties: { [key: string]: string } = {};
                         telemetryProperties["success"] = `OnRetry${retryCount}`;
@@ -215,19 +216,19 @@ export class PackageManager {
 
         return new Promise<void>((resolve, reject) => {
             let secondsDelay: number = Math.pow(2, delay);
-            if (secondsDelay == 1) {
+            if (secondsDelay === 1) {
                 secondsDelay = 0;
             }
             if (secondsDelay > 4) {
                 this.AppendChannel(`Waiting ${secondsDelay} seconds...`);
             }
             setTimeout(() => {
-                if (!pkg.tmpFile || pkg.tmpFile.fd == 0) {
+                if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
                     return reject(new PackageManagerError('Temporary Package file unavailable', 'DownloadFile', pkg));
                 }
 
                 let handleHttpResponse: (response: IncomingMessage) => void = (response: IncomingMessage) => {
-                    if (response.statusCode == 301 || response.statusCode == 302) {
+                    if (response.statusCode === 301 || response.statusCode === 302) {
                         // Redirect - download from new location
                         let redirectUrl: string | string[];
                         if (typeof response.headers.location === "string") {
@@ -236,7 +237,7 @@ export class PackageManager {
                             redirectUrl = response.headers.location[0];
                         }
                         return resolve(this.DownloadFile(redirectUrl, pkg, 0));
-                    } else if (response.statusCode != 200) {
+                    } else if (response.statusCode !== 200) {
                         // Download failed - print error message
                         let errorMessage: string = `failed (error code '${response.statusCode}')`;
                         return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
@@ -306,7 +307,7 @@ export class PackageManager {
         this.SetStatusTooltip(`Installing package '${pkg.description}'`);
 
         return new Promise<void>((resolve, reject) => {
-            if (!pkg.tmpFile || pkg.tmpFile.fd == 0) {
+            if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
                 return reject(new PackageManagerError('Downloaded file unavailable', 'InstallPackage', pkg));
             }
 
@@ -357,7 +358,7 @@ export class PackageManager {
                                 });
                             } else {
                                 // Skip the message for text files, because there is a duplicate text file unzipped.
-                                if (path.extname(absoluteEntryPath) != ".txt") {
+                                if (path.extname(absoluteEntryPath) !== ".txt") {
                                     this.AppendLineChannel(`Warning: File '${absoluteEntryPath}' already exists and was not updated.`);
                                 }
                                 zipfile.readEntry();
