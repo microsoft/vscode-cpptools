@@ -346,13 +346,18 @@ export class CppProperties {
                 filePaths.add(c.compileCommands);
             }
         });
-        filePaths.forEach((path: string) => {
-            this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                if (event !== "rename") {
-                    this.onCompileCommandsChanged(path);
-                }
-            }));
-        });
+        try {
+            filePaths.forEach((path: string) => {
+                this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
+                    if (event !== "rename") {
+                        this.onCompileCommandsChanged(path);
+                    }
+                }));
+            });
+        } catch (e) {
+            // The file watcher limit is hit.
+            // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
+        }
     }
 
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
@@ -424,7 +429,11 @@ export class CppProperties {
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
-            if (!this.configurationIncomplete && newJson.configurations && this.configurationJson) {
+            if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
+                throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
+            }
+            if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
+                this.CurrentConfiguration < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
                     if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
                         this.currentConfigurationIndex.Value = i;
@@ -433,6 +442,9 @@ export class CppProperties {
                 }
             }
             this.configurationJson = newJson;
+            if (this.CurrentConfiguration >= newJson.configurations.length) {
+                this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
+            }
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
             // the system includes were available.
