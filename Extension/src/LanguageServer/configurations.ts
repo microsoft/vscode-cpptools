@@ -481,11 +481,11 @@ export class CppProperties {
                 config.compilerPath = this.defaultCompilerPath;
                 dirty = true;
             }
-            if (!config.cStandard) {
+            if (!config.cStandard && this.defaultCStandard) {
                 config.cStandard = this.defaultCStandard;
                 dirty = true;
             }
-            if (!config.cppStandard) {
+            if (!config.cppStandard && this.defaultCppStandard) {
                 config.cppStandard = this.defaultCppStandard;
                 dirty = true;
             }
