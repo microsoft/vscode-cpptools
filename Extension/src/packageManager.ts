@@ -154,7 +154,7 @@ export class PackageManager {
                     return reject(new PackageManagerError('Error from temp.file', 'DownloadPackage', pkg, err));
                 }
 
-                resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
+                return resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
             });
         });
     }
@@ -281,11 +281,11 @@ export class PackageManager {
                         });
 
                         response.on('end', () => {
-                            resolve();
+                            return resolve();
                         });
 
                         response.on('error', (error) => {
-                            reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response error', 'DownloadFile', pkg, error.stack, error.name));
+                            return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response error', 'DownloadFile', pkg, error.stack, error.name));
                         });
 
                         // Begin piping data from the response to the package file
@@ -296,7 +296,7 @@ export class PackageManager {
                 let request: ClientRequest = https.request(options, handleHttpResponse);
 
                 request.on('error', (error) => {
-                    reject(new PackageManagerError('HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
+                    return reject(new PackageManagerError('HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
                 });
 
                 // Execute the request
@@ -313,21 +313,21 @@ export class PackageManager {
 
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
-                reject(new PackageManagerError('Downloaded file unavailable', 'InstallPackage', pkg));
+                return reject(new PackageManagerError('Downloaded file unavailable', 'InstallPackage', pkg));
             }
 
             yauzl.fromFd(pkg.tmpFile.fd, { lazyEntries: true }, (err, zipfile) => {
                 if (err) {
-                    reject(new PackageManagerError('Zip file error', 'InstallPackage', pkg, err));
+                    return reject(new PackageManagerError('Zip file error', 'InstallPackage', pkg, err));
                 }
 
                 // setup zip file events
                 zipfile.on('end', () => {
-                    resolve();
+                    return resolve();
                 });
 
                 zipfile.on('error', err => {
-                    reject(new PackageManagerError('Zip File Error', 'InstallPackage', pkg, err, err.code));
+                    return reject(new PackageManagerError('Zip File Error', 'InstallPackage', pkg, err, err.code));
                 });
 
                 zipfile.readEntry();
@@ -339,7 +339,7 @@ export class PackageManager {
                         // Directory - create it
                         mkdirp.mkdirp(absoluteEntryPath, { mode: 0o775 }, (err) => {
                             if (err) {
-                                reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
+                                return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
                             }
 
                             zipfile.readEntry();
@@ -350,16 +350,16 @@ export class PackageManager {
                                 // File - extract it
                                 zipfile.openReadStream(entry, (err, readStream: fs.ReadStream) => {
                                     if (err) {
-                                        reject(new PackageManagerError('Error reading zip stream', 'InstallPackage', pkg, err));
+                                        return reject(new PackageManagerError('Error reading zip stream', 'InstallPackage', pkg, err));
                                     }
 
                                     readStream.on('error', (err) => {
-                                        reject(new PackageManagerError('Error in readStream', 'InstallPackage', pkg, err));
+                                        return reject(new PackageManagerError('Error in readStream', 'InstallPackage', pkg, err));
                                     });
 
                                     mkdirp.mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, (err) => {
                                         if (err) {
-                                            reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
+                                            return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
                                         }
 
                                         // Create as a .tmp file to avoid partially unzipped files 
@@ -383,7 +383,7 @@ export class PackageManager {
                                         });
 
                                         writeStream.on('error', (err) => {
-                                            reject(new PackageManagerError('Error in writeStream', 'InstallPackage', pkg, err));
+                                            return reject(new PackageManagerError('Error in writeStream', 'InstallPackage', pkg, err));
                                         });
 
                                         readStream.pipe(writeStream);
