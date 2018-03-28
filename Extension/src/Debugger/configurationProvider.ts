@@ -37,8 +37,7 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         // Help WSL users with using the correct bash.exe
-        if (os.platform() === 'win32' && config.pipeTransport && config.pipeTransport.pipeProgram)
-        {
+        if (os.platform() === 'win32' && config.pipeTransport && config.pipeTransport.pipeProgram) {
             const pipeProgramStr: string = config.pipeTransport.pipeProgram;
 
             if (pipeProgramStr.indexOf("sysnative") >= 0 && process.arch === 'x64') {
