@@ -357,7 +357,7 @@ export class PackageManager {
                                         return reject(new PackageManagerError('Error in readStream', 'InstallPackage', pkg, err));
                                     });
 
-                                    mkdirp.mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, (err) => {
+                                    mkdirp.mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
                                         if (err) {
                                             return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
                                         }
@@ -366,21 +366,24 @@ export class PackageManager {
                                         // counting as completed files.
                                         let absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
                                         if (fs.existsSync(absoluteEntryTempFile)) {
-                                            util.unlinkPromise(absoluteEntryTempFile).catch((err) => {
+                                            try {
+                                                await util.unlinkPromise(absoluteEntryTempFile);
+                                            } catch (err) {
                                                 return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
-                                            });
+                                            };
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
                                         let fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
                                         let writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
 
-                                        writeStream.on('close', () => {
-                                            // Remove .tmp extension from the file.
-                                            util.renamePromise(absoluteEntryTempFile, absoluteEntryPath).catch((err) => {
+                                        writeStream.on('close', async () => {
+                                            try {
+                                                // Remove .tmp extension from the file.
+                                                await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
+                                            } catch (err) {
                                                 return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
-                                            });
-
+                                            };
                                             // Wait till output is done writing before reading the next zip entry.
                                             // Otherwise, it's possible to try to launch the .exe before it is done being created.
                                             zipfile.readEntry();
