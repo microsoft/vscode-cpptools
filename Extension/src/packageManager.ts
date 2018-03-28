@@ -175,7 +175,7 @@ export class PackageManager {
             } catch (error) {
                 retryCount += 1;
                 lastError = error;
-                if (retryCount === MAX_RETRIES) {
+                if (retryCount >= MAX_RETRIES) {
                     this.AppendChannel(` Failed to download ` + pkg.url);
                     throw error;
                 } else {
@@ -366,7 +366,9 @@ export class PackageManager {
                                         // counting as completed files.
                                         let absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
                                         if (fs.existsSync(absoluteEntryTempFile)) {
-                                            fs.unlinkSync(absoluteEntryTempFile);
+                                            util.unlinkPromise(absoluteEntryTempFile).catch((err) => {
+                                                return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
+                                            });
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
@@ -375,7 +377,9 @@ export class PackageManager {
 
                                         writeStream.on('close', () => {
                                             // Remove .tmp extension from the file.
-                                            fs.renameSync(absoluteEntryTempFile, absoluteEntryPath);
+                                            util.renamePromise(absoluteEntryTempFile, absoluteEntryPath).catch((err) => {
+                                                return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
+                                            });
 
                                             // Wait till output is done writing before reading the next zip entry.
                                             // Otherwise, it's possible to try to launch the .exe before it is done being created.
@@ -400,11 +404,10 @@ export class PackageManager {
                     }
                 });
             });
-        })
-            .then(() => {
-                // Clean up temp file
-                pkg.tmpFile.removeCallback();
-            });
+        }).then(() => {
+            // Clean up temp file
+            pkg.tmpFile.removeCallback();
+        });
     }
 
     private AppendChannel(text: string): void {
