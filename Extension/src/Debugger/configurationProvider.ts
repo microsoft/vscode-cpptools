@@ -5,8 +5,10 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
+import * as process from 'process';
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
+import { getOutputChannelLogger, showOutputChannel } from './../logger';
 
 abstract class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private type: DebuggerType;
@@ -32,6 +34,26 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.type === 'cppvsdbg' && os.platform() !== 'win32') {
             vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
             return undefined;
+        }
+
+        // Help WSL users with using the correct bash.exe
+        if (os.platform() === 'win32' && config.pipeTransport && config.pipeTransport.pipeProgram)
+        {
+            const pipeProgramStr: string = config.pipeTransport.pipeProgram;
+
+            if (pipeProgramStr.indexOf("sysnative") >= 0 && process.arch === 'x64') {
+                // User has sysnative but is running VSCode 64 bit. Should be using System32
+                config.pipeTransport.pipeProgram = pipeProgramStr.replace("sysnative", "System32");
+                getOutputChannelLogger().appendLine(`WARNING: 64-bit VSCode should use System32 for the directory for pipeProgram.`);
+                getOutputChannelLogger().appendLine(`pipeProgram has been modified to be: ${config.pipeTransport.pipeProgram}`);
+                showOutputChannel();
+            } else if (pipeProgramStr.indexOf("System32") >= 0 && process.arch === 'ia32') {
+                // User has System32 but is running VSCode 32 bit. Should be using sysnative
+                config.pipeTransport.pipeProgram = pipeProgramStr.replace("System32", "sysnative");
+                getOutputChannelLogger().appendLine(`WARNING: 32-bit VSCode should use sysnative for the directory for pipeProgram.`);
+                getOutputChannelLogger().appendLine(`pipeProgram has been modified to be: ${config.pipeTransport.pipeProgram}`);
+                showOutputChannel();
+            }
         }
 
         return config;
