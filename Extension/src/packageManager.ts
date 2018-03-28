@@ -370,7 +370,7 @@ export class PackageManager {
                                                 await util.unlinkPromise(absoluteEntryTempFile);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
-                                            };
+                                            }
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
@@ -383,7 +383,7 @@ export class PackageManager {
                                                 await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
-                                            };
+                                            }
                                             // Wait till output is done writing before reading the next zip entry.
                                             // Otherwise, it's possible to try to launch the .exe before it is done being created.
                                             zipfile.readEntry();
