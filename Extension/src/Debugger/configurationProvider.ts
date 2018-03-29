@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as os from 'os';
-import * as path from 'path';
 import * as process from 'process';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
@@ -39,8 +38,8 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
             return undefined;
         }
 
-        const winDir = process.env.WINDIR? process.env.WINDIR.toLowerCase() : null;
-        const winDirAltDirSep =  process.env.WINDIR ? process.env.WINDIR.replace('\\', '/').toLowerCase() : null;
+        const winDir: string = process.env.WINDIR ? process.env.WINDIR.toLowerCase() : null;
+        const winDirAltDirSep: string =  process.env.WINDIR ? process.env.WINDIR.replace('\\', '/').toLowerCase() : null;
 
         // Help WSL users with using the correct pipeProgram if the one they selected does not exist.
         if (os.platform() === 'win32' &&
@@ -52,19 +51,16 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
 
             if (process.arch === 'x64') {
                 const pathSep: string = checkForFolderInPath(pipeProgramStr, "sysnative");
-                if (pathSep)
-                {
+                if (pathSep) {
                     // User has sysnative but is running VSCode 64 bit. Should be using System32 since sysnative is a 32bit concept.
                     config.pipeTransport.pipeProgram = pipeProgramStr.replace(`${pathSep}sysnative${pathSep}`, `${pathSep}system32${pathSep}`);
                     getOutputChannelLogger().appendLine(`WARNING: 64-bit VSCode should use System32 for the directory for pipeProgram.`);
                     getOutputChannelLogger().appendLine(`pipeProgram has been modified to be: ${config.pipeTransport.pipeProgram}`);
                     showOutputChannel();
                 }
-            }
-            else if (process.arch === 'ia32') {
+            } else if (process.arch === 'ia32') {
                 const pathSep: string = checkForFolderInPath(pipeProgramStr, "system32");
-                if (pathSep)
-                {
+                if (pathSep) {
                     // User has System32 but is running VSCode 32 bit. Should be using sysnative
                     config.pipeTransport.pipeProgram = pipeProgramStr.replace(`${pathSep}system32${pathSep}`, `${pathSep}sysnative${pathSep}`);
                     getOutputChannelLogger().appendLine(`WARNING: 32-bit VSCode should use sysnative for the directory for pipeProgram.`);
@@ -82,8 +78,7 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
 // Returns the path seperator it detected if the folder is in the path. 
 // Or else it returns empty string to indicate it did not find it in the path.
 function checkForFolderInPath(path: string, folder: string): string {
-    if (path.indexOf(`/${folder}/`) >= 0)
-    {
+    if (path.indexOf(`/${folder}/`) >= 0) {
         return '/';
     } else if (path.indexOf(`\\${folder}\\`) >= 0) {
         return '\\';
