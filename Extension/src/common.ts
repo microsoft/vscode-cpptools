@@ -409,3 +409,25 @@ export function checkDistro(platformInfo: PlatformInformation): void {
         getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
     }
 }
+
+export async function unlinkPromise(fileName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.unlink(fileName, err => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve();
+        });
+    });
+}
+
+export async function renamePromise(oldName: string, newName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.rename(oldName, newName, err => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve();
+        });
+    });
+}

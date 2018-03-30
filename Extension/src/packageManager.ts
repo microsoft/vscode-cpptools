@@ -137,69 +137,74 @@ export class PackageManager {
             });
     }
 
-    private DownloadPackage(pkg: IPackage): Promise<void> {
+    private async DownloadPackage(pkg: IPackage): Promise<void> {
         this.AppendChannel(`Downloading package '${pkg.description}' `);
 
         this.SetStatusText("$(cloud-download) Downloading packages...");
         this.SetStatusTooltip(`Downloading package '${pkg.description}'...`);
 
+        const tmpResult: tmp.SyncResult = await this.CreateTempFile(pkg);
+        await this.DownloadPackageWithRetries(pkg, tmpResult);
+    }
+
+    private async CreateTempFile(pkg: IPackage): Promise<tmp.SyncResult> {
         return new Promise<tmp.SyncResult>((resolve, reject) => {
             tmp.file({ prefix: "package-" }, (err, path, fd, cleanupCallback) => {
                 if (err) {
                     return reject(new PackageManagerError('Error from temp.file', 'DownloadPackage', pkg, err));
                 }
 
-                resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
+                return resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
             });
-        })
-            .then((tmpResult) => {
-                pkg.tmpFile = tmpResult;
+        });
+    }
 
-                let lastError: any = null;
-                let retryCount: number = 0;
-                let handleDownloadFailure: (num: any, error: any) => void = (num, error) => {
-                    retryCount = num;
-                    lastError = error;
+    private async DownloadPackageWithRetries(pkg: IPackage, tmpResult: tmp.SyncResult): Promise<void> {
+        pkg.tmpFile = tmpResult;
+
+        let success: boolean = false;
+        let lastError: any = null;
+        let retryCount: number = 0;
+        const MAX_RETRIES: number = 5;
+
+        // Retry the download at most MAX_RETRIES times with 2-32 seconds delay.
+        do {
+            try {
+                await this.DownloadFile(pkg.url, pkg, retryCount);
+                success = true;
+            } catch (error) {
+                retryCount += 1;
+                lastError = error;
+                if (retryCount >= MAX_RETRIES) {
+                    this.AppendChannel(` Failed to download ` + pkg.url);
+                    throw error;
+                } else {
+                    // This will skip the success = true.
                     this.AppendChannel(` Failed. Retrying...`);
-                };
-                // Retry the download at most 5 times with 2-32 seconds delay.
-                return this.DownloadFile(pkg.url, pkg, 0).catch((error) => { 
-                    handleDownloadFailure(1, error);
-                    return this.DownloadFile(pkg.url, pkg, 1).catch((error) => { 
-                        handleDownloadFailure(2, error);
-                        return this.DownloadFile(pkg.url, pkg, 2).catch((error) => { 
-                            handleDownloadFailure(3, error);
-                            return this.DownloadFile(pkg.url, pkg, 3).catch((error) => { 
-                                handleDownloadFailure(4, error);
-                                return this.DownloadFile(pkg.url, pkg, 4).catch((error) => { 
-                                    handleDownloadFailure(5, error);
-                                    return this.DownloadFile(pkg.url, pkg, 5); // Last try, don't catch the error.
-                                });
-                            });
-                        });
-                    });
-                }).then(() => {
-                    this.AppendLineChannel(" Done!");
-                    if (retryCount !== 0) {
-                        // Log telemetry to see if retrying helps.
-                        let telemetryProperties: { [key: string]: string } = {};
-                        telemetryProperties["success"] = `OnRetry${retryCount}`;
-                        if (lastError instanceof PackageManagerError) {
-                            let packageError: PackageManagerError = lastError;
-                            telemetryProperties['error.methodName'] = packageError.methodName;
-                            telemetryProperties['error.message'] = packageError.message;
-                            if (packageError.pkg) {
-                                telemetryProperties['error.packageName'] = packageError.pkg.description;
-                                telemetryProperties['error.packageUrl'] = packageError.pkg.url;
-                            }
-                            if (packageError.errorCode) {
-                                telemetryProperties['error.errorCode'] = packageError.errorCode;
-                            }
-                        }
-                        Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
-                    }
-                });
-            });
+                    continue;
+                }
+            }
+        } while (!success && retryCount < MAX_RETRIES);
+
+        this.AppendLineChannel(" Done!");
+        if (retryCount !== 0) {
+            // Log telemetry to see if retrying helps.
+            let telemetryProperties: { [key: string]: string } = {};
+            telemetryProperties["success"] = `OnRetry${retryCount}`;
+            if (lastError instanceof PackageManagerError) {
+                let packageError: PackageManagerError = lastError;
+                telemetryProperties['error.methodName'] = packageError.methodName;
+                telemetryProperties['error.message'] = packageError.message;
+                if (packageError.pkg) {
+                    telemetryProperties['error.packageName'] = packageError.pkg.description;
+                    telemetryProperties['error.packageUrl'] = packageError.pkg.url;
+                }
+                if (packageError.errorCode) {
+                    telemetryProperties['error.errorCode'] = packageError.errorCode;
+                }
+            }
+            Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
+        }
     }
 
     // reloadCpptoolsJson in main.ts uses ~25% of this function.
@@ -276,11 +281,11 @@ export class PackageManager {
                         });
 
                         response.on('end', () => {
-                            resolve();
+                            return resolve();
                         });
 
                         response.on('error', (error) => {
-                            reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response error', 'DownloadFile', pkg, error.stack, error.name));
+                            return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response error', 'DownloadFile', pkg, error.stack, error.name));
                         });
 
                         // Begin piping data from the response to the package file
@@ -291,7 +296,7 @@ export class PackageManager {
                 let request: ClientRequest = https.request(options, handleHttpResponse);
 
                 request.on('error', (error) => {
-                    reject(new PackageManagerError('HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
+                    return reject(new PackageManagerError('HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
                 });
 
                 // Execute the request
@@ -316,6 +321,15 @@ export class PackageManager {
                     return reject(new PackageManagerError('Zip file error', 'InstallPackage', pkg, err));
                 }
 
+                // setup zip file events
+                zipfile.on('end', () => {
+                    return resolve();
+                });
+
+                zipfile.on('error', err => {
+                    return reject(new PackageManagerError('Zip File Error', 'InstallPackage', pkg, err, err.code));
+                });
+
                 zipfile.readEntry();
 
                 zipfile.on('entry', (entry: yauzl.Entry) => {
@@ -334,26 +348,52 @@ export class PackageManager {
                         util.checkFileExists(absoluteEntryPath).then((exists: boolean) => {
                             if (!exists) {
                                 // File - extract it
-                                zipfile.openReadStream(entry, (err, readStream) => {
+                                zipfile.openReadStream(entry, (err, readStream: fs.ReadStream) => {
                                     if (err) {
                                         return reject(new PackageManagerError('Error reading zip stream', 'InstallPackage', pkg, err));
                                     }
 
-                                    mkdirp.mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, (err) => {
+                                    readStream.on('error', (err) => {
+                                        return reject(new PackageManagerError('Error in readStream', 'InstallPackage', pkg, err));
+                                    });
+
+                                    mkdirp.mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
                                         if (err) {
                                             return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
                                         }
 
+                                        // Create as a .tmp file to avoid partially unzipped files 
+                                        // counting as completed files.
+                                        let absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
+                                        if (fs.existsSync(absoluteEntryTempFile)) {
+                                            try {
+                                                await util.unlinkPromise(absoluteEntryTempFile);
+                                            } catch (err) {
+                                                return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
+                                            }
+                                        }
+
                                         // Make sure executable files have correct permissions when extracted
                                         let fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        let writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
 
-                                        let writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryPath, { mode: fileMode });
-                                        readStream.pipe(writeStream);
-                                        writeStream.on('close', () => {
+                                        writeStream.on('close', async () => {
+                                            try {
+                                                // Remove .tmp extension from the file.
+                                                await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
+                                            } catch (err) {
+                                                return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
+                                            }
                                             // Wait till output is done writing before reading the next zip entry.
                                             // Otherwise, it's possible to try to launch the .exe before it is done being created.
                                             zipfile.readEntry();
                                         });
+
+                                        writeStream.on('error', (err) => {
+                                            return reject(new PackageManagerError('Error in writeStream', 'InstallPackage', pkg, err));
+                                        });
+
+                                        readStream.pipe(writeStream);
                                     });
                                 });
                             } else {
@@ -366,20 +406,11 @@ export class PackageManager {
                         });
                     }
                 });
-
-                zipfile.on('end', () => {
-                    resolve();
-                });
-
-                zipfile.on('error', err => {
-                    reject(new PackageManagerError('Zip File Error', 'InstallPackage', pkg, err, err.code));
-                });
             });
-        })
-            .then(() => {
-                // Clean up temp file
-                pkg.tmpFile.removeCallback();
-            });
+        }).then(() => {
+            // Clean up temp file
+            pkg.tmpFile.removeCallback();
+        });
     }
 
     private AppendChannel(text: string): void {
