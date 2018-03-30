@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.16.1: March 30, 2018
+* Fix random deadlock caused by logging code on Linux/Mac. [#1759](https://github.com/Microsoft/vscode-cpptools/issues/1759)
+* Fix compiler from `compileCommands` not being queried for includes/defines if `compilePath` isn't set. [#1754](https://github.com/Microsoft/vscode-cpptools/issues/1754)
+* Fix OSX `UseShellExecute` I/O bug. [#1756](https://github.com/Microsoft/vscode-cpptools/issues/1756)
+* Invalidate partially unziped files from package manager. [#1757](https://github.com/Microsoft/vscode-cpptools/issues/1757)
+
 ## Version 0.16.0: March 28, 2018
 * Enable autocomplete for local and global scopes. [#13](https://github.com/Microsoft/vscode-cpptools/issues/13)
 * Add a setting to define multiline comment patterns: `C_Cpp.commentContinuationPatterns`. [#1100](https://github.com/Microsoft/vscode-cpptools/issues/1100), [#1539](https://github.com/Microsoft/vscode-cpptools/issues/1539)
