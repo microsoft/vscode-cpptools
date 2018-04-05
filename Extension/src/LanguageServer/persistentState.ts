@@ -8,7 +8,7 @@ import * as util from '../common';
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-class PersistentStateBase<T> {
+export class PersistentStateBase<T> {
     private key: string;
     private defaultvalue: T;
     private state: vscode.Memento;

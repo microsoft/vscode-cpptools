@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import * as LanguageServer from './LanguageServer/extension';
 
-class TemporaryCommandRegistrar {
+export class TemporaryCommandRegistrar {
     // Used to save/re-execute commands used before the extension has activated (e.g. delayed by dependency downloading).
     private delayedCommandsToExecute: Set<string>;
     private tempCommands: vscode.Disposable[]; // Need to save this to unregister/dispose the temporary commands.

@@ -14,6 +14,7 @@ import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
+import { Configuration, ConfigurationJson } from './LanguageServer/configurations';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -31,6 +32,11 @@ export function getPackageJsonPath(): string {
 export function getPackageJsonString(): string {
     packageJson.main = "./out/src/main"; // Needs to be reset, because the relative path is removed by VS Code.
     return JSON.stringify(packageJson, null, 2);
+}
+
+export let registeredConfigurations: Configuration;
+export function registerConfigurations(configuration: Configuration): void {
+    registeredConfigurations = configuration;
 }
 
 // Extension is ready if install.lock exists and debugAdapters folder exist.

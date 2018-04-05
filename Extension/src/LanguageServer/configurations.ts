@@ -109,7 +109,7 @@ export interface CompilerDefaults {
     frameworks: string[];
 }
 
-interface ConfigurationJson {
+export interface ConfigurationJson {
     configurations: Configuration[];
     version: number;
 }

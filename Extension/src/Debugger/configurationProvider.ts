@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
 
-abstract class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
+export abstract class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private type: DebuggerType;
     private provider: IConfigurationAssetProvider;
 

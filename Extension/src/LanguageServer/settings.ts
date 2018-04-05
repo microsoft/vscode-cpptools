@@ -11,7 +11,7 @@ function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
 }
 
-class Settings {
+export class Settings {
     private readonly settings: vscode.WorkspaceConfiguration;
 
     /**
