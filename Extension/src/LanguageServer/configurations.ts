@@ -422,6 +422,15 @@ export class CppProperties {
         this.updateServerOnFolderSettingsChange();
     }
 
+    private sanitizePath(myPath: string): string {
+        myPath = myPath.replace("${workspaceFolder}", vscode.workspace.rootPath);
+        myPath = path.normalize(myPath);
+        if (myPath.length > 1 && (myPath.endsWith('/') || myPath.endsWith('\\'))) {
+            myPath = myPath.slice(0, -1); // Remove trailing slash
+        }
+        return myPath;
+    }
+
     private parsePropertiesFile(): void {
         try {
             let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
@@ -443,6 +452,17 @@ export class CppProperties {
                     }
                 }
             }
+            
+            // Sanitize the paths in browse.path and includePath
+            for (let i: number = 0; i < newJson.configurations.length; i++) {
+                for (let j: number = 0; j < newJson.configurations[i].browse.path.length; j++) {
+                    newJson.configurations[i].browse.path[j] = this.sanitizePath(newJson.configurations[i].browse.path[j]);
+                }
+                for (let j: number = 0; j < newJson.configurations[i].includePath.length; j++) {
+                    newJson.configurations[i].includePath[j] = this.sanitizePath(newJson.configurations[i].includePath[j]);
+                }
+            }
+
             this.configurationJson = newJson;
             if (this.CurrentConfiguration >= newJson.configurations.length) {
                 this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
