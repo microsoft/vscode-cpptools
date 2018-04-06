@@ -35,7 +35,8 @@
     "Languages",
     "Debuggers",
     "Formatters",
-    "Linters"
+    "Linters",
+    "Snippets"
   ],
   "activationEvents": [
     "*"
@@ -1102,7 +1103,13 @@
       "[c]": {
         "editor.autoIndent": false
       }
-    }
+    },
+    "snippets": [
+      {
+        "language": "cpp",
+        "path": "./cpp_snippets.json"
+      }
+    ]
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
