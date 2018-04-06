@@ -397,6 +397,18 @@ export class CppProperties {
         }
     }
 
+    public registerCustomConfigurations(configurations: Configuration[]): void {
+        this.configurationJson.configurations = configurations;
+        this.currentConfigurationIndex.Value = 0;
+        this.applyDefaultIncludePathsAndFrameworks();
+
+        // This will overwrite the config file. TODO: Any parts of the config file that we want to preserve?
+        let c_cpp_properties_path: string = path.join(this.configFolder, "c_cpp_properties.json");
+        let c_cpp_properties_content: string = JSON.stringify(this.configurationJson, null, 4);
+        fs.writeFileSync(c_cpp_properties_path, c_cpp_properties_content);
+        this.updateServerOnFolderSettingsChange();
+    }
+
     private handleConfigurationChange(): void {
         this.configFileWatcherFallbackTime = new Date();
         if (this.propertiesFile) {

@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as cpptools from './client';
+import { Configuration } from './configurations';
 
 const defaultClientKey: string = "@@default@@";
 export interface ClientKey {

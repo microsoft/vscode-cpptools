@@ -16,6 +16,7 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import * as os from 'os';
+import { Configuration } from './configurations';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -25,6 +26,7 @@ let disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
+let realActivationComplete: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 
@@ -105,6 +107,8 @@ function realActivation(): void {
     reportMacCrashes();
 
     intervalTimer = setInterval(onInterval, 2500);
+
+    realActivationComplete = true;
 }
 
 export function updateLanguageConfigurations(): void {
@@ -113,6 +117,14 @@ export function updateLanguageConfigurations(): void {
 
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
+}
+
+export async function registerConfigurations(configurations: Configuration[]): Promise<void> {
+    while (!realActivationComplete) {
+        setTimeout(() => {}, 500);
+    }
+
+    clients.ActiveClient.registerConfigurations(configurations);
 }
 
 /*********************************************

@@ -47,11 +47,12 @@ export function deactivate(): Thenable<void> {
     return LanguageServer.deactivate();
 }
 
-export class CPPTools {
+// TODO: Move this elsewhere
+export interface ICppTools {
+    registerConfigurations(configurations: Configuration[]): void;
+}
 
-    public registerConfigurations(configurations?: Configuration): void {
-        util.registerConfigurations(configurations);
-    }
+export class CPPTools implements ICppTools {
 
     async processRuntimeDependencies(): Promise<void> {
         const installLockExists: boolean = await util.checkInstallLockFile();
@@ -294,6 +295,10 @@ export class CPPTools {
         // Redownload cpptools.json after activation so it's not blocked.
         // It'll be used after the extension reloads.
         cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
+    }
+
+    async registerConfigurations(configurations: Configuration[]): Promise<void> {
+        await LanguageServer.registerConfigurations(configurations);
     }
 
     rewriteManifest(): Promise<void> {

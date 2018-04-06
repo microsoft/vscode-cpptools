@@ -22,6 +22,7 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
+import { Configuration } from '../../out/src/LanguageServer/configurations';
 
 let ui: UI;
 
@@ -237,6 +238,7 @@ export interface Client {
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
     handleAddToIncludePathCommand(path: string): void;
+    registerConfigurations(configurations: Configuration[]): void;
     onInterval(): void;
     dispose(): Thenable<void>;
 }
@@ -874,6 +876,10 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
+    public registerConfigurations(configurations: Configuration[]): void {
+        this.notifyWhenReady(() => this.configuration.registerCustomConfigurations(configurations));
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
@@ -943,6 +949,7 @@ class NullClient implements Client {
     handleShowParsingCommands(): void {}
     handleConfigurationEditCommand(): void {}
     handleAddToIncludePathCommand(path: string): void {}
+    registerConfigurations(configurations: Configuration[]): void {}
     onInterval(): void {}
     dispose(): Thenable<void> {
         this.booleanEvent.dispose();
