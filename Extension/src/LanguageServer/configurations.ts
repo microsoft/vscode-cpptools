@@ -424,7 +424,7 @@ export class CppProperties {
 
     private sanitizePath(myPath: string): string {
         myPath = myPath.replace("${workspaceFolder}", vscode.workspace.rootPath);
-        myPath = path.normalize(myPath);
+        myPath = path.normalize(myPath); // Resolve .. and . and repeated slashes
         if (myPath.length > 1 && (myPath.endsWith('/') || myPath.endsWith('\\'))) {
             myPath = myPath.slice(0, -1); // Remove trailing slash
         }
