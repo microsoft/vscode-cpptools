@@ -149,7 +149,7 @@ export class PackageManager {
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
         this.AppendChannel(`Downloading package '${pkg.description}' `);
 
-        progress.report({message: `Downloading ${progressCount} packages: '${pkg.description}'...`});
+        progress.report({message: `Downloading ${progressCount}: ${pkg.description}`});
 
         const tmpResult: tmp.SyncResult = await this.CreateTempFile(pkg);
         await this.DownloadPackageWithRetries(pkg, tmpResult, progress);
@@ -306,7 +306,7 @@ export class PackageManager {
     private InstallPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
         this.AppendLineChannel(`Installing package '${pkg.description}'`);
 
-        progress.report({message: ` Installing ${progressCount} packages: '${pkg.description}'`});
+        progress.report({message: `Installing ${progressCount}: ${pkg.description}`});
 
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
