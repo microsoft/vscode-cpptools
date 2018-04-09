@@ -141,11 +141,14 @@ export class CppProperties {
         console.assert(rootPath !== undefined);
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
-        this.resetToDefaultSettings(this.currentConfigurationIndex.Value === -1);
-
+        
         let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
         if (fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
+            this.parsePropertiesFile();
+        }
+        if (!this.configurationJson) {
+            this.resetToDefaultSettings(this.CurrentConfiguration === -1);
         }
 
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
@@ -492,7 +495,12 @@ export class CppProperties {
             }
 
             if (dirty) {
-                fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+                try {
+                    fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+                } catch {
+                    // Ignore write errors, the file may be under source control. We can always recompute the changes.
+                    vscode.window.showWarningMessage('Attempt to update "' + this.propertiesFile.fsPath + '" failed (do you have write access?)');
+                }
             }
         } catch (err) {
             vscode.window.showErrorMessage('Failed to parse "' + this.propertiesFile.fsPath + '": ' + err.message);
