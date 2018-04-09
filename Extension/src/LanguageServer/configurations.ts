@@ -455,12 +455,26 @@ export class CppProperties {
             // the system includes were available.
             this.configurationIncomplete = false;
 
+            // Update intelliSenseMode, compilerPath, cStandard, and cppStandard with the defaults if they're missing.
             let dirty: boolean = false;
             for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
                 let config: Configuration = this.configurationJson.configurations[i];
                 if (config.intelliSenseMode === undefined) {
                     dirty = true;
                     config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
+                }
+                // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
+                if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands) {
+                    config.compilerPath = this.defaultCompilerPath;
+                    dirty = true;
+                }
+                if (!config.cStandard && this.defaultCStandard) {
+                    config.cStandard = this.defaultCStandard;
+                    dirty = true;
+                }
+                if (!config.cppStandard && this.defaultCppStandard) {
+                    config.cppStandard = this.defaultCppStandard;
+                    dirty = true;
                 }
             }
 
@@ -478,27 +492,11 @@ export class CppProperties {
                 }
             }
 
-            // Update the compilerPath, cStandard, and cppStandard with the default if they're missing.
-            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
-            // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
-            if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands) {
-                config.compilerPath = this.defaultCompilerPath;
-                dirty = true;
-            }
-            if (!config.cStandard && this.defaultCStandard) {
-                config.cStandard = this.defaultCStandard;
-                dirty = true;
-            }
-            if (!config.cppStandard && this.defaultCppStandard) {
-                config.cppStandard = this.defaultCppStandard;
-                dirty = true;
-            }
-
             if (dirty) {
                 try {
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
                 } catch {
-                    // Ignore write errors, the file may be under source control. We can always recompute the changes.
+                    // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
                     vscode.window.showWarningMessage('Attempt to update "' + this.propertiesFile.fsPath + '" failed (do you have write access?)');
                 }
             }
