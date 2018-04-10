@@ -78,7 +78,7 @@ export interface IConfiguration {
     GetAttachConfiguration(): IConfigurationSnippet;
 }
 
-export abstract class Configuration implements IConfiguration {
+abstract class Configuration implements IConfiguration {
     public snippetPrefix = "C/C++: ";
 
     public executable: string;

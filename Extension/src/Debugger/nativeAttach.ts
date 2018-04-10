@@ -7,7 +7,7 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 import { AttachItem, AttachItemsProvider } from './attachToProcess';
 
-export class Process {
+class Process {
     constructor(public name: string, public pid: string, public commandLine: string) { }
 
     public toAttachItem(): AttachItem {
@@ -30,7 +30,7 @@ export class NativeAttachItemsProviderFactory {
     }
 }
 
-export abstract class NativeAttachItemsProvider implements AttachItemsProvider {
+abstract class NativeAttachItemsProvider implements AttachItemsProvider {
     protected abstract getInternalProcessEntries(): Promise<Process[]>;
 
     getAttachItems(): Promise<AttachItem[]> {
