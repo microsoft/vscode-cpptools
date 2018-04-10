@@ -33,8 +33,9 @@ script:
   - npm install
   - npm run tslint
   - npm run compile
-  - npm run test
+  # pr-check needs to run before test. test modifies package.json.
   - npm run pr-check
+  - npm run test
 
 after_failure:
   - find ~ -name "integrationTests.log" -type f -exec cat {} \;
