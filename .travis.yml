@@ -34,6 +34,7 @@ script:
   - npm run tslint
   - npm run compile
   - npm run test
+  - npm run pr-check
 
 after_failure:
   - find ~ -name "integrationTests.log" -type f -exec cat {} \;
