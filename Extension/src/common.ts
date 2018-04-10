@@ -21,17 +21,33 @@ export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
 }
 
-export let packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
+// Use this package.json to read values
+export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
+
+// Use getRawPackageJson to read and write back to package.json
+// This prevents obtaining any of VSCode's expanded variables.
+let rawPackageJson: any = null;
+export function getRawPackageJson(): any {
+    if (rawPackageJson === null) {
+        const fileContents: Buffer = fs.readFileSync(getPackageJsonPath());
+        rawPackageJson = JSON.parse(fileContents.toString());
+    }
+    return rawPackageJson;
+}
+
+// This function is used to stringify the rawPackageJson.
+// Do not use with util.packageJson or else the expanded
+// package.json will be written back.
+export function stringifyPackageJson(packageJson: string): string {
+    return JSON.stringify(packageJson, null, 2);
+}
 
 export function getExtensionFilePath(extensionfile: string): string {
     return path.resolve(extensionContext.extensionPath, extensionfile);
 }
+
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
-}
-export function getPackageJsonString(): string {
-    packageJson.main = "./out/src/main"; // Needs to be reset, because the relative path is removed by VS Code.
-    return JSON.stringify(packageJson, null, 2);
 }
 
 export let registeredConfigurations: Configuration;
@@ -414,4 +430,26 @@ export function checkDistro(platformInfo: PlatformInformation): void {
         // or SunOS (the other platforms supported by node)
         getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
     }
+}
+
+export async function unlinkPromise(fileName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.unlink(fileName, err => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve();
+        });
+    });
+}
+
+export async function renamePromise(oldName: string, newName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.rename(oldName, newName, err => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve();
+        });
+    });
 }

@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -1109,6 +1109,7 @@
     "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p ./",
+    "pr-check": "gulp pr-check",
     "test": "gulp allTests",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
@@ -1145,7 +1146,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=867977",
+      "url": "https://go.microsoft.com/fwlink/?linkid=871264",
       "platforms": [
         "linux"
       ],
@@ -1159,7 +1160,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=867978",
+      "url": "https://go.microsoft.com/fwlink/?linkid=871265",
       "platforms": [
         "linux"
       ],
@@ -1175,7 +1176,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=867979",
+      "url": "https://go.microsoft.com/fwlink/?linkid=871266",
       "platforms": [
         "darwin"
       ],
@@ -1186,7 +1187,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=867980",
+      "url": "https://go.microsoft.com/fwlink/?linkid=871267",
       "platforms": [
         "win32"
       ],
