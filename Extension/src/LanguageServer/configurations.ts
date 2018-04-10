@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
-import { Browse, CompilerDefaults, Configuration, ConfigurationJson } from '../interfaces';
+import { CompilerDefaults, Configuration, ConfigurationJson } from '../interfaces';
 import { PersistentFolderState } from './persistentState';
 const configVersion: number = 3;
 

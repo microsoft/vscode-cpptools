@@ -14,7 +14,7 @@ import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
-import { Configuration, ConfigurationJson } from './interfaces';
+import { Configuration } from './interfaces';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {

@@ -12,7 +12,7 @@ import {
 } from 'vscode-languageclient';
 import * as util from '../common';
 import * as configs from './configurations';
-import { CompilerDefaults } from '../interfaces';
+import { Configuration, CompilerDefaults } from '../interfaces';
 import { CppSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState } from './persistentState';
@@ -23,7 +23,6 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
-import { Configuration } from '../../out/src/interfaces';
 
 let ui: UI;
 
