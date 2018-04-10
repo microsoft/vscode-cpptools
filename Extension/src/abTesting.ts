@@ -80,16 +80,17 @@ export function downloadCpptoolsJsonPkg(): Promise<void> {
 export function processCpptoolsJson(cpptoolsString: string): Promise<void> {
     let cpptoolsObject: any = JSON.parse(cpptoolsString);
     let intelliSenseEnginePercentage: number = cpptoolsObject.intelliSenseEngine_default_percentage;
+    let packageJson: any = util.getRawPackageJson();
 
-    if (!util.packageJson.extensionFolderPath.includes(".vscode-insiders")) {
-        let prevIntelliSenseEngineDefault: any = util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
+    if (!packageJson.extensionFolderPath.includes(".vscode-insiders")) {
+        let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (util.extensionContext.globalState.get<number>(userBucketString, userBucketMax + 1) <= intelliSenseEnginePercentage) {
-            util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
+            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
         } else {
-            util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
+            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
         }
-        if (prevIntelliSenseEngineDefault !== util.packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
-            return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
+        if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
+            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
         }
     }
 }

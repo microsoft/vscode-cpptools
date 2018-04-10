@@ -291,7 +291,9 @@ async function finalizeExtensionActivation(): Promise<void> {
 
 function rewriteManifest(): Promise<void> {
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
-    util.packageJson.activationEvents = [
+    let packageJson: any = util.getRawPackageJson();
+    
+    packageJson.activationEvents = [
         "onLanguage:cpp",
         "onLanguage:c",
         "onCommand:extension.pickNativeProcess",
@@ -314,5 +316,5 @@ function rewriteManifest(): Promise<void> {
         "onDebug"
     ];
 
-    return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
+    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
 }

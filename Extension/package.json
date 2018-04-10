@@ -1109,6 +1109,7 @@
     "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p ./",
+    "pr-check": "gulp pr-check",
     "test": "gulp allTests",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
