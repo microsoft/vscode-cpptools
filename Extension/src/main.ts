@@ -8,7 +8,7 @@ import * as cpptoolsJsonUtils from './abTesting';
 import * as DebuggerExtension from './Debugger/extension';
 import * as fs from 'fs';
 import * as LanguageServer from './LanguageServer/extension';
-import {Configuration} from './LanguageServer/configurations';
+import {Configuration} from './interfaces';
 import * as os from 'os';
 import * as Telemetry from './telemetry';
 import * as util from './common';

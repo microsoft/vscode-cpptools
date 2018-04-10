@@ -16,7 +16,7 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import * as os from 'os';
-import { Configuration } from './configurations';
+import { Configuration } from '../interfaces';
 
 let prevCrashFile: string;
 let clients: ClientCollection;

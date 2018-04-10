@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
+import { Browse, CompilerDefaults, Configuration, ConfigurationJson } from '../interfaces';
 import { PersistentFolderState } from './persistentState';
 const configVersion: number = 3;
 
@@ -80,39 +81,6 @@ let defaultSettings: string = `{
     "version": ${configVersion}
 }
 `;
-
-export interface Browse {
-    path?: string[];
-    limitSymbolsToIncludedHeaders?: boolean;
-    databaseFilename?: string;
-}
-
-export interface Configuration {
-    name: string;
-    compilerPath?: string;
-    cStandard?: string;
-    cppStandard?: string;
-    includePath?: string[];
-    macFrameworkPath?: string[];
-    defines?: string[];
-    intelliSenseMode?: string;
-    compileCommands?: string;
-    forcedInclude?: string[];
-    browse?: Browse;
-}
-
-export interface CompilerDefaults {
-    compilerPath: string;
-    cStandard: string;
-    cppStandard: string;
-    includes: string[];
-    frameworks: string[];
-}
-
-export interface ConfigurationJson {
-    configurations: Configuration[];
-    version: number;
-}
 
 export class CppProperties {
     private propertiesFile: vscode.Uri = null;

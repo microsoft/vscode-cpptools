@@ -12,6 +12,7 @@ import {
 } from 'vscode-languageclient';
 import * as util from '../common';
 import * as configs from './configurations';
+import { CompilerDefaults } from '../interfaces';
 import { CppSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState } from './persistentState';
@@ -22,7 +23,7 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
-import { Configuration } from '../../out/src/LanguageServer/configurations';
+import { Configuration } from '../../out/src/interfaces';
 
 let ui: UI;
 
@@ -89,7 +90,7 @@ interface DecorationRangesPair {
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
-const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
+const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 
 // Notifications to the server
@@ -327,7 +328,7 @@ class DefaultClient implements Client {
 
                 // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                 // The event handlers must be set before this happens.
-                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: CompilerDefaults) => {
                     this.configuration.CompilerDefaults = compilerDefaults;
                 });
 
@@ -812,7 +813,7 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
     }
 
-    private onConfigurationsChanged(configurations: configs.Configuration[]): void {
+    private onConfigurationsChanged(configurations: Configuration[]): void {
         let params: FolderSettingsParams = {
             configurations: configurations,
             currentConfiguration: this.configuration.CurrentConfiguration
