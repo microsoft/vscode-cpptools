@@ -48,7 +48,7 @@
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"ifelse": {
-		"prefix": "ifelse",
+		"prefix": "ifel",
 		"body": "\nif(${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
 		"description": "if(…) else",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
@@ -64,44 +64,44 @@
 	// function_snippets  
 
 	"confunct": {
-		"prefix": "confunct",
-		"body": "\nconstexpr ${1:int} ${2:function_name}(${3:/* args */}) {\n\treturn ${0:/* code */};\n}\n",
+		"prefix": "confunc",
+		"body": "\nconstexpr ${1:int} ${2:function_name}(${3:/* args */})\n{\n\treturn ${0:/* code */};\n}\n",
 		"description": "Constexpr Function",
 		"scope": "source.c++"
 	},
 	"main_": {
 		"prefix": "main_",
-		"body": "\nint main(int argc, char const *argv[]) {\n\t${1:/* code */}\n\treturn 0;\n}\n",
+		"body": "\nint main(int argc, char const *argv[])\n{\n\t${1:/* code */}\n\treturn 0;\n}\n",
 		"description": "main(…)",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"funct": {
-		"prefix": "funct",
-		"body": "\n${1:int} ${2:function_name}(${3:/* args */}) {\n\t${0:/* code */}\n}\n",
+		"prefix": "func",
+		"body": "\n${1:int} ${2:function_name}(${3:/* args */})\n{\n\t${0:/* code */}\n}\n",
 		"description": "Regular Function",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"tempfunc": {
 		"prefix": "tempfunc",
-		"body": "\ntemplate<typename ${1:T}>\n${2:int} ${3:function_name}(${4:/* args */}) noexcept {\n\t$0\n}\n",
+		"body": "\ntemplate<typename ${1:T}>\n${2:int} ${3:function_name}(${4:/* args */}) noexcept\n{\n\t$0\n}\n",
 		"description": "Templated Function",
 		"scope": "source.c++"
 	},
 	"tempfunca": {
 		"prefix": "tempfunca",
-		"body": "\ntemplate<typename ${1:T}>\nauto ${2:function_name}(${3:/* args */}) -> decltype(${4:/* expression */}) {\n\t${0:/* code */}\n}\n",
+		"body": "\ntemplate<typename ${1:T}>\nauto ${2:function_name}(${3:/* args */}) -> decltype(${4:/* expression */})\n{\n\t${0:/* code */}\n}\n",
 		"description": "Template Auto Function",
 		"scope": "source.c++, source.objc++"
 	},
 	"tempcfunca": {
 		"prefix": "tempcfunca",
-		"body": "\ntemplate<typename ${1:T}>\nconstexpr auto ${2:function_name}(${3:/* args */}) noexcept -> decltype(${4:/* code */}) {\n\treturn ${4:/* code */};\n}\n",
+		"body": "\ntemplate<typename ${1:T}>\nconstexpr auto ${2:function_name}(${3:/* args */}) noexcept -> decltype(${4:/* code */})\n{\n\treturn ${4:/* code */};\n}\n",
 		"description": "Template Auto Constexpr Function",
 		"scope": "source.c++"
 	},
 	"tempcfunc": {
 		"prefix": "tempcfunc",
-		"body": "\ntemplate<typename ${1:T}>\nconstexpr ${2:int} ${3:function_name}(${4:/* args */}) {\n\treturn ${5:/* code */};\n}\n",
+		"body": "\ntemplate<typename ${1:T}>\nconstexpr ${2:int} ${3:function_name}(${4:/* args */})\n{\n\treturn ${5:/* code */};\n}\n",
 		"description": "Template Constexpr Function",
 		"scope": "source.c++"
 	}, 
