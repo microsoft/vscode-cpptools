@@ -33,6 +33,8 @@ script:
   - npm install
   - npm run tslint
   - npm run compile
+  # pr-check needs to run before test. test modifies package.json.
+  - npm run pr-check
   - npm run test
 
 after_failure:

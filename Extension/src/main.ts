@@ -114,18 +114,22 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
     let outputChannelLogger: Logger = getOutputChannelLogger();
     outputChannelLogger.appendLine("Updating C/C++ dependencies...");
 
-    let statusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
-    let packageManager: PackageManager = new PackageManager(info, outputChannelLogger, statusItem);
+    let packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
 
-    outputChannelLogger.appendLine('');
-    setInstallationStage('downloadPackages');
-    await packageManager.DownloadPackages();
+    return vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "C/C++ Extension",
+        cancellable: false
+    }, async (progress, token) => {
 
-    outputChannelLogger.appendLine('');
-    setInstallationStage('installPackages');
-    await packageManager.InstallPackages();
+        outputChannelLogger.appendLine('');
+        setInstallationStage('downloadPackages');
+        await packageManager.DownloadPackages(progress);
 
-    statusItem.dispose();
+        outputChannelLogger.appendLine('');
+        setInstallationStage('installPackages');
+        await packageManager.InstallPackages(progress);
+    });
 }
 
 function makeBinariesExecutable(): Promise<void> {
@@ -287,7 +291,9 @@ async function finalizeExtensionActivation(): Promise<void> {
 
 function rewriteManifest(): Promise<void> {
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
-    util.packageJson.activationEvents = [
+    let packageJson: any = util.getRawPackageJson();
+    
+    packageJson.activationEvents = [
         "onLanguage:cpp",
         "onLanguage:c",
         "onCommand:extension.pickNativeProcess",
@@ -310,5 +316,5 @@ function rewriteManifest(): Promise<void> {
         "onDebug"
     ];
 
-    return util.writeFileText(util.getPackageJsonPath(), util.getPackageJsonString());
+    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
 }
