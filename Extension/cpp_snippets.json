@@ -3,37 +3,37 @@
 {
   "class_": {
     "prefix": "class_",
-    "body": "\r\nclass ${1:${TM_FILENAME_BASE:name}}\r\n{\r\nprivate:\r\n\t${2:/* data */}\r\npublic:\r\n\t${1}(${3:/* args */});\r\n\t~${1}();\r\n};\r\n\r\n${1}::${1}(${3})\r\n{\r\n}\r\n\r\n${1}::~${1}()\r\n{\r\n}\r\n",
+    "body": "\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\t${2:/* data */}\npublic:\n\t${1}(${3:/* args */});\n\t~${1}();\n};\n\n${1}::${1}(${3})\n{\n}\n\n${1}::~${1}()\n{\n}\n",
     "description": "Class",
     "scope": "source.c++, source.objc++"
   },
   "classi": {
     "prefix": "classi",
-    "body": "\r\nclass ${1:${TM_FILENAME_BASE:name}}\r\n{\r\nprivate:\r\n\t${2:/* data */}\r\npublic:\r\n\t${1}::${1}(${3:/* args */}) { $0 }\r\n\t${1}::~${1}() { }\r\n};",
+    "body": "\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\t${2:/* data */}\npublic:\n\t${1}::${1}(${3:/* args */}) { $0 }\n\t${1}::~${1}() { }\n};",
     "description": "Class with internally defined constructors",
     "scope": "source.c++, source.objc++"
   },
 	"classtemp": {
-		"prefix": "classtemp",
-		"body": "\r\ntemplate<typename ${1:T}>\r\nclass ${2:${TM_FILENAME/(.+)\\..+|.*/$1/:name}} {\r\nprivate:\r\n\t${3:/* data */}\r\npublic:\r\n\t${2/(\\w+).*/$1/}(${4:/* args */}) ${5:= default;}\r\n};\r\n",
+		"prefix": "classt",
+		"body": "\ntemplate<typename T}>\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\tT ${2:/* data */}\npublic:\n\t${1}(T ${3:/* args */});\n};\n",
 		"description": "Class Template",
 		"scope": "source.c++, source.objc++"
 	},
 	"excep": {
 		"prefix": "excep",
-		"body": "\r\nclass ${1:${TM_FILENAME/(.+)\\..+|.*/$1/:name}} : public ${2:std::runtime_error} {\r\npublic:\r\n\t${1/(\\w+).*/$1/}(const std::string& str): ${2:std::runtime_error}(${3:str}) {}\r\n};\r\n",
+		"body": "\nclass ${1:${TM_FILENAME_BASE}} : public ${2:std::runtime_error}\n{\npublic:\n\t${1}(const std::string& str): ${2:std::runtime_error}(${3:str}) {}\n};\n",
 		"description": "Create exception",
 		"scope": "source.c++, source.objc++"
 	},
 	"struct_": {
 		"prefix": "struct_",
-		"body": "\nstruct ${1:${TM_FILENAME/(.+)\\..+|.*/$1/:name}} {\n\t${0:/* data */}\n};\n",
+		"body": "\nstruct ${1:${TM_FILENAME_BASE}}\n{\n\t${0:/* data */}\n};\n",
 		"description": "Struct",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"structtemp": {
-		"prefix": "structtemp",
-		"body": "\r\ntemplate<typename ${1:T}>\r\nstruct ${2:${TM_FILENAME/(.+)\\..+|.*/$1/:name}} {\r\n\t${0:/* code */}\r\n};\r\n",
+		"prefix": "structt",
+		"body": "\ntemplate<typename T>\nstruct ${1:${TM_FILENAME_BASE}} {\n\tT ${0:/* data */}\n};\n",
 		"description": "Templated Struct",
 		"scope": "source.c++, source.objc++"
 	},
@@ -49,13 +49,13 @@
 	},
 	"ifelse": {
 		"prefix": "ifelse",
-		"body": "\r\nif(${1:/* condition */}) {\r\n\t${2:/* code */}\r\n}\r\nelse {\r\n\t${0:/* code */}\r\n}\r\n",
+		"body": "\nif(${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
 		"description": "if(…) else",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"ifelif": {
 		"prefix": "ifelif",
-		"body": "\r\nif(${1:/* condition */}) {\r\n\t${2:/* code */}\r\n}\r\nelse if(${3:/* condition */}) {\r\n\t${4:/* code */}\r\n}\r\nelse {\r\n\t${0:/* code */}\r\n}\r\n",
+		"body": "\nif(${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse if(${3:/* condition */}) {\n\t${4:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
 		"description": "if(…) else if(…) else",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	}, 
@@ -65,7 +65,7 @@
 
 	"confunct": {
 		"prefix": "confunct",
-		"body": "\r\nconstexpr ${1:int} ${2:function_name}(${3:/* args */}) {\r\n\treturn ${0:/* code */};\r\n}\r\n",
+		"body": "\nconstexpr ${1:int} ${2:function_name}(${3:/* args */}) {\n\treturn ${0:/* code */};\n}\n",
 		"description": "Constexpr Function",
 		"scope": "source.c++"
 	},
@@ -77,31 +77,31 @@
 	},
 	"funct": {
 		"prefix": "funct",
-		"body": "\r\n${1:int} ${2:function_name}(${3:/* args */}) {\r\n\t${0:/* code */}\r\n}\r\n",
+		"body": "\n${1:int} ${2:function_name}(${3:/* args */}) {\n\t${0:/* code */}\n}\n",
 		"description": "Regular Function",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"tempfunc": {
 		"prefix": "tempfunc",
-		"body": "\r\ntemplate<typename ${1:T}>\r\n${2:int} ${3:function_name}(${4:/* args */}) noexcept {\r\n\t$0\r\n}\r\n",
+		"body": "\ntemplate<typename ${1:T}>\n${2:int} ${3:function_name}(${4:/* args */}) noexcept {\n\t$0\n}\n",
 		"description": "Templated Function",
 		"scope": "source.c++"
 	},
 	"tempfunca": {
 		"prefix": "tempfunca",
-		"body": "\r\ntemplate<typename ${1:T}>\r\nauto ${2:function_name}(${3:/* args */}) -> decltype(${4:/* expression */}) {\r\n\t${0:/* code */}\r\n}\r\n",
+		"body": "\ntemplate<typename ${1:T}>\nauto ${2:function_name}(${3:/* args */}) -> decltype(${4:/* expression */}) {\n\t${0:/* code */}\n}\n",
 		"description": "Template Auto Function",
 		"scope": "source.c++, source.objc++"
 	},
 	"tempcfunca": {
 		"prefix": "tempcfunca",
-		"body": "\r\ntemplate<typename ${1:T}>\r\nconstexpr auto ${2:function_name}(${3:/* args */}) noexcept -> decltype(${4:/* code */}) {\r\n\treturn ${4:/* code */};\r\n}\r\n",
+		"body": "\ntemplate<typename ${1:T}>\nconstexpr auto ${2:function_name}(${3:/* args */}) noexcept -> decltype(${4:/* code */}) {\n\treturn ${4:/* code */};\n}\n",
 		"description": "Template Auto Constexpr Function",
 		"scope": "source.c++"
 	},
 	"tempcfunc": {
 		"prefix": "tempcfunc",
-		"body": "\r\ntemplate<typename ${1:T}>\r\nconstexpr ${2:int} ${3:function_name}(${4:/* args */}) {\r\n\treturn ${5:/* code */};\r\n}\r\n",
+		"body": "\ntemplate<typename ${1:T}>\nconstexpr ${2:int} ${3:function_name}(${4:/* args */}) {\n\treturn ${5:/* code */};\n}\n",
 		"description": "Template Constexpr Function",
 		"scope": "source.c++"
 	}, 
@@ -110,19 +110,19 @@
 	// functor_snippets  
 	"bintempfunctor": {
 		"prefix": "bintempfunctor",
-		"body": "\r\nstruct ${1:name} {\r\n\ttemplate<typename T, typename U>\r\n\tconstexpr auto operator()(T&& t, U&& u) const noexcept -> decltype(${2:/* code */}) {\r\n\t\treturn ${2:/* code */};\r\n\t}\r\n};\r\n",
+		"body": "\nstruct ${1:name} {\n\ttemplate<typename T, typename U>\n\tconstexpr auto operator()(T&& t, U&& u) const noexcept -> decltype(${2:/* code */}) {\n\t\treturn ${2:/* code */};\n\t}\n};\n",
 		"description": "Binary Template Functor",
 		"scope": "source.c++"
 	},
 	"functor": {
 		"prefix": "functor",
-		"body": "\r\nstruct ${1:name} {\r\n\t${2:bool} operator()(${3:/* args */}) const noexcept {\r\n\t\t${0:/* code */}\r\n\t}\r\n};\r\n",
+		"body": "\nstruct ${1:name} {\n\t${2:bool} operator()(${3:/* args */}) const noexcept {\n\t\t${0:/* code */}\n\t}\n};\n",
 		"description": "Functor",
 		"scope": "source.c++"
 	},
 	"tempfunctor": {
 		"prefix": "tempfunctor",
-		"body": "\r\nstruct ${1:name} {\r\n\ttemplate<typename T>\r\n\tconstexpr auto operator()(T&& t) const noexcept -> decltype(${2:/* code */}) {\r\n\t\treturn ${2:/* code */};\r\n\t}\r\n};\r\n",
+		"body": "\nstruct ${1:name} {\n\ttemplate<typename T>\n\tconstexpr auto operator()(T&& t) const noexcept -> decltype(${2:/* code */}) {\n\t\treturn ${2:/* code */};\n\t}\n};\n",
 		"description": "Unary Template Functor",
 		"scope": "source.c++"
 	},
@@ -183,7 +183,7 @@
 	},
 	"while": {
 		"prefix": "while",
-		"body": "\r\nwhile(${1:/* condition */}) {\r\n\t${2:/* code */}\r\n}\r\n",
+		"body": "\nwhile(${1:/* condition */}) {\n\t${2:/* code */}\n}\n",
 		"description": "While Loop",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
@@ -192,43 +192,43 @@
 	// preprocessor_snippets  
 	"clanggreater": {
 		"prefix": "clanggreater",
-		"body": "\r\ndefined(__clang__) && ((__clang_major__ > ${1:3}) || (__clang_major__ == ${1:3}) && (__clang_minor__ >= ${2:2}))\r\n",
+		"body": "\ndefined(__clang__) && ((__clang_major__ > ${1:3}) || (__clang_major__ == ${1:3}) && (__clang_minor__ >= ${2:2}))\n",
 		"description": "Clang Version >= Check",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"clangless": {
 		"prefix": "clangless",
-		"body": "\r\ndefined(__clang__) && ((__clang_major__ < ${1:3}) || (__clang_major__ == ${1:3}) && (__clang_minor__ <= ${2:2}))\r\n",
+		"body": "\ndefined(__clang__) && ((__clang_major__ < ${1:3}) || (__clang_major__ == ${1:3}) && (__clang_minor__ <= ${2:2}))\n",
 		"description": "Clang Version <= Check",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"gccgreater": {
 		"prefix": "gccgreater",
-		"body": "\r\ndefined(__GNUC__) && ((__GNUC__ > ${1:4}) || ((__GNUC__ == ${1:4}) && (__GNUC_MINOR__ >= ${2:7})))\r\n",
+		"body": "\ndefined(__GNUC__) && ((__GNUC__ > ${1:4}) || ((__GNUC__ == ${1:4}) && (__GNUC_MINOR__ >= ${2:7})))\n",
 		"description": "GCC Version >= Check",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"gccless": {
 		"prefix": "gccless",
-		"body": "\r\ndefined(__GNUC__) && ((__GNUC__ < ${1:4}) || ((__GNUC__ == ${1:4}) && (__GNUC_MINOR__ <= ${2:7})))\r\n",
+		"body": "\ndefined(__GNUC__) && ((__GNUC__ < ${1:4}) || ((__GNUC__ == ${1:4}) && (__GNUC_MINOR__ <= ${2:7})))\n",
 		"description": "GCC Version <= Check",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"ifnd": {
 		"prefix": "ifnd",
-		"body": "\r\n#ifndef $1\r\n#define ${1:${TM_FILENAME/(([A-Z])([A-Z][a-z]))|(([a-z])([A-Z]))|([a-z])|(\\.)/\\U(?1:$2_$3)(?4:$5_$6)$7(?8:_)\\E/g}}\r\n\r\n${0}\r\n\r\n#endif // $1\r\n",
+		"body": "\n#ifndef $1\n#define ${1:${TM_FILENAME/(([A-Z])([A-Z][a-z]))|(([a-z])([A-Z]))|([a-z])|(\\.)/\\U(?1:$2_$3)(?4:$5_$6)$7(?8:_)\\E/g}}\n\n${0}\n\n#endif // $1\n",
 		"description": "ifndef (…)",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"ifelifpre": {
 		"prefix": "ifelifpre",
-		"body": "\r\n#if ${1:/* condition */}\r\n${2:/* code */}\r\n#elif ${3:/* condition */}\r\n${4:/* code */}\r\n#else\r\n${0:/* code */}\r\n#endif\r\n",
+		"body": "\n#if ${1:/* condition */}\n${2:/* code */}\n#elif ${3:/* condition */}\n${4:/* code */}\n#else\n${0:/* code */}\n#endif\n",
 		"description": "#if … #elif … #else",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"ifelsepre": {
 		"prefix": "ifelsepre",
-		"body": "\r\n#if ${1:/* condition */}\r\n${2:/* code */}\r\n#else\r\n${0:/*code */}\r\n#endif\r\n",
+		"body": "\n#if ${1:/* condition */}\n${2:/* code */}\n#else\n${0:/*code */}\n#endif\n",
 		"description": "#if … #else",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
@@ -254,7 +254,7 @@
 	},
 	"declv": {
 		"prefix": "declv",
-		"body": "\r\nstd::declval<${1:T}>()\r\n",
+		"body": "\nstd::declval<${1:T}>()\n",
 		"description": "std::declval<T>()",
 		"scope": "source.c++"
 	},
@@ -266,7 +266,7 @@
 	},
 	"mitl": {
 		"prefix": "mitl",
-		"body": "\r\n// The MIT License (MIT)\r\n\r\n// Copyright (c) ${1:YEAR} ${2:NAME}\r\n\r\n//  Permission is hereby granted, free of charge, to any person obtaining a\r\n//  copy of this software and associated documentation files (the \"Software\"),\r\n//  to deal in the Software without restriction, including without limitation\r\n//  the rights to use, copy, modify, merge, publish, distribute, sublicense,\r\n//  and/or sell copies of the Software, and to permit persons to whom the\r\n//  Software is furnished to do so, subject to the following conditions:\r\n//\r\n//  The above copyright notice and this permission notice shall be included in\r\n//  all copies or substantial portions of the Software.\r\n//\r\n//  THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS\r\n//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\r\n//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\r\n//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\r\n//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\r\n//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER\r\n//  DEALINGS IN THE SOFTWARE.\r\n\r\n${0:/* code */}\r\n",
+		"body": "\n// The MIT License (MIT)\n\n// Copyright (c) ${1:YEAR} ${2:NAME}\n\n//  Permission is hereby granted, free of charge, to any person obtaining a\n//  copy of this software and associated documentation files (the \"Software\"),\n//  to deal in the Software without restriction, including without limitation\n//  the rights to use, copy, modify, merge, publish, distribute, sublicense,\n//  and/or sell copies of the Software, and to permit persons to whom the\n//  Software is furnished to do so, subject to the following conditions:\n//\n//  The above copyright notice and this permission notice shall be included in\n//  all copies or substantial portions of the Software.\n//\n//  THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS\n//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER\n//  DEALINGS IN THE SOFTWARE.\n\n${0:/* code */}\n",
 		"description": "MIT License",
 		"scope": ""
 	},
@@ -278,7 +278,7 @@
 	},
 	"returns": {
 		"prefix": "returns",
-		"body": "\r\n-> decltype(${1:/* code */}) {\r\n\treturn ${1:/* code */};\r\n}\r\n",
+		"body": "\n-> decltype(${1:/* code */}) {\n\treturn ${1:/* code */};\n}\n",
 		"description": "-> decltype(…)",
 		"scope": "source.c++"
 	},
@@ -290,19 +290,19 @@
 	},
 	"try": {
 		"prefix": "try",
-		"body": "\r\ntry {\r\n\t${1:/* code */}\r\n}\r\ncatch(${2:const std::exception& e}) {\r\n\t${0:std::cerr << e.what() << '\\n';}\r\n}\r\n",
+		"body": "\ntry {\n\t${1:/* code */}\n}\ncatch(${2:const std::exception& e}) {\n\t${0:std::cerr << e.what() << '\\n';}\n}\n",
 		"description": "Try Catch Block",
 		"scope": "source.c++, source.objc++, source.c++11"
 	},
 	"usings": {
 		"prefix": "usings",
-		"body": "\r\nusing ${1:my_type} = ${2:int};\r\n",
+		"body": "\nusing ${1:my_type} = ${2:int};\n",
 		"description": "Using Statement",
 		"scope": "source.c++"
 	},
 	"usingt": {
 		"prefix": "usingt",
-		"body": "\r\ntemplate<typename ${1:T}>\r\nusing ${2:Type} = ${3:typename T::type};\r\n",
+		"body": "\ntemplate<typename ${1:T}>\nusing ${2:Type} = ${3:typename T::type};\n",
 		"description": "Using Statement (Templated)",
 		"scope": "source.c++"
 	},
