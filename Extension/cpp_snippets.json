@@ -110,19 +110,19 @@
 	// functor_snippets  
 	"bintempfunctor": {
 		"prefix": "bintempfunctor",
-		"body": "\nstruct ${1:name} {\n\ttemplate<typename T, typename U>\n\tconstexpr auto operator()(T&& t, U&& u) const noexcept -> decltype(${2:/* code */}) {\n\t\treturn ${2:/* code */};\n\t}\n};\n",
+		"body": "\nstruct ${1:name}\n{\n\ttemplate<typename T, typename U>\n\tconstexpr auto operator()(T&& t, U&& u) const noexcept -> decltype(${2:/* code */})\n\t{\n\t\treturn ${2:/* code */};\n\t}\n};\n",
 		"description": "Binary Template Functor",
 		"scope": "source.c++"
 	},
 	"functor": {
 		"prefix": "functor",
-		"body": "\nstruct ${1:name} {\n\t${2:bool} operator()(${3:/* args */}) const noexcept {\n\t\t${0:/* code */}\n\t}\n};\n",
+		"body": "\nstruct ${1:name}\n{\n\t${2:bool} operator()(${3:/* args */}) const noexcept\n\t{\n\t\t${0:/* code */}\n\t}\n};\n",
 		"description": "Functor",
 		"scope": "source.c++"
 	},
 	"tempfunctor": {
 		"prefix": "tempfunctor",
-		"body": "\nstruct ${1:name} {\n\ttemplate<typename T>\n\tconstexpr auto operator()(T&& t) const noexcept -> decltype(${2:/* code */}) {\n\t\treturn ${2:/* code */};\n\t}\n};\n",
+		"body": "\nstruct ${1:name}\n{\n\ttemplate<typename T>\n\tconstexpr auto operator()(T&& t) const noexcept -> decltype(${2:/* code */})\n\t{\n\t\treturn ${2:/* code */};\n\t}\n};\n",
 		"description": "Unary Template Functor",
 		"scope": "source.c++"
 	},
@@ -131,31 +131,31 @@
 	// lambda_snippets  
 	"lamref": {
 		"prefix": "lamref",
-		"body": "\n[&](${1:/* args */}) {\n\t${2:/* code */}\n}\n",
+		"body": "\n[&](${1:/* args */})\n{\n\t${2:/* code */}\n}\n",
 		"description": "Lambda – Catch All by Reference",
 		"scope": "source.c++, source.c++11"
 	},
 	"lamval": {
 		"prefix": "lamval",
-		"body": "\n[=](${1:/* args */}) {\n\t${2:/* code */}\n}\n",
+		"body": "\n[=](${1:/* args */})\n{\n\t${2:/* code */}\n}\n",
 		"description": "Lambda – Catch All by Value",
 		"scope": "source.c++, source.c++11"
 	},
 	"lamfull": {
 		"prefix": "lamfull",
-		"body": "\n[${1:/* capture */}](${2:/* args */}) ${3:mutable} ${4:noexcept} -> ${5:/* return */} {\n\t${6:/* code */}\n}\n",
+		"body": "\n[${1:/* capture */}](${2:/* args */})\n${3:mutable} ${4:noexcept} -> ${5:/* return */}\n{\n\t${6:/* code */}\n}\n",
 		"description": "Lambda – Full Spec",
 		"scope": "source.c++, source.c++11"
 	},
 	"lamret": {
 		"prefix": "lamret",
-		"body": "\n[${1:/* capture */}](${2:/* args */}) -> ${3:/* return */} {\n\t${4:/* code */}\n}\n",
+		"body": "\n[${1:/* capture */}](${2:/* args */}) -> ${3:/* return */}\n{\n\t${4:/* code */}\n}\n",
 		"description": "Lambda – Explicit Return Declaration",
 		"scope": "source.c++, source.c++11"
 	},
 	"lammin": {
 		"prefix": "lammin",
-		"body": "\n[${1:/* capture */}] {\n\t${2:/* code */}\n}\n",
+		"body": "\n[${1:/* capture */}]\n{\n\t${2:/* code */}\n}\n",
 		"description": "Lambda – Minimal",
 		"scope": "source.c++, source.c++11"
 	},
@@ -165,25 +165,25 @@
 
 	"do_": {
 		"prefix": "do_",
-		"body": "\ndo {\n\t${0:/* code */}\n} while (${1:/* condition */});\n",
+		"body": "\ndo\n{\n\t${0:/* code */}\n} while (${1:/* condition */});\n",
 		"description": "Do While Loop",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"for_": {
 		"prefix": "for_",
-		"body": "\nfor(unsigned ${2:i} = 0; $2 < ${1:count}; ${3:++$2}) {\n\t${0:/* code */}\n}\n",
+		"body": "\nfor(unsigned ${2:i} = 0; $2 < ${1:count}; ${3:++$2})\n{\n\t${0:/* code */}\n}\n",
 		"description": "For Loop",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"forrange": {
 		"prefix": "forrange",
-		"body": "\nfor(auto&& ${1:i} : ${2:v}) {\n\t$0\n}\n",
+		"body": "\nfor(auto&& ${1:i} : ${2:v})\n{\n\t$0\n}\n",
 		"description": "Range-based For Loop",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
 	"while": {
 		"prefix": "while",
-		"body": "\nwhile(${1:/* condition */}) {\n\t${2:/* code */}\n}\n",
+		"body": "\nwhile(${1:/* condition */}){\n\t${2:/* code */}\n}\n",
 		"description": "While Loop",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
@@ -216,7 +216,7 @@
 	},
 	"ifnd": {
 		"prefix": "ifnd",
-		"body": "\n#ifndef $1\n#define ${1:${TM_FILENAME/(([A-Z])([A-Z][a-z]))|(([a-z])([A-Z]))|([a-z])|(\\.)/\\U(?1:$2_$3)(?4:$5_$6)$7(?8:_)\\E/g}}\n\n${0}\n\n#endif // $1\n",
+		"body": "\n#if !defined($1)\n#define ${1:MACRO}\n\n${0}\n\n#endif // $1\n",
 		"description": "ifndef (…)",
 		"scope": "source.c, source.objc, source.c++, source.objc++"
 	},
@@ -238,7 +238,7 @@
 
 	"cpptraitfun": {
 		"prefix": "cpptraitfun",
-		"body": "\nstruct ${1:my_trait}_impl {\n\ttemplate<typename T, ${$2:/* expression SFINAE here */}>\n\tstatic std::true_type test(int);\n\ttemplate<typename...>\n\tstatic std::false_type test(...);\n};\n\ntemplate<typename T>\nstruct ${1:my_trait} : decltype(${1:my_trait}_impl::test<T>(0)) {};\n$0\n",
+		"body": "\nstruct ${1:my_trait}_impl\n{\n\ttemplate<typename T, ${$2:/* expression SFINAE here */}>\n\tstatic std::true_type test(int);\n\ttemplate<typename...>\n\tstatic std::false_type test(...);\n};\n\ntemplate<typename T>\nstruct ${1:my_trait} : decltype(${1:my_trait}_impl::test<T>(0)) {};\n$0\n",
 		"description": "Do While Loop",
 		"scope": "source.c++"
 	},
@@ -270,15 +270,15 @@
 		"description": "MIT License",
 		"scope": ""
 	},
-	"name": {
-		"prefix": "name",
-		"body": "\nnamespace ${1:name} {\n\t$0\n} // $1\n",
+	"namesp": {
+		"prefix": "namesp",
+		"body": "\nnamespace ${1:name}\n{\n\t$0\n} // $1\n",
 		"description": "Namespace",
 		"scope": "source.c++, source.objc++"
 	},
 	"returns": {
 		"prefix": "returns",
-		"body": "\n-> decltype(${1:/* code */}) {\n\treturn ${1:/* code */};\n}\n",
+		"body": "\n-> decltype(${1:/* code */})\n{\n\treturn ${1:/* code */};\n}\n",
 		"description": "-> decltype(…)",
 		"scope": "source.c++"
 	},
@@ -290,7 +290,7 @@
 	},
 	"try": {
 		"prefix": "try",
-		"body": "\ntry {\n\t${1:/* code */}\n}\ncatch(${2:const std::exception& e}) {\n\t${0:std::cerr << e.what() << '\\n';}\n}\n",
+		"body": "\ntry\n{\n\t${1:/* code */}\n}\ncatch(${2:const std::exception& e})\n{\n\t${0:std::cerr << e.what() << '\\n';}\n}\n",
 		"description": "Try Catch Block",
 		"scope": "source.c++, source.objc++, source.c++11"
 	},
@@ -306,10 +306,16 @@
 		"description": "Using Statement (Templated)",
 		"scope": "source.c++"
 	},
-	"temv": {
-		"prefix": "temv",
-		"body": "\ntemplate<typename... ${1:Args}>\n",
-		"description": "Variadic Template",
-		"scope": "source.c++, source.objc++, source.c++11"
-	}
+  "temv": {
+    "prefix": "temv",
+    "body": "\ntemplate<typename... ${1:Args}>\n",
+    "description": "Variadic Template",
+    "scope": "source.c++, source.objc++, source.c++11"
+  },
+  "switch_": {
+    "prefix": "switch_",
+    "body": "\nswitch (${1:TM_SELECTEDTEXT})\n{\n\tcase ${2:/* constant-expression */}:\n\t\t${3:/* code */}\n\t\tbreak;\n\tdefault:\n\t\t${4:/* code */}\n}",
+    "description": "switch",
+    "scope": "source.c++, source.objc++"
+  }
 }
