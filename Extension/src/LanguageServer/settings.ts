@@ -41,6 +41,7 @@ export class CppSettings extends Settings {
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
     public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
+    public get snippets(): string { return super.Section.get<string>("snippets"); }
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }
     public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
