@@ -275,6 +275,11 @@
         "category": "C/Cpp"
       },
       {
+        "command": "C_Cpp.ToggleSnippets",
+        "title": "Toggle Snippets",
+        "category":  "C/Cpp"
+      },
+      {
         "command": "C_Cpp.ToggleErrorSquiggles",
         "title": "Toggle Error Squiggles",
         "category": "C/Cpp"
@@ -1117,6 +1122,10 @@
     "snippets": [
       {
         "language": "cpp",
+        "path": "./cpp_snippets.json"
+      },
+      {
+        "language": "c",
         "path": "./cpp_snippets.json"
       }
     ]

@@ -81,7 +81,7 @@
     "prefix": "switch",
     "body": "\nswitch (${1:expression})\n{\n\tcase ${2:/* constant-expression */}:\n\t\t${3:/* code */}\n\t\tbreak;\n\n\tdefault:\n\t\tbreak;\n}",
     "description": "Code snippet for switch",
-    "scope": "source.c++, source.objc++"
+    "scope": "source.c, source.objc, source.c++, source.objc++"
   },
 
   ////////////////////////////////
