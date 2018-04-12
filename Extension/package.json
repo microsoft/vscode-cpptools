@@ -35,8 +35,7 @@
     "Languages",
     "Debuggers",
     "Formatters",
-    "Linters",
-    "Snippets"
+    "Linters"
   ],
   "activationEvents": [
     "*"
@@ -128,16 +127,6 @@
           ],
           "default": "Default",
           "description": "Controls the auto-completion provider. \"Default\" uses the active IntelliSense engine. \"Disabled\" uses the word-based completion provided by Visual Studio Code.",
-          "scope": "resource"
-        },
-        "C_Cpp.snippets": {
-          "type": "string",
-          "enum": [
-            "Enabled",
-            "Disabled"
-          ],
-          "default": "Enabled",
-          "description": "Controls whether snippets are shown while typing.",
           "scope": "resource"
         },
         "C_Cpp.errorSquiggles": {
@@ -1113,13 +1102,7 @@
       "[c]": {
         "editor.autoIndent": false
       }
-    },
-    "snippets": [
-      {
-        "language": "cpp",
-        "path": "./cpp_snippets.json"
-      }
-    ]
+    }
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",

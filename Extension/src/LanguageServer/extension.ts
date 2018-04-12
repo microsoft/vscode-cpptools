@@ -322,13 +322,6 @@ function onAddToIncludePath(path: string): void {
     }
 }
 
-function onToggleSnippets(): void {
-    onActivationEvent();
-    // This only applies to the active client.
-    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("snippets", "Enabled", "Disabled");
-}
-
 function onToggleSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
