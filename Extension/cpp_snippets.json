@@ -1,5 +1,3 @@
-//////////////////////////////// 
-// class_snippets
 {
   "class": {
     "prefix": "class",
@@ -44,24 +42,21 @@
     "scope": "source.c++, source.objc++"
   },
 
-  ////////////////////////////////
-  // conditional_snippets
-
   "if": {
     "prefix": "if",
-    "body": "\nif(${1:/* condition */}) {\n\t${0:/* code */}\n}\n",
+    "body": "\nif (${1:/* condition */}) {\n\t${0:/* code */}\n}\n",
     "description": "Code snippet for if()",
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
   "ifel": {
     "prefix": "ifel",
-    "body": "\nif(${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
+    "body": "\nif (${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
     "description": "Code snippet for if() else",
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
   "ifelif": {
     "prefix": "ifelif",
-    "body": "\nif(${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse if(${3:/* condition */}) {\n\t${4:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
+    "body": "\nif (${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse if(${3:/* condition */}) {\n\t${4:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
     "description": "Code snippet for if() else if() else",
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
@@ -83,9 +78,6 @@
     "description": "Code snippet for switch",
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
-
-  ////////////////////////////////
-  // function_snippets
 
   "confunct": {
     "prefix": "confunc",
@@ -130,8 +122,6 @@
     "scope": "source.c++"
   },
 
-  ////////////////////////////////
-  // functor_snippets
   "bintempfunctor": {
     "prefix": "bintempfunctor",
     "body": "\nstruct ${1:name}\n{\n\ttemplate<typename T, typename U>\n\tconstexpr auto operator()(T&& t, U&& u) const noexcept -> decltype(${2:/* code */})\n\t{\n\t\treturn ${2:/* code */};\n\t}\n};\n",
@@ -151,8 +141,6 @@
     "scope": "source.c++"
   },
 
-  ////////////////////////////////
-  // lambda_snippets
   "lamref": {
     "prefix": "lamref",
     "body": "\n[&](${1:/* args */})\n{\n\t${2:/* code */}\n}\n",
@@ -183,9 +171,6 @@
     "description": "Code snippet for lambda – Minimal",
     "scope": "source.c++, source.c++11"
   },
-
-  ////////////////////////////////
-  // loop_snippets
 
   "do": {
     "prefix": "do_",
@@ -224,8 +209,6 @@
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
 
-  ////////////////////////////////
-  // preprocessor_snippets
   "clanggreater": {
     "prefix": "clanggreater",
     "body": "\ndefined(__clang__) && ((__clang_major__ > ${1:3}) || (__clang_major__ == ${1:3}) && (__clang_minor__ >= ${2:2}))\n",
@@ -269,18 +252,12 @@
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
 
-  ////////////////////////////////
-  // traits_snippets
-
   "cpptraitfun": {
     "prefix": "cpptraitfun",
     "body": "\nstruct ${1:my_trait}_impl\n{\n\ttemplate<typename T, ${$2:/* expression SFINAE here */}>\n\tstatic std::true_type test(int);\n\ttemplate<typename...>\n\tstatic std::false_type test(...);\n};\n\ntemplate<typename T>\nstruct ${1:my_trait} : decltype(${1:my_trait}_impl::test<T>(0)) {};\n$0\n",
     "description": "Code snippet for do while loop",
     "scope": "source.c++"
   },
-
-  ////////////////////////////////
-  // utilities_snippets
 
   "beginend_": {
     "prefix": "beginend_",
