@@ -6,7 +6,6 @@
 import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
-import * as process from 'process';
 import * as vscode from 'vscode';
 
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
@@ -38,9 +37,8 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
             return undefined;
         }
 
-        // Modify WSL config on 64-bit VSCode for OpenDebugAD7
+        // Modify WSL config for OpenDebugAD7
         if (os.platform() === 'win32' &&
-            process.arch === 'x64' &&
             config.pipeTransport &&
             config.pipeTransport.pipeProgram) {
             let replacedPipeProgram: string = null;
@@ -50,7 +48,7 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
             replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
 
             // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-            if (!replacedPipeProgram && config.pipeTransport.pipeCwd) {
+            if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
                 const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
                 const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
                 
