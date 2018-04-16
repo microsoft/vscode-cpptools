@@ -8,11 +8,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
-    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
-} from 'vscode-languageclient';
+    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams } from 'vscode-languageclient';
 import * as util from '../common';
 import * as configs from './configurations';
-import { Configuration, CompilerDefaults } from '../interfaces';
 import { CppSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState } from './persistentState';
@@ -23,6 +21,7 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
+import { CustomConfigurationProvider, SourceFileConfiguration } from '../api';
 
 let ui: UI;
 
@@ -89,7 +88,7 @@ interface DecorationRangesPair {
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
-const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
+const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 
 // Notifications to the server
@@ -221,6 +220,7 @@ export interface Client {
     RootUri: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
+    CustomConfigurationProvider: CustomConfigurationProvider;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
@@ -230,6 +230,8 @@ export interface Client {
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
+    sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void;
+    registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -238,7 +240,6 @@ export interface Client {
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
     handleAddToIncludePathCommand(path: string): void;
-    registerConfigurations(configurations: Configuration[]): void;
     onInterval(): void;
     dispose(): Thenable<void>;
 }
@@ -264,6 +265,7 @@ class DefaultClient implements Client {
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
+    private customConfigurationProvider: CustomConfigurationProvider;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -294,6 +296,9 @@ class DefaultClient implements Client {
     }
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
+    }
+    public get CustomConfigurationProvider(): CustomConfigurationProvider | undefined {
+        return this.customConfigurationProvider;
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -327,7 +332,7 @@ class DefaultClient implements Client {
 
                 // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                 // The event handlers must be set before this happens.
-                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: CompilerDefaults) => {
+                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
                     this.configuration.CompilerDefaults = compilerDefaults;
                 });
 
@@ -482,6 +487,16 @@ class DefaultClient implements Client {
         };
         this.notifyWhenReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
         this.trackedDocuments.add(document);
+    }
+
+    public sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {
+        // TODO: Implement this
+        console.log(config.includePath);
+        console.log(config.defines);
+    }
+
+    public registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
+        this.customConfigurationProvider = provider;
     }
 
     /*************************************************************************************
@@ -812,7 +827,7 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
     }
 
-    private onConfigurationsChanged(configurations: Configuration[]): void {
+    private onConfigurationsChanged(configurations: configs.Configuration[]): void {
         let params: FolderSettingsParams = {
             configurations: configurations,
             currentConfiguration: this.configuration.CurrentConfiguration
@@ -876,10 +891,6 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
-    public registerConfigurations(configurations: Configuration[]): void {
-        this.notifyWhenReady(() => this.configuration.registerCustomConfigurations(configurations));
-    }
-
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
@@ -932,9 +943,12 @@ class NullClient implements Client {
     RootUri: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
+    CustomConfigurationProvider: CustomConfigurationProvider;
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
+    sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {}
+    registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
@@ -949,7 +963,6 @@ class NullClient implements Client {
     handleShowParsingCommands(): void {}
     handleConfigurationEditCommand(): void {}
     handleAddToIncludePathCommand(path: string): void {}
-    registerConfigurations(configurations: Configuration[]): void {}
     onInterval(): void {}
     dispose(): Thenable<void> {
         this.booleanEvent.dispose();

@@ -8,7 +8,6 @@ import * as path from 'path';
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
-import { CompilerDefaults, Configuration, ConfigurationJson } from '../interfaces';
 import { PersistentFolderState } from './persistentState';
 const configVersion: number = 3;
 
@@ -81,6 +80,39 @@ let defaultSettings: string = `{
     "version": ${configVersion}
 }
 `;
+
+export interface Browse {
+    path?: string[];
+    limitSymbolsToIncludedHeaders?: boolean;
+    databaseFilename?: string;
+}
+
+export interface Configuration {
+    name: string;
+    compilerPath?: string;
+    cStandard?: string;
+    cppStandard?: string;
+    includePath?: string[];
+    macFrameworkPath?: string[];
+    defines?: string[];
+    intelliSenseMode?: string;
+    compileCommands?: string;
+    forcedInclude?: string[];
+    browse?: Browse;
+}
+
+export interface CompilerDefaults {
+    compilerPath: string;
+    cStandard: string;
+    cppStandard: string;
+    includes: string[];
+    frameworks: string[];
+}
+
+interface ConfigurationJson {
+    configurations: Configuration[];
+    version: number;
+}
 
 export class CppProperties {
     private propertiesFile: vscode.Uri = null;
@@ -365,18 +397,6 @@ export class CppProperties {
                 }
             });
         }
-    }
-
-    public registerCustomConfigurations(configurations: Configuration[]): void {
-        this.configurationJson.configurations = configurations;
-        this.currentConfigurationIndex.Value = 0;
-        this.applyDefaultIncludePathsAndFrameworks();
-
-        // This will overwrite the config file. TODO: Any parts of the config file that we want to preserve?
-        let c_cpp_properties_path: string = path.join(this.configFolder, "c_cpp_properties.json");
-        let c_cpp_properties_content: string = JSON.stringify(this.configurationJson, null, 4);
-        fs.writeFileSync(c_cpp_properties_path, c_cpp_properties_content);
-        this.updateServerOnFolderSettingsChange();
     }
 
     private handleConfigurationChange(): void {

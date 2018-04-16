@@ -14,7 +14,6 @@ import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
-import { Configuration } from './interfaces';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -48,11 +47,6 @@ export function getExtensionFilePath(extensionfile: string): string {
 
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
-}
-
-export let registeredConfigurations: Configuration;
-export function registerConfigurations(configuration: Configuration): void {
-    registeredConfigurations = configuration;
 }
 
 // Extension is ready if install.lock exists and debugAdapters folder exist.

@@ -7,6 +7,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as events from 'events';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { UI, getUI } from './ui';
@@ -15,8 +16,8 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
+import { CustomConfigurationProvider } from "../api"; 
 import * as os from 'os';
-import { Configuration } from '../interfaces';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -29,6 +30,8 @@ let realActivationOccurred: boolean = false;
 let realActivationComplete: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
+let eventEmitter: events.EventEmitter = new events.EventEmitter();
+let activationCompleteEventId: string = "ActivationComplete";
 
 /**
  * activate: set up the extension for language services
@@ -59,6 +62,17 @@ export function activate(activationEventOccurred: boolean): void {
                 return onActivationEvent();
             }
         }
+    }
+}
+
+export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
+    if (realActivationComplete) {
+        clients.ActiveClient.registerCustomConfigurationProvider(provider);
+    } else {
+        // If activation not already complete, listen for the event.
+        eventEmitter.on(activationCompleteEventId, () => {
+            clients.ActiveClient.registerCustomConfigurationProvider(provider);
+        });
     }
 }
 
@@ -106,9 +120,10 @@ function realActivation(): void {
 
     reportMacCrashes();
 
-    intervalTimer = setInterval(onInterval, 2500);
+    eventEmitter.emit(activationCompleteEventId);
 
     realActivationComplete = true;
+    intervalTimer = setInterval(onInterval, 2500);
 }
 
 export function updateLanguageConfigurations(): void {
@@ -117,14 +132,6 @@ export function updateLanguageConfigurations(): void {
 
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
-}
-
-export async function registerConfigurations(configurations: Configuration[]): Promise<void> {
-    while (!realActivationComplete) {
-        setTimeout(() => {}, 500);
-    }
-
-    clients.ActiveClient.registerConfigurations(configurations);
 }
 
 /*********************************************
