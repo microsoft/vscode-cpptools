@@ -491,7 +491,7 @@ class DefaultClient implements Client {
 
     public sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {
         // TODO: Implement this
-        console.log(config.includePath);
+        console.log(config.includePaths);
         console.log(config.defines);
     }
 

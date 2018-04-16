@@ -11,7 +11,7 @@ export interface CppToolsApi {
 }
 
 export interface SourceFileConfiguration {
-    includePath: string[];    // This must also include the system include path (compiler defaults)
+    includePaths: string[];    // This must also include the system include path (compiler defaults)
     defines: string[];        // This must also include the compiler default defines (_MSC_VER, __cplusplus, etc)
     intelliSenseMode: string; // Probably just ‘msvc-x64’ for Windows
     forcedInclude?: string[]; // Any files that need to be included before the source file is parsed
