@@ -29,7 +29,7 @@ Starting with version 0.16.1, if you set `compilerPath` and `intelliSenseMode`, 
             }
         }
     ]
-	"version": 3
+    "version": 3
 }
 ```
 
