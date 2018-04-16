@@ -10,7 +10,7 @@ Starting with version 0.16.1, if you set `compilerPath` and `intelliSenseMode`, 
         {
             "name": "Win32",
             "intelliSenseMode": "clang-x64",
-            "compilerPath": "C:/MinGW/bin/gcc.exe"
+            "compilerPath": "C:/MinGW/bin/gcc.exe",
             "includePath": [
                 "${workspaceRoot}",
             ],
@@ -28,7 +28,7 @@ Starting with version 0.16.1, if you set `compilerPath` and `intelliSenseMode`, 
                 "databaseFilename": ""
             }
         }
-    ]
+    ],
     "version": 3
 }
 ```
