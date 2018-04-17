@@ -11,11 +11,11 @@ export interface CppToolsApi {
 }
 
 export interface SourceFileConfiguration {
-    includePaths: string[];    // This must also include the system include path (compiler defaults)
-    defines: string[];        // This must also include the compiler default defines (_MSC_VER, __cplusplus, etc)
-    intelliSenseMode: string; // Probably just ‘msvc-x64’ for Windows
+    includePaths: string[];   // This must also include the system include path (compiler defaults)
+    defines: string[];        // This must also include the compiler default defines (__cplusplus, etc)
+    intelliSenseMode: string; // "msvc-x64" or "clang-x64"
     forcedInclude?: string[]; // Any files that need to be included before the source file is parsed
-   standard: string;         // This is the C or C++ standard (language server will determine if the file is C or C++ based on this)
+    standard: string;         // The C or C++ standard
 }
  
 export interface CustomConfigurationProvider {

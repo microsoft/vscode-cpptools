@@ -19,8 +19,8 @@ import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IP
 import { PersistentState } from './LanguageServer/persistentState';
 import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
-import { CppTools } from "./cppTools";
-import { CppToolsApi } from "./api";
+import { CppTools } from './cppTools';
+import { CppToolsApi } from './api';
 
 const releaseNotesVersion: number = 3;
 const cppTools: CppTools = new CppTools();

@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CppToolsApi, CustomConfigurationProvider } from "./api";
-import * as LanguageServer from "./LanguageServer/extension";
+import { CppToolsApi, CustomConfigurationProvider } from './api';
+import * as LanguageServer from './LanguageServer/extension';
 
 export class CppTools implements CppToolsApi {
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
