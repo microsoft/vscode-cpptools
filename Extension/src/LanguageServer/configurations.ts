@@ -9,82 +9,89 @@ import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
 import { PersistentFolderState } from './persistentState';
+import { CppSettings } from './settings';
 const configVersion: number = 3;
 
-let defaultSettings: string = `{
-    "configurations": [
-        {
-            "name": "Mac",
-            "includePath": [
-                "/usr/include",
-                "/usr/local/include",
-                "$\{workspaceFolder\}"
-            ],
-            "defines": [],
-            "intelliSenseMode": "clang-x64",
-            "browse": {
-                "path": [
-                    "/usr/include",
-                    "/usr/local/include",
-                    "$\{workspaceFolder\}"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            },
-            "macFrameworkPath": [
-                "/System/Library/Frameworks",
-                "/Library/Frameworks"
-            ]
-        },
-        {
-            "name": "Linux",
-            "includePath": [
-                "/usr/include",
-                "/usr/local/include",
-                "$\{workspaceFolder\}"
-            ],
-            "defines": [],
-            "intelliSenseMode": "clang-x64",
-            "browse": {
-                "path": [
-                    "/usr/include",
-                    "/usr/local/include",
-                    "$\{workspaceFolder\}"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
-        },
-        {
-            "name": "Win32",
-            "includePath": [
-                "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
-                "$\{workspaceFolder\}"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
-            "intelliSenseMode": "msvc-x64",
-            "browse": {
-                "path": [
-                    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
-                    "$\{workspaceFolder\}"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
-        }
+let defaultMacConfig: string = `{
+    "name": "Mac",
+    "includePath": [
+        "$\{workspaceFolder\}"
     ],
-    "version": ${configVersion}
-}
-`;
+    "defines": [],
+    "intelliSenseMode": "clang-x64",
+    "browse": {
+        "path": [
+            "/usr/include",
+            "/usr/local/include",
+            "$\{workspaceFolder\}"
+        ],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+    },
+    "macFrameworkPath": [
+        "/System/Library/Frameworks",
+        "/Library/Frameworks"
+    ]
+}`;
 
-export interface Browse {
-    path?: string[];
-    limitSymbolsToIncludedHeaders?: boolean;
-    databaseFilename?: string;
+let defaultLinuxConfig: string = `{
+    "name": "Linux",
+    "includePath": [
+        "$\{workspaceFolder\}"
+    ],
+    "defines": [],
+    "intelliSenseMode": "clang-x64",
+    "browse": {
+        "path": [
+            "/usr/include",
+            "/usr/local/include",
+            "$\{workspaceFolder\}"
+        ],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+    }
+}`;
+
+let defaultWindowsConfig: string = `{
+    "name": "Win32",
+    "includePath": [
+        "$\{workspaceFolder\}"
+    ],
+    "defines": [
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE"
+    ],
+    "intelliSenseMode": "msvc-x64",
+    "browse": {
+        "path": [
+            "$\{workspaceFolder\}"
+        ],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+    }
+}`;
+
+function getDefaultConfig(): Configuration {
+    if (process.platform === 'darwin') {
+        return JSON.parse(defaultMacConfig);
+    } else if (process.platform === 'win32') {
+        return JSON.parse(defaultWindowsConfig);
+    } else {
+        return JSON.parse(defaultLinuxConfig);
+    }
+}
+
+function getDefaultCppProperties(): ConfigurationJson {
+    return {
+        configurations: [ getDefaultConfig() ],
+        version: configVersion
+    };
+}
+
+interface ConfigurationJson {
+    configurations: Configuration[];
+    version: number;
 }
 
 export interface Configuration {
@@ -101,6 +108,12 @@ export interface Configuration {
     browse?: Browse;
 }
 
+export interface Browse {
+    path?: string[];
+    limitSymbolsToIncludedHeaders?: boolean | string;
+    databaseFilename?: string;
+}
+
 export interface CompilerDefaults {
     compilerPath: string;
     cStandard: string;
@@ -109,12 +122,8 @@ export interface CompilerDefaults {
     frameworks: string[];
 }
 
-interface ConfigurationJson {
-    configurations: Configuration[];
-    version: number;
-}
-
 export class CppProperties {
+    private rootUri: vscode.Uri;
     private propertiesFile: vscode.Uri = null;
     private readonly configFolder: string;
     private configurationJson: ConfigurationJson = null;
@@ -133,12 +142,14 @@ export class CppProperties {
     private selectionChanged = new vscode.EventEmitter<number>();
     private compileCommandsChanged = new vscode.EventEmitter<string>();
 
-    // Any time the `defaultSettings` are parsed and assigned to `this.configurationJson`,
+    // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
     private configurationIncomplete: boolean = true;
 
-    constructor(rootPath: string) {
-        console.assert(rootPath !== undefined);
+    constructor(rootUri: vscode.Uri) {
+        console.assert(rootUri !== undefined);
+        this.rootUri = rootUri;
+        let rootPath: string = rootUri ? rootUri.fsPath : "";
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
         
@@ -207,8 +218,16 @@ export class CppProperties {
         this.compileCommandsChanged.fire(path);
     }
 
+    public onDidChangeSettings(): void {
+        // Default settings may have changed in a way that affects the configuration.
+        // Just send another message since the language server will sort out whether anything important changed or not.
+        if (!this.configurationIncomplete) {
+            this.handleConfigurationChange();
+        }
+    }
+
     private resetToDefaultSettings(resetIndex: boolean): void {
-        this.configurationJson = JSON.parse(defaultSettings);
+        this.configurationJson = getDefaultCppProperties();
         if (resetIndex || this.CurrentConfiguration < 0 ||
             this.CurrentConfiguration >= this.configurationJson.configurations.length) {
             this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
@@ -218,19 +237,30 @@ export class CppProperties {
 
     private applyDefaultIncludePathsAndFrameworks(): void {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks) {
-            this.configurationJson.configurations[this.CurrentConfiguration].includePath = this.defaultIncludes;
-            this.configurationJson.configurations[this.CurrentConfiguration].browse.path = this.defaultIncludes;
-            if (process.platform === 'darwin') {
-                this.configurationJson.configurations[this.CurrentConfiguration].macFrameworkPath = this.defaultFrameworks;
+            let configuration: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            let settings: CppSettings = new CppSettings(this.rootUri);
+
+            // Do compilerPath first so that we can avoid adding system includes to the includePath when possible.
+            if (this.defaultCompilerPath && !settings.defaultCompilerPath) {
+                configuration.compilerPath = this.defaultCompilerPath;
             }
-            if (this.defaultCompilerPath) {
-                this.configurationJson.configurations[this.CurrentConfiguration].compilerPath = this.defaultCompilerPath;
+
+            // Only add default settings if user hasn't explicitly set one of the VS Code settings and
+            // there is no compiler set.
+            if (!settings.defaultIncludePath && !configuration.compilerPath) {
+                configuration.includePath = this.defaultIncludes;
             }
-            if (this.defaultCStandard) {
-                this.configurationJson.configurations[this.CurrentConfiguration].cStandard = this.defaultCStandard;
+            if (!settings.defaultBrowsePath) {
+                configuration.browse.path = this.defaultIncludes;
             }
-            if (this.defaultCppStandard) {
-                this.configurationJson.configurations[this.CurrentConfiguration].cppStandard = this.defaultCppStandard;
+            if (process.platform === 'darwin' && !settings.defaultMacFrameworkPath) {
+                configuration.macFrameworkPath = this.defaultFrameworks;
+            }
+            if (this.defaultCStandard && !settings.defaultCStandard) {
+                configuration.cStandard = this.defaultCStandard;
+            }
+            if (this.defaultCppStandard && !settings.defaultCppStandard) {
+                configuration.cppStandard = this.defaultCppStandard;
             }
             this.configurationIncomplete = false;
         }
@@ -284,7 +314,11 @@ export class CppProperties {
 
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            if (config.includePath === undefined) {
+                config.includePath = [ "${default}" ];
+            }
             config.includePath.splice(config.includePath.length, 0, path);
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
             this.updateServerOnFolderSettingsChange();
@@ -300,38 +334,79 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveAndSplit(paths: string[] | undefined): string[] {
+    private resolveDefaults(entries: string[], defaultValue: string[]): string[] {
+        let result: string[] = [];
+        entries.forEach(entry => {
+            if (entry === "${default}") {
+                result = result.concat(defaultValue);
+            } else {
+                result.push(entry);
+            }
+        });
+        return result;
+    }
+
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[]): string[] {
         let result: string[] = [];
         if (paths) {
             paths.forEach(entry => {
                 let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
+                entries = this.resolveDefaults(entries, defaultValue);
                 result = result.concat(entries);
             });
         }
         return result;
     }
 
+    private resolveVariables(input: string | boolean, defaultValue: string | boolean): string | boolean {
+        if (input === undefined || input === "${default}") {
+            input = defaultValue;
+        }
+        if (typeof input === "boolean") {
+            return input;
+        }
+        return util.resolveVariables(input);
+    }
+
+    private updateConfiguration(property: string[], defaultValue: string[]): string[];
+    private updateConfiguration(property: string, defaultValue: string): string;
+    private updateConfiguration(property: string | boolean, defaultValue: boolean): boolean;
+    private updateConfiguration(property, defaultValue): any {
+        if (typeof property === "string" || typeof defaultValue === "string") {
+            return this.resolveVariables(property, defaultValue);
+        } else if (typeof property === "boolean" || typeof defaultValue === "boolean") {
+            return this.resolveVariables(property, defaultValue);
+        } else if (property instanceof Array || defaultValue instanceof Array) {
+            if (property) {
+                return this.resolveAndSplit(property, defaultValue);
+            } else if (property === undefined && defaultValue) {
+                return this.resolveAndSplit(defaultValue, []);
+            }
+        }
+        return property;
+    }
+
     private updateServerOnFolderSettingsChange(): void {
+        let settings: CppSettings = new CppSettings(this.rootUri);
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let configuration: Configuration = this.configurationJson.configurations[i];
-            if (configuration.includePath) {
-                configuration.includePath = this.resolveAndSplit(configuration.includePath);
+
+            configuration.includePath = this.updateConfiguration(configuration.includePath, settings.defaultIncludePath);
+            configuration.defines = this.updateConfiguration(configuration.defines, settings.defaultDefines);
+            configuration.macFrameworkPath = this.updateConfiguration(configuration.macFrameworkPath, settings.defaultMacFrameworkPath);
+            configuration.forcedInclude = this.updateConfiguration(configuration.forcedInclude, settings.defaultForcedInclude);
+            configuration.compileCommands = this.updateConfiguration(configuration.compileCommands, settings.defaultCompileCommands);
+            configuration.compilerPath = this.updateConfiguration(configuration.compilerPath, settings.defaultCompilerPath);
+            configuration.cStandard = this.updateConfiguration(configuration.cStandard, settings.defaultCStandard);
+            configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard);
+            configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode);
+
+            if (!configuration.browse) {
+                configuration.browse = {};
             }
-            if (configuration.browse && configuration.browse.path) {
-                configuration.browse.path = this.resolveAndSplit(configuration.browse.path);
-            }
-            if (configuration.macFrameworkPath) {
-                configuration.macFrameworkPath = this.resolveAndSplit(configuration.macFrameworkPath);
-            }
-            if (configuration.forcedInclude) {
-                configuration.forcedInclude = this.resolveAndSplit(configuration.forcedInclude);
-            }
-            if (configuration.compileCommands) {
-                configuration.compileCommands = util.resolveVariables(configuration.compileCommands);
-            }
-            if (configuration.compilerPath) {
-                configuration.compilerPath = util.resolveVariables(configuration.compilerPath);
-            }
+            configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath);
+            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfiguration(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders);
+            configuration.browse.databaseFilename = this.updateConfiguration(configuration.browse.databaseFilename, settings.defaultDatabaseFilename);
         }
 
         this.updateCompileCommandsFileWatchers();
@@ -456,23 +531,25 @@ export class CppProperties {
             this.configurationIncomplete = false;
 
             // Update intelliSenseMode, compilerPath, cStandard, and cppStandard with the defaults if they're missing.
+            // If VS Code settings exist for these properties, don't add them to c_cpp_properties.json
             let dirty: boolean = false;
+            let settings: CppSettings = new CppSettings(this.rootUri);
             for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
                 let config: Configuration = this.configurationJson.configurations[i];
-                if (config.intelliSenseMode === undefined) {
+                if (config.intelliSenseMode === undefined && !settings.defaultIntelliSenseMode) {
                     dirty = true;
                     config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
                 }
                 // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
-                if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands) {
+                if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && !settings.defaultCompilerPath) {
                     config.compilerPath = this.defaultCompilerPath;
                     dirty = true;
                 }
-                if (!config.cStandard && this.defaultCStandard) {
+                if (!config.cStandard && this.defaultCStandard && !settings.defaultCStandard) {
                     config.cStandard = this.defaultCStandard;
                     dirty = true;
                 }
-                if (!config.cppStandard && this.defaultCppStandard) {
+                if (!config.cppStandard && this.defaultCppStandard && !settings.defaultCppStandard) {
                     config.cppStandard = this.defaultCppStandard;
                     dirty = true;
                 }
