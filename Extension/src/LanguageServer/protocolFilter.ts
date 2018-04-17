@@ -7,7 +7,8 @@
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
-import { SourceFileConfiguration } from '../api';
+import { SourceFileConfiguration, CustomConfigurationProvider } from '../api';
+import { getActiveCustomConfigurationProvider } from './extension';
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -24,11 +25,11 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-
-                if (me.ActiveCustomConfigurationProvider) {
+                let provider: CustomConfigurationProvider = getActiveCustomConfigurationProvider(); 
+                if (provider) {
                     // If custom config provider exists, ask for the custom configuration and send a notification to the server
                     // before the textDocument/didOpen message so that the right information is used when the file is opened.
-                    me.ActiveCustomConfigurationProvider.provideConfiguration(document.uri)
+                    provider.provideConfiguration(document.uri)
                     .then((config: SourceFileConfiguration) => {
                         me.sendCustomConfiguration(document, config);
                         sendMessage(document);

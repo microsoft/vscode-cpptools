@@ -30,6 +30,8 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 let customConfigurationProviders: CustomConfigurationProvider[] = [];
+let activeCustomConfigurationProviderIndex: number = 0;
+
 /**
  * activate: set up the extension for language services
  */
@@ -63,10 +65,12 @@ export function activate(activationEventOccurred: boolean): void {
 }
 
 export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-    if (realActivationOccurred) {
-        clients.ActiveClient.registerCustomConfigurationProvider(provider);
-    } else {
-        customConfigurationProviders.push(provider);
+    customConfigurationProviders.push(provider);
+}
+
+export function getActiveCustomConfigurationProvider(): CustomConfigurationProvider | undefined {
+    if (customConfigurationProviders.length > 0) {
+        return customConfigurationProviders[activeCustomConfigurationProviderIndex];
     }
 }
 
@@ -113,8 +117,6 @@ function realActivation(): void {
     updateLanguageConfigurations();
 
     reportMacCrashes();
-
-    customConfigurationProviders.forEach(provider => clients.ActiveClient.registerCustomConfigurationProvider(provider));
     
     intervalTimer = setInterval(onInterval, 2500);
 }

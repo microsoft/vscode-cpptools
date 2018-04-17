@@ -226,8 +226,6 @@ export interface Client {
     RootUri: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    CustomConcigurationProviders: CustomConfigurationProvider[];
-    ActiveCustomConfigurationProvider: CustomConfigurationProvider;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
@@ -238,7 +236,6 @@ export interface Client {
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
     sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void;
-    registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -272,8 +269,6 @@ class DefaultClient implements Client {
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
-    private customConfigurationProviders: CustomConfigurationProvider[] = [];
-    private activeCustomConfigurationProviderIndex: number = 0;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -304,12 +299,6 @@ class DefaultClient implements Client {
     }
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
-    }
-    public get CustomConcigurationProviders(): CustomConfigurationProvider[] {
-        return this.customConfigurationProviders;
-    }
-    public get ActiveCustomConfigurationProvider(): CustomConfigurationProvider | undefined {
-        return this.customConfigurationProviders[this.activeCustomConfigurationProviderIndex];
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -498,10 +487,6 @@ class DefaultClient implements Client {
         };
         this.notifyWhenReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
         this.trackedDocuments.add(document);
-    }
-
-    public registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-        this.customConfigurationProviders.push(provider);
     }
 
     /*************************************************************************************
@@ -956,13 +941,10 @@ class NullClient implements Client {
     RootUri: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    CustomConcigurationProviders: CustomConfigurationProvider[] = [];
-    ActiveCustomConfigurationProvider: CustomConfigurationProvider;
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
     sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {}
-    registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
