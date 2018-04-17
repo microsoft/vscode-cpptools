@@ -85,6 +85,11 @@ interface DecorationRangesPair {
     ranges: vscode.Range[];
 }
 
+interface CustomConfigurationParams {
+    uri: string;
+    configuration: SourceFileConfiguration;
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -104,6 +109,7 @@ const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, v
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
+const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/sendCustomConfiguration');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -494,12 +500,6 @@ class DefaultClient implements Client {
         this.trackedDocuments.add(document);
     }
 
-    public sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {
-        // TODO: Implement this
-        console.log(config.includePaths);
-        console.log(config.defines);
-    }
-
     public registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
         this.customConfigurationProviders.push(provider);
     }
@@ -856,6 +856,14 @@ class DefaultClient implements Client {
     private onCompileCommandsChanged(path: string): void {
         let params: FileChangedParams = {
             uri: path
+        };
+        this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
+    }
+
+    public sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {
+        let params: CustomConfigurationParams = {
+            uri: document.uri.toString(),
+            configuration: config
         };
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
