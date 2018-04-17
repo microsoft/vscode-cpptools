@@ -850,7 +850,7 @@ class DefaultClient implements Client {
             uri: document.uri.toString(),
             configuration: config
         };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
+        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
     }
 
     /*********************************************
