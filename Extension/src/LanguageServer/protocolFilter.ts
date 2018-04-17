@@ -7,7 +7,7 @@
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
-import { SourceFileConfiguration } from "../api";
+import { SourceFileConfiguration } from '../api';
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -25,12 +25,17 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
 
-                // If custom config provider exists, ask for the custom configuration and send a notification to the server
-                // before the textDocument/didOpen message so that the right information is used when the file is opened.
-                me.CustomConfigurationProvider.provideConfiguration(document.uri, (config: SourceFileConfiguration) => {
-                    me.sendCustomConfiguration(document, config);  // We have to add this method to client.ts
+                if (me.ActiveCustomConfigurationProvider) {
+                    // If custom config provider exists, ask for the custom configuration and send a notification to the server
+                    // before the textDocument/didOpen message so that the right information is used when the file is opened.
+                    me.ActiveCustomConfigurationProvider.provideConfiguration(document.uri)
+                    .then((config: SourceFileConfiguration) => {
+                        me.sendCustomConfiguration(document, config);
+                        sendMessage(document);
+                    });
+                } else {
                     sendMessage(document);
-                });
+                }
             }
         },
         didChange: defaultHandler,

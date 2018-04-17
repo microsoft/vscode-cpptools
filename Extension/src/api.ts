@@ -20,5 +20,5 @@ export interface SourceFileConfiguration {
  
 export interface CustomConfigurationProvider {
     name: string;
-    provideConfiguration(uri: vscode.Uri, callback: (config: SourceFileConfiguration) => any): void;
+    provideConfiguration(uri: vscode.Uri): Thenable<SourceFileConfiguration>;
 }

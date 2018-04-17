@@ -27,12 +27,9 @@ let disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
-let realActivationComplete: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-let eventEmitter: events.EventEmitter = new events.EventEmitter();
-let activationCompleteEventId: string = "ActivationComplete";
-
+let customConfigurationProviders: CustomConfigurationProvider[] = [];
 /**
  * activate: set up the extension for language services
  */
@@ -66,13 +63,10 @@ export function activate(activationEventOccurred: boolean): void {
 }
 
 export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-    if (realActivationComplete) {
+    if (realActivationOccurred) {
         clients.ActiveClient.registerCustomConfigurationProvider(provider);
     } else {
-        // If activation not already complete, listen for the event.
-        eventEmitter.on(activationCompleteEventId, () => {
-            clients.ActiveClient.registerCustomConfigurationProvider(provider);
-        });
+        customConfigurationProviders.push(provider);
     }
 }
 
@@ -120,9 +114,8 @@ function realActivation(): void {
 
     reportMacCrashes();
 
-    eventEmitter.emit(activationCompleteEventId);
-
-    realActivationComplete = true;
+    customConfigurationProviders.forEach(provider => clients.ActiveClient.registerCustomConfigurationProvider(provider));
+    
     intervalTimer = setInterval(onInterval, 2500);
 }
 

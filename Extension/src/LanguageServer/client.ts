@@ -220,7 +220,8 @@ export interface Client {
     RootUri: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    CustomConfigurationProvider: CustomConfigurationProvider;
+    CustomConcigurationProviders: CustomConfigurationProvider[];
+    ActiveCustomConfigurationProvider: CustomConfigurationProvider;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
@@ -265,7 +266,8 @@ class DefaultClient implements Client {
     private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
-    private customConfigurationProvider: CustomConfigurationProvider;
+    private customConfigurationProviders: CustomConfigurationProvider[] = [];
+    private activeCustomConfigurationProviderIndex: number = 0;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -297,8 +299,11 @@ class DefaultClient implements Client {
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
     }
-    public get CustomConfigurationProvider(): CustomConfigurationProvider | undefined {
-        return this.customConfigurationProvider;
+    public get CustomConcigurationProviders(): CustomConfigurationProvider[] {
+        return this.customConfigurationProviders;
+    }
+    public get ActiveCustomConfigurationProvider(): CustomConfigurationProvider | undefined {
+        return this.customConfigurationProviders[this.activeCustomConfigurationProviderIndex];
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -496,7 +501,7 @@ class DefaultClient implements Client {
     }
 
     public registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-        this.customConfigurationProvider = provider;
+        this.customConfigurationProviders.push(provider);
     }
 
     /*************************************************************************************
@@ -943,7 +948,8 @@ class NullClient implements Client {
     RootUri: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    CustomConfigurationProvider: CustomConfigurationProvider;
+    CustomConcigurationProviders: CustomConfigurationProvider[] = [];
+    ActiveCustomConfigurationProvider: CustomConfigurationProvider;
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
