@@ -38,7 +38,26 @@
     "Linters"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onCommand:extension.pickNativeProcess",
+    "onCommand:extension.pickRemoteNativeProcess",
+    "onCommand:C_Cpp.ConfigurationEdit",
+    "onCommand:C_Cpp.ConfigurationSelect",
+    "onCommand:C_Cpp.SwitchHeaderSource",
+    "onCommand:C_Cpp.Navigate",
+    "onCommand:C_Cpp.GoToDeclaration",
+    "onCommand:C_Cpp.PeekDeclaration",
+    "onCommand:C_Cpp.ToggleErrorSquiggles",
+    "onCommand:C_Cpp.ToggleIncludeFallback",
+    "onCommand:C_Cpp.ToggleDimInactiveRegions",
+    "onCommand:C_Cpp.ShowReleaseNotes",
+    "onCommand:C_Cpp.ResetDatabase",
+    "onCommand:C_Cpp.PauseParsing",
+    "onCommand:C_Cpp.ResumeParsing",
+    "onCommand:C_Cpp.ShowParsingCommands",
+    "onCommand:C_Cpp.TakeSurvey",
+    "onDebug"
   ],
   "main": "./out/src/main",
   "contributes": {
@@ -231,7 +250,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.includePath": {
-          "type": [ "array", "null" ],
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
@@ -240,7 +262,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.defines": {
-          "type": [ "array", "null" ],
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
@@ -249,7 +274,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.macFrameworkPath": {
-          "type": [ "array", "null" ],
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
@@ -258,13 +286,19 @@
           "scope": "resource"
         },
         "C_Cpp.default.compileCommands": {
-          "type": [ "string", "null" ],
+          "type": [
+            "string",
+            "null"
+          ],
           "default": null,
           "description": "The value to use in a configuration if \"compileCommands\" is not specified, or the values to insert if \"${default}\" is present in \"compileCommands\".",
           "scope": "resource"
         },
         "C_Cpp.default.forcedInclude": {
-          "type": [ "array", "null" ],
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
@@ -273,7 +307,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.intelliSenseMode": {
-          "type": [ "string", "null" ],
+          "type": [
+            "string",
+            "null"
+          ],
           "enum": [
             "msvc-x64",
             "clang-x64"
@@ -283,13 +320,19 @@
           "scope": "resource"
         },
         "C_Cpp.default.compilerPath": {
-          "type": [ "string", "null" ],
+          "type": [
+            "string",
+            "null"
+          ],
           "default": null,
           "description": "The value to use in a configuration if \"compilerPath\" is not specified, or the values to insert if \"${default}\" is present in \"compilerPath\".",
           "scope": "resource"
         },
         "C_Cpp.default.cStandard": {
-          "type": [ "string", "null" ],
+          "type": [
+            "string",
+            "null"
+          ],
           "enum": [
             "c89",
             "c99",
@@ -300,7 +343,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
-          "type": [ "string", "null" ],
+          "type": [
+            "string",
+            "null"
+          ],
           "enum": [
             "c++98",
             "c++03",
@@ -313,7 +359,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.browse.path": {
-          "type": [ "array", "null" ],
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
@@ -322,7 +371,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.browse.databaseFilename": {
-          "type": [ "string", "null" ],
+          "type": [
+            "string",
+            "null"
+          ],
           "default": null,
           "description": "The value to use in a configuration if \"browse.databaseFilename\" is not specified, or the values to insert if \"${default}\" is present in \"browse.databaseFilename\".",
           "scope": "resource"
@@ -334,7 +386,10 @@
           "scope": "resource"
         },
         "C_Cpp.default.systemIncludePath": {
-          "type": [ "array", "null" ],
+          "type": [
+            "array",
+            "null"
+          ],
           "items": {
             "type": "string"
           },
@@ -1248,6 +1303,7 @@
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
+    "npm": "^5.8.0",
     "tmp": "~0.0.33",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",

@@ -21,8 +21,6 @@ let defaultMacConfig: string = `{
     "intelliSenseMode": "clang-x64",
     "browse": {
         "path": [
-            "/usr/include",
-            "/usr/local/include",
             "$\{workspaceFolder\}"
         ],
         "limitSymbolsToIncludedHeaders": true,
@@ -43,8 +41,6 @@ let defaultLinuxConfig: string = `{
     "intelliSenseMode": "clang-x64",
     "browse": {
         "path": [
-            "/usr/include",
-            "/usr/local/include",
             "$\{workspaceFolder\}"
         ],
         "limitSymbolsToIncludedHeaders": true,
