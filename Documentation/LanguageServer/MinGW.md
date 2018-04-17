@@ -1,12 +1,49 @@
 For developers using MinGW on Windows, we recommend you start with the following **c_cpp_properties.json** template.  Select "C/Cpp: Edit Configurations" from the command palette to create this file if you haven't already.
 
-Note that you may have to change the MinGW version number to match what you have installed. Eg. `C:/MinGW/lib/gcc/mingw32/5.3.0/` instead of `C:/MinGW/lib/gcc/mingw32/6.3.0/`.
+## With extension version 0.16.1 and higher:
+
+Starting with version 0.16.1, if you set the `compilerPath` property and change `intelliSenseMode` to `clang-x64`, you no longer need to copy the system include path or defines to `includePath` and `defines` to enable IntelliSense to work properly. However, `browse.path` still needs to be updated manually to add the system include paths to enable code browsing for system headers. For example:
 
 ```json
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "MinGW",
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "C:/MinGW/bin/gcc.exe",
+            "includePath": [
+                "${workspaceRoot}",
+            ],
+            "defines": [
+                "_DEBUG"
+            ],
+            "browse": {
+                "path": [
+                    "C:/MinGW/lib/gcc/mingw32/6.3.0/include",
+                    "C:/MinGW/lib/gcc/mingw32/6.3.0/include-fixed",
+                    "C:/MinGW/include/*"
+                    "${workspaceRoot}",
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 3
+}
+```
+
+Note that the `browse.path` setting is not automatically updated at this time and you may have to change the MinGW version number to match what you have installed. If you are using a different MinGW distribution, the values for `compilerPath` and `browse.path` will likely be different than what is written here.
+
+## With extension version 0.16.0 and earlier:
+
+In earlier versions of the extension, the `includePath` and a some system defines need to be set in order for IntelliSense to work properly. Note that you may have to change the MinGW version number to match what you have installed. Eg. `C:/MinGW/lib/gcc/mingw32/5.3.0/` instead of `C:/MinGW/lib/gcc/mingw32/6.3.0/`.
+
+```json
+{
+    "configurations": [
+        {
+            "name": "MinGW",
             "intelliSenseMode": "clang-x64",
             "includePath": [
                 "${workspaceRoot}",
@@ -19,7 +56,6 @@ Note that you may have to change the MinGW version number to match what you have
             ],
             "defines": [
                 "_DEBUG",
-                "UNICODE",
                 "__GNUC__=6",
                 "__cdecl=__attribute__((__cdecl__))"
             ],
@@ -28,6 +64,7 @@ Note that you may have to change the MinGW version number to match what you have
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include",
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include-fixed",
                     "C:/MinGW/include/*"
+                    "${workspaceRoot}",
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -37,7 +74,7 @@ Note that you may have to change the MinGW version number to match what you have
 }
 ```
 
-The `includePath` above includes the system header paths that gcc uses in version 6.3.0 for C++ projects and matches the output of `gcc -v -E -x c++ -`. The `intelliSenseMode` should be set to **"clang-x64"** to get MinGW projects to work properly with IntelliSense. The `__GNUC__=#` define should match the major version of the toolchain in your installation (6 in this example).
+The `includePath` above includes the system header paths that gcc uses in version 6.3.0 for C++ projects and matches the output of `"gcc -v -E -x c++ nul"`. The `intelliSenseMode` should be set to **"clang-x64"** to get MinGW projects to work properly with IntelliSense. The `__GNUC__=#` define should match the major version of the toolchain in your installation (6 in this example).
 
 For C projects, simply remove the C++ lines:
 
@@ -45,7 +82,7 @@ For C projects, simply remove the C++ lines:
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "MinGW",
             "intelliSenseMode": "clang-x64",
             "includePath": [
                 "${workspaceRoot}",
@@ -55,7 +92,6 @@ For C projects, simply remove the C++ lines:
             ],
             "defines": [
                 "_DEBUG",
-                "UNICODE",
                 "__GNUC__=6",
                 "__cdecl=__attribute__((__cdecl__))"
             ],
@@ -64,6 +100,7 @@ For C projects, simply remove the C++ lines:
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include",
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include-fixed",
                     "C:/MinGW/include/*"
+                    "${workspaceRoot}",
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -72,7 +109,3 @@ For C projects, simply remove the C++ lines:
     ]
 }
 ```
-
-With these configurations, you should be all set up to use the new IntelliSense engine for linting, memberlist autocomplete, and quick info (tooltips).  Add `"C_Cpp.intelliSenseEngine": "Default"` to your **settings.json** file to try out the new IntelliSense engine.
-
-UPDATE: Starting with 0.16.1, setting the `compilerPath` property to the full path to your MinGW compiler should set all the compiler includes and defines automatically, but the `browse.path` setting still needs to be set manually.
