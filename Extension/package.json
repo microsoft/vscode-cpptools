@@ -150,16 +150,6 @@
           "description": "Controls the auto-completion provider. \"Default\" uses the active IntelliSense engine. \"Disabled\" uses the word-based completion provided by Visual Studio Code.",
           "scope": "resource"
         },
-        "C_Cpp.snippets": {
-          "type": "string",
-          "enum": [
-            "Enabled",
-            "Disabled"
-          ],
-          "default": "Enabled",
-          "description": "Controls whether snippets are shown while typing.",
-          "scope": "resource"
-        },
         "C_Cpp.errorSquiggles": {
           "type": "string",
           "enum": [
