@@ -332,10 +332,44 @@ function onToggleSquiggles(): void {
 
 function onToggleSnippets(): void {
     onActivationEvent();
-    // This only applies to the active client.
-    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("snippets", "Enabled", "Disabled");
+
+    // This will apply to all clients as it's a global toggle. It will require a reload.
+    const snippetsCatName: string  = "Snippets";
+    const snippetsNodeName: string = "snippets";
+    let newPackageJson = util.getRawPackageJson();
+
+    if (newPackageJson.categories.findIndex(function (cat) { return cat === snippetsCatName; }) == -1) {
+        // Add the Snippet category and snippets node. 
+
+        newPackageJson.categories.push(snippetsCatName);
+        newPackageJson.contributes[snippetsNodeName] = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
+
+        fs.writeFileSync(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson));
+        showReloadPrompt("Reload Window to finish enabling C++ snippets");
+    }
+    else {
+        // Remove the category and snippets node.
+
+        let ndxCat = newPackageJson.categories.indexOf(snippetsCatName);
+        if (ndxCat != -1)
+            newPackageJson.categories.splice(ndxCat, 1);
+
+        delete newPackageJson.contributes[snippetsNodeName];
+
+        fs.writeFileSync(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson));
+        showReloadPrompt("Reload Window to finish disabling C++ snippets");
+    }
+
 }
+
+function showReloadPrompt(msg: string): void { 
+    let reload: string = "Reload"; 
+    vscode.window.showInformationMessage(msg, reload).then(value => { 
+       if (value === reload) { 
+          vscode.commands.executeCommand("workbench.action.reloadWindow"); 
+       } 
+    }); 
+ } 
 
 function onToggleIncludeFallback(): void {
     onActivationEvent();
