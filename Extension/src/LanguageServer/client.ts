@@ -145,13 +145,13 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
 
         if (filter(key, val, settings)) {
             previousCppSettings[key] = val;
-            switch (String(key).toLowerCase()) {
+            switch (key.toLowerCase()) {
                 case "clang_format_path": {
                     continue;
                 }
                 case "clang_format_style":
                 case "clang_format_fallbackstyle": {
-                    let newKey: string = String(key) + "2";
+                    let newKey: string = key + "2";
                     if (val) {
                         switch (String(val).toLowerCase()) {
                             case "visual studio":
@@ -177,6 +177,9 @@ function collectSettingsForTelemetry(filter: (key: string, val: string, settings
                     break;
                 }
                 default: {
+                    if (key.startsWith("default.")) {
+                        continue;   // Don't log c_cpp_properties.json defaults since they may contain PII.
+                    }
                     result[key] = String(previousCppSettings[key]);
                     break;
                 }
@@ -317,7 +320,7 @@ class DefaultClient implements Client {
             ui.bind(this);
 
             this.onReadyPromise = languageClient.onReady().then(() => {
-                this.configuration = new configs.CppProperties(this.RootPath);
+                this.configuration = new configs.CppProperties(this.RootUri);
                 this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                 this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
                 this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
@@ -392,6 +395,7 @@ class DefaultClient implements Client {
                 tab_size: other.editorTabSize,
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
+                defaultSystemIncludePath: settings.defaultSystemIncludePath,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
                 dimInactiveRegions: settings.dimInactiveRegions,
@@ -446,6 +450,7 @@ class DefaultClient implements Client {
             if (changedSettings["commentContinuationPatterns"]) {
                 updateLanguageConfigurations();
             }
+            this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
         }
     }
