@@ -12,75 +12,22 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 const configVersion: number = 3;
 
-let defaultMacConfig: string = `{
-    "name": "Mac",
-    "includePath": [
-        "$\{workspaceFolder\}"
-    ],
-    "defines": [],
-    "intelliSenseMode": "clang-x64",
-    "browse": {
-        "path": [
-            "$\{workspaceFolder\}"
-        ],
-        "limitSymbolsToIncludedHeaders": true,
-        "databaseFilename": ""
-    },
-    "macFrameworkPath": [
-        "/System/Library/Frameworks",
-        "/Library/Frameworks"
-    ]
-}`;
-
-let defaultLinuxConfig: string = `{
-    "name": "Linux",
-    "includePath": [
-        "$\{workspaceFolder\}"
-    ],
-    "defines": [],
-    "intelliSenseMode": "clang-x64",
-    "browse": {
-        "path": [
-            "$\{workspaceFolder\}"
-        ],
-        "limitSymbolsToIncludedHeaders": true,
-        "databaseFilename": ""
-    }
-}`;
-
-let defaultWindowsConfig: string = `{
-    "name": "Win32",
-    "includePath": [
-        "$\{workspaceFolder\}"
-    ],
-    "defines": [
-        "_DEBUG",
-        "UNICODE",
-        "_UNICODE"
-    ],
-    "intelliSenseMode": "msvc-x64",
-    "browse": {
-        "path": [
-            "$\{workspaceFolder\}"
-        ],
-        "limitSymbolsToIncludedHeaders": true,
-        "databaseFilename": ""
-    }
-}`;
-
+// No properties are set in the config since we want to apply vscode settings first (if applicable).
+// That code won't trigger if another value is already set.
+// The property defaults are moved down to applyDefaultIncludePathsAndFrameworks.
 function getDefaultConfig(): Configuration {
     if (process.platform === 'darwin') {
-        return JSON.parse(defaultMacConfig);
+        return { name: "Mac", browse: {} };
     } else if (process.platform === 'win32') {
-        return JSON.parse(defaultWindowsConfig);
+        return { name: "Win32", browse: {} };
     } else {
-        return JSON.parse(defaultLinuxConfig);
+        return { name: "Linux", browse: {} };
     }
 }
 
 function getDefaultCppProperties(): ConfigurationJson {
     return {
-        configurations: [ getDefaultConfig() ],
+        configurations: [getDefaultConfig()],
         version: configVersion
     };
 }
@@ -116,6 +63,7 @@ export interface CompilerDefaults {
     cppStandard: string;
     includes: string[];
     frameworks: string[];
+    intelliSenseMode: string;
 }
 
 export class CppProperties {
@@ -132,6 +80,7 @@ export class CppProperties {
     private defaultCppStandard: string = null;
     private defaultIncludes: string[] = null;
     private defaultFrameworks: string[] = null;
+    private defaultIntelliSenseMode: string = null;
     private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
@@ -148,7 +97,7 @@ export class CppProperties {
         let rootPath: string = rootUri ? rootUri.fsPath : "";
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
-        
+
         let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
         if (fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
@@ -196,6 +145,7 @@ export class CppProperties {
         this.defaultCppStandard = compilerDefaults.cppStandard;
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
+        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
@@ -217,7 +167,10 @@ export class CppProperties {
     public onDidChangeSettings(): void {
         // Default settings may have changed in a way that affects the configuration.
         // Just send another message since the language server will sort out whether anything important changed or not.
-        if (!this.configurationIncomplete) {
+        if (!this.propertiesFile) {
+            this.resetToDefaultSettings(true);
+            this.handleConfigurationChange();
+        } else if (!this.configurationIncomplete) {
             this.handleConfigurationChange();
         }
     }
@@ -236,27 +189,37 @@ export class CppProperties {
             let configuration: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             let settings: CppSettings = new CppSettings(this.rootUri);
 
-            // Do compilerPath first so that we can avoid adding system includes to the includePath when possible.
-            if (this.defaultCompilerPath && !settings.defaultCompilerPath) {
-                configuration.compilerPath = this.defaultCompilerPath;
-            }
+            // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
+            // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
+            // to the setting will be lost if this configuration is saved into a c_cpp_properties.json file.
 
-            // Only add default settings if user hasn't explicitly set one of the VS Code settings and
-            // there is no compiler set.
-            if (!settings.defaultIncludePath && !configuration.compilerPath) {
-                configuration.includePath = this.defaultIncludes;
+            // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
+
+            if (!settings.defaultIncludePath) {
+                // We don't add system includes to the includePath anymore. The language server has this information.
+                configuration.includePath = ["${workspaceFolder}"];
+            }
+            if (!settings.defaultDefines) {
+                configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
             }
             if (!settings.defaultBrowsePath) {
-                configuration.browse.path = this.defaultIncludes;
+                // We don't add system includes to the browse.path anymore. The language server has this information.
+                configuration.browse.path = ["${workspaceFolder}"];
             }
-            if (process.platform === 'darwin' && !settings.defaultMacFrameworkPath) {
+            if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
             }
-            if (this.defaultCStandard && !settings.defaultCStandard) {
+            if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
+                configuration.compilerPath = this.defaultCompilerPath;
+            }
+            if (!settings.defaultCStandard && this.defaultCStandard) {
                 configuration.cStandard = this.defaultCStandard;
             }
-            if (this.defaultCppStandard && !settings.defaultCppStandard) {
+            if (!settings.defaultCppStandard && this.defaultCppStandard) {
                 configuration.cppStandard = this.defaultCppStandard;
+            }
+            if (!settings.defaultIntelliSenseMode) {
+                configuration.intelliSenseMode = this.defaultIntelliSenseMode;
             }
             this.configurationIncomplete = false;
         }
@@ -313,7 +276,7 @@ export class CppProperties {
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             if (config.includePath === undefined) {
-                config.includePath = [ "${default}" ];
+                config.includePath = ["${default}"];
             }
             config.includePath.splice(config.includePath.length, 0, path);
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
