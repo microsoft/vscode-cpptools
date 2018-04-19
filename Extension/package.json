@@ -208,7 +208,7 @@
             "Back Slash"
           ],
           "default": "Forward Slash",
-          "description": "The character used as a separator for #include auto-completion results",
+          "description": "The character used as a path separator for #include auto-completion results.",
           "scope": "resource"
         },
         "C_Cpp.commentContinuationPatterns": {
