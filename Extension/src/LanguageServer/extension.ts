@@ -7,7 +7,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as events from 'events';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { UI, getUI } from './ui';

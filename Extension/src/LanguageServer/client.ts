@@ -8,7 +8,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
-    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams } from 'vscode-languageclient';
+    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
+} from 'vscode-languageclient';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
