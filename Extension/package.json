@@ -201,6 +201,16 @@
           "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
           "scope": "resource"
         },
+        "C_Cpp.preferredPathSeparator": {
+          "type": "string",
+          "enum": [
+            "Forward Slash",
+            "Back Slash"
+          ],
+          "default": "Forward Slash",
+          "description": "The character used as a separator for #include auto-completion results",
+          "scope": "resource"
+        },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [
