@@ -8,7 +8,28 @@ import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import { SourceFileConfiguration, CustomConfigurationProvider } from '../api';
-import { getActiveCustomConfigurationProvider } from './extension';
+import { customConfigurationProviders } from './extension';
+
+function runThenableWithTimeout(promise: Thenable<any>, ms: number): Thenable<any> {
+    let timer: NodeJS.Timer;
+
+    // Create a promise that rejects in <ms> milliseconds
+    let timeout: Promise<any> = new Promise((resolve, reject) => {
+        timer = setTimeout(() => {
+            clearTimeout(timer);
+            reject("Timed out in " + ms + "ms.");
+        }, ms);
+    });
+
+    // Returns a race between our timeout and the passed in promise
+    return Promise.race([
+        promise,
+        timeout
+    ]).then((result: any) => {
+        clearTimeout(timer);
+        return result;
+    });
+}
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -25,18 +46,25 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-                let provider: CustomConfigurationProvider = getActiveCustomConfigurationProvider(); 
-                if (provider) {
-                    // If custom config provider exists, ask for the custom configuration and send a notification to the server
-                    // before the textDocument/didOpen message so that the right information is used when the file is opened.
-                    provider.provideConfiguration(document.uri)
-                    .then((config: SourceFileConfiguration) => {
-                        me.sendCustomConfiguration(document, config);
-                        sendMessage(document);
-                    });
-                } else {
-                    sendMessage(document);
-                }
+
+                // Loop through registered providers until one is able to service the current document
+                customConfigurationProviders.some((provider: CustomConfigurationProvider): boolean => {
+                    let canProvide: boolean = provider.canProvideConfiguration(document.uri);
+                    if (canProvide) {
+                        runThenableWithTimeout(
+                            provider.provideConfiguration(document.uri), 1000).then((result: SourceFileConfiguration) => {
+                                me.sendCustomConfiguration(document, result);
+                                sendMessage(document);
+                            }, (error: any) => {
+                                // Timed out
+                                sendMessage(document);
+                            });
+                    }
+                    return canProvide;
+                });
+
+                // No custom providers
+                sendMessage(document);
             }
         },
         didChange: defaultHandler,

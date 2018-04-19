@@ -29,8 +29,8 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-let customConfigurationProviders: CustomConfigurationProvider[] = [];
-let activeCustomConfigurationProviderIndex: number = 0;
+
+export let customConfigurationProviders: CustomConfigurationProvider[] = [];
 
 /**
  * activate: set up the extension for language services
@@ -66,12 +66,6 @@ export function activate(activationEventOccurred: boolean): void {
 
 export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
     customConfigurationProviders.push(provider);
-}
-
-export function getActiveCustomConfigurationProvider(): CustomConfigurationProvider | undefined {
-    if (customConfigurationProviders.length > 0) {
-        return customConfigurationProviders[activeCustomConfigurationProviderIndex];
-    }
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
