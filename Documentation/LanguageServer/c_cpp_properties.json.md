@@ -81,4 +81,4 @@
   When true, the Tag Parser will only parse code files that have been directly or indirectly included by a source file in `${workspaceRoot}`. When false, the Tag Parser will parse all code files found in the paths specified in the **path** list.
 
 * #### `databaseFilename`
-  When set, this instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The `${workspaceRoot}` variable can be used to specify a path relative to the workspace folder (e.g. `$[workspaceRoot}/.vscode/browse.vc.db`)
+  When set, this instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The `${workspaceRoot}` variable can be used to specify a path relative to the workspace folder (e.g. `${workspaceRoot}/.vscode/browse.vc.db`)
