@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.17.0: May 7, 2018
+* Auto-complete for headers after typing `#include`. [#802](https://github.com/Microsoft/vscode-cpptools/issues/802)
+* Configuration improvements. [#1338](https://github.com/Microsoft/vscode-cpptools/issues/1338)
+  * potentially addresses: [#368](https://github.com/Microsoft/vscode-cpptools/issues/368), [#410](https://github.com/Microsoft/vscode-cpptools/issues/410), [#1229](https://github.com/Microsoft/vscode-cpptools/issues/1229), [#1270](https://github.com/Microsoft/vscode-cpptools/issues/)
+* Add support for querying system includes/defines from compilers in WSL environment.
+
 ## Version 0.16.1: March 30, 2018
 * Fix random deadlock caused by logging code on Linux/Mac. [#1759](https://github.com/Microsoft/vscode-cpptools/issues/1759)
 * Fix compiler from `compileCommands` not being queried for includes/defines if `compilerPath` isn't set on Windows. [#1754](https://github.com/Microsoft/vscode-cpptools/issues/1754)

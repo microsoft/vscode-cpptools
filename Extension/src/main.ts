@@ -313,7 +313,8 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ResumeParsing",
         "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
-        "onDebug"
+        "onDebug",
+        "workspaceContains:/.vscode/c_cpp_properties.json"
     ];
 
     return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
