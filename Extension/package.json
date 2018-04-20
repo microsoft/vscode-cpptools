@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.16.1",
+  "version": "0.17.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -1295,6 +1295,7 @@
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
+    "update": "^0.7.4",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.0.11",
@@ -1304,7 +1305,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871264",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872599",
       "platforms": [
         "linux"
       ],
@@ -1318,7 +1319,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871265",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872600",
       "platforms": [
         "linux"
       ],
@@ -1334,7 +1335,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871266",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872601",
       "platforms": [
         "darwin"
       ],
@@ -1345,7 +1346,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871267",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872602",
       "platforms": [
         "win32"
       ],
@@ -1353,7 +1354,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848955",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872607",
       "platforms": [
         "linux"
       ],
@@ -1366,7 +1367,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=864640",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872608",
       "platforms": [
         "linux"
       ],
@@ -1381,7 +1382,7 @@
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848956",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872609",
       "platforms": [
         "darwin"
       ],
@@ -1391,7 +1392,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848957",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872610",
       "platforms": [
         "win32"
       ],
