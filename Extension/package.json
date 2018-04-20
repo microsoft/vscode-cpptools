@@ -1295,7 +1295,6 @@
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
-    "update": "^0.7.4",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.0.11",
