@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.16.1",
+  "version": "0.17.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -199,6 +199,16 @@
           ],
           "default": "checkFolders",
           "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
+          "scope": "resource"
+        },
+        "C_Cpp.preferredPathSeparator": {
+          "type": "string",
+          "enum": [
+            "Forward Slash",
+            "Back Slash"
+          ],
+          "default": "Forward Slash",
+          "description": "The character used as a path separator for #include auto-completion results.",
           "scope": "resource"
         },
         "C_Cpp.commentContinuationPatterns": {
@@ -1294,7 +1304,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871264",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872599",
       "platforms": [
         "linux"
       ],
@@ -1308,7 +1318,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871265",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872600",
       "platforms": [
         "linux"
       ],
@@ -1324,7 +1334,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871266",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872601",
       "platforms": [
         "darwin"
       ],
@@ -1335,7 +1345,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871267",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872602",
       "platforms": [
         "win32"
       ],
@@ -1343,7 +1353,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848955",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872607",
       "platforms": [
         "linux"
       ],
@@ -1356,7 +1366,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=864640",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872608",
       "platforms": [
         "linux"
       ],
@@ -1371,7 +1381,7 @@
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848956",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872609",
       "platforms": [
         "darwin"
       ],
@@ -1381,7 +1391,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848957",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872610",
       "platforms": [
         "win32"
       ],

@@ -401,7 +401,8 @@ class DefaultClient implements Client {
                 dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
-                exclusionPolicy: settings.exclusionPolicy
+                exclusionPolicy: settings.exclusionPolicy,
+                preferredPathSeparator: settings.preferredPathSeparator
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {
