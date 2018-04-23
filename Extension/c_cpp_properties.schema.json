@@ -11,7 +11,7 @@
                 ],
                 "properties": {
                     "name": {
-                        "description": "Configuration identifier. Mac, Linux, or Win32 are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.",
+                        "description": "Configuration identifier. Mac, Linux, and Win32 are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.",
                         "type": "string"
                     },
                     "compilerPath": {
@@ -24,7 +24,8 @@
                         "enum": [
                             "c89",
                             "c99",
-                            "c11"
+                            "c11",
+                            "${default}"
                         ]
                     },
                     "cppStandard": {
@@ -35,7 +36,8 @@
                             "c++03",
                             "c++11",
                             "c++14",
-                            "c++17"
+                            "c++17",
+                            "${default}"
                         ]
                     },
                     "compileCommands": {
@@ -64,12 +66,13 @@
                         }
                     },
                     "intelliSenseMode": {
+                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64 and Linux/Mac default to clang-x64.",
                         "type": "string",
                         "enum": [
                             "msvc-x64",
-                            "clang-x64"
-                        ],
-                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64 and Linux/Mac default to clang-x64."
+                            "clang-x64",
+                            "${default}"
+                        ]
                     },
                     "forcedInclude": {
                         "description": "A list of files that should be included before any include file in a translation unit.",

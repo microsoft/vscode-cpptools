@@ -282,7 +282,7 @@
             "null"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"compileCommands\" is not specified, or the values to insert if \"${default}\" is present in \"compileCommands\".",
+          "description": "The value to use in a configuration if \"compileCommands\" is either not specified, or set to \"${default}\".",
           "scope": "resource"
         },
         "C_Cpp.default.forcedInclude": {
@@ -307,7 +307,7 @@
             "clang-x64"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"intelliSenseMode\" is not specified, or the values to insert if \"${default}\" is present in \"intelliSenseMode\".",
+          "description": "The value to use in a configuration if \"intelliSenseMode\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
         "C_Cpp.default.compilerPath": {
@@ -316,7 +316,7 @@
             "null"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"compilerPath\" is not specified, or the values to insert if \"${default}\" is present in \"compilerPath\".",
+          "description": "The value to use in a configuration if \"compilerPath\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
         "C_Cpp.default.cStandard": {
@@ -330,7 +330,7 @@
             "c11"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"cStandard\" is not specified, or the values to insert if \"${default}\" is present in \"cStandard\".",
+          "description": "The value to use in a configuration if \"cStandard\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
@@ -346,7 +346,7 @@
             "c++17"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"cppStandard\" is not specified, or the values to insert if \"${default}\" is present in \"cppStandard\".",
+          "description": "The value to use in a configuration if \"cppStandard\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
         "C_Cpp.default.browse.path": {
@@ -367,13 +367,13 @@
             "null"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"browse.databaseFilename\" is not specified, or the values to insert if \"${default}\" is present in \"browse.databaseFilename\".",
+          "description": "The value to use in a configuration if \"browse.databaseFilename\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
         "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": {
           "type": "boolean",
           "default": true,
-          "description": "The value to use in a configuration if \"browse.limitSymbolsToIncludedHeaders\" is not specified, or the values to insert if \"${default}\" is present in \"browse.limitSymbolsToIncludedHeaders\".",
+          "description": "The value to use in a configuration if \"browse.limitSymbolsToIncludedHeaders\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
         "C_Cpp.default.systemIncludePath": {
