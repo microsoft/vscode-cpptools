@@ -86,7 +86,10 @@
                         "properties": {
                             "limitSymbolsToIncludedHeaders": {
                                 "description": "true to process only those files directly or indirectly included as headers, false to process all files under the specified include paths.",
-                                "type": "boolean"
+                                "type": [
+                                    "boolean",
+                                    "string"
+                                ]
                             },
                             "databaseFilename": {
                                 "description": "Path to the generated symbol database. If a relative path is specified, it will be made relative to the workspace's default storage location.",
