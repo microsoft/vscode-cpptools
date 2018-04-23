@@ -9,6 +9,7 @@ const gulp = require('gulp');
 const env = require('gulp-env')
 const tslint = require('gulp-tslint');
 const mocha = require('gulp-mocha');
+const fs = require('fs');
 
 gulp.task('allTests', () => {
     gulp.start('unitTests');
@@ -73,4 +74,12 @@ gulp.task('tslint', () => {
             summarizeFailureOutput: false,
             emitError: false
         }))
+});
+
+gulp.task('pr-check', () => {
+    const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
+    if (packageJson.activationEvents.length !== 1 &&  packageJson.activationEvents[0] !== '*') {
+        console.log('Please make sure to not check in package.json that has been rewritten by the extension activation. If you intended to have changes in package.json, please only check-in your changes. If you did not, please run `git checkout -- package.json`.');
+        process.exit(1);
+    }
 });
