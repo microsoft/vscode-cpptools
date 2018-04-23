@@ -472,7 +472,7 @@ export class CppProperties {
                 throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
             }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
-                this.CurrentConfiguration < this.configurationJson.configurations.length) {
+                this.CurrentConfiguration >= 0 && this.CurrentConfiguration < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
                     if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
                         this.currentConfigurationIndex.Value = i;
@@ -481,7 +481,7 @@ export class CppProperties {
                 }
             }
             this.configurationJson = newJson;
-            if (this.CurrentConfiguration >= newJson.configurations.length) {
+            if (this.CurrentConfiguration < 0 || this.CurrentConfiguration >= newJson.configurations.length) {
                 this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
             }
 

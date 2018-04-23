@@ -395,14 +395,16 @@ class DefaultClient implements Client {
                 tab_size: other.editorTabSize,
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
-                defaultSystemIncludePath: settings.defaultSystemIncludePath,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
                 dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
                 exclusionPolicy: settings.exclusionPolicy,
-                preferredPathSeparator: settings.preferredPathSeparator
+                preferredPathSeparator: settings.preferredPathSeparator,
+                default: {
+                    systemIncludePath: settings.defaultSystemIncludePath
+                }
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {
