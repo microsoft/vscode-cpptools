@@ -12,7 +12,7 @@ Starting with version 0.16.1, if you set the `compilerPath` property and change 
             "intelliSenseMode": "clang-x64",
             "compilerPath": "C:/MinGW/bin/gcc.exe",
             "includePath": [
-                "${workspaceRoot}",
+                "${workspaceRoot}"
             ],
             "defines": [
                 "_DEBUG"
@@ -21,8 +21,8 @@ Starting with version 0.16.1, if you set the `compilerPath` property and change 
                 "path": [
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include",
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include-fixed",
-                    "C:/MinGW/include/*"
-                    "${workspaceRoot}",
+                    "C:/MinGW/include/*",
+                    "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -63,8 +63,8 @@ In earlier versions of the extension, the `includePath` and a some system define
                 "path": [
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include",
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include-fixed",
-                    "C:/MinGW/include/*"
-                    "${workspaceRoot}",
+                    "C:/MinGW/include/*",
+                    "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -99,8 +99,8 @@ For C projects, simply remove the C++ lines:
                 "path": [
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include",
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include-fixed",
-                    "C:/MinGW/include/*"
-                    "${workspaceRoot}",
+                    "C:/MinGW/include/*",
+                    "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
