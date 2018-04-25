@@ -26,7 +26,9 @@ Starting with version 0.16.1, if you set the `compilerPath` property and change 
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
-            }
+            },
+            "cStandard": "c11",
+            "cppStandard": "c++17"
         }
     ],
     "version": 3
