@@ -12,7 +12,7 @@ Starting with version 0.16.1, if you set the `compilerPath` property and change 
             "intelliSenseMode": "clang-x64",
             "compilerPath": "C:/MinGW/bin/gcc.exe",
             "includePath": [
-                "${workspaceRoot}"
+                "${workspaceFolder}"
             ],
             "defines": [
                 "_DEBUG"
@@ -22,7 +22,7 @@ Starting with version 0.16.1, if you set the `compilerPath` property and change 
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include",
                     "C:/MinGW/lib/gcc/mingw32/6.3.0/include-fixed",
                     "C:/MinGW/include/*",
-                    "${workspaceRoot}"
+                    "${workspaceFolder}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
