@@ -13,7 +13,7 @@
   },
   "classt": {
     "prefix": "classt",
-    "body": "\ntemplate<typename T}>\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\tT ${2:/* data */}\npublic:\n\t${1}(T ${3:/* args */});\n};\n",
+    "body": "\ntemplate<typename T>\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\tT ${2:/* data */}\npublic:\n\t${1}(T ${3:/* args */});\n};\n",
     "description": "Code snippet for class template",
     "scope": "source.c++, source.objc++"
   },
