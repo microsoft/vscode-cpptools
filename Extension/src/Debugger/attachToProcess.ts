@@ -3,10 +3,15 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as vscode from 'vscode';
 import { execChildProcess } from '../common';
 import { PsProcessParser } from './nativeAttach';
+
+import * as debugUtils from './utils';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import * as util from '../common';
+import * as vscode from 'vscode';
 
 export interface AttachItem extends vscode.QuickPickItem {
     id: string;
@@ -49,20 +54,47 @@ export class RemoteAttachPicker {
 
     private _channel: vscode.OutputChannel = null;
 
-    public ShowAttachEntries(args: any): Promise<string> {
+    public ShowAttachEntries(config: any): Promise<string> {
         return util.isExtensionReady().then(ready => {
             if (!ready) {
                 util.displayExtensionNotReadyPrompt();
             } else {
                 this._channel.clear();
 
-                let pipeTransport: any = args ? args.pipeTransport : null;
+                let pipeTransport: any = config ? config.pipeTransport : null;
 
                 if (pipeTransport === null) {
                     return Promise.reject<string>(new Error("Chosen debug configuration does not contain pipeTransport"));
                 }
 
-                let pipeProgram: string = pipeTransport.pipeProgram;
+                let pipeProgram: string = null;
+
+                if (os.platform() === 'win32' &&
+                    pipeTransport.pipeProgram &&
+                    !fs.existsSync(pipeTransport.pipeProgram)) {
+                    const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
+                    const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch];
+                    
+                    // Check for pipeProgram
+                    if (!fs.existsSync(config.pipeTransport.pipeProgram)) {
+                        pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
+                    }
+
+                    // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+                    if (!pipeProgram && config.pipeTransport.pipeCwd) {
+                        const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                        const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+                        
+                        if (!fs.existsSync(newPipeProgramStr)) {
+                            pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
+                        }
+                    }
+                }
+
+                if (!pipeProgram) {
+                    pipeProgram = pipeTransport.pipeProgram;
+                }
+
                 let pipeArgs: string[] = pipeTransport.pipeArgs;
 
                 let argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);

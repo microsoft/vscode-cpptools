@@ -3,8 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import * as debugUtils from './utils';
 import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
+
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
 
@@ -32,6 +35,29 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
         if (config.type === 'cppvsdbg' && os.platform() !== 'win32') {
             vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
             return undefined;
+        }
+
+        // Modify WSL config for OpenDebugAD7
+        if (os.platform() === 'win32' &&
+            config.pipeTransport &&
+            config.pipeTransport.pipeProgram) {
+            let replacedPipeProgram: string = null;
+            const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
+
+            // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
+            replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
+
+            // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+            if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
+                const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+                
+                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
+            }
+
+            if (replacedPipeProgram) {
+                config.pipeTransport.pipeProgram = replacedPipeProgram;
+            }
         }
 
         return config;
