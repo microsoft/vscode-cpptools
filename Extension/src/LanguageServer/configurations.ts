@@ -255,6 +255,10 @@ export class CppProperties {
             }
         }
         catch(error) {}
+        finally {
+            this.vcpkgPathReady = true;
+            this.handleConfigurationChange();
+        }
     }
 
     private getConfigIndexForPlatform(config: any): number {
