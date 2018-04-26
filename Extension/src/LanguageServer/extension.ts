@@ -336,9 +336,9 @@ function onToggleSnippets(): void {
     // This will apply to all clients as it's a global toggle. It will require a reload.
     const snippetsCatName: string  = "Snippets";
     const snippetsNodeName: string = "snippets";
-    let newPackageJson = util.getRawPackageJson();
+    let newPackageJson: any = util.getRawPackageJson();
 
-    if (newPackageJson.categories.findIndex(function (cat) { return cat === snippetsCatName; }) == -1) {
+    if (newPackageJson.categories.findIndex(cat => cat === snippetsCatName) === -1) {
         // Add the Snippet category and snippets node. 
 
         newPackageJson.categories.push(snippetsCatName);
