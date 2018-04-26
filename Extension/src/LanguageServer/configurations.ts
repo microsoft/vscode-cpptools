@@ -10,7 +10,6 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
-import { doesNotThrow } from 'assert';
 const configVersion: number = 3;
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
@@ -230,12 +229,10 @@ export class CppProperties {
     }
 
     private async buildVcpkgIncludePath() {
-        const vcpkgConfigPath:string = "c:/users/jimgries/AppData/Local/vcpkg/vcpkg.path.txt";
-
         try {
             // Check for vcpkg instance and include relevent paths if found.
             if (await util.checkFileExists(util.getVcpkgHomePath())) {
-                let vcpkgRoot: string = await util.readFileText(vcpkgConfigPath);
+                let vcpkgRoot: string = await util.readFileText(util.getVcpkgHomePath());
                 let vcpkgInstallPath: string = path.join(vcpkgRoot.slice(0, vcpkgRoot.lastIndexOf("\r\n")), "/vcpkg/installed");
                 if (await util.checkDirectoryExists(vcpkgInstallPath)) {
                     fs.readdir(vcpkgInstallPath, (err, list) => {
@@ -244,8 +241,10 @@ export class CppProperties {
                             if (entry != "vcpkg") {
                                let pathToCheck: string = path.join(vcpkgInstallPath, entry);
                                if (fs.existsSync(pathToCheck)) {
-                                   var s = path.join(pathToCheck,"include");
-                                   this.vcpkgIncludes.push(s);
+                                    let p: string = path.join(pathToCheck,"include");
+                                    if (fs.existsSync(p)) {
+                                        this.vcpkgIncludes.push(p);
+                                    }
                                }
                             }
                         });
