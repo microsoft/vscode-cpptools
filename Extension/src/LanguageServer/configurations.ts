@@ -234,7 +234,7 @@ export class CppProperties {
             // Check for vcpkg instance and include relevent paths if found.
             if (await util.checkFileExists(util.getVcpkgHomePath())) {
                 let vcpkgRoot: string = await util.readFileText(util.getVcpkgHomePath());
-                let vcpkgInstallPath: string = path.join(vcpkgRoot.slice(0, vcpkgRoot.lastIndexOf("\r\n")), "/vcpkg/installed");
+                let vcpkgInstallPath: string = path.join(vcpkgRoot.trim(), "/vcpkg/installed");
                 if (await util.checkDirectoryExists(vcpkgInstallPath)) {
                     fs.readdir(vcpkgInstallPath, (err, list) => {
                         // For every *directory* in the list (non-recursive)
