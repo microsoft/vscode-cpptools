@@ -49,7 +49,7 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
-export function getVcpkgHomePath(): string {
+export function getVcpkgPathDescriptorFile(): string {
     if (process.platform === 'win32') {
         return path.join(process.env.LOCALAPPDATA, "vcpkg/vcpkg.path.txt");
     } else {

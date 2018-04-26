@@ -232,8 +232,8 @@ export class CppProperties {
     private async buildVcpkgIncludePath() {
         try {
             // Check for vcpkg instance and include relevent paths if found.
-            if (await util.checkFileExists(util.getVcpkgHomePath())) {
-                let vcpkgRoot: string = await util.readFileText(util.getVcpkgHomePath());
+            if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
+                let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
                 let vcpkgInstallPath: string = path.join(vcpkgRoot.trim(), "/vcpkg/installed");
                 if (await util.checkDirectoryExists(vcpkgInstallPath)) {
                     fs.readdir(vcpkgInstallPath, (err, list) => {
@@ -254,9 +254,12 @@ export class CppProperties {
                     })
                 };
             }
+            else {
+                this.vcpkgPathReady = true;
+                this.handleConfigurationChange();
+            }
         }
-        catch(error) {}
-        finally {
+        catch(error) {
             this.vcpkgPathReady = true;
             this.handleConfigurationChange();
         }
