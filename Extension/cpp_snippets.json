@@ -109,7 +109,7 @@
   },
   "ifd": {
     "prefix": "ifnd",
-    "body": "\n#if defined($1)\n#define ${1:MACRO}\n\n${0}\n\n#endif // $1\n",
+    "body": "\n#if defined($1)\n\n${0}\n\n#endif // $1\n",
     "description": "Code snippet for if defined()",
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },

@@ -344,22 +344,23 @@ function onToggleSnippets(): void {
         newPackageJson.categories.push(snippetsCatName);
         newPackageJson.contributes[snippetsNodeName] = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
 
-        fs.writeFileSync(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson));
-        showReloadPrompt("Reload Window to finish enabling C++ snippets");
-    }
-    else {
+        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
+            showReloadPrompt("Reload Window to finish enabling C++ snippets");
+        });
+        
+    } else {
         // Remove the category and snippets node.
-
         let ndxCat = newPackageJson.categories.indexOf(snippetsCatName);
-        if (ndxCat != -1)
+        if (ndxCat != -1) {
             newPackageJson.categories.splice(ndxCat, 1);
+        }
 
         delete newPackageJson.contributes[snippetsNodeName];
 
-        fs.writeFileSync(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson));
-        showReloadPrompt("Reload Window to finish disabling C++ snippets");
+        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
+            showReloadPrompt("Reload Window to finish disabling C++ snippets");
+        });
     }
-
 }
 
 function showReloadPrompt(msg: string): void { 
