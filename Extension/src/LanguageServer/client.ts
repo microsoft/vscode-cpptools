@@ -340,18 +340,24 @@ class DefaultClient implements Client {
                 // Listen for messages from the language server.
                 this.registerNotifications();
                 this.registerFileWatcher();
-            }, () => {
+            }, (err) => {
                 this.isSupported = false;   // Running on an OS we don't support yet.
                 if (!this.failureMessageShown.Value) {
                     this.failureMessageShown.Value = true;
-                    vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled.");
+                    vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
                 }
             });
-        } catch {
+        } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
+            let additionalInfo: string;
+            if (err.code === "EPERM") {
+                additionalInfo = `EPERM: Check permissions for '${getLanguageServerFileName()}'`;
+            } else {
+                additionalInfo = String(err);
+            }
             if (!this.failureMessageShown.Value) {
                 this.failureMessageShown.Value = true;
-                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled.");
+                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + additionalInfo);
             }
         }
     }
