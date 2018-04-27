@@ -197,7 +197,7 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"];
+                configuration.includePath = ["${workspaceFolder}/**"];
             }
             if (!settings.defaultDefines) {
                 configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
