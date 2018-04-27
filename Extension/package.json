@@ -437,14 +437,6 @@
         "category": "C/Cpp"
       },
       {
-        "command": "workbench.action.gotoSymbol",
-        "title": "Go to Symbol in File..."
-      },
-      {
-        "command": "workbench.action.showAllSymbols",
-        "title": "Go to Symbol in Workspace..."
-      },
-      {
         "command": "C_Cpp.ShowReleaseNotes",
         "title": "Show Release Notes",
         "category": "C/Cpp"
@@ -1459,7 +1451,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=852926",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872985",
       "platforms": [
         "win32"
       ],
