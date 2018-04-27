@@ -287,6 +287,16 @@ export function checkDirectoryExists(dirPath: string): Promise<boolean> {
     });
 }
 
+/** Read the files in a directory */
+export function readDir(dirPath: string): Promise<string[]> {
+    return new Promise((resolve) => {
+        fs.readdir(dirPath, (err, list) => {
+            resolve(list);
+            });
+        });
+}
+
+
 /** Test whether the lock file exists.*/
 export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());

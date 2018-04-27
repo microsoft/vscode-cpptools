@@ -236,33 +236,28 @@ export class CppProperties {
                 let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
                 let vcpkgInstallPath: string = path.join(vcpkgRoot.trim(), "/vcpkg/installed");
                 if (await util.checkDirectoryExists(vcpkgInstallPath)) {
-                    fs.readdir(vcpkgInstallPath, (err, list) => {
-                        // For every *directory* in the list (non-recursive)
-                        list.forEach((entry) => {
-                            if (entry != "vcpkg") {
-                               let pathToCheck: string = path.join(vcpkgInstallPath, entry);
-                               if (fs.existsSync(pathToCheck)) {
-                                    let p: string = path.join(pathToCheck,"include");
-                                    if (fs.existsSync(p)) {
-                                        this.vcpkgIncludes.push(p);
-                                    }
-                               }
+                    let list: string[] = await util.readDir(vcpkgInstallPath);
+                    // For every *directory* in the list (non-recursive)
+                    list.forEach((entry) => {
+                        if (entry != "vcpkg") {
+                            let pathToCheck: string = path.join(vcpkgInstallPath, entry);
+                            if (fs.existsSync(pathToCheck)) {
+                                let p: string = path.join(pathToCheck,"include");
+                                if (fs.existsSync(p)) {
+                                    this.vcpkgIncludes.push(p);
+                                }
                             }
-                        });
-                        this.vcpkgPathReady = true;
-                        this.handleConfigurationChange();
-                    })
+                        }
+                    });
                 };
             }
-            else {
-                this.vcpkgPathReady = true;
-                this.handleConfigurationChange();
-            }
         }
-        catch(error) {
+        catch(error) {}
+        finally {
             this.vcpkgPathReady = true;
             this.handleConfigurationChange();
         }
+
     }
 
     private getConfigIndexForPlatform(config: any): number {
