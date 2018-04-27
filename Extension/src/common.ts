@@ -296,7 +296,6 @@ export function readDir(dirPath: string): Promise<string[]> {
         });
 }
 
-
 /** Test whether the lock file exists.*/
 export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());
