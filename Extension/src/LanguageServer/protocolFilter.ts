@@ -8,7 +8,7 @@ import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import { SourceFileConfiguration, CustomConfigurationProvider } from '../api';
-import { customConfigurationProviders } from './extension';
+import { provideCustomConfiguration } from './extension';
 
 function runThenableWithTimeout(promise: Thenable<any>, ms: number): Thenable<any> {
     let timer: NodeJS.Timer;
@@ -28,6 +28,9 @@ function runThenableWithTimeout(promise: Thenable<any>, ms: number): Thenable<an
     ]).then((result: any) => {
         clearTimeout(timer);
         return result;
+    }, (error: any) => {
+        clearTimeout(timer);
+        throw error;
     });
 }
 
@@ -46,26 +49,17 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-
-                // Loop through registered providers until one is able to service the current document
-                let hasProvider: boolean = customConfigurationProviders.some((provider: CustomConfigurationProvider): boolean => {
-                    let canProvide: boolean = provider.canProvideConfiguration(document.uri);
-                    if (canProvide) {
-                        runThenableWithTimeout(
-                            provider.provideConfiguration(document.uri), 1000).then((result: SourceFileConfiguration) => {
-                                me.sendCustomConfiguration(document, result);
-                                sendMessage(document);
-                            }, (error: any) => {
-                                // Timed out
-                                sendMessage(document);
-                            });
-                    }
-                    return canProvide;
-                });
-
-                if (!hasProvider) {
+                runThenableWithTimeout(provideCustomConfiguration(document).then((config: SourceFileConfiguration) => {
+                    me.sendCustomConfiguration(document, config);
                     sendMessage(document);
-                }
+                }, (error: any) => {
+                    // No config provider found for document
+                    sendMessage(document);
+                }), 1000).then((result: any) => {}, (error: any) => {
+                    // Timed out
+                    // TODO: Send cancellation to provider
+                    sendMessage(document);
+                });
             }
         },
         didChange: defaultHandler,

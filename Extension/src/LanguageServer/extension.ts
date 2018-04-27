@@ -15,7 +15,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
-import { CustomConfigurationProvider } from '../api'; 
+import { CustomConfigurationProvider, SourceFileConfiguration } from '../api'; 
 import * as os from 'os';
 
 let prevCrashFile: string;
@@ -28,8 +28,7 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-
-export let customConfigurationProviders: CustomConfigurationProvider[] = [];
+let customConfigurationProviders: CustomConfigurationProvider[] = [];
 
 /**
  * activate: set up the extension for language services
@@ -65,6 +64,25 @@ export function activate(activationEventOccurred: boolean): void {
 
 export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
     customConfigurationProviders.push(provider);
+}
+
+export function provideCustomConfiguration(document: vscode.TextDocument): Thenable<SourceFileConfiguration> {
+    // Loop through registered providers until one is able to service the current document
+    let customConfigProvider: CustomConfigurationProvider;
+
+    customConfigurationProviders.some((provider: CustomConfigurationProvider): boolean => {
+        let canProvide: boolean = provider.canProvideConfiguration(document.uri);
+        if (canProvide) {
+            customConfigProvider = provider;
+        }
+        return canProvide;
+    });
+
+    if (customConfigProvider) {
+        return customConfigProvider.provideConfiguration(document.uri);
+    } else {
+        Promise.reject("No providers found for " + document.uri);
+    }
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
