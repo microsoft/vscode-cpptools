@@ -49,7 +49,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-                runThenableWithTimeout(provideCustomConfiguration(document).then((config: SourceFileConfiguration) => {
+                me.runBlockingTask(runThenableWithTimeout(provideCustomConfiguration(document).then((config: SourceFileConfiguration) => {
                     me.sendCustomConfiguration(document, config);
                     sendMessage(document);
                 }, (error: any) => {
@@ -59,7 +59,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                     // Timed out
                     // TODO: Send cancellation to provider
                     sendMessage(document);
-                });
+                }));
             }
         },
         didChange: defaultHandler,

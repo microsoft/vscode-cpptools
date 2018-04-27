@@ -230,6 +230,8 @@ export interface Client {
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
+    runBlockingTask<T>(task: Thenable<T>): Thenable<T>;
+    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
     requestGoToDeclaration(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
@@ -312,7 +314,9 @@ class DefaultClient implements Client {
      * @see requestWhenReady<T>(request)
      * @see notifyWhenReady(notify)
      */
-    private onReadyPromise: Thenable<void>;
+
+    private pendingTask: Thenable<any>;
+    private pendingRequests: number = 0;
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         try {
@@ -324,7 +328,7 @@ class DefaultClient implements Client {
             ui = getUI();
             ui.bind(this);
 
-            this.onReadyPromise = languageClient.onReady().then(() => {
+            this.runBlockingTask(languageClient.onReady().then(() => {
                 this.configuration = new configs.CppProperties(this.RootPath);
                 this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                 this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
@@ -351,7 +355,7 @@ class DefaultClient implements Client {
                     this.failureMessageShown.Value = true;
                     vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled.");
                 }
-            });
+            }));
         } catch {
             this.isSupported = false;   // Running on an OS we don't support yet.
             if (!this.failureMessageShown.Value) {
@@ -493,22 +497,50 @@ class DefaultClient implements Client {
     /*************************************************************************************
      * wait until the language client is ready for use before attempting to send messages
      *************************************************************************************/
+    public runBlockingTask<T>(task: Thenable<T>): Thenable<T> {
+        if (this.pendingTask) {
+            return this.requestWhenReady<T>(() => { return task; });
+        } else {
+            this.pendingTask = task;
+            return task.then((result) => {
+                this.pendingTask = undefined;
+                return result;
+            }, (error) => {
+                this.pendingTask = undefined;
+                throw error;
+            });
+        }
+    }
 
-    private requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
-        if (this.languageClient) {
+    public requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
+        if (this.pendingTask === undefined) {
             return request();
-        } else if (this.isSupported && this.onReadyPromise) {
-            return this.onReadyPromise.then(() => request());
+        } else if (this.isSupported && this.pendingTask) {
+            this.pendingRequests++;
+            return this.pendingTask.then(() => {
+                this.pendingRequests--;
+                if (this.pendingRequests === 0) {
+                    this.pendingTask = undefined;
+                }
+                return request();
+            });
         } else {
             return Promise.reject<T>("Unsupported client");
         }
     }
 
     private notifyWhenReady(notify: () => void): void {
-        if (this.languageClient) {
+        if (this.pendingTask === undefined) {
             notify();
-        } else if (this.isSupported && this.onReadyPromise) {
-            this.onReadyPromise.then(() => notify());
+        } else if (this.isSupported && this.pendingTask) {
+            this.pendingRequests++;
+            this.pendingTask.then(() => {
+                this.pendingRequests--;
+                if (this.pendingRequests === 0) {
+                    this.pendingTask = undefined;
+                }
+                notify();
+            });
         }
     }
 
@@ -945,6 +977,8 @@ class NullClient implements Client {
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
+    runBlockingTask<T>(task: Thenable<T>): Thenable<T> { return; }
+    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return; }
     sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
