@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.16.1",
+  "version": "0.17.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -202,6 +202,16 @@
           "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
           "scope": "resource"
         },
+        "C_Cpp.preferredPathSeparator": {
+          "type": "string",
+          "enum": [
+            "Forward Slash",
+            "Backslash"
+          ],
+          "default": "Forward Slash",
+          "description": "The character used as a path separator for #include auto-completion results.",
+          "scope": "resource"
+        },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [
@@ -229,6 +239,154 @@
             ]
           },
           "description": "Defines the editor behavior for when the Enter key is pressed inside a multiline or single line comment block.",
+          "scope": "resource"
+        },
+        "C_Cpp.default.includePath": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use in a configuration if \"includePath\" is not specified, or the values to insert if \"${default}\" is present in \"includePath\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.defines": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use in a configuration if \"defines\" is not specified, or the values to insert if \"${default}\" is present in \"defines\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.macFrameworkPath": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use in a configuration if \"macFrameworkPath\" is not specified, or the values to insert if \"${default}\" is present in \"macFrameworkPath\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.compileCommands": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "The value to use in a configuration if \"compileCommands\" is either not specified, or set to \"${default}\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.forcedInclude": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use in a configuration if \"forcedInclude\" is not specified, or the values to insert if \"${default}\" is present in \"forcedInclude\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.intelliSenseMode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "msvc-x64",
+            "clang-x64"
+          ],
+          "default": null,
+          "description": "The value to use in a configuration if \"intelliSenseMode\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.compilerPath": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "The value to use in a configuration if \"compilerPath\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.cStandard": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "c89",
+            "c99",
+            "c11"
+          ],
+          "default": null,
+          "description": "The value to use in a configuration if \"cStandard\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.cppStandard": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "c++98",
+            "c++03",
+            "c++11",
+            "c++14",
+            "c++17"
+          ],
+          "default": null,
+          "description": "The value to use in a configuration if \"cppStandard\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.browse.path": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use in a configuration if \"browse.path\" is not specified, or the values to insert if \"${default}\" is present in \"browse.path\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.browse.databaseFilename": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "The value to use in a configuration if \"browse.databaseFilename\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": {
+          "type": "boolean",
+          "default": true,
+          "description": "The value to use in a configuration if \"browse.limitSymbolsToIncludedHeaders\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.systemIncludePath": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
           "scope": "resource"
         }
       }
@@ -1162,7 +1320,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871264",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872599",
       "platforms": [
         "linux"
       ],
@@ -1176,7 +1334,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871265",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872600",
       "platforms": [
         "linux"
       ],
@@ -1192,7 +1350,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871266",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872601",
       "platforms": [
         "darwin"
       ],
@@ -1203,7 +1361,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=871267",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872602",
       "platforms": [
         "win32"
       ],
@@ -1211,7 +1369,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848955",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872607",
       "platforms": [
         "linux"
       ],
@@ -1224,7 +1382,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=864640",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872608",
       "platforms": [
         "linux"
       ],
@@ -1239,7 +1397,7 @@
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848956",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872609",
       "platforms": [
         "darwin"
       ],
@@ -1249,7 +1407,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=848957",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=872610",
       "platforms": [
         "win32"
       ],
