@@ -437,14 +437,6 @@
         "category": "C/Cpp"
       },
       {
-        "command": "workbench.action.gotoSymbol",
-        "title": "Go to Symbol in File..."
-      },
-      {
-        "command": "workbench.action.showAllSymbols",
-        "title": "Go to Symbol in Workspace..."
-      },
-      {
         "command": "C_Cpp.ShowReleaseNotes",
         "title": "Show Release Notes",
         "category": "C/Cpp"
