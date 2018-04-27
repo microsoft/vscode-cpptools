@@ -48,6 +48,20 @@ export class CppSettings extends Settings {
     public get workspaceParsingPriority(): boolean { return super.Section.get<boolean>("workspaceParsingPriority"); }
     public get exclusionPolicy(): boolean { return super.Section.get<boolean>("exclusionPolicy"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
+    public get preferredPathSeparator(): string { return super.Section.get<string>("preferredPathSeparator"); }
+    public get defaultIncludePath(): string[] { return super.Section.get<string[]>("default.includePath"); }
+    public get defaultDefines(): string[] { return super.Section.get<string[]>("default.defines"); }
+    public get defaultMacFrameworkPath(): string[] { return super.Section.get<string[]>("default.macFrameworkPath"); }
+    public get defaultCompileCommands(): string { return super.Section.get<string>("default.compileCommands"); }
+    public get defaultForcedInclude(): string[] { return super.Section.get<string[]>("default.forcedInclude"); }
+    public get defaultIntelliSenseMode(): string { return super.Section.get<string>("default.intelliSenseMode"); }
+    public get defaultCompilerPath(): string { return super.Section.get<string>("default.compilerPath"); }
+    public get defaultCStandard(): string { return super.Section.get<string>("default.cStandard"); }
+    public get defaultCppStandard(): string { return super.Section.get<string>("default.cppStandard"); }
+    public get defaultBrowsePath(): string[] { return super.Section.get<string[]>("default.browse.path"); }
+    public get defaultDatabaseFilename(): string { return super.Section.get<string>("default.browse.databaseFilename"); }
+    public get defaultLimitSymbolsToIncludedHeaders(): boolean { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
+    public get defaultSystemIncludePath(): string[] { return super.Section.get<string[]>("default.systemIncludePath"); }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);

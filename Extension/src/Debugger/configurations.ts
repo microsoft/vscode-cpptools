@@ -218,7 +218,8 @@ export class WindowsConfigurations extends Configuration {
 }
 
 export class WSLConfigurations extends Configuration {
-    public bashPipeProgram = "C:\\\\Windows\\\\sysnative\\\\bash.exe";
+    // Detects if the current VSCode is 32-bit and uses the correct bash.exe
+    public bashPipeProgram = process.arch === 'ia32' ? "${env:windir}\\\\sysnative\\\\bash.exe" : "${env:windir}\\\\system32\\\\bash.exe";
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Bash on Windows Launch`;

@@ -47,14 +47,28 @@ export function activate(activationEventOccurred: boolean): void {
 
     // Check if an activation event has already occurred.
     if (activationEventOccurred) {
-        return onActivationEvent();
+        onActivationEvent();
+        return;
     }
-    
+
+    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+            let config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            if (fs.existsSync(config)) {
+                onActivationEvent();
+                return;
+            }
+        }
+    }
+
+    // handle "onLanguage:cpp" and "onLanguage:c" activation events.
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
             if (document.languageId === "cpp" || document.languageId === "c") {
-                return onActivationEvent();
+                onActivationEvent();
+                return;
             }
         }
     }
