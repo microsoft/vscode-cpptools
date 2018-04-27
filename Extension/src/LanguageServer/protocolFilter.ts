@@ -48,7 +48,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 me.TrackedDocuments.add(document);
 
                 // Loop through registered providers until one is able to service the current document
-                customConfigurationProviders.some((provider: CustomConfigurationProvider): boolean => {
+                let hasProvider: boolean = customConfigurationProviders.some((provider: CustomConfigurationProvider): boolean => {
                     let canProvide: boolean = provider.canProvideConfiguration(document.uri);
                     if (canProvide) {
                         runThenableWithTimeout(
@@ -63,8 +63,9 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                     return canProvide;
                 });
 
-                // No custom providers
-                sendMessage(document);
+                if (!hasProvider) {
+                    sendMessage(document);
+                }
             }
         },
         didChange: defaultHandler,
