@@ -229,7 +229,7 @@ export class CppProperties {
         }
     }
 
-    private async buildVcpkgIncludePath() {
+    private async buildVcpkgIncludePath(): Promise<void> {
         try {
             // Check for vcpkg instance and include relevent paths if found.
             if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
@@ -239,21 +239,19 @@ export class CppProperties {
                     let list: string[] = await util.readDir(vcpkgInstallPath);
                     // For every *directory* in the list (non-recursive)
                     list.forEach((entry) => {
-                        if (entry != "vcpkg") {
+                        if (entry !== "vcpkg") {
                             let pathToCheck: string = path.join(vcpkgInstallPath, entry);
                             if (fs.existsSync(pathToCheck)) {
-                                let p: string = path.join(pathToCheck,"include");
+                                let p: string = path.join(pathToCheck, "include");
                                 if (fs.existsSync(p)) {
                                     this.vcpkgIncludes.push(p);
                                 }
                             }
                         }
                     });
-                };
+                }
             }
-        }
-        catch(error) {}
-        finally {
+        } catch (error) {} finally {
             this.vcpkgPathReady = true;
             this.handleConfigurationChange();
         }
