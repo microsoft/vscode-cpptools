@@ -37,12 +37,12 @@ function runThenableWithTimeout(promise: Thenable<any>, ms: number): Thenable<an
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
     /* tslint:disable */
-    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data) => void) => { if (clients.ActiveClient === me) { callback(data); } };
-    let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return callback(a); } return null; };
-    let invoke2 = (a, b, callback: (a, b) => any) => { if (clients.ActiveClient === me) { return callback(a, b); } return null; };
-    let invoke3 = (a, b, c, callback: (a, b, c) => any) => { if (clients.ActiveClient === me)  { return callback(a, b, c); } return null; };
-    let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => { if (clients.ActiveClient === me)  { return callback(a, b, c, d); } return null; };
-    let invoke5 = (a, b, c, d, e, callback: (a, b, c, d, e) => any) => { if (clients.ActiveClient === me)  { return callback(a, b, c, d, e); } return null; };
+    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data) => void) => { if (clients.ActiveClient === me) {me.notifyWhenReady(() => callback(data));}};
+    let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(callback(a)); } return null; };
+    let invoke2 = (a, b, callback: (a, b) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(callback(a, b)); } return null; };
+    let invoke3 = (a, b, c, callback: (a, b, c) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(callback(a, b, c)); } return null; };
+    let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(callback(a, b, c, d)); } return null; };
+    let invoke5 = (a, b, c, d, e, callback: (a, b, c, d, e) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(callback(a, b, c, d, e)); } return null; };
     /* tslint:enable */
 
     return {
@@ -55,7 +55,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 }, (error: any) => {
                     // No config provider found for document
                     sendMessage(document);
-                }), 1000).then((result: any) => {}, (error: any) => {
+                }), 1).then((result: any) => {}, (error: any) => {
                     // Timed out
                     // TODO: Send cancellation to provider
                     sendMessage(document);
@@ -66,7 +66,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
             if (clients.ActiveClient === me) {
-                return sendMessage(event);
+                return me.requestWhenReady(() => sendMessage(event));
             }
             return Promise.resolve([]);
         },
@@ -75,7 +75,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
             if (clients.ActiveClient === me) {
                 console.assert(me.TrackedDocuments.has(document));
                 me.TrackedDocuments.delete(document);
-                sendMessage(document);
+                me.notifyWhenReady(() => sendMessage(document));
             }
         },
 

@@ -231,7 +231,8 @@ export interface Client {
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     takeOwnership(document: vscode.TextDocument): void;
     runBlockingTask<T>(task: Thenable<T>): Thenable<T>;
-    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
+    requestWhenReady(request: () => Thenable<any>): Thenable<any>;
+    notifyWhenReady(notify: () => void): void;
     requestGoToDeclaration(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
@@ -309,8 +310,8 @@ class DefaultClient implements Client {
     }
 
     /**
-     * All public methods on this class must be guarded by the "onReady" promise. Requests and notifications received before the client is
-     * ready are executed after this promise is resolved.
+     * All public methods on this class must be guarded by the "pendingTask" promise. Requests and notifications received before the task is
+     * complete are executed after this promise is resolved.
      * @see requestWhenReady<T>(request)
      * @see notifyWhenReady(notify)
      */
@@ -495,11 +496,12 @@ class DefaultClient implements Client {
     }
 
     /*************************************************************************************
-     * wait until the language client is ready for use before attempting to send messages
+     * wait until the all pendingTasks are complete (e.g. language client is ready for use)
+     * before attempting to send messages
      *************************************************************************************/
-    public runBlockingTask<T>(task: Thenable<T>): Thenable<T> {
+    public runBlockingTask(task: Thenable<any>): Thenable<any> {
         if (this.pendingTask) {
-            return this.requestWhenReady<T>(() => { return task; });
+            return this.requestWhenReady(() => { return task; });
         } else {
             this.pendingTask = task;
             return task.then((result) => {
@@ -512,7 +514,7 @@ class DefaultClient implements Client {
         }
     }
 
-    public requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
+    public requestWhenReady(request: () => Thenable<any>): Thenable<any> {
         if (this.pendingTask === undefined) {
             return request();
         } else if (this.isSupported && this.pendingTask) {
@@ -525,11 +527,11 @@ class DefaultClient implements Client {
                 return request();
             });
         } else {
-            return Promise.reject<T>("Unsupported client");
+            return Promise.reject("Unsupported client");
         }
     }
 
-    private notifyWhenReady(notify: () => void): void {
+    public notifyWhenReady(notify: () => void): void {
         if (this.pendingTask === undefined) {
             notify();
         } else if (this.isSupported && this.pendingTask) {
@@ -978,7 +980,8 @@ class NullClient implements Client {
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     takeOwnership(document: vscode.TextDocument): void {}
     runBlockingTask<T>(task: Thenable<T>): Thenable<T> { return; }
-    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return; }
+    requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
+    notifyWhenReady(notify: () => void): void {}
     sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
