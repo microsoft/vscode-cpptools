@@ -364,8 +364,8 @@ function onToggleSnippets(): void {
         
     } else {
         // Remove the category and snippets node.
-        let ndxCat = newPackageJson.categories.indexOf(snippetsCatName);
-        if (ndxCat != -1) {
+        let ndxCat: number = newPackageJson.categories.indexOf(snippetsCatName);
+        if (ndxCat !== -1) {
             newPackageJson.categories.splice(ndxCat, 1);
         }
 
