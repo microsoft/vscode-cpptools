@@ -20,6 +20,6 @@ export interface SourceFileConfiguration {
  
 export interface CustomConfigurationProvider {
     name: string;
-    canProvideConfiguration(uri: vscode.Uri): boolean;
+    canProvideConfiguration(uri: vscode.Uri): Thenable<boolean>;
     provideConfiguration(uri: vscode.Uri): Thenable<SourceFileConfiguration>;
 }

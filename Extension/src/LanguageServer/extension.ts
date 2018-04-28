@@ -15,7 +15,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
-import { CustomConfigurationProvider, SourceFileConfiguration } from '../api'; 
+import { CustomConfigurationProvider, SourceFileConfiguration } from '../api';
 import * as os from 'os';
 
 let prevCrashFile: string;
@@ -43,7 +43,7 @@ export function activate(activationEventOccurred: boolean): void {
         activatedPreviously.Value = false;
         realActivation();
     }
-    
+
     registerCommands();
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
@@ -51,7 +51,7 @@ export function activate(activationEventOccurred: boolean): void {
     if (activationEventOccurred) {
         return onActivationEvent();
     }
-    
+
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
@@ -66,23 +66,50 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
     customConfigurationProviders.push(provider);
 }
 
-export function provideCustomConfiguration(document: vscode.TextDocument): Thenable<SourceFileConfiguration> {
-    // Loop through registered providers until one is able to service the current document
-    let customConfigProvider: CustomConfigurationProvider;
-
-    customConfigurationProviders.some((provider: CustomConfigurationProvider): boolean => {
-        let canProvide: boolean = provider.canProvideConfiguration(document.uri);
-        if (canProvide) {
-            customConfigProvider = provider;
+export async function provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
+    return runBlockingThenableWithTimeout(new Promise(async (resolve, reject) => {
+        // Loop through registered providers until one is able to service the current document
+        for (let i: number = 0; i < customConfigurationProviders.length; i++) {
+            if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
+                return customConfigurationProviders[i].provideConfiguration(document.uri)
+                    .then((config: SourceFileConfiguration) => {
+                        clients.ActiveClient.sendCustomConfiguration(document, config);
+                        console.log(config);
+                        resolve();
+                    }, (error) => {
+                        //Timed out. TODO: Cancel request
+                        console.log("timed out");
+                        reject(error);
+                    });
+            }
         }
-        return canProvide;
+
+        reject("No providers found for " + document.uri);
+    }), 1000);
+}
+
+function runBlockingThenableWithTimeout(promise: Thenable<any>, ms: number): Thenable<any> {
+    let timer: NodeJS.Timer;
+
+    // Create a promise that rejects in <ms> milliseconds
+    let timeout: Promise<any> = new Promise((resolve, reject) => {
+        timer = setTimeout(() => {
+            clearTimeout(timer);
+            reject("Timed out in " + ms + "ms.");
+        }, ms);
     });
 
-    if (customConfigProvider) {
-        return customConfigProvider.provideConfiguration(document.uri);
-    } else {
-        Promise.reject("No providers found for " + document.uri);
-    }
+    // Returns a race between our timeout and the passed in promise
+    return clients.ActiveClient.runBlockingTask(Promise.race([
+        promise,
+        timeout
+    ]).then((result: any) => {
+        clearTimeout(timer);
+        return result;
+    }, (error: any) => {
+        clearTimeout(timer);
+        throw error;
+    }));
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
@@ -128,7 +155,7 @@ function realActivation(): void {
     updateLanguageConfigurations();
 
     reportMacCrashes();
-    
+
     intervalTimer = setInterval(onInterval, 2500);
 }
 
@@ -183,7 +210,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
         (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c")) {
         return;
-        }
+    }
 
     if (activeDocument !== event.textEditor.document.uri.toString()) {
         // For some strange (buggy?) reason we don't reliably get onDidChangeActiveTextEditor callbacks.
@@ -314,7 +341,7 @@ function selectClient(): Thenable<Client> {
 function onResetDatabase(): void {
     onActivationEvent();
     /* need to notify the affected client(s) */
-    selectClient().then(client => client.resetDatabase(), rejected => {});
+    selectClient().then(client => client.resetDatabase(), rejected => { });
 }
 
 function onSelectConfiguration(): void {
@@ -333,7 +360,7 @@ function onEditConfiguration(): void {
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => { });
     }
 }
 
@@ -375,17 +402,17 @@ function onShowReleaseNotes(): void {
 
 function onPauseParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.pauseParsing(), rejected => {});
+    selectClient().then(client => client.pauseParsing(), rejected => { });
 }
 
 function onResumeParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.resumeParsing(), rejected => {});
+    selectClient().then(client => client.resumeParsing(), rejected => { });
 }
 
 function onShowParsingCommands(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
+    selectClient().then(client => client.handleShowParsingCommands(), rejected => { });
 }
 
 function onTakeSurvey(): void {
