@@ -49,6 +49,14 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
+export function getVcpkgPathDescriptorFile(): string {
+    if (process.platform === 'win32') {
+        return path.join(process.env.LOCALAPPDATA, "vcpkg/vcpkg.path.txt");
+    } else {
+        return path.join(process.env.HOME, ".vcpkg/vcpkg.path.txt");
+    }
+}
+
 // Extension is ready if install.lock exists and debugAdapters folder exist.
 export async function isExtensionReady(): Promise<boolean> {
     const doesInstallLockFileExist: boolean = await checkInstallLockFile();
@@ -264,6 +272,28 @@ export function checkFileExists(filePath: string): Promise<boolean> {
             }
         });
     });
+}
+
+/** Test whether a directory exists */
+export function checkDirectoryExists(dirPath: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fs.stat(dirPath, (err, stats) => {
+            if (stats && stats.isDirectory()) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+    });
+}
+
+/** Read the files in a directory */
+export function readDir(dirPath: string): Promise<string[]> {
+    return new Promise((resolve) => {
+        fs.readdir(dirPath, (err, list) => {
+            resolve(list);
+            });
+        });
 }
 
 /** Test whether the lock file exists.*/
