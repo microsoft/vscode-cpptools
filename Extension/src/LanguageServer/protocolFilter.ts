@@ -10,6 +10,30 @@ import { Client } from './client';
 import { SourceFileConfiguration, CustomConfigurationProvider } from '../api';
 import { provideCustomConfiguration } from './extension';
 
+function runThenableWithTimeout(promise: Thenable<any>, ms: number): Thenable<any> {
+    let timer: NodeJS.Timer;
+
+    // Create a promise that rejects in <ms> milliseconds
+    let timeout: Promise<any> = new Promise((resolve, reject) => {
+        timer = setTimeout(() => {
+            clearTimeout(timer);
+            reject("Timed out in " + ms + "ms.");
+        }, ms);
+    });
+
+    // Returns a race between our timeout and the passed in promise
+    return Promise.race([
+        promise,
+        timeout
+    ]).then((result: any) => {
+        clearTimeout(timer);
+        return result;
+    }, (error: any) => {
+        clearTimeout(timer);
+        throw error;
+    });
+}
+
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
     /* tslint:disable */
@@ -25,7 +49,11 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-                provideCustomConfiguration(document).then(() => sendMessage(document), () => sendMessage(document));
+                provideCustomConfiguration(document).then(() => {
+                    sendMessage(document);
+                }, () => {
+                    sendMessage(document);
+                });
             }
         },
         didChange: defaultHandler,

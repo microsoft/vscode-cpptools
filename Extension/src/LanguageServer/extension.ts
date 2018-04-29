@@ -67,30 +67,21 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
 }
 
 export async function provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
-    return runBlockingThenableWithTimeout(new Promise(async (resolve, reject) => {
+    return runBlockingThenableWithTimeout(async () => {
         // Loop through registered providers until one is able to service the current document
         for (let i: number = 0; i < customConfigurationProviders.length; i++) {
             if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
-                return customConfigurationProviders[i].provideConfiguration(document.uri)
-                    .then((config: SourceFileConfiguration) => {
-                        clients.ActiveClient.sendCustomConfiguration(document, config);
-                        console.log(config);
-                        resolve();
-                    }, (error) => {
-                        //Timed out. TODO: Cancel request
-                        console.log("timed out");
-                        reject(error);
-                    });
+                return (customConfigurationProviders[i].provideConfiguration(document.uri));
             }
         }
-
-        reject("No providers found for " + document.uri);
-    }), 1000);
+        return Promise.reject("No providers found for " + document.uri);
+    }, 1000).then((config: SourceFileConfiguration) => {
+        clients.ActiveClient.sendCustomConfiguration(document, config);
+    });
 }
 
-function runBlockingThenableWithTimeout(promise: Thenable<any>, ms: number): Thenable<any> {
+function runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number): Thenable<any> {
     let timer: NodeJS.Timer;
-
     // Create a promise that rejects in <ms> milliseconds
     let timeout: Promise<any> = new Promise((resolve, reject) => {
         timer = setTimeout(() => {
@@ -100,10 +91,7 @@ function runBlockingThenableWithTimeout(promise: Thenable<any>, ms: number): The
     });
 
     // Returns a race between our timeout and the passed in promise
-    return clients.ActiveClient.runBlockingTask(Promise.race([
-        promise,
-        timeout
-    ]).then((result: any) => {
+    return clients.ActiveClient.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
         clearTimeout(timer);
         return result;
     }, (error: any) => {
