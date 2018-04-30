@@ -5,6 +5,8 @@ This is the official repository for the [Microsoft C/C++ extension for VS Code](
 The `vscode-cpptools` repository is where we do development and there are many ways you can support the extension, for example:
 
 * [Report issues or request features](https://github.com/Microsoft/vscode-cpptools/issues)
+   - If someone has already filed a similar issue, please leave a thumbs up reaction on the issue
+   - [List of popular feature requests](https://github.com/Microsoft/vscode-cpptools/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22Feature+Request%22)
 * [Contribute to the extension](Extension)
 
 ## Getting Started
@@ -17,7 +19,7 @@ If you have any questions, check out our our [**Documentation**](Documentation) 
 
 ### Contribution
 
-Contributions are always welcome. Please see our [contributing guide](CONTRIBUTING.md)
+Contributions are always welcome. Please see our [contributing guide](CONTRIBUTING.md) for more details.
 
 ### Microsoft Open Source Code of Conduct
 
