@@ -201,7 +201,7 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
+                configuration.includePath = ["${workspaceFolder}/**"].concat(this.vcpkgIncludes);
             }
             if (!settings.defaultBrowsePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
@@ -234,7 +234,7 @@ export class CppProperties {
             // Check for vcpkg instance and include relevent paths if found.
             if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
                 let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
-                let vcpkgInstallPath: string = path.join(vcpkgRoot.trim(), "/vcpkg/installed");
+                let vcpkgInstallPath: string = path.join(vcpkgRoot.trim(), "/installed");
                 if (await util.checkDirectoryExists(vcpkgInstallPath)) {
                     let list: string[] = await util.readDir(vcpkgInstallPath);
                     // For every *directory* in the list (non-recursive)
