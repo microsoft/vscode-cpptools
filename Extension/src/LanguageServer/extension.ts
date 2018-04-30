@@ -356,7 +356,7 @@ function onToggleSnippets(): void {
         // Add the Snippet category and snippets node. 
 
         newPackageJson.categories.push(snippetsCatName);
-        newPackageJson.contributes[snippetsNodeName] = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
+        newPackageJson.contributes.snippetsNodeName = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
 
         fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
             showReloadPrompt("Reload Window to finish enabling C++ snippets");
