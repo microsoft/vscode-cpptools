@@ -1,0 +1,140 @@
+{
+  "class": {
+    "prefix": "class",
+    "body": "\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\t${2:/* data */}\npublic:\n\t${1}(${3:/* args */});\n\t~${1}();\n};\n\n${1}::${1}(${3})\n{\n}\n\n${1}::~${1}()\n{\n}\n",
+    "description": "Code snippet for class",
+    "scope": "source.c++, source.objc++"
+  },
+  "classi": {
+    "prefix": "classi",
+    "body": "\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\t${2:/* data */}\npublic:\n\t${1}::${1}(${3:/* args */}) { $0 }\n\t${1}::~${1}() { }\n};",
+    "description": "Code snippet for class with inlined constructor/destructor",
+    "scope": "source.c++, source.objc++"
+  },
+  "classt": {
+    "prefix": "classt",
+    "body": "\ntemplate<typename T>\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\tT ${2:/* data */}\npublic:\n\t${1}(T ${3:/* args */});\n};\n",
+    "description": "Code snippet for class template",
+    "scope": "source.c++, source.objc++"
+  },
+  "struct": {
+    "prefix": "struct",
+    "body": "\nstruct ${1:${TM_FILENAME_BASE}}\n{\n\t${0:/* data */}\n};\n",
+    "description": "Code snippet for struct",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "union": {
+    "prefix": "union",
+    "body": "\nunion ${1:${TM_FILENAME_BASE}}\n{\n\t${0:/* data */}\n};\n",
+    "description": "Code snippet for union",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "if": {
+    "prefix": "if",
+    "body": "\nif (${1:/* condition */}) {\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for if()",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "ifel": {
+    "prefix": "ifel",
+    "body": "\nif (${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for if() else",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "ifelif": {
+    "prefix": "ifelif",
+    "body": "\nif (${1:/* condition */}) {\n\t${2:/* code */}\n}\nelse if(${3:/* condition */}) {\n\t${4:/* code */}\n}\nelse {\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for if() else if() else",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "else": {
+    "prefix": "else",
+    "body": "\nelse\n{\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for else",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "elif": {
+    "prefix": "elif",
+    "body": "\nelse if (${1:/* condition */})\n{\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for else if ()",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "switch": {
+    "prefix": "switch",
+    "body": "\nswitch (${1:expression})\n{\n\tcase ${2:/* constant-expression */}:\n\t\t${3:/* code */}\n\t\tbreak;\n\n\tdefault:\n\t\tbreak;\n}",
+    "description": "Code snippet for switch",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "main": {
+    "prefix": "main",
+    "body": "\nint main(int argc, char const *argv[])\n{\n\t${1:/* code */}\n\treturn 0;\n}\n",
+    "description": "Code snippet for main()",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "do": {
+    "prefix": "do_",
+    "body": "\ndo\n{\n\t${0:/* code */}\n} while (${1:/* condition */});\n",
+    "description": "Code snippet for do while loop",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "for": {
+    "prefix": "for",
+    "body": "\nfor(${1:size_t} ${2:i} = 0; $2 < ${3:count}; ${4:$2++})\n{\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for for loop",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "forr": {
+    "prefix": "forr",
+    "body": "\nfor(int ${1:i} = ${2:length} - 1; $1 >= 0; ${3:$1--})\n{\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for reverse for loop",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "foreach": {
+    "prefix": "foreach",
+    "body": "\nfor(${1:object} = ${2:var} in ${3:collection})\n{\n\t${0:/* code */}\n}\n",
+    "description": "Code snippet for foreach loop",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "forrange": {
+    "prefix": "forrange",
+    "body": "\nfor(auto&& ${1:i} : ${2:v})\n{\n\t$0\n}\n",
+    "description": "Code snippet for range-based forloop",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "while": {
+    "prefix": "while",
+    "body": "\nwhile(${1:/* condition */}){\n\t${2:/* code */}\n}\n",
+    "description": "Code snippet for while loop",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "ifd": {
+    "prefix": "ifnd",
+    "body": "\n#if defined($1)\n\n${0}\n\n#endif // $1\n",
+    "description": "Code snippet for if defined()",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "ifnd": {
+    "prefix": "ifnd",
+    "body": "\n#if !defined($1)\n#define ${1:MACRO}\n\n${0}\n\n#endif // $1\n",
+    "description": "Code snippet for if !defined()",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "mitl": {
+    "prefix": "mitl",
+    "body": "\n// The MIT License (MIT)\n\n// Copyright (c) ${1:YEAR} ${2:NAME}\n\n//  Permission is hereby granted, free of charge, to any person obtaining a\n//  copy of this software and associated documentation files (the \"Software\"),\n//  to deal in the Software without restriction, including without limitation\n//  the rights to use, copy, modify, merge, publish, distribute, sublicense,\n//  and/or sell copies of the Software, and to permit persons to whom the\n//  Software is furnished to do so, subject to the following conditions:\n//\n//  The above copyright notice and this permission notice shall be included in\n//  all copies or substantial portions of the Software.\n//\n//  THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS\n//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER\n//  DEALINGS IN THE SOFTWARE.\n\n${0:/* code */}\n",
+    "description": "Code snippet for MIT License",
+    "scope": ""
+  },
+  "namesp": {
+    "prefix": "namesp",
+    "body": "\nnamespace ${1:name}\n{\n\t$0\n} // $1\n",
+    "description": "Code snippet for namespace",
+    "scope": "source.c++, source.objc++"
+  },
+  "try": {
+    "prefix": "try",
+    "body": "\ntry\n{\n\t${1:/* code */}\n}\ncatch(${2:const std::exception& e})\n{\n\t${0:std::cerr << e.what() << '\\n';}\n}\n",
+    "description": "Code snippet for try catch block",
+    "scope": "source.c++, source.objc++, source.c++11"
+  }
+}
