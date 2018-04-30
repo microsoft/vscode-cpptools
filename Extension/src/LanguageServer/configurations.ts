@@ -201,7 +201,7 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
+                configuration.includePath = ["${workspaceFolder}/**"].concat(this.vcpkgIncludes);
             }
             if (!settings.defaultBrowsePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
