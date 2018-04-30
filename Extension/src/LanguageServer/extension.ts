@@ -349,14 +349,13 @@ function onToggleSnippets(): void {
 
     // This will apply to all clients as it's a global toggle. It will require a reload.
     const snippetsCatName: string  = "Snippets";
-    const snippetsNodeName: string = "snippets";
     let newPackageJson: any = util.getRawPackageJson();
 
     if (newPackageJson.categories.findIndex(cat => cat === snippetsCatName) === -1) {
         // Add the Snippet category and snippets node. 
 
         newPackageJson.categories.push(snippetsCatName);
-        newPackageJson.contributes.snippetsNodeName = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
+        newPackageJson.contributes.snippets = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
 
         fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
             showReloadPrompt("Reload Window to finish enabling C++ snippets");
@@ -369,7 +368,7 @@ function onToggleSnippets(): void {
             newPackageJson.categories.splice(ndxCat, 1);
         }
 
-        delete newPackageJson.contributes[snippetsNodeName];
+        delete newPackageJson.contributes.snippets;
 
         fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
             showReloadPrompt("Reload Window to finish disabling C++ snippets");
