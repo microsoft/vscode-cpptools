@@ -35,7 +35,8 @@
     "Languages",
     "Debuggers",
     "Formatters",
-    "Linters"
+    "Linters",
+    "Snippets"
   ],
   "activationEvents": [
     "*"
@@ -419,6 +420,11 @@
       {
         "command": "C_Cpp.Navigate",
         "title": "Navigate...",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ToggleSnippets",
+        "title": "Toggle Snippets",
         "category": "C/Cpp"
       },
       {
@@ -1252,7 +1258,17 @@
       "[c]": {
         "editor.autoIndent": false
       }
-    }
+    },
+    "snippets": [
+      {
+        "language": "cpp",
+        "path": "./cpp_snippets.json"
+      },
+      {
+        "language": "c",
+        "path": "./cpp_snippets.json"
+      }
+    ]
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
