@@ -49,7 +49,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-                provideCustomConfiguration(document).then(() => {
+                provideCustomConfiguration(document, me).then(() => {
                     sendMessage(document);
                 }, () => {
                     sendMessage(document);
