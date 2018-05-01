@@ -117,6 +117,7 @@ const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> 
 
 const maxSettingLengthForTelemetry: number = 50;
 let previousCppSettings: { [key: string]: any } = {};
+let failureMessageShown: boolean = false;
 
 /**
  * track settings changes for telemetry
@@ -262,7 +263,6 @@ class DefaultClient implements Client {
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
-    private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
 
@@ -335,23 +335,29 @@ class DefaultClient implements Client {
                 // Once this is set, we don't defer any more callbacks.
                 this.languageClient = languageClient;
                 telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", getNonDefaultSettings(this.RootUri));
-                this.failureMessageShown.Value = false;
+                failureMessageShown = false;
 
                 // Listen for messages from the language server.
                 this.registerNotifications();
                 this.registerFileWatcher();
-            }, () => {
+            }, (err) => {
                 this.isSupported = false;   // Running on an OS we don't support yet.
-                if (!this.failureMessageShown.Value) {
-                    this.failureMessageShown.Value = true;
-                    vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled.");
+                if (!failureMessageShown) {
+                    failureMessageShown = true;
+                    vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
                 }
             });
-        } catch {
+        } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
-            if (!this.failureMessageShown.Value) {
-                this.failureMessageShown.Value = true;
-                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled.");
+            if (!failureMessageShown) {
+                failureMessageShown = true;
+                let additionalInfo: string;
+                if (err.code === "EPERM") {
+                    additionalInfo = `EPERM: Check permissions for '${getLanguageServerFileName()}'`;
+                } else {
+                    additionalInfo = String(err);
+                }
+                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + additionalInfo);
             }
         }
     }
