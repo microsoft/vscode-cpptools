@@ -686,7 +686,10 @@ class DefaultClient implements Client {
             if (showIntelliSenseFallbackMessage.Value) {
                 let learnMorePanel: string = "Learn More";
                 let dontShowAgain: string = "Don't Show Again";
-                vscode.window.showInformationMessage("Configure includePath for better IntelliSense results.", learnMorePanel, dontShowAgain).then((value) => {
+                let message: string = this.configuration.VcpkgInstalled ?   
+                    "Use vcpkg to install libraries, or update your includePath to allow IntelliSense to find missing headers." :
+                    "Configure includePath or install vcpkg to allow IntelliSense to find missing headers.";
+                vscode.window.showInformationMessage(message, learnMorePanel, dontShowAgain).then((value) => {
                     switch (value) {
                         case learnMorePanel:
                             let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
