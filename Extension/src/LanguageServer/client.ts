@@ -22,7 +22,7 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
-import { CustomConfigurationProvider, SourceFileConfiguration } from '../api';
+import { CustomConfigurationProvider, SourceFileConfiguration, SourceFileConfigurationItem } from '../api';
 
 let ui: UI;
 
@@ -86,11 +86,6 @@ interface DecorationRangesPair {
     ranges: vscode.Range[];
 }
 
-interface CustomConfigurationParams {
-    uri: string;
-    configuration: SourceFileConfiguration;
-}
-
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -110,7 +105,7 @@ const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, v
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
-const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/sendCustomConfiguration');
+const CustomConfigurationNotification: NotificationType<SourceFileConfigurationItem[], void> = new NotificationType<SourceFileConfigurationItem[], void>('cpptools/sendCustomConfiguration');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -239,7 +234,7 @@ export interface Client {
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
-    sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void;
+    sendCustomConfigurations(config: SourceFileConfigurationItem[]): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -880,12 +875,8 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
 
-    public sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {
-        let params: CustomConfigurationParams = {
-            uri: document.uri.toString(),
-            configuration: config
-        };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
+    public sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {
+        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, configs));
     }
 
     /*********************************************
@@ -982,7 +973,7 @@ class NullClient implements Client {
     runBlockingTask<T>(task: Thenable<T>): Thenable<T> { return; }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
-    sendCustomConfiguration(document: vscode.TextDocument, config: SourceFileConfiguration): void {}
+    sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }

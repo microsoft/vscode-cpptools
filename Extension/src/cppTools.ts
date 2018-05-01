@@ -11,4 +11,8 @@ export class CppTools implements CppToolsApi {
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
         LanguageServer.registerCustomConfigurationProvider(provider);
     }
+
+    didCustomConfigurationChange(provider: CustomConfigurationProvider): void {
+        LanguageServer.onDidCustomConfigurationChange(provider);
+    }
 }

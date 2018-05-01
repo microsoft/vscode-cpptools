@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 
 export interface CppToolsApi {
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void;
+    didCustomConfigurationChange(provider: CustomConfigurationProvider): void;
 }
 
 export interface SourceFileConfiguration {
@@ -17,9 +18,14 @@ export interface SourceFileConfiguration {
     forcedInclude?: string[]; // Any files that need to be included before the source file is parsed
     standard: string;         // The C or C++ standard
 }
- 
+
+export interface SourceFileConfigurationItem {
+    documentUri: string;
+    configuration: SourceFileConfiguration;
+}
+
 export interface CustomConfigurationProvider {
     name: string;
     canProvideConfiguration(uri: vscode.Uri): Thenable<boolean>;
-    provideConfiguration(uri: vscode.Uri): Thenable<SourceFileConfiguration>;
+    provideConfigurations(uris: vscode.Uri[]): Thenable<SourceFileConfigurationItem[]>;
 }

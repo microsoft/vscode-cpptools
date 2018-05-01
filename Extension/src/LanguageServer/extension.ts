@@ -15,7 +15,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
-import { CustomConfigurationProvider, SourceFileConfiguration } from '../api';
+import { CustomConfigurationProvider, SourceFileConfiguration, SourceFileConfigurationItem } from '../api';
 import * as os from 'os';
 
 let prevCrashFile: string;
@@ -71,16 +71,40 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
         // Loop through registered providers until one is able to service the current document
         for (let i: number = 0; i < customConfigurationProviders.length; i++) {
             if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
-                return (customConfigurationProviders[i].provideConfiguration(document.uri));
+                return customConfigurationProviders[i].provideConfigurations([document.uri]);
             }
         }
         return Promise.reject("No providers found for " + document.uri);
-    }, 1000).then((config: SourceFileConfiguration) => {
-        client.sendCustomConfiguration(document, config);
+    }, 1000, client).then((configs: SourceFileConfigurationItem[]) => {
+        if (configs !== null && configs.length > 0) {
+            client.sendCustomConfigurations(configs);
+        }
     });
 }
 
-function runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number): Thenable<any> {
+export function onDidCustomConfigurationChange(customConfigurationProvider: CustomConfigurationProvider): void {
+    // TODO: How to handle multiple workspaces? Only works with the current workspace.
+    // Should this be called when the workspace changes?
+    if (vscode.workspace.textDocuments === undefined || vscode.workspace.textDocuments.length === 0) {
+        return;
+    }
+
+    let documents: vscode.Uri[] = [];
+    for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
+        let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
+        if (document.languageId === "cpp" || document.languageId === "c") {
+            documents.push(document.uri);
+        }
+    }
+
+    // TODO: Can we rely on clients.ActiveClient to be the client for the current workspace?
+    runBlockingThenableWithTimeout(() => customConfigurationProvider.provideConfigurations(documents), 1000, clients.ActiveClient)
+    .then((configs: SourceFileConfigurationItem[]) => {
+        clients.ActiveClient.sendCustomConfigurations(configs);
+    });
+}
+
+function runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, client: Client): Thenable<any> {
     let timer: NodeJS.Timer;
     // Create a promise that rejects in <ms> milliseconds
     let timeout: Promise<any> = new Promise((resolve, reject) => {
@@ -91,7 +115,7 @@ function runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: numbe
     });
 
     // Returns a race between our timeout and the passed in promise
-    return clients.ActiveClient.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
+    return client.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
         clearTimeout(timer);
         return result;
     }, (error: any) => {
