@@ -239,12 +239,13 @@ export class CppProperties {
             if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
                 let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
                 if (await util.checkDirectoryExists(vcpkgRoot)) {
-                    let list: string[] = await util.readDir(path.join(vcpkgRoot.trim(), "/installed");
+                    let vcpkgInstalledPath: string = path.join(vcpkgRoot.trim(), "/installed");
+                    let list: string[] = await util.readDir(vcpkgInstalledPath);
                     if (list !== undefined) {
                         // For every *directory* in the list (non-recursive). Each directory is basically a platform.
                         list.forEach((entry) => {
                             if (entry !== "vcpkg") {
-                                let pathToCheck: string = path.join(vcpkgInstallPath, entry);
+                                let pathToCheck: string = path.join(vcpkgInstalledPath, entry);
                                 if (fs.existsSync(pathToCheck)) {
                                     let p: string = path.join(pathToCheck, "include");
                                     if (fs.existsSync(p)) {
