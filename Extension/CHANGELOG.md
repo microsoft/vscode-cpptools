@@ -13,7 +13,7 @@
 * Change file not found in `compile_commands.json` message from an error to a warning. [#1783](https://github.com/Microsoft/vscode-cpptools/issues/1783)
 * Fix an IntelliSense crash during completion requests. [#1782](https://github.com/Microsoft/vscode-cpptools/issues/1782)
 * Update the installed clang-format to 6.0.
-* Fix bug with compile_commands.json when "arguments" have a switch and a value in the arg. [#1890](https://github.com/Microsoft/vscode-cpptools/issues/1890)
+* Fix bug with `compile_commands.json` when "arguments" have both a switch and a value in the arg. [#1890](https://github.com/Microsoft/vscode-cpptools/issues/1890)
 * Fix bug with garbage data appearing in tooltips on Linux/Mac. [#1577](https://github.com/Microsoft/vscode-cpptools/issues/1577)
 
 ## Version 0.16.1: March 30, 2018
