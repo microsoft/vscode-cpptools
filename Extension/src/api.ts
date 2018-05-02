@@ -5,6 +5,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { CancellationToken } from 'vscode-jsonrpc';
 
 export interface CppToolsApi {
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void;
@@ -26,6 +27,6 @@ export interface SourceFileConfigurationItem {
 
 export interface CustomConfigurationProvider {
     name: string;
-    canProvideConfiguration(uri: vscode.Uri): Thenable<boolean>;
-    provideConfigurations(uris: vscode.Uri[]): Thenable<SourceFileConfigurationItem[]>;
+    canProvideConfiguration(uri: vscode.Uri, token?: CancellationToken): Thenable<boolean>;
+    provideConfigurations(uris: vscode.Uri[], token?: CancellationToken): Thenable<SourceFileConfigurationItem[]>;
 }

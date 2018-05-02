@@ -6,6 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { CancellationTokenSource, CancellationToken } from "vscode-jsonrpc";
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -67,6 +68,7 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
 }
 
 export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
+    let tokenSource: CancellationTokenSource = new CancellationTokenSource();
     return runBlockingThenableWithTimeout(async () => {
         // Loop through registered providers until one is able to service the current document
         for (let i: number = 0; i < customConfigurationProviders.length; i++) {
@@ -75,7 +77,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
             }
         }
         return Promise.reject("No providers found for " + document.uri);
-    }, 1000, client).then((configs: SourceFileConfigurationItem[]) => {
+    }, 1000, client, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
         if (configs !== null && configs.length > 0) {
             client.sendCustomConfigurations(configs);
         }
@@ -97,29 +99,32 @@ export function onDidCustomConfigurationChange(customConfigurationProvider: Cust
         }
     }
 
+    let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+
     // TODO: Can we rely on clients.ActiveClient to be the client for the current workspace?
-    runBlockingThenableWithTimeout(() => customConfigurationProvider.provideConfigurations(documents), 1000, clients.ActiveClient)
+    runBlockingThenableWithTimeout(() => customConfigurationProvider.provideConfigurations(documents, tokenSource.token), 1000, clients.ActiveClient, tokenSource)
     .then((configs: SourceFileConfigurationItem[]) => {
         clients.ActiveClient.sendCustomConfigurations(configs);
     });
 }
 
-function runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, client: Client): Thenable<any> {
+function runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, client: Client, tokenSource?: CancellationTokenSource): Thenable<any> {
     let timer: NodeJS.Timer;
     // Create a promise that rejects in <ms> milliseconds
     let timeout: Promise<any> = new Promise((resolve, reject) => {
         timer = setTimeout(() => {
             clearTimeout(timer);
+            if (tokenSource) {
+                tokenSource.cancel();
+            }
             reject("Timed out in " + ms + "ms.");
         }, ms);
     });
 
     // Returns a race between our timeout and the passed in promise
     return client.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
-        clearTimeout(timer);
         return result;
     }, (error: any) => {
-        clearTimeout(timer);
         throw error;
     }));
 }
