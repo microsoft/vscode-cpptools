@@ -20,8 +20,12 @@ suite(`Debug Integration Test: `, function() {
         let debugSessionTerminated = new Promise(resolve => {
             vscode.debug.onDidTerminateDebugSession((e) => resolve());
         });
-        
-        assert.equal(vscode.debug.activeDebugSession.type, "cppdbg");
+
+        try {
+            assert.equal(vscode.debug.activeDebugSession.type, "cppdbg");
+        } catch (e) {
+            assert.fail("Debugger failed to launch. Did the extension activate correctly?")
+        }
 
         await debugSessionTerminated;
     });

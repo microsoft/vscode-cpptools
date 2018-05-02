@@ -156,6 +156,10 @@ export class CppProperties {
         this.handleConfigurationChange();
     }
 
+    public get VcpkgInstalled(): boolean {
+        return this.vcpkgIncludes.length > 0;
+    }
+
     private onConfigurationsChanged(): void {
         this.configurationsChanged.fire(this.Configurations);
     }
@@ -234,28 +238,29 @@ export class CppProperties {
             // Check for vcpkg instance and include relevent paths if found.
             if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
                 let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
-                let vcpkgInstallPath: string = path.join(vcpkgRoot.trim(), "/installed");
-                if (await util.checkDirectoryExists(vcpkgInstallPath)) {
-                    let list: string[] = await util.readDir(vcpkgInstallPath);
-                    // For every *directory* in the list (non-recursive)
-                    list.forEach((entry) => {
-                        if (entry !== "vcpkg") {
-                            let pathToCheck: string = path.join(vcpkgInstallPath, entry);
-                            if (fs.existsSync(pathToCheck)) {
-                                let p: string = path.join(pathToCheck, "include");
-                                if (fs.existsSync(p)) {
-                                    this.vcpkgIncludes.push(p);
+                if (await util.checkDirectoryExists(vcpkgRoot)) {
+                    let vcpkgInstalledPath: string = path.join(vcpkgRoot.trim(), "/installed");
+                    let list: string[] = await util.readDir(vcpkgInstalledPath);
+                    if (list !== undefined) {
+                        // For every *directory* in the list (non-recursive). Each directory is basically a platform.
+                        list.forEach((entry) => {
+                            if (entry !== "vcpkg") {
+                                let pathToCheck: string = path.join(vcpkgInstalledPath, entry);
+                                if (fs.existsSync(pathToCheck)) {
+                                    let p: string = path.join(pathToCheck, "include");
+                                    if (fs.existsSync(p)) {
+                                        this.vcpkgIncludes.push(p);
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             }
         } catch (error) {} finally {
             this.vcpkgPathReady = true;
             this.handleConfigurationChange();
         }
-
     }
 
     private getConfigIndexForPlatform(config: any): number {
