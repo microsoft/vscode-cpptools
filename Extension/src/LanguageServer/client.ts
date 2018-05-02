@@ -687,8 +687,8 @@ class DefaultClient implements Client {
                 let learnMorePanel: string = "Learn More";
                 let dontShowAgain: string = "Don't Show Again";
                 let fallbackMsg: string = this.configuration.VcpkgInstalled ?   
-                    "Use vcpkg to install libraries, specify a different default compiler, or update your includePath to allow IntelliSense to find missing headers." :
-                    "Configure your IntelliSense settings help it find missing headers.";
+                    "Update your IntelliSense settings or use vcpkg to install additional libraries to help find missing headers." :
+                    "Configure your IntelliSense settings to help find missing headers.";
                 vscode.window.showInformationMessage(fallbackMsg, learnMorePanel, dontShowAgain).then((value) => {
                     switch (value) {
                         case learnMorePanel:
