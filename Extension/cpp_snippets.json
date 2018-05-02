@@ -7,7 +7,7 @@
   },
   "classi": {
     "prefix": "classi",
-    "body": "\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\t${2:/* data */}\npublic:\n\t${1}(${3:/* args */}) { $0 }\n\t~${1}() { }\n};",
+    "body": "\nclass ${1:${TM_FILENAME_BASE}}\n{\nprivate:\n\t${2:/* data */}\npublic:\n\t${1}(${3:/* args */}) { $0}\n\t~${1}() { }\n};",
     "description": "Code snippet for class with inlined constructor/destructor",
     "scope": "source.c++, source.objc++"
   },
