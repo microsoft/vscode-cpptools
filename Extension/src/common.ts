@@ -143,7 +143,7 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
-export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string}): string {
+export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
     }
@@ -162,7 +162,12 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
         let newValue: string = undefined;
         switch (varType) {
             case "env": {
-                newValue = additionalEnvironment[name];
+                let v: string | string[] = additionalEnvironment[name];
+                if (typeof v === "string") {
+                    newValue = v;
+                } else if (input === match && v instanceof Array) {
+                    newValue = v.join(";");
+                }
                 if (!newValue) {
                     newValue = process.env[name];
                 }

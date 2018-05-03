@@ -34,7 +34,7 @@ function getDefaultCppProperties(): ConfigurationJson {
 
 interface ConfigurationJson {
     configurations: Configuration[];
-    variables?: {[key: string]: string};
+    variables?: {[key: string]: string | string[]};
     version: number;
 }
 

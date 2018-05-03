@@ -107,11 +107,23 @@
                 }
             }
         },
-        "variables" : {
+        "variables": {
             "type": "object",
             "description": "Custom variables that can be resused anywhere in this file using the ${variable} syntax.",
             "patternProperties": {
-                "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^default$)(^.+$)": { "type": "string" }
+                "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^default$)(^.+$)": {
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
             },
             "additionalProperties": false
         },
