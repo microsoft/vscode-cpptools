@@ -15,6 +15,8 @@
 * Update the installed clang-format to 6.0.
 * Fix bug with `compile_commands.json` when "arguments" have both a switch and a value in the arg. [#1890](https://github.com/Microsoft/vscode-cpptools/issues/1890)
 * Fix bug with garbage data appearing in tooltips on Linux/Mac. [#1577](https://github.com/Microsoft/vscode-cpptools/issues/1577)
+* Add snippets.
+* Add support for vcpkg.
 
 ## Version 0.16.1: March 30, 2018
 * Fix random deadlock caused by logging code on Linux/Mac. [#1759](https://github.com/Microsoft/vscode-cpptools/issues/1759)
