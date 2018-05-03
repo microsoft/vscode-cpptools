@@ -143,9 +143,12 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
-export function resolveVariables(input: string): string {
+export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string}): string {
     if (!input) {
         return "";
+    }
+    if (!additionalEnvironment) {
+        additionalEnvironment = {};
     }
 
     // Replace environment and configuration variables.
@@ -158,7 +161,13 @@ export function resolveVariables(input: string): string {
         }
         let newValue: string = undefined;
         switch (varType) {
-            case "env": { newValue = process.env[name]; break; }
+            case "env": {
+                newValue = additionalEnvironment[name];
+                if (!newValue) {
+                    newValue = process.env[name];
+                }
+                break;
+            }
             case "config": {
                 let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
                 let keys: string[] = name.split('.');

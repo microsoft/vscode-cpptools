@@ -107,6 +107,14 @@
                 }
             }
         },
+        "variables" : {
+            "type": "object",
+            "description": "Custom variables that can be resused anywhere in this file using the ${variable} syntax.",
+            "patternProperties": {
+                "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^default$)(^.+$)": { "type": "string" }
+            },
+            "additionalProperties": false
+        },
         "version": {
             "type": "integer",
             "description": "Version of the configuration file. This property is managed by the extension. Please do not change it."
@@ -115,6 +123,9 @@
     "properties": {
         "configurations": {
             "$ref": "#/definitions/configurations"
+        },
+        "variables": {
+            "$ref": "#/definitions/variables"
         },
         "version": {
             "$ref": "#/definitions/version"
