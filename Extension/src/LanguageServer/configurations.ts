@@ -80,6 +80,8 @@ export class CppProperties {
     private defaultCppStandard: string = null;
     private defaultIncludes: string[] = null;
     private defaultFrameworks: string[] = null;
+    private vcpkgIncludes: string[] = [];
+    private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode: string = null;
     private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
     private disposables: vscode.Disposable[] = [];
@@ -124,6 +126,8 @@ export class CppProperties {
             this.handleConfigurationChange();
         });
 
+        this.buildVcpkgIncludePath();
+
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
@@ -150,6 +154,10 @@ export class CppProperties {
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
         this.handleConfigurationChange();
+    }
+
+    public get VcpkgInstalled(): boolean {
+        return this.vcpkgIncludes.length > 0;
     }
 
     private onConfigurationsChanged(): void {
@@ -184,8 +192,8 @@ export class CppProperties {
         this.configurationIncomplete = true;
     }
 
-    private applyDefaultIncludePathsAndFrameworks(): void {
-        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks) {
+     private applyDefaultIncludePathsAndFrameworks(): void {
+        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             let configuration: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             let settings: CppSettings = new CppSettings(this.rootUri);
 
@@ -197,14 +205,14 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"];
+                configuration.includePath = ["${workspaceFolder}/**"].concat(this.vcpkgIncludes);
+            }
+            if (!settings.defaultBrowsePath) {
+                // We don't add system includes to the includePath anymore. The language server has this information.
+                configuration.browse.path = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
             }
             if (!settings.defaultDefines) {
                 configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
-            }
-            if (!settings.defaultBrowsePath) {
-                // We don't add system includes to the browse.path anymore. The language server has this information.
-                configuration.browse.path = ["${workspaceFolder}"];
             }
             if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
@@ -222,6 +230,36 @@ export class CppProperties {
                 configuration.intelliSenseMode = this.defaultIntelliSenseMode;
             }
             this.configurationIncomplete = false;
+        }
+    }
+
+    private async buildVcpkgIncludePath(): Promise<void> {
+        try {
+            // Check for vcpkg instance and include relevent paths if found.
+            if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
+                let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
+                if (await util.checkDirectoryExists(vcpkgRoot)) {
+                    let vcpkgInstalledPath: string = path.join(vcpkgRoot.trim(), "/installed");
+                    let list: string[] = await util.readDir(vcpkgInstalledPath);
+                    if (list !== undefined) {
+                        // For every *directory* in the list (non-recursive). Each directory is basically a platform.
+                        list.forEach((entry) => {
+                            if (entry !== "vcpkg") {
+                                let pathToCheck: string = path.join(vcpkgInstalledPath, entry);
+                                if (fs.existsSync(pathToCheck)) {
+                                    let p: string = path.join(pathToCheck, "include");
+                                    if (fs.existsSync(p)) {
+                                        this.vcpkgIncludes.push(p);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        } catch (error) {} finally {
+            this.vcpkgPathReady = true;
+            this.handleConfigurationChange();
         }
     }
 
