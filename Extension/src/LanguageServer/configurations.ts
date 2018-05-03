@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
-const configVersion: number = 3;
+const configVersion: number = 4;
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
 // That code won't trigger if another value is already set.
@@ -527,31 +527,7 @@ export class CppProperties {
             // the system includes were available.
             this.configurationIncomplete = false;
 
-            // Update intelliSenseMode, compilerPath, cStandard, and cppStandard with the defaults if they're missing.
-            // If VS Code settings exist for these properties, don't add them to c_cpp_properties.json
             let dirty: boolean = false;
-            let settings: CppSettings = new CppSettings(this.rootUri);
-            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-                let config: Configuration = this.configurationJson.configurations[i];
-                if (config.intelliSenseMode === undefined && !settings.defaultIntelliSenseMode) {
-                    dirty = true;
-                    config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
-                }
-                // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
-                if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && !settings.defaultCompilerPath) {
-                    config.compilerPath = this.defaultCompilerPath;
-                    dirty = true;
-                }
-                if (!config.cStandard && this.defaultCStandard && !settings.defaultCStandard) {
-                    config.cStandard = this.defaultCStandard;
-                    dirty = true;
-                }
-                if (!config.cppStandard && this.defaultCppStandard && !settings.defaultCppStandard) {
-                    config.cppStandard = this.defaultCppStandard;
-                    dirty = true;
-                }
-            }
-
             if (this.configurationJson.version !== configVersion) {
                 dirty = true;
                 if (this.configurationJson.version === undefined) {
@@ -560,6 +536,10 @@ export class CppProperties {
 
                 if (this.configurationJson.version === 2) {
                     this.updateToVersion3();
+                }
+                
+                if (this.configurationJson.version === 3) {
+                    this.updateToVersion4();
                 } else {
                     this.configurationJson.version = configVersion;
                     vscode.window.showErrorMessage('Unknown version number found in c_cpp_properties.json. Some features may not work as expected.');
@@ -607,6 +587,30 @@ export class CppProperties {
                         "/Library/Frameworks"
                     ];
                 }
+            }
+        }
+    }
+
+    private updateToVersion4(): void {
+        this.configurationJson.version = 4;
+        // Update intelliSenseMode, compilerPath, cStandard, and cppStandard with the defaults if they're missing.
+        // If VS Code settings exist for these properties, don't add them to c_cpp_properties.json
+        let settings: CppSettings = new CppSettings(this.rootUri);
+        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+            let config: Configuration = this.configurationJson.configurations[i];
+
+            if (config.intelliSenseMode === undefined && !settings.defaultIntelliSenseMode) {
+                config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
+            }
+            // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
+            if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && !settings.defaultCompilerPath) {
+                config.compilerPath = this.defaultCompilerPath;
+            }
+            if (!config.cStandard && this.defaultCStandard && !settings.defaultCStandard) {
+                config.cStandard = this.defaultCStandard;
+            }
+            if (!config.cppStandard && this.defaultCppStandard && !settings.defaultCppStandard) {
+                config.cppStandard = this.defaultCppStandard;
             }
         }
     }
