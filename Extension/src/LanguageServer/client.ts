@@ -87,6 +87,10 @@ interface DecorationRangesPair {
     ranges: vscode.Range[];
 }
 
+interface CustomConfigurationParams {
+    configurationItems: SourceFileConfigurationItem[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -106,7 +110,7 @@ const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, v
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
-const CustomConfigurationNotification: NotificationType<SourceFileConfigurationItem[], void> = new NotificationType<SourceFileConfigurationItem[], void>('cpptools/sendCustomConfiguration');
+const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/sendCustomConfiguration');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -237,7 +241,7 @@ export interface Client {
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
-    sendCustomConfigurations(config: SourceFileConfigurationItem[]): void;
+    sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -541,6 +545,7 @@ class DefaultClient implements Client {
     
         // Returns a race between our timeout and the passed in promise
         return this.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
+            clearTimeout(timer);
             return result;
         }, (error: any) => {
             throw error;
@@ -914,7 +919,10 @@ class DefaultClient implements Client {
     }
 
     public sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {
-        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, configs));
+        let params: CustomConfigurationParams = {
+            configurationItems: configs
+        };
+        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
     }
 
     /*********************************************
