@@ -35,7 +35,8 @@
     "Languages",
     "Debuggers",
     "Formatters",
-    "Linters"
+    "Linters",
+    "Snippets"
   ],
   "activationEvents": [
     "*"
@@ -422,6 +423,11 @@
         "category": "C/Cpp"
       },
       {
+        "command": "C_Cpp.ToggleSnippets",
+        "title": "Toggle Snippets",
+        "category": "C/Cpp"
+      },
+      {
         "command": "C_Cpp.ToggleErrorSquiggles",
         "title": "Toggle Error Squiggles",
         "category": "C/Cpp"
@@ -435,14 +441,6 @@
         "command": "C_Cpp.ToggleDimInactiveRegions",
         "title": "Toggle Inactive Region Colorization",
         "category": "C/Cpp"
-      },
-      {
-        "command": "workbench.action.gotoSymbol",
-        "title": "Go to Symbol in File..."
-      },
-      {
-        "command": "workbench.action.showAllSymbols",
-        "title": "Go to Symbol in Workspace..."
       },
       {
         "command": "C_Cpp.ShowReleaseNotes",
@@ -1260,7 +1258,17 @@
       "[c]": {
         "editor.autoIndent": false
       }
-    }
+    },
+    "snippets": [
+      {
+        "language": "cpp",
+        "path": "./cpp_snippets.json"
+      },
+      {
+        "language": "c",
+        "path": "./cpp_snippets.json"
+      }
+    ]
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
@@ -1298,7 +1306,7 @@
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.0.11",
-    "vscode-languageclient": "~3.4.5",
+    "vscode-languageclient": "3.5.1",
     "yauzl": "~2.8.0"
   },
   "runtimeDependencies": [
@@ -1459,7 +1467,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=852926",
+      "url": "https://go.microsoft.com/fwlink/?linkid=872985",
       "platforms": [
         "win32"
       ],
