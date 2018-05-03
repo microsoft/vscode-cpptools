@@ -23,6 +23,7 @@ import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
 import { CustomConfigurationProvider, SourceFileConfiguration, SourceFileConfigurationItem } from '../api';
+import { CancellationTokenSource } from 'vscode';
 
 let ui: UI;
 
@@ -224,8 +225,10 @@ export interface Client {
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
+    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void;
     takeOwnership(document: vscode.TextDocument): void;
     runBlockingTask<T>(task: Thenable<T>): Thenable<T>;
+    runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any>;
     requestWhenReady(request: () => Thenable<any>): Thenable<any>;
     notifyWhenReady(notify: () => void): void;
     requestGoToDeclaration(): Thenable<void>;
@@ -471,6 +474,20 @@ class DefaultClient implements Client {
         }
     }
 
+    public onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {
+        let documentUris: vscode.Uri[] = [];
+        for (let i: number = 0; i < this.TrackedDocuments.size; ++i) {
+            let document: vscode.TextDocument = this.TrackedDocuments[i];
+            documentUris.push(document.uri);
+        }
+
+        let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+        this.runBlockingThenableWithTimeout(() => provider.provideConfigurations(documentUris, tokenSource.token), 1000, tokenSource)
+        .then((configs: SourceFileConfigurationItem[]) => {
+            this.sendCustomConfigurations(configs);
+        });
+    }
+
     /**
      * Take ownership of a document that was previously serviced by another client.
      * This process involves sending a textDocument/didOpen message to the server so
@@ -509,6 +526,27 @@ class DefaultClient implements Client {
         }
     }
 
+    public runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> {
+        let timer: NodeJS.Timer;
+        // Create a promise that rejects in <ms> milliseconds
+        let timeout: Promise<any> = new Promise((resolve, reject) => {
+            timer = setTimeout(() => {
+                clearTimeout(timer);
+                if (tokenSource) {
+                    tokenSource.cancel();
+                }
+                reject("Timed out in " + ms + "ms.");
+            }, ms);
+        });
+    
+        // Returns a race between our timeout and the passed in promise
+        return this.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
+            return result;
+        }, (error: any) => {
+            throw error;
+        }));
+    }
+    
     public requestWhenReady(request: () => Thenable<any>): Thenable<any> {
         if (this.pendingTask === undefined) {
             return request();
@@ -969,8 +1007,10 @@ class NullClient implements Client {
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
+    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {}
     takeOwnership(document: vscode.TextDocument): void {}
     runBlockingTask<T>(task: Thenable<T>): Thenable<T> { return; }
+    runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return; }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
     sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {}

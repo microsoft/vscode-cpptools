@@ -69,7 +69,7 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
 
 export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
     let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-    return runBlockingThenableWithTimeout(async () => {
+    return client.runBlockingThenableWithTimeout(async () => {
         // Loop through registered providers until one is able to service the current document
         for (let i: number = 0; i < customConfigurationProviders.length; i++) {
             if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
@@ -77,7 +77,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
             }
         }
         return Promise.reject("No providers found for " + document.uri);
-    }, 1000, client, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
+    }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
         if (configs !== null && configs.length > 0) {
             client.sendCustomConfigurations(configs);
         }
@@ -85,48 +85,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
 }
 
 export function onDidCustomConfigurationChange(customConfigurationProvider: CustomConfigurationProvider): void {
-    // TODO: How to handle multiple workspaces? Only works with the current workspace.
-    // Should this be called when the workspace changes?
-    if (vscode.workspace.textDocuments === undefined || vscode.workspace.textDocuments.length === 0) {
-        return;
-    }
-
-    let documents: vscode.Uri[] = [];
-    for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
-        let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-        if (document.languageId === "cpp" || document.languageId === "c") {
-            documents.push(document.uri);
-        }
-    }
-
-    let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-
-    // TODO: Can we rely on clients.ActiveClient to be the client for the current workspace?
-    runBlockingThenableWithTimeout(() => customConfigurationProvider.provideConfigurations(documents, tokenSource.token), 1000, clients.ActiveClient, tokenSource)
-    .then((configs: SourceFileConfigurationItem[]) => {
-        clients.ActiveClient.sendCustomConfigurations(configs);
-    });
-}
-
-function runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, client: Client, tokenSource?: CancellationTokenSource): Thenable<any> {
-    let timer: NodeJS.Timer;
-    // Create a promise that rejects in <ms> milliseconds
-    let timeout: Promise<any> = new Promise((resolve, reject) => {
-        timer = setTimeout(() => {
-            clearTimeout(timer);
-            if (tokenSource) {
-                tokenSource.cancel();
-            }
-            reject("Timed out in " + ms + "ms.");
-        }, ms);
-    });
-
-    // Returns a race between our timeout and the passed in promise
-    return client.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
-        return result;
-    }, (error: any) => {
-        throw error;
-    }));
+    clients.forEach((client: Client) => client.onDidChangeCustomConfigurations(customConfigurationProvider));
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
