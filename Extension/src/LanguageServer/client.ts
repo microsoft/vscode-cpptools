@@ -486,8 +486,9 @@ class DefaultClient implements Client {
         }
 
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-        this.runBlockingThenableWithTimeout(() => provider.provideConfigurations(documentUris, tokenSource.token), 1000, tokenSource)
-        .then((configs: SourceFileConfigurationItem[]) => {
+        this.runBlockingThenableWithTimeout(() => {
+            return provider.provideConfigurations(documentUris, tokenSource.token);
+        }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
             this.sendCustomConfigurations(configs);
         });
     }
