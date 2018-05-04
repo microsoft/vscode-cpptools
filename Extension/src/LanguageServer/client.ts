@@ -714,12 +714,9 @@ class DefaultClient implements Client {
     }
 
     private updateInactiveRegions(params: InactiveRegionParams): void {
-        let renderOptions: vscode.DecorationRenderOptions = {
-            light: { color: "rgba(175,175,175,1.0)" },
-            dark: { color: "rgba(155,155,155,1.0)" },
-            rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
-        };
-        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
+        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
+            opacity: '0.5'
+        });
 
         // We must convert to vscode.Ranges in order to make use of the API's
         let ranges: vscode.Range[] = [];
