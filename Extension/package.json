@@ -533,6 +533,7 @@
         },
         "configurationAttributes": {
           "launch": {
+            "type": "object",
             "required": [
               "program"
             ],
@@ -719,8 +720,8 @@
                 }
               },
               "logging": {
-                "type": "object",
                 "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
@@ -759,10 +760,10 @@
                 "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
                 "type": "object",
                 "default": {
-                  "pipeCwd": "${workspaceRoot}",
+                  "pipeCwd": "/usr/bin",
                   "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
                   "pipeArgs": [],
-                  "debuggerPath": "enter the path for the debugger on the target machine, for example /usr/bin/gdb"
+                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
                 },
                 "properties": {
                   "pipeCwd": {
@@ -801,6 +802,7 @@
             }
           },
           "attach": {
+            "type": "object",
             "required": [
               "program",
               "processId"
@@ -883,8 +885,8 @@
                 }
               },
               "logging": {
-                "type": "object",
                 "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
@@ -923,10 +925,10 @@
                 "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
                 "type": "object",
                 "default": {
-                  "pipeCwd": "${workspaceRoot}",
+                  "pipeCwd": "/usr/bin",
                   "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
                   "pipeArgs": [],
-                  "debuggerPath": "enter the path for the debugger on the target machine, for example /usr/bin/gdb"
+                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
                 },
                 "properties": {
                   "pipeCwd": {
@@ -1007,6 +1009,7 @@
         },
         "configurationAttributes": {
           "launch": {
+            "type": "object",
             "required": [
               "program",
               "cwd"
@@ -1109,6 +1112,7 @@
             }
           },
           "attach": {
+            "type": "object",
             "required": [
               "processId"
             ],
@@ -1272,6 +1276,7 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
+    "generateOptionsSchema": "gulp generateOptionsSchema",
     "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p ./",

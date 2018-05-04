@@ -31,8 +31,8 @@ script:
   # Build and then run tests
   - cd Extension
   - npm install
-  - npm run tslint
   - npm run compile
+  - npm run tslint
   # pr-check needs to run before test. test modifies package.json.
   - npm run pr-check
   - npm run test
