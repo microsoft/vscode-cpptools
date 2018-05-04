@@ -10,6 +10,7 @@ const env = require('gulp-env')
 const tslint = require('gulp-tslint');
 const mocha = require('gulp-mocha');
 const fs = require('fs');
+const optionsSchemaGenerator = require('./out/tools/GenerateOptionsSchema');
 
 gulp.task('allTests', () => {
     gulp.start('unitTests');
@@ -82,4 +83,8 @@ gulp.task('pr-check', () => {
         console.log('Please make sure to not check in package.json that has been rewritten by the extension activation. If you intended to have changes in package.json, please only check-in your changes. If you did not, please run `git checkout -- package.json`.');
         process.exit(1);
     }
+});
+
+gulp.task('generateOptionsSchema', () => {
+    optionsSchemaGenerator.GenerateOptionsSchema();
 });
