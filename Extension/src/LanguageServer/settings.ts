@@ -40,6 +40,7 @@ export class CppSettings extends Settings {
     public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
     public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
+    public get inactiveRegionOpacity(): string { return super.Section.get<string>("inactiveRegionOpacity"); }
     public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }

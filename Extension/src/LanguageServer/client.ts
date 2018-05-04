@@ -712,10 +712,12 @@ class DefaultClient implements Client {
     private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
-
+    
     private updateInactiveRegions(params: InactiveRegionParams): void {
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
-            opacity: '0.5'
+            opacity: String(settings.inactiveRegionOpacity)
         });
 
         // We must convert to vscode.Ranges in order to make use of the API's
@@ -742,7 +744,6 @@ class DefaultClient implements Client {
             this.inactiveRegionsDecorations.set(params.uri, toInsert);
         }
 
-        let settings: CppSettings = new CppSettings(this.RootUri);
         if (settings.dimInactiveRegions) {
             // Apply the decorations to all *visible* text editors
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
