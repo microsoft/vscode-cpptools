@@ -96,7 +96,7 @@ function ReplaceReferences(definitions: any, objects: any) {
     return objects;
 }
 
-function mergeReferences(baseDefinitions: any, additionalDefinitions: any) : void {
+function MergeReferences(baseDefinitions: any, additionalDefinitions: any) : void {
     for (let key in additionalDefinitions) {
         if (baseDefinitions[key]) {
             throw `Error: '${key}' defined in multiple schema files.`;
