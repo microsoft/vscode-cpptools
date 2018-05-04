@@ -34,7 +34,7 @@ function getDefaultCppProperties(): ConfigurationJson {
 
 interface ConfigurationJson {
     configurations: Configuration[];
-    variables?: {[key: string]: string | string[]};
+    env?: {[key: string]: string | string[]};
     version: number;
 }
 
@@ -352,7 +352,7 @@ export class CppProperties {
         let result: string[] = [];
         if (paths) {
             paths.forEach(entry => {
-                let entries: string[] = util.resolveVariables(entry, this.configurationJson.variables).split(";").filter(e => e);
+                let entries: string[] = util.resolveVariables(entry, this.configurationJson.env).split(";").filter(e => e);
                 entries = this.resolveDefaults(entries, defaultValue);
                 result = result.concat(entries);
             });
@@ -367,7 +367,7 @@ export class CppProperties {
         if (typeof input === "boolean") {
             return input;
         }
-        return util.resolveVariables(input, this.configurationJson.variables);
+        return util.resolveVariables(input, this.configurationJson.env);
     }
 
     private updateConfiguration(property: string[], defaultValue: string[]): string[];
@@ -529,10 +529,10 @@ export class CppProperties {
             }
 
             // Remove disallowed variable overrides
-            if (this.configurationJson.variables) {
-                delete this.configurationJson.variables['workspaceRoot'];
-                delete this.configurationJson.variables['workspaceFolder'];
-                delete this.configurationJson.variables['default'];
+            if (this.configurationJson.env) {
+                delete this.configurationJson.env['workspaceRoot'];
+                delete this.configurationJson.env['workspaceFolder'];
+                delete this.configurationJson.env['default'];
             }
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
