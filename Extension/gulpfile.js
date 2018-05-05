@@ -52,6 +52,7 @@ gulp.task('integrationTests', () => {
 /// Misc Tasks
 const allTypeScript = [
     'src/**/*.ts',
+    'tools/**/*.ts',
     '!**/*.d.ts',
     '!**/typings**'
 ];

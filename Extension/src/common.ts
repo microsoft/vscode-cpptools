@@ -206,7 +206,7 @@ export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
 
-export function GetHttpsProxyAgent(): HttpsProxyAgent {
+export function getHttpsProxyAgent(): HttpsProxyAgent {
     let proxy: string = vscode.workspace.getConfiguration().get<string>('http.proxy');
     if (!proxy) {
         proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;

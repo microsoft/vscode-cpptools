@@ -223,7 +223,7 @@ export class PackageManager {
         let options: https.RequestOptions = {
             host: parsedUrl.host,
             path: parsedUrl.path,
-            agent: util.GetHttpsProxyAgent(),
+            agent: util.getHttpsProxyAgent(),
             rejectUnauthorized: proxyStrictSSL
         };
 
