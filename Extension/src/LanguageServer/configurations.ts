@@ -34,6 +34,7 @@ function getDefaultCppProperties(): ConfigurationJson {
 
 interface ConfigurationJson {
     configurations: Configuration[];
+    env?: {[key: string]: string | string[]};
     version: number;
 }
 
@@ -336,7 +337,11 @@ export class CppProperties {
         let result: string[] = [];
         entries.forEach(entry => {
             if (entry === "${default}") {
-                result = result.concat(defaultValue);
+                // package.json default values for string[] properties is null.
+                // If no default is set, return an empty array instead of an array with `null` in it.
+                if (defaultValue !== null) {
+                    result = result.concat(defaultValue);
+                }
             } else {
                 result.push(entry);
             }
@@ -348,7 +353,7 @@ export class CppProperties {
         let result: string[] = [];
         if (paths) {
             paths.forEach(entry => {
-                let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
+                let entries: string[] = util.resolveVariables(entry, this.configurationJson.env).split(";").filter(e => e);
                 entries = this.resolveDefaults(entries, defaultValue);
                 result = result.concat(entries);
             });
@@ -363,7 +368,7 @@ export class CppProperties {
         if (typeof input === "boolean") {
             return input;
         }
-        return util.resolveVariables(input);
+        return util.resolveVariables(input, this.configurationJson.env);
     }
 
     private updateConfiguration(property: string[], defaultValue: string[]): string[];
@@ -522,6 +527,13 @@ export class CppProperties {
             this.configurationJson = newJson;
             if (this.CurrentConfiguration < 0 || this.CurrentConfiguration >= newJson.configurations.length) {
                 this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
+            }
+
+            // Remove disallowed variable overrides
+            if (this.configurationJson.env) {
+                delete this.configurationJson.env['workspaceRoot'];
+                delete this.configurationJson.env['workspaceFolder'];
+                delete this.configurationJson.env['default'];
             }
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
