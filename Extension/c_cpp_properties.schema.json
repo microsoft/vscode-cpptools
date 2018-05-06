@@ -109,7 +109,7 @@
         },
         "env": {
             "type": "object",
-            "description": "Custom variables that can be resused anywhere in this file using the ${variable} or ${env:variable} syntax.",
+            "description": "Custom variables that can be reused anywhere in this file using the ${variable} or ${env:variable} syntax.",
             "patternProperties": {
                 "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^default$)(^.+$)": {
                     "oneOf": [
