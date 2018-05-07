@@ -20,17 +20,41 @@ export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
 }
 
-export let packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
+// Use this package.json to read values
+export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
+
+// Use getRawPackageJson to read and write back to package.json
+// This prevents obtaining any of VSCode's expanded variables.
+let rawPackageJson: any = null;
+export function getRawPackageJson(): any {
+    if (rawPackageJson === null) {
+        const fileContents: Buffer = fs.readFileSync(getPackageJsonPath());
+        rawPackageJson = JSON.parse(fileContents.toString());
+    }
+    return rawPackageJson;
+}
+
+// This function is used to stringify the rawPackageJson.
+// Do not use with util.packageJson or else the expanded
+// package.json will be written back.
+export function stringifyPackageJson(packageJson: string): string {
+    return JSON.stringify(packageJson, null, 2);
+}
 
 export function getExtensionFilePath(extensionfile: string): string {
     return path.resolve(extensionContext.extensionPath, extensionfile);
 }
+
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
-export function getPackageJsonString(): string {
-    packageJson.main = "./out/src/main"; // Needs to be reset, because the relative path is removed by VS Code.
-    return JSON.stringify(packageJson, null, 2);
+
+export function getVcpkgPathDescriptorFile(): string {
+    if (process.platform === 'win32') {
+        return path.join(process.env.LOCALAPPDATA, "vcpkg/vcpkg.path.txt");
+    } else {
+        return path.join(process.env.HOME, ".vcpkg/vcpkg.path.txt");
+    }
 }
 
 // Extension is ready if install.lock exists and debugAdapters folder exist.
@@ -119,9 +143,12 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
-export function resolveVariables(input: string): string {
+export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
+    }
+    if (!additionalEnvironment) {
+        additionalEnvironment = {};
     }
 
     // Replace environment and configuration variables.
@@ -134,7 +161,18 @@ export function resolveVariables(input: string): string {
         }
         let newValue: string = undefined;
         switch (varType) {
-            case "env": { newValue = process.env[name]; break; }
+            case "env": {
+                let v: string | string[] = additionalEnvironment[name];
+                if (typeof v === "string") {
+                    newValue = v;
+                } else if (input === match && v instanceof Array) {
+                    newValue = v.join(";");
+                }
+                if (!newValue) {
+                    newValue = process.env[name];
+                }
+                break;
+            }
             case "config": {
                 let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
                 let keys: string[] = name.split('.');
@@ -182,7 +220,7 @@ export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
 
-export function GetHttpsProxyAgent(): HttpsProxyAgent {
+export function getHttpsProxyAgent(): HttpsProxyAgent {
     let proxy: string = vscode.workspace.getConfiguration().get<string>('http.proxy');
     if (!proxy) {
         proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
@@ -248,6 +286,28 @@ export function checkFileExists(filePath: string): Promise<boolean> {
             }
         });
     });
+}
+
+/** Test whether a directory exists */
+export function checkDirectoryExists(dirPath: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fs.stat(dirPath, (err, stats) => {
+            if (stats && stats.isDirectory()) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+    });
+}
+
+/** Read the files in a directory */
+export function readDir(dirPath: string): Promise<string[]> {
+    return new Promise((resolve) => {
+        fs.readdir(dirPath, (err, list) => {
+            resolve(list);
+            });
+        });
 }
 
 /** Test whether the lock file exists.*/

@@ -31,7 +31,7 @@ function formatString(format: string, args: string[]): string {
     return format;
 }
 
-function CreateLaunchString(name: string, type: string, executable: string): string {
+function createLaunchString(name: string, type: string, executable: string): string {
         return `"name": "${name}",
 "type": "${type}",
 "request": "launch",
@@ -44,7 +44,7 @@ function CreateLaunchString(name: string, type: string, executable: string): str
 `;
     }
 
-function CreateAttachString(name: string, type: string, executable: string): string {
+function createAttachString(name: string, type: string, executable: string): string {
     return formatString(`
 "name": "${name}",
 "type": "${type}",
@@ -53,7 +53,7 @@ function CreateAttachString(name: string, type: string, executable: string): str
 `, [type === "cppdbg" ? `${os.EOL}"program": "${"enter program name, for example $\{workspaceFolder\}/" + executable}",` : ""]);
     }
 
-function CreateRemoteAttachString(name: string, type: string, executable: string): string {
+function createRemoteAttachString(name: string, type: string, executable: string): string {
         return `
 "name": "${name}",
 "type": "${type}",
@@ -63,7 +63,7 @@ function CreateRemoteAttachString(name: string, type: string, executable: string
 `;
     }
 
- function CreatePipeTransportString(pipeProgram: string, debuggerProgram: string, pipeArgs: string[] = []): string {
+ function createPipeTransportString(pipeProgram: string, debuggerProgram: string, pipeArgs: string[] = []): string {
         return `
 "pipeTransport": {
 \t"debuggerPath": "/usr/bin/${debuggerProgram}",
@@ -106,7 +106,7 @@ export class MIConfigurations extends Configuration {
         let name: string = `(${this.MIMode}) Launch`;
 
         let body: string = formatString(`{
-\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "", 
 this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
@@ -124,7 +124,7 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
         let name: string = `(${this.MIMode}) Attach`;
 
         let body: string = formatString(`{ 
-\t${indentJsonString(CreateAttachString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
 this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
@@ -146,8 +146,8 @@ export class PipeTransportConfigurations extends Configuration {
 
         let body: string = formatString(`
 {
-\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(CreatePipeTransportString(this.pipeProgram, this.MIMode))},
+\t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(createPipeTransportString(this.pipeProgram, this.MIMode))},
 \t"MIMode": "${this.MIMode}"{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
@@ -165,8 +165,8 @@ export class PipeTransportConfigurations extends Configuration {
 
         let body: string = formatString(`
 {
-\t${indentJsonString(CreateRemoteAttachString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(CreatePipeTransportString(this.pipeProgram, this.MIMode))},
+\t${indentJsonString(createRemoteAttachString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(createPipeTransportString(this.pipeProgram, this.MIMode))},
 \t"MIMode": "${this.MIMode}"{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
         return {
@@ -186,7 +186,7 @@ export class WindowsConfigurations extends Configuration {
 
         let body: string = `
 {
-\t${indentJsonString(CreateLaunchString(name, this.windowsDebugger, this.executable))}
+\t${indentJsonString(createLaunchString(name, this.windowsDebugger, this.executable))}
 }`;
 
         return {
@@ -204,7 +204,7 @@ export class WindowsConfigurations extends Configuration {
 
         let body: string = `
 {
-\t${indentJsonString(CreateAttachString(name, this.windowsDebugger, this.executable))}
+\t${indentJsonString(createAttachString(name, this.windowsDebugger, this.executable))}
 }`;
 
         return {
@@ -218,15 +218,16 @@ export class WindowsConfigurations extends Configuration {
 }
 
 export class WSLConfigurations extends Configuration {
-    public bashPipeProgram = "C:\\\\Windows\\\\sysnative\\\\bash.exe";
+    // Detects if the current VSCode is 32-bit and uses the correct bash.exe
+    public bashPipeProgram = process.arch === 'ia32' ? "${env:windir}\\\\sysnative\\\\bash.exe" : "${env:windir}\\\\system32\\\\bash.exe";
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Bash on Windows Launch`;
 
         let body: string = formatString(`
 {
-\t${indentJsonString(CreateLaunchString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
+\t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(createPipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
@@ -242,8 +243,8 @@ export class WSLConfigurations extends Configuration {
 
         let body: string = formatString(`
 {
-\t${indentJsonString(CreateRemoteAttachString(name, this.miDebugger, this.executable))},
-\t${indentJsonString(CreatePipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
+\t${indentJsonString(createRemoteAttachString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(createPipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {

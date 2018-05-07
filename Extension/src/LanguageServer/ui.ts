@@ -110,12 +110,15 @@ export class UI {
 
     public activeDocumentChanged(): void {
         let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-        let show: boolean = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
+        let isCpp: boolean = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
-        this.ShowConfiguration = show;
-        this.ShowDBIcon = show;
-        this.ShowFlameIcon = show;
-        this.ShowNavigation = show;
+        // It's sometimes desirable to see the config and icons when making settings changes.
+        let isSettingsJson: boolean = (activeEditor && (activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
+
+        this.ShowConfiguration = isCpp || isSettingsJson;
+        this.ShowDBIcon = isCpp || isSettingsJson;
+        this.ShowFlameIcon = isCpp || isSettingsJson;
+        this.ShowNavigation = isCpp;
     }
 
     public bind(client: Client): void {

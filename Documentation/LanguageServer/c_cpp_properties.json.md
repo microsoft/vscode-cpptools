@@ -78,7 +78,7 @@
   This list of paths will be used by the Tag Parser to search for headers included by your source files. The Tag Parser will automatically search all subfolders in these paths unless the path ends with a `/*` or `\*`. For example, `/usr/include` directs the Tag Parser to search the `include` folder and its subfolders for headers while `/usr/include/*` directs the Tag Parser not to look in any subfolders of `/usr/include`.
 
 * #### `limitSymbolsToIncludedHeaders`
-  When true, the Tag Parser will only parse code files that have been directly or indirectly included by a source file in `${workspaceRoot}`. When false, the Tag Parser will parse all code files found in the paths specified in the **path** list.
+  When true, the Tag Parser will only parse code files that have been directly or indirectly included by a source file in `${workspaceFolder}`. When false, the Tag Parser will parse all code files found in the paths specified in the **path** list.
 
 * #### `databaseFilename`
-  When set, this instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The `${workspaceRoot}` variable can be used to specify a path relative to the workspace folder (e.g. `$[workspaceRoot}/.vscode/browse.vc.db`)
+  When set, this instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The `${workspaceFolder}` variable can be used to specify a path relative to the workspace folder (e.g. `${workspaceFolder}/.vscode/browse.vc.db`)

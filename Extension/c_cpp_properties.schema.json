@@ -11,7 +11,7 @@
                 ],
                 "properties": {
                     "name": {
-                        "description": "Configuration identifier. Mac, Linux, or Win32 are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.",
+                        "description": "Configuration identifier. Mac, Linux, and Win32 are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.",
                         "type": "string"
                     },
                     "compilerPath": {
@@ -24,7 +24,8 @@
                         "enum": [
                             "c89",
                             "c99",
-                            "c11"
+                            "c11",
+                            "${default}"
                         ]
                     },
                     "cppStandard": {
@@ -35,7 +36,8 @@
                             "c++03",
                             "c++11",
                             "c++14",
-                            "c++17"
+                            "c++17",
+                            "${default}"
                         ]
                     },
                     "compileCommands": {
@@ -64,12 +66,13 @@
                         }
                     },
                     "intelliSenseMode": {
+                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64 and Linux/Mac default to clang-x64.",
                         "type": "string",
                         "enum": [
                             "msvc-x64",
-                            "clang-x64"
-                        ],
-                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64 and Linux/Mac default to clang-x64."
+                            "clang-x64",
+                            "${default}"
+                        ]
                     },
                     "forcedInclude": {
                         "description": "A list of files that should be included before any include file in a translation unit.",
@@ -83,7 +86,10 @@
                         "properties": {
                             "limitSymbolsToIncludedHeaders": {
                                 "description": "true to process only those files directly or indirectly included as headers, false to process all files under the specified include paths.",
-                                "type": "boolean"
+                                "type": [
+                                    "boolean",
+                                    "string"
+                                ]
                             },
                             "databaseFilename": {
                                 "description": "Path to the generated symbol database. If a relative path is specified, it will be made relative to the workspace's default storage location.",
@@ -101,6 +107,26 @@
                 }
             }
         },
+        "env": {
+            "type": "object",
+            "description": "Custom variables that can be reused anywhere in this file using the ${variable} or ${env:variable} syntax.",
+            "patternProperties": {
+                "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^default$)(^.+$)": {
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
         "version": {
             "type": "integer",
             "description": "Version of the configuration file. This property is managed by the extension. Please do not change it."
@@ -109,6 +135,9 @@
     "properties": {
         "configurations": {
             "$ref": "#/definitions/configurations"
+        },
+        "env": {
+            "$ref": "#/definitions/env"
         },
         "version": {
             "$ref": "#/definitions/version"
