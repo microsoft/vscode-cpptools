@@ -16,7 +16,7 @@ You can learn how to use the extension at [VS Code for C/C++](https://code.visua
 
 If you clone this repository, you can also try out our [Code Samples](Code%20Samples).
 
-If you have any questions, check out our our [**Documentation**](Documentation) folder. If you do not find your answer there, feel free to ask it in our [issues page](https://github.com/Microsoft/vscode-cpptools/issues).
+If you have any questions, check out our [**Documentation**](Documentation) folder. If you do not find your answer there, feel free to ask it in our [issues page](https://github.com/Microsoft/vscode-cpptools/issues).
 
 ### Contribution
 
