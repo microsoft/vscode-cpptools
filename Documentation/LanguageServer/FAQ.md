@@ -28,7 +28,14 @@ If you want IntelliSense to operate on your files even when all #include directi
 
 ## Why do I see red squiggles under Standard Library types?
 
-The most common reason for this is missing include paths. If you are using a compiler in the GCC family, you should set  `"compilerPath"` in **c_cpp_properties.json** to the path to your compiler and the extension will query the compiler for the system includes and defines. If you are using a Microsoft compiler from Visual Studio or Clang for Windows, don't add the `"compilerPath"` property to your configuration.
+The most common reason for this is missing include paths and defines. The easiest way to fix this on each platform is as follows:
+
+**Linux/Mac**
+* Set `"intelliSenseMode": "clang-x64"` and `"compilerPath"` in **c_cpp_properties.json** to the path to your compiler.
+
+**Windows**
+* If you are using a Microsoft compiler from Visual Studio, set `"intelliSenseMode": "msvc-x64"`, but don't add the `"compilerPath"` property to **c_cpp_properties.json**.
+* If you are using Clang for Windows, set `"intelliSenseMode": "msvc-x64"`, and `"compilerPath"` in **c_cpp_properties.json** to the path to your compiler.
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
