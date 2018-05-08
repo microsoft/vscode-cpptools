@@ -6,11 +6,18 @@
 
 ```json
 {
+    "env" : {
+        "defaultIncludePath": [
+            "${workspaceFolder}",
+            "${workspaceFolder}/include"
+        ],
+        "myCompilerPath": "/usr/local/bin/gcc-7"
+    },
     "configurations": [
         {
             "name": "Win32",
             "intelliSenseMode": "msvc-x64",
-            "includePath": [ "${workspaceFolder}" ],
+            "includePath": [ "${defaultIncludePath}", "/another/path" ],
             "macFrameworkPath": [ "/System/Library/Frameworks" ],
             "defines": [ "FOO", "BAR=100" ],
             "forcedInclude": [ "${workspaceFolder}/include/config.h" ],
@@ -30,6 +37,9 @@
 ```
 
 ## Top-level properties
+
+* #### `env`
+  An array of user-defined variables that will be available for substitution in the configurations via the standard environment variable syntax: `${<var>}` or `${env:<var>}`. Strings and arrays of strings are accepted.
 
 * #### `configurations`
   An array of configuration objects that provide the IntelliSense engine with information about your project and your preferences. By default, the extension creates 3 configurations for you, one each for Linux, Mac, and Windows, but it is not required to keep them all. You may also add additional configurations if necessary.
