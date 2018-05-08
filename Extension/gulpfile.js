@@ -87,5 +87,5 @@ gulp.task('pr-check', () => {
 });
 
 gulp.task('generateOptionsSchema', () => {
-    optionsSchemaGenerator.GenerateOptionsSchema();
+    optionsSchemaGenerator.generateOptionsSchema();
 });
