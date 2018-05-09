@@ -12,7 +12,6 @@ import * as util from '../common';
  */
 type FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean;
 type KeyValuePair = { key: string; value: string };
-type SettingInfo = { key: string; defaultValue?: any; globalValue?: any; workspaceValue?: any; workspaceFolderValue?: any };
 
 const maxSettingLengthForTelemetry: number = 50;
 let cache: SettingsTracker = undefined;
