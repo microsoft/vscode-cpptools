@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
+import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 const configVersion: number = 4;
@@ -313,6 +314,7 @@ export class CppProperties {
 
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+            telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             if (config.includePath === undefined) {
