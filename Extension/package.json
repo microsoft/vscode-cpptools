@@ -168,10 +168,11 @@
             "None",
             "Error",
             "Warning",
-            "Information"
+            "Information",
+            "Debug"
           ],
           "default": "Error",
-          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information.",
+          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information < Debug.",
           "scope": "resource"
         },
         "C_Cpp.autoAddFileAssociations": {

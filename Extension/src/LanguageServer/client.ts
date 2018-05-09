@@ -22,6 +22,7 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
+import { SettingsTracker, getTracker } from './settingsTracker';
 
 let ui: UI;
 
@@ -115,166 +116,7 @@ const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> 
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 
-const maxSettingLengthForTelemetry: number = 50;
-let previousCppSettings: { [key: string]: any } = {};
 let failureMessageShown: boolean = false;
-
-/**
- * track settings changes for telemetry
- */
-type FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean;
-type KeyValuePair = { key: string; value: string };
-type SettingInfo = { key: string; defaultValue?: any; globalValue?: any; workspaceValue?: any; workspaceFolderValue?: any };
-
-function typeMatch(value: any, type?: string | string[]): string {
-    if (type) {
-        if (type instanceof Array) {
-            for (let i: number = 0; i < type.length; i++) {
-                let t: string = type[i];
-                if (t) {
-                    if (typeof value === t) {
-                        return t;
-                    }
-                    if (t === "array" && value instanceof Array) {
-                        return t;
-                    }
-                    if (t === "null" && value === null) {
-                        return t;
-                    }
-                }
-            }
-        } else if (typeof type === "string" && typeof value === type) {
-            return type;
-        }
-    }
-    return undefined;
-}
-
-function getSetting(settings: vscode.WorkspaceConfiguration, key: string): any {
-    // Ignore methods and settings that don't exist
-    let info: SettingInfo = settings.inspect(key);
-    if (info.defaultValue !== undefined) {
-        let val: any = settings.get(key);
-        if (val instanceof Object) {
-            return val; // It's a sub-section.
-        }
-
-        // Skip values that don't match the setting's type or enum.
-        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-        if (curSetting) {
-            let type: string = typeMatch(val, curSetting["type"]);
-            if (type) {
-                if (type !== "string") {
-                    return val;
-                }
-                let curEnum: any[] = curSetting["enum"];
-                if (curEnum && curEnum.indexOf(val) === -1) {
-                    return "<invalid>";
-                }
-                return val;
-            }
-        }
-    }
-    return undefined;
-}
-
-function filterAndSanitize(key: string, val: any, settings: vscode.WorkspaceConfiguration, filter: FilterFunction): KeyValuePair {
-    if (filter(key, val, settings)) {
-        let value: string;
-        previousCppSettings[key] = val;
-        switch (key) {
-            case "clang_format_style":
-            case "clang_format_fallbackStyle": {
-                let newKey: string = key + "2";
-                if (val) {
-                    switch (String(val).toLowerCase()) {
-                        case "visual studio":
-                        case "llvm":
-                        case "google":
-                        case "chromium":
-                        case "mozilla":
-                        case "webkit":
-                        case "file":
-                        case "none": {
-                            value = String(previousCppSettings[key]);
-                            break;
-                        }
-                        default: {
-                            value = "...";
-                            break;
-                        }
-                    }
-                } else {
-                    value = "null";
-                }
-                key = newKey;
-                break;
-            }
-            case "commentContinuationPatterns": {
-                let defVal: string = JSON.stringify(settings.inspect(key).defaultValue);
-                let jsonVal: string = JSON.stringify(val);
-                value = (jsonVal !== defVal) ? "..." : "<default>"; // Track whether it's being used, but nothing specific about it.
-                break;
-            }
-            default: {
-                if (key === "clang_format_path" || key.startsWith("default.")) {
-                    value = (val !== settings.inspect(key).defaultValue) ? "..." : "<default>"; // Track whether it's being used, but nothing specific about it.
-                } else {
-                    value = String(previousCppSettings[key]);
-                }
-            }
-        }
-        if (value && value.length > maxSettingLengthForTelemetry) {
-            value = value.substr(0, maxSettingLengthForTelemetry) + "...";
-        }
-        return {key: key, value: value};
-    }
-}
-
-function collectSettingsForTelemetry(filter: FilterFunction, resource: vscode.Uri): { [key: string]: string } {
-    let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
-    let result: { [key: string]: string } = {};
-
-    for (let key in settings) {
-        let val: any = getSetting(settings, key);
-        if (val === undefined) {
-            continue;
-        }
-        if (val instanceof Object && !(val instanceof Array)) {
-            for (let subKey in val) {
-                let newKey: string = key + "." + subKey;
-                let subVal: any = getSetting(settings, newKey);
-                if (subVal === undefined) {
-                    continue;
-                }
-                let entry: KeyValuePair = filterAndSanitize(newKey, subVal, settings, filter);
-                if (entry && entry.key && entry.value) {
-                    result[entry.key] = entry.value;
-                }
-            }
-            continue;
-        }
-
-        let entry: KeyValuePair = filterAndSanitize(key, val, settings, filter);
-        if (entry && entry.key && entry.value) {
-            result[entry.key] = entry.value;
-        }
-    }
-
-    return result;
-}
-
-function initializeSettingsCache(resource: vscode.Uri): void {
-    collectSettingsForTelemetry(() => true, resource);
-}
-
-function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } {
-    let filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
-        return val !== settings.inspect(key).defaultValue;
-    };
-    initializeSettingsCache(resource);
-    return collectSettingsForTelemetry(filter, resource);
-}
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -335,6 +177,7 @@ class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
+    private settingsTracker: SettingsTracker;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -404,7 +247,8 @@ class DefaultClient implements Client {
 
                 // Once this is set, we don't defer any more callbacks.
                 this.languageClient = languageClient;
-                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", getNonDefaultSettings(this.RootUri));
+                this.settingsTracker = getTracker(this.RootUri);
+                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                 failureMessageShown = false;
 
                 // Listen for messages from the language server.
@@ -517,13 +361,7 @@ class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(): void {
-        // This relies on getNonDefaultSettings being called first.
-        console.assert(Object.keys(previousCppSettings).length > 0);
-
-        let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
-            return !(key in previousCppSettings) || val !== previousCppSettings[key];
-        };
-        let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
+        let changedSettings: { [key: string] : string} = this.settingsTracker.getChangedSettings();
 
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
