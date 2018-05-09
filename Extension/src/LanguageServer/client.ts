@@ -122,72 +122,142 @@ let failureMessageShown: boolean = false;
 /**
  * track settings changes for telemetry
  */
-function collectSettingsForTelemetry(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
+type FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean;
+type KeyValuePair = { key: string; value: string };
+type SettingInfo = { key: string; defaultValue?: any; globalValue?: any; workspaceValue?: any; workspaceFolderValue?: any };
+
+function typeMatch(value: any, type?: string | string[]): string {
+    if (type) {
+        if (type instanceof Array) {
+            for (let i: number = 0; i < type.length; i++) {
+                let t: string = type[i];
+                if (t) {
+                    if (typeof value === t) {
+                        return t;
+                    }
+                    if (t === "array" && value instanceof Array) {
+                        return t;
+                    }
+                    if (t === "null" && value === null) {
+                        return t;
+                    }
+                }
+            }
+        } else if (typeof type === "string" && typeof value === type) {
+            return type;
+        }
+    }
+    return undefined;
+}
+
+function getSetting(settings: vscode.WorkspaceConfiguration, key: string): any {
+    // Ignore methods and settings that don't exist
+    let info: SettingInfo = settings.inspect(key);
+    if (info.defaultValue !== undefined) {
+        let val: any = settings.get(key);
+        if (val instanceof Object) {
+            return val; // It's a sub-section.
+        }
+
+        // Skip values that don't match the setting's type or enum.
+        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+        if (curSetting) {
+            let type: string = typeMatch(val, curSetting["type"]);
+            if (type) {
+                if (type !== "string") {
+                    return val;
+                }
+                let curEnum: any[] = curSetting["enum"];
+                if (curEnum && curEnum.indexOf(val) === -1) {
+                    return "<invalid>";
+                }
+                return val;
+            }
+        }
+    }
+    return undefined;
+}
+
+function filterAndSanitize(key: string, val: any, settings: vscode.WorkspaceConfiguration, filter: FilterFunction): KeyValuePair {
+    if (filter(key, val, settings)) {
+        let value: string;
+        previousCppSettings[key] = val;
+        switch (key) {
+            case "clang_format_style":
+            case "clang_format_fallbackStyle": {
+                let newKey: string = key + "2";
+                if (val) {
+                    switch (String(val).toLowerCase()) {
+                        case "visual studio":
+                        case "llvm":
+                        case "google":
+                        case "chromium":
+                        case "mozilla":
+                        case "webkit":
+                        case "file":
+                        case "none": {
+                            value = String(previousCppSettings[key]);
+                            break;
+                        }
+                        default: {
+                            value = "...";
+                            break;
+                        }
+                    }
+                } else {
+                    value = "null";
+                }
+                key = newKey;
+                break;
+            }
+            case "commentContinuationPatterns": {
+                let defVal: string = JSON.stringify(settings.inspect(key).defaultValue);
+                let jsonVal: string = JSON.stringify(val);
+                value = (jsonVal !== defVal) ? "..." : "<default>"; // Track whether it's being used, but nothing specific about it.
+                break;
+            }
+            default: {
+                if (key === "clang_format_path" || key.startsWith("default.")) {
+                    value = (val !== settings.inspect(key).defaultValue) ? "..." : "<default>"; // Track whether it's being used, but nothing specific about it.
+                } else {
+                    value = String(previousCppSettings[key]);
+                }
+            }
+        }
+        if (value && value.length > maxSettingLengthForTelemetry) {
+            value = value.substr(0, maxSettingLengthForTelemetry) + "...";
+        }
+        return {key: key, value: value};
+    }
+}
+
+function collectSettingsForTelemetry(filter: FilterFunction, resource: vscode.Uri): { [key: string]: string } {
     let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
     let result: { [key: string]: string } = {};
 
     for (let key in settings) {
-        if (settings.inspect(key).defaultValue === undefined) {
-            continue; // ignore methods and settings that don't exist
+        let val: any = getSetting(settings, key);
+        if (val === undefined) {
+            continue;
         }
-        let val: any = settings.get(key);
-        if (val instanceof Object) {
-            val = JSON.stringify(val, null, 2);
-        }
-
-        // Skip values that don't match the setting's enum.
-        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-        if (curSetting) {
-            let curEnum: any[] = curSetting["enum"];
-            if (curEnum && curEnum.indexOf(val) === -1) {
-                continue;
-            }
-        }
-
-        if (filter(key, val, settings)) {
-            previousCppSettings[key] = val;
-            switch (key.toLowerCase()) {
-                case "clang_format_path": {
+        if (val instanceof Object && !(val instanceof Array)) {
+            for (let subKey in val) {
+                let newKey: string = key + "." + subKey;
+                let subVal: any = getSetting(settings, newKey);
+                if (subVal === undefined) {
                     continue;
                 }
-                case "clang_format_style":
-                case "clang_format_fallbackstyle": {
-                    let newKey: string = key + "2";
-                    if (val) {
-                        switch (String(val).toLowerCase()) {
-                            case "visual studio":
-                            case "llvm":
-                            case "google":
-                            case "chromium":
-                            case "mozilla":
-                            case "webkit":
-                            case "file":
-                            case "none": {
-                                result[newKey] = String(previousCppSettings[key]);
-                                break;
-                            }
-                            default: {
-                                result[newKey] = "...";
-                                break;
-                            }
-                        }
-                    } else {
-                        result[newKey] = "null";
-                    }
-                    key = newKey;
-                    break;
-                }
-                default: {
-                    if (key.startsWith("default.")) {
-                        continue;   // Don't log c_cpp_properties.json defaults since they may contain PII.
-                    }
-                    result[key] = String(previousCppSettings[key]);
-                    break;
+                let entry: KeyValuePair = filterAndSanitize(newKey, subVal, settings, filter);
+                if (entry && entry.key && entry.value) {
+                    result[entry.key] = entry.value;
                 }
             }
-            if (result[key].length > maxSettingLengthForTelemetry) {
-                result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
-            }
+            continue;
+        }
+
+        let entry: KeyValuePair = filterAndSanitize(key, val, settings, filter);
+        if (entry && entry.key && entry.value) {
+            result[entry.key] = entry.value;
         }
     }
 
