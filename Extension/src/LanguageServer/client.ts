@@ -480,10 +480,7 @@ class DefaultClient implements Client {
 
     public onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {
         let documentUris: vscode.Uri[] = [];
-        for (let i: number = 0; i < this.TrackedDocuments.size; ++i) {
-            let document: vscode.TextDocument = this.TrackedDocuments[i];
-            documentUris.push(document.uri);
-        }
+        this.trackedDocuments.forEach(document => documentUris.push(document.uri));
 
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
         this.runBlockingThenableWithTimeout(() => {
