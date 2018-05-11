@@ -450,7 +450,7 @@ class DefaultClient implements Client {
         if (this.rootFolder) {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
-                path.join(this.RootPath, "*"),
+                "**/*",
                 false /*ignoreCreateEvents*/,
                 true /*ignoreChangeEvents*/,
                 false /*ignoreDeleteEvents*/);
