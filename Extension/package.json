@@ -1305,7 +1305,7 @@
   },
   "dependencies": {
     "http-proxy-agent": "~2.0.0",
-    "https-proxy-agent": "~2.1.0",
+    "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
