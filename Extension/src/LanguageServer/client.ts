@@ -483,6 +483,11 @@ class DefaultClient implements Client {
         this.trackedDocuments.forEach(document => documentUris.push(document.uri));
 
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+
+        if (documentUris.length === 0) {
+            return;
+        }
+
         this.runBlockingThenableWithTimeout(() => {
             return provider.provideConfigurations(documentUris, tokenSource.token);
         }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
