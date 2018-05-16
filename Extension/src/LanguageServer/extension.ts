@@ -65,17 +65,23 @@ export function activate(activationEventOccurred: boolean): void {
 
 export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
     customConfigurationProviders.push(provider);
+
+    // Request for configurations from the provider only if realActivationOccurred.
+    // Otherwise, the request will be sent when realActivation is called.
+    if (realActivationOccurred) {
+        onDidCustomConfigurationChange(provider);
+    }
 }
 
 export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
     let tokenSource: CancellationTokenSource = new CancellationTokenSource();
     return client.runBlockingThenableWithTimeout(async () => {
         // Loop through registered providers until one is able to service the current document
-        for (let i: number = 0; i < customConfigurationProviders.length; i++) {
-            if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
-                return customConfigurationProviders[i].provideConfigurations([document.uri]);
+        customConfigurationProviders.forEach(async provider => {
+            if (await provider.canProvideConfiguration(document.uri)) {
+                return provider.provideConfigurations([document.uri]);
             }
-        }
+        });
         return Promise.reject("No providers found for " + document.uri);
     }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
         if (configs !== null && configs.length > 0) {
@@ -121,6 +127,10 @@ function realActivation(): void {
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
     }
+
+    // There may have already been registered CustomConfigurationProviders.
+    // Request for configurations from those providers.
+    customConfigurationProviders.forEach(provider => onDidCustomConfigurationChange(provider));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
