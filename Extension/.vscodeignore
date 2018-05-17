@@ -11,4 +11,5 @@ CMakeLists.txt
 debugAdapters/install.lock*
 out/src/Debugger/copyScript.js
 tools/**
+out/tools/**
 notices/**

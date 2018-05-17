@@ -24,6 +24,7 @@ import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
 import { CustomConfigurationProvider, SourceFileConfiguration, SourceFileConfigurationItem } from '../api';
 import { CancellationTokenSource } from 'vscode';
+import { SettingsTracker, getTracker } from './settingsTracker';
 
 let ui: UI;
 
@@ -122,92 +123,7 @@ const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> 
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 
-const maxSettingLengthForTelemetry: number = 50;
-let previousCppSettings: { [key: string]: any } = {};
-
-/**
- * track settings changes for telemetry
- */
-function collectSettingsForTelemetry(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
-    let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
-    let result: { [key: string]: string } = {};
-
-    for (let key in settings) {
-        if (settings.inspect(key).defaultValue === undefined) {
-            continue; // ignore methods and settings that don't exist
-        }
-        let val: any = settings.get(key);
-        if (val instanceof Object) {
-            val = JSON.stringify(val, null, 2);
-        }
-
-        // Skip values that don't match the setting's enum.
-        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-        if (curSetting) {
-            let curEnum: any[] = curSetting["enum"];
-            if (curEnum && curEnum.indexOf(val) === -1) {
-                continue;
-            }
-        }
-
-        if (filter(key, val, settings)) {
-            previousCppSettings[key] = val;
-            switch (String(key).toLowerCase()) {
-                case "clang_format_path": {
-                    continue;
-                }
-                case "clang_format_style":
-                case "clang_format_fallbackstyle": {
-                    let newKey: string = String(key) + "2";
-                    if (val) {
-                        switch (String(val).toLowerCase()) {
-                            case "visual studio":
-                            case "llvm":
-                            case "google":
-                            case "chromium":
-                            case "mozilla":
-                            case "webkit":
-                            case "file":
-                            case "none": {
-                                result[newKey] = String(previousCppSettings[key]);
-                                break;
-                            }
-                            default: {
-                                result[newKey] = "...";
-                                break;
-                            }
-                        }
-                    } else {
-                        result[newKey] = "null";
-                    }
-                    key = newKey;
-                    break;
-                }
-                default: {
-                    result[key] = String(previousCppSettings[key]);
-                    break;
-                }
-            }
-            if (result[key].length > maxSettingLengthForTelemetry) {
-                result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
-            }
-        }
-    }
-
-    return result;
-}
-
-function initializeSettingsCache(resource: vscode.Uri): void {
-    collectSettingsForTelemetry(() => true, resource);
-}
-
-function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } {
-    let filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
-        return val !== settings.inspect(key).defaultValue;
-    };
-    initializeSettingsCache(resource);
-    return collectSettingsForTelemetry(filter, resource);
-}
+let failureMessageShown: boolean = false;
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -272,9 +188,9 @@ class DefaultClient implements Client {
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
-    private failureMessageShown = new PersistentState<boolean>("DefaultClient.failureMessageShown", false);
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
+    private settingsTracker: SettingsTracker;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -332,7 +248,7 @@ class DefaultClient implements Client {
             ui.bind(this);
 
             this.runBlockingTask(languageClient.onReady()).then(() => {
-                this.configuration = new configs.CppProperties(this.RootPath);
+                this.configuration = new configs.CppProperties(this.RootUri);
                 this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                 this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
                 this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
@@ -346,24 +262,31 @@ class DefaultClient implements Client {
 
                 // Once this is set, we don't defer any more callbacks.
                 this.languageClient = languageClient;
-                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", getNonDefaultSettings(this.RootUri));
-                this.failureMessageShown.Value = false;
+                this.settingsTracker = getTracker(this.RootUri);
+                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
+                failureMessageShown = false;
 
                 // Listen for messages from the language server.
                 this.registerNotifications();
                 this.registerFileWatcher();
-            }, () => {
+            }, (err) => {
                 this.isSupported = false;   // Running on an OS we don't support yet.
-                if (!this.failureMessageShown.Value) {
-                    this.failureMessageShown.Value = true;
-                    vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled.");
+                if (!failureMessageShown) {
+                    failureMessageShown = true;
+                    vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
                 }
             });
-        } catch {
+        } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
-            if (!this.failureMessageShown.Value) {
-                this.failureMessageShown.Value = true;
-                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled.");
+            if (!failureMessageShown) {
+                failureMessageShown = true;
+                let additionalInfo: string;
+                if (err.code === "EPERM") {
+                    additionalInfo = `EPERM: Check permissions for '${getLanguageServerFileName()}'`;
+                } else {
+                    additionalInfo = String(err);
+                }
+                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + additionalInfo);
             }
         }
     }
@@ -412,7 +335,11 @@ class DefaultClient implements Client {
                 dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
-                exclusionPolicy: settings.exclusionPolicy
+                exclusionPolicy: settings.exclusionPolicy,
+                preferredPathSeparator: settings.preferredPathSeparator,
+                default: {
+                    systemIncludePath: settings.defaultSystemIncludePath
+                }
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {
@@ -449,18 +376,13 @@ class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(): void {
-        // This relies on getNonDefaultSettings being called first.
-        console.assert(Object.keys(previousCppSettings).length > 0);
-
-        let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
-            return !(key in previousCppSettings) || val !== previousCppSettings[key];
-        };
-        let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
+        let changedSettings: { [key: string] : string} = this.settingsTracker.getChangedSettings();
 
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
                 updateLanguageConfigurations();
             }
+            this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
         }
     }
@@ -611,7 +533,7 @@ class DefaultClient implements Client {
         if (this.rootFolder) {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
-                path.join(this.RootPath, "*"),
+                "**/*",
                 false /*ignoreCreateEvents*/,
                 true /*ignoreChangeEvents*/,
                 false /*ignoreDeleteEvents*/);
@@ -755,7 +677,10 @@ class DefaultClient implements Client {
             if (showIntelliSenseFallbackMessage.Value) {
                 let learnMorePanel: string = "Learn More";
                 let dontShowAgain: string = "Don't Show Again";
-                vscode.window.showInformationMessage("Configure includePath for better IntelliSense results.", learnMorePanel, dontShowAgain).then((value) => {
+                let fallbackMsg: string = this.configuration.VcpkgInstalled ?   
+                    "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
+                    "Configure your IntelliSense settings to help find missing headers.";
+                vscode.window.showInformationMessage(fallbackMsg, learnMorePanel, dontShowAgain).then((value) => {
                     switch (value) {
                         case learnMorePanel:
                             let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);

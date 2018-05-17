@@ -119,18 +119,22 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
     let outputChannelLogger: Logger = getOutputChannelLogger();
     outputChannelLogger.appendLine("Updating C/C++ dependencies...");
 
-    let statusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
-    let packageManager: PackageManager = new PackageManager(info, outputChannelLogger, statusItem);
+    let packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
 
-    outputChannelLogger.appendLine('');
-    setInstallationStage('downloadPackages');
-    await packageManager.DownloadPackages();
+    return vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "C/C++ Extension",
+        cancellable: false
+    }, async (progress, token) => {
 
-    outputChannelLogger.appendLine('');
-    setInstallationStage('installPackages');
-    await packageManager.InstallPackages();
+        outputChannelLogger.appendLine('');
+        setInstallationStage('downloadPackages');
+        await packageManager.DownloadPackages(progress);
 
-    statusItem.dispose();
+        outputChannelLogger.appendLine('');
+        setInstallationStage('installPackages');
+        await packageManager.InstallPackages(progress);
+    });
 }
 
 function makeBinariesExecutable(): Promise<void> {
@@ -308,13 +312,15 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ToggleErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
+        "onCommand:C_Cpp.ToggleSnippets",
         "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
         "onCommand:C_Cpp.PauseParsing",
         "onCommand:C_Cpp.ResumeParsing",
         "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
-        "onDebug"
+        "onDebug",
+        "workspaceContains:/.vscode/c_cpp_properties.json"
     ];
 
     return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
