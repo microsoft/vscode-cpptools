@@ -1,30 +1,60 @@
-// Available variables which can be used inside of strings.
-// ${workspaceRoot}: the root folder of the team
-// ${file}: the current opened file
-// ${fileBasename}: the current opened file's basename
-// ${fileDirname}: the current opened file's dirname
-// ${fileExtname}: the current opened file's extension
-// ${cwd}: the current working directory of the spawned process
-
-// A task runner that calls a custom npm script that compiles the extension.
 {
-	"version": "0.1.0",
-
-	// we want to run npm
-	"command": "npm",
-
-	// the command is a shell script
-	"isShellCommand": true,
-
-	// show the output window only if unrecognized errors occur.
-	"showOutput": "silent",
-
-	// we run the custom script "compile" as defined in package.json
-	"args": ["run", "compile", "--loglevel", "silent"],
-
-	// The tsc compiler is started in watching mode
-	"isWatching": true,
-
-	// use the standard tsc in watch mode problem matcher to find compile problems in the output.
-	"problemMatcher": "$tsc-watch"
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "TypeScript Compile",
+            "identifier": "compile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "isBackground": true,
+            "type": "shell",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            },
+            "command": "npm",
+            "args": [
+                "run",
+                "compile",
+                "--loglevel",
+                "silent"
+            ],
+            "problemMatcher": "$tsc-watch"
+        },
+        {
+            "label": "TypeScript Lint",
+            "identifier": "tslint",
+            "group": "build",
+            "isBackground": false,
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "tslint"
+            ],
+            "problemMatcher": {
+                "fileLocation": "absolute",
+                "source": "tslint",
+                "pattern": [
+                    {
+                        "regexp": "(ERROR:) ([a-zA-Z/:\\-\\.]*)\\[(\\d+), (\\d+)\\]: (.*)",
+                        "severity": 1,
+                        "file": 2,
+                        "line": 3,
+                        "column": 4,
+                        "message": 5
+                    }
+                ]
+            },
+            "dependsOn": [
+                "compile"
+            ]
+        }
+    ]
 }

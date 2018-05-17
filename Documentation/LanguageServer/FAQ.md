@@ -3,6 +3,7 @@
 * [How do I get IntelliSense to work correctly?](#how-do-i-get-intellisense-to-work-correctly)
 * [Why do I see red squiggles under Standard Library types?](#why-do-i-see-red-squiggles-under-standard-library-types)
 * [How do I get the new IntelliSense to work with MinGW on Windows?](#how-do-i-get-the-new-intellisense-to-work-with-mingw-on-windows)
+* [How do I get the new IntelliSense to work with the Windows Subsystem for Linux?](#how-do-i-get-the-new-intellisense-to-work-with-the-windows-subsystem-for-linux)
 * [What is the difference between `"includePath"` and `"browse.path"` in **c_cpp_properties.json**?](#what-is-the-difference-between-includepath-and-browsepath-in-c_cpp_propertiesjson)
 * [How do I re-create the IntelliSense database?](#how-do-i-re-create-the-intellisense-database)
 
@@ -27,11 +28,22 @@ If you want IntelliSense to operate on your files even when all #include directi
 
 ## Why do I see red squiggles under Standard Library types?
 
-The most common reason for this is missing or sorted include paths. If you are using a compiler in the GCC family, the system includes that you add to your `"includePath"` in **c_cpp_properties.json** should match the output of the following command: `gcc -Wp,-v -E -xc -x c++ /dev/null` (replace 'gcc' with whichever compiler you are using). GCC and its relatives require the paths to be in a specific order too, so sorting the paths for aesthetics will likely result in incorrect IntelliSense results.
+The most common reason for this is missing include paths and defines. The easiest way to fix this on each platform is as follows:
+
+**Linux/Mac**
+* Set `"intelliSenseMode": "clang-x64"` and `"compilerPath"` in **c_cpp_properties.json** to the path to your compiler.
+
+**Windows**
+* If you are using a Microsoft compiler from Visual Studio, set `"intelliSenseMode": "msvc-x64"`, but don't add the `"compilerPath"` property to **c_cpp_properties.json**.
+* If you are using Clang for Windows, set `"intelliSenseMode": "msvc-x64"`, and `"compilerPath"` in **c_cpp_properties.json** to the path to your compiler.
 
 ## How do I get the new IntelliSense to work with MinGW on Windows?
 
-Since MinGW is a relative of GCC, Microsoft mode compilation (which is the default on Windows) doesn't work very well with it. To use GCC/CLang mode, set the `"intelliSenseMode"` property in your **c_cpp_properties.json** file to `"clang-x64"`. An example **c_cpp_properties.json** [is shared here for your convenience](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/MinGW.md).
+The page discussing configuration with MinGW is [here](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/MinGW.md).
+
+## How do I get the new IntelliSense to work with the Windows Subsystem for Linux?
+
+The page discussing configuration with WSL is [here](https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/Windows%20Subsystem%20for%20Linux.md).
 
 ## What is the difference between `"includePath"` and `"browse.path"` in **c_cpp_properties.json**?
 

@@ -1,6 +1,11 @@
 {
     "rules": {
         "curly": true,
+        "ext-variable-name": [
+            true,
+            ["class", "pascal"],
+            ["function", "camel"]
+        ],
         "file-header": [true, ".*"],
         "indent": [true, "spaces", 4],
         "new-parens": true,
@@ -18,5 +23,9 @@
         "typedef": [true, "variable-declaration", "call-signature"],
         "whitespace": [true, "check-branch", "check-operator", "check-separator", "check-preblock", "check-type"]
     },
-    "rulesDirectory": ["node_modules/tslint-microsoft-contrib", "node_modules/tslint-no-unused-expression-chai/rules"]
+    "rulesDirectory": [
+        "node_modules/tslint-microsoft-contrib", 
+        "node_modules/tslint-no-unused-expression-chai/rules",
+        "node_modules/vrsource-tslint-rules/rules"
+    ]
 }
