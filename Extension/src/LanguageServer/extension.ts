@@ -91,11 +91,11 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
     let tokenSource: CancellationTokenSource = new CancellationTokenSource();
     return client.runBlockingThenableWithTimeout(async () => {
         // Loop through registered providers until one is able to service the current document
-        customConfigurationProviders.forEach(async provider => {
-            if (await provider.canProvideConfiguration(document.uri)) {
-                return provider.provideConfigurations([document.uri]);
+        for (let i: number = 0; i < customConfigurationProviders.length; i++) {
+            if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
+                return customConfigurationProviders[i].provideConfigurations([document.uri]);
             }
-        });
+        }
         return Promise.reject("No providers found for " + document.uri);
     }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
         if (configs !== null && configs.length > 0) {
