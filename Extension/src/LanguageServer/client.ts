@@ -22,7 +22,7 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
-import { CustomConfigurationProvider, SourceFileConfiguration, SourceFileConfigurationItem } from '../api';
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 

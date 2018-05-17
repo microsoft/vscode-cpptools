@@ -16,7 +16,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
-import { CustomConfigurationProvider, SourceFileConfiguration, SourceFileConfigurationItem } from '../api';
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
 import * as os from 'os';
 
 let prevCrashFile: string;

@@ -62,12 +62,14 @@ export interface CustomConfigurationProvider {
  */
 export interface SourceFileConfiguration {
     /**
-     * This must also include the system include path (compiler defaults)
+     * This must also include the system include path (compiler defaults) unless
+     * @param compilerPath is specified
      */
-    includePaths: string[];
+    includePath: string[];
 
     /**
-     * This must also include the compiler default defines (__cplusplus, etc)
+     * This must also include the compiler default defines (__cplusplus, etc) unless
+     * @param compilerPath is specified
      */
     defines: string[];
 
@@ -75,6 +77,11 @@ export interface SourceFileConfiguration {
      * "msvc-x64" or "clang-x64"
      */
     intelliSenseMode: string;
+    
+    /**
+     * The C or C++ standard
+     */
+    standard: string;
 
     /**
      * Any files that need to be included before the source file is parsed
@@ -82,9 +89,9 @@ export interface SourceFileConfiguration {
     forcedInclude?: string[];
 
     /**
-     * // The C or C++ standard
+     * The path to the compiler
      */
-    standard: string;
+    compilerPath?: string;
 }
 
 /**

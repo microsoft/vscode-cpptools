@@ -7,7 +7,6 @@
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
-import { SourceFileConfiguration, CustomConfigurationProvider } from '../api';
 import { provideCustomConfiguration } from './extension';
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
