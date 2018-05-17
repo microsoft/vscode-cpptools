@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
+import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 const configVersion: number = 4;
@@ -206,7 +207,7 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
+                configuration.includePath = ["${workspaceFolder}/**"].concat(this.vcpkgIncludes);
             }
             if (!settings.defaultBrowsePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
@@ -266,17 +267,13 @@ export class CppProperties {
     }
 
     private getConfigIndexForPlatform(config: any): number {
-        if (this.configurationJson.configurations.length > 3) {
-            return this.configurationJson.configurations.length - 1; // Default to the last custom configuration.
-        }
-        let nodePlatform: NodeJS.Platform = process.platform;
         let plat: string;
-        if (nodePlatform === 'linux') {
-            plat = "Linux";
-        } else if (nodePlatform === 'darwin') {
+        if (process.platform === 'darwin') {
             plat = "Mac";
-        } else if (nodePlatform === 'win32') {
+        } else if (process.platform === 'win32') {
             plat = "Win32";
+        } else {
+            plat = "Linux";
         }
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             if (config.configurations[i].name === plat) {
@@ -292,14 +289,12 @@ export class CppProperties {
             return "clang-x64";
         } else if (name === "Win32") {
             return "msvc-x64";
-        } else {
+        } else if (process.platform === 'win32') {
             // Custom configs default to the OS's preference.
-            let nodePlatform: NodeJS.Platform = process.platform;
-            if (nodePlatform === 'linux' || nodePlatform === 'darwin') {
-                return "clang-x64";
-            }
+            return "msvc-x64";
+        } else {
+            return "clang-x64";
         }
-        return "msvc-x64";
     }
 
     private includePathConverted(): boolean {
@@ -313,6 +308,7 @@ export class CppProperties {
 
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+            telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             if (config.includePath === undefined) {
@@ -593,7 +589,7 @@ export class CppProperties {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let config: Configuration = this.configurationJson.configurations[i];
             // Look for Mac configs and extra configs on Mac systems
-            if (config.name === "Mac" || (process.platform === "darwin" && config.name !== "Win32" && config.name !== "Linux")) {
+            if (config.name === "Mac" || (process.platform === 'darwin' && config.name !== "Win32" && config.name !== "Linux")) {
                 if (config.macFrameworkPath === undefined) {
                     config.macFrameworkPath = [
                         "/System/Library/Frameworks",
