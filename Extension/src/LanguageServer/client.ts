@@ -22,6 +22,7 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
+import { SettingsTracker, getTracker } from './settingsTracker';
 
 let ui: UI;
 
@@ -115,96 +116,7 @@ const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> 
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 
-const maxSettingLengthForTelemetry: number = 50;
-let previousCppSettings: { [key: string]: any } = {};
 let failureMessageShown: boolean = false;
-
-/**
- * track settings changes for telemetry
- */
-function collectSettingsForTelemetry(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
-    let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
-    let result: { [key: string]: string } = {};
-
-    for (let key in settings) {
-        if (settings.inspect(key).defaultValue === undefined) {
-            continue; // ignore methods and settings that don't exist
-        }
-        let val: any = settings.get(key);
-        if (val instanceof Object) {
-            val = JSON.stringify(val, null, 2);
-        }
-
-        // Skip values that don't match the setting's enum.
-        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-        if (curSetting) {
-            let curEnum: any[] = curSetting["enum"];
-            if (curEnum && curEnum.indexOf(val) === -1) {
-                continue;
-            }
-        }
-
-        if (filter(key, val, settings)) {
-            previousCppSettings[key] = val;
-            switch (key.toLowerCase()) {
-                case "clang_format_path": {
-                    continue;
-                }
-                case "clang_format_style":
-                case "clang_format_fallbackstyle": {
-                    let newKey: string = key + "2";
-                    if (val) {
-                        switch (String(val).toLowerCase()) {
-                            case "visual studio":
-                            case "llvm":
-                            case "google":
-                            case "chromium":
-                            case "mozilla":
-                            case "webkit":
-                            case "file":
-                            case "none": {
-                                result[newKey] = String(previousCppSettings[key]);
-                                break;
-                            }
-                            default: {
-                                result[newKey] = "...";
-                                break;
-                            }
-                        }
-                    } else {
-                        result[newKey] = "null";
-                    }
-                    key = newKey;
-                    break;
-                }
-                default: {
-                    if (key.startsWith("default.")) {
-                        continue;   // Don't log c_cpp_properties.json defaults since they may contain PII.
-                    }
-                    result[key] = String(previousCppSettings[key]);
-                    break;
-                }
-            }
-            if (result[key].length > maxSettingLengthForTelemetry) {
-                result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
-            }
-        }
-    }
-
-    return result;
-}
-
-function initializeSettingsCache(resource: vscode.Uri): void {
-    collectSettingsForTelemetry(() => true, resource);
-}
-
-function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } {
-    let filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
-        return val !== settings.inspect(key).defaultValue;
-    };
-    initializeSettingsCache(resource);
-    return collectSettingsForTelemetry(filter, resource);
-}
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -265,6 +177,7 @@ class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
+    private settingsTracker: SettingsTracker;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -334,7 +247,8 @@ class DefaultClient implements Client {
 
                 // Once this is set, we don't defer any more callbacks.
                 this.languageClient = languageClient;
-                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", getNonDefaultSettings(this.RootUri));
+                this.settingsTracker = getTracker(this.RootUri);
+                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                 failureMessageShown = false;
 
                 // Listen for messages from the language server.
@@ -447,13 +361,7 @@ class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(): void {
-        // This relies on getNonDefaultSettings being called first.
-        console.assert(Object.keys(previousCppSettings).length > 0);
-
-        let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
-            return !(key in previousCppSettings) || val !== previousCppSettings[key];
-        };
-        let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
+        let changedSettings: { [key: string] : string} = this.settingsTracker.getChangedSettings();
 
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
@@ -542,7 +450,7 @@ class DefaultClient implements Client {
         if (this.rootFolder) {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
-                path.join(this.RootPath, "*"),
+                "**/*",
                 false /*ignoreCreateEvents*/,
                 true /*ignoreChangeEvents*/,
                 false /*ignoreDeleteEvents*/);

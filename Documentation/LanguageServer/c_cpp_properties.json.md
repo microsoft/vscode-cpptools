@@ -1,14 +1,23 @@
 # `c_cpp_properties.json` Reference Guide
 
+> See also: [Customizing Default Settings](Customizing%20Default%20Settings.md)
+
 ### Example
 
 ```json
 {
+    "env" : {
+        "defaultIncludePath": [
+            "${workspaceFolder}",
+            "${workspaceFolder}/include"
+        ],
+        "myCompilerPath": "/usr/local/bin/gcc-7"
+    },
     "configurations": [
         {
             "name": "Win32",
             "intelliSenseMode": "msvc-x64",
-            "includePath": [ "${workspaceFolder}" ],
+            "includePath": [ "${defaultIncludePath}", "/another/path" ],
             "macFrameworkPath": [ "/System/Library/Frameworks" ],
             "defines": [ "FOO", "BAR=100" ],
             "forcedInclude": [ "${workspaceFolder}/include/config.h" ],
@@ -23,11 +32,14 @@
             }
         }
     ],
-    "version": 3
+    "version": 4
 }
 ```
 
 ## Top-level properties
+
+* #### `env`
+  An array of user-defined variables that will be available for substitution in the configurations via the standard environment variable syntax: `${<var>}` or `${env:<var>}`. Strings and arrays of strings are accepted.
 
 * #### `configurations`
   An array of configuration objects that provide the IntelliSense engine with information about your project and your preferences. By default, the extension creates 3 configurations for you, one each for Linux, Mac, and Windows, but it is not required to keep them all. You may also add additional configurations if necessary.
@@ -67,7 +79,7 @@
 * #### `compileCommands` (optional)
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, the includes and defines discovered in this file will be used instead of the values set for `includePath` and `defines`. If the compile commands database does not contain an entry for the translation unit that corresponds to the file you opened in the editor, then a warning message will appear and the extension will use the `includePath` and `defines` settings instead.
 
-  *For more information about the file format, see the [Clang documentation](https://clang.llvm.org/docs/JSONCompilationDatabase.html). Some build systems, such as CMake, [simplify generating this file](https://cmake.org/cmake/help/v3.5/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html).*
+  >For more information about the file format, see the [Clang documentation](https://clang.llvm.org/docs/JSONCompilationDatabase.html). Some build systems, such as CMake, [simplify generating this file](https://cmake.org/cmake/help/v3.5/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html).
 
 * #### `browse`
   The set of properties used when `"C_Cpp.intelliSenseEngine"` is set to `"Tag Parser"` (also referred to as "fuzzy" IntelliSense, or the "browse" engine). These properties are also used by the Go To Definition/Declaration features, or when the "Default" IntelliSense engine is unable to resolve the #includes in your source files.

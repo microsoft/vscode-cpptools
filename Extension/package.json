@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -168,10 +168,11 @@
             "None",
             "Error",
             "Warning",
-            "Information"
+            "Information",
+            "Debug"
           ],
           "default": "Error",
-          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information.",
+          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information < Debug.",
           "scope": "resource"
         },
         "C_Cpp.autoAddFileAssociations": {
@@ -1304,7 +1305,7 @@
   },
   "dependencies": {
     "http-proxy-agent": "~2.0.0",
-    "https-proxy-agent": "~2.1.0",
+    "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
@@ -1318,7 +1319,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872599",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874214",
       "platforms": [
         "linux"
       ],
@@ -1332,7 +1333,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872600",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874215",
       "platforms": [
         "linux"
       ],
@@ -1348,7 +1349,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872601",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874216",
       "platforms": [
         "darwin"
       ],
@@ -1359,7 +1360,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872602",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874217",
       "platforms": [
         "win32"
       ],
