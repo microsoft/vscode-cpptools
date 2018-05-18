@@ -12,7 +12,7 @@ export class CppTools implements CppToolsApi {
         LanguageServer.registerCustomConfigurationProvider(provider);
     }
 
-    didCustomConfigurationChange(provider: CustomConfigurationProvider): void {
-        LanguageServer.onDidCustomConfigurationChange(provider);
+    didChangeCustomConfiguration(provider: CustomConfigurationProvider): void {
+        LanguageServer.onDidChangeCustomConfiguration(provider);
     }
 }

@@ -83,7 +83,7 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
     // Request for configurations from the provider only if realActivationOccurred.
     // Otherwise, the request will be sent when realActivation is called.
     if (realActivationOccurred) {
-        onDidCustomConfigurationChange(provider);
+        onDidChangeCustomConfiguration(provider);
     }
 }
 
@@ -104,7 +104,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
     });
 }
 
-export function onDidCustomConfigurationChange(customConfigurationProvider: CustomConfigurationProvider): void {
+export function onDidChangeCustomConfiguration(customConfigurationProvider: CustomConfigurationProvider): void {
     clients.forEach((client: Client) => client.onDidChangeCustomConfigurations(customConfigurationProvider));
 }
 
@@ -144,7 +144,7 @@ function realActivation(): void {
 
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
-    customConfigurationProviders.forEach(provider => onDidCustomConfigurationChange(provider));
+    customConfigurationProviders.forEach(provider => onDidChangeCustomConfiguration(provider));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
