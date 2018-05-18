@@ -6,7 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CancellationTokenSource, CancellationToken } from "vscode-jsonrpc";
+import { CancellationTokenSource } from "vscode-jsonrpc";
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
