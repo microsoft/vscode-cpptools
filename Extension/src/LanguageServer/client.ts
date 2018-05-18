@@ -22,6 +22,9 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
+import { CancellationTokenSource } from 'vscode';
+import { SettingsTracker, getTracker } from './settingsTracker';
 
 let ui: UI;
 
@@ -85,6 +88,10 @@ interface DecorationRangesPair {
     ranges: vscode.Range[];
 }
 
+interface CustomConfigurationParams {
+    configurationItems: SourceFileConfigurationItem[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -104,6 +111,7 @@ const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, v
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
+const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -115,96 +123,7 @@ const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> 
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 
-const maxSettingLengthForTelemetry: number = 50;
-let previousCppSettings: { [key: string]: any } = {};
 let failureMessageShown: boolean = false;
-
-/**
- * track settings changes for telemetry
- */
-function collectSettingsForTelemetry(filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean, resource: vscode.Uri): { [key: string]: string } {
-    let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", resource);
-    let result: { [key: string]: string } = {};
-
-    for (let key in settings) {
-        if (settings.inspect(key).defaultValue === undefined) {
-            continue; // ignore methods and settings that don't exist
-        }
-        let val: any = settings.get(key);
-        if (val instanceof Object) {
-            val = JSON.stringify(val, null, 2);
-        }
-
-        // Skip values that don't match the setting's enum.
-        let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-        if (curSetting) {
-            let curEnum: any[] = curSetting["enum"];
-            if (curEnum && curEnum.indexOf(val) === -1) {
-                continue;
-            }
-        }
-
-        if (filter(key, val, settings)) {
-            previousCppSettings[key] = val;
-            switch (key.toLowerCase()) {
-                case "clang_format_path": {
-                    continue;
-                }
-                case "clang_format_style":
-                case "clang_format_fallbackstyle": {
-                    let newKey: string = key + "2";
-                    if (val) {
-                        switch (String(val).toLowerCase()) {
-                            case "visual studio":
-                            case "llvm":
-                            case "google":
-                            case "chromium":
-                            case "mozilla":
-                            case "webkit":
-                            case "file":
-                            case "none": {
-                                result[newKey] = String(previousCppSettings[key]);
-                                break;
-                            }
-                            default: {
-                                result[newKey] = "...";
-                                break;
-                            }
-                        }
-                    } else {
-                        result[newKey] = "null";
-                    }
-                    key = newKey;
-                    break;
-                }
-                default: {
-                    if (key.startsWith("default.")) {
-                        continue;   // Don't log c_cpp_properties.json defaults since they may contain PII.
-                    }
-                    result[key] = String(previousCppSettings[key]);
-                    break;
-                }
-            }
-            if (result[key].length > maxSettingLengthForTelemetry) {
-                result[key] = result[key].substr(0, maxSettingLengthForTelemetry) + "...";
-            }
-        }
-    }
-
-    return result;
-}
-
-function initializeSettingsCache(resource: vscode.Uri): void {
-    collectSettingsForTelemetry(() => true, resource);
-}
-
-function getNonDefaultSettings(resource: vscode.Uri): { [key: string]: string } {
-    let filter: (key: string, val: string, settings: vscode.WorkspaceConfiguration) => boolean = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
-        return val !== settings.inspect(key).defaultValue;
-    };
-    initializeSettingsCache(resource);
-    return collectSettingsForTelemetry(filter, resource);
-}
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -226,13 +145,19 @@ export interface Client {
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
+    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void;
     takeOwnership(document: vscode.TextDocument): void;
+    runBlockingTask<T>(task: Thenable<T>): Thenable<T>;
+    runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any>;
+    requestWhenReady(request: () => Thenable<any>): Thenable<any>;
+    notifyWhenReady(notify: () => void): void;
     requestGoToDeclaration(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
+    sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -265,6 +190,7 @@ class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
+    private settingsTracker: SettingsTracker;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -302,12 +228,14 @@ class DefaultClient implements Client {
     }
 
     /**
-     * All public methods on this class must be guarded by the "onReady" promise. Requests and notifications received before the client is
-     * ready are executed after this promise is resolved.
+     * All public methods on this class must be guarded by the "pendingTask" promise. Requests and notifications received before the task is
+     * complete are executed after this promise is resolved.
      * @see requestWhenReady<T>(request)
      * @see notifyWhenReady(notify)
      */
-    private onReadyPromise: Thenable<void>;
+
+    private pendingTask: Thenable<any>;
+    private pendingRequests: number = 0;
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         try {
@@ -319,7 +247,7 @@ class DefaultClient implements Client {
             ui = getUI();
             ui.bind(this);
 
-            this.onReadyPromise = languageClient.onReady().then(() => {
+            this.runBlockingTask(languageClient.onReady()).then(() => {
                 this.configuration = new configs.CppProperties(this.RootUri);
                 this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                 this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
@@ -334,7 +262,8 @@ class DefaultClient implements Client {
 
                 // Once this is set, we don't defer any more callbacks.
                 this.languageClient = languageClient;
-                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", getNonDefaultSettings(this.RootUri));
+                this.settingsTracker = getTracker(this.RootUri);
+                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                 failureMessageShown = false;
 
                 // Listen for messages from the language server.
@@ -447,13 +376,7 @@ class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(): void {
-        // This relies on getNonDefaultSettings being called first.
-        console.assert(Object.keys(previousCppSettings).length > 0);
-
-        let filter: (key: string, val: string) => boolean = (key: string, val: string) => {
-            return !(key in previousCppSettings) || val !== previousCppSettings[key];
-        };
-        let changedSettings: { [key: string] : string} = collectSettingsForTelemetry(filter, this.RootUri);
+        let changedSettings: { [key: string] : string} = this.settingsTracker.getChangedSettings();
 
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
@@ -477,6 +400,23 @@ class DefaultClient implements Client {
         }
     }
 
+    public onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {
+        let documentUris: vscode.Uri[] = [];
+        this.trackedDocuments.forEach(document => documentUris.push(document.uri));
+
+        let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+
+        if (documentUris.length === 0) {
+            return;
+        }
+
+        this.runBlockingThenableWithTimeout(() => {
+            return provider.provideConfigurations(documentUris, tokenSource.token);
+        }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
+            this.sendCustomConfigurations(configs);
+        });
+    }
+
     /**
      * Take ownership of a document that was previously serviced by another client.
      * This process involves sending a textDocument/didOpen message to the server so
@@ -497,24 +437,75 @@ class DefaultClient implements Client {
     }
 
     /*************************************************************************************
-     * wait until the language client is ready for use before attempting to send messages
+     * wait until the all pendingTasks are complete (e.g. language client is ready for use)
+     * before attempting to send messages
      *************************************************************************************/
-
-    private requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
-        if (this.languageClient) {
-            return request();
-        } else if (this.isSupported && this.onReadyPromise) {
-            return this.onReadyPromise.then(() => request());
+    public runBlockingTask(task: Thenable<any>): Thenable<any> {
+        if (this.pendingTask) {
+            return this.requestWhenReady(() => { return task; });
         } else {
-            return Promise.reject<T>("Unsupported client");
+            this.pendingTask = task;
+            return task.then((result) => {
+                this.pendingTask = undefined;
+                return result;
+            }, (error) => {
+                this.pendingTask = undefined;
+                throw error;
+            });
         }
     }
 
-    private notifyWhenReady(notify: () => void): void {
-        if (this.languageClient) {
+    public runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> {
+        let timer: NodeJS.Timer;
+        // Create a promise that rejects in <ms> milliseconds
+        let timeout: Promise<any> = new Promise((resolve, reject) => {
+            timer = setTimeout(() => {
+                clearTimeout(timer);
+                if (tokenSource) {
+                    tokenSource.cancel();
+                }
+                reject("Timed out in " + ms + "ms.");
+            }, ms);
+        });
+    
+        // Returns a race between our timeout and the passed in promise
+        return this.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
+            clearTimeout(timer);
+            return result;
+        }, (error: any) => {
+            throw error;
+        }));
+    }
+    
+    public requestWhenReady(request: () => Thenable<any>): Thenable<any> {
+        if (this.pendingTask === undefined) {
+            return request();
+        } else if (this.isSupported && this.pendingTask) {
+            this.pendingRequests++;
+            return this.pendingTask.then(() => {
+                this.pendingRequests--;
+                if (this.pendingRequests === 0) {
+                    this.pendingTask = undefined;
+                }
+                return request();
+            });
+        } else {
+            return Promise.reject("Unsupported client");
+        }
+    }
+
+    public notifyWhenReady(notify: () => void): void {
+        if (this.pendingTask === undefined) {
             notify();
-        } else if (this.isSupported && this.onReadyPromise) {
-            this.onReadyPromise.then(() => notify());
+        } else if (this.isSupported && this.pendingTask) {
+            this.pendingRequests++;
+            this.pendingTask.then(() => {
+                this.pendingRequests--;
+                if (this.pendingRequests === 0) {
+                    this.pendingTask = undefined;
+                }
+                notify();
+            });
         }
     }
 
@@ -542,7 +533,7 @@ class DefaultClient implements Client {
         if (this.rootFolder) {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
-                path.join(this.RootPath, "*"),
+                "**/*",
                 false /*ignoreCreateEvents*/,
                 true /*ignoreChangeEvents*/,
                 false /*ignoreDeleteEvents*/);
@@ -855,6 +846,13 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
 
+    public sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {
+        let params: CustomConfigurationParams = {
+            configurationItems: configs
+        };
+        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
+    }
+
     /*********************************************
      * command handlers
      *********************************************/
@@ -945,7 +943,13 @@ class NullClient implements Client {
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
+    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {}
     takeOwnership(document: vscode.TextDocument): void {}
+    runBlockingTask<T>(task: Thenable<T>): Thenable<T> { return; }
+    runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return; }
+    requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
+    notifyWhenReady(notify: () => void): void {}
+    sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }

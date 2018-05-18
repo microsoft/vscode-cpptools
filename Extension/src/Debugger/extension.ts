@@ -34,6 +34,7 @@ export function initialize(): void {
     configurationProvider.getConfigurationSnippets();
 
     const launchJsonDocumentSelector: vscode.DocumentSelector = [{
+        scheme: 'file',
         language: 'jsonc',
         pattern: '**/launch.json'
     }];

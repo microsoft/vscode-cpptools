@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.17.0-insiders2",
+  "version": "0.17.2-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -32,7 +32,7 @@
     "multi-root ready"
   ],
   "categories": [
-    "Languages",
+    "Programming Languages",
     "Debuggers",
     "Formatters",
     "Linters",
@@ -168,10 +168,11 @@
             "None",
             "Error",
             "Warning",
-            "Information"
+            "Information",
+            "Debug"
           ],
           "default": "Error",
-          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information.",
+          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information < Debug.",
           "scope": "resource"
         },
         "C_Cpp.autoAddFileAssociations": {
@@ -533,6 +534,7 @@
         },
         "configurationAttributes": {
           "launch": {
+            "type": "object",
             "required": [
               "program"
             ],
@@ -719,8 +721,8 @@
                 }
               },
               "logging": {
-                "type": "object",
                 "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
@@ -759,10 +761,10 @@
                 "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
                 "type": "object",
                 "default": {
-                  "pipeCwd": "${workspaceRoot}",
+                  "pipeCwd": "/usr/bin",
                   "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
                   "pipeArgs": [],
-                  "debuggerPath": "enter the path for the debugger on the target machine, for example /usr/bin/gdb"
+                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
                 },
                 "properties": {
                   "pipeCwd": {
@@ -801,6 +803,7 @@
             }
           },
           "attach": {
+            "type": "object",
             "required": [
               "program",
               "processId"
@@ -883,8 +886,8 @@
                 }
               },
               "logging": {
-                "type": "object",
                 "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
@@ -923,10 +926,10 @@
                 "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
                 "type": "object",
                 "default": {
-                  "pipeCwd": "${workspaceRoot}",
+                  "pipeCwd": "/usr/bin",
                   "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
                   "pipeArgs": [],
-                  "debuggerPath": "enter the path for the debugger on the target machine, for example /usr/bin/gdb"
+                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
                 },
                 "properties": {
                   "pipeCwd": {
@@ -1007,6 +1010,7 @@
         },
         "configurationAttributes": {
           "launch": {
+            "type": "object",
             "required": [
               "program",
               "cwd"
@@ -1109,6 +1113,7 @@
             }
           },
           "attach": {
+            "type": "object",
             "required": [
               "processId"
             ],
@@ -1272,6 +1277,7 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
+    "generateOptionsSchema": "gulp generateOptionsSchema",
     "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p ./",
@@ -1285,20 +1291,21 @@
   "devDependencies": {
     "@types/mocha": "^2.2.43",
     "@types/node": "^8.0.46",
+    "gulp": "3.9.1",
     "gulp-env": "0.4.0",
     "gulp-mocha": "5.0.0",
     "gulp-tslint": "8.1.2",
-    "gulp": "3.9.1",
     "mocha": "^4.0.1",
+    "tslint": "5.8.0",
     "tslint-microsoft-contrib": "5.0.1",
     "tslint-no-unused-expression-chai": "0.0.3",
-    "tslint": "5.8.0",
     "typescript": "^2.5.3",
-    "vscode": "^1.1.14"
+    "vrsource-tslint-rules": "^5.8.2",
+    "vscode": "^1.1.17"
   },
   "dependencies": {
     "http-proxy-agent": "~2.0.0",
-    "https-proxy-agent": "~2.1.0",
+    "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
@@ -1312,7 +1319,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872599",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874214",
       "platforms": [
         "linux"
       ],
@@ -1326,7 +1333,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872600",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874215",
       "platforms": [
         "linux"
       ],
@@ -1342,7 +1349,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872601",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874216",
       "platforms": [
         "darwin"
       ],
@@ -1353,7 +1360,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872602",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874217",
       "platforms": [
         "win32"
       ],
