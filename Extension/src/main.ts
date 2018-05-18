@@ -19,10 +19,13 @@ import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IP
 import { PersistentState } from './LanguageServer/persistentState';
 import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
+import { CppTools } from './cppTools';
+import { CppToolsApi } from './api';
 
 const releaseNotesVersion: number = 3;
+const cppTools: CppTools = new CppTools();
 
-export function activate(context: vscode.ExtensionContext): void | Promise<void> {
+export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi> {
     initializeTemporaryCommandRegistrar();
     util.setExtensionContext(context);
     Telemetry.activate();
@@ -33,7 +36,9 @@ export function activate(context: vscode.ExtensionContext): void | Promise<void>
     // Initialize the DebuggerExtension and register the related commands and providers.
     DebuggerExtension.initialize();
 
-    return processRuntimeDependencies();
+    await processRuntimeDependencies();
+
+    return cppTools;
 }
 
 export function deactivate(): Thenable<void> {
