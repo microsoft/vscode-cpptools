@@ -6,6 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { CancellationTokenSource } from "vscode-jsonrpc";
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -15,6 +16,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
 import * as os from 'os';
 
 let prevCrashFile: string;
@@ -27,6 +29,7 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
+let customConfigurationProviders: CustomConfigurationProvider[] = [];
 
 /**
  * activate: set up the extension for language services
@@ -41,23 +44,68 @@ export function activate(activationEventOccurred: boolean): void {
         activatedPreviously.Value = false;
         realActivation();
     }
-    
+
     registerCommands();
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
     // Check if an activation event has already occurred.
     if (activationEventOccurred) {
-        return onActivationEvent();
+        onActivationEvent();
+        return;
     }
-    
+
+    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+            let config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            if (fs.existsSync(config)) {
+                onActivationEvent();
+                return;
+            }
+        }
+    }
+
+    // handle "onLanguage:cpp" and "onLanguage:c" activation events.
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
             if (document.languageId === "cpp" || document.languageId === "c") {
-                return onActivationEvent();
+                onActivationEvent();
+                return;
             }
         }
     }
+}
+
+export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
+    customConfigurationProviders.push(provider);
+
+    // Request for configurations from the provider only if realActivationOccurred.
+    // Otherwise, the request will be sent when realActivation is called.
+    if (realActivationOccurred) {
+        onDidChangeCustomConfiguration(provider);
+    }
+}
+
+export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
+    let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+    return client.runBlockingThenableWithTimeout(async () => {
+        // Loop through registered providers until one is able to service the current document
+        for (let i: number = 0; i < customConfigurationProviders.length; i++) {
+            if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
+                return customConfigurationProviders[i].provideConfigurations([document.uri]);
+            }
+        }
+        return Promise.reject("No providers found for " + document.uri);
+    }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
+        if (configs !== null && configs.length > 0) {
+            client.sendCustomConfigurations(configs);
+        }
+    });
+}
+
+export function onDidChangeCustomConfiguration(customConfigurationProvider: CustomConfigurationProvider): void {
+    clients.forEach((client: Client) => client.onDidChangeCustomConfigurations(customConfigurationProvider));
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
@@ -93,6 +141,10 @@ function realActivation(): void {
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
     }
+
+    // There may have already been registered CustomConfigurationProviders.
+    // Request for configurations from those providers.
+    customConfigurationProviders.forEach(provider => onDidChangeCustomConfiguration(provider));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
@@ -158,7 +210,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
         (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c")) {
         return;
-        }
+    }
 
     if (activeDocument !== event.textEditor.document.uri.toString()) {
         // For some strange (buggy?) reason we don't reliably get onDidChangeActiveTextEditor callbacks.
@@ -192,6 +244,7 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleSnippets', onToggleSnippets));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
@@ -289,7 +342,7 @@ function selectClient(): Thenable<Client> {
 function onResetDatabase(): void {
     onActivationEvent();
     /* need to notify the affected client(s) */
-    selectClient().then(client => client.resetDatabase(), rejected => {});
+    selectClient().then(client => client.resetDatabase(), rejected => { });
 }
 
 function onSelectConfiguration(): void {
@@ -308,7 +361,7 @@ function onEditConfiguration(): void {
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => { });
     }
 }
 
@@ -328,6 +381,47 @@ function onToggleSquiggles(): void {
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
 }
+
+function onToggleSnippets(): void {
+    onActivationEvent();
+
+    // This will apply to all clients as it's a global toggle. It will require a reload.
+    const snippetsCatName: string  = "Snippets";
+    let newPackageJson: any = util.getRawPackageJson();
+
+    if (newPackageJson.categories.findIndex(cat => cat === snippetsCatName) === -1) {
+        // Add the Snippet category and snippets node. 
+
+        newPackageJson.categories.push(snippetsCatName);
+        newPackageJson.contributes.snippets = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
+
+        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
+            showReloadPrompt("Reload Window to finish enabling C++ snippets");
+        });
+        
+    } else {
+        // Remove the category and snippets node.
+        let ndxCat: number = newPackageJson.categories.indexOf(snippetsCatName);
+        if (ndxCat !== -1) {
+            newPackageJson.categories.splice(ndxCat, 1);
+        }
+
+        delete newPackageJson.contributes.snippets;
+
+        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
+            showReloadPrompt("Reload Window to finish disabling C++ snippets");
+        });
+    }
+}
+
+function showReloadPrompt(msg: string): void { 
+    let reload: string = "Reload"; 
+    vscode.window.showInformationMessage(msg, reload).then(value => { 
+       if (value === reload) { 
+          vscode.commands.executeCommand("workbench.action.reloadWindow"); 
+       } 
+    }); 
+ } 
 
 function onToggleIncludeFallback(): void {
     onActivationEvent();
@@ -350,17 +444,17 @@ function onShowReleaseNotes(): void {
 
 function onPauseParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.pauseParsing(), rejected => {});
+    selectClient().then(client => client.pauseParsing(), rejected => { });
 }
 
 function onResumeParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.resumeParsing(), rejected => {});
+    selectClient().then(client => client.resumeParsing(), rejected => { });
 }
 
 function onShowParsingCommands(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
+    selectClient().then(client => client.handleShowParsingCommands(), rejected => { });
 }
 
 function onTakeSurvey(): void {
