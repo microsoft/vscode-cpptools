@@ -77,9 +77,9 @@ A new setting will be added that allows you specify the system include path sepa
 C_Cpp.default.systemIncludePath                    : string[]
 ```
 
-### Include Path Resolution Strategies
+### System Include Path/Defines Resolution Strategies
 
-The extension determines the includePath to send to the IntelliSense engine in the following manner:
+The extension determines the system includePath and defines to send to the IntelliSense engine in the following manner:
 
 1. If `compileCommands` has a valid value and the file open in the editor is in the database, use the compile command in the database entry to determine the include path and defines.
     * The system include path and defines are determined using the following logic (in order):
