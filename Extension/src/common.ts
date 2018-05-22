@@ -152,7 +152,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
     }
 
     // Replace environment and configuration variables.
-    let regexp: RegExp = /\$\{((env|config)(.|:))?(.*?)\}/g;
+    let regexp: RegExp = /\$\{((env|config|workspaceFolder)(.|:))?(.*?)\}/g;
     let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
         // Historically, if the variable didn't have anything before the "." or ":"
         // it was assumed to be an environment variable
@@ -178,6 +178,18 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
                 let keys: string[] = name.split('.');
                 keys.forEach((key: string) => { config = (config) ? config.get(key) : config; });
                 newValue = (config) ? config.toString() : undefined;
+                break;
+            }
+            case "workspaceFolder": {
+                // Only replace ${workspaceFolder:name} variables for now.
+                // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
+                // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
+                if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
+                    let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+                    if (folder) {
+                        newValue = folder.uri.fsPath;
+                    }
+                }
                 break;
             }
             default: { assert.fail("unknown varType matched"); }
