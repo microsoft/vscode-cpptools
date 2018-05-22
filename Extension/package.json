@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.17.0-master",
+  "version": "0.17.2-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -1319,7 +1319,7 @@
   },
   "dependencies": {
     "http-proxy-agent": "~2.0.0",
-    "https-proxy-agent": "~2.1.0",
+    "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
@@ -1333,7 +1333,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872599",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874519",
       "platforms": [
         "linux"
       ],
@@ -1347,7 +1347,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872600",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874520",
       "platforms": [
         "linux"
       ],
@@ -1363,7 +1363,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872601",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874521",
       "platforms": [
         "darwin"
       ],
@@ -1374,7 +1374,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872602",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874522",
       "platforms": [
         "win32"
       ],
