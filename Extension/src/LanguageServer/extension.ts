@@ -89,6 +89,9 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
 
 export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
     let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+    if (customConfigurationProviders.length > 0) {
+        return Promise.resolve();
+    }
     return client.runBlockingThenableWithTimeout(async () => {
         // Loop through registered providers until one is able to service the current document
         for (let i: number = 0; i < customConfigurationProviders.length; i++) {
@@ -98,7 +101,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
         }
         return Promise.reject("No providers found for " + document.uri);
     }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
-        if (configs !== null && configs.length > 0) {
+        if (configs && configs.length > 0) {
             client.sendCustomConfigurations(configs);
         }
     });
