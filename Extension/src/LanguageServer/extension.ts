@@ -89,7 +89,7 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
 
 export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
     let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-    if (customConfigurationProviders.length > 0) {
+    if (customConfigurationProviders.length === 0) {
         return Promise.resolve();
     }
     return client.runBlockingThenableWithTimeout(async () => {
