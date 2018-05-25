@@ -83,7 +83,7 @@ The extension determines the system includePath and defines to send to the Intel
 
 1. If `compileCommands` has a valid value and the file open in the editor is in the database, use the compile command in the database entry to determine the include path and defines.
     * The system include path and defines are determined using the following logic (in order):
-        1. If `systemIncludePath` has a value, use it (continue to the next step to seach for system defines).
+        1. If `systemIncludePath` has a value, use it (continue to the next step to search for system defines).
         2. If `compilerPath` is valid, query it.
         3. Interpret the first argument in the command as the compiler and attempt to query it.
         4. If `compilerPath` is `""`, use an empty array for system include path and defines.
@@ -91,7 +91,7 @@ The extension determines the system includePath and defines to send to the Intel
 	
 2. If `compileCommands` is invalid or the current file is not listed in the database, use the `includePath` and `defines` properties in the configuration for IntelliSense.
     * The system include path and defines are determined using the following logic (in order):
-        1. If `systemIncludePath` has a value, use it (continue to the next step to seach for system defines).
+        1. If `systemIncludePath` has a value, use it (continue to the next step to search for system defines).
         2. If `compilerPath` is valid, query it.
         3. If `compilerPath` is `""`, use an empty array for system include path and defines (they are assumed to be in the `includePath` and `defines` for the current config already).
         4. If `compilerPath` is undefined, look for a compiler on the system and query it.
