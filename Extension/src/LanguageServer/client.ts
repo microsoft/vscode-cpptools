@@ -703,7 +703,7 @@ class DefaultClient implements Client {
     private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
-    
+
     private updateInactiveRegions(params: InactiveRegionParams): void {
         let settings: CppSettings = new CppSettings(this.RootUri);
         
