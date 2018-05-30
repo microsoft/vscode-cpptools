@@ -6,6 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { CancellationTokenSource } from "vscode-jsonrpc";
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -15,6 +16,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
 import * as os from 'os';
 
 let prevCrashFile: string;
@@ -27,6 +29,7 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
+let customConfigurationProviders: CustomConfigurationProvider[] = [];
 
 /**
  * activate: set up the extension for language services
@@ -41,7 +44,7 @@ export function activate(activationEventOccurred: boolean): void {
         activatedPreviously.Value = false;
         realActivation();
     }
-    
+
     registerCommands();
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
@@ -72,6 +75,40 @@ export function activate(activationEventOccurred: boolean): void {
             }
         }
     }
+}
+
+export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
+    customConfigurationProviders.push(provider);
+
+    // Request for configurations from the provider only if realActivationOccurred.
+    // Otherwise, the request will be sent when realActivation is called.
+    if (realActivationOccurred) {
+        onDidChangeCustomConfiguration(provider);
+    }
+}
+
+export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
+    let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+    if (customConfigurationProviders.length === 0) {
+        return Promise.resolve();
+    }
+    return client.runBlockingThenableWithTimeout(async () => {
+        // Loop through registered providers until one is able to service the current document
+        for (let i: number = 0; i < customConfigurationProviders.length; i++) {
+            if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
+                return customConfigurationProviders[i].provideConfigurations([document.uri]);
+            }
+        }
+        return Promise.reject("No providers found for " + document.uri);
+    }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
+        if (configs && configs.length > 0) {
+            client.sendCustomConfigurations(configs);
+        }
+    });
+}
+
+export function onDidChangeCustomConfiguration(customConfigurationProvider: CustomConfigurationProvider): void {
+    clients.forEach((client: Client) => client.onDidChangeCustomConfigurations(customConfigurationProvider));
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
@@ -107,6 +144,10 @@ function realActivation(): void {
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
     }
+
+    // There may have already been registered CustomConfigurationProviders.
+    // Request for configurations from those providers.
+    customConfigurationProviders.forEach(provider => onDidChangeCustomConfiguration(provider));
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
@@ -172,7 +213,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
         (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c")) {
         return;
-        }
+    }
 
     if (activeDocument !== event.textEditor.document.uri.toString()) {
         // For some strange (buggy?) reason we don't reliably get onDidChangeActiveTextEditor callbacks.
@@ -304,7 +345,7 @@ function selectClient(): Thenable<Client> {
 function onResetDatabase(): void {
     onActivationEvent();
     /* need to notify the affected client(s) */
-    selectClient().then(client => client.resetDatabase(), rejected => {});
+    selectClient().then(client => client.resetDatabase(), rejected => { });
 }
 
 function onSelectConfiguration(): void {
@@ -323,7 +364,7 @@ function onEditConfiguration(): void {
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => { });
     }
 }
 
@@ -406,17 +447,17 @@ function onShowReleaseNotes(): void {
 
 function onPauseParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.pauseParsing(), rejected => {});
+    selectClient().then(client => client.pauseParsing(), rejected => { });
 }
 
 function onResumeParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.resumeParsing(), rejected => {});
+    selectClient().then(client => client.resumeParsing(), rejected => { });
 }
 
 function onShowParsingCommands(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
+    selectClient().then(client => client.handleShowParsingCommands(), rejected => { });
 }
 
 function onTakeSurvey(): void {

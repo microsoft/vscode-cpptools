@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as fs from "fs";
 import * as vscode from 'vscode';
 import * as util from '../common';
+import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 const configVersion: number = 4;
@@ -34,6 +35,7 @@ function getDefaultCppProperties(): ConfigurationJson {
 
 interface ConfigurationJson {
     configurations: Configuration[];
+    env?: {[key: string]: string | string[]};
     version: number;
 }
 
@@ -265,17 +267,13 @@ export class CppProperties {
     }
 
     private getConfigIndexForPlatform(config: any): number {
-        if (this.configurationJson.configurations.length > 3) {
-            return this.configurationJson.configurations.length - 1; // Default to the last custom configuration.
-        }
-        let nodePlatform: NodeJS.Platform = process.platform;
         let plat: string;
-        if (nodePlatform === 'linux') {
-            plat = "Linux";
-        } else if (nodePlatform === 'darwin') {
+        if (process.platform === 'darwin') {
             plat = "Mac";
-        } else if (nodePlatform === 'win32') {
+        } else if (process.platform === 'win32') {
             plat = "Win32";
+        } else {
+            plat = "Linux";
         }
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             if (config.configurations[i].name === plat) {
@@ -291,14 +289,12 @@ export class CppProperties {
             return "clang-x64";
         } else if (name === "Win32") {
             return "msvc-x64";
-        } else {
+        } else if (process.platform === 'win32') {
             // Custom configs default to the OS's preference.
-            let nodePlatform: NodeJS.Platform = process.platform;
-            if (nodePlatform === 'linux' || nodePlatform === 'darwin') {
-                return "clang-x64";
-            }
+            return "msvc-x64";
+        } else {
+            return "clang-x64";
         }
-        return "msvc-x64";
     }
 
     private includePathConverted(): boolean {
@@ -312,6 +308,7 @@ export class CppProperties {
 
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+            telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             if (config.includePath === undefined) {
@@ -336,7 +333,11 @@ export class CppProperties {
         let result: string[] = [];
         entries.forEach(entry => {
             if (entry === "${default}") {
-                result = result.concat(defaultValue);
+                // package.json default values for string[] properties is null.
+                // If no default is set, return an empty array instead of an array with `null` in it.
+                if (defaultValue !== null) {
+                    result = result.concat(defaultValue);
+                }
             } else {
                 result.push(entry);
             }
@@ -348,7 +349,7 @@ export class CppProperties {
         let result: string[] = [];
         if (paths) {
             paths.forEach(entry => {
-                let entries: string[] = util.resolveVariables(entry).split(";").filter(e => e);
+                let entries: string[] = util.resolveVariables(entry, this.configurationJson.env).split(";").filter(e => e);
                 entries = this.resolveDefaults(entries, defaultValue);
                 result = result.concat(entries);
             });
@@ -363,7 +364,7 @@ export class CppProperties {
         if (typeof input === "boolean") {
             return input;
         }
-        return util.resolveVariables(input);
+        return util.resolveVariables(input, this.configurationJson.env);
     }
 
     private updateConfiguration(property: string[], defaultValue: string[]): string[];
@@ -524,6 +525,13 @@ export class CppProperties {
                 this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
             }
 
+            // Remove disallowed variable overrides
+            if (this.configurationJson.env) {
+                delete this.configurationJson.env['workspaceRoot'];
+                delete this.configurationJson.env['workspaceFolder'];
+                delete this.configurationJson.env['default'];
+            }
+
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
             // the system includes were available.
             this.configurationIncomplete = false;
@@ -581,7 +589,7 @@ export class CppProperties {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let config: Configuration = this.configurationJson.configurations[i];
             // Look for Mac configs and extra configs on Mac systems
-            if (config.name === "Mac" || (process.platform === "darwin" && config.name !== "Win32" && config.name !== "Linux")) {
+            if (config.name === "Mac" || (process.platform === 'darwin' && config.name !== "Win32" && config.name !== "Linux")) {
                 if (config.macFrameworkPath === undefined) {
                     config.macFrameworkPath = [
                         "/System/Library/Frameworks",

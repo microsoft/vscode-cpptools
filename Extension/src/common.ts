@@ -143,13 +143,16 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
-export function resolveVariables(input: string): string {
+export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
     }
+    if (!additionalEnvironment) {
+        additionalEnvironment = {};
+    }
 
     // Replace environment and configuration variables.
-    let regexp: RegExp = /\$\{((env|config)(.|:))?(.*?)\}/g;
+    let regexp: RegExp = /\$\{((env|config|workspaceFolder)(.|:))?(.*?)\}/g;
     let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
         // Historically, if the variable didn't have anything before the "." or ":"
         // it was assumed to be an environment variable
@@ -158,12 +161,35 @@ export function resolveVariables(input: string): string {
         }
         let newValue: string = undefined;
         switch (varType) {
-            case "env": { newValue = process.env[name]; break; }
+            case "env": {
+                let v: string | string[] = additionalEnvironment[name];
+                if (typeof v === "string") {
+                    newValue = v;
+                } else if (input === match && v instanceof Array) {
+                    newValue = v.join(";");
+                }
+                if (!newValue) {
+                    newValue = process.env[name];
+                }
+                break;
+            }
             case "config": {
                 let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
                 let keys: string[] = name.split('.');
                 keys.forEach((key: string) => { config = (config) ? config.get(key) : config; });
                 newValue = (config) ? config.toString() : undefined;
+                break;
+            }
+            case "workspaceFolder": {
+                // Only replace ${workspaceFolder:name} variables for now.
+                // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
+                // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
+                if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
+                    let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+                    if (folder) {
+                        newValue = folder.uri.fsPath;
+                    }
+                }
                 break;
             }
             default: { assert.fail("unknown varType matched"); }
@@ -206,7 +232,7 @@ export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
 
-export function GetHttpsProxyAgent(): HttpsProxyAgent {
+export function getHttpsProxyAgent(): HttpsProxyAgent {
     let proxy: string = vscode.workspace.getConfiguration().get<string>('http.proxy');
     if (!proxy) {
         proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;

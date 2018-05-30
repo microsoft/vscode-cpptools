@@ -35,7 +35,7 @@ function downloadCpptoolsJson(urlString): Promise<void> {
         let request: ClientRequest = https.request({
             host: parsedUrl.host,
             path: parsedUrl.path,
-            agent: util.GetHttpsProxyAgent(),
+            agent: util.getHttpsProxyAgent(),
             rejectUnauthorized: vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true)
         }, (response) => {
             if (response.statusCode === 301 || response.statusCode === 302) {
