@@ -247,7 +247,8 @@ class DefaultClient implements Client {
             ui = getUI();
             ui.bind(this);
 
-            this.runBlockingTask(languageClient.onReady()).then(() => {
+            // requests/notifications are deferred until this.languageClient is set.
+            this.runBlockingTask(languageClient.onReady().then(() => {
                 this.configuration = new configs.CppProperties(this.RootUri);
                 this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                 this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
@@ -260,7 +261,6 @@ class DefaultClient implements Client {
                     this.configuration.CompilerDefaults = compilerDefaults;
                 });
 
-                // Once this is set, we don't defer any more callbacks.
                 this.languageClient = languageClient;
                 this.settingsTracker = getTracker(this.RootUri);
                 telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
@@ -275,7 +275,7 @@ class DefaultClient implements Client {
                     failureMessageShown = true;
                     vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
                 }
-            });
+            }));
         } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
             if (!failureMessageShown) {
