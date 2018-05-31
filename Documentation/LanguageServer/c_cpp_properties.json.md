@@ -7,7 +7,7 @@
 ```json
 {
     "env" : {
-        "defaultIncludePath": [
+        "myDefaultIncludePath": [
             "${workspaceFolder}",
             "${workspaceFolder}/include"
         ],
@@ -15,9 +15,9 @@
     },
     "configurations": [
         {
-            "name": "Win32",
-            "intelliSenseMode": "msvc-x64",
-            "includePath": [ "${defaultIncludePath}", "/another/path" ],
+            "name": "Mac",
+            "intelliSenseMode": "clang-x64",
+            "includePath": [ "${myDefaultIncludePath}", "/another/path" ],
             "macFrameworkPath": [ "/System/Library/Frameworks" ],
             "defines": [ "FOO", "BAR=100" ],
             "forcedInclude": [ "${workspaceFolder}/include/config.h" ],
@@ -42,7 +42,7 @@
   An array of user-defined variables that will be available for substitution in the configurations via the standard environment variable syntax: `${<var>}` or `${env:<var>}`. Strings and arrays of strings are accepted.
 
 * #### `configurations`
-  An array of configuration objects that provide the IntelliSense engine with information about your project and your preferences. By default, the extension creates 3 configurations for you, one each for Linux, Mac, and Windows, but it is not required to keep them all. You may also add additional configurations if necessary.
+  An array of configuration objects that provide the IntelliSense engine with information about your project and your preferences. By default, the extension creates a configuration for you based on your operating system. You may also add additional configurations.
 
 * #### `version`
   We recommend you don't edit this field. It tracks the current version of the **c_cpp_properties.json** file so that the extension knows what properties and settings should be present and how to upgrade this file to the latest version.
@@ -56,13 +56,13 @@
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this property determines which mode the IntelliSense engine will run in. `"msvc-x64"` maps to Visual Studio mode with 64-bit pointer sizes. `"clang-x64"` maps to GCC/CLang mode with 64-bit pointer sizes. Windows uses `"msvc-x64"` by default and Linux/Mac use `"clang-x64"` by default.
 
 * #### `includePath`
-  If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-I` switch; the IntelliSense engine will not do a recursive search in these paths for includes. If a GCC/CLang compiler is specified in the `compilerPath` setting, it is not necessary to list the system include paths in this list.
+  If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-I` switch. If a path ends with `/**` the IntelliSense engine will do a recursive search for includes starting from that directory. If on Windows with Visual Studio installed, or if a compiler is specified in the `compilerPath` setting, it is not necessary to list the system include paths in this list.
 
 * #### `macFrameworkPath`
   If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of paths will be used by IntelliSense to search for framework headers included by your source files. This is basically the same as the list of paths you pass to your compiler with the `-F` switch; the IntelliSense engine will not do a recursive search in these paths for includes.
 
 * #### `defines`
-  If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of preprocessor symbols will be used by IntelliSense during the compilation of your source files. This is basically the same as the list of symbols you pass to your compiler with the `-D` switch.
+  If `"C_Cpp.intelliSenseEngine"` is set to "Default" in your settings file, this list of preprocessor symbols will be used by IntelliSense during the compilation of your source files. This is basically the same as the list of symbols you pass to your compiler with the `-D` switch. If on Windows with Visual Studio installed, or if a compiler is specified in the `compilerPath` setting, it is not necessary to list the system include paths in this list.
 
 * #### `forcedInclude` (optional)
   A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.
