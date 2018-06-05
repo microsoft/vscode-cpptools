@@ -1327,7 +1327,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874519",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874913",
       "platforms": [
         "linux"
       ],
@@ -1341,7 +1341,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874520",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874914",
       "platforms": [
         "linux"
       ],
@@ -1357,7 +1357,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874521",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874915",
       "platforms": [
         "darwin"
       ],
@@ -1368,7 +1368,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874522",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874916",
       "platforms": [
         "win32"
       ],
