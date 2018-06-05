@@ -149,8 +149,10 @@
         "C_Cpp.inactiveRegionOpacity": {
           "type:": "number",
           "default": 0.5,
-          "Description": "Controls the opacity of inactive preprocessor blocks. Scales between 0.0 and 1.0. This setting is overridden by dimInactiveRegions.",
-          "scope": "resource"
+          "Description": "Controls the opacity of inactive preprocessor blocks. Scales between 0.0 and 1.0. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource",
+          "minimum": 0,
+          "maximum": 1
         },
         "C_Cpp.formatting": {
           "type": "string",
