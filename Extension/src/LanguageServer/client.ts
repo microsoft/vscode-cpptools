@@ -708,7 +708,8 @@ class DefaultClient implements Client {
         let settings: CppSettings = new CppSettings(this.RootUri);
         
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
-            opacity: settings.inactiveRegionOpacity.toString()
+            opacity: settings.inactiveRegionOpacity.toString(),
+            rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
         });
 
         // We must convert to vscode.Ranges in order to make use of the API's
