@@ -705,12 +705,12 @@ class DefaultClient implements Client {
     }
 
     private updateInactiveRegions(params: InactiveRegionParams): void {
-        let renderOptions: vscode.DecorationRenderOptions = {
-            light: { color: "rgba(175,175,175,1.0)" },
-            dark: { color: "rgba(155,155,155,1.0)" },
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        
+        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
+            opacity: settings.inactiveRegionOpacity.toString(),
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
-        };
-        let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(renderOptions);
+        });
 
         // We must convert to vscode.Ranges in order to make use of the API's
         let ranges: vscode.Range[] = [];
@@ -736,7 +736,6 @@ class DefaultClient implements Client {
             this.inactiveRegionsDecorations.set(params.uri, toInsert);
         }
 
-        let settings: CppSettings = new CppSettings(this.RootUri);
         if (settings.dimInactiveRegions) {
             // Apply the decorations to all *visible* text editors
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);

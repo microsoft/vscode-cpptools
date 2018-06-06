@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.22.0"
+    "vscode": "^1.23.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -145,6 +145,14 @@
           "default": true,
           "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
+        },
+        "C_Cpp.inactiveRegionOpacity": {
+          "type:": "number",
+          "default": 0.55,
+          "Description": "Controls the opacity of inactive preprocessor blocks. Scales between 0.1 and 1.0. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource",
+          "minimum": 0.1,
+          "maximum": 1
         },
         "C_Cpp.formatting": {
           "type": "string",
