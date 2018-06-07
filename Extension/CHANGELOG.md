@@ -1,6 +1,22 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.17.2: May 21, 2018
+## Version 0.17.5-insiders: June 7, 2018
+* Change inactive regions from gray to translucent. [#1907](https://github.com/Microsoft/vscode-cpptools/issues/1907)
+* Improve performance of recursive includes paths. [#2068](https://github.com/Microsoft/vscode-cpptools/issues/2068)
+* Fix #include completion with headers in the same directory. [#2031](https://github.com/Microsoft/vscode-cpptools/issues/2031)
+* Support asm clobber registers on Windows. [#2090](https://github.com/Microsoft/vscode-cpptools/issues/2090)
+* Fix some crashes. [#2080](https://github.com/Microsoft/vscode-cpptools/issues/2080)
+
+## Version 0.17.4: May 31, 2018
+* Fix infinite loop (caused by deadlock) when using recursive includes. [#2043](https://github.com/Microsoft/vscode-cpptools/issues/2043)
+* Stop using recursive includes in the default configuration.
+  * @Hyzeta [PR #2059](https://github.com/Microsoft/vscode-cpptools/pull/2059)
+* Fix various other potential deadlocks and crashes.
+* Fix Go to Definition on `#include` not filtering out results based on the path. [#1253](https://github.com/Microsoft/vscode-cpptools/issues/1253), [#2033](https://github.com/Microsoft/vscode-cpptools/issues/2033)
+* Fix database icon getting stuck. [#1917](https://github.com/Microsoft/vscode-cpptools/issues/1917)
+
+## Version 0.17.3: May 22, 2018
+* Add support for `${workspaceFolder:folderName}`. [#1774](https://github.com/Microsoft/vscode-cpptools/issues/1774)
 * Fix infinite loop during initialization on Windows. [#1960](https://github.com/Microsoft/vscode-cpptools/issues/1960)
 * Fix main process IntelliSense-related crashes. [#2006](https://github.com/Microsoft/vscode-cpptools/issues/2006)
 * Fix deadlock after formatting large files. [#2007](https://github.com/Microsoft/vscode-cpptools/issues/2007)

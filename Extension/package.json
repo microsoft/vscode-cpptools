@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.17.2-insiders",
+  "version": "0.17.5-insiders",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.22.0"
+    "vscode": "^1.23.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -145,6 +145,14 @@
           "default": true,
           "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
+        },
+        "C_Cpp.inactiveRegionOpacity": {
+          "type:": "number",
+          "default": 0.55,
+          "Description": "Controls the opacity of inactive preprocessor blocks. Scales between 0.1 and 1.0. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource",
+          "minimum": 0.1,
+          "maximum": 1
         },
         "C_Cpp.formatting": {
           "type": "string",
@@ -1301,10 +1309,10 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.17"
+    "vscode": "^1.1.18"
   },
   "dependencies": {
-    "http-proxy-agent": "~2.0.0",
+    "http-proxy-agent": "~2.1.0",
     "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
@@ -1319,7 +1327,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874519",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874913",
       "platforms": [
         "linux"
       ],
@@ -1333,7 +1341,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874520",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874914",
       "platforms": [
         "linux"
       ],
@@ -1349,7 +1357,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874521",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874915",
       "platforms": [
         "darwin"
       ],
@@ -1360,7 +1368,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874522",
+      "url": "https://go.microsoft.com/fwlink/?linkid=874916",
       "platforms": [
         "win32"
       ],
