@@ -543,6 +543,7 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
+            "default": {},
             "required": [
               "program"
             ],
@@ -580,6 +581,7 @@
                 "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
@@ -605,6 +607,7 @@
                 "description": "If provided, this replaces the default commands used to launch a target with some other commands. For example, this can be \"-target-attach\" in order to attach to a target process. An empty command list replaces the launch commands with nothing, which can be useful if the debugger is being provided launch options as command line options. Example: \"customLaunchSetupCommands\": [ { \"text\": \"target-run\", \"description\": \"run target\", \"ignoreFailures\": false }].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
@@ -649,6 +652,7 @@
                 "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "name": "string",
                     "value": "string"
@@ -670,6 +674,11 @@
                 "type": "string",
                 "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
                 "default": "/usr/bin/gdb"
+              },
+              "miDebuggerArgs": {
+                "type": "string",
+                "description": "Arguments for the mi debugger (such as gdb) to use. When unspecified.",
+                "default": ""
               },
               "miDebuggerServerAddress": {
                 "type": "string",
@@ -812,6 +821,7 @@
           },
           "attach": {
             "type": "object",
+            "default": {},
             "required": [
               "program",
               "processId"
@@ -978,6 +988,7 @@
                 "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
@@ -1019,6 +1030,7 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
+            "default": {},
             "required": [
               "program",
               "cwd"
@@ -1052,6 +1064,7 @@
                 "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "name": "string",
                     "value": "string"
@@ -1122,6 +1135,7 @@
           },
           "attach": {
             "type": "object",
+            "default": {},
             "required": [
               "processId"
             ],
