@@ -27,8 +27,8 @@ The symbol files are as follows:
 **On Linux/Mac**
 * Microsoft.MICore.dll.mdb
 * Microsoft.MIDebugEngine.dll.mdb
-* vscode\OpenDebugAD7.mdb
-* vscode\Microsoft.DebugEngineHost.mdb
+* vscode\OpenDebugAD7.exe.mdb
+* vscode\Microsoft.DebugEngineHost.dll.mdb
 
 ### Debugging On Windows
 
