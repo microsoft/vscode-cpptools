@@ -92,6 +92,10 @@ interface CustomConfigurationParams {
     configurationItems: SourceFileConfigurationItem[];
 }
 
+interface CompileCommandsPaths {
+    paths: string[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -122,6 +126,7 @@ const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, v
 const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
+const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 
 let failureMessageShown: boolean = false;
 
@@ -521,6 +526,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
+        this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.setupOutputHandlers();
     }
 
@@ -743,6 +749,43 @@ class DefaultClient implements Client {
                 e.setDecorations(decoration, ranges);
             }
         }
+    }
+
+    private promptCompileCommands(params: CompileCommandsPaths) : void {
+        if (this.configuration.Configurations[this.configuration.CurrentConfiguration].compileCommands !== undefined) {
+            return;
+        }
+
+        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
+        if (!showCompileCommandsSelection.Value) {
+           return;
+        }
+
+        let message: string = "Blah";
+        let yes: string = "Yes";
+        let later: string = "Later";
+        let dontShowAgain: string = "Don't Show Again";
+        vscode.window.showInformationMessage(message, yes, dontShowAgain).then((value) => {
+            switch (value) {
+                case yes:
+                    ui.showCompileCommands(params.paths).then((index) => {
+                        if (index < 0) {
+                            return;
+                        }
+                        if (index >= params.paths.length) {
+                            this.handleConfigurationEditCommand();
+                            return;
+                        }
+                        this.configuration.setCompileCommands(params.paths[index]);
+                    });
+                    break;
+                case later:
+                    break;
+                case dontShowAgain:
+                    showCompileCommandsSelection.Value = false;
+                    break;
+            }
+        });
     }
 
     /*********************************************
