@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.17.5: June 18, 2018
+* Change inactive regions from gray to translucent. [#1907](https://github.com/Microsoft/vscode-cpptools/issues/1907)
+* Improve performance of recursive includes paths. [#2068](https://github.com/Microsoft/vscode-cpptools/issues/2068)
+* Fix #include completion with headers in the same directory. [#2031](https://github.com/Microsoft/vscode-cpptools/issues/2031)
+* Support asm clobber registers on Windows. [#2090](https://github.com/Microsoft/vscode-cpptools/issues/2090)
+* Fix some crashes. [#2080](https://github.com/Microsoft/vscode-cpptools/issues/2080)
+* `browse.path` now inherits `includePath` if not set in `c_cpp_properties.json`.
+
 ## Version 0.17.4: May 31, 2018
 * Fix infinite loop (caused by deadlock) when using recursive includes. [#2043](https://github.com/Microsoft/vscode-cpptools/issues/2043)
 * Stop using recursive includes in the default configuration.
