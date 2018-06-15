@@ -73,7 +73,10 @@ export class ABTestSettings {
                 if (newSettings.recursiveIncludes) {
                     this.recursiveIncludesDefault.Value = newSettings.recursiveIncludes;
                 }
-                this.settings = newSettings;
+                this.settings = {
+                    defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
+                    recursiveIncludes: this.recursiveIncludesDefault.Value
+                };
             }
         } catch (error) {
             // Ignore any cpptoolsJsonFile errors
