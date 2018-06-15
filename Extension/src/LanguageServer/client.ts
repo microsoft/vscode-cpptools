@@ -756,7 +756,7 @@ class DefaultClient implements Client {
             return;
         }
 
-        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
+        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showPromptCompileCommands", true);
         if (!showCompileCommandsSelection.Value) {
            return;
         }
@@ -769,7 +769,7 @@ class DefaultClient implements Client {
             switch (value) {
                 case yes:
                     ui.showCompileCommands(params.paths).then((index) => {
-                        if (index < 0) {
+                        if (index <= 0) {
                             return;
                         }
                         if (index >= params.paths.length) {
