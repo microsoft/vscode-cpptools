@@ -16,8 +16,6 @@ import { PersistentState } from './LanguageServer/persistentState';
 
 const userBucketMax: number = 100;
 const userBucketString: string = "CPP.UserBucket";
-const intelliSenseEngineDefault: PersistentState<number> = new PersistentState<number>("ABTest.1", 100);
-const recursiveIncludesDefault: PersistentState<number> = new PersistentState<number>("ABTest.2", 100);
 const localConfigFile: string = "cpptools.json";
 
 interface Settings {
@@ -26,15 +24,23 @@ interface Settings {
 }
 
 export class ABTestSettings {
+    private settings: Settings;
+    private intelliSenseEngineDefault: PersistentState<number>;
+    private recursiveIncludesDefault: PersistentState<number>;
     private bucket: PersistentState<number>;
-    private settings: Settings = {
-        defaultIntelliSenseEngine: intelliSenseEngineDefault.Value,
-        recursiveIncludes: recursiveIncludesDefault.Value
-    };
 
     constructor() {
-        let bucketAssignment: number = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
-        this.bucket = new PersistentState<number>(userBucketString, bucketAssignment);
+        this.intelliSenseEngineDefault = new PersistentState<number>("ABTest.1", 100);
+        this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
+        this.settings = {
+            defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
+            recursiveIncludes: this.recursiveIncludesDefault.Value
+        };
+        this.bucket = new PersistentState<number>(userBucketString, -1);
+        if (this.bucket.Value === -1) {
+            this.bucket.Value = Math.floor(Math.random() * userBucketMax) + 1; // Range is [1, userBucketMax].
+        }
+
         this.updateSettingsAsync().then(() => {
             // Redownload cpptools.json after initialization so it's not blocked.
             // It'll be used the next time the extension reloads.
@@ -62,10 +68,10 @@ export class ABTestSettings {
                 const fileContent: string = await util.readFileText(cpptoolsJsonFile);
                 let newSettings: Settings = <Settings>JSON.parse(fileContent);
                 if (newSettings.defaultIntelliSenseEngine) {
-                    intelliSenseEngineDefault.Value = newSettings.defaultIntelliSenseEngine;
+                    this.intelliSenseEngineDefault.Value = newSettings.defaultIntelliSenseEngine;
                 }
                 if (newSettings.recursiveIncludes) {
-                    recursiveIncludesDefault.Value = newSettings.recursiveIncludes;
+                    this.recursiveIncludesDefault.Value = newSettings.recursiveIncludes;
                 }
                 this.settings = newSettings;
             }
