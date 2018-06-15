@@ -322,7 +322,6 @@ export class CppProperties {
 
     public setCompileCommands(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-            telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
             config.compileCommands = path;
