@@ -756,9 +756,9 @@ class DefaultClient implements Client {
             return;
         }
 
-        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showPromptCompileCommands", true);
+        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showCompileCommandsSelection", true);
         if (!showCompileCommandsSelection.Value) {
-           return;
+            return;
         }
 
         let message: string = "Detected compile_commands.json. Would you like to select a compile_commands.json for this configuration?";
@@ -769,7 +769,7 @@ class DefaultClient implements Client {
             switch (value) {
                 case yes:
                     ui.showCompileCommands(params.paths).then((index) => {
-                        if (index <= 0) {
+                        if (index < 0) {
                             return;
                         }
                         if (index >= params.paths.length) {
