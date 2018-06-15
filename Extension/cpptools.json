@@ -1,3 +1,5 @@
 {
-    "intelliSenseEngine_default_percentage": 100
+    "intelliSenseEngine_default_percentage": 100,
+    "defaultIntelliSenseEngine": 100,
+    "recursiveIncludes": 100
 }
