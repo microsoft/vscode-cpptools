@@ -87,6 +87,7 @@
     },
     "SetupCommandsConfiguration": {
       "type": "object",
+      "default": {},
       "properties": {
         "text": {
           "type": "string",
@@ -107,6 +108,7 @@
     },
     "KeyValuePair": {
       "type": "object",
+      "default": {},
       "properties": {
         "name": "string",
         "value": "string"
@@ -114,6 +116,7 @@
     },
     "CppdbgLaunchOptions": {
       "type": "object",
+      "default": {},
       "required": [
         "program"
       ],
@@ -204,6 +207,11 @@
           "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
           "default": "/usr/bin/gdb"
         },
+        "miDebuggerArgs": {
+          "type": "string",
+          "description": "Arguments for the mi debugger (such as gdb) to use. When unspecified.",
+          "default": ""
+        },
         "miDebuggerServerAddress": {
           "type": "string",
           "description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
@@ -273,6 +281,7 @@
     },
     "CppdbgAttachOptions": {
       "type": "object",
+      "default": {},
       "required": [
         "program",
         "processId"
@@ -374,6 +383,7 @@
     },
     "CppvsdbgLaunchOptions": {
       "type": "object",
+      "default": {},
       "required": [
         "program",
         "cwd"
@@ -473,6 +483,7 @@
     },
     "CppvsdbgAttachOptions": {
       "type": "object",
+      "default": {},
       "required": [
         "processId"
       ],
