@@ -11,6 +11,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
+import { ABTestSettings, getABTestSettings } from '../abTesting';
 const configVersion: number = 4;
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
@@ -207,7 +208,9 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
+                let abTestSettings: ABTestSettings = getABTestSettings();
+                let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+                configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
             }
             // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
             if (!settings.defaultDefines) {
