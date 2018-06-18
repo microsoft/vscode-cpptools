@@ -761,27 +761,33 @@ class DefaultClient implements Client {
             return;
         }
 
-        let message: string = "Detected compile_commands.json. Would you like to select a compile_commands.json for this configuration?";
+        let message: string = "Would you like to use compile_command.json files to auto-configure IntelliSense?";
         let yes: string = "Yes";
-        let later: string = "Later";
-        let dontShowAgain: string = "Don't Show Again";
-        vscode.window.showInformationMessage(message, yes, later, dontShowAgain).then((value) => {
+        let notNow: string = "Not Now";
+        let dontAskAgain: string = "Don't Ask Again";
+        vscode.window.showInformationMessage(message, yes, notNow, dontAskAgain).then((value) => {
             switch (value) {
                 case yes:
-                    ui.showCompileCommands(params.paths).then((index) => {
-                        if (index < 0) {
-                            return;
-                        }
-                        if (index >= params.paths.length) {
-                            this.handleConfigurationEditCommand();
-                            return;
-                        }
-                        this.configuration.setCompileCommands(params.paths[index]);
-                    });
+                    if (params.paths.length > 1) {
+                        ui.showCompileCommands(params.paths).then((index) => {
+                            if (index < 0) {
+                                return;
+                            }
+                            if (index >= params.paths.length) {
+                                this.handleConfigurationEditCommand();
+                                return;
+                            }
+                            this.configuration.setCompileCommands(params.paths[index]);
+                        });
+                    }
+                    else {
+                        this.configuration.setCompileCommands(params.paths[0]);
+                    }
+
                     break;
-                case later:
+                case notNow:
                     break;
-                case dontShowAgain:
+                case dontAskAgain:
                     showCompileCommandsSelection.Value = false;
                     break;
             }
