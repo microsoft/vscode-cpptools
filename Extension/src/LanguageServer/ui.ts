@@ -176,15 +176,14 @@ export class UI {
         for (let i: number = 0; i < paths.length; i++) {
             items.push({label: paths[i], description: "", index: i});
         }
-        items.push({ label: "Edit Configurations...", description: "", index: paths.length });
 
         return vscode.window.showQuickPick(items, options)
-        .then(selection => {
-            if (!selection) {
-                return -1;
-            }
-            return selection.index;
-        });
+            .then(selection => {
+                if (!selection) {
+                    return -1;
+                }
+                return selection.index;
+            });
     }
 
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
