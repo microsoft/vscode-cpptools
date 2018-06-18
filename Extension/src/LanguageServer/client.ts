@@ -779,8 +779,7 @@ class DefaultClient implements Client {
                             }
                             this.configuration.setCompileCommands(params.paths[index]);
                         });
-                    }
-                    else {
+                    } else {
                         this.configuration.setCompileCommands(params.paths[0]);
                     }
                     break;
