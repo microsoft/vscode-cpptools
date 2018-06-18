@@ -761,10 +761,10 @@ class DefaultClient implements Client {
             return;
         }
 
-        let message: string = "Would you like to use compile_command.json files to auto-configure IntelliSense?";
-        let yes: string = "Yes";
-        let notNow: string = "Not Now";
-        let dontAskAgain: string = "Don't Ask Again";
+        const message: string = "Would you like to use compile_command.json files to auto-configure IntelliSense?";
+        const yes: string = "Yes";
+        const notNow: string = "Not Now";
+        const dontAskAgain: string = "Don't Ask Again";
         vscode.window.showInformationMessage(message, yes, notNow, dontAskAgain).then((value) => {
             switch (value) {
                 case yes:
