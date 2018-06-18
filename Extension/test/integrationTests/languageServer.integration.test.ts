@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getLanguageConfigFromPatterns } from '../../src/LanguageServer/languageConfig';
+import * as api from '../../src/api';
 import * as config from '../../src/LanguageServer/configurations';
 import { CppSettings } from '../../src/LanguageServer/settings';
 
@@ -76,6 +77,70 @@ suite("multiline comment setting tests", function() {
         assert.deepEqual(rules, defaultSLRules);
     });
 
+});
+
+suite("extensibility tests", function() {
+    let cpptools: api.CppToolsApi;
+    let lastResult: api.SourceFileConfigurationItem[];
+    let defaultConfig: api.SourceFileConfiguration = {
+        includePath: [ "${workspaceFolder}" ],
+        defines: [ "${workspaceFolder}" ],
+        intelliSenseMode: "msvc-x64",
+        standard: "c++17"
+    };
+    let provider: api.CustomConfigurationProvider = {
+        name: "Test Provider",
+        extensionId: "ms-vscode.cpptools",
+        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+            return Promise.resolve(true);
+        },
+        provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
+            let result: api.SourceFileConfigurationItem[] = [];
+            uris.forEach(uri => {
+                result.push({
+                    uri: uri.toString(),
+                    configuration: defaultConfig
+                });
+            });
+            lastResult = result;
+            return Promise.resolve(result);
+        },
+        dispose(): void {
+            console.log("disposed");
+        }
+    };
+
+    suiteSetup(async function(): Promise<void> {
+        let extension: vscode.Extension<api.CppToolsApi> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        if (!extension.isActive) { 
+            await extension.activate().then(cpptoolsApi => cpptools = cpptoolsApi);
+        } else {
+            cpptools = extension.exports;
+        }
+        cpptools.registerCustomConfigurationProvider(provider);
+    });
+
+    suiteTeardown(function(): void {
+        if (cpptools) {
+            cpptools.dispose();
+        }
+    });
+
+    test("Check provider", async () => {
+        // Open a c++ file to start the language server.
+        console.log("check provider test");
+        let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
+        let uri: vscode.Uri = vscode.Uri.file(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        cpptools.didChangeCustomConfiguration(provider);
+        await new Promise<void>((resolve, reject) => {
+            setTimeout(() => {
+                let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
+                assert.deepEqual(lastResult, expected);
+                resolve();
+            }, 5000);
+        });
+    });
 });
 
 /*

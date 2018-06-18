@@ -10,7 +10,7 @@ import { CancellationToken } from 'vscode-jsonrpc';
 /**
  * An interface to allow Custom Configuration Provider extensions to communicate with this extension.
  */
-export interface CppToolsApi {
+export interface CppToolsApi extends vscode.Disposable {
     /**
      * Register the Custom Configuration Provider.
      * This must be called as soon as the provider extension is ready. This is necessary for cpptools
@@ -32,11 +32,16 @@ export interface CppToolsApi {
 /**
  * An interface to allow this extension to communicate with Custom Configuration Provider extensions.
  */
-export interface CustomConfigurationProvider {
+export interface CustomConfigurationProvider extends vscode.Disposable {
     /**
-     * The name of the Custom Configuration Provider extension.
+     * The friendly name of the Custom Configuration Provider extension.
      */
     name: string;
+
+    /**
+     * The id of the extension providing custom configurations. (e.g. `ms-vscode.cpptools`)
+     */
+    extensionId: string;
 
     /**
      * A request to determine whether this provider can provide IntelliSense configurations for the given document.

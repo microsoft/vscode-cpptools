@@ -14,7 +14,7 @@ import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
-import { PersistentState } from './persistentState';
+import { PersistentState, PersistentFolderState } from './persistentState';
 import { UI, getUI } from './ui';
 import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
@@ -145,7 +145,10 @@ export interface Client {
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
-    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void;
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): void;
+    updateCustomConfigurations(provider: CustomConfigurationProvider): void;
+    getCustomConfigurationProviderId(): string|undefined;
+    getCurrentConfigName(): string;
     takeOwnership(document: vscode.TextDocument): void;
     runBlockingTask<T>(task: Thenable<T>): Thenable<T>;
     runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any>;
@@ -400,7 +403,32 @@ class DefaultClient implements Client {
         }
     }
 
-    public onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {
+    public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
+        if (!this.configuration.CurrentConfiguration.configurationProvider) {
+            let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
+            if (ask.Value) {
+                const message: string = `${provider.name} would like to provide IntelliSense configuration information for this workspace`;
+                const allow: string = "Allow";
+                const notNow: string = "Not Now";
+                const dontAskAgain: string = "Don't Ask Again";
+                vscode.window.showInformationMessage(message, allow, notNow, dontAskAgain).then(result => {
+                    switch (result) {
+                        case allow: {
+                            this.configuration.addCustomConfigurationProvider(provider.extensionId).then(() => {
+                                this.updateCustomConfigurations(provider);
+                            });
+                            break;
+                        }
+                        case dontAskAgain: {
+                            ask.Value = false;
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    public updateCustomConfigurations(provider: CustomConfigurationProvider): void {
         let documentUris: vscode.Uri[] = [];
         this.trackedDocuments.forEach(document => documentUris.push(document.uri));
 
@@ -415,6 +443,14 @@ class DefaultClient implements Client {
         }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
             this.sendCustomConfigurations(configs);
         });
+    }
+
+    public getCustomConfigurationProviderId(): string|undefined {
+        return this.configuration.CurrentConfiguration.configurationProvider;
+    }
+
+    public getCurrentConfigName(): string {
+        return this.configuration.CurrentConfiguration.name;
     }
 
     /**
@@ -820,7 +856,7 @@ class DefaultClient implements Client {
     private onConfigurationsChanged(configurations: configs.Configuration[]): void {
         let params: FolderSettingsParams = {
             configurations: configurations,
-            currentConfiguration: this.configuration.CurrentConfiguration
+            currentConfiguration: this.configuration.CurrentConfigurationIndex
         };
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
@@ -942,7 +978,10 @@ class NullClient implements Client {
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
-    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {}
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): void {}
+    updateCustomConfigurations(provider: CustomConfigurationProvider): void {}
+    getCustomConfigurationProviderId(): string|undefined { return undefined; }
+    getCurrentConfigName(): string { return ""; }
     takeOwnership(document: vscode.TextDocument): void {}
     runBlockingTask<T>(task: Thenable<T>): Thenable<T> { return; }
     runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return; }

@@ -1,0 +1,9 @@
+{
+    "configurations": [
+        {
+            "name": "default",
+            "configurationProvider": "ms-vscode.cpptools"
+        }
+    ],
+    "version": 4
+}
