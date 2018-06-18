@@ -783,7 +783,6 @@ class DefaultClient implements Client {
                     else {
                         this.configuration.setCompileCommands(params.paths[0]);
                     }
-
                     break;
                 case notNow:
                     break;
