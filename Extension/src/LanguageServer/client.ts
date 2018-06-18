@@ -773,10 +773,6 @@ class DefaultClient implements Client {
                             if (index < 0) {
                                 return;
                             }
-                            if (index >= params.paths.length) {
-                                this.handleConfigurationEditCommand();
-                                return;
-                            }
                             this.configuration.setCompileCommands(params.paths[index]);
                         });
                     } else {
