@@ -311,6 +311,16 @@ export class CppProperties {
         });
     }
 
+    public setCompileCommands(path: string): void {
+        this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            config.compileCommands = path;
+            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            this.updateServerOnFolderSettingsChange();
+        });
+    }
+
     public select(index: number): Configuration {
         if (index === this.configurationJson.configurations.length) {
             this.handleConfigurationEditCommand(vscode.window.showTextDocument);
