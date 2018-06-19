@@ -4,9 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CustomConfigurationProvider } from './api';
+import { CustomConfigurationProvider } from 'vscode-cpptools';
+import { CppToolsTestApi, CppToolsTestHook, Status } from 'vscode-cpptools/testApi';
 import * as LanguageServer from './LanguageServer/extension';
-import { CppToolsTestApi, CppToolsTestHook, Status } from './testApi';
 import * as vscode from 'vscode';
 
 export class CppTools implements CppToolsTestApi {

@@ -1332,7 +1332,8 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.18"
+    "vscode": "^1.1.18",
+    "vscode-cpptools": "^1.0.2"
   },
   "dependencies": {
     "http-proxy-agent": "~2.1.0",

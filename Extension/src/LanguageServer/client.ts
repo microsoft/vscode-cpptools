@@ -10,6 +10,8 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from 'vscode-cpptools';
+import { Status } from 'vscode-cpptools/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
@@ -22,10 +24,8 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
-import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
-import { Status } from '../testApi';
 import { getTestHook, TestHook } from '../cppTools';
 
 let ui: UI;

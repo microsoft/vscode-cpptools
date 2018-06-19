@@ -6,8 +6,8 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getLanguageConfigFromPatterns } from '../../src/LanguageServer/languageConfig';
-import * as api from '../../src/api';
-import * as apit from '../../src/testApi';
+import * as api from 'vscode-cpptools';
+import * as apit from 'vscode-cpptools/testApi';
 import * as config from '../../src/LanguageServer/configurations';
 import { CppSettings } from '../../src/LanguageServer/settings';
 

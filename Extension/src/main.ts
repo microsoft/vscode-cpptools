@@ -13,6 +13,7 @@ import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
 
+import { CppToolsApi } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
@@ -20,7 +21,6 @@ import { PersistentState } from './LanguageServer/persistentState';
 import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools } from './cppTools';
-import { CppToolsApi } from './api';
 
 const releaseNotesVersion: number = 3;
 const cppTools: CppTools = new CppTools();

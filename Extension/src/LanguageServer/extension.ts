@@ -7,6 +7,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { CancellationTokenSource } from "vscode-jsonrpc";
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from 'vscode-cpptools';
+import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -16,8 +18,6 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
-import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
-import * as os from 'os';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
