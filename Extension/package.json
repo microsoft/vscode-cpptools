@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.17.4",
+  "version": "0.17.5",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.22.0"
+    "vscode": "^1.23.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -145,6 +145,14 @@
           "default": true,
           "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
+        },
+        "C_Cpp.inactiveRegionOpacity": {
+          "type:": "number",
+          "default": 0.55,
+          "Description": "Controls the opacity of inactive preprocessor blocks. Scales between 0.1 and 1.0. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource",
+          "minimum": 0.1,
+          "maximum": 1
         },
         "C_Cpp.formatting": {
           "type": "string",
@@ -535,6 +543,7 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
+            "default": {},
             "required": [
               "program"
             ],
@@ -572,6 +581,7 @@
                 "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
@@ -597,6 +607,7 @@
                 "description": "If provided, this replaces the default commands used to launch a target with some other commands. For example, this can be \"-target-attach\" in order to attach to a target process. An empty command list replaces the launch commands with nothing, which can be useful if the debugger is being provided launch options as command line options. Example: \"customLaunchSetupCommands\": [ { \"text\": \"target-run\", \"description\": \"run target\", \"ignoreFailures\": false }].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
@@ -641,6 +652,7 @@
                 "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "name": "string",
                     "value": "string"
@@ -662,6 +674,11 @@
                 "type": "string",
                 "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
                 "default": "/usr/bin/gdb"
+              },
+              "miDebuggerArgs": {
+                "type": "string",
+                "description": "Arguments for the mi debugger (such as gdb) to use. When unspecified.",
+                "default": ""
               },
               "miDebuggerServerAddress": {
                 "type": "string",
@@ -804,6 +821,7 @@
           },
           "attach": {
             "type": "object",
+            "default": {},
             "required": [
               "program",
               "processId"
@@ -970,6 +988,7 @@
                 "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
@@ -1011,6 +1030,7 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
+            "default": {},
             "required": [
               "program",
               "cwd"
@@ -1044,6 +1064,7 @@
                 "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
                 "items": {
                   "type": "object",
+                  "default": {},
                   "properties": {
                     "name": "string",
                     "value": "string"
@@ -1114,6 +1135,7 @@
           },
           "attach": {
             "type": "object",
+            "default": {},
             "required": [
               "processId"
             ],
@@ -1301,10 +1323,10 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.17"
+    "vscode": "^1.1.18"
   },
   "dependencies": {
-    "http-proxy-agent": "~2.0.0",
+    "http-proxy-agent": "~2.1.0",
     "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
@@ -1319,7 +1341,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874913",
+      "url": "https://go.microsoft.com/fwlink/?linkid=875587",
       "platforms": [
         "linux"
       ],
@@ -1333,7 +1355,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874914",
+      "url": "https://go.microsoft.com/fwlink/?linkid=875588",
       "platforms": [
         "linux"
       ],
@@ -1349,7 +1371,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874915",
+      "url": "https://go.microsoft.com/fwlink/?linkid=875589",
       "platforms": [
         "darwin"
       ],
@@ -1360,7 +1382,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=874916",
+      "url": "https://go.microsoft.com/fwlink/?linkid=875590",
       "platforms": [
         "win32"
       ],

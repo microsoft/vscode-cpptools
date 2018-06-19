@@ -168,6 +168,24 @@ export class UI {
             });
     }
 
+    public showCompileCommands(paths: string[]): Thenable<number> {
+        let options: vscode.QuickPickOptions = {};
+        options.placeHolder = "Select a compile_commands.json...";
+
+        let items: IndexableQuickPickItem[] = [];
+        for (let i: number = 0; i < paths.length; i++) {
+            items.push({label: paths[i], description: "", index: i});
+        }
+
+        return vscode.window.showQuickPick(items, options)
+            .then(selection => {
+                if (!selection) {
+                    return -1;
+                }
+                return selection.index;
+            });
+    }
+
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select a Workspace...";
