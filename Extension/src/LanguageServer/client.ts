@@ -94,6 +94,10 @@ interface CustomConfigurationParams {
     configurationItems: SourceFileConfigurationItem[];
 }
 
+interface CompileCommandsPaths {
+    paths: string[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -124,6 +128,7 @@ const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, v
 const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
+const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 
 let failureMessageShown: boolean = false;
 
@@ -561,6 +566,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
+        this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.setupOutputHandlers();
     }
 
@@ -788,6 +794,46 @@ class DefaultClient implements Client {
                 e.setDecorations(decoration, ranges);
             }
         }
+    }
+
+    private promptCompileCommands(params: CompileCommandsPaths) : void {
+        if (this.configuration.Configurations[this.configuration.CurrentConfiguration].compileCommands !== undefined) {
+            return;
+        }
+
+        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showCompileCommandsSelection", true);
+        if (!showCompileCommandsSelection.Value) {
+            return;
+        }
+
+        let compileCommandStr: string = params.paths.length > 1 ? "a compile_commands.json file" : params.paths[0];
+        let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the " + this.Name : "this";
+        const message: string = `Would you like to use ${compileCommandStr} to auto-configure IntelliSense for ${folderStr} folder?`;
+
+        const yes: string = "Yes";
+        const notNow: string = "Not Now";
+        const dontAskAgain: string = "Don't Ask Again";
+        vscode.window.showInformationMessage(message, yes, notNow, dontAskAgain).then((value) => {
+            switch (value) {
+                case yes:
+                    if (params.paths.length > 1) {
+                        ui.showCompileCommands(params.paths).then((index) => {
+                            if (index < 0) {
+                                return;
+                            }
+                            this.configuration.setCompileCommands(params.paths[index]);
+                        });
+                    } else {
+                        this.configuration.setCompileCommands(params.paths[0]);
+                    }
+                    break;
+                case notNow:
+                    break;
+                case dontAskAgain:
+                    showCompileCommandsSelection.Value = false;
+                    break;
+            }
+        });
     }
 
     /*********************************************

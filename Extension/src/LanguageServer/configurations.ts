@@ -323,6 +323,14 @@ export class CppProperties {
                 // Don't need to update server since this doesn't immediately affect it.
                 resolve();
             });
+
+    public setCompileCommands(path: string): void {
+        this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            config.compileCommands = path;
+            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            this.updateServerOnFolderSettingsChange();
         });
     }
 
