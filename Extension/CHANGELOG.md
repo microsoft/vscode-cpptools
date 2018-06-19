@@ -4,14 +4,14 @@
 * Detect `compile_commands.json` and show prompt to use it. [#1297](https://github.com/Microsoft/vscode-cpptools/issues/1297)
 * Change inactive regions from gray to translucent. [#1907](https://github.com/Microsoft/vscode-cpptools/issues/1907)
 * Improve performance of recursive includes paths. [#2068](https://github.com/Microsoft/vscode-cpptools/issues/2068)
-* Fix IntellSense client failure due to `No args provider`. [#1908](https://github.com/Microsoft/vscode-cpptools/issues/1908)
+* Fix IntelliSense client failure due to `No args provider`. [#1908](https://github.com/Microsoft/vscode-cpptools/issues/1908)
 * Fix `#include` completion with headers in the same directory. [#2031](https://github.com/Microsoft/vscode-cpptools/issues/2031)
 * Fix non-header files outside the workspace folder not being parsed (i.e. so `Go to Definition` works). [#2053](https://github.com/Microsoft/vscode-cpptools/issues/2053)
 * Fix some crashes. [#2080](https://github.com/Microsoft/vscode-cpptools/issues/2080)
 * Support asm clobber registers on Windows. [#2090](https://github.com/Microsoft/vscode-cpptools/issues/2090)
 * `browse.path` now inherits `includePath` if not set in `c_cpp_properties.json`.
 * On Windows, `compilerPath` now populates with the guessed `cl.exe` path, and the `MSVC` include path is based on the `cl.exe` path.
-* Fix files under a non-recursive browse.path being removed from the database.
+* Fix files under a non-recursive `browse.path` being removed from the database.
 * Fix `*` not working in `browse.path` with WSL.
 
 ## Version 0.17.4: May 31, 2018
