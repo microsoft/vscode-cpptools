@@ -761,7 +761,7 @@ class DefaultClient implements Client {
             return;
         }
 
-        let compileCommandStr: string = params.paths.length > 1 ? "a compile_commands.json file" : params.paths[0].replace("${workspaceFolder}", this.Name);
+        let compileCommandStr: string = params.paths.length > 1 ? "a compile_commands.json file" : params.paths[0];
         let folderStr: string = vscode.workspace.workspaceFolders.length > 1 ? "the " + this.Name : "this";
         const message: string = `Would you like to use ${compileCommandStr} to auto-configure IntelliSense for ${folderStr} folder?`;
 
