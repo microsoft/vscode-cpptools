@@ -91,6 +91,10 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
     }
 }
 
+export function tryRegisterConfigurationProviders(client: Client): void {
+    customConfigurationProviders.forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
+}
+
 export function unregisterCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
     console.assert(customConfigurationProviders.has(provider.extensionId), `${provider.extensionId} is not registered`);
     customConfigurationProviders.delete(provider.extensionId);

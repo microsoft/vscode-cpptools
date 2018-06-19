@@ -11,7 +11,7 @@ import {
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
 import { CustomConfigurationProvider, SourceFileConfigurationItem } from 'vscode-cpptools';
-import { Status } from 'vscode-cpptools/testApi';
+import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
@@ -414,11 +414,15 @@ class DefaultClient implements Client {
 
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): Thenable<void> {
         return this.notifyWhenReady(() => {
+            if (!this.RootPath) {
+                return; // There is no folder open, therefore there is no c_cpp_properties.json to edit.
+            }
             let selectedProvider: string = this.configuration.CurrentConfiguration.configurationProvider;
             if (!selectedProvider) {
                 let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
                 if (ask.Value) {
-                    const message: string = `${provider.name} would like to provide IntelliSense configuration information for this workspace.`;
+                    let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
+                    const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
                     const allow: string = "Allow";
                     const notNow: string = "Not Now";
                     const dontAskAgain: string = "Don't Ask Again";
@@ -811,7 +815,7 @@ class DefaultClient implements Client {
         }
 
         let compileCommandStr: string = params.paths.length > 1 ? "a compile_commands.json file" : params.paths[0];
-        let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the " + this.Name : "this";
+        let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
         const message: string = `Would you like to use ${compileCommandStr} to auto-configure IntelliSense for ${folderStr} folder?`;
 
         const yes: string = "Yes";
