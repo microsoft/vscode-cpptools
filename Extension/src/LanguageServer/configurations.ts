@@ -11,6 +11,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
+import { ABTestSettings, getABTestSettings } from '../abTesting';
 const configVersion: number = 4;
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
@@ -18,11 +19,11 @@ const configVersion: number = 4;
 // The property defaults are moved down to applyDefaultIncludePathsAndFrameworks.
 function getDefaultConfig(): Configuration {
     if (process.platform === 'darwin') {
-        return { name: "Mac", browse: {} };
+        return { name: "Mac" };
     } else if (process.platform === 'win32') {
-        return { name: "Win32", browse: {} };
+        return { name: "Win32" };
     } else {
-        return { name: "Linux", browse: {} };
+        return { name: "Linux" };
     }
 }
 
@@ -209,12 +210,11 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
+                let abTestSettings: ABTestSettings = getABTestSettings();
+                let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+                configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
             }
-            if (!settings.defaultBrowsePath) {
-                // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.browse.path = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
-            }
+            // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
             if (!settings.defaultDefines) {
                 configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
             }
@@ -297,15 +297,6 @@ export class CppProperties {
         } else {
             return "clang-x64";
         }
-    }
-
-    private includePathConverted(): boolean {
-        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            if (this.configurationJson.configurations[i].browse === undefined || this.configurationJson.configurations[i].browse.path === undefined) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public addToIncludePathCommand(path: string): void {
@@ -419,7 +410,23 @@ export class CppProperties {
             if (!configuration.browse) {
                 configuration.browse = {};
             }
-            configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath);
+
+            if (!configuration.browse.path) {
+                if (settings.defaultBrowsePath) {
+                    configuration.browse.path = settings.defaultBrowsePath;
+                } else if (configuration.includePath) {
+                    // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
+                    configuration.browse.path = configuration.includePath.slice(0);
+                    if (-1 === configuration.includePath.findIndex((value: string, index: number) => {
+                        return !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\|\\\*\*|\/|\/\*\*)?$/g);
+                    })) {
+                        configuration.browse.path.push("${workspaceFolder}");
+                    }
+                }
+            } else {
+                configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath);
+            }
+
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfiguration(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders);
             configuration.browse.databaseFilename = this.updateConfiguration(configuration.browse.databaseFilename, settings.defaultDatabaseFilename);
         }
@@ -468,7 +475,7 @@ export class CppProperties {
                     let filePath: vscode.Uri = vscode.Uri.parse("untitled:" + fullPathToFile);
                     vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
                         let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                        if (this.configurationJson === undefined) {
+                        if (this.configurationJson) {
                             this.resetToDefaultSettings(true);
                         }
                         this.applyDefaultIncludePathsAndFrameworks();
@@ -587,17 +594,8 @@ export class CppProperties {
 
     private updateToVersion2(): void {
         this.configurationJson.version = 2;
-        if (!this.includePathConverted()) {
-            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-                let config: Configuration = this.configurationJson.configurations[i];
-                if (config.browse === undefined) {
-                    config.browse = {};
-                }
-                if (config.browse.path === undefined && (this.defaultIncludes !== undefined || config.includePath !== undefined)) {
-                    config.browse.path = (config.includePath === undefined) ? this.defaultIncludes.slice(0) : config.includePath.slice(0);
-                }
-            }
-        }
+        // no-op. We don't automatically populate the browse.path anymore.
+        // We use includePath if browse.path is not present which is what this code used to do.
     }
 
     private updateToVersion3(): void {
