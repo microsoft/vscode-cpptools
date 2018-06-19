@@ -418,7 +418,7 @@ class DefaultClient implements Client {
             if (!selectedProvider) {
                 let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
                 if (ask.Value) {
-                    const message: string = `${provider.name} would like to provide IntelliSense configuration information for this workspace`;
+                    const message: string = `${provider.name} would like to provide IntelliSense configuration information for this workspace.`;
                     const allow: string = "Allow";
                     const notNow: string = "Not Now";
                     const dontAskAgain: string = "Don't Ask Again";
@@ -433,6 +433,10 @@ class DefaultClient implements Client {
                             }
                             case dontAskAgain: {
                                 ask.Value = false;
+                                break;
+                            }
+                            default: {
+                                break;
                             }
                         }
                     });
