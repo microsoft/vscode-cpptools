@@ -797,7 +797,7 @@ class DefaultClient implements Client {
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
-        if (this.configuration.Configurations[this.configuration.CurrentConfiguration].compileCommands !== undefined) {
+        if (this.configuration.CurrentConfiguration.compileCommands !== undefined) {
             return;
         }
 
