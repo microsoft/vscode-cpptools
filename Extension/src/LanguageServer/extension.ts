@@ -101,13 +101,13 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
     if (customConfigurationProviders.size === 0) {
         return Promise.resolve();
     }
-    let providerId: string|undefined = client.getCustomConfigurationProviderId();
+    let providerId: string|undefined = await client.getCustomConfigurationProviderId();
     if (!providerId) {
         return Promise.resolve();
     }
     
     let providerName: string = providerId;
-    let configName: string = client.getCurrentConfigName();
+    let configName: string = await client.getCurrentConfigName();
     let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
         // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
         try {
@@ -123,7 +123,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
         return Promise.reject("");
     };
 
-    return client.runBlockingThenableWithTimeout(provideConfigurationAsync, 1000, tokenSource).then(
+    return client.queueTaskWithTimeout(provideConfigurationAsync, 1000, tokenSource).then(
         (configs: SourceFileConfigurationItem[]) => {
             if (configs && configs.length > 0) {
                 client.sendCustomConfigurations(configs);
