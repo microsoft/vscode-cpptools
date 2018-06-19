@@ -57,11 +57,11 @@ export class CppTools implements CppToolsTestApi {
 export class TestHook implements CppToolsTestHook {
     private statusChangedEvent: vscode.EventEmitter<Status> = new vscode.EventEmitter<Status>();
 
-    public get StatusChanged() {
+    public get StatusChanged(): vscode.Event<Status> {
         return this.statusChangedEvent.event;
     }
 
-    public updateStatus(status: Status) {
+    public updateStatus(status: Status): void {
         this.statusChangedEvent.fire(status);
     }
 
