@@ -11,7 +11,6 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
-import { CustomConfigurationProvider } from '../api';
 const configVersion: number = 4;
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
@@ -326,7 +325,6 @@ export class CppProperties {
     public addCustomConfigurationProvider(providerId: string): Thenable<void> {
         return new Promise<void>((resolve) => {
             this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-                telemetry.logLanguageServerEvent("addCustomConfigurationProvider");
                 this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
                 let config: Configuration = this.CurrentConfiguration;
                 config.configurationProvider = providerId;

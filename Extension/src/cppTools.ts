@@ -4,10 +4,12 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CppToolsApi, CustomConfigurationProvider } from './api';
+import { CustomConfigurationProvider } from './api';
 import * as LanguageServer from './LanguageServer/extension';
+import { CppToolsTestApi, CppToolsTestHook, Status } from './testApi';
+import * as vscode from 'vscode';
 
-export class CppTools implements CppToolsApi {
+export class CppTools implements CppToolsTestApi {
     private providers: CustomConfigurationProvider[] = [];
 
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
@@ -46,4 +48,38 @@ export class CppTools implements CppToolsApi {
         });
         this.providers = [];
     }
+
+    getTestHook(): CppToolsTestHook {
+        return getTestHook();
+    }
+}
+
+export class TestHook implements CppToolsTestHook {
+    private statusChangedEvent: vscode.EventEmitter<Status> = new vscode.EventEmitter<Status>();
+
+    public get StatusChanged() {
+        return this.statusChangedEvent.event;
+    }
+
+    public updateStatus(status: Status) {
+        this.statusChangedEvent.fire(status);
+    }
+
+    public dispose(): void {
+        this.statusChangedEvent.dispose();
+        this.statusChangedEvent = null;
+    }
+
+    public valid(): boolean {
+        return !!this.statusChangedEvent;
+    }
+}
+
+let testHook: TestHook;
+
+export function getTestHook(): TestHook {
+    if (!testHook || !testHook.valid()) {
+        testHook = new TestHook();
+    }
+    return testHook;
 }

@@ -25,6 +25,8 @@ import { updateLanguageConfigurations } from './extension';
 import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
+import { Status } from '../testApi';
+import { getTestHook, TestHook } from '../cppTools';
 
 let ui: UI;
 
@@ -404,7 +406,8 @@ class DefaultClient implements Client {
     }
 
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-        if (!this.configuration.CurrentConfiguration.configurationProvider) {
+        let selectedProvider: string = this.configuration.CurrentConfiguration.configurationProvider;
+        if (!selectedProvider) {
             let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
             if (ask.Value) {
                 const message: string = `${provider.name} would like to provide IntelliSense configuration information for this workspace`;
@@ -415,6 +418,7 @@ class DefaultClient implements Client {
                     switch (result) {
                         case allow: {
                             this.configuration.addCustomConfigurationProvider(provider.extensionId).then(() => {
+                                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
                                 this.updateCustomConfigurations(provider);
                             });
                             break;
@@ -425,6 +429,8 @@ class DefaultClient implements Client {
                     }
                 });
             }
+        } else if (selectedProvider === provider.extensionId) {
+            telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
         }
     }
 
@@ -697,14 +703,19 @@ class DefaultClient implements Client {
     private updateStatus(notificationBody: ReportStatusNotificationBody): void {
         let message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
+        let testHook: TestHook = getTestHook();
         if (message.endsWith("Indexing...")) {
             this.model.isTagParsing.Value = true;
+            testHook.updateStatus(Status.TagParsingBegun);
         } else if (message.endsWith("Updating IntelliSense...")) {
             this.model.isUpdatingIntelliSense.Value = true;
+            testHook.updateStatus(Status.IntelliSenseCompiling);
         } else if (message.endsWith("IntelliSense Ready")) {
             this.model.isUpdatingIntelliSense.Value = false;
+            testHook.updateStatus(Status.IntelliSenseReady);
         } else if (message.endsWith("Ready")) { // Tag Parser Ready
             this.model.isTagParsing.Value = false;
+            testHook.updateStatus(Status.TagParsingDone);
             util.setProgress(util.getProgressParseRootSuccess());
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());

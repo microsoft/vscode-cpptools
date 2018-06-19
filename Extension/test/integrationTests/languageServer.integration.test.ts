@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getLanguageConfigFromPatterns } from '../../src/LanguageServer/languageConfig';
 import * as api from '../../src/api';
+import * as apit from '../../src/testApi';
 import * as config from '../../src/LanguageServer/configurations';
 import { CppSettings } from '../../src/LanguageServer/settings';
 
@@ -80,7 +81,7 @@ suite("multiline comment setting tests", function() {
 });
 
 suite("extensibility tests", function() {
-    let cpptools: api.CppToolsApi;
+    let cpptools: apit.CppToolsTestApi;
     let lastResult: api.SourceFileConfigurationItem[];
     let defaultConfig: api.SourceFileConfiguration = {
         includePath: [ "${workspaceFolder}" ],
@@ -111,7 +112,7 @@ suite("extensibility tests", function() {
     };
 
     suiteSetup(async function(): Promise<void> {
-        let extension: vscode.Extension<api.CppToolsApi> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        let extension: vscode.Extension<apit.CppToolsTestApi> = vscode.extensions.getExtension("ms-vscode.cpptools");
         if (!extension.isActive) { 
             await extension.activate().then(cpptoolsApi => cpptools = cpptoolsApi);
         } else {
@@ -129,17 +130,22 @@ suite("extensibility tests", function() {
     test("Check provider", async () => {
         // Open a c++ file to start the language server.
         console.log("check provider test");
+        let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
+        let testResult: any = new Promise<void>((resolve, reject) => {
+            testHook.StatusChanged(status => {
+                console.log("Status change: " + status.toString());
+                if (status === apit.Status.IntelliSenseReady) {
+                    let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
+                    assert.deepEqual(lastResult, expected);
+                    resolve();
+                }
+            });
+            setTimeout(() => { reject("timeout"); }, 5000);
+        });
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
         let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
-        cpptools.didChangeCustomConfiguration(provider);
-        await new Promise<void>((resolve, reject) => {
-            setTimeout(() => {
-                let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
-                assert.deepEqual(lastResult, expected);
-                resolve();
-            }, 5000);
-        });
+        await testResult;
     });
 });
 
