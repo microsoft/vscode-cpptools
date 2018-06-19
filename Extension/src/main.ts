@@ -281,7 +281,7 @@ async function finalizeExtensionActivation(): Promise<void> {
     
     let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
     let packageJson: any = util.getRawPackageJson();
-    if (!packageJson.extensionFolderPath.includes(".vscode-insiders")) {
+    if (util.packageJson.extensionLocation && !util.packageJson.extensionLocation.path.includes(".vscode-insiders")) {
         let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (abTestSettings.UseDefaultIntelliSenseEngine) {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
