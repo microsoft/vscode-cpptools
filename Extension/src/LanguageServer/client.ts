@@ -761,19 +761,9 @@ class DefaultClient implements Client {
             return;
         }
 
-        let message: string = "Would you like to use ";
-        if (params.paths.length > 1) {
-            message += "a compile_commands.json file";
-        } else {
-            message += params.paths[0];
-        }
-        message += " to auto-configure IntelliSense for ";
-        if (vscode.workspace.workspaceFolders.length > 1) {
-            message += "the " + this.Name;
-        } else {
-            message += "this";
-        }
-        message += " folder?";
+        let compileCommandStr: string = params.paths.length > 1 ? "a compile_commands.json file" : params.paths[0].replace("${workspaceFolder}", this.Name);
+        let folderStr: string = vscode.workspace.workspaceFolders.length > 1 ? "the " + this.Name : "this";
+        const message: string = `Would you like to use ${compileCommandStr} to auto-configure IntelliSense for ${folderStr} folder?`;
 
         const yes: string = "Yes";
         const notNow: string = "Not Now";
