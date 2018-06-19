@@ -13,6 +13,9 @@
 * On Windows, `compilerPath` now populates with the guessed `cl.exe` path, and the `MSVC` include path is based on the `cl.exe` path.
 * Fix files under a non-recursive `browse.path` being removed from the database.
 * Fix `*` not working in `browse.path` with WSL.
+* Fix for -break-insert main returning multiple bind points. [#729](https://github.com/Microsoft/MIEngine/pull/729)
+* Use -- instead of -x for gnome-terminal. [#733](https://github.com/Microsoft/MIEngine/pull/733)
+* Added `miDebuggerArgs` in order to pass arguments to the program in `miDebuggerPath`. [#720](https://github.com/Microsoft/MIEngine/pull/720)
 
 ## Version 0.17.4: May 31, 2018
 * Fix infinite loop (caused by deadlock) when using recursive includes. [#2043](https://github.com/Microsoft/vscode-cpptools/issues/2043)
