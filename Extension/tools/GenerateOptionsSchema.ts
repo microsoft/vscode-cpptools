@@ -121,3 +121,5 @@ export function generateOptionsSchema(): void {
 
     fs.writeFileSync('package.json', content);
 }
+
+generateOptionsSchema();

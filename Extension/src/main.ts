@@ -30,7 +30,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.setExtensionContext(context);
     Telemetry.activate();
     util.setProgress(0);
-    cpptoolsJsonUtils.activate(context);
     initializeInstallationInformation();
 
     // Initialize the DebuggerExtension and register the related commands and providers.
@@ -275,23 +274,24 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    const cpptoolsJsonFile: string = util.getExtensionFilePath("cpptools.json");
-
-    try {
-        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
-        if (exists) {
-            const cpptoolsString: string = await util.readFileText(cpptoolsJsonFile);
-            await cpptoolsJsonUtils.processCpptoolsJson(cpptoolsString);
-        }
-    } catch (error) {
-        // Ignore any cpptoolsJsonFile errors
-    }
-
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
-    // Redownload cpptools.json after activation so it's not blocked.
-    // It'll be used after the extension reloads.
-    cpptoolsJsonUtils.downloadCpptoolsJsonPkg();
+    // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
+    // (this may result in rewriting the package.json file)
+    
+    let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
+    let packageJson: any = util.getRawPackageJson();
+    if (util.packageJson.extensionLocation && !util.packageJson.extensionLocation.path.includes(".vscode-insiders")) {
+        let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
+        if (abTestSettings.UseDefaultIntelliSenseEngine) {
+            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
+        } else {
+            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
+        }
+        if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
+            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+        }
+    }
 }
 
 function rewriteManifest(): Promise<void> {

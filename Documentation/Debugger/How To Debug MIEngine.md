@@ -1,6 +1,4 @@
-# How To Debug MIEngine (Work in Progress)
-
-*This is a work in progress. Please create a pull request with updates if there is anything wrong with it.*
+# How To Debug MIEngine
 
 MIEngine is one of the components used to enable the C/C++ debugging scenario with the Microsoft C/C++ extension with VS Code. This document is to help enable users who want to debug and contribute to MIEngine to fix issues or extend functionality. MIEngine is used to communicate with `gdb`/`lldb` using the MI protocol. 
 
@@ -15,28 +13,38 @@ You can open the solution file **MIDebugEngine.sln** located under **src** and c
 * Microsoft.MICore.dll
 * Microsoft.MICore.XmlSerializers.dll
 * Microsoft.MIDebugEngine.dll
+* vscode\OpenDebugAD7.exe
+* vscode\Microsoft.DebugEngineHost.dll
 
 The symbol files are as follows:
 
 **On Windows** 
 * Microsoft.MICore.pdb
 * Microsoft.MIDebugEngine.dll
+* vscode\OpenDebugAD7.pdb
+* vscode\Microsoft.DebugEngineHost.pdb
 
 **On Linux/Mac**
 * Microsoft.MICore.dll.mdb
 * Microsoft.MIDebugEngine.dll.mdb
+* vscode\OpenDebugAD7.exe.mdb
+* vscode\Microsoft.DebugEngineHost.dll.mdb
 
 ### Debugging On Windows
 
-On Windows, the easiest way to debug is to use Visual Studio. Locate the **package.json** file in the **Extension** folder and open it in an editor.
+On Windows, the easiest way to debug is to use Visual Studio. Locate the **src\Debugger\extension.ts** file in the **Extension** folder and open it in an editor.
 
-Locate the following line: 
+If you are not building the extension, Locate the **out\src\Debugger\extension.ts** file in the **.vscode\extensions\ms-vscode.cpptools** folder and open it in an editor.
+
+Locate the following lines: 
 ```json
-"program": "./debugAdapters/OpenDebugAD7",
+return {
+    command: command
+};
 ```
-and add the following line below it:
+and add the following line to the object:
 ```json
-"args": ["--pauseForDebugger"],
+args: ["--pauseForDebugger"]
 ```
 
 This will cause the debugger to look like it has hung once you start debugging, but in reality it is waiting for a debugger to attach. Set your breakpoints and attach your debugger to the `OpenDebugAD7.exe` process. Once the debugger is attached, VS Code should start debugging and you can reproduce your scenario. 
