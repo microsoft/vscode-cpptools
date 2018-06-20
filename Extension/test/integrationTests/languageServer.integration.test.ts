@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getLanguageConfigFromPatterns } from '../../src/LanguageServer/languageConfig';
 import * as api from 'vscode-cpptools';
-import * as apit from 'vscode-cpptools/testApi';
+import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../src/LanguageServer/configurations';
 import { CppSettings } from '../../src/LanguageServer/settings';
 
@@ -80,7 +80,7 @@ suite("multiline comment setting tests", function() {
 
 });
 
-suite("extensibility tests", function() {
+suite("extensibility tests v1", function() {
     let cpptools: apit.CppToolsTestApi;
     let lastResult: api.SourceFileConfigurationItem[];
     let defaultConfig: api.SourceFileConfiguration = {
@@ -107,14 +107,81 @@ suite("extensibility tests", function() {
             return Promise.resolve(result);
         },
         dispose(): void {
-            console.log("disposed");
+            console.log("    disposed");
+        }
+    };
+
+    suiteSetup(async function(): Promise<void> {
+        let extension: vscode.Extension<apit.CppToolsTestExtension> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        if (!extension.isActive) { 
+            cpptools = (await extension.activate()).getTestApi(api.Version.v1);
+        } else {
+            cpptools = extension.exports.getTestApi(api.Version.v1);
+        }
+        cpptools.registerCustomConfigurationProvider(provider);
+    });
+
+    suiteTeardown(function(): void {
+        if (cpptools) {
+            cpptools.dispose();
+        }
+    });
+
+    test("Check provider", async () => {
+        // Open a c++ file to start the language server.
+        let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
+        let testResult: any = new Promise<void>((resolve, reject) => {
+            testHook.StatusChanged(status => {
+                console.log("    Status change: " + status.toString());
+                if (status === apit.Status.IntelliSenseReady) {
+                    let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
+                    assert.deepEqual(lastResult, expected);
+                    resolve();
+                }
+            });
+            setTimeout(() => { reject("timeout"); }, 2500);
+        });
+        let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
+        let uri: vscode.Uri = vscode.Uri.file(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await testResult;
+    });
+});
+
+suite("extensibility tests v0", function() {
+    let cpptools: apit.CppToolsTestApi;
+    let lastResult: api.SourceFileConfigurationItem[];
+    let defaultConfig: api.SourceFileConfiguration = {
+        includePath: [ "${workspaceFolder}" ],
+        defines: [ "${workspaceFolder}" ],
+        intelliSenseMode: "msvc-x64",
+        standard: "c++17"
+    };
+
+    // has to be 'any' instead of api.CustomConfigurationProvider because dispose is missing on the old interface version
+    let provider: any = {
+        name: "Test Provider",
+        extensionId: "ms-vscode.cpptools",
+        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+            return Promise.resolve(true);
+        },
+        provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
+            let result: api.SourceFileConfigurationItem[] = [];
+            uris.forEach(uri => {
+                result.push({
+                    uri: uri.toString(),
+                    configuration: defaultConfig
+                });
+            });
+            lastResult = result;
+            return Promise.resolve(result);
         }
     };
 
     suiteSetup(async function(): Promise<void> {
         let extension: vscode.Extension<apit.CppToolsTestApi> = vscode.extensions.getExtension("ms-vscode.cpptools");
         if (!extension.isActive) { 
-            await extension.activate().then(cpptoolsApi => cpptools = cpptoolsApi);
+            cpptools = await extension.activate();
         } else {
             cpptools = extension.exports;
         }
@@ -129,20 +196,19 @@ suite("extensibility tests", function() {
 
     test("Check provider", async () => {
         // Open a c++ file to start the language server.
-        console.log("check provider test");
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
             testHook.StatusChanged(status => {
-                console.log("Status change: " + status.toString());
+                console.log("    Status change: " + status.toString());
                 if (status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     resolve();
                 }
             });
-            setTimeout(() => { reject("timeout"); }, 5000);
+            setTimeout(() => { reject("timeout"); }, 2500);
         });
-        let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
+        let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main2.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
         let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
         await testResult;
@@ -163,8 +229,6 @@ suite("configuration tests", function() {
     suiteTeardown(async function() {
         // Delete c_cpp_properties.json
     });
-
-    
 
     test("Check default configuration", () => {
         let rootUri: vscode.Uri;

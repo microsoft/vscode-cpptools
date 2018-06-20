@@ -26,7 +26,7 @@ import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
-import { getTestHook, TestHook } from '../cppTools';
+import { getTestHook, TestHook } from '../testHook';
 
 let ui: UI;
 

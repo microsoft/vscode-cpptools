@@ -7,7 +7,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { CancellationTokenSource } from "vscode-jsonrpc";
-import { CustomConfigurationProvider, SourceFileConfigurationItem } from 'vscode-cpptools';
+import { CustomConfigurationProvider, SourceFileConfigurationItem, Version } from 'vscode-cpptools';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
@@ -18,6 +18,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
+import { CustomConfigurationProviderInternal } from '../customProvider';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -29,7 +30,7 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-let customConfigurationProviders: Map<string, CustomConfigurationProvider> = new Map<string, CustomConfigurationProvider>();
+let customConfigurationProviders: Map<string, CustomConfigurationProviderInternal> = new Map<string, CustomConfigurationProviderInternal>();
 
 /**
  * activate: set up the extension for language services
@@ -77,10 +78,14 @@ export function activate(activationEventOccurred: boolean): void {
     }
 }
 
-export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-    if (customConfigurationProviders.has(provider.extensionId)) {
-        console.error(`CustomConfigurationProvider '${provider.extensionId}' has already been registered.`);
-    } else {
+export function registerCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): void {
+    let register: boolean = !customConfigurationProviders.has(provider.extensionId);
+    if (!register) {
+        let existing: CustomConfigurationProviderInternal = customConfigurationProviders.get(provider.extensionId);
+        register = (existing.version === Version.v0 && provider.version === Version.v0);
+    }
+
+    if (register) {
         customConfigurationProviders.set(provider.extensionId, provider);
 
         // Request for configurations from the provider only if realActivationOccurred.
@@ -88,6 +93,8 @@ export function registerCustomConfigurationProvider(provider: CustomConfiguratio
         if (realActivationOccurred) {
             clients.forEach(client => client.onRegisterCustomConfigurationProvider(provider));
         }
+    } else {
+        console.error(`CustomConfigurationProvider '${provider.extensionId}' has already been registered.`);
     }
 }
 
@@ -95,7 +102,7 @@ export function tryRegisterConfigurationProviders(client: Client): void {
     customConfigurationProviders.forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
 }
 
-export function unregisterCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
+export function unregisterCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): void {
     console.assert(customConfigurationProviders.has(provider.extensionId), `${provider.extensionId} is not registered`);
     customConfigurationProviders.delete(provider.extensionId);
 }
@@ -116,7 +123,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
         // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
         try {
             if (customConfigurationProviders.has(providerId)) {
-                let provider: CustomConfigurationProvider = customConfigurationProviders.get(providerId);
+                let provider: CustomConfigurationProviderInternal = customConfigurationProviders.get(providerId);
                 providerName = provider.name;
                 if (await provider.canProvideConfiguration(document.uri, tokenSource.token)) {
                     return provider.provideConfigurations([document.uri], tokenSource.token);
@@ -138,7 +145,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
         });
 }
 
-export function onDidChangeCustomConfiguration(customConfigurationProvider: CustomConfigurationProvider): void {
+export function onDidChangeCustomConfiguration(customConfigurationProvider: CustomConfigurationProviderInternal): void {
     clients.forEach((client: Client) => client.updateCustomConfigurations(customConfigurationProvider));
 }
 
