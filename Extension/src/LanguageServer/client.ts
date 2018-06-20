@@ -14,7 +14,7 @@ import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
-import { PersistentState } from './persistentState';
+import { PersistentState, PersistentFolderState } from './persistentState';
 import { UI, getUI } from './ui';
 import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
@@ -756,7 +756,7 @@ class DefaultClient implements Client {
             return;
         }
 
-        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showCompileCommandsSelection", true);
+        let showCompileCommandsSelection: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, this.RootPath);
         if (!showCompileCommandsSelection.Value) {
             return;
         }
