@@ -756,7 +756,7 @@ class DefaultClient implements Client {
             return;
         }
 
-        let showCompileCommandsSelection: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, this.Name);
+        let showCompileCommandsSelection: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, this.RootPath);
         if (!showCompileCommandsSelection.Value) {
             return;
         }
