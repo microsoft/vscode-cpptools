@@ -315,14 +315,21 @@ export class CppProperties {
 
     public addCustomConfigurationProvider(providerId: string): Thenable<void> {
         return new Promise<void>((resolve) => {
-            this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-                this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-                let config: Configuration = this.CurrentConfiguration;
-                config.configurationProvider = providerId;
-                fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-                // Don't need to update server since this doesn't immediately affect it.
+            if (this.propertiesFile) {
+                this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+                    this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+                    let config: Configuration = this.CurrentConfiguration;
+                    config.configurationProvider = providerId;
+                    fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+                    // Don't need to update server since this doesn't immediately affect it.
+                    resolve();
+                });
+            } else {
+                let settings: CppSettings = new CppSettings(this.rootUri);
+                settings.update("default.configurationProvider", providerId);
+                this.CurrentConfiguration.configurationProvider = providerId;
                 resolve();
-            });
+            }
         });
     }
 
