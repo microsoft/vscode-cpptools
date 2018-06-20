@@ -417,7 +417,7 @@ class DefaultClient implements Client {
             if (!this.RootPath) {
                 return; // There is no folder open, therefore there is no c_cpp_properties.json to edit.
             }
-            let selectedProvider: string = this.configuration.CurrentConfiguration.configurationProvider;
+            let selectedProvider: string = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
                 let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
                 if (ask.Value) {

@@ -141,6 +141,13 @@ export class CppProperties {
     public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
+    
+    public get CurrentConfigurationProvider(): string|null {
+        if (this.CurrentConfiguration.configurationProvider) {
+            return this.CurrentConfiguration.configurationProvider;
+        }
+        return new CppSettings(this.rootUri).defaultConfigurationProvider;
+    }
 
     public get ConfigurationNames(): string[] {
         let result: string[] = [];
