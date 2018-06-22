@@ -9,6 +9,7 @@
 * Fix non-header files outside the workspace folder not being parsed (i.e. so `Go to Definition` works). [#2053](https://github.com/Microsoft/vscode-cpptools/issues/2053)
 * Fix some crashes. [#2080](https://github.com/Microsoft/vscode-cpptools/issues/2080)
 * Support asm clobber registers on Windows. [#2090](https://github.com/Microsoft/vscode-cpptools/issues/2090)
+* Fix usage of `${config:section.setting}`. [#2165](https://github.com/Microsoft/vscode-cpptools/issues/2165)
 * `browse.path` now inherits `includePath` if not set in `c_cpp_properties.json`.
 * On Windows, `compilerPath` now populates with the guessed `cl.exe` path, and the `MSVC` include path is based on the `cl.exe` path.
 * Fix files under a non-recursive `browse.path` being removed from the database.
