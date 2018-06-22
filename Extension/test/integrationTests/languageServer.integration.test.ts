@@ -90,7 +90,7 @@ suite("extensibility tests v1", function() {
         standard: "c++17"
     };
     let provider: api.CustomConfigurationProvider = {
-        name: "Test Provider",
+        name: "Test-v1",
         extensionId: "ms-vscode.cpptools",
         canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
@@ -132,14 +132,15 @@ suite("extensibility tests v1", function() {
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
             testHook.StatusChanged(status => {
-                console.log("    Status change: " + status.toString());
+                console.log("    Status change1: " + status.toString());
                 if (status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
+                    testHook.dispose();
                     resolve();
                 }
             });
-            setTimeout(() => { reject("timeout"); }, 2500);
+            setTimeout(() => { reject(new Error("timeout")); }, 2500);
         });
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
@@ -160,8 +161,7 @@ suite("extensibility tests v0", function() {
 
     // has to be 'any' instead of api.CustomConfigurationProvider because dispose is missing on the old interface version
     let provider: any = {
-        name: "Test Provider",
-        extensionId: "ms-vscode.cpptools",
+        name: "Test-v0",
         canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
@@ -199,14 +199,14 @@ suite("extensibility tests v0", function() {
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
             testHook.StatusChanged(status => {
-                console.log("    Status change: " + status.toString());
+                console.log("    Status change2: " + status.toString());
                 if (status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     resolve();
                 }
             });
-            setTimeout(() => { reject("timeout"); }, 2500);
+            setTimeout(() => { reject(new Error("timeout")); }, 25000);
         });
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main2.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
