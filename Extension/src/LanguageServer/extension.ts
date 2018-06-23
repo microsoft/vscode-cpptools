@@ -113,6 +113,7 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
         return Promise.resolve();
     }
     let providerId: string|undefined = await client.getCustomConfigurationProviderId();
+    console.log("providerId = " + providerId);
     if (!providerId) {
         return Promise.resolve();
     }
@@ -587,4 +588,8 @@ export function deactivate(): Thenable<void> {
 
 export function isFolderOpen(): boolean {
     return vscode.workspace.workspaceFolders !== undefined && vscode.workspace.workspaceFolders.length > 0;
+}
+
+export function getActiveClient(): Client {
+    return clients.ActiveClient;
 }

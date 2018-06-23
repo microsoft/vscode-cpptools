@@ -6,10 +6,12 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getLanguageConfigFromPatterns } from '../../src/LanguageServer/languageConfig';
+import * as util from '../../src/common';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../src/LanguageServer/configurations';
 import { CppSettings } from '../../src/LanguageServer/settings';
+import { getActiveClient } from '../../src/LanguageServer/extension';
 
 suite("multiline comment setting tests", function() {
     suiteSetup(async function() { 
@@ -112,13 +114,22 @@ suite("extensibility tests v1", function() {
     };
 
     suiteSetup(async function(): Promise<void> {
-        let extension: vscode.Extension<apit.CppToolsTestExtension> = vscode.extensions.getExtension("ms-vscode.cpptools");
-        if (!extension.isActive) { 
-            cpptools = (await extension.activate()).getTestApi(api.Version.v1);
-        } else {
-            cpptools = extension.exports.getTestApi(api.Version.v1);
-        }
+        cpptools = await apit.getCppToolsTestApi(api.Version.v1);
         cpptools.registerCustomConfigurationProvider(provider);
+
+        await util.writeFileText(vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json", 
+            `{
+                "configurations": [
+                    {
+                        "name": "test1",
+                        "configurationProvider": "ms-vscode.cpptools"
+                    }
+                ],
+                "version": 4
+            }`);
+        console.log("    wrote c_cpp_properties.json");
+
+        //getActiveClient().ActiveConfigChanged();  // TODO: finish this
     });
 
     suiteTeardown(function(): void {
@@ -179,19 +190,27 @@ suite("extensibility tests v0", function() {
     };
 
     suiteSetup(async function(): Promise<void> {
-        let extension: vscode.Extension<apit.CppToolsTestApi> = vscode.extensions.getExtension("ms-vscode.cpptools");
-        if (!extension.isActive) { 
-            cpptools = await extension.activate();
-        } else {
-            cpptools = extension.exports;
-        }
+        cpptools = await apit.getCppToolsTestApi(api.Version.v0);
         cpptools.registerCustomConfigurationProvider(provider);
+
+        await util.writeFileText(vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json", 
+            `{
+                "configurations": [
+                    {
+                        "name": "test0",
+                        "configurationProvider": "Test-v0"
+                    }
+                ],
+                "version": 4
+            }`);
+        console.log("    wrote c_cpp_properties.json");
     });
 
-    suiteTeardown(function(): void {
+    suiteTeardown(async function(): Promise<void> {
         if (cpptools) {
             cpptools.dispose();
         }
+        await util.deleteFile(vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json");
     });
 
     test("Check provider", async () => {
@@ -211,6 +230,7 @@ suite("extensibility tests v0", function() {
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main2.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
         let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        console.log("    document opened");
         await testResult;
     });
 });

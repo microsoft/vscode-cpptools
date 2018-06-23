@@ -430,6 +430,7 @@ export class CppProperties {
             configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard);
             configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode);
             configuration.configurationProvider = this.updateConfiguration(configuration.configurationProvider, settings.defaultConfigurationProvider);
+            console.log("configuration provider = " + configuration.configurationProvider);
 
             if (!configuration.browse) {
                 configuration.browse = {};
