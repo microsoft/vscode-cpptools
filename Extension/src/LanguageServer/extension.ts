@@ -113,7 +113,6 @@ export async function provideCustomConfiguration(document: vscode.TextDocument, 
         return Promise.resolve();
     }
     let providerId: string|undefined = await client.getCustomConfigurationProviderId();
-    console.log("providerId = " + providerId);
     if (!providerId) {
         return Promise.resolve();
     }
@@ -591,5 +590,8 @@ export function isFolderOpen(): boolean {
 }
 
 export function getActiveClient(): Client {
+    if (!realActivationOccurred) {
+        realActivation();
+    }
     return clients.ActiveClient;
 }

@@ -82,6 +82,21 @@ suite("multiline comment setting tests", function() {
 
 });
 
+async function changeCppProperties(cppProperties: config.ConfigurationJson, disposables: vscode.Disposable[]): Promise<void> {
+    let promise: Promise<void> = new Promise<void>((resolve, reject) => {;
+        disposables.push(getActiveClient().ActiveConfigChanged(name => {
+            if (name === cppProperties.configurations[0].name) {
+                resolve();
+            }
+        }));
+
+        // Can't trust the file watcher, so we need to allocate additional time for the backup watcher to fire.
+        setTimeout(() => { reject(new Error("timeout")); }, 4000);
+    });
+    await util.writeFileText(vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json", JSON.stringify(cppProperties));
+    return promise;
+}
+
 suite("extensibility tests v1", function() {
     let cpptools: apit.CppToolsTestApi;
     let lastResult: api.SourceFileConfigurationItem[];
@@ -112,30 +127,22 @@ suite("extensibility tests v1", function() {
             console.log("    disposed");
         }
     };
+    let disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
         cpptools = await apit.getCppToolsTestApi(api.Version.v1);
         cpptools.registerCustomConfigurationProvider(provider);
+        disposables.push(cpptools);
 
-        await util.writeFileText(vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json", 
-            `{
-                "configurations": [
-                    {
-                        "name": "test1",
-                        "configurationProvider": "ms-vscode.cpptools"
-                    }
-                ],
-                "version": 4
-            }`);
-        console.log("    wrote c_cpp_properties.json");
-
-        //getActiveClient().ActiveConfigChanged();  // TODO: finish this
+        await changeCppProperties({
+                configurations: [ { name: "test1", configurationProvider: provider.extensionId } ],
+                version: 4
+            },
+            disposables);
     });
 
     suiteTeardown(function(): void {
-        if (cpptools) {
-            cpptools.dispose();
-        }
+        disposables.forEach(d => d.dispose());
     });
 
     test("Check provider", async () => {
@@ -188,28 +195,22 @@ suite("extensibility tests v0", function() {
             return Promise.resolve(result);
         }
     };
+    let disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
         cpptools = await apit.getCppToolsTestApi(api.Version.v0);
         cpptools.registerCustomConfigurationProvider(provider);
+        disposables.push(cpptools); // This is a no-op for v0, but do it anyway to make sure nothing breaks.
 
-        await util.writeFileText(vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json", 
-            `{
-                "configurations": [
-                    {
-                        "name": "test0",
-                        "configurationProvider": "Test-v0"
-                    }
-                ],
-                "version": 4
-            }`);
-        console.log("    wrote c_cpp_properties.json");
+        await changeCppProperties({
+            configurations: [ { name: "test2", configurationProvider: provider.name } ],
+            version: 4
+        },
+        disposables);
     });
 
     suiteTeardown(async function(): Promise<void> {
-        if (cpptools) {
-            cpptools.dispose();
-        }
+        disposables.forEach(d => d.dispose());
         await util.deleteFile(vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json");
     });
 
