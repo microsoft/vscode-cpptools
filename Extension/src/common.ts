@@ -333,10 +333,9 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
         fs.readFile(filePath, encoding, (err, data) => {
             if (err) {
                 reject(err);
-                return;
+            } else {
+                resolve(data);
             }
-
-            resolve(data);
         });
     });
 }
@@ -347,10 +346,21 @@ export function writeFileText(filePath: string, content: string, encoding: strin
         fs.writeFile(filePath, content, { encoding }, (err) => {
             if (err) {
                 reject(err);
-                return;
+            } else {
+                resolve();
             }
+        });
+    });
+}
 
-            resolve();
+export function deleteFile(filePath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
         });
     });
 }

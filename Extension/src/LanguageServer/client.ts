@@ -10,11 +10,13 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
+import { CustomConfigurationProvider, SourceFileConfigurationItem } from 'vscode-cpptools';
+import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
-import { PersistentState } from './persistentState';
+import { PersistentState, PersistentFolderState } from './persistentState';
 import { UI, getUI } from './ui';
 import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
@@ -22,9 +24,9 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations } from './extension';
-import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
+import { getTestHook, TestHook } from '../testHook';
 
 let ui: UI;
 
@@ -150,10 +152,13 @@ export interface Client {
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
-    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void;
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): Thenable<void>;
+    updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void>;
+    getCustomConfigurationProviderId(): Thenable<string|undefined>;
+    getCurrentConfigName(): Thenable<string>;
     takeOwnership(document: vscode.TextDocument): void;
-    runBlockingTask<T>(task: Thenable<T>): Thenable<T>;
-    runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any>;
+    queueTask<T>(task: () => Thenable<T>): Thenable<T>;
+    queueTaskWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any>;
     requestWhenReady(request: () => Thenable<any>): Thenable<any>;
     notifyWhenReady(notify: () => void): void;
     requestGoToDeclaration(): Thenable<void>;
@@ -253,34 +258,36 @@ class DefaultClient implements Client {
             ui.bind(this);
 
             // requests/notifications are deferred until this.languageClient is set.
-            this.runBlockingTask(languageClient.onReady().then(() => {
-                this.configuration = new configs.CppProperties(this.RootUri);
-                this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
-                this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
-                this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
-                this.disposables.push(this.configuration);
+            this.queueTask(() => languageClient.onReady().then(
+                () => {
+                    this.configuration = new configs.CppProperties(this.RootUri);
+                    this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
+                    this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
+                    this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
+                    this.disposables.push(this.configuration);
 
-                // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                // The event handlers must be set before this happens.
-                languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
-                    this.configuration.CompilerDefaults = compilerDefaults;
-                });
+                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                    // The event handlers must be set before this happens.
+                    languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                        this.configuration.CompilerDefaults = compilerDefaults;
+                    });
 
-                this.languageClient = languageClient;
-                this.settingsTracker = getTracker(this.RootUri);
-                telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
-                failureMessageShown = false;
+                    this.languageClient = languageClient;
+                    this.settingsTracker = getTracker(this.RootUri);
+                    telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
+                    failureMessageShown = false;
 
-                // Listen for messages from the language server.
-                this.registerNotifications();
-                this.registerFileWatcher();
-            }, (err) => {
-                this.isSupported = false;   // Running on an OS we don't support yet.
-                if (!failureMessageShown) {
-                    failureMessageShown = true;
-                    vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
-                }
-            }));
+                    // Listen for messages from the language server.
+                    this.registerNotifications();
+                    this.registerFileWatcher();
+                },
+                (err) => {
+                    this.isSupported = false;   // Running on an OS we don't support yet.
+                    if (!failureMessageShown) {
+                        failureMessageShown = true;
+                        vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
+                    }
+                }));
         } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
             if (!failureMessageShown) {
@@ -405,21 +412,69 @@ class DefaultClient implements Client {
         }
     }
 
-    public onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {
-        let documentUris: vscode.Uri[] = [];
-        this.trackedDocuments.forEach(document => documentUris.push(document.uri));
-
-        let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-
-        if (documentUris.length === 0) {
-            return;
-        }
-
-        this.runBlockingThenableWithTimeout(() => {
-            return provider.provideConfigurations(documentUris, tokenSource.token);
-        }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
-            this.sendCustomConfigurations(configs);
+    public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): Thenable<void> {
+        return this.notifyWhenReady(() => {
+            if (!this.RootPath) {
+                return; // There is no folder open, therefore there is no c_cpp_properties.json to edit.
+            }
+            let selectedProvider: string = this.configuration.CurrentConfigurationProvider;
+            if (!selectedProvider) {
+                let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
+                if (ask.Value) {
+                    let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
+                    const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
+                    const allow: string = "Allow";
+                    const notNow: string = "Not Now";
+                    const dontAskAgain: string = "Don't Ask Again";
+                    vscode.window.showInformationMessage(message, allow, notNow, dontAskAgain).then(result => {
+                        switch (result) {
+                            case allow: {
+                                this.configuration.addCustomConfigurationProvider(provider.extensionId).then(() => {
+                                    telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+                                    this.updateCustomConfigurations(provider);
+                                });
+                                break;
+                            }
+                            case dontAskAgain: {
+                                ask.Value = false;
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                    });
+                }
+            } else if (selectedProvider === provider.extensionId) {
+                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+            }
         });
+    }
+
+    public updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void> {
+        return this.notifyWhenReady(() => {
+            let documentUris: vscode.Uri[] = [];
+            this.trackedDocuments.forEach(document => documentUris.push(document.uri));
+
+            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+
+            if (documentUris.length === 0) {
+                return;
+            }
+
+            let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
+                return provider.provideConfigurations(documentUris, tokenSource.token);
+            };
+            this.queueTaskWithTimeout(task, 1000, tokenSource).then(configs => this.sendCustomConfigurations(configs));
+        });
+    }
+
+    public getCustomConfigurationProviderId(): Thenable<string|undefined> {
+        return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.configurationProvider));
+    }
+
+    public getCurrentConfigName(): Thenable<string> {
+        return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
     }
 
     /**
@@ -443,75 +498,68 @@ class DefaultClient implements Client {
 
     /*************************************************************************************
      * wait until the all pendingTasks are complete (e.g. language client is ready for use)
-     * before attempting to send messages
+     * before attempting to send messages or operate on the client.
      *************************************************************************************/
-    public runBlockingTask(task: Thenable<any>): Thenable<any> {
-        if (this.pendingTask) {
-            return this.requestWhenReady(() => { return task; });
-        } else {
-            this.pendingTask = task;
-            return task.then((result) => {
-                this.pendingTask = undefined;
+
+    public queueTask(task: () => Thenable<any>): Thenable<any> {
+        if (this.isSupported) {
+            this.pendingRequests++;
+            let nextTask: () => Thenable<any> = () => {
+                let result: Thenable<any> = task();
+                this.pendingRequests--;
+                if (this.pendingRequests === 0) {
+                    this.pendingTask = null;
+                }
                 return result;
-            }, (error) => {
-                this.pendingTask = undefined;
-                throw error;
-            });
+            };
+
+            if (this.pendingTask) {
+                // We don't want the queue to stall because of a rejected promise.
+                return this.pendingTask.then(nextTask, nextTask);
+            } else {
+                this.pendingTask = nextTask();
+                return this.pendingTask;
+            }
+        } else {
+            return Promise.reject("Unsupported client");
         }
     }
 
-    public runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> {
+    public queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: CancellationTokenSource): Thenable<any> {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
-        let timeout: Promise<any> = new Promise((resolve, reject) => {
+        let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
             timer = setTimeout(() => {
                 clearTimeout(timer);
-                if (tokenSource) {
-                    tokenSource.cancel();
+                if (cancelToken) {
+                    cancelToken.cancel();
                 }
                 reject("Timed out in " + ms + "ms.");
             }, ms);
         });
     
         // Returns a race between our timeout and the passed in promise
-        return this.runBlockingTask(Promise.race([thenable(), timeout]).then((result: any) => {
-            clearTimeout(timer);
-            return result;
-        }, (error: any) => {
-            throw error;
-        }));
+        return this.queueTask(() => {
+            return Promise.race([task(), timeout()]).then(
+                (result: any) => {
+                    clearTimeout(timer);
+                    return result;
+                },
+                (error: any) => {
+                    throw error;
+                });
+        });
     }
     
     public requestWhenReady(request: () => Thenable<any>): Thenable<any> {
-        if (this.pendingTask === undefined) {
-            return request();
-        } else if (this.isSupported && this.pendingTask) {
-            this.pendingRequests++;
-            return this.pendingTask.then(() => {
-                this.pendingRequests--;
-                if (this.pendingRequests === 0) {
-                    this.pendingTask = undefined;
-                }
-                return request();
-            });
-        } else {
-            return Promise.reject("Unsupported client");
-        }
+        return this.queueTask(request);
     }
 
-    public notifyWhenReady(notify: () => void): void {
-        if (this.pendingTask === undefined) {
+    public notifyWhenReady(notify: () => void): Thenable<void> {
+        return this.queueTask(() => new Promise(resolve => {
             notify();
-        } else if (this.isSupported && this.pendingTask) {
-            this.pendingRequests++;
-            this.pendingTask.then(() => {
-                this.pendingRequests--;
-                if (this.pendingRequests === 0) {
-                    this.pendingTask = undefined;
-                }
-                notify();
-            });
-        }
+            resolve();
+        }));
     }
 
     /**
@@ -667,14 +715,19 @@ class DefaultClient implements Client {
     private updateStatus(notificationBody: ReportStatusNotificationBody): void {
         let message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
+        let testHook: TestHook = getTestHook();
         if (message.endsWith("Indexing...")) {
             this.model.isTagParsing.Value = true;
+            testHook.updateStatus(Status.TagParsingBegun);
         } else if (message.endsWith("Updating IntelliSense...")) {
             this.model.isUpdatingIntelliSense.Value = true;
+            testHook.updateStatus(Status.IntelliSenseCompiling);
         } else if (message.endsWith("IntelliSense Ready")) {
             this.model.isUpdatingIntelliSense.Value = false;
+            testHook.updateStatus(Status.IntelliSenseReady);
         } else if (message.endsWith("Ready")) { // Tag Parser Ready
             this.model.isTagParsing.Value = false;
+            testHook.updateStatus(Status.TagParsingDone);
             util.setProgress(util.getProgressParseRootSuccess());
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
@@ -752,7 +805,7 @@ class DefaultClient implements Client {
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
-        if (this.configuration.Configurations[this.configuration.CurrentConfiguration].compileCommands !== undefined) {
+        if (this.configuration.CurrentConfiguration.compileCommands !== undefined) {
             return;
         }
 
@@ -762,7 +815,7 @@ class DefaultClient implements Client {
         }
 
         let compileCommandStr: string = params.paths.length > 1 ? "a compile_commands.json file" : params.paths[0];
-        let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the " + this.Name : "this";
+        let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
         const message: string = `Would you like to use ${compileCommandStr} to auto-configure IntelliSense for ${folderStr} folder?`;
 
         const yes: string = "Yes";
@@ -866,7 +919,7 @@ class DefaultClient implements Client {
     private onConfigurationsChanged(configurations: configs.Configuration[]): void {
         let params: FolderSettingsParams = {
             configurations: configurations,
-            currentConfiguration: this.configuration.CurrentConfiguration
+            currentConfiguration: this.configuration.CurrentConfigurationIndex
         };
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
@@ -988,10 +1041,13 @@ class NullClient implements Client {
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
-    onDidChangeCustomConfigurations(provider: CustomConfigurationProvider): void {}
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): Thenable<void> { return Promise.resolve(); }
+    updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void> { return Promise.resolve(); }
+    getCustomConfigurationProviderId(): Thenable<string|undefined> { return Promise.resolve(undefined); }
+    getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     takeOwnership(document: vscode.TextDocument): void {}
-    runBlockingTask<T>(task: Thenable<T>): Thenable<T> { return; }
-    runBlockingThenableWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return; }
+    queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
+    queueTaskWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return; }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
     sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {}

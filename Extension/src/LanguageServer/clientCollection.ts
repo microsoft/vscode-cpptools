@@ -9,6 +9,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as cpptools from './client';
 import * as path from 'path';
+import { tryRegisterConfigurationProviders } from './extension';
 
 const defaultClientKey: string = "@@default@@";
 export interface ClientKey {
@@ -187,7 +188,9 @@ export class ClientCollection {
         } else {
             let key: string = util.asFolder(folder.uri);
             if (!this.languageClients.has(key)) {
-                this.languageClients.set(key, cpptools.createClient(this, folder));
+                let client: cpptools.Client = cpptools.createClient(this, folder);
+                this.languageClients.set(key, client);
+                tryRegisterConfigurationProviders(client);
             }
             return this.languageClients.get(key);
         }

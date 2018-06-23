@@ -34,7 +34,7 @@ function getDefaultCppProperties(): ConfigurationJson {
     };
 }
 
-interface ConfigurationJson {
+export interface ConfigurationJson {
     configurations: Configuration[];
     env?: {[key: string]: string | string[]};
     version: number;
@@ -51,6 +51,7 @@ export interface Configuration {
     intelliSenseMode?: string;
     compileCommands?: string;
     forcedInclude?: string[];
+    configurationProvider?: string;
     browse?: Browse;
 }
 
@@ -109,7 +110,7 @@ export class CppProperties {
             this.parsePropertiesFile();
         }
         if (!this.configurationJson) {
-            this.resetToDefaultSettings(this.CurrentConfiguration === -1);
+            this.resetToDefaultSettings(this.CurrentConfigurationIndex === -1);
         }
 
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
@@ -138,7 +139,15 @@ export class CppProperties {
     public get SelectionChanged(): vscode.Event<number> { return this.selectionChanged.event; }
     public get CompileCommandsChanged(): vscode.Event<string> { return this.compileCommandsChanged.event; }
     public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
-    public get CurrentConfiguration(): number { return this.currentConfigurationIndex.Value; }
+    public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
+    public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
+    
+    public get CurrentConfigurationProvider(): string|null {
+        if (this.CurrentConfiguration.configurationProvider) {
+            return this.CurrentConfiguration.configurationProvider;
+        }
+        return new CppSettings(this.rootUri).defaultConfigurationProvider;
+    }
 
     public get ConfigurationNames(): string[] {
         let result: string[] = [];
@@ -168,7 +177,7 @@ export class CppProperties {
     }
 
     private onSelectionChanged(): void {
-        this.selectionChanged.fire(this.CurrentConfiguration);
+        this.selectionChanged.fire(this.CurrentConfigurationIndex);
     }
 
     private onCompileCommandsChanged(path: string): void {
@@ -188,8 +197,8 @@ export class CppProperties {
 
     private resetToDefaultSettings(resetIndex: boolean): void {
         this.configurationJson = getDefaultCppProperties();
-        if (resetIndex || this.CurrentConfiguration < 0 ||
-            this.CurrentConfiguration >= this.configurationJson.configurations.length) {
+        if (resetIndex || this.CurrentConfigurationIndex < 0 ||
+            this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
             this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
         }
         this.configurationIncomplete = true;
@@ -197,7 +206,7 @@ export class CppProperties {
 
      private applyDefaultIncludePathsAndFrameworks(): void {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
-            let configuration: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            let configuration: Configuration = this.CurrentConfiguration;
             let settings: CppSettings = new CppSettings(this.rootUri);
 
             // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
@@ -301,7 +310,7 @@ export class CppProperties {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            let config: Configuration = this.CurrentConfiguration;
             if (config.includePath === undefined) {
                 config.includePath = ["${default}"];
             }
@@ -311,10 +320,30 @@ export class CppProperties {
         });
     }
 
+    public addCustomConfigurationProvider(providerId: string): Thenable<void> {
+        return new Promise<void>((resolve) => {
+            if (this.propertiesFile) {
+                this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+                    this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+                    let config: Configuration = this.CurrentConfiguration;
+                    config.configurationProvider = providerId;
+                    fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+                    // Don't need to update server since this doesn't immediately affect it.
+                    resolve();
+                });
+            } else {
+                let settings: CppSettings = new CppSettings(this.rootUri);
+                settings.update("default.configurationProvider", providerId);
+                this.CurrentConfiguration.configurationProvider = providerId;
+                resolve();
+            }
+        });
+    }
+
     public setCompileCommands(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            let config: Configuration = this.CurrentConfiguration;
             config.compileCommands = path;
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
             this.updateServerOnFolderSettingsChange();
@@ -400,6 +429,7 @@ export class CppProperties {
             configuration.cStandard = this.updateConfiguration(configuration.cStandard, settings.defaultCStandard);
             configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard);
             configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode);
+            configuration.configurationProvider = this.updateConfiguration(configuration.configurationProvider, settings.defaultConfigurationProvider);
 
             if (!configuration.browse) {
                 configuration.browse = {};
@@ -500,8 +530,8 @@ export class CppProperties {
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
             if (this.configurationJson !== undefined) {
-                if (this.CurrentConfiguration < 0 ||
-                    this.CurrentConfiguration >= this.configurationJson.configurations.length) {
+                if (this.CurrentConfigurationIndex < 0 ||
+                    this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
                     // If the index is out of bounds (during initialization or due to removal of configs), fix it.
                     this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
                 }
@@ -529,16 +559,16 @@ export class CppProperties {
                 throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
             }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
-                this.CurrentConfiguration >= 0 && this.CurrentConfiguration < this.configurationJson.configurations.length) {
+                this.CurrentConfigurationIndex >= 0 && this.CurrentConfigurationIndex < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
-                    if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
+                    if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfigurationIndex].name) {
                         this.currentConfigurationIndex.Value = i;
                         break;
                     }
                 }
             }
             this.configurationJson = newJson;
-            if (this.CurrentConfiguration < 0 || this.CurrentConfiguration >= newJson.configurations.length) {
+            if (this.CurrentConfigurationIndex < 0 || this.CurrentConfigurationIndex >= newJson.configurations.length) {
                 this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
             }
 

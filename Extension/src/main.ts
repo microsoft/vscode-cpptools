@@ -13,19 +13,19 @@ import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
 
+import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
 import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
-import { CppTools } from './cppTools';
-import { CppToolsApi } from './api';
+import { CppTools1 } from './cppTools1';
 
 const releaseNotesVersion: number = 3;
-const cppTools: CppTools = new CppTools();
+const cppTools: CppTools1 = new CppTools1();
 
-export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi> {
+export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi|CppToolsExtension> {
     initializeTemporaryCommandRegistrar();
     util.setExtensionContext(context);
     Telemetry.activate();
@@ -279,9 +279,10 @@ async function finalizeExtensionActivation(): Promise<void> {
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
     // (this may result in rewriting the package.json file)
     
-    let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
-    let packageJson: any = util.getRawPackageJson();
-    if (util.packageJson.extensionLocation && !util.packageJson.extensionLocation.path.includes(".vscode-insiders")) {
+    let packageJsonPath: string = util.getExtensionFilePath("package.json");
+    if (!packageJsonPath.includes(".vscode-insiders")) {
+        let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
+        let packageJson: any = util.getRawPackageJson();
         let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (abTestSettings.UseDefaultIntelliSenseEngine) {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
