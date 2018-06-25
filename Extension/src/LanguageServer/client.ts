@@ -10,7 +10,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
-import { CustomConfigurationProvider, SourceFileConfigurationItem, Version } from 'vscode-cpptools';
+import { SourceFileConfigurationItem, Version } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -27,7 +27,7 @@ import { updateLanguageConfigurations } from './extension';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
-import { CustomConfigurationProviderInternal } from '../LanguageServer/customProviders';
+import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
 
 let ui: UI;
 
@@ -153,8 +153,9 @@ export interface Client {
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
-    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): Thenable<void>;
-    updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void>;
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
+    updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
+    provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
     getCustomConfigurationProviderId(): Thenable<string|undefined>;
     getCurrentConfigName(): Thenable<string>;
     takeOwnership(document: vscode.TextDocument): void;
@@ -202,6 +203,7 @@ class DefaultClient implements Client {
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
+    private configurationProvider: string;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -413,7 +415,7 @@ class DefaultClient implements Client {
         }
     }
 
-    public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): Thenable<void> {
+    public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
             if (!this.RootPath) {
                 return; // There is no folder open, therefore there is no c_cpp_properties.json to edit.
@@ -432,7 +434,6 @@ class DefaultClient implements Client {
                             case allow: {
                                 this.configuration.addCustomConfigurationProvider(provider.extensionId).then(() => {
                                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                                    this.updateCustomConfigurations(provider);
                                 });
                                 break;
                             }
@@ -454,23 +455,64 @@ class DefaultClient implements Client {
         });
     }
 
-    public updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void> {
+    public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
+            let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
+            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) || this.trackedDocuments.size === 0) {
+                return;
+            }
+
             let tokenSource: CancellationTokenSource = new CancellationTokenSource();
             let documentUris: vscode.Uri[] = [];
             this.trackedDocuments.forEach(document => documentUris.push(document.uri));
 
-            if (documentUris.length === 0) {
-                return;
-            }
-
             let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
-                return provider.provideConfigurations(documentUris, tokenSource.token);
+                return currentProvider.provideConfigurations(documentUris, tokenSource.token);
             };
             this.queueTaskWithTimeout(task, 1000, tokenSource).then(configs => this.sendCustomConfigurations(configs));
         });
     }
 
+    public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
+        let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+
+        if (providers.size === 0) {
+            return Promise.resolve();
+        }
+        let providerId: string|undefined = await this.getCustomConfigurationProviderId();
+        if (!providerId) {
+            return Promise.resolve();
+        }
+
+        let providerName: string = providerId;
+        let configName: string = await this.getCurrentConfigName();
+        let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
+            // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
+            try {
+                let provider: CustomConfigurationProvider1|null = providers.get(providerId);
+                if (provider) {
+                    providerName = provider.name;
+                    if (await provider.canProvideConfiguration(document.uri, tokenSource.token)) {
+                        return provider.provideConfigurations([document.uri], tokenSource.token);
+                    }
+                }
+            } catch {
+            }
+            return Promise.reject("");
+        };
+    
+        return this.queueTaskWithTimeout(provideConfigurationAsync, 1000, tokenSource).then(
+            (configs: SourceFileConfigurationItem[]) => {
+                if (configs && configs.length > 0) {
+                    this.sendCustomConfigurations(configs);
+                }
+            },
+            () => {
+                vscode.window.showInformationMessage(`'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. Settings from the '${configName}' configuration will be used instead.`);
+            });
+    }
+    
     public getCustomConfigurationProviderId(): Thenable<string|undefined> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.configurationProvider));
     }
@@ -926,6 +968,12 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
             this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
+        }).then(() => {
+            let newProvider: string = this.configuration.CurrentConfigurationProvider;
+            if (this.configurationProvider !== newProvider) {
+                this.configurationProvider = newProvider;
+                this.updateCustomConfigurations();
+            }
         });
     }
 
@@ -1043,8 +1091,9 @@ class NullClient implements Client {
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
-    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): Thenable<void> { return Promise.resolve(); }
-    updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void> { return Promise.resolve(); }
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
+    updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
+    provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     getCustomConfigurationProviderId(): Thenable<string|undefined> { return Promise.resolve(undefined); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     takeOwnership(document: vscode.TextDocument): void {}

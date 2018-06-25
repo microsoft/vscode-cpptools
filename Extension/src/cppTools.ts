@@ -6,55 +6,33 @@
 
 import { CustomConfigurationProvider, Version } from 'vscode-cpptools';
 import { CppToolsTestApi, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
-import { CustomConfigurationProviderInternal, CustomProviderWrapper } from './LanguageServer/customProviders';
+import { CustomConfigurationProvider1, getCustomConfigProviders, CustomConfigurationProviderCollection } from './LanguageServer/customProviders';
 import * as LanguageServer from './LanguageServer/extension';
 import * as test from './testHook';
 
 export class CppTools implements CppToolsTestApi {
     private version: Version;
-    private providers: CustomConfigurationProviderInternal[] = [];
+    private providers: CustomConfigurationProvider1[] = [];
 
     constructor(version: Version) {
         this.version = version;
     }
 
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-        let wrapper: CustomProviderWrapper = new CustomProviderWrapper(provider, this.version);
-        if (wrapper.isValid) {
-            this.providers.push(wrapper);
-            LanguageServer.registerCustomConfigurationProvider(wrapper);
-        } else {
-            let missing: string[] = [];
-            if (!provider.name) {
-                missing.push("'name'");
-            }
-            if (this.version !== Version.v0 && !provider.extensionId) {
-                missing.push("'extensionId'");
-            }
-            if (!provider.canProvideConfiguration) {
-                missing.push("'canProvideConfiguration'");
-            }
-            if (!provider.provideConfigurations) {
-                missing.push("'canProvideConfiguration'");
-            }
-            if (this.version !== Version.v0 && !provider.dispose) {
-                missing.push("'dispose'");
-            }
-            console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}`);
+        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+        if (providers.add(provider, this.version)) {
+            let added: CustomConfigurationProvider1 = providers.get(provider);
+            this.providers.push(added);
+            LanguageServer.getClients().forEach(client => client.onRegisterCustomConfigurationProvider(added));
         }
     }
 
     didChangeCustomConfiguration(provider: CustomConfigurationProvider): void {
-        let wrapper: CustomConfigurationProviderInternal = this.providers.find(p => {
-            let result: boolean = p.name === provider.name;
-            if (result && this.version !== Version.v0) {
-                result = p.extensionId === provider.extensionId;
-            }
-            return result;
-        });
+        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+        let p: CustomConfigurationProvider1 = providers.get(provider);
 
-        if (wrapper) {
-            LanguageServer.onDidChangeCustomConfiguration(wrapper);
+        if (p) {
+            LanguageServer.getClients().forEach(client => client.updateCustomConfigurations(p));
         } else {
             console.assert(false, "provider should be registered before sending config change messages");
         }
@@ -62,7 +40,7 @@ export class CppTools implements CppToolsTestApi {
 
     dispose(): void {
         this.providers.forEach(provider => {
-            LanguageServer.unregisterCustomConfigurationProvider(provider);
+            getCustomConfigProviders().remove(provider);
             provider.dispose();
         });
         this.providers = [];

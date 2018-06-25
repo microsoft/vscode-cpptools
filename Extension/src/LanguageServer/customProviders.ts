@@ -7,7 +7,10 @@
 import { CustomConfigurationProvider, Version, SourceFileConfigurationItem } from 'vscode-cpptools';
 import * as vscode from 'vscode';
 
-export interface CustomConfigurationProviderInternal extends CustomConfigurationProvider {
+/**
+ * An interface that is guaranteed to be backward compatible with version 0
+ */
+export interface CustomConfigurationProvider1 extends CustomConfigurationProvider {
     isValid: boolean;
     version: Version;
 }
@@ -15,12 +18,15 @@ export interface CustomConfigurationProviderInternal extends CustomConfiguration
 /**
  * Wraps the incoming CustomConfigurationProvider so that we can treat all of them as if they were the same version (e.g. latest)
  */
-export class CustomProviderWrapper implements CustomConfigurationProviderInternal {
+class CustomProviderWrapper implements CustomConfigurationProvider1 {
     private provider: CustomConfigurationProvider;
     private _version: Version;
 
     constructor(provider: CustomConfigurationProvider, version: Version) {
         this.provider = provider;
+        if (provider.extensionId && version === Version.v0) {
+            version = Version.v1;   // provider implemented the new API but is interfacing with the extension using the old API version.
+        }
         this._version = version;
     }
 
@@ -67,27 +73,89 @@ export class CustomProviderWrapper implements CustomConfigurationProviderInterna
 export class CustomConfigurationProviderCollection {
     private providers: Map<string, CustomProviderWrapper> = new Map<string, CustomProviderWrapper>();
 
+    private logProblems(provider: CustomConfigurationProvider, version: Version): void {
+        let missing: string[] = [];
+        if (!provider.name) {
+            missing.push("'name'");
+        }
+        if (version !== Version.v0 && !provider.extensionId) {
+            missing.push("'extensionId'");
+        }
+        if (!provider.canProvideConfiguration) {
+            missing.push("'canProvideConfiguration'");
+        }
+        if (!provider.provideConfigurations) {
+            missing.push("'canProvideConfiguration'");
+        }
+        if (version !== Version.v0 && !provider.dispose) {
+            missing.push("'dispose'");
+        }
+        console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}`);
+    }
+
+    private getId(provider: string|CustomConfigurationProvider): string {
+        if (typeof provider === "string") {
+            return provider;
+        } else if (provider.extensionId) {
+            return provider.extensionId;
+        } else if (provider.name) {
+            return provider.name;
+        } else {
+            console.error(`invalid provider: ${provider}`);
+            return "";
+        }
+    }
+
+    public get size(): number {
+        return this.providers.size;
+    }
+
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
         let wrapper: CustomProviderWrapper = new CustomProviderWrapper(provider, version);
-        let registered: boolean = !this.providers.has(wrapper.extensionId);
+        if (!wrapper.isValid) {
+            this.logProblems(provider, version);
+            return false;
+        }
 
-        if (!registered) {
+        let exists: boolean = this.providers.has(wrapper.extensionId);
+        if (exists) {
             let existing: CustomProviderWrapper = this.providers.get(wrapper.extensionId);
-            registered = (existing.version === Version.v0 && wrapper.version === Version.v0);
+            exists = (existing.version === Version.v0 && wrapper.version === Version.v0);
         }
     
-        if (registered) {
+        if (!exists) {
             this.providers.set(wrapper.extensionId, wrapper);
         } else {
             console.error(`CustomConfigurationProvider '${wrapper.extensionId}' has already been registered.`);
         }
-        return registered;
+        return !exists;
     }
 
-    public forEach(func: (provider: CustomConfigurationProvider) => void): void {
+    public get(provider: string|CustomConfigurationProvider): CustomConfigurationProvider1|null {
+        let id: string = this.getId(provider);
+
+        if (this.providers.has(id)) {
+            return this.providers.get(id);
+        }
+        return null;
+    }
+
+    public forEach(func: (provider: CustomConfigurationProvider1) => void): void {
         this.providers.forEach(provider => func(provider));
     }
 
     public remove(provider: CustomConfigurationProvider): void {
+        let id: string = this.getId(provider);
+        if (this.providers.has(id)) {
+            this.providers.delete(id);
+        } else {
+            console.warn(`${id} is not registered`);
+        }
     }
+}
+
+let providerCollection: CustomConfigurationProviderCollection = new CustomConfigurationProviderCollection();
+
+export function getCustomConfigProviders(): CustomConfigurationProviderCollection {
+    return providerCollection;
 }

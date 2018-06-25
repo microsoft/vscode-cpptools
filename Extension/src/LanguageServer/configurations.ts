@@ -316,7 +316,7 @@ export class CppProperties {
             }
             config.includePath.splice(config.includePath.length, 0, path);
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-            this.updateServerOnFolderSettingsChange();
+            this.handleConfigurationChange();
         });
     }
 
@@ -328,7 +328,7 @@ export class CppProperties {
                     let config: Configuration = this.CurrentConfiguration;
                     config.configurationProvider = providerId;
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-                    // Don't need to update server since this doesn't immediately affect it.
+                    this.handleConfigurationChange();
                     resolve();
                 });
             } else {
@@ -346,7 +346,7 @@ export class CppProperties {
             let config: Configuration = this.CurrentConfiguration;
             config.compileCommands = path;
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-            this.updateServerOnFolderSettingsChange();
+            this.handleConfigurationChange();
         });
     }
 

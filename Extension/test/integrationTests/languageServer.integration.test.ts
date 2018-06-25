@@ -87,7 +87,7 @@ function cppPropertiesPath(): string {
 }
 
 async function changeCppProperties(cppProperties: config.ConfigurationJson, disposables: vscode.Disposable[]): Promise<void> {
-    let promise: Promise<void> = new Promise<void>((resolve, reject) => {;
+    let promise: Promise<void> = new Promise<void>((resolve, reject) => {
         disposables.push(getActiveClient().ActiveConfigChanged(name => {
             if (name === cppProperties.configurations[0].name) {
                 resolve();
@@ -95,9 +95,11 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, disp
         }));
 
         // Can't trust the file watcher, so we need to allocate additional time for the backup watcher to fire.
-        setTimeout(() => { reject(new Error("timeout")); }, 40000);
+        setTimeout(() => { reject(new Error("timeout")); }, 4000);
     });
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
+    let contents: string = await util.readFileText(cppPropertiesPath());
+    console.log("wrote c_cpp_properties.json: " + contents);
     return promise;
 }
 
@@ -175,7 +177,7 @@ suite("extensibility tests v1", function() {
         disposables.forEach(d => d.dispose());
         disposables = [];
 
-        await util.deleteFile(cppPropertiesPath());
+        //await util.deleteFile(cppPropertiesPath());
         await changeCppProperties({
                 configurations: [ {name: "test2", configurationProvider: provider.name} ],
                 version: 4
@@ -188,7 +190,6 @@ suite("extensibility tests v1", function() {
 
         let contents: string = await util.readFileText(cppPropertiesPath());
         let cppProperties: config.ConfigurationJson = JSON.parse(contents);
-        console.log(contents);
         assert.equal(cppProperties.configurations[0].configurationProvider, provider.extensionId, "configurationProvider should be changed from 'name' to 'extensionId'");
         await util.deleteFile(cppPropertiesPath());
     });
