@@ -10,7 +10,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
-import { CustomConfigurationProvider, SourceFileConfigurationItem } from 'vscode-cpptools';
+import { CustomConfigurationProvider, SourceFileConfigurationItem, Version } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -27,6 +27,7 @@ import { updateLanguageConfigurations } from './extension';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
+import { CustomConfigurationProviderInternal } from '../LanguageServer/customProviders';
 
 let ui: UI;
 
@@ -152,7 +153,7 @@ export interface Client {
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
-    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): Thenable<void>;
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): Thenable<void>;
     updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void>;
     getCustomConfigurationProviderId(): Thenable<string|undefined>;
     getCurrentConfigName(): Thenable<string>;
@@ -412,7 +413,7 @@ class DefaultClient implements Client {
         }
     }
 
-    public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): Thenable<void> {
+    public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): Thenable<void> {
         return this.notifyWhenReady(() => {
             if (!this.RootPath) {
                 return; // There is no folder open, therefore there is no c_cpp_properties.json to edit.
@@ -447,16 +448,17 @@ class DefaultClient implements Client {
                 }
             } else if (selectedProvider === provider.extensionId) {
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+            } else if (selectedProvider === provider.name) {
+                this.configuration.addCustomConfigurationProvider(provider.extensionId); // update the configurationProvider in c_cpp_properties.json
             }
         });
     }
 
     public updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void> {
         return this.notifyWhenReady(() => {
+            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
             let documentUris: vscode.Uri[] = [];
             this.trackedDocuments.forEach(document => documentUris.push(document.uri));
-
-            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
 
             if (documentUris.length === 0) {
                 return;
@@ -1041,7 +1043,7 @@ class NullClient implements Client {
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
-    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider): Thenable<void> { return Promise.resolve(); }
+    onRegisterCustomConfigurationProvider(provider: CustomConfigurationProviderInternal): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(provider: CustomConfigurationProvider): Thenable<void> { return Promise.resolve(); }
     getCustomConfigurationProviderId(): Thenable<string|undefined> { return Promise.resolve(undefined); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }

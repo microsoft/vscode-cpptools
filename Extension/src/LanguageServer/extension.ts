@@ -18,7 +18,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
-import { CustomConfigurationProviderInternal } from '../customProvider';
+import { CustomConfigurationProviderInternal } from './customProviders';
 
 let prevCrashFile: string;
 let clients: ClientCollection;

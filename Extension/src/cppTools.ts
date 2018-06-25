@@ -6,7 +6,7 @@
 
 import { CustomConfigurationProvider, Version } from 'vscode-cpptools';
 import { CppToolsTestApi, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
-import { CustomConfigurationProviderInternal, CustomProviderWrapper } from './customProvider';
+import { CustomConfigurationProviderInternal, CustomProviderWrapper } from './LanguageServer/customProviders';
 import * as LanguageServer from './LanguageServer/extension';
 import * as test from './testHook';
 

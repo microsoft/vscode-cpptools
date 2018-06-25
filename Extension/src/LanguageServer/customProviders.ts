@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CustomConfigurationProvider, Version, CppToolsApi, SourceFileConfigurationItem } from 'vscode-cpptools';
+import { CustomConfigurationProvider, Version, SourceFileConfigurationItem } from 'vscode-cpptools';
 import * as vscode from 'vscode';
 
 export interface CustomConfigurationProviderInternal extends CustomConfigurationProvider {
@@ -61,5 +61,33 @@ export class CustomProviderWrapper implements CustomConfigurationProviderInterna
         if (this._version !== Version.v0) {
             this.provider.dispose();
         }
+    }
+}
+
+export class CustomConfigurationProviderCollection {
+    private providers: Map<string, CustomProviderWrapper> = new Map<string, CustomProviderWrapper>();
+
+    public add(provider: CustomConfigurationProvider, version: Version): boolean {
+        let wrapper: CustomProviderWrapper = new CustomProviderWrapper(provider, version);
+        let registered: boolean = !this.providers.has(wrapper.extensionId);
+
+        if (!registered) {
+            let existing: CustomProviderWrapper = this.providers.get(wrapper.extensionId);
+            registered = (existing.version === Version.v0 && wrapper.version === Version.v0);
+        }
+    
+        if (registered) {
+            this.providers.set(wrapper.extensionId, wrapper);
+        } else {
+            console.error(`CustomConfigurationProvider '${wrapper.extensionId}' has already been registered.`);
+        }
+        return registered;
+    }
+
+    public forEach(func: (provider: CustomConfigurationProvider) => void): void {
+        this.providers.forEach(provider => func(provider));
+    }
+
+    public remove(provider: CustomConfigurationProvider): void {
     }
 }

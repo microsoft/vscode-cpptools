@@ -355,13 +355,17 @@ export function writeFileText(filePath: string, content: string, encoding: strin
 
 export function deleteFile(filePath: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
-        });
+        if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
     });
 }
 
