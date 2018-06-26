@@ -25,7 +25,7 @@ import { CppTools1 } from './cppTools1';
 const releaseNotesVersion: number = 3;
 const cppTools: CppTools1 = new CppTools1();
 
-export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi|CppToolsExtension> {
+export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     initializeTemporaryCommandRegistrar();
     util.setExtensionContext(context);
     Telemetry.activate();

@@ -14,6 +14,10 @@ export class TestHook implements CppToolsTestHook {
         return this.statusChangedEvent.event;
     }
 
+    public get valid(): boolean {
+        return !!this.statusChangedEvent;
+    }
+
     public updateStatus(status: Status): void {
         this.statusChangedEvent.fire(status);
     }
@@ -22,16 +26,12 @@ export class TestHook implements CppToolsTestHook {
         this.statusChangedEvent.dispose();
         this.statusChangedEvent = null;
     }
-
-    public valid(): boolean {
-        return !!this.statusChangedEvent;
-    }
 }
 
 let testHook: TestHook;
 
 export function getTestHook(): TestHook {
-    if (!testHook || !testHook.valid()) {
+    if (!testHook || !testHook.valid) {
         testHook = new TestHook();
     }
     return testHook;

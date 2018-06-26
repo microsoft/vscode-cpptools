@@ -9,7 +9,7 @@ import { CppToolsTestApi, CppToolsTestHook, CppToolsTestExtension } from 'vscode
 import { CppTools } from './cppTools';
 
 /**
- * This class implements both interfaces since the extension returned CppToolsTestApi for v0,
+ * This class implements both interfaces since the extension returned CppToolsApi for v0,
  * but returns CppToolsTestExtension for v1 and later.
  */
 export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
