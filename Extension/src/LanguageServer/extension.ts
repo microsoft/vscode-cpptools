@@ -6,8 +6,6 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CancellationToken } from "vscode-jsonrpc";
-import { CustomConfigurationProvider, SourceFileConfigurationItem, Version, SourceFileConfiguration, getCppToolsApi } from 'vscode-cpptools';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
