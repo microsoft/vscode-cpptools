@@ -184,7 +184,7 @@ suite("extensibility tests v0", function(): void {
         standard: "c++17"
     };
 
-    // has to be 'any' instead of api.CustomConfigurationProvider because dispose is missing on the old interface version
+    // Has to be 'any' instead of api.CustomConfigurationProvider because dispose is missing on the old interface version
     let provider: any = {
         name: "cpptoolsTest-v0",
         canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
@@ -222,7 +222,7 @@ suite("extensibility tests v0", function(): void {
     });
 
     test("Check provider", async () => {
-        // Open a c++ file to start the language server.
+        // Open a C++ file to start the language server.
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main2.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
 

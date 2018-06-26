@@ -25,7 +25,7 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
     constructor(provider: CustomConfigurationProvider, version: Version) {
         this.provider = provider;
         if (provider.extensionId && version === Version.v0) {
-            version = Version.v1;   // provider implemented the new API but is interfacing with the extension using the old API version.
+            version = Version.v1; // provider implemented the new API but is interfacing with the extension using the old API version.
         }
         this._version = version;
     }
@@ -90,7 +90,7 @@ export class CustomConfigurationProviderCollection {
         if (version !== Version.v0 && !provider.dispose) {
             missing.push("'dispose'");
         }
-        console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}`);
+        console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}.`);
     }
 
     private getId(provider: string|CustomConfigurationProvider): string {

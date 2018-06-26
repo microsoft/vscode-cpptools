@@ -418,7 +418,7 @@ class DefaultClient implements Client {
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
             if (!this.RootPath) {
-                return; // There is no folder open, therefore there is no c_cpp_properties.json to edit.
+                return; // There is no c_cpp_properties.json to edit because there is no folder open.
             }
             let selectedProvider: string = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
