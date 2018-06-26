@@ -175,9 +175,9 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
             }
             case "config": {
                 let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-                let keys: string[] = name.split('.');
-                keys.forEach((key: string) => { config = (config) ? config.get(key) : config; });
-                newValue = (config) ? config.toString() : undefined;
+                if (config) {
+                    newValue = config.get<string>(name);
+                }
                 break;
             }
             case "workspaceFolder": {
