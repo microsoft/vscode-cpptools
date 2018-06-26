@@ -210,7 +210,7 @@ suite("extensibility tests v0", function() {
         disposables.push(cpptools); // This is a no-op for v0, but do it anyway to make sure nothing breaks.
 
         await changeCppProperties({
-            configurations: [ { name: "test3", configurationProvider: provider.name } ],
+            configurations: [ { name: "test2", configurationProvider: provider.name } ],
             version: 4
         },
         disposables);
