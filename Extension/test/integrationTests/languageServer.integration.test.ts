@@ -6,11 +6,15 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getLanguageConfigFromPatterns } from '../../src/LanguageServer/languageConfig';
+import * as util from '../../src/common';
+import * as api from 'vscode-cpptools';
+import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../src/LanguageServer/configurations';
 import { CppSettings } from '../../src/LanguageServer/settings';
+import { getActiveClient } from '../../src/LanguageServer/extension';
 
-suite("multiline comment setting tests", function() {
-    suiteSetup(async function() { 
+suite("multiline comment setting tests", function(): void {
+    suiteSetup(async function(): Promise<void> { 
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
         if (!extension.isActive) { 
             await extension.activate(); 
@@ -78,6 +82,168 @@ suite("multiline comment setting tests", function() {
 
 });
 
+function cppPropertiesPath(): string {
+    return vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json";
+}
+
+async function changeCppProperties(cppProperties: config.ConfigurationJson, disposables: vscode.Disposable[]): Promise<void> {
+    let promise: Promise<void> = new Promise<void>((resolve, reject) => {
+        disposables.push(getActiveClient().ActiveConfigChanged(name => {
+            if (name === cppProperties.configurations[0].name) {
+                resolve();
+            }
+        }));
+
+        // Can't trust the file watcher, so we need to allocate additional time for the backup watcher to fire.
+        setTimeout(() => { reject(new Error("timeout")); }, 4000);
+    });
+    await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
+    let contents: string = await util.readFileText(cppPropertiesPath());
+    console.log("    wrote c_cpp_properties.json: " + contents);
+    return promise;
+}
+
+suite("extensibility tests v1", function(): void {
+    let cpptools: apit.CppToolsTestApi;
+    let lastResult: api.SourceFileConfigurationItem[];
+    let defaultConfig: api.SourceFileConfiguration = {
+        includePath: [ "${workspaceFolder}" ],
+        defines: [ "${workspaceFolder}" ],
+        intelliSenseMode: "msvc-x64",
+        standard: "c++17"
+    };
+    let provider: api.CustomConfigurationProvider = {
+        name: "cpptoolsTest-v1",
+        extensionId: "ms-vscode.cpptools-test",
+        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+            return Promise.resolve(true);
+        },
+        provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
+            let result: api.SourceFileConfigurationItem[] = [];
+            uris.forEach(uri => {
+                result.push({
+                    uri: uri.toString(),
+                    configuration: defaultConfig
+                });
+            });
+            lastResult = result;
+            return Promise.resolve(result);
+        },
+        dispose(): void {
+            console.log("    disposed");
+        }
+    };
+    let disposables: vscode.Disposable[] = [];
+
+    suiteSetup(async function(): Promise<void> {
+        cpptools = await apit.getCppToolsTestApi(api.Version.v1);
+        cpptools.registerCustomConfigurationProvider(provider);
+        disposables.push(cpptools);
+
+        await changeCppProperties({
+                configurations: [ {name: "test1", configurationProvider: provider.extensionId} ],
+                version: 4
+            },
+            disposables);
+    });
+
+    suiteTeardown(function(): void {
+        disposables.forEach(d => d.dispose());
+    });
+
+    test("Check provider", async () => {
+        // Open a c++ file to start the language server.
+        let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
+        let uri: vscode.Uri = vscode.Uri.file(path);
+
+        let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
+        let testResult: any = new Promise<void>((resolve, reject) => {
+            disposables.push(testHook.StatusChanged(status => {
+                if (status === apit.Status.IntelliSenseReady) {
+                    let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
+                    assert.deepEqual(lastResult, expected);
+                    resolve();
+                }
+            }));
+            setTimeout(() => { reject(new Error("timeout")); }, 2500);
+        });
+        disposables.push(testHook);
+
+        await vscode.workspace.openTextDocument(path);
+        await testResult;
+    });
+});
+
+suite("extensibility tests v0", function(): void {
+    let cpptools: apit.CppToolsTestApi;
+    let lastResult: api.SourceFileConfigurationItem[];
+    let defaultConfig: api.SourceFileConfiguration = {
+        includePath: [ "${workspaceFolder}" ],
+        defines: [ "${workspaceFolder}" ],
+        intelliSenseMode: "msvc-x64",
+        standard: "c++17"
+    };
+
+    // Has to be 'any' instead of api.CustomConfigurationProvider because dispose is missing on the old interface version
+    let provider: any = {
+        name: "cpptoolsTest-v0",
+        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+            return Promise.resolve(true);
+        },
+        provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
+            let result: api.SourceFileConfigurationItem[] = [];
+            uris.forEach(uri => {
+                result.push({
+                    uri: uri.toString(),
+                    configuration: defaultConfig
+                });
+            });
+            lastResult = result;
+            return Promise.resolve(result);
+        }
+    };
+    let disposables: vscode.Disposable[] = [];
+
+    suiteSetup(async function(): Promise<void> {
+        cpptools = await apit.getCppToolsTestApi(api.Version.v0);
+        cpptools.registerCustomConfigurationProvider(provider);
+        disposables.push(cpptools); // This is a no-op for v0, but do it anyway to make sure nothing breaks.
+
+        await changeCppProperties({
+            configurations: [ { name: "test2", configurationProvider: provider.name } ],
+            version: 4
+        },
+        disposables);
+    });
+
+    suiteTeardown(async function(): Promise<void> {
+        disposables.forEach(d => d.dispose());
+        await util.deleteFile(cppPropertiesPath());
+    });
+
+    test("Check provider", async () => {
+        // Open a C++ file to start the language server.
+        let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main2.cpp";
+        let uri: vscode.Uri = vscode.Uri.file(path);
+
+        let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
+        let testResult: any = new Promise<void>((resolve, reject) => {
+            disposables.push(testHook.StatusChanged(status => {
+                if (status === apit.Status.IntelliSenseReady) {
+                    let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
+                    assert.deepEqual(lastResult, expected);
+                    resolve();
+                }
+            }));
+            setTimeout(() => { reject(new Error("timeout")); }, 2500);
+        });
+        disposables.push(testHook);
+
+        await vscode.workspace.openTextDocument(path);
+        await testResult;
+    });
+});
+
 /*
 suite("configuration tests", function() {
     suiteSetup(async function() { 
@@ -92,8 +258,6 @@ suite("configuration tests", function() {
     suiteTeardown(async function() {
         // Delete c_cpp_properties.json
     });
-
-    
 
     test("Check default configuration", () => {
         let rootUri: vscode.Uri;

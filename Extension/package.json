@@ -359,6 +359,15 @@
           "description": "The value to use in a configuration if \"cppStandard\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
+        "C_Cpp.default.configurationProvider": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "The value to use in a configuration if \"configurationProvider\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
         "C_Cpp.default.browse.path": {
           "type": [
             "array",
@@ -1323,7 +1332,8 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.18"
+    "vscode": "^1.1.18",
+    "vscode-cpptools": "^1.2.2"
   },
   "dependencies": {
     "http-proxy-agent": "~2.1.0",

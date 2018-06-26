@@ -81,6 +81,10 @@
                             "type": "string"
                         }
                     },
+                    "configurationProvider": {
+                        "description": "The id of a VS Code extension that can provide IntelliSense configuration information for source files.",
+                        "type": "string"
+                    },
                     "browse": {
                         "type": "object",
                         "properties": {
