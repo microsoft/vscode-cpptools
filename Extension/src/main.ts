@@ -18,7 +18,7 @@ import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistr
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import { initializeInstallationInformation, getInstallationInformationInstance, InstallationInformation, setInstallationStage } from './installationInformation';
+import { getInstallationInformation, InstallationInformation, setInstallationStage } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
@@ -30,7 +30,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.setExtensionContext(context);
     Telemetry.activate();
     util.setProgress(0);
-    initializeInstallationInformation();
 
     // Initialize the DebuggerExtension and register the related commands and providers.
     DebuggerExtension.initialize();
@@ -57,6 +56,9 @@ async function processRuntimeDependencies(): Promise<void> {
             } catch (error) {
                 getOutputChannelLogger().showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
                 showOutputChannel();
+
+                // Send the failure telemetry since postInstall will not be called.
+                sendTelemetry(await PlatformInformation.GetPlatformInformation());
             }
         // The extension have been installed and activated before.
         } else {
@@ -68,6 +70,9 @@ async function processRuntimeDependencies(): Promise<void> {
             await onlineInstallation();
         } catch (error) {
             handleError(error);
+            
+            // Send the failure telemetry since postInstall will not be called.
+            sendTelemetry(await PlatformInformation.GetPlatformInformation());
         }
     }
 }
@@ -173,7 +178,7 @@ function touchInstallLockFile(): Promise<void> {
 }
 
 function handleError(error: any): void {
-    let installationInformation: InstallationInformation = getInstallationInformationInstance();
+    let installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
     installationInformation.telemetryProperties['stage'] = installationInformation.stage;
     let errorMessage: string;
@@ -228,7 +233,7 @@ function handleError(error: any): void {
 }
 
 function sendTelemetry(info: PlatformInformation): boolean {
-    let installBlob: InstallationInformation = getInstallationInformationInstance();
+    let installBlob: InstallationInformation = getInstallationInformation();
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
