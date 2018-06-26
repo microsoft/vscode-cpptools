@@ -1101,7 +1101,7 @@ class NullClient implements Client {
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
-    queueTaskWithTimeout(thenable: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return; }
+    queueTaskWithTimeout(task: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return task(); }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
     sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {}
