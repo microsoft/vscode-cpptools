@@ -7,7 +7,6 @@
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
-import { provideCustomConfiguration } from './extension';
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -24,7 +23,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-                provideCustomConfiguration(document, me).then(() => {
+                me.provideCustomConfiguration(document).then(() => {
                     sendMessage(document);
                 }, () => {
                     sendMessage(document);
