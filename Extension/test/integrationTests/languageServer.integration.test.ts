@@ -172,27 +172,6 @@ suite("extensibility tests v1", function() {
         await vscode.workspace.openTextDocument(path);
         await testResult;
     });
-
-    test("Check upgrade", async () => {
-        disposables.forEach(d => d.dispose());
-        disposables = [];
-
-        //await util.deleteFile(cppPropertiesPath());
-        await changeCppProperties({
-                configurations: [ {name: "test2", configurationProvider: provider.name} ],
-                version: 4
-            },
-            disposables);
-
-        cpptools = await apit.getCppToolsTestApi(api.Version.v1);
-        cpptools.registerCustomConfigurationProvider(provider);
-        disposables.push(cpptools);
-
-        let contents: string = await util.readFileText(cppPropertiesPath());
-        let cppProperties: config.ConfigurationJson = JSON.parse(contents);
-        assert.equal(cppProperties.configurations[0].configurationProvider, provider.extensionId, "configurationProvider should be changed from 'name' to 'extensionId'");
-        await util.deleteFile(cppPropertiesPath());
-    });
 });
 
 suite("extensibility tests v0", function() {

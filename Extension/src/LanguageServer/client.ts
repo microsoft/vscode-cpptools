@@ -457,6 +457,9 @@ class DefaultClient implements Client {
 
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
+            if (!this.configurationProvider) {
+                return;
+            }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
             if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) || this.trackedDocuments.size === 0) {
                 return;

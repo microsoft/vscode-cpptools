@@ -152,6 +152,30 @@ export class CustomConfigurationProviderCollection {
             console.warn(`${id} is not registered`);
         }
     }
+
+    public checkId(providerId?: string): string {
+        if (!providerId) {
+            return providerId;
+        }
+        let found: CustomConfigurationProvider1[] = [];
+        let noUpdate: boolean = false;
+        this.forEach(provider => {
+            if (provider.extensionId === providerId) {
+                noUpdate = true;
+            } else if (provider.name === providerId && provider.version !== Version.v0) {
+                found.push(provider);
+            }
+        });
+        if (noUpdate) {
+            return providerId;
+        }
+        if (found.length === 1) {
+            return found[0].extensionId;
+        } else if (found.length > 1) {
+            console.warn("duplicate provider name found. Not upgrading.");
+        }
+        return providerId;
+    }
 }
 
 let providerCollection: CustomConfigurationProviderCollection = new CustomConfigurationProviderCollection();

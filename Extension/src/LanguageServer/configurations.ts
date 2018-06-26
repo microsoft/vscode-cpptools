@@ -12,6 +12,7 @@ import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
+import { getCustomConfigProviders } from './customProviders';
 const configVersion: number = 4;
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
@@ -572,6 +573,15 @@ export class CppProperties {
                 this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
             }
 
+            let dirty: boolean = false;
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                let newId: string = getCustomConfigProviders().checkId(this.configurationJson.configurations[i].configurationProvider);
+                if (newId !== this.configurationJson.configurations[i].configurationProvider) {
+                    dirty = true;
+                    this.configurationJson.configurations[i].configurationProvider = newId;
+                }
+            }
+
             // Remove disallowed variable overrides
             if (this.configurationJson.env) {
                 delete this.configurationJson.env['workspaceRoot'];
@@ -583,7 +593,6 @@ export class CppProperties {
             // the system includes were available.
             this.configurationIncomplete = false;
 
-            let dirty: boolean = false;
             if (this.configurationJson.version !== configVersion) {
                 dirty = true;
                 if (this.configurationJson.version === undefined) {
