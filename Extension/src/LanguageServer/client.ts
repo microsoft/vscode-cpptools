@@ -10,7 +10,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
-import { SourceFileConfigurationItem, Version } from 'vscode-cpptools';
+import { SourceFileConfigurationItem } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';

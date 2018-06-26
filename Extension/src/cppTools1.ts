@@ -5,7 +5,7 @@
 'use strict';
 
 import { CustomConfigurationProvider, Version, CppToolsApi } from 'vscode-cpptools';
-import { CppToolsTestApi, CppToolsTestHook, Status, CppToolsTestExtension } from 'vscode-cpptools/out/testApi';
+import { CppToolsTestApi, CppToolsTestHook, CppToolsTestExtension } from 'vscode-cpptools/out/testApi';
 import { CppTools } from './cppTools';
 
 /**

@@ -13,8 +13,8 @@ import * as config from '../../src/LanguageServer/configurations';
 import { CppSettings } from '../../src/LanguageServer/settings';
 import { getActiveClient } from '../../src/LanguageServer/extension';
 
-suite("multiline comment setting tests", function() {
-    suiteSetup(async function() { 
+suite("multiline comment setting tests", function(): void {
+    suiteSetup(async function(): Promise<void> { 
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
         if (!extension.isActive) { 
             await extension.activate(); 
@@ -99,11 +99,11 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, disp
     });
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     let contents: string = await util.readFileText(cppPropertiesPath());
-    console.log("wrote c_cpp_properties.json: " + contents);
+    console.log("    wrote c_cpp_properties.json: " + contents);
     return promise;
 }
 
-suite("extensibility tests v1", function() {
+suite("extensibility tests v1", function(): void {
     let cpptools: apit.CppToolsTestApi;
     let lastResult: api.SourceFileConfigurationItem[];
     let defaultConfig: api.SourceFileConfiguration = {
@@ -174,7 +174,7 @@ suite("extensibility tests v1", function() {
     });
 });
 
-suite("extensibility tests v0", function() {
+suite("extensibility tests v0", function(): void {
     let cpptools: apit.CppToolsTestApi;
     let lastResult: api.SourceFileConfigurationItem[];
     let defaultConfig: api.SourceFileConfiguration = {

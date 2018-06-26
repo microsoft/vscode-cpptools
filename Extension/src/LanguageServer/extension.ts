@@ -31,44 +31,11 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 
-let defaultConfig: SourceFileConfiguration = {
-    includePath: [ "${workspaceFolder}" ],
-    defines: [ "${workspaceFolder}" ],
-    intelliSenseMode: "msvc-x64",
-    standard: "c++17"
-};
-let provider: CustomConfigurationProvider = {
-    name: "Test Provider v1",
-    extensionId: "bob.v1-provider",
-    canProvideConfiguration(uri: vscode.Uri, token?: CancellationToken): Thenable<boolean> {
-        return Promise.resolve(true);
-    },
-    provideConfigurations(uris: vscode.Uri[], token?: CancellationToken): Thenable<SourceFileConfigurationItem[]> {
-        let result: SourceFileConfigurationItem[] = [];
-        uris.forEach(uri => {
-            console.log("provide config for " + uri.fsPath);
-            result.push({
-                uri: uri.toString(),
-                configuration: defaultConfig
-            });
-        });
-        return Promise.resolve(result);
-    },
-    dispose(): void {
-        console.log("disposed");
-    }
-};
-
 /**
  * activate: set up the extension for language services
  */
 export function activate(activationEventOccurred: boolean): void {
     console.log("activating extension");
-
-    getCppToolsApi(Version.v1).then(api => {
-        api.registerCustomConfigurationProvider(provider);
-        disposables.push(api);
-    });
 
     // Activate immediately if an activation event occurred in the previous workspace session.
     // If onActivationEvent doesn't occur, it won't auto-activate next time.
