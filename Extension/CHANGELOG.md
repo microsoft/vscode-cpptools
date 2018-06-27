@@ -1,5 +1,18 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.17.6: June 28, 2018
+* Fix the database icon getting stuck with recursive includes. [#2104](https://github.com/Microsoft/vscode-cpptools/issues/2104)
+* Fix the red flame appearing late with recursive includes. [#2105](https://github.com/Microsoft/vscode-cpptools/issues/2105)
+* Fix source files being parsed in system directories. [#2156](https://github.com/Microsoft/vscode-cpptools/issues/2156)
+* Fix a crash when saving with recursive includes. [#2173](https://github.com/Microsoft/vscode-cpptools/issues/2173)
+* Fix a crash when the `includePath` or `browse.path` is `"**"`. [#2174](https://github.com/Microsoft/vscode-cpptools/issues/2174)
+* Fix IntelliSense for WSL without g++ installed. [#2178](https://github.com/Microsoft/vscode-cpptools/issues/2178)
+* Fix random IntelliSense (completion) failures due to edits being delayed. [#2184](https://github.com/Microsoft/vscode-cpptools/issues/2184)
+* Fix a performance bug with recursive includes.
+* Fixed a CPU usage problem on Mac related to system frameworks parsing.
+* Keep the IntelliSense process around for 10 seconds after a file is closed in case it's needed again.
+* Added an API so build system extensions can provide IntelliSense configurations for source files. More details at [npmjs.com](https://www.npmjs.com/package/vscode-cpptools).
+
 ## Version 0.17.5: June 21, 2018
 * Detect `compile_commands.json` and show prompt to use it. [#1297](https://github.com/Microsoft/vscode-cpptools/issues/1297)
 * Change inactive regions from gray to translucent. [#1907](https://github.com/Microsoft/vscode-cpptools/issues/1907)
