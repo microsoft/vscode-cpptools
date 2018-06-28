@@ -169,7 +169,7 @@ export interface Client {
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
-    sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void;
+    sendCustomConfigurations(configs: any): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -997,9 +997,27 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
 
-    public sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {
+    public sendCustomConfigurations(configs: any): void {
+        // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
+        if (!configs || !(configs instanceof Array)) {
+            return;
+        }
+        let sanitized: SourceFileConfigurationItem[] = <SourceFileConfigurationItem[]>configs;
+        sanitized = sanitized.filter(item => {
+            if (item && item.uri && item.configuration &&
+                item.configuration.includePath && item.configuration.defines && item.configuration.intelliSenseMode && item.configuration.standard) {
+                return true;
+            }
+            console.warn("discarding invalid SourceFileConfigurationItem: " + item);
+            return false;
+        });
+
+        if (sanitized.length === 0) {
+            return;
+        }
+        
         let params: CustomConfigurationParams = {
-            configurationItems: configs
+            configurationItems: sanitized
         };
         this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
     }
@@ -1104,7 +1122,7 @@ class NullClient implements Client {
     queueTaskWithTimeout(task: () => Thenable<any>, ms: number, tokenSource?: CancellationTokenSource): Thenable<any> { return task(); }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
-    sendCustomConfigurations(configs: SourceFileConfigurationItem[]): void {}
+    sendCustomConfigurations(configs: any): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
