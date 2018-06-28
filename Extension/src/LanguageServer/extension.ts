@@ -6,7 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CancellationTokenSource } from "vscode-jsonrpc";
+import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -16,8 +16,7 @@ import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
-import { CustomConfigurationProvider, SourceFileConfigurationItem } from '../api';
-import * as os from 'os';
+import { getCustomConfigProviders } from './customProviders';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -29,7 +28,6 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-let customConfigurationProviders: CustomConfigurationProvider[] = [];
 
 /**
  * activate: set up the extension for language services
@@ -77,40 +75,6 @@ export function activate(activationEventOccurred: boolean): void {
     }
 }
 
-export function registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-    customConfigurationProviders.push(provider);
-
-    // Request for configurations from the provider only if realActivationOccurred.
-    // Otherwise, the request will be sent when realActivation is called.
-    if (realActivationOccurred) {
-        onDidChangeCustomConfiguration(provider);
-    }
-}
-
-export async function provideCustomConfiguration(document: vscode.TextDocument, client: Client): Promise<void> {
-    let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-    if (customConfigurationProviders.length === 0) {
-        return Promise.resolve();
-    }
-    return client.runBlockingThenableWithTimeout(async () => {
-        // Loop through registered providers until one is able to service the current document
-        for (let i: number = 0; i < customConfigurationProviders.length; i++) {
-            if (await customConfigurationProviders[i].canProvideConfiguration(document.uri)) {
-                return customConfigurationProviders[i].provideConfigurations([document.uri]);
-            }
-        }
-        return Promise.reject("No providers found for " + document.uri);
-    }, 1000, tokenSource).then((configs: SourceFileConfigurationItem[]) => {
-        if (configs && configs.length > 0) {
-            client.sendCustomConfigurations(configs);
-        }
-    });
-}
-
-export function onDidChangeCustomConfiguration(customConfigurationProvider: CustomConfigurationProvider): void {
-    clients.forEach((client: Client) => client.onDidChangeCustomConfigurations(customConfigurationProvider));
-}
-
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
     if (document.languageId === "c" || document.languageId === "cpp") {
         onActivationEvent();
@@ -147,7 +111,9 @@ function realActivation(): void {
 
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
-    customConfigurationProviders.forEach(provider => onDidChangeCustomConfiguration(provider));
+    clients.forEach(client => {
+        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
+    });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
@@ -547,4 +513,18 @@ export function deactivate(): Thenable<void> {
 
 export function isFolderOpen(): boolean {
     return vscode.workspace.workspaceFolders !== undefined && vscode.workspace.workspaceFolders.length > 0;
+}
+
+export function getClients(): ClientCollection {
+    if (!realActivationOccurred) {
+        realActivation();
+    }
+    return clients;
+}
+
+export function getActiveClient(): Client {
+    if (!realActivationOccurred) {
+        realActivation();
+    }
+    return clients.ActiveClient;
 }

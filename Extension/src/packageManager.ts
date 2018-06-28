@@ -183,11 +183,10 @@ export class PackageManager {
             } catch (error) {
                 retryCount += 1;
                 lastError = error;
-                if (retryCount >= MAX_RETRIES) {
+                if (retryCount > MAX_RETRIES) {
                     this.AppendChannel(` Failed to download ` + pkg.url);
                     throw error;
                 } else {
-                    // This will skip the success = true.
                     this.AppendChannel(` Failed. Retrying...`);
                     continue;
                 }
