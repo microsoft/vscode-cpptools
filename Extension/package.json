@@ -1332,8 +1332,7 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.18",
-    "vscode-cpptools": "^1.2.2"
+    "vscode": "^1.1.18"
   },
   "dependencies": {
     "http-proxy-agent": "~2.1.0",
@@ -1342,6 +1341,7 @@
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
+    "vscode-cpptools": "^1.2.2",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.0.11",
