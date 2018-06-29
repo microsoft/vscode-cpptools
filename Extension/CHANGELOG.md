@@ -1,18 +1,43 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.17.5-insiders: June 7, 2018
+## Version 0.17.6: June 28, 2018
+* Fix the database icon getting stuck with recursive includes. [#2104](https://github.com/Microsoft/vscode-cpptools/issues/2104)
+* Fix the red flame appearing late with recursive includes. [#2105](https://github.com/Microsoft/vscode-cpptools/issues/2105)
+* Fix source files being parsed in system directories. [#2156](https://github.com/Microsoft/vscode-cpptools/issues/2156)
+* Fix a crash when saving with recursive includes. [#2173](https://github.com/Microsoft/vscode-cpptools/issues/2173)
+* Fix a crash when the `includePath` or `browse.path` is `"**"`. [#2174](https://github.com/Microsoft/vscode-cpptools/issues/2174)
+* Fix IntelliSense for WSL without g++ installed. [#2178](https://github.com/Microsoft/vscode-cpptools/issues/2178)
+* Fix random IntelliSense (completion) failures due to edits being delayed. [#2184](https://github.com/Microsoft/vscode-cpptools/issues/2184)
+* Fix a performance bug with recursive includes.
+* Fixed a CPU usage problem on Mac related to system frameworks parsing.
+* Keep the IntelliSense process around for 10 seconds after a file is closed in case it's needed again.
+* Added an API so build system extensions can provide IntelliSense configurations for source files. More details at [npmjs.com](https://www.npmjs.com/package/vscode-cpptools).
+* Fix automatic argument quoting when debugging with gdb/lldb to include when the argument has a '(' or ')' in it. Also escape existing '"' symbols.
+
+## Version 0.17.5: June 21, 2018
+* Detect `compile_commands.json` and show prompt to use it. [#1297](https://github.com/Microsoft/vscode-cpptools/issues/1297)
 * Change inactive regions from gray to translucent. [#1907](https://github.com/Microsoft/vscode-cpptools/issues/1907)
 * Improve performance of recursive includes paths. [#2068](https://github.com/Microsoft/vscode-cpptools/issues/2068)
-* Fix #include completion with headers in the same directory. [#2031](https://github.com/Microsoft/vscode-cpptools/issues/2031)
-* Support asm clobber registers on Windows. [#2090](https://github.com/Microsoft/vscode-cpptools/issues/2090)
+* Fix IntelliSense client failure due to `No args provider`. [#1908](https://github.com/Microsoft/vscode-cpptools/issues/1908)
+* Fix `#include` completion with headers in the same directory. [#2031](https://github.com/Microsoft/vscode-cpptools/issues/2031)
+* Fix non-header files outside the workspace folder not being parsed (i.e. so `Go to Definition` works). [#2053](https://github.com/Microsoft/vscode-cpptools/issues/2053)
 * Fix some crashes. [#2080](https://github.com/Microsoft/vscode-cpptools/issues/2080)
+* Support asm clobber registers on Windows. [#2090](https://github.com/Microsoft/vscode-cpptools/issues/2090)
+* Fix usage of `${config:section.setting}`. [#2165](https://github.com/Microsoft/vscode-cpptools/issues/2165)
+* `browse.path` now inherits `includePath` if not set in `c_cpp_properties.json`.
+* On Windows, `compilerPath` now populates with the guessed `cl.exe` path, and the `MSVC` include path is based on the `cl.exe` path.
+* Fix files under a non-recursive `browse.path` being removed from the database.
+* Fix `*` not working in `browse.path` with WSL.
+* Fix for -break-insert main returning multiple bind points. [#729](https://github.com/Microsoft/MIEngine/pull/729)
+* Use -- instead of -x for gnome-terminal. [#733](https://github.com/Microsoft/MIEngine/pull/733)
+* Added `miDebuggerArgs` in order to pass arguments to the program in `miDebuggerPath`. [#720](https://github.com/Microsoft/MIEngine/pull/720)
 
 ## Version 0.17.4: May 31, 2018
 * Fix infinite loop (caused by deadlock) when using recursive includes. [#2043](https://github.com/Microsoft/vscode-cpptools/issues/2043)
 * Stop using recursive includes in the default configuration.
   * @Hyzeta [PR #2059](https://github.com/Microsoft/vscode-cpptools/pull/2059)
 * Fix various other potential deadlocks and crashes.
-* Fix Go to Definition on `#include` not filtering out results based on the path. [#1253](https://github.com/Microsoft/vscode-cpptools/issues/1253), [#2033](https://github.com/Microsoft/vscode-cpptools/issues/2033)
+* Fix `Go to Definition` on `#include` not filtering out results based on the path. [#1253](https://github.com/Microsoft/vscode-cpptools/issues/1253), [#2033](https://github.com/Microsoft/vscode-cpptools/issues/2033)
 * Fix database icon getting stuck. [#1917](https://github.com/Microsoft/vscode-cpptools/issues/1917)
 
 ## Version 0.17.3: May 22, 2018
@@ -190,7 +215,7 @@
 * Light bulbs (code actions) for #include errors now suggest potential paths to add to the `includePath` based on a recursive search of the `browse.path`. [#846](https://github.com/Microsoft/vscode-cpptools/issues/846)
 * Browse database now removes old symbols when `browse.path` changes. [#262](https://github.com/Microsoft/vscode-cpptools/issues/262)
 * Add `*` on new lines after a multiline comment with `/**` is started. [#579](https://github.com/Microsoft/vscode-cpptools/issues/579)
-* Fix Go to Definition, completion, and parameter hints for partially scoped members. [#635](https://github.com/Microsoft/vscode-cpptools/issues/635)
+* Fix `Go to Definition`, completion, and parameter hints for partially scoped members. [#635](https://github.com/Microsoft/vscode-cpptools/issues/635)
 * Fix bug in `macFrameworkPath` not resolving variables.
 
 ## Version 0.12.4: September 12, 2017

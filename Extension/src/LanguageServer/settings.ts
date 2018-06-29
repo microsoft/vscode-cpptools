@@ -58,6 +58,7 @@ export class CppSettings extends Settings {
     public get defaultCompilerPath(): string { return super.Section.get<string>("default.compilerPath"); }
     public get defaultCStandard(): string { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string { return super.Section.get<string>("default.cppStandard"); }
+    public get defaultConfigurationProvider(): string { return super.Section.get<string>("default.configurationProvider"); }
     public get defaultBrowsePath(): string[] { return super.Section.get<string[]>("default.browse.path"); }
     public get defaultDatabaseFilename(): string { return super.Section.get<string>("default.browse.databaseFilename"); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }

@@ -11,6 +11,8 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
+import { ABTestSettings, getABTestSettings } from '../abTesting';
+import { getCustomConfigProviders } from './customProviders';
 const configVersion: number = 4;
 
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
@@ -18,11 +20,11 @@ const configVersion: number = 4;
 // The property defaults are moved down to applyDefaultIncludePathsAndFrameworks.
 function getDefaultConfig(): Configuration {
     if (process.platform === 'darwin') {
-        return { name: "Mac", browse: {} };
+        return { name: "Mac" };
     } else if (process.platform === 'win32') {
-        return { name: "Win32", browse: {} };
+        return { name: "Win32" };
     } else {
-        return { name: "Linux", browse: {} };
+        return { name: "Linux" };
     }
 }
 
@@ -33,7 +35,7 @@ function getDefaultCppProperties(): ConfigurationJson {
     };
 }
 
-interface ConfigurationJson {
+export interface ConfigurationJson {
     configurations: Configuration[];
     env?: {[key: string]: string | string[]};
     version: number;
@@ -50,6 +52,7 @@ export interface Configuration {
     intelliSenseMode?: string;
     compileCommands?: string;
     forcedInclude?: string[];
+    configurationProvider?: string;
     browse?: Browse;
 }
 
@@ -108,7 +111,7 @@ export class CppProperties {
             this.parsePropertiesFile();
         }
         if (!this.configurationJson) {
-            this.resetToDefaultSettings(this.CurrentConfiguration === -1);
+            this.resetToDefaultSettings(this.CurrentConfigurationIndex === -1);
         }
 
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
@@ -137,7 +140,15 @@ export class CppProperties {
     public get SelectionChanged(): vscode.Event<number> { return this.selectionChanged.event; }
     public get CompileCommandsChanged(): vscode.Event<string> { return this.compileCommandsChanged.event; }
     public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
-    public get CurrentConfiguration(): number { return this.currentConfigurationIndex.Value; }
+    public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
+    public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
+    
+    public get CurrentConfigurationProvider(): string|null {
+        if (this.CurrentConfiguration.configurationProvider) {
+            return this.CurrentConfiguration.configurationProvider;
+        }
+        return new CppSettings(this.rootUri).defaultConfigurationProvider;
+    }
 
     public get ConfigurationNames(): string[] {
         let result: string[] = [];
@@ -167,7 +178,7 @@ export class CppProperties {
     }
 
     private onSelectionChanged(): void {
-        this.selectionChanged.fire(this.CurrentConfiguration);
+        this.selectionChanged.fire(this.CurrentConfigurationIndex);
     }
 
     private onCompileCommandsChanged(path: string): void {
@@ -187,8 +198,8 @@ export class CppProperties {
 
     private resetToDefaultSettings(resetIndex: boolean): void {
         this.configurationJson = getDefaultCppProperties();
-        if (resetIndex || this.CurrentConfiguration < 0 ||
-            this.CurrentConfiguration >= this.configurationJson.configurations.length) {
+        if (resetIndex || this.CurrentConfigurationIndex < 0 ||
+            this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
             this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
         }
         this.configurationIncomplete = true;
@@ -196,7 +207,7 @@ export class CppProperties {
 
      private applyDefaultIncludePathsAndFrameworks(): void {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
-            let configuration: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            let configuration: Configuration = this.CurrentConfiguration;
             let settings: CppSettings = new CppSettings(this.rootUri);
 
             // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
@@ -207,12 +218,11 @@ export class CppProperties {
 
             if (!settings.defaultIncludePath) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.includePath = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
+                let abTestSettings: ABTestSettings = getABTestSettings();
+                let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+                configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
             }
-            if (!settings.defaultBrowsePath) {
-                // We don't add system includes to the includePath anymore. The language server has this information.
-                configuration.browse.path = ["${workspaceFolder}"].concat(this.vcpkgIncludes);
-            }
+            // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
             if (!settings.defaultDefines) {
                 configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
             }
@@ -297,26 +307,47 @@ export class CppProperties {
         }
     }
 
-    private includePathConverted(): boolean {
-        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            if (this.configurationJson.configurations[i].browse === undefined || this.configurationJson.configurations[i].browse.path === undefined) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-            let config: Configuration = this.configurationJson.configurations[this.CurrentConfiguration];
+            let config: Configuration = this.CurrentConfiguration;
             if (config.includePath === undefined) {
                 config.includePath = ["${default}"];
             }
             config.includePath.splice(config.includePath.length, 0, path);
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-            this.updateServerOnFolderSettingsChange();
+            this.handleConfigurationChange();
+        });
+    }
+
+    public addCustomConfigurationProvider(providerId: string): Thenable<void> {
+        return new Promise<void>((resolve) => {
+            if (this.propertiesFile) {
+                this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+                    this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+                    let config: Configuration = this.CurrentConfiguration;
+                    config.configurationProvider = providerId;
+                    fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+                    this.handleConfigurationChange();
+                    resolve();
+                });
+            } else {
+                let settings: CppSettings = new CppSettings(this.rootUri);
+                settings.update("default.configurationProvider", providerId);
+                this.CurrentConfiguration.configurationProvider = providerId;
+                resolve();
+            }
+        });
+    }
+
+    public setCompileCommands(path: string): void {
+        this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            let config: Configuration = this.CurrentConfiguration;
+            config.compileCommands = path;
+            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            this.handleConfigurationChange();
         });
     }
 
@@ -399,11 +430,28 @@ export class CppProperties {
             configuration.cStandard = this.updateConfiguration(configuration.cStandard, settings.defaultCStandard);
             configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard);
             configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode);
+            configuration.configurationProvider = this.updateConfiguration(configuration.configurationProvider, settings.defaultConfigurationProvider);
 
             if (!configuration.browse) {
                 configuration.browse = {};
             }
-            configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath);
+
+            if (!configuration.browse.path) {
+                if (settings.defaultBrowsePath) {
+                    configuration.browse.path = settings.defaultBrowsePath;
+                } else if (configuration.includePath) {
+                    // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
+                    configuration.browse.path = configuration.includePath.slice(0);
+                    if (-1 === configuration.includePath.findIndex((value: string, index: number) => {
+                        return !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\|\\\*\*|\/|\/\*\*)?$/g);
+                    })) {
+                        configuration.browse.path.push("${workspaceFolder}");
+                    }
+                }
+            } else {
+                configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath);
+            }
+
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfiguration(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders);
             configuration.browse.databaseFilename = this.updateConfiguration(configuration.browse.databaseFilename, settings.defaultDatabaseFilename);
         }
@@ -452,7 +500,7 @@ export class CppProperties {
                     let filePath: vscode.Uri = vscode.Uri.parse("untitled:" + fullPathToFile);
                     vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
                         let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                        if (this.configurationJson === undefined) {
+                        if (this.configurationJson) {
                             this.resetToDefaultSettings(true);
                         }
                         this.applyDefaultIncludePathsAndFrameworks();
@@ -483,8 +531,8 @@ export class CppProperties {
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
             if (this.configurationJson !== undefined) {
-                if (this.CurrentConfiguration < 0 ||
-                    this.CurrentConfiguration >= this.configurationJson.configurations.length) {
+                if (this.CurrentConfigurationIndex < 0 ||
+                    this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
                     // If the index is out of bounds (during initialization or due to removal of configs), fix it.
                     this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
                 }
@@ -512,17 +560,26 @@ export class CppProperties {
                 throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
             }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
-                this.CurrentConfiguration >= 0 && this.CurrentConfiguration < this.configurationJson.configurations.length) {
+                this.CurrentConfigurationIndex >= 0 && this.CurrentConfigurationIndex < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
-                    if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfiguration].name) {
+                    if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfigurationIndex].name) {
                         this.currentConfigurationIndex.Value = i;
                         break;
                     }
                 }
             }
             this.configurationJson = newJson;
-            if (this.CurrentConfiguration < 0 || this.CurrentConfiguration >= newJson.configurations.length) {
+            if (this.CurrentConfigurationIndex < 0 || this.CurrentConfigurationIndex >= newJson.configurations.length) {
                 this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
+            }
+
+            let dirty: boolean = false;
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                let newId: string = getCustomConfigProviders().checkId(this.configurationJson.configurations[i].configurationProvider);
+                if (newId !== this.configurationJson.configurations[i].configurationProvider) {
+                    dirty = true;
+                    this.configurationJson.configurations[i].configurationProvider = newId;
+                }
             }
 
             // Remove disallowed variable overrides
@@ -536,7 +593,6 @@ export class CppProperties {
             // the system includes were available.
             this.configurationIncomplete = false;
 
-            let dirty: boolean = false;
             if (this.configurationJson.version !== configVersion) {
                 dirty = true;
                 if (this.configurationJson.version === undefined) {
@@ -571,17 +627,8 @@ export class CppProperties {
 
     private updateToVersion2(): void {
         this.configurationJson.version = 2;
-        if (!this.includePathConverted()) {
-            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-                let config: Configuration = this.configurationJson.configurations[i];
-                if (config.browse === undefined) {
-                    config.browse = {};
-                }
-                if (config.browse.path === undefined && (this.defaultIncludes !== undefined || config.includePath !== undefined)) {
-                    config.browse.path = (config.includePath === undefined) ? this.defaultIncludes.slice(0) : config.includePath.slice(0);
-                }
-            }
-        }
+        // no-op. We don't automatically populate the browse.path anymore.
+        // We use includePath if browse.path is not present which is what this code used to do.
     }
 
     private updateToVersion3(): void {

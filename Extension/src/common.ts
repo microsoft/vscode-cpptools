@@ -175,9 +175,9 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
             }
             case "config": {
                 let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-                let keys: string[] = name.split('.');
-                keys.forEach((key: string) => { config = (config) ? config.get(key) : config; });
-                newValue = (config) ? config.toString() : undefined;
+                if (config) {
+                    newValue = config.get<string>(name);
+                }
                 break;
             }
             case "workspaceFolder": {
@@ -333,10 +333,9 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
         fs.readFile(filePath, encoding, (err, data) => {
             if (err) {
                 reject(err);
-                return;
+            } else {
+                resolve(data);
             }
-
-            resolve(data);
         });
     });
 }
@@ -347,11 +346,26 @@ export function writeFileText(filePath: string, content: string, encoding: strin
         fs.writeFile(filePath, content, { encoding }, (err) => {
             if (err) {
                 reject(err);
-                return;
+            } else {
+                resolve();
             }
-
-            resolve();
         });
+    });
+}
+
+export function deleteFile(filePath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
     });
 }
 
@@ -362,7 +376,7 @@ export function getInstallLockPath(): string {
 
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
-    const readmeMessage: string = `Please refer to ${readmePath} for troubleshooting information. Issues can be created at https://github.com/Microsoft/vscppsamples/issues`;
+    const readmeMessage: string = `Please refer to ${readmePath} for troubleshooting information. Issues can be created at https://github.com/Microsoft/vscode-cpptools/issues`;
     return readmeMessage;
 }
 
