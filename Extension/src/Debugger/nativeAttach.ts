@@ -111,8 +111,8 @@ export class PsProcessParser {
     // Note that comm on Linux systems is truncated to 16 characters:
     // https://bugzilla.redhat.com/show_bug.cgi?id=429565
     // Since 'args' contains the full path to the executable, even if truncated, searching will work as desired.
-    public static get psLinuxCommand(): string { return `ps -axww -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
-    public static get psDarwinCommand(): string { return `ps -axww -o pid=,comm=${PsProcessParser.commColumnTitle},args= -c`; }
+    public static get psLinuxCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
+    public static get psDarwinCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args= -c`; }
 
     // Only public for tests.
     public static ParseProcessFromPs(processes: string): Process[] {
