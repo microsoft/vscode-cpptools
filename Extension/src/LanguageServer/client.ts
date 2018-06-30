@@ -28,6 +28,7 @@ import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
+import { existsSync, readFileSync } from 'fs';
 
 let ui: UI;
 
@@ -322,6 +323,15 @@ class DefaultClient implements Client {
             storagePath = path.join(storagePath, serverName);
         }
 
+         // Check for vcpkg instance.
+        if (existsSync(util.getVcpkgPathDescriptorFile())) {
+            let vcpkgRoot: string = readFileSync(util.getVcpkgPathDescriptorFile()).toString();
+            vcpkgRoot = vcpkgRoot.trim();
+            if (existsSync(vcpkgRoot)) {
+                util.setVcpkgRoot(vcpkgRoot);
+            }
+        }
+
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'cpp' },
@@ -354,7 +364,8 @@ class DefaultClient implements Client {
                 preferredPathSeparator: settings.preferredPathSeparator,
                 default: {
                     systemIncludePath: settings.defaultSystemIncludePath
-                }
+                },
+                vcpkg_root: util.getVcpkgRoot()
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {

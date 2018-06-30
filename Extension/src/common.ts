@@ -57,6 +57,15 @@ export function getVcpkgPathDescriptorFile(): string {
     }
 }
 
+let vcpkgRoot: string;
+export function setVcpkgRoot(vcpkg_path: string): void {
+    vcpkgRoot = vcpkg_path;
+}
+
+export function getVcpkgRoot(): string {
+    return vcpkgRoot;
+}
+
 // Extension is ready if install.lock exists and debugAdapters folder exist.
 export async function isExtensionReady(): Promise<boolean> {
     const doesInstallLockFileExist: boolean = await checkInstallLockFile();
