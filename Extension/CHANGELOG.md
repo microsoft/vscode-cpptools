@@ -8,7 +8,6 @@
 * Fix a crash when saving with recursive includes. [#2173](https://github.com/Microsoft/vscode-cpptools/issues/2173)
 * Fix a crash when the `includePath` or `browse.path` is `"**"`. [#2174](https://github.com/Microsoft/vscode-cpptools/issues/2174)
 * Fix IntelliSense for WSL without g++ installed. [#2178](https://github.com/Microsoft/vscode-cpptools/issues/2178)
-* Fix `pickRemoteProcess` with certain remote targets. [#2183](https://github.com/Microsoft/vscode-cpptools/issues/2183)
 * Fix random IntelliSense (completion) failures due to edits being delayed. [#2184](https://github.com/Microsoft/vscode-cpptools/issues/2184)
 * Fix database deletion failure with non-ASCII file paths on Windows. [#2205](https://github.com/Microsoft/vscode-cpptools/issues/2205)
 * Fix `Go to Definition` results with `var::` and `var->`, and filter out invalid constructor results. [#2207](https://github.com/Microsoft/vscode-cpptools/issues/2207)
@@ -18,7 +17,6 @@
 * Added an API so build system extensions can provide IntelliSense configurations for source files. More details at [npmjs.com](https://www.npmjs.com/package/vscode-cpptools).
 * Fix automatic argument quoting when debugging with gdb/lldb to include when the argument has a '(' or ')' in it. Also escape existing '"' symbols.
 * Removed `-` in `ps` call for ProcessPicker and RemoteProcessPicker. [#2183](https://github.com/Microsoft/vscode-cpptools/issues/2183)
-* Escaped `(` and `)` for GDB parameters. [#740](https://github.com/Microsoft/MIEngine/pull/740)
 
 ## Version 0.17.5: June 21, 2018
 * Detect `compile_commands.json` and show prompt to use it. [#1297](https://github.com/Microsoft/vscode-cpptools/issues/1297)
