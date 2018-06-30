@@ -17,6 +17,8 @@
 * Keep the IntelliSense process around for 10 seconds after a file is closed in case it's needed again.
 * Added an API so build system extensions can provide IntelliSense configurations for source files. More details at [npmjs.com](https://www.npmjs.com/package/vscode-cpptools).
 * Fix automatic argument quoting when debugging with gdb/lldb to include when the argument has a '(' or ')' in it. Also escape existing '"' symbols.
+* Removed `-` in `ps` call for ProcessPicker and RemoteProcessPicker. [#2183](https://github.com/Microsoft/vscode-cpptools/issues/2183)
+* Escaped `(` and `)` for GDB parameters. [#740](https://github.com/Microsoft/MIEngine/pull/740)
 
 ## Version 0.17.5: June 21, 2018
 * Detect `compile_commands.json` and show prompt to use it. [#1297](https://github.com/Microsoft/vscode-cpptools/issues/1297)
