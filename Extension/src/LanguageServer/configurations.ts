@@ -88,7 +88,7 @@ export class CppProperties {
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode: string = null;
-    private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
+    private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
     private selectionChanged = new vscode.EventEmitter<number>();
