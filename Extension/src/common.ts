@@ -59,7 +59,7 @@ export function getVcpkgPathDescriptorFile(): string {
 
 let vcpkgRoot: string;
 export function setVcpkgRoot(vcpkg_path: string): void {
-    vcpkgRoot = vcpkg_path;
+    vcpkgRoot = vcpkg_path.replace(/\\/g, "/");
 }
 
 export function getVcpkgRoot(): string {
