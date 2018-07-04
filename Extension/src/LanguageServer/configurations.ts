@@ -250,13 +250,12 @@ export class CppProperties {
             // Check for vcpkgRoot and include relevent paths if found.
             let vcpkgRoot: string = util.getVcpkgRoot();
             if (vcpkgRoot) {
-                let vcpkgInstalledPath: string = path.join(vcpkgRoot, "/installed");
-                let list: string[] = await util.readDir(vcpkgInstalledPath);
+                let list: string[] = await util.readDir(vcpkgRoot);
                 if (list !== undefined) {
                     // For every *directory* in the list (non-recursive). Each directory is basically a platform.
                     list.forEach((entry) => {
                         if (entry !== "vcpkg") {
-                            let pathToCheck: string = path.join(vcpkgInstalledPath, entry);
+                            let pathToCheck: string = path.join(vcpkgRoot, entry);
                             if (fs.existsSync(pathToCheck)) {
                                 let p: string = path.join(pathToCheck, "include");
                                 if (fs.existsSync(p)) {

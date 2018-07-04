@@ -328,7 +328,7 @@ class DefaultClient implements Client {
             let vcpkgRoot: string = readFileSync(util.getVcpkgPathDescriptorFile()).toString();
             vcpkgRoot = vcpkgRoot.trim();
             if (existsSync(vcpkgRoot)) {
-                util.setVcpkgRoot(vcpkgRoot);
+                util.setVcpkgRoot(path.join(vcpkgRoot, "/installed"));
             }
         }
 
