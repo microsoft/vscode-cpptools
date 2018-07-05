@@ -58,11 +58,18 @@ export function getVcpkgPathDescriptorFile(): string {
 }
 
 let vcpkgRoot: string;
-export function setVcpkgRoot(vcpkg_path: string): void {
-    vcpkgRoot = vcpkg_path.replace(/\\/g, "/");
-}
-
 export function getVcpkgRoot(): string {
+    if (!vcpkgRoot && vcpkgRoot !== "") {
+        vcpkgRoot = "";
+        // Check for vcpkg instance.
+        if (fs.existsSync(getVcpkgPathDescriptorFile())) {
+            let vcpkgRootTemp: string = fs.readFileSync(getVcpkgPathDescriptorFile()).toString();
+            vcpkgRootTemp = vcpkgRootTemp.trim();
+            if (fs.existsSync(vcpkgRootTemp)) {
+                vcpkgRoot = path.join(vcpkgRootTemp, "/installed").replace(/\\/g, "/");
+            }
+        }
+    }
     return vcpkgRoot;
 }
 

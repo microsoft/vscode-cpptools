@@ -28,7 +28,6 @@ import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
-import { existsSync, readFileSync } from 'fs';
 
 let ui: UI;
 
@@ -321,15 +320,6 @@ class DefaultClient implements Client {
         let storagePath: string = util.extensionContext.storagePath;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             storagePath = path.join(storagePath, serverName);
-        }
-
-         // Check for vcpkg instance.
-        if (existsSync(util.getVcpkgPathDescriptorFile())) {
-            let vcpkgRoot: string = readFileSync(util.getVcpkgPathDescriptorFile()).toString();
-            vcpkgRoot = vcpkgRoot.trim();
-            if (existsSync(vcpkgRoot)) {
-                util.setVcpkgRoot(path.join(vcpkgRoot, "/installed"));
-            }
         }
 
         let clientOptions: LanguageClientOptions = {
