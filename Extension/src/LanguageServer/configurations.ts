@@ -495,9 +495,8 @@ export class CppProperties {
         } else {
             fs.mkdir(this.configFolder, (e: NodeJS.ErrnoException) => {
                 if (!e || e.code === 'EEXIST') {
-                    let dirPathEscaped: string = this.configFolder.replace("#", "%23");
-                    let fullPathToFile: string = path.join(dirPathEscaped, "c_cpp_properties.json");
-                    let filePath: vscode.Uri = vscode.Uri.parse("untitled:" + fullPathToFile);
+                    let fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
+                    let filePath: vscode.Uri = vscode.Uri.file(fullPathToFile).with({ scheme: "untitled" });
                     vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
                         let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         if (this.configurationJson) {
