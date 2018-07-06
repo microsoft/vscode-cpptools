@@ -513,7 +513,11 @@ class DefaultClient implements Client {
                 }
             },
             () => {
-                vscode.window.showInformationMessage(`'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. Settings from the '${configName}' configuration will be used instead.`);
+                if (!util.isHeader(document) && !vscode.debug.activeDebugSession) {
+                    vscode.window.showInformationMessage(
+                        `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                        `Settings from the '${configName}' configuration will be used instead.`);
+                }
             });
     }
     
