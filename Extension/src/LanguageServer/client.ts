@@ -354,7 +354,8 @@ class DefaultClient implements Client {
                 preferredPathSeparator: settings.preferredPathSeparator,
                 default: {
                     systemIncludePath: settings.defaultSystemIncludePath
-                }
+                },
+                vcpkg_root: util.getVcpkgRoot()
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {

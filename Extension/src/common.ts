@@ -57,6 +57,22 @@ export function getVcpkgPathDescriptorFile(): string {
     }
 }
 
+let vcpkgRoot: string;
+export function getVcpkgRoot(): string {
+    if (!vcpkgRoot && vcpkgRoot !== "") {
+        vcpkgRoot = "";
+        // Check for vcpkg instance.
+        if (fs.existsSync(getVcpkgPathDescriptorFile())) {
+            let vcpkgRootTemp: string = fs.readFileSync(getVcpkgPathDescriptorFile()).toString();
+            vcpkgRootTemp = vcpkgRootTemp.trim();
+            if (fs.existsSync(vcpkgRootTemp)) {
+                vcpkgRoot = path.join(vcpkgRootTemp, "/installed").replace(/\\/g, "/");
+            }
+        }
+    }
+    return vcpkgRoot;
+}
+
 // Extension is ready if install.lock exists and debugAdapters folder exist.
 export async function isExtensionReady(): Promise<boolean> {
     const doesInstallLockFileExist: boolean = await checkInstallLockFile();

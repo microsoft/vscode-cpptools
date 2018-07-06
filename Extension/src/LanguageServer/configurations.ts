@@ -88,7 +88,7 @@ export class CppProperties {
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode: string = null;
-    private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
+    private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
     private selectionChanged = new vscode.EventEmitter<number>();
@@ -247,27 +247,25 @@ export class CppProperties {
 
     private async buildVcpkgIncludePath(): Promise<void> {
         try {
-            // Check for vcpkg instance and include relevent paths if found.
-            if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
-                let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
-                vcpkgRoot = vcpkgRoot.trim();
-                if (await util.checkDirectoryExists(vcpkgRoot)) {
-                    let vcpkgInstalledPath: string = path.join(vcpkgRoot, "/installed");
-                    let list: string[] = await util.readDir(vcpkgInstalledPath);
-                    if (list !== undefined) {
-                        // For every *directory* in the list (non-recursive). Each directory is basically a platform.
-                        list.forEach((entry) => {
-                            if (entry !== "vcpkg") {
-                                let pathToCheck: string = path.join(vcpkgInstalledPath, entry);
-                                if (fs.existsSync(pathToCheck)) {
-                                    let p: string = path.join(pathToCheck, "include");
-                                    if (fs.existsSync(p)) {
-                                        this.vcpkgIncludes.push(p);
-                                    }
+            // Check for vcpkgRoot and include relevent paths if found.
+            let vcpkgRoot: string = util.getVcpkgRoot();
+            if (vcpkgRoot) {
+                let list: string[] = await util.readDir(vcpkgRoot);
+                if (list !== undefined) {
+                    // For every *directory* in the list (non-recursive). Each directory is basically a platform.
+                    list.forEach((entry) => {
+                        if (entry !== "vcpkg") {
+                            let pathToCheck: string = path.join(vcpkgRoot, entry);
+                            if (fs.existsSync(pathToCheck)) {
+                                let p: string = path.join(pathToCheck, "include");
+                                if (fs.existsSync(p)) {
+                                    p = p.replace(/\\/g, "/");
+                                    p = p.replace(vcpkgRoot, "${vcpkgRoot}");
+                                    this.vcpkgIncludes.push(p);
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }
         } catch (error) {} finally {
