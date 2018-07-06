@@ -3,7 +3,7 @@
 ## Version 0.17.7: July 16, 2018
 * Add `${vcpkgRoot}` variable. [#1817](https://github.com/Microsoft/vscode-cpptools/issues/1817)
 * Skip automatic parsing of source files in Mac system framework paths. [#2156](https://github.com/Microsoft/vscode-cpptools/issues/2156)
-* Fix `Edit Configuration` not working after c_cpp_properties.json is deleted. [#2214](https://github.com/Microsoft/vscode-cpptools/issues/2214)
+* Fix `Edit Configuration` not working after `c_cpp_properties.json` is deleted. [#2214](https://github.com/Microsoft/vscode-cpptools/issues/2214)
 * Fix indexing of the entire root drive on Windows when no is folder open. [#2216](https://github.com/Microsoft/vscode-cpptools/issues/2216)
 * Fix out-of-memory crash with `#include` code actions when no folder is open. [#2225](https://github.com/Microsoft/vscode-cpptools/issues/2225)
 
