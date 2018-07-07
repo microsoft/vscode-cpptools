@@ -286,6 +286,15 @@
           "description": "The value to use in a configuration if \"macFrameworkPath\" is not specified, or the values to insert if \"${default}\" is present in \"macFrameworkPath\".",
           "scope": "resource"
         },
+        "C_Cpp.default.windowsSDKVersion": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Version of the Windows SDK include path to use on Windows..",
+          "scope": "resource"
+        },
         "C_Cpp.default.compileCommands": {
           "type": [
             "string",

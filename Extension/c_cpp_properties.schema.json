@@ -58,6 +58,10 @@
                             "type": "string"
                         }
                     },
+                    "windowsSDKVersion": {
+                        "description": "Version of the Windows SDK include path to use on Windows.",
+                        "type": "string"
+                    },
                     "defines": {
                         "description": "A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use = to set a value, e.g. VERSION=1.",
                         "type": "array",
