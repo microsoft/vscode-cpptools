@@ -73,6 +73,16 @@ export function getVcpkgRoot(): string {
     return vcpkgRoot;
 }
 
+/**
+ * This is a fuzzy determination of whether a uri represents a header file.
+ * For the purposes of this function, a header file has no extension, or an extension that begins with the letter 'h'.
+ * @param document The document to check.
+ */
+export function isHeader(document: vscode.TextDocument): boolean {
+    let ext: string = path.extname(document.uri.fsPath);
+    return !ext || ext.startsWith(".h") || ext.startsWith(".H");
+}
+
 // Extension is ready if install.lock exists and debugAdapters folder exist.
 export async function isExtensionReady(): Promise<boolean> {
     const doesInstallLockFileExist: boolean = await checkInstallLockFile();

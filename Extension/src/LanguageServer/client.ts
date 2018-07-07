@@ -513,8 +513,16 @@ class DefaultClient implements Client {
                 }
             },
             () => {
-                vscode.window.showInformationMessage(`'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. Settings from the '${configName}' configuration will be used instead.`);
+                if (!this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
+                    vscode.window.showInformationMessage(
+                        `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                        `Settings from the '${configName}' configuration will be used instead.`);
+                }
             });
+    }
+
+    private isExternalHeader(document: vscode.TextDocument): boolean {
+        return util.isHeader(document) && !document.uri.toString().startsWith(this.RootUri.toString());
     }
     
     public getCustomConfigurationProviderId(): Thenable<string|undefined> {
