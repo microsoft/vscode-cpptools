@@ -292,7 +292,7 @@
             "null"
           ],
           "default": null,
-          "description": "Version of the Windows SDK include path to use on Windows..",
+          "description": "Version of the Windows SDK include path to use on Windows, e.g. '10.0.17134.0'.",
           "scope": "resource"
         },
         "C_Cpp.default.compileCommands": {
