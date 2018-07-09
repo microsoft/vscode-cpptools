@@ -416,6 +416,11 @@
         "category": "C/Cpp"
       },
       {
+        "command": "C_Cpp.ConfigurationProviderSelect",
+        "title": "Change Configuration Provider...",
+        "category": "C/Cpp"
+      },
+      {
         "command": "C_Cpp.ConfigurationEdit",
         "title": "Edit Configurations...",
         "category": "C/Cpp"
