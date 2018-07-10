@@ -293,6 +293,7 @@
           ],
           "default": null,
           "description": "Version of the Windows SDK include path to use on Windows, e.g. '10.0.17134.0'.",
+          "pattern": "^\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1$",
           "scope": "resource"
         },
         "C_Cpp.default.compileCommands": {
