@@ -1,6 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.17.7: July 16, 2018
+* Add `windowsSdkVersion` to `c_cpp_properties.json`. [#1585](https://github.com/Microsoft/vscode-cpptools/issues/1585)
 * Add `${vcpkgRoot}` variable. [#1817](https://github.com/Microsoft/vscode-cpptools/issues/1817)
 * Skip automatic parsing of source files in Mac system framework paths. [#2156](https://github.com/Microsoft/vscode-cpptools/issues/2156)
 * Fix `Edit Configurations...` not working after `c_cpp_properties.json` is deleted. [#2214](https://github.com/Microsoft/vscode-cpptools/issues/2214)
