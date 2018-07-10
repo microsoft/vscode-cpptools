@@ -326,13 +326,17 @@ export class CppProperties {
         });
     }
 
-    public addCustomConfigurationProvider(providerId: string): Thenable<void> {
+    public updateCustomConfigurationProvider(providerId: string): Thenable<void> {
         return new Promise<void>((resolve) => {
             if (this.propertiesFile) {
                 this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
                     this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
                     let config: Configuration = this.CurrentConfiguration;
-                    config.configurationProvider = providerId;
+                    if (providerId) {
+                        config.configurationProvider = providerId;
+                    } else {
+                        delete config.configurationProvider;
+                    }
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
                     this.handleConfigurationChange();
                     resolve();
