@@ -286,7 +286,7 @@
           "description": "The value to use in a configuration if \"macFrameworkPath\" is not specified, or the values to insert if \"${default}\" is present in \"macFrameworkPath\".",
           "scope": "resource"
         },
-        "C_Cpp.default.windowsSDKVersion": {
+        "C_Cpp.default.windowsSdkVersion": {
           "type": [
             "string",
             "null"

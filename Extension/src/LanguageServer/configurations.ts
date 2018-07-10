@@ -48,7 +48,7 @@ export interface Configuration {
     cppStandard?: string;
     includePath?: string[];
     macFrameworkPath?: string[];
-    windowsSDKVersion?: string;
+    windowsSdkVersion?: string;
     defines?: string[];
     intelliSenseMode?: string;
     compileCommands?: string;
@@ -69,7 +69,7 @@ export interface CompilerDefaults {
     cppStandard: string;
     includes: string[];
     frameworks: string[];
-    windowsSDKVersion: string;
+    windowsSdkVersion: string;
     intelliSenseMode: string;
 }
 
@@ -87,7 +87,7 @@ export class CppProperties {
     private defaultCppStandard: string = null;
     private defaultIncludes: string[] = null;
     private defaultFrameworks: string[] = null;
-    private defaultWindowsSDKVersion: string = null;
+    private defaultWindowsSdkVersion: string = null;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode: string = null;
@@ -165,7 +165,7 @@ export class CppProperties {
         this.defaultCppStandard = compilerDefaults.cppStandard;
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
-        this.defaultWindowsSDKVersion = compilerDefaults.windowsSDKVersion;
+        this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
@@ -233,8 +233,8 @@ export class CppProperties {
             if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
             }
-            if (!settings.defaultWindowsSDKVersion && process.platform === 'win32') {
-                configuration.windowsSDKVersion = this.defaultWindowsSDKVersion;
+            if (!settings.defaultWindowsSdkVersion && process.platform === 'win32') {
+                configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
             if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
@@ -429,7 +429,7 @@ export class CppProperties {
             configuration.includePath = this.updateConfiguration(configuration.includePath, settings.defaultIncludePath);
             configuration.defines = this.updateConfiguration(configuration.defines, settings.defaultDefines);
             configuration.macFrameworkPath = this.updateConfiguration(configuration.macFrameworkPath, settings.defaultMacFrameworkPath);
-            configuration.windowsSDKVersion = this.updateConfiguration(configuration.windowsSDKVersion, settings.defaultWindowsSDKVersion);
+            configuration.windowsSdkVersion = this.updateConfiguration(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion);
             configuration.forcedInclude = this.updateConfiguration(configuration.forcedInclude, settings.defaultForcedInclude);
             configuration.compileCommands = this.updateConfiguration(configuration.compileCommands, settings.defaultCompileCommands);
             configuration.compilerPath = this.updateConfiguration(configuration.compilerPath, settings.defaultCompilerPath);

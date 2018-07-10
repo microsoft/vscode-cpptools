@@ -52,7 +52,7 @@ export class CppSettings extends Settings {
     public get defaultIncludePath(): string[] { return super.Section.get<string[]>("default.includePath"); }
     public get defaultDefines(): string[] { return super.Section.get<string[]>("default.defines"); }
     public get defaultMacFrameworkPath(): string[] { return super.Section.get<string[]>("default.macFrameworkPath"); }
-    public get defaultWindowsSDKVersion(): string { return super.Section.get<string>("default.windowsSDKVersion"); }
+    public get defaultWindowsSdkVersion(): string { return super.Section.get<string>("default.windowsSdkVersion"); }
     public get defaultCompileCommands(): string { return super.Section.get<string>("default.compileCommands"); }
     public get defaultForcedInclude(): string[] { return super.Section.get<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string { return super.Section.get<string>("default.intelliSenseMode"); }
