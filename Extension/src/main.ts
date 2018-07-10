@@ -311,6 +311,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.ConfigurationEdit",
         "onCommand:C_Cpp.ConfigurationSelect",
+        "onCommand:C_Cpp.ConfigurationProviderSelect",
         "onCommand:C_Cpp.SwitchHeaderSource",
         "onCommand:C_Cpp.Navigate",
         "onCommand:C_Cpp.GoToDeclaration",
