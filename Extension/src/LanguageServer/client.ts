@@ -119,6 +119,7 @@ const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, voi
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
+const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -175,6 +176,7 @@ export interface Client {
     pauseParsing(): void;
     resumeParsing(): void;
     handleConfigurationSelectCommand(): void;
+    handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
     handleAddToIncludePathCommand(path: string): void;
@@ -354,7 +356,8 @@ class DefaultClient implements Client {
                 preferredPathSeparator: settings.preferredPathSeparator,
                 default: {
                     systemIncludePath: settings.defaultSystemIncludePath
-                }
+                },
+                vcpkg_root: util.getVcpkgRoot()
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {
@@ -432,7 +435,7 @@ class DefaultClient implements Client {
                     vscode.window.showInformationMessage(message, allow, notNow, dontAskAgain).then(result => {
                         switch (result) {
                             case allow: {
-                                this.configuration.addCustomConfigurationProvider(provider.extensionId).then(() => {
+                                this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
                                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
                                 });
                                 break;
@@ -450,7 +453,7 @@ class DefaultClient implements Client {
             } else if (selectedProvider === provider.extensionId) {
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
             } else if (selectedProvider === provider.name) {
-                this.configuration.addCustomConfigurationProvider(provider.extensionId); // update the configurationProvider in c_cpp_properties.json
+                this.configuration.updateCustomConfigurationProvider(provider.extensionId); // v0 -> v1 upgrade. Update the configurationProvider in c_cpp_properties.json
             }
         });
     }
@@ -512,8 +515,16 @@ class DefaultClient implements Client {
                 }
             },
             () => {
-                vscode.window.showInformationMessage(`'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. Settings from the '${configName}' configuration will be used instead.`);
+                if (!this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
+                    vscode.window.showInformationMessage(
+                        `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                        `Settings from the '${configName}' configuration will be used instead.`);
+                }
             });
+    }
+
+    private isExternalHeader(document: vscode.TextDocument): boolean {
+        return util.isHeader(document) && !document.uri.toString().startsWith(this.RootUri.toString());
     }
     
     public getCustomConfigurationProviderId(): Thenable<string|undefined> {
@@ -1022,6 +1033,10 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
     }
 
+    private clearCustomConfigurations(): void {
+        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification));
+    }
+
     /*********************************************
      * command handlers
      *********************************************/
@@ -1033,6 +1048,27 @@ class DefaultClient implements Client {
                         return;
                     }
                     this.configuration.select(index);
+                });
+        });
+    }
+
+    public handleConfigurationProviderSelectCommand(): void {
+        this.notifyWhenReady(() => {
+            ui.showConfigurationProviders()
+                .then(extensionId => {
+                    if (extensionId === undefined) {
+                        // operation was cancelled.
+                        return;
+                    }
+                    this.configuration.updateCustomConfigurationProvider(extensionId)
+                        .then(() => {
+                            if (extensionId) {
+                                this.updateCustomConfigurations(getCustomConfigProviders().get(extensionId));
+                                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
+                            } else {
+                                this.clearCustomConfigurations();
+                            }
+                        });
                 });
         });
     }
@@ -1134,6 +1170,7 @@ class NullClient implements Client {
     pauseParsing(): void {}
     resumeParsing(): void {}
     handleConfigurationSelectCommand(): void {}
+    handleConfigurationProviderSelectCommand(): void {}
     handleShowParsingCommands(): void {}
     handleConfigurationEditCommand(): void {}
     handleAddToIncludePathCommand(path: string): void {}

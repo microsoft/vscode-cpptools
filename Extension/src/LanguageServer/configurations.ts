@@ -48,6 +48,7 @@ export interface Configuration {
     cppStandard?: string;
     includePath?: string[];
     macFrameworkPath?: string[];
+    windowsSdkVersion?: string;
     defines?: string[];
     intelliSenseMode?: string;
     compileCommands?: string;
@@ -68,6 +69,7 @@ export interface CompilerDefaults {
     cppStandard: string;
     includes: string[];
     frameworks: string[];
+    windowsSdkVersion: string;
     intelliSenseMode: string;
 }
 
@@ -85,10 +87,11 @@ export class CppProperties {
     private defaultCppStandard: string = null;
     private defaultIncludes: string[] = null;
     private defaultFrameworks: string[] = null;
+    private defaultWindowsSdkVersion: string = null;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode: string = null;
-    private readonly configurationGlobPattern: string = "**/c_cpp_properties.json"; // TODO: probably should be a single file, not all files...
+    private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
     private selectionChanged = new vscode.EventEmitter<number>();
@@ -162,6 +165,7 @@ export class CppProperties {
         this.defaultCppStandard = compilerDefaults.cppStandard;
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
+        this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
@@ -229,6 +233,9 @@ export class CppProperties {
             if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
             }
+            if (!settings.defaultWindowsSdkVersion && process.platform === 'win32') {
+                configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+            }
             if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
             }
@@ -247,27 +254,25 @@ export class CppProperties {
 
     private async buildVcpkgIncludePath(): Promise<void> {
         try {
-            // Check for vcpkg instance and include relevent paths if found.
-            if (await util.checkFileExists(util.getVcpkgPathDescriptorFile())) {
-                let vcpkgRoot: string = await util.readFileText(util.getVcpkgPathDescriptorFile());
-                vcpkgRoot = vcpkgRoot.trim();
-                if (await util.checkDirectoryExists(vcpkgRoot)) {
-                    let vcpkgInstalledPath: string = path.join(vcpkgRoot, "/installed");
-                    let list: string[] = await util.readDir(vcpkgInstalledPath);
-                    if (list !== undefined) {
-                        // For every *directory* in the list (non-recursive). Each directory is basically a platform.
-                        list.forEach((entry) => {
-                            if (entry !== "vcpkg") {
-                                let pathToCheck: string = path.join(vcpkgInstalledPath, entry);
-                                if (fs.existsSync(pathToCheck)) {
-                                    let p: string = path.join(pathToCheck, "include");
-                                    if (fs.existsSync(p)) {
-                                        this.vcpkgIncludes.push(p);
-                                    }
+            // Check for vcpkgRoot and include relevent paths if found.
+            let vcpkgRoot: string = util.getVcpkgRoot();
+            if (vcpkgRoot) {
+                let list: string[] = await util.readDir(vcpkgRoot);
+                if (list !== undefined) {
+                    // For every *directory* in the list (non-recursive). Each directory is basically a platform.
+                    list.forEach((entry) => {
+                        if (entry !== "vcpkg") {
+                            let pathToCheck: string = path.join(vcpkgRoot, entry);
+                            if (fs.existsSync(pathToCheck)) {
+                                let p: string = path.join(pathToCheck, "include");
+                                if (fs.existsSync(p)) {
+                                    p = p.replace(/\\/g, "/");
+                                    p = p.replace(vcpkgRoot, "${vcpkgRoot}");
+                                    this.vcpkgIncludes.push(p);
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }
         } catch (error) {} finally {
@@ -321,13 +326,17 @@ export class CppProperties {
         });
     }
 
-    public addCustomConfigurationProvider(providerId: string): Thenable<void> {
+    public updateCustomConfigurationProvider(providerId: string): Thenable<void> {
         return new Promise<void>((resolve) => {
             if (this.propertiesFile) {
                 this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
                     this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
                     let config: Configuration = this.CurrentConfiguration;
-                    config.configurationProvider = providerId;
+                    if (providerId) {
+                        config.configurationProvider = providerId;
+                    } else {
+                        delete config.configurationProvider;
+                    }
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
                     this.handleConfigurationChange();
                     resolve();
@@ -424,6 +433,7 @@ export class CppProperties {
             configuration.includePath = this.updateConfiguration(configuration.includePath, settings.defaultIncludePath);
             configuration.defines = this.updateConfiguration(configuration.defines, settings.defaultDefines);
             configuration.macFrameworkPath = this.updateConfiguration(configuration.macFrameworkPath, settings.defaultMacFrameworkPath);
+            configuration.windowsSdkVersion = this.updateConfiguration(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion);
             configuration.forcedInclude = this.updateConfiguration(configuration.forcedInclude, settings.defaultForcedInclude);
             configuration.compileCommands = this.updateConfiguration(configuration.compileCommands, settings.defaultCompileCommands);
             configuration.compilerPath = this.updateConfiguration(configuration.compilerPath, settings.defaultCompilerPath);
@@ -495,9 +505,8 @@ export class CppProperties {
         } else {
             fs.mkdir(this.configFolder, (e: NodeJS.ErrnoException) => {
                 if (!e || e.code === 'EEXIST') {
-                    let dirPathEscaped: string = this.configFolder.replace("#", "%23");
-                    let fullPathToFile: string = path.join(dirPathEscaped, "c_cpp_properties.json");
-                    let filePath: vscode.Uri = vscode.Uri.parse("untitled:" + fullPathToFile);
+                    let fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
+                    let filePath: vscode.Uri = vscode.Uri.file(fullPathToFile).with({ scheme: "untitled" });
                     vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
                         let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         if (this.configurationJson) {
