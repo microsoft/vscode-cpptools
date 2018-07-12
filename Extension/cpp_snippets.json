@@ -65,10 +65,16 @@
     "description": "Code snippet for switch",
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
-  "main": {
-    "prefix": "main",
+  "imain": {
+    "prefix": "imain",
     "body": "\nint main(int argc, char const *argv[])\n{\n\t${1:/* code */}\n\treturn 0;\n}\n",
-    "description": "Code snippet for main()",
+    "description": "Code snippet for int main()",
+    "scope": "source.c, source.objc, source.c++, source.objc++"
+  },
+  "vmain": {
+    "prefix": "vmain",
+    "body": "\nvoid main()\n{\n\t${1:/* code */}\n}\n",
+    "description": "Code snippet for void main()",
     "scope": "source.c, source.objc, source.c++, source.objc++"
   },
   "do": {
