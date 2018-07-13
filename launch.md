@@ -101,6 +101,9 @@ You can change the behavior of GDB or LLDB by setting the following options.
 
 * #### `miDebuggerPath`
   The path to the debugger (such as gdb). When only the executable is specified, it will search the operating system's PATH variable for a debugger (GDB on Linux and Windows, LLDB on OS X).
+  
+* #### `miDebuggerArgs`
+  Additional arguments to pass to the debugger (such as gdb).
 
 * #### `stopAtEntry`
   If set to true, the debugger should stop at the entry-point of the target (ignored on attach). Default value is `false`.
