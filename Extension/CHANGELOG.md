@@ -20,6 +20,7 @@
 * Fix `#include` autocomplete with Mac framework headers. [#2251](https://github.com/Microsoft/vscode-cpptools/issues/2251)
 * Fix for debugging to support empty arguments for debuggee. [#2258](https://github.com/Microsoft/vscode-cpptools/issues/2258)
 * Fix `Go to Definition` bug (missing symbols outside the workspace). [#2281](https://github.com/Microsoft/vscode-cpptools/issues/2281)
+* Fix completion not working in an initializer list. [VS #207122](https://developercommunity.visualstudio.com/content/problem/207122/c-intellisense-not-working-within-an-initializer-l.html)
 * Fix for debugging async Visual C++ causing debugger to hang.
 
 ## Version 0.17.6: July 2, 2018
