@@ -18,7 +18,7 @@
 * Fix variables not resolving in `macFrameworkPath`. [#2234](https://github.com/Microsoft/vscode-cpptools/issues/2234)
 * Fix `Go to Definition` not working for macros followed by `.` or `->`. [#2245](https://github.com/Microsoft/vscode-cpptools/issues/2245)
 * Fix `#include` autocomplete with Mac framework headers. [#2251](https://github.com/Microsoft/vscode-cpptools/issues/2251)
-* Fix `Go to Definition` bug with `compile_commands.json` and recursive includes. [#2281](https://github.com/Microsoft/vscode-cpptools/issues/2281)
+* Fix `Go to Definition` bug. [#2281](https://github.com/Microsoft/vscode-cpptools/issues/2281)
 
 ## Version 0.17.6: July 2, 2018
 * Fix the database icon getting stuck with recursive includes. [#2104](https://github.com/Microsoft/vscode-cpptools/issues/2104)
