@@ -48,6 +48,7 @@ export class CppSettings extends Settings {
     public get workspaceParsingPriority(): boolean { return super.Section.get<boolean>("workspaceParsingPriority"); }
     public get exclusionPolicy(): boolean { return super.Section.get<boolean>("exclusionPolicy"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
+    public get configurationWarnings(): string { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string { return super.Section.get<string>("preferredPathSeparator"); }
     public get defaultIncludePath(): string[] { return super.Section.get<string[]>("default.includePath"); }
     public get defaultDefines(): string[] { return super.Section.get<string[]>("default.defines"); }

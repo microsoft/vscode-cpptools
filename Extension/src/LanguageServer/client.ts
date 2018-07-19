@@ -30,6 +30,7 @@ import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
 
 let ui: UI;
+const configProviderTimeout: number = 2000;
 
 interface NavigationPayload {
     navigation: string;
@@ -430,17 +431,18 @@ class DefaultClient implements Client {
                     let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
                     const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
                     const allow: string = "Allow";
-                    const notNow: string = "Not Now";
-                    const dontAskAgain: string = "Don't Ask Again";
-                    vscode.window.showInformationMessage(message, allow, notNow, dontAskAgain).then(result => {
+                    const dontAllow: string = "Don't Allow";
+                    const askLater: string = "Ask Me Later";
+                    vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(result => {
                         switch (result) {
                             case allow: {
                                 this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
                                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
                                 });
+                                ask.Value = false;
                                 break;
                             }
-                            case dontAskAgain: {
+                            case dontAllow: {
                                 ask.Value = false;
                                 break;
                             }
@@ -475,7 +477,7 @@ class DefaultClient implements Client {
             let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
                 return currentProvider.provideConfigurations(documentUris, tokenSource.token);
             };
-            this.queueTaskWithTimeout(task, 1000, tokenSource).then(configs => this.sendCustomConfigurations(configs));
+            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs));
         });
     }
 
@@ -508,17 +510,29 @@ class DefaultClient implements Client {
             return Promise.reject("");
         };
     
-        return this.queueTaskWithTimeout(provideConfigurationAsync, 1000, tokenSource).then(
+        return this.queueTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
             (configs: SourceFileConfigurationItem[]) => {
                 if (configs && configs.length > 0) {
                     this.sendCustomConfigurations(configs);
                 }
             },
             () => {
-                if (!this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
+                let settings: CppSettings = new CppSettings(this.RootUri);
+                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
+                    const dismiss: string = "Dismiss";
+                    const disable: string = "Disable Warnings";
                     vscode.window.showInformationMessage(
                         `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
-                        `Settings from the '${configName}' configuration will be used instead.`);
+                        `Settings from the '${configName}' configuration will be used instead.`,
+                        dismiss,
+                        disable).then(response => {
+                            switch (response) {
+                                case disable: {
+                                    settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+                                    break;
+                                }
+                            }
+                        });
                 }
             });
     }

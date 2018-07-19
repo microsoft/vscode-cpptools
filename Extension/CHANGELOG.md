@@ -21,6 +21,7 @@
 * Fix `#include` autocomplete with Mac framework headers. [#2251](https://github.com/Microsoft/vscode-cpptools/issues/2251)
 * Fix for debugging to support empty arguments for debuggee. [#2258](https://github.com/Microsoft/vscode-cpptools/issues/2258)
 * Fix `Go to Definition` bug (missing symbols outside the workspace). [#2281](https://github.com/Microsoft/vscode-cpptools/issues/2281)
+* Add a setting to silence configuration provider warnings. [#2292](https://github.com/Microsoft/vscode-cpptools/issues/2292)
 * Fix for debugging async Visual C++ causing debugger to hang.
 * Fix `main` snippet.
 
