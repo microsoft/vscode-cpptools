@@ -30,6 +30,7 @@ import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
 
 let ui: UI;
+const configProviderTimeout: number = 2000;
 
 interface NavigationPayload {
     navigation: string;
@@ -476,7 +477,7 @@ class DefaultClient implements Client {
             let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
                 return currentProvider.provideConfigurations(documentUris, tokenSource.token);
             };
-            this.queueTaskWithTimeout(task, 1000, tokenSource).then(configs => this.sendCustomConfigurations(configs));
+            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs));
         });
     }
 
@@ -509,7 +510,7 @@ class DefaultClient implements Client {
             return Promise.reject("");
         };
     
-        return this.queueTaskWithTimeout(provideConfigurationAsync, 2000, tokenSource).then(
+        return this.queueTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
             (configs: SourceFileConfigurationItem[]) => {
                 if (configs && configs.length > 0) {
                     this.sendCustomConfigurations(configs);
