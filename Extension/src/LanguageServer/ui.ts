@@ -6,6 +6,7 @@
 
 import * as vscode from 'vscode';
 import { Client } from './client';
+import { getCustomConfigProviders, CustomConfigurationProviderCollection } from './customProviders';
 
 let ui: UI;
 
@@ -160,12 +161,22 @@ export class UI {
         items.push({ label: "Edit Configurations...", description: "", index: configurationNames.length });
 
         return vscode.window.showQuickPick(items, options)
-            .then(selection => {
-                if (!selection) {
-                    return -1;
-                }
-                return selection.index;
-            });
+            .then(selection => (selection) ? selection.index : -1);
+    }
+
+    public showConfigurationProviders(): Thenable<string|undefined> {
+        let options: vscode.QuickPickOptions = {};
+        options.placeHolder = "Select a Configuration Provider...";
+        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+
+        let items: KeyedQuickPickItem[] = [];
+        providers.forEach(provider => {
+            items.push({ label: provider.name, description: "", key: provider.extensionId });
+        });
+        items.push({ label: "(none)", description: "Disable the active configuration provider, if applicable.", key: "" });
+
+        return vscode.window.showQuickPick(items, options)
+            .then(selection => (selection) ? selection.key : undefined);
     }
 
     public showCompileCommands(paths: string[]): Thenable<number> {
@@ -178,12 +189,7 @@ export class UI {
         }
 
         return vscode.window.showQuickPick(items, options)
-            .then(selection => {
-                if (!selection) {
-                    return -1;
-                }
-                return selection.index;
-            });
+            .then(selection => (selection) ? selection.index : -1);
     }
 
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
@@ -194,12 +200,7 @@ export class UI {
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
 
         return vscode.window.showQuickPick(items, options)
-            .then(selection => {
-                if (!selection) {
-                    return "";
-                }
-                return selection.key;
-            });
+            .then(selection => (selection) ? selection.key : "");
     }
 
     public showParsingCommands(): Thenable<number> {
@@ -215,12 +216,7 @@ export class UI {
         }
         
         return vscode.window.showQuickPick(items, options)
-            .then(selection => {
-                if (!selection) {
-                    return -1;
-                }
-                return selection.index;
-            });
+            .then(selection => (selection) ? selection.index : -1);
     }
 
     public dispose(): void {

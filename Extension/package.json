@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.17.6",
+  "version": "0.17.7-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -250,6 +250,16 @@
           "description": "Defines the editor behavior for when the Enter key is pressed inside a multiline or single line comment block.",
           "scope": "resource"
         },
+        "C_Cpp.configurationWarnings": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
+          "scope": "resource"
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
@@ -284,6 +294,16 @@
           },
           "default": null,
           "description": "The value to use in a configuration if \"macFrameworkPath\" is not specified, or the values to insert if \"${default}\" is present in \"macFrameworkPath\".",
+          "scope": "resource"
+        },
+        "C_Cpp.default.windowsSdkVersion": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Version of the Windows SDK include path to use on Windows, e.g. '10.0.17134.0'.",
+          "pattern": "^\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1$",
           "scope": "resource"
         },
         "C_Cpp.default.compileCommands": {
@@ -413,6 +433,11 @@
       {
         "command": "C_Cpp.ConfigurationSelect",
         "title": "Select a Configuration...",
+        "category": "C/Cpp"
+      },
+      {
+        "command": "C_Cpp.ConfigurationProviderSelect",
+        "title": "Change Configuration Provider...",
         "category": "C/Cpp"
       },
       {
@@ -1351,7 +1376,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2003936",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2004596",
       "platforms": [
         "linux"
       ],
@@ -1365,7 +1390,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2003833",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2004498",
       "platforms": [
         "linux"
       ],
@@ -1381,7 +1406,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2003834",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2004597",
       "platforms": [
         "darwin"
       ],
@@ -1392,7 +1417,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2003835",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2004598",
       "platforms": [
         "win32"
       ],
