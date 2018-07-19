@@ -250,6 +250,16 @@
           "description": "Defines the editor behavior for when the Enter key is pressed inside a multiline or single line comment block.",
           "scope": "resource"
         },
+        "C_Cpp.configurationWarnings": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
+          "scope": "resource"
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
