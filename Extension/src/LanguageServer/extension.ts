@@ -210,6 +210,7 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', onSelectConfigurationProvider));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
@@ -311,7 +312,7 @@ function selectClient(): Thenable<Client> {
 function onResetDatabase(): void {
     onActivationEvent();
     /* need to notify the affected client(s) */
-    selectClient().then(client => client.resetDatabase(), rejected => { });
+    selectClient().then(client => client.resetDatabase(), rejected => {});
 }
 
 function onSelectConfiguration(): void {
@@ -325,12 +326,21 @@ function onSelectConfiguration(): void {
     }
 }
 
+function onSelectConfigurationProvider(): void {
+    onActivationEvent();
+    if (!isFolderOpen()) {
+        vscode.window.showInformationMessage('Open a folder first to select a configuration provider');
+    } else {
+        selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
+    }
+}
+
 function onEditConfiguration(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => { });
+        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
     }
 }
 
@@ -413,17 +423,17 @@ function onShowReleaseNotes(): void {
 
 function onPauseParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.pauseParsing(), rejected => { });
+    selectClient().then(client => client.pauseParsing(), rejected => {});
 }
 
 function onResumeParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.resumeParsing(), rejected => { });
+    selectClient().then(client => client.resumeParsing(), rejected => {});
 }
 
 function onShowParsingCommands(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleShowParsingCommands(), rejected => { });
+    selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
 }
 
 function onTakeSurvey(): void {
