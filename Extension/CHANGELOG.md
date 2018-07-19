@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.17.7: July 18, 2018
+## Version 0.17.7: July 19, 2018
 * Fix `Go to Definition` for code scoped with an aliased namespace. [#387](https://github.com/Microsoft/vscode-cpptools/issues/387)
 * Fix incorrect IntelliSense errors with template template-arguments. [#1014](https://github.com/Microsoft/vscode-cpptools/issues/1014)
 * Fix crash when using designated initializer lists. [#1440](https://github.com/Microsoft/vscode-cpptools/issues/1440)
@@ -15,6 +15,7 @@
 * Add `Change Configuration Provider...` command. [#2224](https://github.com/Microsoft/vscode-cpptools/issues/2224)
 * Fix out-of-memory crash with `#include` code actions when no folder is open. [#2225](https://github.com/Microsoft/vscode-cpptools/issues/2225)
 * Fix `intelliSenseMode` with custom config providers on Windows. [#2228](https://github.com/Microsoft/vscode-cpptools/issues/2228)
+* Fix formatting not working on Windows if the VC++ 2015 redist isn't installed. [#2232](https://github.com/Microsoft/vscode-cpptools/issues/2232)
 * Fix variables not resolving in `macFrameworkPath`. [#2234](https://github.com/Microsoft/vscode-cpptools/issues/2234)
 * Fix `Go to Definition` not working for macros followed by `.` or `->`. [#2245](https://github.com/Microsoft/vscode-cpptools/issues/2245)
 * Fix `#include` autocomplete with Mac framework headers. [#2251](https://github.com/Microsoft/vscode-cpptools/issues/2251)
