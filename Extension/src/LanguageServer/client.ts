@@ -1068,7 +1068,7 @@ class DefaultClient implements Client {
 
     public handleConfigurationProviderSelectCommand(): void {
         this.notifyWhenReady(() => {
-            ui.showConfigurationProviders()
+            ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider)
                 .then(extensionId => {
                     if (extensionId === undefined) {
                         // operation was cancelled.

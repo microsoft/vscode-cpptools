@@ -164,14 +164,18 @@ export class UI {
             .then(selection => (selection) ? selection.index : -1);
     }
 
-    public showConfigurationProviders(): Thenable<string|undefined> {
+    public showConfigurationProviders(currentProvider: string|null): Thenable<string|undefined> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select a Configuration Provider...";
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
 
         let items: KeyedQuickPickItem[] = [];
         providers.forEach(provider => {
-            items.push({ label: provider.name, description: "", key: provider.extensionId });
+            let label: string = provider.name;
+            if (provider.extensionId === currentProvider) {
+                label += " (active)";
+            }
+            items.push({ label: label, description: "", key: provider.extensionId });
         });
         items.push({ label: "(none)", description: "Disable the active configuration provider, if applicable.", key: "" });
 
