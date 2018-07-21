@@ -233,7 +233,7 @@ export class CppProperties {
             if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
             }
-            if (!settings.defaultWindowsSdkVersion && process.platform === 'win32') {
+            if (!settings.defaultWindowsSdkVersion && this.defaultWindowsSdkVersion && process.platform === 'win32') {
                 configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
             if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
