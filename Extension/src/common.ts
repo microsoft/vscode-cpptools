@@ -178,7 +178,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
     }
 
     // Replace environment and configuration variables.
-    let regexp: RegExp = /\$\{((env|config|workspaceFolder)(.|:))?(.*?)\}/g;
+    let regexp: RegExp = /\$\{((env|config|workspaceFolder)(\.|:))?(.*?)\}/g;
     let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
         // Historically, if the variable didn't have anything before the "." or ":"
         // it was assumed to be an environment variable
