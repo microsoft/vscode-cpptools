@@ -154,6 +154,24 @@
           "minimum": 0.1,
           "maximum": 1
         },
+        "C_Cpp.inactiveRegionForegroundColor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Controls the font coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to the syntax coloring scheme of the editor. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource"
+        },
+        "C_Cpp.inactiveRegionBackgroundColor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Controls the background coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to transparent. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource"
+        },
         "C_Cpp.formatting": {
           "type": "string",
           "enum": [
