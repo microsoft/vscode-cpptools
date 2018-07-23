@@ -41,7 +41,7 @@ export class CppSettings extends Settings {
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
     public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }
-    public get inactiveRegionFontColor(): string { return super.Section.get<string>("inactiveRegionFontColor"); }
+    public get inactiveRegionForegroundColor(): string { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
     public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }

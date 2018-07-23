@@ -1,5 +1,8 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.17.8: August 16, 2018
+* Add `inactiveRegionForegroundColor` and `inactiveRegionBackgroundColor` to settings. [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
+
 ## Version 0.17.7: July 22, 2018
 * Fix `Go to Definition` for code scoped with an aliased namespace. [#387](https://github.com/Microsoft/vscode-cpptools/issues/387)
 * Fix incorrect IntelliSense errors with template template-arguments. [#1014](https://github.com/Microsoft/vscode-cpptools/issues/1014)
@@ -24,7 +27,6 @@
 * Add a setting to silence configuration provider warnings. [#2292](https://github.com/Microsoft/vscode-cpptools/issues/2292)
 * Fix for debugging async Visual C++ causing debugger to hang.
 * Fix `main` snippet.
-* Add `inactiveRegionFontColor` and `inactiveRegionBackgroundColor` to settings. [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
 
 ## Version 0.17.6: July 2, 2018
 * Fix the database icon getting stuck with recursive includes. [#2104](https://github.com/Microsoft/vscode-cpptools/issues/2104)
