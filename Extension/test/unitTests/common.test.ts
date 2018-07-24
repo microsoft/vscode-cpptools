@@ -90,6 +90,15 @@ suite("Common Utility validation", () => {
                 .shouldResolveTo(input);
         });
 
+        test("env with macro inside environment definition", () => {
+            resolveVariablesWithInput("${arm6.include}")
+                .withEnvironment({
+                    "envRoot": "apps/tool/buildenv",
+                    "arm6.include": "${envRoot}/arm6/include"
+                })
+                .shouldResolveTo("apps/tool/buildenv/arm6/include");
+        });
+
         test("env input with 1 level of nested variables anchored at end", () => {
             resolveVariablesWithInput("${foo${test}}")
                 .withEnvironment({
