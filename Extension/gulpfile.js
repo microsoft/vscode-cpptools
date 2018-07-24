@@ -18,7 +18,11 @@ gulp.task('allTests', () => {
 });
 
 gulp.task('unitTests', () => {
-    gulp.src('./out/test/unitTests', {read: false}).pipe(
+    env.set({
+            CODE_TESTS_PATH: "./out/test/unitTests",
+        }
+    );
+    gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false}).pipe(
         mocha({
             ui: "tdd"
         })
