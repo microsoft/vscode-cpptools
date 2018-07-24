@@ -99,6 +99,34 @@ suite("Common Utility validation", () => {
                 .shouldResolveTo("apps/tool/buildenv/arm6/include");
         });
 
+        test("env nested with half open variable", () => {
+            resolveVariablesWithInput("${arm6.include}")
+                .withEnvironment({
+                    "envRoot": "apps/tool/buildenv",
+                    "arm6.include": "${envRoot/arm6/include"
+                })
+                .shouldResolveTo("${envRoot/arm6/include");
+        });
+
+        test("env nested with half closed variable", () => {
+            resolveVariablesWithInput("${arm6.include}")
+                .withEnvironment({
+                    "envRoot": "apps/tool/buildenv",
+                    "arm6.include": "envRoot}/arm6/include"
+                })
+                .shouldResolveTo("envRoot}/arm6/include");
+        });
+
+        test("env nested with a cycle", () => {
+            resolveVariablesWithInput("${a}")
+                .withEnvironment({
+                    "a": "${b}",
+                    "b": "${c}",
+                    "c": "${a}"
+                })
+                .shouldResolveTo("${c}");
+        });
+
         test("env input with 1 level of nested variables anchored at end", () => {
             resolveVariablesWithInput("${foo${test}}")
                 .withEnvironment({

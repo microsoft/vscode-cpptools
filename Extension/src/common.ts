@@ -199,6 +199,10 @@ function expandNestedVariable(input: string, additionalEnvironment: {[key: strin
         }
 
         const closeIndex: number = indexOfMatchingCloseBrace(openIndex + 2, stackInput);
+        if (closeIndex < 0) {
+            break;
+        }
+
         stack.push({
             prefix: stackInput.substring(0, openIndex),
             postfix: stackInput.substring(closeIndex + 1)
@@ -276,13 +280,15 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
 
     // Replace environment and configuration variables.
     let ret: string = input;
+    const cycleCache: Set<string> = new Set([ ret ]);
     const openTagRegex: RegExp = /\$\{/;
     while (openTagRegex.test(ret)) {
         const expansion: string = expandNestedVariable(ret, additionalEnvironment);
-        const doneExpanding: boolean = expansion === ret;
+        const doneExpanding: boolean = cycleCache.has(expansion);
         if (doneExpanding) {
             break;
         }
+        cycleCache.add(expansion);
         ret = expansion;
     }
 
