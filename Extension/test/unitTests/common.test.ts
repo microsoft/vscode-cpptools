@@ -1,48 +1,53 @@
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
+
 import * as assert from "assert";
 import {  resolveVariables } from "../../src/common";
 
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
-        const success = "success";
-        const home = process.env.HOME;
+        const success: string = "success";
+        const home: string = process.env.HOME;
 
         test("raw input", () => {
-            const input = "test";
-            assert.equal(resolveVariables(input, {}), input);
+            const input: string = "test";
+            inputAndEnvironment(input, {})
+                .shouldResolveTo(input);
         });
 
         test("raw input with tilde", () => {
-            const input = "~/test";
-            assert.equal(resolveVariables(input, {}), `${home}/test`)
+            inputAndEnvironment("~/test", {})
+                .shouldResolveTo(`${home}/test`);
         });
 
         test("env input with tilde", () => {
-            const input = "${path}/test";
-            const actual = resolveVariables(input, {
-                path: home
-            }); 
-            assert.equal(actual, `${home}/test`)
+            inputAndEnvironment("${path}/test", {
+                    path: home
+                })
+                .shouldResolveTo(`${home}/test`);
         });
 
         test("solo env input resulting in array", () => {
-            const input = "${test}";
-            const actual = resolveVariables(input, {
-                test: ["foo", "bar"]
-            }); 
-            assert.equal(actual, "foo;bar")
+            inputAndEnvironment("${test}", {
+                    test: ["foo", "bar"]
+                })
+                .shouldResolveTo("foo;bar");
         });
 
         test("mixed raw and env input resulting in array", () => {
-            const input = "baz${test}";
-            const actual = resolveVariables(input, {
-                test: ["foo", "bar"]
-            }); 
-            assert.equal(actual, input)
+            const input: string = "baz${test}";
+            resolveVariablesWithInput(input)
+                .withEnvironment({
+                    test: ["foo", "bar"]
+                })
+                .shouldResolveTo(input);
         });
 
         test("solo env input not in env config finds process env", () => {
-            const processKey = `cpptoolstests_${Date.now()}`;
-            const input = "foo${" + processKey + "}";
+            const processKey: string = `cpptoolstests_${Date.now()}`;
+            const input: string = "foo${" + processKey + "}";
             let actual: string;
             try {
                 process.env[processKey] = "bar";
@@ -54,100 +59,131 @@ suite("Common Utility validation", () => {
         });
 
         test("env input", () => {
-            shouldSuccessfullyLookupInEnv("${test}", "test");
+            resolveVariablesWithInput("${test}")
+                .withEnvironment({
+                    "test": success
+                })
+                .shouldResolveTo(success);
         });
 
         test("env input mixed with plain text", () => {
-            const input = "${test}bar";
-            const env = {
-                test: "foo"
-            };
-            const result = resolveVariables(input, env);
-            assert.equal(result, "foobar");
+            resolveVariablesWithInput("${test}bar")
+                .withEnvironment({
+                    "test": "foo"
+                })
+                .shouldResolveTo("foobar");
         });
 
         test("env input with two variables", () => {
-            const input = "f${a}${b}r";
-            const env = {
-                a: "oo",
-                b: "ba"
-            };
-            const result = resolveVariables(input, env);
-            assert.equal(result, "foobar");
+            resolveVariablesWithInput("f${a}${b}r")
+                .withEnvironment({
+                    a: "oo",
+                    b: "ba"
+                })
+                .shouldResolveTo("foobar");
         });
 
         test("env input not in env", () => {
-            const input = "${test}";
-            assert.equal(resolveVariables(input, {}), input);
+            const input: string = "${test}";
+            resolveVariablesWithInput(input)
+                .withEnvironment({})
+                .shouldResolveTo(input);
         });
 
         test("env input with 1 level of nested variables anchored at end", () => {
-            const input = "${foo${test}}";
-
-            const env = {
-                "foobar": success,
-                "test": "bar"
-            };
-            assert.equal(resolveVariables(input, env), success);
+            resolveVariablesWithInput("${foo${test}}")
+                .withEnvironment({
+                    "foobar": success,
+                    "test": "bar"
+                })
+                .shouldResolveTo(success);
         });
 
         test("env input with 1 level of nested variables anchored in the middle", () => {
-            const input = "${f${test}r}";
-
-            const env = {
-                "foobar": success,
-                "test": "ooba"
-            };
-            assert.equal(resolveVariables(input, env), success);
+            resolveVariablesWithInput("${f${test}r}")
+                .withEnvironment({
+                    "foobar": success,
+                    "test": "ooba"
+                })
+                .shouldResolveTo(success);
         });
 
         test("env input with 1 level of nested variable anchored at front", () => {
-            const input = "${${test}bar}";
-
-            const env = {
-                "foobar": success,
-                "test": "foo"
-            };
-            assert.equal(resolveVariables(input, env), success);
+            resolveVariablesWithInput("${${test}bar}")
+                .withEnvironment({
+                    "foobar": success,
+                    "test": "foo"
+                })
+                .shouldResolveTo(success);
         });
 
         test("env input with 3 levels of nested variables", () => {
-            const input = "${foo${a${b${c}}}}";
-            const env = {
-                "foobar": success,
-                "a1": "bar",
-                "b2": "1",
-                "c": "2"
-            };
-            assert.equal(resolveVariables(input, env), success);
+            resolveVariablesWithInput("${foo${a${b${c}}}}")
+                .withEnvironment({
+                    "foobar": success,
+                    "a1": "bar",
+                    "b2": "1",
+                    "c": "2"
+                })
+                .shouldResolveTo(success);
         });
 
         test("env input contains env", () => {
-            shouldSuccessfullyLookupInEnv("${envRoot}", "envRoot");
+            resolveVariablesWithInput("${envRoot}")
+                .shouldLookupSymbol("envRoot");
         });
 
         test("env input contains config", () => {
-            shouldSuccessfullyLookupInEnv("${configRoot}", "configRoot");
+            resolveVariablesWithInput("${configRoot}")
+                .shouldLookupSymbol("configRoot");
         });
 
         test("env input contains workspaceFolder", () => {
-            shouldSuccessfullyLookupInEnv("${workspaceFolderRoot}", "workspaceFolderRoot");
+            resolveVariablesWithInput("${workspaceFolderRoot}")
+                .shouldLookupSymbol("workspaceFolderRoot");
         });
 
         test("input contains env.", () => {
-            shouldSuccessfullyLookupInEnv("${env.Root}", "Root");
+            resolveVariablesWithInput("${env.Root}")
+                .shouldLookupSymbol("Root");
         });
 
         test("input contains env:", () => {
-            shouldSuccessfullyLookupInEnv("${env:Root}", "Root");
+            resolveVariablesWithInput("${env:Root}")
+                .shouldLookupSymbol("Root");
         });
 
-
-        const shouldSuccessfullyLookupInEnv = (input: string, expectedResolvedKey: string) => {
-            const env = {};
-            env[expectedResolvedKey] = success;
-            const result = resolveVariables(input, env);
-            assert.equal(result, success);
+        interface ResolveTestFlowEnvironment {
+            withEnvironment(additionalEnvironment: {[key: string]: string | string[]}): ResolveTestFlowAssert;
+            shouldLookupSymbol: (key: string) => void;
         }
+        interface ResolveTestFlowAssert {
+            shouldResolveTo: (x: string) => void;
+        }
+
+        function resolveVariablesWithInput(input: string): ResolveTestFlowEnvironment {
+            return {
+                withEnvironment: (additionalEnvironment: {[key: string]: string | string[]}) => {
+                    return inputAndEnvironment(input, additionalEnvironment);
+                },
+                shouldLookupSymbol: (symbol: string) => {
+                    const environment: {[key: string]: string | string[]} = {};
+                    environment[symbol] = success;
+                    return inputAndEnvironment(input, environment)
+                        .shouldResolveTo(success);
+                }
+            };
+        }
+
+        function inputAndEnvironment(input: string, additionalEnvironment: {[key: string]: string | string[]}): ResolveTestFlowAssert {
+            return {
+                    shouldResolveTo: (expected: string) => {
+                    const actual: string = resolveVariables(input, additionalEnvironment);
+                    const msg: string = `Expected ${expected}. Got ${actual} with input ${input} and environment ${JSON.stringify(additionalEnvironment)}.`;
+                    assert.equal(actual, expected, msg);
+                }
+            };
+        }
+
     });
 });
