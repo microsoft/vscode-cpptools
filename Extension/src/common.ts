@@ -169,6 +169,104 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
+export function resolveInnerVariable(originalInput: string, wholeVariable: string, innerVariable: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+    let varType: string;
+    let name: string = innerVariable.replace(/(env|config|workspaceFolder)[\.|:](.*)/, (ignored: string, type: string, rest: string) => {
+        varType = type;
+        return rest;
+    });
+
+    // Historically, if the variable didn't have anything before the "." or ":"
+    // it was assumed to be an environment variable
+    if (varType === undefined) {
+        varType = "env";
+    }
+    let newValue: string = undefined;
+    switch (varType) {
+        case "env": {
+            let v: string | string[] = additionalEnvironment[name];
+            if (typeof v === "string") {
+                newValue = v;
+            } else if (originalInput === wholeVariable && v instanceof Array) {
+                newValue = v.join(";");
+            }
+            if (!newValue) {
+                newValue = process.env[name];
+            }
+            break;
+        }
+        case "config": {
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+            if (config) {
+                newValue = config.get<string>(name);
+            }
+            break;
+        }
+        case "workspaceFolder": {
+            // Only replace ${workspaceFolder:name} variables for now.
+            // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
+            // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
+            if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
+                let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+                if (folder) {
+                    newValue = folder.uri.fsPath;
+                }
+            }
+            break;
+        }
+        default: { assert.fail("unknown varType matched"); }
+    }
+    return (newValue) ? newValue : wholeVariable;
+}
+
+function indexOfMatchingCloseBrace(startingPos: number, input: string) {
+    let balanceFactor = 0;
+    for (let i = startingPos; i < input.length; i++) {
+        if (input[i] === "$" && i + 1 < input.length && input[i+1] === "{") {
+            balanceFactor += 1;
+        } else if (input[i] === "}") {
+            if (balanceFactor === 0) {
+                return i;
+            } else {
+                balanceFactor -= 1;
+            }
+        }
+    }
+    return -1;
+}
+
+interface StackEntry {
+    prefix: string;
+    postfix: string;
+}
+
+function expandVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+    let stack: StackEntry[] = [];
+    let stackInput = input;
+    while (stackInput !== "") {
+        const openIndex = stackInput.indexOf("${");
+        if (-1 < openIndex) {
+            const closeIndex = indexOfMatchingCloseBrace(openIndex+2, stackInput);
+            stack.push({
+                prefix: stackInput.substring(0, openIndex),
+                postfix: stackInput.substring(closeIndex + 1)
+            });
+            stackInput = stackInput.substring(openIndex + 2, closeIndex);
+        } else {
+            break;
+        }
+    }
+
+    let ret: string = stackInput;
+    while (stack.length !== 0) {
+        let stackEntry = stack.pop();
+        let resolvedItem =  resolveInnerVariable(input, "${" + ret + "}", ret, additionalEnvironment);
+        ret = stackEntry.prefix + resolvedItem + stackEntry.postfix;
+    }
+
+    return ret;
+}
+
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
@@ -178,53 +276,19 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
     }
 
     // Replace environment and configuration variables.
-    let regexp: RegExp = /\$\{((env|config|workspaceFolder)(\.|:))?(.*?)\}/g;
-    let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
-        // Historically, if the variable didn't have anything before the "." or ":"
-        // it was assumed to be an environment variable
-        if (varType === undefined) {
-            varType = "env";
+    let ret: string = input;
+    let openTagRegex = /\$\{/;
+    while (openTagRegex.test(ret)) {
+        let expansion = expandVariables(ret, additionalEnvironment);
+        // Needed to prevent infinite loop in the failed lookup case
+        if (expansion === ret) {
+            break;
         }
-        let newValue: string = undefined;
-        switch (varType) {
-            case "env": {
-                let v: string | string[] = additionalEnvironment[name];
-                if (typeof v === "string") {
-                    newValue = v;
-                } else if (input === match && v instanceof Array) {
-                    newValue = v.join(";");
-                }
-                if (!newValue) {
-                    newValue = process.env[name];
-                }
-                break;
-            }
-            case "config": {
-                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-                if (config) {
-                    newValue = config.get<string>(name);
-                }
-                break;
-            }
-            case "workspaceFolder": {
-                // Only replace ${workspaceFolder:name} variables for now.
-                // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
-                // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
-                if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
-                    let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-                    if (folder) {
-                        newValue = folder.uri.fsPath;
-                    }
-                }
-                break;
-            }
-            default: { assert.fail("unknown varType matched"); }
-        }
-        return (newValue) ? newValue : match;
-    });
+        ret = expansion;
+    }
 
     // Resolve '~' at the start of the path.
-    regexp = /^\~/g;
+    let regexp: RegExp = /^\~/g;
     ret = ret.replace(regexp, (match: string, name: string) => {
         let newValue: string = process.env.HOME;
         return (newValue) ? newValue : match;
