@@ -219,10 +219,10 @@ export function resolveInnerVariable(originalInput: string, wholeVariable: strin
     return (newValue) ? newValue : wholeVariable;
 }
 
-function indexOfMatchingCloseBrace(startingPos: number, input: string) {
-    let balanceFactor = 0;
-    for (let i = startingPos; i < input.length; i++) {
-        if (input[i] === "$" && i + 1 < input.length && input[i+1] === "{") {
+function indexOfMatchingCloseBrace(startingPos: number, input: string): number {
+    let balanceFactor: number = 0;
+    for (let i: number = startingPos; i < input.length; i++) {
+        if (input[i] === "$" && i + 1 < input.length && input[i + 1] === "{") {
             balanceFactor += 1;
         } else if (input[i] === "}") {
             if (balanceFactor === 0) {
@@ -242,11 +242,11 @@ interface StackEntry {
 
 function expandVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     let stack: StackEntry[] = [];
-    let stackInput = input;
+    let stackInput: string = input;
     while (stackInput !== "") {
-        const openIndex = stackInput.indexOf("${");
+        const openIndex: number = stackInput.indexOf("${");
         if (-1 < openIndex) {
-            const closeIndex = indexOfMatchingCloseBrace(openIndex+2, stackInput);
+            const closeIndex: number = indexOfMatchingCloseBrace(openIndex + 2, stackInput);
             stack.push({
                 prefix: stackInput.substring(0, openIndex),
                 postfix: stackInput.substring(closeIndex + 1)
@@ -259,8 +259,8 @@ function expandVariables(input: string, additionalEnvironment: {[key: string]: s
 
     let ret: string = stackInput;
     while (stack.length !== 0) {
-        let stackEntry = stack.pop();
-        let resolvedItem =  resolveInnerVariable(input, "${" + ret + "}", ret, additionalEnvironment);
+        let stackEntry: StackEntry = stack.pop();
+        let resolvedItem: string =  resolveInnerVariable(input, "${" + ret + "}", ret, additionalEnvironment);
         ret = stackEntry.prefix + resolvedItem + stackEntry.postfix;
     }
 
@@ -277,9 +277,9 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
 
     // Replace environment and configuration variables.
     let ret: string = input;
-    let openTagRegex = /\$\{/;
+    const openTagRegex: RegExp = /\$\{/;
     while (openTagRegex.test(ret)) {
-        let expansion = expandVariables(ret, additionalEnvironment);
+        const expansion: string = expandVariables(ret, additionalEnvironment);
         // Needed to prevent infinite loop in the failed lookup case
         if (expansion === ret) {
             break;
