@@ -124,7 +124,7 @@ suite("Common Utility validation", () => {
                     "b": "${c}",
                     "c": "${a}"
                 })
-                .shouldResolveTo("${c}");
+                .shouldResolveTo("${a}");
         });
 
         test("env input with 1 level of nested variables anchored at end", () => {
@@ -133,7 +133,7 @@ suite("Common Utility validation", () => {
                     "foobar": success,
                     "test": "bar"
                 })
-                .shouldResolveTo(success);
+                .shouldResolveTo("${foo${test}}");
         });
 
         test("env input with 1 level of nested variables anchored in the middle", () => {
@@ -142,7 +142,7 @@ suite("Common Utility validation", () => {
                     "foobar": success,
                     "test": "ooba"
                 })
-                .shouldResolveTo(success);
+                .shouldResolveTo("${f${test}r}");
         });
 
         test("env input with 1 level of nested variable anchored at front", () => {
@@ -151,7 +151,7 @@ suite("Common Utility validation", () => {
                     "foobar": success,
                     "test": "foo"
                 })
-                .shouldResolveTo(success);
+                .shouldResolveTo("${${test}bar}");
         });
 
         test("env input with 3 levels of nested variables", () => {
@@ -162,7 +162,7 @@ suite("Common Utility validation", () => {
                     "b2": "1",
                     "c": "2"
                 })
-                .shouldResolveTo(success);
+                .shouldResolveTo("${foo${a${b${c}}}}");
         });
 
         test("env input contains env", () => {
