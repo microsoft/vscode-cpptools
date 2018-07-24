@@ -169,7 +169,54 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
-export function resolveInnerVariable(originalInput: string, wholeVariable: string, innerVariable: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+function indexOfMatchingCloseBrace(startingPos: number, input: string): number {
+    let closeBracesToFind: number = 1;
+    for (let i: number = startingPos; i < input.length; i++) {
+        if (input[i] === "$" && i + 1 < input.length && input[i + 1] === "{") {
+            closeBracesToFind += 1;
+        } else if (input[i] === "}") {
+            closeBracesToFind -= 1;
+            if (closeBracesToFind < 1) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+interface StackEntry {
+    prefix: string;
+    postfix: string;
+}
+
+function expandNestedVariable(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+    let stack: StackEntry[] = [];
+    let stackInput: string = input;
+    while (stackInput !== "") {
+        const openIndex: number = stackInput.indexOf("${");
+        if (openIndex < 0) {
+            break;
+        }
+
+        const closeIndex: number = indexOfMatchingCloseBrace(openIndex + 2, stackInput);
+        stack.push({
+            prefix: stackInput.substring(0, openIndex),
+            postfix: stackInput.substring(closeIndex + 1)
+        });
+        stackInput = stackInput.substring(openIndex + 2, closeIndex);
+    }
+
+    let ret: string = stackInput;
+    while (stack.length !== 0) {
+        let stackEntry: StackEntry = stack.pop();
+        let resolvedItem: string =  resolveSingleVariableBlock(input, "${" + ret + "}", ret, additionalEnvironment);
+        ret = stackEntry.prefix + resolvedItem + stackEntry.postfix;
+    }
+
+    return ret;
+}
+
+function resolveSingleVariableBlock(originalInput: string, wholeVariable: string, innerVariable: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     let varType: string;
     let name: string = innerVariable.replace(/(env|config|workspaceFolder)[\.|:](.*)/, (ignored: string, type: string, rest: string) => {
         varType = type;
@@ -219,54 +266,6 @@ export function resolveInnerVariable(originalInput: string, wholeVariable: strin
     return (newValue) ? newValue : wholeVariable;
 }
 
-function indexOfMatchingCloseBrace(startingPos: number, input: string): number {
-    let balanceFactor: number = 0;
-    for (let i: number = startingPos; i < input.length; i++) {
-        if (input[i] === "$" && i + 1 < input.length && input[i + 1] === "{") {
-            balanceFactor += 1;
-        } else if (input[i] === "}") {
-            if (balanceFactor === 0) {
-                return i;
-            } else {
-                balanceFactor -= 1;
-            }
-        }
-    }
-    return -1;
-}
-
-interface StackEntry {
-    prefix: string;
-    postfix: string;
-}
-
-function expandVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
-    let stack: StackEntry[] = [];
-    let stackInput: string = input;
-    while (stackInput !== "") {
-        const openIndex: number = stackInput.indexOf("${");
-        if (-1 < openIndex) {
-            const closeIndex: number = indexOfMatchingCloseBrace(openIndex + 2, stackInput);
-            stack.push({
-                prefix: stackInput.substring(0, openIndex),
-                postfix: stackInput.substring(closeIndex + 1)
-            });
-            stackInput = stackInput.substring(openIndex + 2, closeIndex);
-        } else {
-            break;
-        }
-    }
-
-    let ret: string = stackInput;
-    while (stack.length !== 0) {
-        let stackEntry: StackEntry = stack.pop();
-        let resolvedItem: string =  resolveInnerVariable(input, "${" + ret + "}", ret, additionalEnvironment);
-        ret = stackEntry.prefix + resolvedItem + stackEntry.postfix;
-    }
-
-    return ret;
-}
-
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
@@ -279,9 +278,9 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
     let ret: string = input;
     const openTagRegex: RegExp = /\$\{/;
     while (openTagRegex.test(ret)) {
-        const expansion: string = expandVariables(ret, additionalEnvironment);
-        // Needed to prevent infinite loop in the failed lookup case
-        if (expansion === ret) {
+        const expansion: string = expandNestedVariable(ret, additionalEnvironment);
+        const doneExpanding: boolean = expansion === ret;
+        if (doneExpanding) {
             break;
         }
         ret = expansion;
