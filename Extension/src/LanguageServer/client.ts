@@ -840,6 +840,8 @@ class DefaultClient implements Client {
         
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
             opacity: settings.inactiveRegionOpacity.toString(),
+            backgroundColor: settings.inactiveRegionBackgroundColor,
+            color: settings.inactiveRegionForegroundColor,
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
         });
 
