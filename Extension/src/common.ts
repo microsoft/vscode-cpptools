@@ -231,7 +231,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
     // Resolve '~' at the start of the path.
     regexp = () => /^\~/g;
     ret = ret.replace(regexp(), (match: string, name: string) => {
-        let newValue: string = process.env.HOME;
+        let newValue: string = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
         return (newValue) ? newValue : match;
     });
 
