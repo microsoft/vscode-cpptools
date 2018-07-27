@@ -2,6 +2,7 @@
 
 ## Version 0.17.8: August 16, 2018
 * Add `inactiveRegionForegroundColor` and `inactiveRegionBackgroundColor` to settings. [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
+* Add multi-pass environment variable resolution allowing variables defined in terms of other variables. [#2322](https://github.com/Microsoft/vscode-cpptools/pull/2322)
 
 ## Version 0.17.7: July 22, 2018
 * Fix `Go to Definition` for code scoped with an aliased namespace. [#387](https://github.com/Microsoft/vscode-cpptools/issues/387)
