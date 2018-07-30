@@ -260,7 +260,6 @@ export class UI {
                 configured: configured
             });
         };
-        console.log(`show prompt: ${priority}`);
 
         if (this.configurationUIPromise) {
             this.configurationUIPromise = this.configurationUIPromise.then(result => {
