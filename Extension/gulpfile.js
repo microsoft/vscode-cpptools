@@ -12,11 +12,6 @@ const mocha = require('gulp-mocha');
 const fs = require('fs');
 const optionsSchemaGenerator = require('./out/tools/GenerateOptionsSchema');
 
-gulp.task('allTests', () => {
-    gulp.start('unitTests');
-    gulp.start('integrationTests');
-});
-
 gulp.task('unitTests', () => {
     env.set({
             CODE_TESTS_PATH: "./out/test/unitTests",
@@ -26,15 +21,11 @@ gulp.task('unitTests', () => {
         mocha({
             ui: "tdd"
         })
-    ).once('error', err => {
-        process.exit(1);
-    })
-    .once('end', () => {
-        process.exit();
-    })
+    ).once('error', err => process.exit(1))
+    .once('end', () => process.exit())
 });
 
-gulp.task('integrationTests', () => {
+gulp.task('integrationTests', ['unitTests'], () => {
     env.set({
             CODE_TESTS_PATH: "./out/test/integrationTests",
             CODE_TESTS_WORKSPACE: "./test/integrationTests/testAssets/SimpleCppProject"
@@ -42,16 +33,13 @@ gulp.task('integrationTests', () => {
     );
     gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false}).pipe(
         mocha({
-            ui: "tdd",
-            delay: true
+            ui: "tdd"
         })
-    ).once('error', err => {
-        process.exit(1);
-    })
-    .once('end', () => {
-        process.exit();
-    })
+    ).once('error', err => process.exit(1))
+    .once('end', () => process.exit())
 });
+
+gulp.task('allTests', ['unitTests', 'integrationTests']);
 
 /// Misc Tasks
 const allTypeScript = [
