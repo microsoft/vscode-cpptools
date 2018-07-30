@@ -236,23 +236,23 @@ export class UI {
             .then(selection => (selection) ? selection.index : -1);
     }
 
-    public showConfigureIncludePathMessage(prompt: () => Thenable<boolean>): void {
+    public showConfigureIncludePathMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
         setTimeout(() => {
-            this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt);
+            this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
         }, 10000);
     }
 
-    public showConfigureCompileCommandsMessage(prompt: () => Thenable<boolean>): void {
+    public showConfigureCompileCommandsMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
         setTimeout(() => {
-            this.showConfigurationPrompt(ConfigurationPriority.CompileCommands, prompt);
+            this.showConfigurationPrompt(ConfigurationPriority.CompileCommands, prompt, onSkip);
         }, 5000);
     }
 
-    public showConfigureCustomProviderMessage(prompt: () => Thenable<boolean>): void {
-        this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt);
+    public showConfigureCustomProviderMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
+        this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
     }
 
-    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>): void {
+    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
         let showPrompt: () => Thenable<ConfigurationResult> = async () => {
             let configured: boolean = await prompt();
             return Promise.resolve({
@@ -269,6 +269,7 @@ export class UI {
                 } else if (!result.configured) {
                     return showPrompt();
                 }
+                onSkip();
                 return Promise.resolve({
                     priority: result.priority,
                     configured: true

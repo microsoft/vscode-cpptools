@@ -454,7 +454,8 @@ class DefaultClient implements Client {
                             }
                             return false;
                         });
-                    });
+                    },
+                    () => ask.Value = false);
                 }
             } else if (selectedProvider === provider.extensionId) {
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
@@ -833,7 +834,8 @@ class DefaultClient implements Client {
                         }
                         return true;
                     });
-                });
+                },
+                () => showIntelliSenseFallbackMessage.Value = false);
             }
         }
     }
@@ -924,7 +926,8 @@ class DefaultClient implements Client {
                 }
                 return false;
             });
-        });
+        },
+        () => ask.Value = false);
     }
 
     /*********************************************
