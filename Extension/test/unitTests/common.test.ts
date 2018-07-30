@@ -9,7 +9,7 @@ import {  resolveVariables } from "../../src/common";
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
         const success: string = "success";
-        const home: string = process.env.HOME;
+        const home: string = process.env.HOME || process.env.USERPROFILE;
 
         test("raw input", () => {
             const input: string = "test";
