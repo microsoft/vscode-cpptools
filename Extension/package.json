@@ -225,7 +225,7 @@
             "All",
             "Just My Code"
           ],
-          "default": "All",
+          "default": "Just My Code",
           "description": "The symbols to include in the query results when 'Go to Symbol in Workspace' is invoked",
           "scope": "resource"
         },
