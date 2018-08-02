@@ -11,7 +11,7 @@ This preview release of the extension adds language support for C/C++ to Visual 
   * Quick Info (Hover)
   * Error Squiggles
 * Debugging
-  * Support for debugging Windows (PDB, Mingw/Cygwin), Linux and OS X applications
+  * Support for debugging Windows (PDB, MinGW/Cygwin), Linux and macOS applications
   * Line by line code stepping
   * Breakpoints (including conditional and function breakpoints)
   * Variable inspection

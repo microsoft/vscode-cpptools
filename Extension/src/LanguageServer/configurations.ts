@@ -345,7 +345,11 @@ export class CppProperties {
                 });
             } else {
                 let settings: CppSettings = new CppSettings(this.rootUri);
-                settings.update("default.configurationProvider", providerId);
+                if (providerId) {
+                    settings.update("default.configurationProvider", providerId);
+                } else {
+                    settings.update("default.configurationProvider", undefined); // delete the setting
+                }
                 this.CurrentConfiguration.configurationProvider = providerId;
                 resolve();
             }
@@ -515,6 +519,13 @@ export class CppProperties {
                             this.resetToDefaultSettings(true);
                         }
                         this.applyDefaultIncludePathsAndFrameworks();
+                        let settings: CppSettings = new CppSettings(this.rootUri);
+                        if (settings.defaultConfigurationProvider) {
+                            this.configurationJson.configurations.forEach(config => {
+                                config.configurationProvider = settings.defaultConfigurationProvider;
+                            });
+                            settings.update("default.configurationProvider", undefined); // delete the setting
+                        }
                         edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
                         vscode.workspace.applyEdit(edit).then((status) => {
                             // Fix for issue 163
