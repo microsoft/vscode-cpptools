@@ -309,6 +309,8 @@ export class CppProperties {
         } else if (process.platform === 'win32') {
             // Custom configs default to the OS's preference.
             return "msvc-x64";
+        } else if (process.platform === 'darwin') {
+            return "clang-x64";
         } else {
             return "gcc-x64";
         }
