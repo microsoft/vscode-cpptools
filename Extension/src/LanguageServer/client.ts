@@ -353,6 +353,7 @@ class DefaultClient implements Client {
                 dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
+                workspaceSymbols: settings.workspaceSymbols,
                 exclusionPolicy: settings.exclusionPolicy,
                 preferredPathSeparator: settings.preferredPathSeparator,
                 default: {
