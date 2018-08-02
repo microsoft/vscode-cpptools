@@ -222,8 +222,8 @@
         "C_Cpp.workspaceSymbols": {
           "type": "string",
           "enum": [
-            "Just My Code",
-            "All"
+            "All",
+            "Just My Code"
           ],
           "default": "All",
           "description": "The symbols to include in the query results when 'Go to Symbol in Workspace' is invoked",
