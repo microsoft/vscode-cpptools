@@ -1,6 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.17.7: July 19, 2018
+## Version 0.17.8: August 16, 2018
+* Add `inactiveRegionForegroundColor` and `inactiveRegionBackgroundColor` to settings. [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
+* Add multi-pass environment variable resolution allowing variables defined in terms of other variables. [#2322](https://github.com/Microsoft/vscode-cpptools/pull/2322)
+
+## Version 0.17.7: July 22, 2018
 * Fix `Go to Definition` for code scoped with an aliased namespace. [#387](https://github.com/Microsoft/vscode-cpptools/issues/387)
 * Fix incorrect IntelliSense errors with template template-arguments. [#1014](https://github.com/Microsoft/vscode-cpptools/issues/1014)
 * Fix crash when using designated initializer lists. [#1440](https://github.com/Microsoft/vscode-cpptools/issues/1440)

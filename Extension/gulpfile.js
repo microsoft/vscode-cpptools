@@ -12,42 +12,30 @@ const mocha = require('gulp-mocha');
 const fs = require('fs');
 const optionsSchemaGenerator = require('./out/tools/GenerateOptionsSchema');
 
-gulp.task('allTests', () => {
-    gulp.start('unitTests');
-    gulp.start('integrationTests');
-});
-
 gulp.task('unitTests', () => {
-    gulp.src('./out/test/unitTests', {read: false}).pipe(
-        mocha({
-            ui: "tdd"
-        })
-    ).once('error', err => {
-        process.exit(1);
-    })
-    .once('end', () => {
-        process.exit();
-    })
+    env.set({
+            CODE_TESTS_PATH: "./out/test/unitTests",
+        });
+
+    gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
+        .pipe(mocha({ ui: "tdd" }))
+        .once('error', err => process.exit(1))
+        .once('end', () => process.exit())
 });
 
 gulp.task('integrationTests', () => {
     env.set({
             CODE_TESTS_PATH: "./out/test/integrationTests",
             CODE_TESTS_WORKSPACE: "./test/integrationTests/testAssets/SimpleCppProject"
-        }
-    );
-    gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false}).pipe(
-        mocha({
-            ui: "tdd",
-            delay: true
-        })
-    ).once('error', err => {
-        process.exit(1);
-    })
-    .once('end', () => {
-        process.exit();
-    })
+        });
+
+    gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
+        .pipe(mocha({ ui: "tdd" }))
+        .once('error', err => process.exit(1))
+        .once('end', () => process.exit())
 });
+
+gulp.task('allTests', ['unitTests', 'integrationTests']);
 
 /// Misc Tasks
 const allTypeScript = [
@@ -80,7 +68,7 @@ gulp.task('tslint', () => {
 
 gulp.task('pr-check', () => {
     const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-    if (packageJson.activationEvents.length !== 1 &&  packageJson.activationEvents[0] !== '*') {
+    if (packageJson.activationEvents.length !== 1 && packageJson.activationEvents[0] !== '*') {
         console.log('Please make sure to not check in package.json that has been rewritten by the extension activation. If you intended to have changes in package.json, please only check-in your changes. If you did not, please run `git checkout -- package.json`.');
         process.exit(1);
     }
