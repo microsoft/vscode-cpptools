@@ -362,6 +362,7 @@
           ],
           "enum": [
             "msvc-x64",
+            "gcc-x64",
             "clang-x64"
           ],
           "default": null,

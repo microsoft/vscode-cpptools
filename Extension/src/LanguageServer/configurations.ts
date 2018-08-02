@@ -300,15 +300,19 @@ export class CppProperties {
 
     private getIntelliSenseModeForPlatform(name: string): string {
         // Do the built-in configs first.
-        if (name === "Linux" || name === "Mac") {
+        if (name === "Linux") {
+            return "gcc-x64";
+        } else if (name === "Mac") {
             return "clang-x64";
         } else if (name === "Win32") {
             return "msvc-x64";
         } else if (process.platform === 'win32') {
             // Custom configs default to the OS's preference.
             return "msvc-x64";
-        } else {
+        } else if (process.platform === 'darwin') {
             return "clang-x64";
+        } else {
+            return "gcc-x64";
         }
     }
 
