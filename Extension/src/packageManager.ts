@@ -197,7 +197,7 @@ export class PackageManager {
         if (retryCount !== 0) {
             // Log telemetry to see if retrying helps.
             let telemetryProperties: { [key: string]: string } = {};
-            telemetryProperties["success"] = `OnRetry${retryCount}`;
+            telemetryProperties["success"] = success ? `OnRetry${retryCount}` : 'false';
             if (lastError instanceof PackageManagerError) {
                 let packageError: PackageManagerError = lastError;
                 telemetryProperties['error.methodName'] = packageError.methodName;

@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.17.7-insiders",
+  "version": "0.17.8-insiders",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -154,6 +154,24 @@
           "minimum": 0.1,
           "maximum": 1
         },
+        "C_Cpp.inactiveRegionForegroundColor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Controls the font coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to the syntax coloring scheme of the editor. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource"
+        },
+        "C_Cpp.inactiveRegionBackgroundColor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Controls the background coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to transparent. This setting only applies when inactive region dimming is enabled.",
+          "scope": "resource"
+        },
         "C_Cpp.formatting": {
           "type": "string",
           "enum": [
@@ -199,6 +217,16 @@
           ],
           "default": "highest",
           "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/medium/low correspond to approximately 100/75/50/25% CPU usage.",
+          "scope": "resource"
+        },
+        "C_Cpp.workspaceSymbols": {
+          "type": "string",
+          "enum": [
+            "All",
+            "Just My Code"
+          ],
+          "default": "Just My Code",
+          "description": "The symbols to include in the query results when 'Go to Symbol in Workspace' is invoked",
           "scope": "resource"
         },
         "C_Cpp.exclusionPolicy": {
@@ -248,6 +276,16 @@
             ]
           },
           "description": "Defines the editor behavior for when the Enter key is pressed inside a multiline or single line comment block.",
+          "scope": "resource"
+        },
+        "C_Cpp.configurationWarnings": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
           "scope": "resource"
         },
         "C_Cpp.default.includePath": {
@@ -324,6 +362,7 @@
           ],
           "enum": [
             "msvc-x64",
+            "gcc-x64",
             "clang-x64"
           ],
           "default": null,
@@ -1366,7 +1405,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2004596",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006256",
       "platforms": [
         "linux"
       ],
@@ -1380,7 +1419,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2004498",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006255",
       "platforms": [
         "linux"
       ],
@@ -1396,7 +1435,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2004597",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006254",
       "platforms": [
         "darwin"
       ],
@@ -1407,7 +1446,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2004598",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006362",
       "platforms": [
         "win32"
       ],

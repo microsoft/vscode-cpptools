@@ -233,7 +233,7 @@ export class CppProperties {
             if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
             }
-            if (!settings.defaultWindowsSdkVersion && process.platform === 'win32') {
+            if (!settings.defaultWindowsSdkVersion && this.defaultWindowsSdkVersion && process.platform === 'win32') {
                 configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
             if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
@@ -300,15 +300,19 @@ export class CppProperties {
 
     private getIntelliSenseModeForPlatform(name: string): string {
         // Do the built-in configs first.
-        if (name === "Linux" || name === "Mac") {
+        if (name === "Linux") {
+            return "gcc-x64";
+        } else if (name === "Mac") {
             return "clang-x64";
         } else if (name === "Win32") {
             return "msvc-x64";
         } else if (process.platform === 'win32') {
             // Custom configs default to the OS's preference.
             return "msvc-x64";
-        } else {
+        } else if (process.platform === 'darwin') {
             return "clang-x64";
+        } else {
+            return "gcc-x64";
         }
     }
 
@@ -343,7 +347,11 @@ export class CppProperties {
                 });
             } else {
                 let settings: CppSettings = new CppSettings(this.rootUri);
-                settings.update("default.configurationProvider", providerId);
+                if (providerId) {
+                    settings.update("default.configurationProvider", providerId);
+                } else {
+                    settings.update("default.configurationProvider", undefined); // delete the setting
+                }
                 this.CurrentConfiguration.configurationProvider = providerId;
                 resolve();
             }
@@ -513,6 +521,13 @@ export class CppProperties {
                             this.resetToDefaultSettings(true);
                         }
                         this.applyDefaultIncludePathsAndFrameworks();
+                        let settings: CppSettings = new CppSettings(this.rootUri);
+                        if (settings.defaultConfigurationProvider) {
+                            this.configurationJson.configurations.forEach(config => {
+                                config.configurationProvider = settings.defaultConfigurationProvider;
+                            });
+                            settings.update("default.configurationProvider", undefined); // delete the setting
+                        }
                         edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
                         vscode.workspace.applyEdit(edit).then((status) => {
                             // Fix for issue 163
