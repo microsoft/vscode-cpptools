@@ -1,8 +1,23 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.17.8: August 16, 2018
-* Add `inactiveRegionForegroundColor` and `inactiveRegionBackgroundColor` to settings. [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
+* Fix attach to process for systems without `bash` by using `sh` instead. [#569](https://github.com/Microsoft/vscode-cpptools/issues/569)
+  * Andy Neff (@andyneff) [PR 2340](https://github.com/Microsoft/vscode-cpptools/pull/2340)
+* Fix IntelliSense crash after hover or completion with `_Complex` types. [#689](https://github.com/Microsoft/vscode-cpptools/issues/689), [#1112](https://github.com/Microsoft/vscode-cpptools/issues/1112)
+* Add `C_Cpp.workspaceSymbols` setting with default `Just My Code` to filter out system header symbols. [#1119](https://github.com/Microsoft/vscode-cpptools/issues/1119), [#2320](https://github.com/Microsoft/vscode-cpptools/issues/2320)
+* Add `C_Cpp.inactiveRegionForegroundColor` and `C_Cpp.inactiveRegionBackgroundColor` settings. [#1620](https://github.com/Microsoft/vscode-cpptools/issues/1620), [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
+  * John Patterson (@john-patterson) [PR 2308](https://github.com/Microsoft/vscode-cpptools/pull/2308)
+* Fix Mac framework dependencies not being discovered. [#1913](https://github.com/Microsoft/vscode-cpptools/issues/1913)
+* Fix red flame getting stuck after modifying `c_cpp_properties.json`. [#2077](https://github.com/Microsoft/vscode-cpptools/issues/2077)
+* Add `gcc-x64` `intelliSenseMode` and send the correct clang or gcc version to our parser, fixing various IntelliSense errors. [#2175](https://github.com/Microsoft/vscode-cpptools/issues/2175), [#2299](https://github.com/Microsoft/vscode-cpptools/issues/2299), [#2317](https://github.com/Microsoft/vscode-cpptools/issues/2317)
+* Make `Go to Definition` on the definition go to the declaration instead. [#2298](https://github.com/Microsoft/vscode-cpptools/issues/2298)
+* Don't add empty `windowsSDKVersion` if none exists. [#2300](https://github.com/Microsoft/vscode-cpptools/issues/2300)
 * Add multi-pass environment variable resolution allowing variables defined in terms of other variables. [#2322](https://github.com/Microsoft/vscode-cpptools/pull/2322)
+  * John Patterson (@john-patterson) [PR 2322](https://github.com/Microsoft/vscode-cpptools/pull/2322)
+* Fix IntelliSense crash when the gcc-8 type_traits header is used. [#2323](https://github.com/Microsoft/vscode-cpptools/issues/2323), [#2328](https://github.com/Microsoft/vscode-cpptools/issues/2328)
+* Limit configuration popups to one at a time. [#2324](https://github.com/Microsoft/vscode-cpptools/issues/2324)
+* Allow users to use `~` for `${userProfile}` on Windows. [PR 2333](https://github.com/Microsoft/vscode-cpptools/pull/2333)
+* Filter out buggy IntelliSense error `"= delete" can only appear on the first declaration of a function`. [#2352](https://github.com/Microsoft/vscode-cpptools/issues/2352)
 
 ## Version 0.17.7: July 22, 2018
 * Fix `Go to Definition` for code scoped with an aliased namespace. [#387](https://github.com/Microsoft/vscode-cpptools/issues/387)
