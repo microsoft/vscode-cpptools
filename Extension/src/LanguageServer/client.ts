@@ -30,6 +30,7 @@ import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
 
 let ui: UI;
+const configProviderTimeout: number = 2000;
 
 interface NavigationPayload {
     navigation: string;
@@ -352,6 +353,7 @@ class DefaultClient implements Client {
                 dimInactiveRegions: settings.dimInactiveRegions,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
+                workspaceSymbols: settings.workspaceSymbols,
                 exclusionPolicy: settings.exclusionPolicy,
                 preferredPathSeparator: settings.preferredPathSeparator,
                 default: {
@@ -427,28 +429,34 @@ class DefaultClient implements Client {
             if (!selectedProvider) {
                 let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
                 if (ask.Value) {
-                    let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
-                    const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
-                    const allow: string = "Allow";
-                    const notNow: string = "Not Now";
-                    const dontAskAgain: string = "Don't Ask Again";
-                    vscode.window.showInformationMessage(message, allow, notNow, dontAskAgain).then(result => {
-                        switch (result) {
-                            case allow: {
-                                this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
-                                    telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                                });
-                                break;
+                    ui.showConfigureCustomProviderMessage(() => {
+                        let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
+                        const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
+                        const allow: string = "Allow";
+                        const dontAllow: string = "Don't Allow";
+                        const askLater: string = "Ask Me Later";
+
+                        return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(result => {
+                            switch (result) {
+                                case allow: {
+                                    this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
+                                        telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+                                    });
+                                    ask.Value = false;
+                                    return true;
+                                }
+                                case dontAllow: {
+                                    ask.Value = false;
+                                    break;
+                                }
+                                default: {
+                                    break;
+                                }
                             }
-                            case dontAskAgain: {
-                                ask.Value = false;
-                                break;
-                            }
-                            default: {
-                                break;
-                            }
-                        }
-                    });
+                            return false;
+                        });
+                    },
+                    () => ask.Value = false);
                 }
             } else if (selectedProvider === provider.extensionId) {
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
@@ -475,7 +483,7 @@ class DefaultClient implements Client {
             let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
                 return currentProvider.provideConfigurations(documentUris, tokenSource.token);
             };
-            this.queueTaskWithTimeout(task, 1000, tokenSource).then(configs => this.sendCustomConfigurations(configs));
+            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs));
         });
     }
 
@@ -508,17 +516,29 @@ class DefaultClient implements Client {
             return Promise.reject("");
         };
     
-        return this.queueTaskWithTimeout(provideConfigurationAsync, 1000, tokenSource).then(
+        return this.queueTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
             (configs: SourceFileConfigurationItem[]) => {
                 if (configs && configs.length > 0) {
                     this.sendCustomConfigurations(configs);
                 }
             },
             () => {
-                if (!this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
+                let settings: CppSettings = new CppSettings(this.RootUri);
+                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
+                    const dismiss: string = "Dismiss";
+                    const disable: string = "Disable Warnings";
                     vscode.window.showInformationMessage(
                         `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
-                        `Settings from the '${configName}' configuration will be used instead.`);
+                        `Settings from the '${configName}' configuration will be used instead.`,
+                        dismiss,
+                        disable).then(response => {
+                            switch (response) {
+                                case disable: {
+                                    settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+                                    break;
+                                }
+                            }
+                        });
                 }
             });
     }
@@ -792,27 +812,31 @@ class DefaultClient implements Client {
         } else if (message.endsWith("IntelliSense Fallback")) {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
-                let learnMorePanel: string = "Learn More";
-                let dontShowAgain: string = "Don't Show Again";
-                let fallbackMsg: string = this.configuration.VcpkgInstalled ?   
-                    "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
-                    "Configure your IntelliSense settings to help find missing headers.";
-                vscode.window.showInformationMessage(fallbackMsg, learnMorePanel, dontShowAgain).then((value) => {
-                    switch (value) {
-                        case learnMorePanel:
-                            let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
-                            vscode.commands.executeCommand('vscode.open', uri);
-                            vscode.commands.getCommands(true).then((commands: string[]) => {
-                                if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                    vscode.commands.executeCommand("workbench.action.problems.focus");
-                                }
-                            });
-                            break;
-                        case dontShowAgain:
-                            showIntelliSenseFallbackMessage.Value = false;
-                            break;
-                    }
-                });
+                ui.showConfigureIncludePathMessage(() => {
+                    let learnMorePanel: string = "Learn More";
+                    let dontShowAgain: string = "Don't Show Again";
+                    let fallbackMsg: string = this.configuration.VcpkgInstalled ?
+                        "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
+                        "Configure your IntelliSense settings to help find missing headers.";
+                    return vscode.window.showInformationMessage(fallbackMsg, learnMorePanel, dontShowAgain).then((value) => {
+                        switch (value) {
+                            case learnMorePanel:
+                                let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
+                                vscode.commands.executeCommand('vscode.open', uri);
+                                vscode.commands.getCommands(true).then((commands: string[]) => {
+                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                        vscode.commands.executeCommand("workbench.action.problems.focus");
+                                    }
+                                });
+                                break;
+                            case dontShowAgain:
+                                showIntelliSenseFallbackMessage.Value = false;
+                                break;
+                        }
+                        return true;
+                    });
+                },
+                () => showIntelliSenseFallbackMessage.Value = false);
             }
         }
     }
@@ -826,6 +850,8 @@ class DefaultClient implements Client {
         
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
             opacity: settings.inactiveRegionOpacity.toString(),
+            backgroundColor: settings.inactiveRegionBackgroundColor,
+            color: settings.inactiveRegionForegroundColor,
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
         });
 
@@ -867,8 +893,8 @@ class DefaultClient implements Client {
             return;
         }
 
-        let showCompileCommandsSelection: PersistentState<boolean> = new PersistentState<boolean>("CPP.showCompileCommandsSelection", true);
-        if (!showCompileCommandsSelection.Value) {
+        let ask: PersistentState<boolean> = new PersistentState<boolean>("CPP.showCompileCommandsSelection", true);
+        if (!ask.Value) {
             return;
         }
 
@@ -876,30 +902,33 @@ class DefaultClient implements Client {
         let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
         const message: string = `Would you like to use ${compileCommandStr} to auto-configure IntelliSense for ${folderStr} folder?`;
 
-        const yes: string = "Yes";
-        const notNow: string = "Not Now";
-        const dontAskAgain: string = "Don't Ask Again";
-        vscode.window.showInformationMessage(message, yes, notNow, dontAskAgain).then((value) => {
-            switch (value) {
-                case yes:
-                    if (params.paths.length > 1) {
-                        ui.showCompileCommands(params.paths).then((index) => {
+        ui.showConfigureCompileCommandsMessage(() => {
+            const yes: string = "Yes";
+            const no: string = "No";
+            const askLater: string = "Ask Me Later";
+            return vscode.window.showInformationMessage(message, yes, no, askLater).then(async (value) => {
+                switch (value) {
+                    case yes:
+                        if (params.paths.length > 1) {
+                            let index: number = await ui.showCompileCommands(params.paths);
                             if (index < 0) {
-                                return;
+                                return false;
                             }
                             this.configuration.setCompileCommands(params.paths[index]);
-                        });
-                    } else {
-                        this.configuration.setCompileCommands(params.paths[0]);
-                    }
-                    break;
-                case notNow:
-                    break;
-                case dontAskAgain:
-                    showCompileCommandsSelection.Value = false;
-                    break;
-            }
-        });
+                        } else {
+                            this.configuration.setCompileCommands(params.paths[0]);
+                        }
+                        return true;
+                    case askLater:
+                        break;
+                    case no:
+                        ask.Value = false;
+                        break;
+                }
+                return false;
+            });
+        },
+        () => ask.Value = false);
     }
 
     /*********************************************
@@ -1054,7 +1083,7 @@ class DefaultClient implements Client {
 
     public handleConfigurationProviderSelectCommand(): void {
         this.notifyWhenReady(() => {
-            ui.showConfigurationProviders()
+            ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider)
                 .then(extensionId => {
                     if (extensionId === undefined) {
                         // operation was cancelled.

@@ -1,6 +1,5 @@
   {
     "defaults": [
-      "--clang",
       "--pack_alignment",
       "8"
     ],
