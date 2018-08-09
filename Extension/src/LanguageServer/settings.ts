@@ -39,6 +39,7 @@ export class CppSettings extends Settings {
     public get intelliSenseEngine(): string { return super.Section.get<string>("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
+    public get warningSquiggles(): string { return super.Section.get<string>("warningSquiggles"); }
     public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string { return super.Section.get<string>("inactiveRegionForegroundColor"); }

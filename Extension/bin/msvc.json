@@ -1,11 +1,7 @@
   {
     "defaults": [
       "cpfe",
-      "--wchar_t_keyword",
-      "--no_warnings",
-      "--rtti",
       "--edge",
-      "--exceptions",
       "--error_limit",
       "25000",
       "-D_EDG_COMPILER",

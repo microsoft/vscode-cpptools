@@ -140,6 +140,16 @@
           "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. Warnings about #includes that could not be located will always be reported to the editor. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
         },
+        "C_Cpp.warningSquiggles": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Disabled",
+          "description": "Controls whether compiler warnings are also shown when errorSquiggles is \"Enabled\".",
+          "scope": "resource"
+        },
         "C_Cpp.dimInactiveRegions": {
           "type": "boolean",
           "default": true,
