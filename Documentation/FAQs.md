@@ -3,7 +3,8 @@
 ## Table of Contents
 * Setup: [Debugging Setup](#debugging-setup)
 * Debugger: [Why is debugging not working?](#why-is-debugging-not-working)
-* Build: [How to enable debug symbols?](#how-to-enable-debug-symbols)
+* Build: [How to enable debug symbols](#how-to-enable-debug-symbols)
+* Logging: [How to enable logging](#how-to-enable-logging)
 
 ## Debugging Setup
 The debugger needs to be configured to know which executable and debugger to use:
@@ -43,3 +44,39 @@ When in doubt, please check your compiler's documentation for the options necess
 
 * #### cl.exe
   Symbols are located in the `*.pdb` file.
+
+## How to enable logging
+
+Enabling logging will show communication information between VS Code and our extension and between our extension and the debugger.
+
+### Logging for `MI` debuggers
+
+The logging block with its defaults is as follows:
+
+```
+"logging": {
+    "trace": false,
+    "traceResponse": false,
+    "engineLogging": false
+}
+```
+
+#### VS Code and the CppTools extension
+
+The logging here is called `trace` logging and can be enabled by setting `trace` and `traceResponse` to `true` in the logging block inside `launch.json`. This will help diagnose issues related to VS Code's communication to our extension and our responses.
+
+#### CppTools extension and the debugger
+
+The logging between CppTools and the debugger is called `engineLogging`. When using an `MI` debugger such as `gdb` or `lldb`, this will show the request, response and events using the `mi` interpreter. This logging will help us determine whether the debugger is receiving the right commands and generating the correct responses.
+
+### Logging for `Visual C++` debugger
+
+The logging block with its defaults is as follows:
+
+```
+"logging": { 
+    "engineLogging": false
+}
+```
+
+The `Visual C++` debugger logging will show only the communication to and from VS Code as all communication to the debugger is done internally to the process and is not visible through logging.
