@@ -71,7 +71,7 @@
             "null"
           ],
           "default": null,
-          "description": "The full path of the clang-format executable.",
+          "description": "The full path of the clang-format executable. Changing this setting requires a Reload Window if it contains environment variables.",
           "scope": "resource"
         },
         "C_Cpp.clang_format_style": {
