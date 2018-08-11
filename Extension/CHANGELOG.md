@@ -21,6 +21,7 @@
 * Fix `files.exclude` not working to exclude non-workspace folders from symbol parsing. [#1066](https://github.com/Microsoft/vscode-cpptools/issues/1066)
 * Fix `Switch Header/Source` to give results that match the parent folder name before using just the file name. [#1085](https://github.com/Microsoft/vscode-cpptools/issues/1085)
 * Fix incorrect IntelliSense errors caused by namespace lookup failure when instantiation template arguments in clang mode. [#1395](https://github.com/Microsoft/vscode-cpptools/issues/1395), [#1559](https://github.com/Microsoft/vscode-cpptools/issues/1559), [#1753](https://github.com/Microsoft/vscode-cpptools/issues/1753), [#2272](https://github.com/Microsoft/vscode-cpptools/issues/2272)
+* Fix missing parameter help when using { for constructors. [#1667](https://github.com/Microsoft/vscode-cpptools/issues/1667)
 * Fix Mac framework dependencies not being discovered. [#1913](https://github.com/Microsoft/vscode-cpptools/issues/1913)
 * Fix `compilerPath` not working with `${workspaceFolder}`. [#1982](https://github.com/Microsoft/vscode-cpptools/issues/1982)
 * Fix red flame getting stuck after modifying `c_cpp_properties.json`. [#2077](https://github.com/Microsoft/vscode-cpptools/issues/2077)
