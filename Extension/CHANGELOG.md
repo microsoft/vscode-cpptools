@@ -12,6 +12,7 @@
   * John Patterson (@john-patterson) [PR 2322](https://github.com/Microsoft/vscode-cpptools/pull/2322)
 * Allow users to use `~` for `${userProfile}` on Windows. [PR 2333](https://github.com/Microsoft/vscode-cpptools/pull/2333)
 * Add support for compiler flags `-fms-extensions` and `-fno-ms-extensions` on Windows (the default for MinGW-based compilers). [#2363](https://github.com/Microsoft/vscode-cpptools/issues/2363)
+* Make completion "show more results" (i.e. inaccessible members) when invoked a 2nd time. [#2386](https://github.com/Microsoft/vscode-cpptools/issues/2386)
 
 ### Bug Fixes
 * Fix attach to process for systems without `bash` by using `sh` instead. [#569](https://github.com/Microsoft/vscode-cpptools/issues/569)
