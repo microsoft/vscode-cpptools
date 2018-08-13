@@ -24,6 +24,7 @@ import { CppTools1 } from './cppTools1';
 
 const releaseNotesVersion: number = 3;
 const cppTools: CppTools1 = new CppTools1();
+let languageServiceDisabled: boolean;
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     initializeTemporaryCommandRegistrar();
@@ -42,6 +43,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 export function deactivate(): Thenable<void> {
     DebuggerExtension.dispose();
     Telemetry.deactivate();
+
+    if (languageServiceDisabled) {
+        return;
+    }
     return LanguageServer.deactivate();
 }
 
@@ -279,6 +284,11 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
+    if (vscode.workspace.getConfiguration("C_Cpp", null).get<boolean>("disableLanguageService")) {
+        languageServiceDisabled = true;
+        Telemetry.logLanguageServerEvent("disableLanguageService");
+        return;
+    }
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
