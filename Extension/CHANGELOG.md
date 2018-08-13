@@ -2,6 +2,7 @@
 
 ## Version 0.18.0: August 16, 2018
 ### New Features
+* Add `C_Cpp.disableLanguageService` setting (for users who only want the debugger features). [#785](https://github.com/Microsoft/vscode-cpptools/issues/785)
 * Add `C_Cpp.warningSquiggles` setting. [#828](https://github.com/Microsoft/vscode-cpptools/issues/828)
 * Add `C_Cpp.workspaceSymbols` setting with default `Just My Code` to filter out system header symbols. [#1119](https://github.com/Microsoft/vscode-cpptools/issues/1119), [#2320](https://github.com/Microsoft/vscode-cpptools/issues/2320)
 * Add `C_Cpp.inactiveRegionForegroundColor` and `C_Cpp.inactiveRegionBackgroundColor` settings. [#1620](https://github.com/Microsoft/vscode-cpptools/issues/1620), [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
