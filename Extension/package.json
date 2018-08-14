@@ -104,7 +104,8 @@
           "type": "string",
           "enum": [
             "Default",
-            "Tag Parser"
+            "Tag Parser",
+            "Disabled"
           ],
           "default": "Default",
           "description": "Controls the IntelliSense provider. \"Tag Parser\" provides \"fuzzy\" results that are not context-aware. \"Default\" provides context-aware results and is in preview mode - member list, hover tooltips, and error squiggles are currently implemented. Features not yet implemented in the new default engine will use the tag parser engine instead.",
@@ -454,12 +455,6 @@
           },
           "default": null,
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
-          "scope": "resource"
-        },
-        "C_Cpp.disableLanguageService": {
-          "type": "boolean",
-          "default": false,
-          "description": "If set, all the C/C++ language service features are disabled (i.e. only the debugger is enabled). Requires a Reload Window to take effect.",
           "scope": "resource"
         }
       }

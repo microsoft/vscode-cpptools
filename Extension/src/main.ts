@@ -284,9 +284,10 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    if (vscode.workspace.getConfiguration("C_Cpp", null).get<boolean>("disableLanguageService")) {
+    if (vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
         languageServiceDisabled = true;
-        Telemetry.logLanguageServerEvent("disableLanguageService");
+        getTemporaryCommandRegistrarInstance().disableLanguageServer();
+        Telemetry.logLanguageServerEvent("intelliSenseEngine disabled");
         return;
     }
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
