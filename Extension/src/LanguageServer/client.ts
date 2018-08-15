@@ -132,6 +132,7 @@ const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> 
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
+const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 
 let failureMessageShown: boolean = false;
 
@@ -336,7 +337,7 @@ class DefaultClient implements Client {
             },
             workspaceFolder: workspaceFolder,
             initializationOptions: {
-                clang_format_path: settings.clangFormatPath,
+                clang_format_path: util.resolveVariables(settings.clangFormatPath, null),
                 clang_format_style: settings.clangFormatStyle,
                 clang_format_fallbackStyle: settings.clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings.clangFormatSortIncludes,
@@ -401,6 +402,10 @@ class DefaultClient implements Client {
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
                 updateLanguageConfigurations();
+            }
+            if (changedSettings["clang_format_path"]) {
+                let settings: CppSettings = new CppSettings(this.RootUri);
+                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, null));
             }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
