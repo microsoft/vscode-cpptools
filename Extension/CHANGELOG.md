@@ -2,8 +2,7 @@
 
 ## Version 0.18.0: August 16, 2018
 ### New Features
-* Add `C_Cpp.disableLanguageService` setting (for users who only want the debugger features). [#785](https://github.com/Microsoft/vscode-cpptools/issues/785)
-* Add `C_Cpp.warningSquiggles` setting. [#828](https://github.com/Microsoft/vscode-cpptools/issues/828)
+* Add the `C_Cpp.intelliSenseEngine` setting value of `Disabled` (for users who only use the debugger). [#785](https://github.com/Microsoft/vscode-cpptools/issues/785)
 * Add `C_Cpp.workspaceSymbols` setting with default `Just My Code` to filter out system header symbols. [#1119](https://github.com/Microsoft/vscode-cpptools/issues/1119), [#2320](https://github.com/Microsoft/vscode-cpptools/issues/2320)
 * Add `C_Cpp.inactiveRegionForegroundColor` and `C_Cpp.inactiveRegionBackgroundColor` settings. [#1620](https://github.com/Microsoft/vscode-cpptools/issues/1620), [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
   * John Patterson (@john-patterson) [PR 2308](https://github.com/Microsoft/vscode-cpptools/pull/2308)
@@ -26,7 +25,6 @@
 * Fix Mac framework dependencies not being discovered. [#1913](https://github.com/Microsoft/vscode-cpptools/issues/1913)
 * Fix `compilerPath` not working with `${workspaceFolder}`. [#1982](https://github.com/Microsoft/vscode-cpptools/issues/1982)
 * Fix red flame getting stuck after modifying `c_cpp_properties.json`. [#2077](https://github.com/Microsoft/vscode-cpptools/issues/2077)
-* Don't show the IntellSense fallback message when a custom configuration provider is used. [#2240](https://github.com/Microsoft/vscode-cpptools/issues/2240)
 * Don't add empty `windowsSDKVersion` if none exists. [#2300](https://github.com/Microsoft/vscode-cpptools/issues/2300)
 * Fix IntelliSense crash when the gcc-8 type_traits header is used. [#2323](https://github.com/Microsoft/vscode-cpptools/issues/2323), [#2328](https://github.com/Microsoft/vscode-cpptools/issues/2328)
 * Limit configuration popups to one at a time. [#2324](https://github.com/Microsoft/vscode-cpptools/issues/2324)
