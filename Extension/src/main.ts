@@ -24,7 +24,9 @@ import { CppTools1 } from './cppTools1';
 
 const releaseNotesVersion: number = 3;
 const cppTools: CppTools1 = new CppTools1();
-let languageServiceDisabled: boolean;
+let languageServiceDisabled: boolean = false;
+let reloadMessageShown: boolean = false;
+let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     initializeTemporaryCommandRegistrar();
@@ -43,6 +45,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 export function deactivate(): Thenable<void> {
     DebuggerExtension.dispose();
     Telemetry.deactivate();
+    disposables.forEach(d => d.dispose());
 
     if (languageServiceDisabled) {
         return;
@@ -287,8 +290,21 @@ async function finalizeExtensionActivation(): Promise<void> {
     if (vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
+        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+            if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") !== "Disabled") {
+                reloadMessageShown = true;
+                util.promptForReloadWindowDueToSettingsChange();
+            }
+        }));
         Telemetry.logLanguageServerEvent("intelliSenseEngine disabled");
         return;
+    } else {
+        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+            if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+                reloadMessageShown = true;
+                util.promptForReloadWindowDueToSettingsChange();
+            }
+        }));
     }
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 

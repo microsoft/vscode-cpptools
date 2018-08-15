@@ -646,7 +646,7 @@ class DefaultClient implements Client {
     private registerNotifications(): void {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-        this.languageClient.onNotification(ReloadWindowNotification, () => this.reloadWindow());
+        this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
         this.languageClient.onNotification(ReportNavigationNotification, (e) => this.navigate(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
@@ -716,15 +716,6 @@ class DefaultClient implements Client {
     /*******************************************************
      * handle notifications coming from the language server
      *******************************************************/
-
-    private reloadWindow(): void {
-        let reload: string = "Reload";
-        vscode.window.showInformationMessage("Reload the workspace for the settings change to take effect.", reload).then((value: string) => {
-            if (value === reload) {
-                vscode.commands.executeCommand("workbench.action.reloadWindow");
-            }
-        });
-    }
 
     private logTelemetry(notificationBody: TelemetryPayload): void {
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);

@@ -11,7 +11,7 @@ class TemporaryCommandRegistrar {
     // Used to save/re-execute commands used before the extension has activated (e.g. delayed by dependency downloading).
     private delayedCommandsToExecute: Set<string>;
     private tempCommands: vscode.Disposable[]; // Need to save this to unregister/dispose the temporary commands.
-    private isDisabled: boolean;
+    private isLanguageServerDisabled: boolean;
 
     private commandsToRegister: string[] = [
         "C_Cpp.ConfigurationEdit",
@@ -45,8 +45,8 @@ class TemporaryCommandRegistrar {
 
     public registerTempCommand(command: string): void {
         this.tempCommands.push(vscode.commands.registerCommand(command, () => {
-            if (this.isDisabled) {
-                vscode.window.showInformationMessage("The C/C++ command is disabled due to C_Cpp.intelliSenseEngine set to Disabled.");
+            if (this.isLanguageServerDisabled) {
+                vscode.window.showInformationMessage("The command is disabled because \"C_Cpp.intelliSenseEngine\" is set to \"Disabled\".");
                 return;
             }
             this.delayedCommandsToExecute.add(command);
@@ -54,7 +54,7 @@ class TemporaryCommandRegistrar {
     }
 
     public disableLanguageServer(): void {
-        this.isDisabled = true;
+        this.isLanguageServerDisabled = true;
     }
 
     public activateLanguageServer(): void {
