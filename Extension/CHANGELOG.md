@@ -26,7 +26,6 @@
 * Fix `compilerPath` not working with `${workspaceFolder}`. [#1982](https://github.com/Microsoft/vscode-cpptools/issues/1982)
 * Fix red flame getting stuck after modifying `c_cpp_properties.json`. [#2077](https://github.com/Microsoft/vscode-cpptools/issues/2077)
 * Don't add empty `windowsSDKVersion` if none exists. [#2300](https://github.com/Microsoft/vscode-cpptools/issues/2300)
-* Fix `compile_commands.json` quotes and escaped quotes not being parsed correctly. [#2305](https://github.com/Microsoft/vscode-cpptools/issues/2305)
 * Fix IntelliSense crash when the gcc-8 type_traits header is used. [#2323](https://github.com/Microsoft/vscode-cpptools/issues/2323), [#2328](https://github.com/Microsoft/vscode-cpptools/issues/2328)
 * Limit configuration popups to one at a time. [#2324](https://github.com/Microsoft/vscode-cpptools/issues/2324)
 * Don't show `includePath` code actions if compile commands or custom configuration providers are used. [#2334](https://github.com/Microsoft/vscode-cpptools/issues/2334)
@@ -37,6 +36,7 @@
 * Fix WSL paths starting with `/mnt/` failing to get symbols parsed. [#2361](https://github.com/Microsoft/vscode-cpptools/issues/2361)
 * Fix IntelliSense process crash when hovering over a designated initializer list with an anonymous struct. [#2370](https://github.com/Microsoft/vscode-cpptools/issues/2370)
 * Stop showing "File: " in completion details for internal compiler defines. [#2387](https://github.com/Microsoft/vscode-cpptools/issues/2387)
+* Invoke `Edit Configurations...` when the `Configuration Help` button is clicked. [#2408](https://github.com/Microsoft/vscode-cpptools/issues/2408)
 * Fix to allow SIGINT to be sent using the kill -2 command when using pipeTransport.
 
 ## Version 0.17.7: July 22, 2018
