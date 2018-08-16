@@ -516,7 +516,7 @@ class DefaultClient implements Client {
                         return provider.provideConfigurations([document.uri], tokenSource.token);
                     }
                 }
-            } catch {
+            } catch (err) {
             }
             return Promise.reject("");
         };
