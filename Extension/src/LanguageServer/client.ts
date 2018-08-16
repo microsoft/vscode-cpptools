@@ -833,6 +833,7 @@ class DefaultClient implements Client {
                                         vscode.commands.executeCommand("workbench.action.problems.focus");
                                     }
                                 });
+                                this.handleConfigurationEditCommand();
                                 break;
                             case dontShowAgain:
                                 showIntelliSenseFallbackMessage.Value = false;
