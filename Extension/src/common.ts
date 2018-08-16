@@ -178,55 +178,60 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
     }
 
     // Replace environment and configuration variables.
-    let regexp: RegExp = /\$\{((env|config|workspaceFolder)(.|:))?(.*?)\}/g;
-    let ret: string = input.replace(regexp, (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
-        // Historically, if the variable didn't have anything before the "." or ":"
-        // it was assumed to be an environment variable
-        if (varType === undefined) {
-            varType = "env";
-        }
-        let newValue: string = undefined;
-        switch (varType) {
-            case "env": {
-                let v: string | string[] = additionalEnvironment[name];
-                if (typeof v === "string") {
-                    newValue = v;
-                } else if (input === match && v instanceof Array) {
-                    newValue = v.join(";");
-                }
-                if (!newValue) {
-                    newValue = process.env[name];
-                }
-                break;
+    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder)(\.|:))?(.*?)\}/g;
+    let ret: string = input;
+    let cycleCache: Set<string> = new Set();
+    while (!cycleCache.has(ret)) {
+        cycleCache.add(ret);
+        ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
+            // Historically, if the variable didn't have anything before the "." or ":"
+            // it was assumed to be an environment variable
+            if (varType === undefined) {
+                varType = "env";
             }
-            case "config": {
-                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-                if (config) {
-                    newValue = config.get<string>(name);
-                }
-                break;
-            }
-            case "workspaceFolder": {
-                // Only replace ${workspaceFolder:name} variables for now.
-                // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
-                // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
-                if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
-                    let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-                    if (folder) {
-                        newValue = folder.uri.fsPath;
+            let newValue: string = undefined;
+            switch (varType) {
+                case "env": {
+                    let v: string | string[] = additionalEnvironment[name];
+                    if (typeof v === "string") {
+                        newValue = v;
+                    } else if (input === match && v instanceof Array) {
+                        newValue = v.join(";");
                     }
+                    if (!newValue) {
+                        newValue = process.env[name];
+                    }
+                    break;
                 }
-                break;
+                case "config": {
+                    let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+                    if (config) {
+                        newValue = config.get<string>(name);
+                    }
+                    break;
+                }
+                case "workspaceFolder": {
+                    // Only replace ${workspaceFolder:name} variables for now.
+                    // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
+                    // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
+                    if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
+                        let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+                        if (folder) {
+                            newValue = folder.uri.fsPath;
+                        }
+                    }
+                    break;
+                }
+                default: { assert.fail("unknown varType matched"); }
             }
-            default: { assert.fail("unknown varType matched"); }
-        }
-        return (newValue) ? newValue : match;
-    });
+            return (newValue) ? newValue : match;
+        });
+    }
 
     // Resolve '~' at the start of the path.
-    regexp = /^\~/g;
-    ret = ret.replace(regexp, (match: string, name: string) => {
-        let newValue: string = process.env.HOME;
+    regexp = () => /^\~/g;
+    ret = ret.replace(regexp(), (match: string, name: string) => {
+        let newValue: string = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
         return (newValue) ? newValue : match;
     });
 
@@ -541,5 +546,14 @@ export async function renamePromise(oldName: string, newName: string): Promise<v
             }
             return resolve();
         });
+    });
+}
+
+export function promptForReloadWindowDueToSettingsChange(): void {
+    let reload: string = "Reload";
+    vscode.window.showInformationMessage("Reload the workspace for the settings change to take effect.", reload).then((value: string) => {
+        if (value === reload) {
+            vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
     });
 }

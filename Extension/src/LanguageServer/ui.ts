@@ -17,11 +17,24 @@ interface KeyedQuickPickItem extends vscode.QuickPickItem {
     key: string;
 }
 
+// Higher numbers mean greater priority.
+enum ConfigurationPriority {
+    IncludePath = 1,
+    CompileCommands = 2,
+    CustomProvider = 3,
+}
+
+interface ConfigurationResult {
+    configured: boolean;
+    priority: ConfigurationPriority;
+}
+
 export class UI {
     private navigationStatusBarItem: vscode.StatusBarItem;
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
+    private configurationUIPromise: Thenable<ConfigurationResult>;
 
     constructor() {
         // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
@@ -164,14 +177,18 @@ export class UI {
             .then(selection => (selection) ? selection.index : -1);
     }
 
-    public showConfigurationProviders(): Thenable<string|undefined> {
+    public showConfigurationProviders(currentProvider: string|null): Thenable<string|undefined> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = "Select a Configuration Provider...";
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
 
         let items: KeyedQuickPickItem[] = [];
         providers.forEach(provider => {
-            items.push({ label: provider.name, description: "", key: provider.extensionId });
+            let label: string = provider.name;
+            if (provider.extensionId === currentProvider) {
+                label += " (active)";
+            }
+            items.push({ label: label, description: "", key: provider.extensionId });
         });
         items.push({ label: "(none)", description: "Disable the active configuration provider, if applicable.", key: "" });
 
@@ -217,6 +234,49 @@ export class UI {
         
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.index : -1);
+    }
+
+    public showConfigureIncludePathMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
+        setTimeout(() => {
+            this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
+        }, 10000);
+    }
+
+    public showConfigureCompileCommandsMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
+        setTimeout(() => {
+            this.showConfigurationPrompt(ConfigurationPriority.CompileCommands, prompt, onSkip);
+        }, 5000);
+    }
+
+    public showConfigureCustomProviderMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
+        this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
+    }
+
+    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
+        let showPrompt: () => Thenable<ConfigurationResult> = async () => {
+            let configured: boolean = await prompt();
+            return Promise.resolve({
+                priority: priority,
+                configured: configured
+            });
+        };
+
+        if (this.configurationUIPromise) {
+            this.configurationUIPromise = this.configurationUIPromise.then(result => {
+                if (priority > result.priority) {
+                    return showPrompt();
+                } else if (!result.configured) {
+                    return showPrompt();
+                }
+                onSkip();
+                return Promise.resolve({
+                    priority: result.priority,
+                    configured: true
+                });
+            });
+        } else {
+            this.configurationUIPromise = showPrompt();
+        }
     }
 
     public dispose(): void {
