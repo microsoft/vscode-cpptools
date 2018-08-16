@@ -809,7 +809,7 @@ class DefaultClient implements Client {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
                 ui.showConfigureIncludePathMessage(() => {
-                    let learnMorePanel: string = "Learn More";
+                    let learnMorePanel: string = "Configuration Help";
                     let dontShowAgain: string = "Don't Show Again";
                     let fallbackMsg: string = this.configuration.VcpkgInstalled ?
                         "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
@@ -824,6 +824,7 @@ class DefaultClient implements Client {
                                         vscode.commands.executeCommand("workbench.action.problems.focus");
                                     }
                                 });
+                                this.handleConfigurationEditCommand();
                                 break;
                             case dontShowAgain:
                                 showIntelliSenseFallbackMessage.Value = false;
