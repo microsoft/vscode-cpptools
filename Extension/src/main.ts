@@ -296,16 +296,14 @@ async function finalizeExtensionActivation(): Promise<void> {
                 util.promptForReloadWindowDueToSettingsChange();
             }
         }));
-        Telemetry.logLanguageServerEvent("intelliSenseEngine disabled");
         return;
-    } else {
-        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
-                reloadMessageShown = true;
-                util.promptForReloadWindowDueToSettingsChange();
-            }
-        }));
     }
+    disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+        if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+            reloadMessageShown = true;
+            util.promptForReloadWindowDueToSettingsChange();
+        }
+    }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
