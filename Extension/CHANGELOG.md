@@ -26,7 +26,7 @@
 * Fix `compilerPath` not working with `${workspaceFolder}`. [#1982](https://github.com/Microsoft/vscode-cpptools/issues/1982)
 * Fix red flame getting stuck after modifying `c_cpp_properties.json`. [#2077](https://github.com/Microsoft/vscode-cpptools/issues/2077)
 * Don't add empty `windowsSDKVersion` if none exists. [#2300](https://github.com/Microsoft/vscode-cpptools/issues/2300)
-* Fix compile_commands.json quotes and escaped quotes not being parsed correctly. [#2305](https://github.com/Microsoft/vscode-cpptools/issues/2305)
+* Fix `compile_commands.json` quotes and escaped quotes not being parsed correctly. [#2305](https://github.com/Microsoft/vscode-cpptools/issues/2305)
 * Fix IntelliSense crash when the gcc-8 type_traits header is used. [#2323](https://github.com/Microsoft/vscode-cpptools/issues/2323), [#2328](https://github.com/Microsoft/vscode-cpptools/issues/2328)
 * Limit configuration popups to one at a time. [#2324](https://github.com/Microsoft/vscode-cpptools/issues/2324)
 * Don't show `includePath` code actions if compile commands or custom configuration providers are used. [#2334](https://github.com/Microsoft/vscode-cpptools/issues/2334)
