@@ -104,7 +104,8 @@
           "type": "string",
           "enum": [
             "Default",
-            "Tag Parser"
+            "Tag Parser",
+            "Disabled"
           ],
           "default": "Default",
           "description": "Controls the IntelliSense provider. \"Tag Parser\" provides \"fuzzy\" results that are not context-aware. \"Default\" provides context-aware results and is in preview mode - member list, hover tooltips, and error squiggles are currently implemented. Features not yet implemented in the new default engine will use the tag parser engine instead.",
