@@ -1,5 +1,8 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.18.1: August 17, 2018
+* Fix 0.18.0 regression causing non-MinGW compilers to use `-fms-extensions` on Windows. [#2424](https://github.com/Microsoft/vscode-cpptools/issues/2424), [#2425](https://github.com/Microsoft/vscode-cpptools/issues/2425)
+
 ## Version 0.18.0: August 17, 2018
 ### New Features
 * Add the `C_Cpp.intelliSenseEngine` setting value of `Disabled` (for users who only use the debugger). [#785](https://github.com/Microsoft/vscode-cpptools/issues/785)
