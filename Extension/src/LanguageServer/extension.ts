@@ -17,6 +17,7 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
+import { SettingsTracker, getTracker } from './settingsTracker';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -140,8 +141,36 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  *********************************************/
 
+async function getJSON(): Promise<any> {
+    // Get json
+    let json_str: string = "foo";
+    const cpptoolsJsonFile: string = util.getExtensionFilePath("/home/griff/test.json");
+
+    try {
+        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
+        if (exists) {
+            const fileContent: string = await util.readFileText(cpptoolsJsonFile);
+            let json_stuff: any = JSON.parse(fileContent);
+            return json_stuff;
+        }
+    } catch (error) {
+        // Ignore any cpptoolsJsonFile errors
+    }
+}
+
 function onDidChangeSettings(): void {
+    let settingsTracker: SettingsTracker;
+    settingsTracker = getTracker(clients.ActiveClient.RootUri);
+    telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", settingsTracker.getUserModifiedSettings());
     clients.forEach(client => client.onDidChangeSettings());
+    let changedSettings: { [key: string] : string } = settingsTracker.getChangedSettings();
+    if (changedSettings["updateChannel"]) {
+        getJSON().then((json_stuff: any) => {
+            console.log(json_stuff[0]["url"]);
+            let urlString: string = json_stuff[0]["url"];
+            
+        });
+    }
 }
 
 let saveMessageShown: boolean = false;
