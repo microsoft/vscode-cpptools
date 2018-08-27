@@ -160,12 +160,12 @@ async function getReleaseJSON(): Promise<any> {
 }
 
 function onDidChangeSettings(): void {
-    let settingsTracker: SettingsTracker;
-    clients.forEach(client => client.onDidChangeSettings());
-
     // Check whether the user changed updateChannel to "Insiders", else return
     let tracker: SettingsTracker = clients.ActiveClient.SettingsTracker;
     let newUpdateChannel: string = tracker.getChangedSettings()["updateChannel"];
+
+    clients.forEach(client => client.onDidChangeSettings());
+
     if (!newUpdateChannel || newUpdateChannel === "Default") {
         return;
     }
