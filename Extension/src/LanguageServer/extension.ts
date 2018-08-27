@@ -18,6 +18,11 @@ import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { SettingsTracker, getTracker } from './settingsTracker';
+import { Version, CppToolsExtension } from 'vscode-cpptools';
+import * as url from 'url';
+import * as https from 'https';
+import { ClientRequest } from 'http';
+import { PlatformInformation } from '../platform';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -29,6 +34,7 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
+const localConfigFile: string = "cpptools.json";
 
 /**
  * activate: set up the extension for language services
@@ -141,7 +147,7 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  *********************************************/
 
-async function getJSON(): Promise<any> {
+async function getReleaseJSON(): Promise<any> {
     // Get json
     let json_str: string = "foo";
     const cpptoolsJsonFile: string = util.getExtensionFilePath("/home/griff/test.json");
@@ -150,8 +156,8 @@ async function getJSON(): Promise<any> {
         const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
         if (exists) {
             const fileContent: string = await util.readFileText(cpptoolsJsonFile);
-            let json_stuff: any = JSON.parse(fileContent);
-            return json_stuff;
+            let releaseJSON: any = JSON.parse(fileContent);
+            return releaseJSON;
         }
     } catch (error) {
         // Ignore any cpptoolsJsonFile errors
@@ -160,17 +166,63 @@ async function getJSON(): Promise<any> {
 
 function onDidChangeSettings(): void {
     let settingsTracker: SettingsTracker;
-    settingsTracker = getTracker(clients.ActiveClient.RootUri);
-    telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", settingsTracker.getUserModifiedSettings());
     clients.forEach(client => client.onDidChangeSettings());
-    let changedSettings: { [key: string] : string } = settingsTracker.getChangedSettings();
-    if (changedSettings["updateChannel"]) {
-        getJSON().then((json_stuff: any) => {
-            console.log(json_stuff[0]["url"]);
-            let urlString: string = json_stuff[0]["url"];
-            
-        });
+
+    // Check whether the user changed updateChannel to "Insiders", else return
+    let tracker: SettingsTracker = clients.ActiveClient.SettingsTracker;
+    let newUpdateChannel: string = tracker.getChangedSettings()["updateChannel"];
+    if (!newUpdateChannel || newUpdateChannel === "Default") {
+        return;
     }
+
+    // Get current version info
+    let version: string = util.packageJson["version"];
+    let dashOffset: number = version.lastIndexOf("-");
+    if (dashOffset !== -1) {
+        // We only want to update if the user is on a Release or Insiders build
+        let suffix: string = version.substr(dashOffset + 1);
+        if (suffix !== "insiders") {
+            return;
+        }
+        version = version.substr(0, dashOffset); // Strip out the suffix
+    }
+
+    getReleaseJSON().then((releaseJSON: any) => {
+        // Get the latest version of the extension
+        let latestBuild: any = releaseJSON[0];
+        if (latestBuild["name"] <= version) {
+            return; // No need to update: already on the latest release
+        }
+
+        PlatformInformation.GetPlatformInformation().then((platformInfo: PlatformInformation) => {
+            // Get the VSIX name to search for in latestBuild
+            let VSIXName: string;
+            if (platformInfo.platform === "linux") {
+                if (platformInfo.architecture === "x86_64") {
+                    VSIXName = "cpptools-linux.vsix";
+                } else 
+                if (platformInfo.architecture === "x86") {
+                    VSIXName = "cpptools-linux32.vsix";
+                }
+            }
+            // TODO mac + win
+            if (!VSIXName) {
+                return;
+            }
+
+            // Get the URL to download the VSIX from
+            let downloadUrl: string;
+            for (let asset of latestBuild["assets"]) {
+                if (asset["name"] === VSIXName) {
+                    downloadUrl = asset["browser_download_url"];
+                }
+            }
+            if (!downloadUrl) {
+                return;
+            }
+            // Download the latest version and install it
+        });
+    });
 }
 
 let saveMessageShown: boolean = false;
