@@ -145,6 +145,7 @@ interface ClientModel {
 }
 
 export interface Client {
+    SettingsTracker: SettingsTracker;
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
     NavigationLocationChanged: vscode.Event<string>;
@@ -218,6 +219,7 @@ class DefaultClient implements Client {
         activeConfigName: new DataBinding<string>("")
     };
 
+    public get SettingsTracker(): SettingsTracker { return this.settingsTracker; }
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
@@ -1171,6 +1173,7 @@ class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
     private stringEvent = new vscode.EventEmitter<string>();
 
+    public get SettingsTracker(): SettingsTracker { let stg: SettingsTracker; return stg; }
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
