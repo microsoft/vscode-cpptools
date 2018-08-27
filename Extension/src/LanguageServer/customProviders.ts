@@ -4,15 +4,16 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CustomConfigurationProvider, Version, SourceFileConfigurationItem } from 'vscode-cpptools';
+import { CustomConfigurationProvider, Version, SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import * as vscode from 'vscode';
 
 /**
  * An interface that is guaranteed to be backward compatible with version 0
  */
 export interface CustomConfigurationProvider1 extends CustomConfigurationProvider {
-    isValid: boolean;
-    version: Version;
+    isReady: boolean;
+    readonly isValid: boolean;
+    readonly version: Version;
 }
 
 /**
@@ -20,9 +21,11 @@ export interface CustomConfigurationProvider1 extends CustomConfigurationProvide
  */
 class CustomProviderWrapper implements CustomConfigurationProvider1 {
     private provider: CustomConfigurationProvider;
+    private _isReady: boolean;
     private _version: Version;
 
     constructor(provider: CustomConfigurationProvider, version: Version) {
+        this._isReady = version < Version.v2;
         this.provider = provider;
         if (provider.extensionId && version === Version.v0) {
             version = Version.v1; // provider implemented the new API but is interfacing with the extension using the old API version.
@@ -30,15 +33,21 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
         this._version = version;
     }
 
+    public get isReady(): boolean {
+        return this._isReady;
+    }
+
+    public set isReady(ready: boolean) {
+        this._isReady = ready;
+    }
+
     public get isValid(): boolean {
-        let valid: boolean = true;
-        if (!this.provider.name || !this.provider.canProvideConfiguration || !this.provider.provideConfigurations) {
-            valid = false;
+        let valid: boolean = !!(this.provider.name && this.provider.canProvideConfiguration && this.provider.provideConfigurations);
+        if (valid && this._version > Version.v0) {
+            valid = !!(this.provider.extensionId && this.provider.dispose);
         }
-        if (this._version !== Version.v0) {
-            if (!this.provider.extensionId || !this.provider.dispose) {
-                valid = false;
-            }
+        if (valid && this._version > Version.v1) {
+            valid = !!(this.provider.canProvideBrowseConfiguration && this.provider.provideBrowseConfiguration);
         }
         return valid;
     }
@@ -61,6 +70,14 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
 
     public provideConfigurations(uris: vscode.Uri[], token?: vscode.CancellationToken): Thenable<SourceFileConfigurationItem[]> {
         return this.provider.provideConfigurations(uris, token);
+    }
+
+    public canProvideBrowseConfiguration(token?: vscode.CancellationToken): Thenable<boolean> {
+        return this._version < Version.v2 ? Promise.resolve(false) : this.provider.canProvideBrowseConfiguration(token);
+    }
+
+    public provideBrowseConfiguration(token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
+        return this._version < Version.v2 ? Promise.resolve({browsePath: []}) : this.provider.provideBrowseConfiguration(token);
     }
 
     public dispose(): void {
@@ -89,6 +106,12 @@ export class CustomConfigurationProviderCollection {
         }
         if (version !== Version.v0 && !provider.dispose) {
             missing.push("'dispose'");
+        }
+        if (version >= Version.v2 && !provider.canProvideBrowseConfiguration) {
+            missing.push("'canProvideBrowseConfiguration'");
+        }
+        if (version >= Version.v2 && !provider.provideBrowseConfiguration) {
+            missing.push("'provideBrowseConfiguration'");
         }
         console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}.`);
     }
@@ -122,7 +145,7 @@ export class CustomConfigurationProviderCollection {
             let existing: CustomProviderWrapper = this.providers.get(wrapper.extensionId);
             exists = (existing.version === Version.v0 && wrapper.version === Version.v0);
         }
-    
+
         if (!exists) {
             this.providers.set(wrapper.extensionId, wrapper);
         } else {

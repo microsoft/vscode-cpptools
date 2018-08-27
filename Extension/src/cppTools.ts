@@ -15,7 +15,15 @@ export class CppTools implements CppToolsTestApi {
     private providers: CustomConfigurationProvider1[] = [];
 
     constructor(version: Version) {
+        if (version > Version.latest) {
+            console.warn(`Version ${version} is not supported by this version of cpptools. Using ${Version.latest} instead.`);
+            version = Version.latest;
+        }
         this.version = version;
+    }
+
+    public getVersion(): Version {
+        return this.version;
     }
 
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
@@ -27,12 +35,38 @@ export class CppTools implements CppToolsTestApi {
         }
     }
 
+    notifyReady(provider: CustomConfigurationProvider): void {
+        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+        let p: CustomConfigurationProvider1 = providers.get(provider);
+
+        if (p) {
+            p.isReady = true;
+            LanguageServer.getClients().forEach(client => {
+                client.updateCustomConfigurations(p);
+                client.updateCustomBrowseConfiguration(p);
+            });
+        } else {
+            console.assert(false, "provider should be registered before signaling it's ready to provide configurations");
+        }
+    }
+
     didChangeCustomConfiguration(provider: CustomConfigurationProvider): void {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         let p: CustomConfigurationProvider1 = providers.get(provider);
 
         if (p) {
             LanguageServer.getClients().forEach(client => client.updateCustomConfigurations(p));
+        } else {
+            console.assert(false, "provider should be registered before sending config change messages");
+        }
+    }
+
+    didChangeCustomBrowseConfiguration(provider: CustomConfigurationProvider): void {
+        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+        let p: CustomConfigurationProvider1 = providers.get(provider);
+
+        if (p) {
+            LanguageServer.getClients().forEach(client => client.updateCustomBrowseConfiguration(p));
         } else {
             console.assert(false, "provider should be registered before sending config change messages");
         }

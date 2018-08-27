@@ -112,7 +112,9 @@ suite("extensibility tests v1", function(): void {
         intelliSenseMode: "msvc-x64",
         standard: "c++17"
     };
-    let provider: api.CustomConfigurationProvider = {
+
+    // Has to be 'any' instead of api.CustomConfigurationProvider because of missing interface members.
+    let provider: any = {
         name: "cpptoolsTest-v1",
         extensionId: "ms-vscode.cpptools-test",
         canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
@@ -184,7 +186,7 @@ suite("extensibility tests v0", function(): void {
         standard: "c++17"
     };
 
-    // Has to be 'any' instead of api.CustomConfigurationProvider because dispose is missing on the old interface version
+    // Has to be 'any' instead of api.CustomConfigurationProvider because of missing interface members.
     let provider: any = {
         name: "cpptoolsTest-v0",
         canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {

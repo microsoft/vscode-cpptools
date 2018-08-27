@@ -10,7 +10,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
-import { SourceFileConfigurationItem } from 'vscode-cpptools';
+import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -96,6 +96,10 @@ interface CustomConfigurationParams {
     configurationItems: SourceFileConfigurationItem[];
 }
 
+interface CustomBrowseConfigurationParams {
+    browseConfiguration: WorkspaceBrowseConfiguration;
+}
+
 interface CompileCommandsPaths {
     paths: string[];
 }
@@ -120,6 +124,7 @@ const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, voi
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
+const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
 
 // Notifications from the server
@@ -158,6 +163,7 @@ export interface Client {
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
+    updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
     getCustomConfigurationProviderId(): Thenable<string|undefined>;
     getCurrentConfigName(): Thenable<string>;
@@ -173,6 +179,7 @@ export interface Client {
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
     sendCustomConfigurations(configs: any): void;
+    sendCustomBrowseConfiguration(config: any): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -492,6 +499,26 @@ class DefaultClient implements Client {
         });
     }
 
+    public updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
+        return this.notifyWhenReady(() => {
+            if (!this.configurationProvider) {
+                return;
+            }
+            let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
+            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) || this.trackedDocuments.size === 0) {
+                return;
+            }
+
+            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+            let task: () => Thenable<WorkspaceBrowseConfiguration> = () => {
+                if (currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
+                    return currentProvider.provideBrowseConfiguration(tokenSource.token);
+                }
+            };
+            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(config => this.sendCustomBrowseConfiguration(config));
+        });
+    }
+
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
@@ -520,7 +547,7 @@ class DefaultClient implements Client {
             }
             return Promise.reject("");
         };
-    
+
         return this.queueTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
             (configs: SourceFileConfigurationItem[]) => {
                 if (configs && configs.length > 0) {
@@ -551,7 +578,7 @@ class DefaultClient implements Client {
     private isExternalHeader(document: vscode.TextDocument): boolean {
         return util.isHeader(document) && !document.uri.toString().startsWith(this.RootUri.toString());
     }
-    
+
     public getCustomConfigurationProviderId(): Thenable<string|undefined> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.configurationProvider));
     }
@@ -620,7 +647,7 @@ class DefaultClient implements Client {
                 reject("Timed out in " + ms + "ms.");
             }, ms);
         });
-    
+
         // Returns a race between our timeout and the passed in promise
         return this.queueTask(() => {
             return Promise.race([task(), timeout()]).then(
@@ -633,7 +660,7 @@ class DefaultClient implements Client {
                 });
         });
     }
-    
+
     public requestWhenReady(request: () => Thenable<any>): Thenable<any> {
         return this.queueTask(request);
     }
@@ -844,7 +871,7 @@ class DefaultClient implements Client {
 
     private updateInactiveRegions(params: InactiveRegionParams): void {
         let settings: CppSettings = new CppSettings(this.RootUri);
-        
+
         let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
             opacity: settings.inactiveRegionOpacity.toString(),
             backgroundColor: settings.inactiveRegionBackgroundColor,
@@ -1013,6 +1040,7 @@ class DefaultClient implements Client {
             if (this.configurationProvider !== newProvider) {
                 this.configurationProvider = newProvider;
                 this.updateCustomConfigurations();
+                this.updateCustomBrowseConfiguration();
             }
         });
     }
@@ -1041,8 +1069,10 @@ class DefaultClient implements Client {
         }
         let sanitized: SourceFileConfigurationItem[] = <SourceFileConfigurationItem[]>configs;
         sanitized = sanitized.filter(item => {
-            if (item && item.uri && item.configuration &&
-                item.configuration.includePath && item.configuration.defines && item.configuration.intelliSenseMode && item.configuration.standard) {
+            if (item && util.isString(item.uri) &&
+                item.configuration && util.isArrayOfString(item.configuration.includePath) && util.isArrayOfString(item.configuration.defines) &&
+                util.isString(item.configuration.intelliSenseMode) && util.isString(item.configuration.standard) && util.isOptionalString(item.configuration.compilerPath) &&
+                util.isOptionalArrayOfString(item.configuration.forcedInclude)) {
                 return true;
             }
             console.warn("discarding invalid SourceFileConfigurationItem: " + item);
@@ -1052,11 +1082,29 @@ class DefaultClient implements Client {
         if (sanitized.length === 0) {
             return;
         }
-        
+
         let params: CustomConfigurationParams = {
             configurationItems: sanitized
         };
         this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
+    }
+
+    public sendCustomBrowseConfiguration(config: any): void {
+        // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
+        if (!config || config instanceof Array) {
+            return;
+        }
+        let sanitized: WorkspaceBrowseConfiguration = <WorkspaceBrowseConfiguration>config;
+        if (!util.isArrayOfString(sanitized.browsePath) || !util.isOptionalString(sanitized.compilerPath) ||
+            !util.isOptionalString(sanitized.standard) || !util.isOptionalString(sanitized.windowsSdkVersion)) {
+            console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
+            return;
+        }
+
+        let params: CustomBrowseConfigurationParams = {
+            browseConfiguration: sanitized
+        };
+        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
     }
 
     private clearCustomConfigurations(): void {
@@ -1176,6 +1224,7 @@ class NullClient implements Client {
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
+    updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     getCustomConfigurationProviderId(): Thenable<string|undefined> { return Promise.resolve(undefined); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
@@ -1185,6 +1234,7 @@ class NullClient implements Client {
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
     sendCustomConfigurations(configs: any): void {}
+    sendCustomBrowseConfiguration(config: any): void {}
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
