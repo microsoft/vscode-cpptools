@@ -27,11 +27,8 @@ export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
             case Version.v0:
                 return this.BackupApi;
 
-            case Version.v1:
-                return new CppTools(version);
-
             default:
-                throw new RangeError(`Invalid version: ${version}`);
+                return new CppTools(version);
         }
     }
 
@@ -39,12 +36,24 @@ export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
         return <CppToolsTestApi>this.getApi(version);
     }
 
+    getVersion(): Version {
+        return this.BackupApi.getVersion();
+    }
+
     registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
         this.BackupApi.registerCustomConfigurationProvider(provider);
     }
 
+    notifyReady(provider: CustomConfigurationProvider): void {
+        this.BackupApi.notifyReady(provider);
+    }
+
     didChangeCustomConfiguration(provider: CustomConfigurationProvider): void {
         this.BackupApi.didChangeCustomConfiguration(provider);
+    }
+
+    didChangeCustomBrowseConfiguration(provider: CustomConfigurationProvider): void {
+        this.BackupApi.didChangeCustomBrowseConfiguration(provider);
     }
 
     dispose(): void {
