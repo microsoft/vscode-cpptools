@@ -27,9 +27,11 @@ let ui: UI;
 let disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
+let insiderUpdateTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
+const insiderUpdateTimerInterval: number = 1000 * 15;
 
 /**
  * activate: set up the extension for language services
@@ -127,6 +129,7 @@ function realActivation(): void {
 
     reportMacCrashes();
 
+    insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
     intervalTimer = setInterval(onInterval, 2500);
 }
 
@@ -166,58 +169,16 @@ function onDidChangeSettings(): void {
 
     clients.forEach(client => client.onDidChangeSettings());
 
-    if (!newUpdateChannel || newUpdateChannel === "Default") {
+    if (!newUpdateChannel) {
+        return;
+    }
+    if (newUpdateChannel === "Default") {
+        clearInterval(insiderUpdateTimer);
         return;
     }
 
-    // Get current version info
-    let version: string = util.packageJson["version"];
-    let dashOffset: number = version.lastIndexOf("-");
-    if (dashOffset !== -1) {
-        // We only want to update if the user is on a Release or Insiders build
-        let suffix: string = version.substr(dashOffset + 1);
-        if (suffix !== "insiders") {
-            return;
-        }
-        version = version.substr(0, dashOffset); // Strip out the suffix
-    }
-
-    getReleaseJSON().then((releaseJSON: any) => {
-        // Get the latest version of the extension
-        let latestBuild: any = releaseJSON[0];
-        if (latestBuild["name"] <= version) {
-            return; // No need to update: already on the latest release
-        }
-
-        PlatformInformation.GetPlatformInformation().then((platformInfo: PlatformInformation) => {
-            // Get the VSIX name to search for in latestBuild
-            let VSIXName: string;
-            if (platformInfo.platform === "linux") {
-                if (platformInfo.architecture === "x86_64") {
-                    VSIXName = "cpptools-linux.vsix";
-                } else 
-                if (platformInfo.architecture === "x86") {
-                    VSIXName = "cpptools-linux32.vsix";
-                }
-            }
-            // TODO mac + win
-            if (!VSIXName) {
-                return;
-            }
-
-            // Get the URL to download the VSIX from
-            let downloadUrl: string;
-            for (let asset of latestBuild["assets"]) {
-                if (asset["name"] === VSIXName) {
-                    downloadUrl = asset["browser_download_url"];
-                }
-            }
-            if (!downloadUrl) {
-                return;
-            }
-            // Download the latest version and install it
-        });
-    });
+    insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+    checkAndApplyUpdate();
 }
 
 let saveMessageShown: boolean = false;
@@ -268,6 +229,67 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
+}
+
+function checkAndApplyUpdate(): void {
+    // Get current version info
+    let json: any = util.getRawPackageJson();
+    let version: string = json["version"]; // util.packageJson["version"];
+    let versionNum: string = version;
+    let dashOffset: number = version.lastIndexOf("-");
+    if (dashOffset !== -1) {
+        // We only want to update if the user is on a Release or Insiders build
+        let suffix: string = version.substr(dashOffset + 1);
+        if (suffix !== "insiders") {
+            return;
+        }
+        versionNum = version.substr(0, dashOffset); // Strip out the suffix
+    }
+
+    getReleaseJSON().then((releaseJSON: any) => {
+        // Get the latest version of the extension
+        let latestBuild: any = releaseJSON[0];
+        if (latestBuild["name"] <= versionNum) {
+            return; // No need to update: already on the latest release
+        }
+
+        PlatformInformation.GetPlatformInformation().then((platformInfo: PlatformInformation) => {
+            // Get the VSIX name to search for in latestBuild
+            let VSIXName: string;
+            if (platformInfo.platform === "linux") {
+                if (platformInfo.architecture === "x86_64") {
+                    VSIXName = "cpptools-linux.vsix";
+                } else 
+                if (platformInfo.architecture === "x86") {
+                    VSIXName = "cpptools-linux32.vsix";
+                }
+            }
+            // TODO mac + win
+            if (!VSIXName) {
+                return;
+            }
+
+            // Get the URL to download the VSIX from
+            let downloadUrl: string;
+            for (let asset of latestBuild["assets"]) {
+                if (asset["name"] === VSIXName) {
+                    downloadUrl = asset["browser_download_url"];
+                }
+            }
+            if (!downloadUrl) {
+                return;
+            }
+            // Download the latest version and install it
+            json["version"] = latestBuild["name"];
+            let path: string = util.getPackageJsonPath();
+            if (!path) {
+                return;
+            }
+            fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(json), () => {
+                showReloadPrompt("Reload Window to finish disabling C++ snippets");
+            });
+        });
+    });
 }
 
 function onInterval(): void {
@@ -591,6 +613,7 @@ export function deactivate(): Thenable<void> {
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
+    clearInterval(insiderUpdateTimer);
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
     ui.dispose();
