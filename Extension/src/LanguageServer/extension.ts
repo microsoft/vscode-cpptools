@@ -18,10 +18,6 @@ import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { SettingsTracker, getTracker } from './settingsTracker';
-import { Version, CppToolsExtension } from 'vscode-cpptools';
-import * as url from 'url';
-import * as https from 'https';
-import { ClientRequest } from 'http';
 import { PlatformInformation } from '../platform';
 
 let prevCrashFile: string;
@@ -34,7 +30,6 @@ let intervalTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-const localConfigFile: string = "cpptools.json";
 
 /**
  * activate: set up the extension for language services
