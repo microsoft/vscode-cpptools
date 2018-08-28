@@ -15,13 +15,6 @@ When you set the `compilerPath` property and change `intelliSenseMode` to `clang
         "${workspaceFolder}"
     ],
     "defines": [],
-    "browse": {
-        "path": [
-            "${workspaceFolder}"
-        ],
-        "limitSymbolsToIncludedHeaders": true,
-        "databaseFilename": ""
-    },
     "cStandard": "c11",
     "cppStandard": "c++17"
 }
