@@ -19,6 +19,10 @@ import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { PlatformInformation } from '../platform';
+import * as url from 'url';
+import * as https from 'https';
+import { ClientRequest } from 'http';
+import { exec } from 'child_process';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -231,10 +235,44 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
+function downloadCpptoolsJsonAsync(urlString, destinationPath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        let parsedUrl: url.Url = url.parse(urlString);
+        let request: ClientRequest = https.request({
+            host: parsedUrl.host,
+            path: parsedUrl.path,
+            agent: util.getHttpsProxyAgent(),
+            rejectUnauthorized: vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true)
+        }, (response) => {
+            if (response.statusCode === 301 || response.statusCode === 302) {
+                console.log(response.statusCode);
+                let redirectUrl: string | string[];
+                if (typeof response.headers.location === "string") {
+                    redirectUrl = response.headers.location;
+                } else {
+                    redirectUrl = response.headers.location[0];
+                }
+                return resolve(downloadCpptoolsJsonAsync(redirectUrl, destinationPath)); // Redirect - download from new location
+            }
+            if (response.statusCode !== 200) {
+                return reject();
+            }
+            let downloadedBytes = 0; // tslint:disable-line
+            let cppToolsJsonFile: fs.WriteStream = fs.createWriteStream(destinationPath);
+            response.on('data', (data) => { downloadedBytes += data.length; });
+            response.on('end', () => { cppToolsJsonFile.close(); });
+            cppToolsJsonFile.on('close', () => { resolve(); this.updateSettingsAsync(); });
+            response.on('error', (error) => { reject(); });
+            response.pipe(cppToolsJsonFile, { end: false });
+        });
+        request.on('error', (error) => { reject(); });
+        request.end();
+    });
+}
+
 function checkAndApplyUpdate(): void {
     // Get current version info
-    let json: any = util.getRawPackageJson();
-    let version: string = json["version"]; // util.packageJson["version"];
+    let version: string = util.packageJson["version"];
     let versionNum: string = version;
     let dashOffset: number = version.lastIndexOf("-");
     if (dashOffset !== -1) {
@@ -249,12 +287,13 @@ function checkAndApplyUpdate(): void {
     getReleaseJSON().then((releaseJSON: any) => {
         // Get the latest version of the extension
         let latestBuild: any = releaseJSON[0];
-        if (latestBuild["name"] <= versionNum) {
+        if (latestBuild["name"] <= versionNum) { // latestBuild["name"] excludes version suffix
             return; // No need to update: already on the latest release
         }
 
         PlatformInformation.GetPlatformInformation().then((platformInfo: PlatformInformation) => {
             // Get the VSIX name to search for in latestBuild
+            // TODO refactor into helper fn
             let VSIXName: string;
             if (platformInfo.platform === "linux") {
                 if (platformInfo.architecture === "x86_64") {
@@ -280,14 +319,28 @@ function checkAndApplyUpdate(): void {
                 return;
             }
             // Download the latest version and install it
-            json["version"] = latestBuild["name"];
-            let path: string = util.getPackageJsonPath();
-            if (!path) {
-                return;
-            }
-            fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(json), () => {
-                showReloadPrompt("Reload Window to finish disabling C++ snippets");
+            let installLoc: string = util.getExtensionFilePath(VSIXName);
+            console.log(installLoc);
+            downloadCpptoolsJsonAsync(downloadUrl, util.getExtensionFilePath(VSIXName)).then(() => {
+                // vscode.commands.executeCommand('workbench.extensions.action.installVSIX', installLoc);
+                let vscodeProcessPath: string = path.dirname(process.execPath);
+                let vsCodeCommandFile: string;
+                if (!vsCodeCommandFile) {
+                    return;
+                }
+                if (platformInfo.platform === "windows") {
+                    vsCodeCommandFile = path.join(vscodeProcessPath, "bin", "code.cmd");
+
+                } else {
+                    vsCodeCommandFile = vscodeProcessPath;
+                }
+                let command: string = vsCodeCommandFile + " --install-extension " + installLoc;
+                exec(command);
             });
+            // json["version"] = latestBuild["name"];
+            // fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(json), () => {
+            //     showReloadPrompt("Reload Window to finish disabling C++ snippets");
+            // });
         });
     });
 }
