@@ -149,23 +149,6 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  *********************************************/
 
-async function getReleaseJSON(): Promise<any> {
-    // Get json
-    let json_str: string = "foo";
-    const cpptoolsJsonFile: string = util.getExtensionFilePath("/home/griff/test.json");
-
-    try {
-        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
-        if (exists) {
-            const fileContent: string = await util.readFileText(cpptoolsJsonFile);
-            let releaseJSON: any = JSON.parse(fileContent);
-            return releaseJSON;
-        }
-    } catch (error) {
-        // Ignore any cpptoolsJsonFile errors
-    }
-}
-
 function onDidChangeSettings(): void {
     // Check whether the user changed updateChannel to "Insiders", else return
     let tracker: SettingsTracker = clients.ActiveClient.SettingsTracker;
@@ -235,7 +218,7 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
-function downloadCpptoolsJsonAsync(urlString, destinationPath: string): Promise<void> {
+function downloadFileToDestination(urlString, destinationPath: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let parsedUrl: url.Url = url.parse(urlString);
         let request: ClientRequest = https.request({
@@ -244,30 +227,48 @@ function downloadCpptoolsJsonAsync(urlString, destinationPath: string): Promise<
             agent: util.getHttpsProxyAgent(),
             rejectUnauthorized: vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true)
         }, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) {
-                console.log(response.statusCode);
+            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
+                // Download from new location
                 let redirectUrl: string | string[];
                 if (typeof response.headers.location === "string") {
                     redirectUrl = response.headers.location;
                 } else {
                     redirectUrl = response.headers.location[0];
                 }
-                return resolve(downloadCpptoolsJsonAsync(redirectUrl, destinationPath)); // Redirect - download from new location
+                return resolve(downloadFileToDestination(redirectUrl, destinationPath));
             }
-            if (response.statusCode !== 200) {
+            if (response.statusCode !== 200) { // If request is not successful
                 return reject();
             }
+            // Write file using downloaded data
             let downloadedBytes = 0; // tslint:disable-line
-            let cppToolsJsonFile: fs.WriteStream = fs.createWriteStream(destinationPath);
+            let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
             response.on('data', (data) => { downloadedBytes += data.length; });
-            response.on('end', () => { cppToolsJsonFile.close(); });
-            cppToolsJsonFile.on('close', () => { resolve(); this.updateSettingsAsync(); });
+            response.on('end', () => { createdFile.close(); });
+            createdFile.on('close', () => { resolve(); this.updateSettingsAsync(); });
             response.on('error', (error) => { reject(); });
-            response.pipe(cppToolsJsonFile, { end: false });
+            response.pipe(createdFile, { end: false });
         });
         request.on('error', (error) => { reject(); });
         request.end();
     });
+}
+
+async function getReleaseJSON(): Promise<any> {
+    // Get json
+    let json_str: string = "foo";
+    const cpptoolsJsonFile: string = util.getExtensionFilePath("/home/griff/test.json");
+
+    try {
+        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
+        if (exists) {
+            const fileContent: string = await util.readFileText(cpptoolsJsonFile);
+            let releaseJSON: any = JSON.parse(fileContent);
+            return releaseJSON;
+        }
+    } catch (error) {
+        // Ignore any cpptoolsJsonFile errors
+    }
 }
 
 function checkAndApplyUpdate(): void {
@@ -320,8 +321,7 @@ function checkAndApplyUpdate(): void {
             }
             // Download the latest version and install it
             let installLoc: string = util.getExtensionFilePath(VSIXName);
-            console.log(installLoc);
-            downloadCpptoolsJsonAsync(downloadUrl, util.getExtensionFilePath(VSIXName)).then(() => {
+            downloadFileToDestination(downloadUrl, util.getExtensionFilePath(VSIXName)).then(() => {
                 // vscode.commands.executeCommand('workbench.extensions.action.installVSIX', installLoc);
                 let vscodeProcessPath: string = path.dirname(process.execPath);
                 let vsCodeCommandFile: string;
@@ -337,10 +337,6 @@ function checkAndApplyUpdate(): void {
                 let command: string = vsCodeCommandFile + " --install-extension " + installLoc;
                 exec(command);
             });
-            // json["version"] = latestBuild["name"];
-            // fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(json), () => {
-            //     showReloadPrompt("Reload Window to finish disabling C++ snippets");
-            // });
         });
     });
 }
