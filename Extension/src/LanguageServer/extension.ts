@@ -21,7 +21,7 @@ import { SettingsTracker, getTracker } from './settingsTracker';
 import { PlatformInformation } from '../platform';
 import * as url from 'url';
 import * as https from 'https';
-import { ClientRequest } from 'http';
+import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { exec } from 'child_process';
 
 let prevCrashFile: string;
@@ -218,14 +218,15 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
-function downloadFileToDestination(urlString, destinationPath: string): Promise<void> {
+function downloadFileToDestination(urlString, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let parsedUrl: url.Url = url.parse(urlString);
         let request: ClientRequest = https.request({
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: util.getHttpsProxyAgent(),
-            rejectUnauthorized: vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true)
+            rejectUnauthorized: vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true),
+            headers: headers
         }, (response) => {
             if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
                 // Download from new location
@@ -254,17 +255,12 @@ function downloadFileToDestination(urlString, destinationPath: string): Promise<
     });
 }
 
-async function getReleaseJSON(): Promise<any> {
-    // Get json
-    let json_str: string = "foo";
-    const cpptoolsJsonFile: string = util.getExtensionFilePath("/home/griff/test.json");
-
+async function parseJsonAtPath(path: string): Promise<any> {
     try {
-        const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
+        const exists: boolean = await util.checkFileExists(path);
         if (exists) {
-            const fileContent: string = await util.readFileText(cpptoolsJsonFile);
-            let releaseJSON: any = JSON.parse(fileContent);
-            return releaseJSON;
+            const fileContent: string = await util.readFileText(path);
+            return JSON.parse(fileContent);
         }
     } catch (error) {
         // Ignore any cpptoolsJsonFile errors
@@ -285,9 +281,10 @@ function checkAndApplyUpdate(): void {
         versionNum = version.substr(0, dashOffset); // Strip out the suffix
     }
 
-    getReleaseJSON().then((releaseJSON: any) => {
+    downloadFileToDestination("https://api.github.com/repos/Microsoft/vscode-cpptools/releases",
+        util.getExtensionFilePath("releases.json"), { "User-Agent": "vscode-cpptools" }).then((releaseJson) => {
         // Get the latest version of the extension
-        let latestBuild: any = releaseJSON[0];
+        let latestBuild: any = releaseJson[0];
         if (latestBuild["name"] <= versionNum) { // latestBuild["name"] excludes version suffix
             return; // No need to update: already on the latest release
         }
@@ -321,9 +318,9 @@ function checkAndApplyUpdate(): void {
                 return;
             }
             // Download the latest version and install it
-            let installLoc: string = util.getExtensionFilePath(vsixName);
-            downloadFileToDestination(downloadUrl, util.getExtensionFilePath(vsixName)).then(() => {
-                // vscode.commands.executeCommand('workbench.extensions.action.installVSIX', installLoc);
+            let vsixPath: string = util.getExtensionFilePath(vsixName);
+            downloadFileToDestination(downloadUrl, vsixPath).then(() => {
+                vscode.commands.executeCommand('workbench.extensions.action.installVSIX', vsixPath);
                 let vscodeProcessPath: string = path.dirname(process.execPath);
                 let vsCodeCommandFile: string;
                 if (!vsCodeCommandFile) {
@@ -336,9 +333,9 @@ function checkAndApplyUpdate(): void {
                 } else {
                     vsCodeCommandFile = vscodeProcessPath;
                 }
-                let command: string = vsCodeCommandFile + " --install-extension " + installLoc;
+                let command: string = vsCodeCommandFile + " --install-extension " + vsixPath;
                 exec(command);
-                // TODO clean up temp files: releaseJSON and the downloaded VSIX
+                // TODO clean up temp files: releaseJson and the downloaded VSIX
             });
         });
     });
