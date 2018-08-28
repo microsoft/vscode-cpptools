@@ -87,7 +87,7 @@
 ### Browse properties
 
 * #### `path`
-  This list of paths will be used by the Tag Parser to search for headers included by your source files. The Tag Parser will automatically search all subfolders in these paths unless the path ends with a `/*` or `\*`. For example, `/usr/include` directs the Tag Parser to search the `include` folder and its subfolders for headers while `/usr/include/*` directs the Tag Parser not to look in any subfolders of `/usr/include`.
+  This list of paths will be used by the Tag Parser to search for headers included by your source files. If omitted, `includePath` will be used as the `path`. The Tag Parser will automatically search all subfolders in these paths unless the path ends with a `/*` or `\*`. For example, `/usr/include` directs the Tag Parser to search the `include` folder and its subfolders for headers while `/usr/include/*` directs the Tag Parser not to look in any subfolders of `/usr/include`.
 
 * #### `limitSymbolsToIncludedHeaders`
   When true, the Tag Parser will only parse code files that have been directly or indirectly included by a source file in `${workspaceFolder}`. When false, the Tag Parser will parse all code files found in the paths specified in the **path** list.
