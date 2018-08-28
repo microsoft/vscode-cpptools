@@ -295,24 +295,25 @@ function checkAndApplyUpdate(): void {
         PlatformInformation.GetPlatformInformation().then((platformInfo: PlatformInformation) => {
             // Get the VSIX name to search for in latestBuild
             // TODO refactor into helper fn
-            let VSIXName: string;
+            // TODO resolve vsixName for mac + win
+            let vsixName: string;
             if (platformInfo.platform === "linux") {
                 if (platformInfo.architecture === "x86_64") {
-                    VSIXName = "cpptools-linux.vsix";
+                    vsixName = "cpptools-linux.vsix";
                 } else 
                 if (platformInfo.architecture === "x86") {
-                    VSIXName = "cpptools-linux32.vsix";
+                    vsixName = "cpptools-linux32.vsix";
                 }
             }
             // TODO mac + win
-            if (!VSIXName) {
+            if (!vsixName) {
                 return;
             }
 
             // Get the URL to download the VSIX from
             let downloadUrl: string;
             for (let asset of latestBuild["assets"]) {
-                if (asset["name"] === VSIXName) {
+                if (asset["name"] === vsixName) {
                     downloadUrl = asset["browser_download_url"];
                 }
             }
@@ -320,14 +321,15 @@ function checkAndApplyUpdate(): void {
                 return;
             }
             // Download the latest version and install it
-            let installLoc: string = util.getExtensionFilePath(VSIXName);
-            downloadFileToDestination(downloadUrl, util.getExtensionFilePath(VSIXName)).then(() => {
+            let installLoc: string = util.getExtensionFilePath(vsixName);
+            downloadFileToDestination(downloadUrl, util.getExtensionFilePath(vsixName)).then(() => {
                 // vscode.commands.executeCommand('workbench.extensions.action.installVSIX', installLoc);
                 let vscodeProcessPath: string = path.dirname(process.execPath);
                 let vsCodeCommandFile: string;
                 if (!vsCodeCommandFile) {
                     return;
                 }
+                // TODO get actual platform name for Windows
                 if (platformInfo.platform === "windows") {
                     vsCodeCommandFile = path.join(vscodeProcessPath, "bin", "code.cmd");
 
@@ -336,6 +338,7 @@ function checkAndApplyUpdate(): void {
                 }
                 let command: string = vsCodeCommandFile + " --install-extension " + installLoc;
                 exec(command);
+                // TODO clean up temp files: releaseJSON and the downloaded VSIX
             });
         });
     });
