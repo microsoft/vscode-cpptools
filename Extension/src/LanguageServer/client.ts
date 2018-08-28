@@ -10,7 +10,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
-import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -92,8 +92,14 @@ interface DecorationRangesPair {
     ranges: vscode.Range[];
 }
 
+// Need to convert vscode.Uri to a string before sending it to the language server.
+interface SourceFileConfigurationItemAdapter {
+    uri: string;
+    configuration: SourceFileConfiguration;
+}
+
 interface CustomConfigurationParams {
-    configurationItems: SourceFileConfigurationItem[];
+    configurationItems: SourceFileConfigurationItemAdapter[];
 }
 
 interface CustomBrowseConfigurationParams {
@@ -1062,21 +1068,28 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
 
+    private isSourceFileConfigurationItem(input: any): input is SourceFileConfigurationItem {
+        return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
+            input.configuration && util.isArrayOfString(input.configuration.includePath) && util.isArrayOfString(input.configuration.defines) &&
+            util.isString(input.configuration.intelliSenseMode) && util.isString(input.configuration.standard) && util.isOptionalString(input.configuration.compilerPath) &&
+            util.isOptionalArrayOfString(input.configuration.forcedInclude));
+    }
+
     public sendCustomConfigurations(configs: any): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             return;
         }
-        let sanitized: SourceFileConfigurationItem[] = <SourceFileConfigurationItem[]>configs;
-        sanitized = sanitized.filter(item => {
-            if (item && util.isString(item.uri) &&
-                item.configuration && util.isArrayOfString(item.configuration.includePath) && util.isArrayOfString(item.configuration.defines) &&
-                util.isString(item.configuration.intelliSenseMode) && util.isString(item.configuration.standard) && util.isOptionalString(item.configuration.compilerPath) &&
-                util.isOptionalArrayOfString(item.configuration.forcedInclude)) {
-                return true;
+        let sanitized: SourceFileConfigurationItemAdapter[] = [];
+        configs.forEach(item => {
+            if (this.isSourceFileConfigurationItem(item)) {
+                sanitized.push({
+                    uri: item.uri.toString(),
+                    configuration: item.configuration
+                });
+            } else {
+                console.warn("discarding invalid SourceFileConfigurationItem: " + item);
             }
-            console.warn("discarding invalid SourceFileConfigurationItem: " + item);
-            return false;
         });
 
         if (sanitized.length === 0) {

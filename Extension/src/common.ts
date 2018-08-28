@@ -169,6 +169,10 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
+export function isUri(input: any): input is vscode.Uri {
+    return input && input instanceof vscode.Uri;
+}
+
 export function isString(input: any): input is string {
     return input && typeof(input) === "string";
 }
