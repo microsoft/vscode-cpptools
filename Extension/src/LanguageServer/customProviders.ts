@@ -77,6 +77,7 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
     }
 
     public provideBrowseConfiguration(token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
+        console.assert(this._version >= Version.v2);
         return this._version < Version.v2 ? Promise.resolve({browsePath: []}) : this.provider.provideBrowseConfiguration(token);
     }
 

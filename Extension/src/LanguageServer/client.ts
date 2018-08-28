@@ -501,7 +501,7 @@ class DefaultClient implements Client {
             let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
                 return currentProvider.provideConfigurations(documentUris, tokenSource.token);
             };
-            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs));
+            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs), () => {});
         });
     }
 
@@ -511,17 +511,18 @@ class DefaultClient implements Client {
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) || this.trackedDocuments.size === 0) {
+            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
                 return;
             }
 
             let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-            let task: () => Thenable<WorkspaceBrowseConfiguration> = () => {
-                if (currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
+            let task: () => Thenable<WorkspaceBrowseConfiguration> = async () => {
+                if (await currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
                     return currentProvider.provideBrowseConfiguration(tokenSource.token);
                 }
+                return Promise.reject("");
             };
-            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(config => this.sendCustomBrowseConfiguration(config));
+            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(config => this.sendCustomBrowseConfiguration(config), () => {});
         });
     }
 
@@ -662,6 +663,7 @@ class DefaultClient implements Client {
                     return result;
                 },
                 (error: any) => {
+                    clearTimeout(timer);
                     throw error;
                 });
         });
