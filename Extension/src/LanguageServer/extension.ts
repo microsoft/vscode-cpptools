@@ -256,6 +256,7 @@ function downloadFileToDestination(urlString, destinationPath: string, headers?:
     });
 }
 
+// TODO factor this out?
 async function parseJsonAtPath(path: string): Promise<any> {
     try {
         const exists: boolean = await util.checkFileExists(path);
@@ -290,8 +291,7 @@ async function checkAndApplyUpdate(): Promise<void> {
     const releaseJsonPath: string = util.getExtensionFilePath("releases.json");
     await downloadFileToDestination("https://api.github.com/repos/Microsoft/vscode-cpptools/releases",
                                     releaseJsonPath, { "User-Agent": "vscode-cpptools" });
-    let latestBuild: any = await parseJsonAtPath(releaseJsonPath); // [0] to get latest build
-    latestBuild = latestBuild[0];
+    const latestBuild: any = await parseJsonAtPath(releaseJsonPath)[0]; // [0] to get latest build
     if (!latestBuild) {
         return;
     }
@@ -347,6 +347,7 @@ async function checkAndApplyUpdate(): Promise<void> {
         return;
     }
 
+    // Install the update
     const command: string = vsCodeCommandFile + " --install-extension " + vsixPath;
     exec(command);
     // TODO clean up temp files: releaseJson and the downloaded VSIX
