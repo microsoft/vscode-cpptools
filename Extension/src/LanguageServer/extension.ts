@@ -133,7 +133,7 @@ function realActivation(): void {
 
     reportMacCrashes();
 
-    insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+    // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
     intervalTimer = setInterval(onInterval, 2500);
 }
 
@@ -164,7 +164,7 @@ function onDidChangeSettings(): void {
         return;
     }
 
-    insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+     // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
     checkAndApplyUpdate();
 }
 
@@ -218,6 +218,7 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
+// TODO move this fn to a common area -- Replace abTesting's downloadCpptoolsJsonAsync with this fn
 function downloadFileToDestination(urlString, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let parsedUrl: url.Url = url.parse(urlString);
@@ -263,78 +264,92 @@ async function parseJsonAtPath(path: string): Promise<any> {
             return JSON.parse(fileContent);
         }
     } catch (error) {
+        console.log(error);
     }
 }
 
-function checkAndApplyUpdate(): void {
-    // Get current version info, stripping out the 
-    let version: string = util.packageJson["version"];
-    let versionNum: string = version;
-    let dashOffset: number = version.indexOf("-");
-    if (dashOffset !== -1) {
-        // We only want to update if the user is on a Release or Insiders build
-        let suffix: string = version.substr(dashOffset + 1);
-        if (suffix !== "insiders") {
-            return;
+async function checkAndApplyUpdate(): Promise<void> {
+    // Get current version name, stripping out everything past (and incl.) the dash if present
+    // Return if the user is using a non-Release or non-Insider build (e.g. build ending in "-master")
+    const version: string = function(): string {
+        let version: string = util.packageJson["version"];
+        const dashOffset: number = version.indexOf("-");
+        if (dashOffset !== -1) {
+            if (version.substr(dashOffset + 1) !== "insiders") {
+                return null;
+            }
+            version = version.substr(0, dashOffset); // Strip out the suffix
         }
-        versionNum = version.substr(0, dashOffset); // Strip out the suffix
+        return version;
+    }();
+    if (!version) {
+        return;
     }
 
+    // Download and parse the JSON release list from GitHub to get the latest build
     const releaseJsonPath: string = util.getExtensionFilePath("releases.json");
-    downloadFileToDestination("https://api.github.com/repos/Microsoft/vscode-cpptools/releases",
-        releaseJsonPath, { "User-Agent": "vscode-cpptools" }).then(() => {
-        parseJsonAtPath(releaseJsonPath).then((parsed) => {
-            const latestBuild: any = parsed[0];
-            if (latestBuild["name"] <= versionNum) { // latestBuild["name"] excludes version suffix
-                return; // No need to update: already on the latest release
+    await downloadFileToDestination("https://api.github.com/repos/Microsoft/vscode-cpptools/releases",
+                                    releaseJsonPath, { "User-Agent": "vscode-cpptools" });
+    let latestBuild: any = await parseJsonAtPath(releaseJsonPath); // [0] to get latest build
+    latestBuild = latestBuild[0];
+    if (!latestBuild) {
+        return;
+    }
+
+    // Check whether the user actually needs to update
+    if (version >= latestBuild["name"]) { // latestBuild["name"] excludes version suffix
+        return;
+    }
+
+    // Get the VSIX name to search for in latestBuild
+    // TODO resolve vsixName for mac + win
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const vsixName: string = function(platformInfo): string {
+        let vsixName: string;
+        if (platformInfo.platform === "linux") {
+            if (platformInfo.architecture === "x86_64") {
+                vsixName = "cpptools-linux.vsix";
+            } else 
+            if (platformInfo.architecture === "x86") {
+                vsixName = "cpptools-linux32.vsix";
             }
+        }
+        return vsixName;
+    }(platformInfo);
+    if (!vsixName) {
+        return;
+    }
+    
+    // Get the URL to download the VSIX, using vsixName as a key
+    const downloadUrl: string = latestBuild["assets"].find((asset) => {
+        return asset["name"] === vsixName;
+    })["browser_download_url"];
+    if (!downloadUrl) {
+        return;
+    }
 
-            PlatformInformation.GetPlatformInformation().then((platformInfo: PlatformInformation) => {
-                // Get the VSIX name to search for in latestBuild
-                // TODO resolve vsixName for mac + win
-                let vsixName: string;
-                if (platformInfo.platform === "linux") {
-                    if (platformInfo.architecture === "x86_64") {
-                        vsixName = "cpptools-linux.vsix";
-                    } else 
-                    if (platformInfo.architecture === "x86") {
-                        vsixName = "cpptools-linux32.vsix";
-                    }
-                }
-                if (!vsixName) {
-                    return;
-                }
-                
-                // Get the URL to download the VSIX from
-                let downloadUrl: string = latestBuild["assets"].find((asset) => {
-                    return asset["name"] === vsixName;
-                })["browser_download_url"];
-                if (!downloadUrl) {
-                    return;
-                }
+    // Download the latest version
+    const vsixPath: string = util.getExtensionFilePath(vsixName);
+    await downloadFileToDestination(downloadUrl, vsixPath);
 
-                // Download the latest version and install it
-                let vsixPath: string = util.getExtensionFilePath(vsixName);
-                downloadFileToDestination(downloadUrl, vsixPath).then(() => {
-                    let vscodeProcessPath: string = path.dirname(process.execPath);
-                    let vsCodeCommandFile: string;
-                    if (!vsCodeCommandFile) {
-                        return;
-                    }
-                    // TODO get actual platform name for Windows
-                    if (platformInfo.platform === "windows") {
-                        vsCodeCommandFile = path.join(vscodeProcessPath, "bin", "code.cmd");
-                        
-                    } else {
-                        vsCodeCommandFile = vscodeProcessPath;
-                    }
-                    let command: string = vsCodeCommandFile + " --install-extension " + vsixPath;
-                    exec(command);
-                    // TODO clean up temp files: releaseJson and the downloaded VSIX
-                });
-            });
-        });
-    });
+    // Get the path to the VSCode command
+    const vsCodeCommandFile: string = function(platformInfo): string {
+        const vscodeProcessPath: string = path.dirname(process.execPath);
+        let vsCodeCommandFile: string;
+        if (platformInfo.platform === "windows") { // TODO get actual platform name for Windows
+            vsCodeCommandFile = path.join(vscodeProcessPath, "bin", "code.cmd");
+        } else {
+            vsCodeCommandFile = vscodeProcessPath;
+        }
+        return vsCodeCommandFile;
+    }(platformInfo);
+    if (!vsCodeCommandFile) {
+        return;
+    }
+
+    const command: string = vsCodeCommandFile + " --install-extension " + vsixPath;
+    exec(command);
+    // TODO clean up temp files: releaseJson and the downloaded VSIX
 }
 
 function onInterval(): void {
