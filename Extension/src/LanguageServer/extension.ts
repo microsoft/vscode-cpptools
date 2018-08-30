@@ -227,13 +227,13 @@ function downloadFileToDestination(urlStr: string, destinationPath: string, head
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: util.getHttpsProxyAgent(),
-            rejectUnauthorized: vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true),
+            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
             headers: headers
         }, (response) => {
             if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
                 // Download from new location
                 let redirectUrl: string;
-                if (typeof response.headers.location === "string") {
+                if (typeof response.headers.location === 'string') {
                     redirectUrl = response.headers.location;
                 } else {
                     redirectUrl = response.headers.location[0];
@@ -274,10 +274,10 @@ async function checkAndApplyUpdate(): Promise<void> {
     // Get current version name, stripping out everything past (and incl.) the dash if present
     // Return if the user is using a non-Release or non-Insider build (e.g. version ending in "-master")
     const version: string = function(): string {
-        let version: string = util.packageJson["version"];
-        const dashOffset: number = version.indexOf("-");
+        let version: string = util.packageJson['version'];
+        const dashOffset: number = version.indexOf('-');
         if (dashOffset !== -1) {
-            if (version.substr(dashOffset + 1) !== "insiders") {
+            if (version.substr(dashOffset + 1) !== 'insiders') {
                 return null;
             }
             version = version.substr(0, dashOffset); // Strip out the suffix
@@ -290,8 +290,8 @@ async function checkAndApplyUpdate(): Promise<void> {
 
     // Download and parse the JSON release list from GitHub to get the latest build
     let releaseJsonFile: any = tmp.fileSync();
-    await downloadFileToDestination("https://api.github.com/repos/Microsoft/vscode-cpptools/releases",
-                                    releaseJsonFile.name, { "User-Agent": "vscode-cpptools" });
+    await downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
+                                    releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' });
     const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name);
     const latestBuild: any = parsedJson[0]; // [0] to get latest build
     if (!latestBuild) {
@@ -300,29 +300,25 @@ async function checkAndApplyUpdate(): Promise<void> {
     releaseJsonFile.removeCallback();
 
     // Check whether the user actually needs to update
-    if (version >= latestBuild["name"]) { // latestBuild["name"] excludes version suffix
+    if (version >= latestBuild['name']) { // latestBuild['name'] excludes version suffix
         return;
     }
 
     // Get the VSIX name to search for in latestBuild
-    // TODO resolve vsixName for mac + win
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     const vsixName: string = function(platformInfo): string {
-        let vsixName: string;
-        if (platformInfo.platform === "linux") {
-            if (platformInfo.architecture === "x86_64") {
-                vsixName = "cpptools-linux.vsix";
-            } else 
-            if (platformInfo.architecture === "x86") {
-                vsixName = "cpptools-linux32.vsix";
+        switch (platformInfo.platform) {
+            case 'win32': return 'cpptools-win32.vsix';
+            case 'darwin': return 'cpptools-osx.vsix';
+            default: {
+                switch (platformInfo.architecture) {
+                    case 'x86': return 'cpptools-linux32.vsix';
+                    case 'x86_64': return 'cpptools-linux.vsix';
+                }
             }
         }
-        return vsixName;
     }(platformInfo);
-    if (!vsixName) {
-        return;
-    }
-    
+
     // Get the URL to download the VSIX, using vsixName as a key
     const downloadUrl: string = latestBuild['assets'].find((asset) => {
         return asset['name'] === vsixName;
