@@ -545,6 +545,10 @@ class DefaultClient implements Client {
             try {
                 let provider: CustomConfigurationProvider1|null = providers.get(providerId);
                 if (provider) {
+                    if (!provider.isReady) {
+                        return Promise.reject(`${providerName} is not ready`);
+                    }
+
                     providerName = provider.name;
                     if (await provider.canProvideConfiguration(document.uri, tokenSource.token)) {
                         return provider.provideConfigurations([document.uri], tokenSource.token);
@@ -561,16 +565,18 @@ class DefaultClient implements Client {
                     this.sendCustomConfigurations(configs);
                 }
             },
-            () => {
+            (err) => {
                 let settings: CppSettings = new CppSettings(this.RootUri);
                 if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = "Dismiss";
                     const disable: string = "Disable Warnings";
-                    vscode.window.showInformationMessage(
-                        `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
-                        `Settings from the '${configName}' configuration will be used instead.`,
-                        dismiss,
-                        disable).then(response => {
+                    let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                        `Settings from the '${configName}' configuration will be used instead.`;
+                    if (err) {
+                        message += ` (${err})`;
+                    }
+
+                    vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
                             switch (response) {
                                 case disable: {
                                     settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
