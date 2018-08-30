@@ -23,6 +23,7 @@ import * as url from 'url';
 import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { exec } from 'child_process';
+import * as tmp from 'tmp';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -288,14 +289,15 @@ async function checkAndApplyUpdate(): Promise<void> {
     }
 
     // Download and parse the JSON release list from GitHub to get the latest build
-    const releaseJsonPath: string = util.getExtensionFilePath("releases.json");
+    let releaseJsonFile: any = tmp.fileSync();
     await downloadFileToDestination("https://api.github.com/repos/Microsoft/vscode-cpptools/releases",
-                                    releaseJsonPath, { "User-Agent": "vscode-cpptools" });
-    const parsedJson: any = await parseJsonAtPath(releaseJsonPath);
+                                    releaseJsonFile.name, { "User-Agent": "vscode-cpptools" });
+    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name);
     const latestBuild: any = parsedJson[0]; // [0] to get latest build
     if (!latestBuild) {
         return;
     }
+    releaseJsonFile.removeCallback();
 
     // Check whether the user actually needs to update
     if (version >= latestBuild["name"]) { // latestBuild["name"] excludes version suffix
@@ -330,17 +332,23 @@ async function checkAndApplyUpdate(): Promise<void> {
     }
 
     // Download the latest version
-    const vsixPath: string = util.getExtensionFilePath(vsixName);
-    await downloadFileToDestination(downloadUrl, vsixPath);
+    const vsixFile: any = tmp.fileSync({ postfix: ".vsix" });
+    await downloadFileToDestination(downloadUrl, vsixFile.name);
 
-    // Get the path to the VSCode command
-    const vsCodeCommandFile: string = function(platformInfo): string {
-        const vscodeProcessPath: string = path.dirname(process.execPath);
+    // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
+    // workbench.extensions.action.installVSIX from TypeScript w/o popping up a file dialog
+    const vsCodeCommandFile: string = await async function(platformInfo): Promise<string> {
         let vsCodeCommandFile: string;
         if (platformInfo.platform === "windows") { // TODO get actual platform name for Windows
+            const vscodeProcessPath: string = path.dirname(process.execPath);
             vsCodeCommandFile = path.join(vscodeProcessPath, "bin", "code.cmd");
         } else {
-            vsCodeCommandFile = vscodeProcessPath;
+            const vsCodeScriptPath: string = "/usr/bin/code";
+            if (await fs.statSync(vsCodeScriptPath)) {
+                vsCodeCommandFile = vsCodeScriptPath;
+            } else {
+                // TODO log telemetry
+            }
         }
         return vsCodeCommandFile;
     }(platformInfo);
@@ -349,9 +357,9 @@ async function checkAndApplyUpdate(): Promise<void> {
     }
 
     // Install the update
-    const command: string = vsCodeCommandFile + " --install-extension " + vsixPath;
+    const command: string = vsCodeCommandFile + " --install-extension " + vsixFile.name;
     exec(command);
-    // TODO clean up temp files: releaseJson and the downloaded VSIX
+    vsixFile.removeCallback();
 }
 
 function onInterval(): void {
