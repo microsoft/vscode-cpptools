@@ -324,26 +324,26 @@ async function checkAndApplyUpdate(): Promise<void> {
     }
     
     // Get the URL to download the VSIX, using vsixName as a key
-    const downloadUrl: string = latestBuild["assets"].find((asset) => {
-        return asset["name"] === vsixName;
-    })["browser_download_url"];
+    const downloadUrl: string = latestBuild['assets'].find((asset) => {
+        return asset['name'] === vsixName;
+    })['browser_download_url'];
     if (!downloadUrl) {
         return;
     }
 
     // Download the latest version
-    const vsixFile: any = tmp.fileSync({ postfix: ".vsix" });
+    const vsixFile: any = tmp.fileSync({ postfix: '.vsix' });
     await downloadFileToDestination(downloadUrl, vsixFile.name);
 
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o popping up a file dialog
     const vsCodeCommandFile: string = await async function(platformInfo): Promise<string> {
         let vsCodeCommandFile: string;
-        if (platformInfo.platform === "windows") { // TODO get actual platform name for Windows
+        if (platformInfo.platform === 'win32') {
             const vscodeProcessPath: string = path.dirname(process.execPath);
-            vsCodeCommandFile = path.join(vscodeProcessPath, "bin", "code.cmd");
+            vsCodeCommandFile = path.join(vscodeProcessPath, 'bin', 'code.cmd');
         } else {
-            const vsCodeScriptPath: string = "/usr/bin/code";
+            const vsCodeScriptPath: string = '/usr/bin/code';
             if (await fs.statSync(vsCodeScriptPath)) {
                 vsCodeCommandFile = vsCodeScriptPath;
             } else {
@@ -357,7 +357,7 @@ async function checkAndApplyUpdate(): Promise<void> {
     }
 
     // Install the update
-    const command: string = vsCodeCommandFile + " --install-extension " + vsixFile.name;
+    const command: string = vsCodeCommandFile + ' --install-extension ' + vsixFile.name;
     exec(command);
     vsixFile.removeCallback();
 }
