@@ -12,7 +12,7 @@
       "-D_MSC_FULL_VER=191426428",
       "-D_MSC_BUILD=0",
       "-D_M_X64=100",
-      "-D_AMD64=100"
+      "-D_M_AMD64=100"
     ],
     "defaults_op" :  "merge"
   }
