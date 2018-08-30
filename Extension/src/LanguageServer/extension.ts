@@ -219,9 +219,9 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
 }
 
 // TODO move this fn to a common area -- Replace abTesting's downloadCpptoolsJsonAsync with this fn
-function downloadFileToDestination(urlString, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
+function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        let parsedUrl: url.Url = url.parse(urlString);
+        let parsedUrl: url.Url = url.parse(urlStr);
         let request: ClientRequest = https.request({
             host: parsedUrl.host,
             path: parsedUrl.path,
@@ -231,7 +231,7 @@ function downloadFileToDestination(urlString, destinationPath: string, headers?:
         }, (response) => {
             if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
                 // Download from new location
-                let redirectUrl: string | string[];
+                let redirectUrl: string;
                 if (typeof response.headers.location === "string") {
                     redirectUrl = response.headers.location;
                 } else {
@@ -271,7 +271,7 @@ async function parseJsonAtPath(path: string): Promise<any> {
 
 async function checkAndApplyUpdate(): Promise<void> {
     // Get current version name, stripping out everything past (and incl.) the dash if present
-    // Return if the user is using a non-Release or non-Insider build (e.g. build ending in "-master")
+    // Return if the user is using a non-Release or non-Insider build (e.g. version ending in "-master")
     const version: string = function(): string {
         let version: string = util.packageJson["version"];
         const dashOffset: number = version.indexOf("-");
@@ -291,7 +291,8 @@ async function checkAndApplyUpdate(): Promise<void> {
     const releaseJsonPath: string = util.getExtensionFilePath("releases.json");
     await downloadFileToDestination("https://api.github.com/repos/Microsoft/vscode-cpptools/releases",
                                     releaseJsonPath, { "User-Agent": "vscode-cpptools" });
-    const latestBuild: any = await parseJsonAtPath(releaseJsonPath)[0]; // [0] to get latest build
+    const parsedJson: any = await parseJsonAtPath(releaseJsonPath);
+    const latestBuild: any = parsedJson[0]; // [0] to get latest build
     if (!latestBuild) {
         return;
     }
