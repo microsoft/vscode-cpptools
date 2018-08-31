@@ -19,9 +19,6 @@ import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { PlatformInformation } from '../platform';
-import * as url from 'url';
-import * as https from 'https';
-import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { exec, execSync } from 'child_process';
 import * as tmp from 'tmp';
 
@@ -219,44 +216,6 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
-// TODO move this fn to a common area -- Replace abTesting's downloadCpptoolsJsonAsync with this fn
-function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        let parsedUrl: url.Url = url.parse(urlStr);
-        let request: ClientRequest = https.request({
-            host: parsedUrl.host,
-            path: parsedUrl.path,
-            agent: util.getHttpsProxyAgent(),
-            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
-            headers: headers
-        }, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
-                // Download from new location
-                let redirectUrl: string;
-                if (typeof response.headers.location === 'string') {
-                    redirectUrl = response.headers.location;
-                } else {
-                    redirectUrl = response.headers.location[0];
-                }
-                return resolve(downloadFileToDestination(redirectUrl, destinationPath));
-            }
-            if (response.statusCode !== 200) { // If request is not successful
-                return reject();
-            }
-            // Write file using downloaded data
-            let downloadedBytes = 0; // tslint:disable-line
-            let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
-            response.on('data', (data) => { downloadedBytes += data.length; });
-            response.on('end', () => { createdFile.close(); });
-            createdFile.on('close', () => { resolve(); this.updateSettingsAsync(); });
-            response.on('error', (error) => { reject(); });
-            response.pipe(createdFile, { end: false });
-        });
-        request.on('error', (error) => { reject(); });
-        request.end();
-    });
-}
-
 // TODO factor this out?
 async function parseJsonAtPath(path: string): Promise<any> {
     try {
@@ -290,7 +249,7 @@ function needsUpdate(userVerStr: string, latestVerStr: string): boolean {
     const user: ParsedVersion = new ParsedVersion(userVerStr);
     const latest: ParsedVersion = new ParsedVersion(latestVerStr);
 
-    // User does not need an update if their version has a suffix that isn't insiders (e.g. master)
+    // User does not need to update if their version has a suffix that isn't insiders (e.g. master)
     // User also does not need to update if latest has a suffix that isn't insiders
     if ((user.suffix && user.suffix !== 'insiders') || (latest.suffix && latest.suffix !== 'insiders')) {
         return false;
@@ -306,7 +265,7 @@ function needsUpdate(userVerStr: string, latestVerStr: string): boolean {
 async function checkAndApplyUpdate(): Promise<void> {
     // Download and parse the JSON release list from GitHub to get the latest build
     let releaseJsonFile: any = tmp.fileSync();
-    await downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
+    await util.downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
         releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' });
     const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name);
     const latestBuild: any = parsedJson[0]; // [0] to get latest build
@@ -315,7 +274,7 @@ async function checkAndApplyUpdate(): Promise<void> {
     }
     releaseJsonFile.removeCallback();
 
-    // Check whether the user actually needs to update
+    // Check whether the user actually needs to update by comparing version strings
     if (!needsUpdate(util.packageJson['version'], latestBuild['name'])) {
         return;
     }
@@ -345,7 +304,7 @@ async function checkAndApplyUpdate(): Promise<void> {
 
     // Download the latest version
     const vsixFile: any = tmp.fileSync({ postfix: '.vsix' });
-    await downloadFileToDestination(downloadUrl, vsixFile.name);
+    await util.downloadFileToDestination(downloadUrl, vsixFile.name);
 
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
