@@ -270,28 +270,44 @@ async function parseJsonAtPath(path: string): Promise<any> {
     }
 }
 
-async function checkAndApplyUpdate(): Promise<void> {
-    // Get current version name, stripping out everything past (and incl.) the dash if present
-    // Return if the user is using a non-Release or non-Insider build (e.g. version ending in "-master")
-    const version: string = function(): string {
-        let version: string = util.packageJson['version'];
-        const dashOffset: number = version.indexOf('-');
-        if (dashOffset !== -1) {
-            if (version.substr(dashOffset + 1) !== 'insiders') {
-                return null;
-            }
-            version = version.substr(0, dashOffset); // Strip out the suffix
-        }
-        return version;
-    }();
-    if (!version) {
-        return;
+class ParsedVersion {
+    public major: number;
+    public minor: number;
+    public patch: number;
+    public suffix?: string;
+
+    constructor(versionStr: string) {
+        let tokens: string[] = versionStr.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
+        // TODO add error checking. Assert? Log? Telemetry?
+        this.major = parseInt(tokens[0]);
+        this.minor = parseInt(tokens[1]);
+        this.patch = parseInt(tokens[2]);
+        this.suffix = tokens[3];
+    }
+}
+
+function needsUpdate(userVerStr: string, latestVerStr: string): boolean {
+    const user: ParsedVersion = new ParsedVersion(userVerStr);
+    const latest: ParsedVersion = new ParsedVersion(latestVerStr);
+
+    // User does not need an update if their version has a suffix that isn't insiders (e.g. master)
+    // User also does not need to update if latest has a suffix that isn't insiders
+    if ((user.suffix && user.suffix !== 'insiders') || (latest.suffix && latest.suffix !== 'insiders')) {
+        return false;
     }
 
+    if (user.major > latest.major || user.minor > latest.minor || user.patch > latest.patch) {
+        return false;
+    }
+
+    return true;
+}
+
+async function checkAndApplyUpdate(): Promise<void> {
     // Download and parse the JSON release list from GitHub to get the latest build
     let releaseJsonFile: any = tmp.fileSync();
     await downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
-                                    releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' });
+        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' });
     const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name);
     const latestBuild: any = parsedJson[0]; // [0] to get latest build
     if (!latestBuild) {
@@ -300,7 +316,7 @@ async function checkAndApplyUpdate(): Promise<void> {
     releaseJsonFile.removeCallback();
 
     // Check whether the user actually needs to update
-    if (version >= latestBuild['name']) { // latestBuild['name'] excludes version suffix
+    if (!needsUpdate(util.packageJson['version'], latestBuild['name'])) {
         return;
     }
 
@@ -355,6 +371,7 @@ async function checkAndApplyUpdate(): Promise<void> {
     // Install the update
     const command: string = vsCodeCommandFile + ' --install-extension ' + vsixFile.name;
     exec(command);
+
     vsixFile.removeCallback();
 }
 
