@@ -22,7 +22,7 @@ import { PlatformInformation } from '../platform';
 import * as url from 'url';
 import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import * as tmp from 'tmp';
 
 let prevCrashFile: string;
@@ -348,23 +348,21 @@ async function checkAndApplyUpdate(): Promise<void> {
     await downloadFileToDestination(downloadUrl, vsixFile.name);
 
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
-    // workbench.extensions.action.installVSIX from TypeScript w/o popping up a file dialog
+    // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     const vsCodeCommandFile: string = await async function(platformInfo): Promise<string> {
-        let vsCodeCommandFile: string;
         if (platformInfo.platform === 'win32') {
             const vscodeProcessPath: string = path.dirname(process.execPath);
-            vsCodeCommandFile = path.join(vscodeProcessPath, 'bin', 'code.cmd');
-        } else {
-            const vsCodeScriptPath: string = '/usr/bin/code';
-            if (await fs.statSync(vsCodeScriptPath)) {
-                vsCodeCommandFile = vsCodeScriptPath;
-            } else {
-                // TODO log telemetry
+            if (!vscodeProcessPath) {
+                return;
             }
+            return path.join(vscodeProcessPath, 'bin', 'code.cmd');
+        } else {
+            const stdout: Buffer = await execSync("which code");
+            return stdout.toString().trim();
         }
-        return vsCodeCommandFile;
     }(platformInfo);
     if (!vsCodeCommandFile) {
+        // TODO log telemetry
         return;
     }
 
