@@ -36,7 +36,7 @@ let insiderUpdateTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-const insiderUpdateTimerInterval: number = 1000 * 15;
+const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 
 /**
  * activate: set up the extension for language services
