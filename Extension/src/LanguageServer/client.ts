@@ -155,7 +155,7 @@ export interface Client {
     RootUri: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    onDidChangeSettings(): void;
+    onDidChangeSettings(): { [key: string] : string };
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
@@ -219,7 +219,6 @@ class DefaultClient implements Client {
         activeConfigName: new DataBinding<string>("")
     };
 
-    public get SettingsTracker(): SettingsTracker { return this.settingsTracker; }
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
@@ -398,8 +397,8 @@ class DefaultClient implements Client {
         return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
     }
 
-    public onDidChangeSettings(): void {
-        let changedSettings: { [key: string] : string} = this.settingsTracker.getChangedSettings();
+    public onDidChangeSettings(): { [key: string] : string } {
+        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
 
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
@@ -412,6 +411,8 @@ class DefaultClient implements Client {
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
         }
+
+        return changedSettings;
     }
 
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
@@ -1173,7 +1174,6 @@ class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
     private stringEvent = new vscode.EventEmitter<string>();
 
-    public get SettingsTracker(): SettingsTracker { let stg: SettingsTracker; return stg; }
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
@@ -1183,7 +1183,7 @@ class NullClient implements Client {
     RootUri: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    onDidChangeSettings(): void {}
+    onDidChangeSettings(): { [key: string] : string } { return {}; }
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
