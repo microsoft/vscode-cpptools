@@ -21,6 +21,8 @@ import { SettingsTracker, getTracker } from './settingsTracker';
 import { PlatformInformation } from '../platform';
 import { exec, execSync } from 'child_process';
 import * as tmp from 'tmp';
+import { isArray, isString } from 'util';
+import { parse } from 'jsonc-parser';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -222,7 +224,7 @@ async function parseJsonAtPath(path: string): Promise<any> {
             return JSON.parse(fileContent);
         }
     } catch (error) {
-        console.log(error);
+        return Promise.reject();
     }
 }
 
@@ -239,6 +241,10 @@ class ParsedVersion {
         this.minor = parseInt(tokens[1]);
         this.patch = parseInt(tokens[2]);
         this.suffix = tokens[3];
+
+        if (!this.major || !this.minor || !this.patch) {
+            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+        }
     }
 }
 
@@ -259,12 +265,34 @@ function needsUpdate(userVerStr: string, latestVerStr: string): boolean {
     return true;
 }
 
+function isReleaseJson(input: any): boolean {
+    const assetArr: any = input[0]['assets'];
+    if (!assetArr || assetArr.length < 4) { // Each asset being an object for mac, win, 32 + 64 bit linux (4 total)
+        return false;
+    }
+    const name: string = assetArr[0]['name'];
+    if (!name) {
+        return false;
+    }
+    const downloadUrl: string = assetArr[0]['browser_download_url'];
+    if (!downloadUrl) {
+        return false;
+    }
+
+    return true;
+}
+
 async function checkAndApplyUpdate(): Promise<void> {
     // Download and parse the JSON release list from GitHub to get the latest build
     let releaseJsonFile: any = tmp.fileSync();
     await util.downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
-        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' });
-    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name);
+        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
+            telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
+        });
+    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name).catch(() => {
+        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
+        return;
+    });
     const latestBuild: any = parsedJson[0]; // [0] to get latest build
     if (!latestBuild) {
         return;
@@ -301,7 +329,9 @@ async function checkAndApplyUpdate(): Promise<void> {
 
     // Download the latest version
     const vsixFile: any = tmp.fileSync({ postfix: '.vsix' });
-    await util.downloadFileToDestination(downloadUrl, vsixFile.name);
+    await util.downloadFileToDestination(downloadUrl, vsixFile.name).catch(() => {
+        telemetry.logLanguageServerEvent('vsixDownloadFailure');
+    });
 
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
@@ -318,13 +348,17 @@ async function checkAndApplyUpdate(): Promise<void> {
         }
     }(platformInfo);
     if (!vsCodeCommandFile) {
-        // TODO log telemetry
+        telemetry.logLanguageServerEvent('cannotFindCodeScript');
         return;
     }
 
     // Install the update
     const command: string = vsCodeCommandFile + ' --install-extension ' + vsixFile.name;
-    exec(command);
+    try {
+        await execSync(command);
+    } catch (error) {
+        telemetry.logLanguageServerEvent("failedInstallCommand");
+    }
 
     vsixFile.removeCallback();
 }
