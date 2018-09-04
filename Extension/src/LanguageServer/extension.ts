@@ -148,20 +148,18 @@ export function updateLanguageConfigurations(): void {
  *********************************************/
 
 function onDidChangeSettings(): void {
-    // Check whether the user changed updateChannel to "Insiders", else return
-    let tracker: SettingsTracker = clients.ActiveClient.SettingsTracker;
-    let newUpdateChannel: string = tracker.getChangedSettings()["updateChannel"];
-
+    const changedActiveClientSettings: { [key: string] : string } = clients.ActiveClient.onDidChangeSettings();
     clients.forEach(client => client.onDidChangeSettings());
 
+    // Implicitly check whether user changed "updateChannel" setting to "Insiders"
+    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
     if (!newUpdateChannel) {
         return;
     }
-    if (newUpdateChannel === "Default") {
+    if (newUpdateChannel === 'Default') {
         clearInterval(insiderUpdateTimer);
         return;
     }
-
      // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
     checkAndApplyUpdate();
 }
@@ -216,7 +214,6 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
-// TODO factor this out?
 async function parseJsonAtPath(path: string): Promise<any> {
     try {
         const exists: boolean = await util.checkFileExists(path);
