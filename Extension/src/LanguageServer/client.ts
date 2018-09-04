@@ -145,7 +145,6 @@ interface ClientModel {
 }
 
 export interface Client {
-    SettingsTracker: SettingsTracker;
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
     NavigationLocationChanged: vscode.Event<string>;
