@@ -155,15 +155,16 @@ function onDidChangeSettings(): void {
 
     // Implicitly check whether user changed "updateChannel" setting to "Insiders"
     const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
-    if (!newUpdateChannel) {
-        return;
+    if (newUpdateChannel) {
+        if (newUpdateChannel === 'Default') {
+            // clearInterval(insiderUpdateTimer);
+        } else
+        if (newUpdateChannel === 'Insiders') {
+            // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+        }
+
+        checkAndApplyUpdate(newUpdateChannel);
     }
-    if (newUpdateChannel === 'Default') {
-        clearInterval(insiderUpdateTimer);
-        return;
-    }
-     // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
-    checkAndApplyUpdate();
 }
 
 let saveMessageShown: boolean = false;
@@ -248,21 +249,23 @@ class ParsedVersion {
     }
 }
 
-function needsUpdate(userVerStr: string, latestVerStr: string): boolean {
-    const user: ParsedVersion = new ParsedVersion(userVerStr);
-    const latest: ParsedVersion = new ParsedVersion(latestVerStr);
-
-    // User does not need to update if their version has a suffix that isn't insiders (e.g. master)
-    // User also does not need to update if latest has a suffix that isn't insiders
-    if ((user.suffix && user.suffix !== 'insiders') || (latest.suffix && latest.suffix !== 'insiders')) {
+function parsedVersionGreater(v1: ParsedVersion, v2: ParsedVersion): boolean {
+    // v1 does not need to update if their version has a suffix that isn't insiders (e.g. master)
+    // v1 also does not need to update if v2 has a suffix that isn't insiders
+    if ((v1.suffix && v1.suffix !== 'insiders') || (v2.suffix && v2.suffix !== 'insiders')) {
         return false;
     }
 
-    if (user.major > latest.major || user.minor > latest.minor || user.patch > latest.patch) {
-        return false;
+    let diff: number = v2.major - v1.major;
+    if (diff) {
+        return diff > 0;
+    } else
+    if (diff = v2.minor - v1.minor) {
+        return diff > 0;
+    } else
+    if (diff = v2.patch - v1.patch) {
+        return diff > 0;
     }
-
-    return true;
 }
 
 interface Asset {
@@ -271,12 +274,8 @@ interface Asset {
 }
 
 interface Release {
-    version: ParsedVersion;
+    name: string;
     assets: Asset[];
-}
-
-interface ReleaseJson {
-    releases: Release[];
 }
 
 function isAsset(input: any): input is Asset {
@@ -284,7 +283,7 @@ function isAsset(input: any): input is Asset {
 }
 
 function isRelease(input: any): input is Release {
-    return input && input.version && typeof(input.version) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
+    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
 }
 
 function isArrayOfAssets(input: any): input is Asset[] {
@@ -300,66 +299,17 @@ function isArrayOfAssets(input: any): input is Asset[] {
     return true;
 }
 
-function isReleaseJson(input: any): input is ReleaseJson {
+function isReleaseJson(input: any): input is Release[] {
     if (!input || !(input instanceof Array) || input.length === 0) {
         return false;
     }
-    return isRelease(input[0].assets);
+    return isRelease(input[0]);
 }
 
-async function checkAndApplyUpdate(): Promise<void> {
-    // Download and parse the JSON release list from GitHub to get the latest build
-    let releaseJsonFile: any = tmp.fileSync();
-    await util.downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
-        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
-            telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
-        });
-    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name).catch(() => {
-        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
-        return;
-    });
-    const latestBuild: any = parsedJson[0]; // [0] to get latest build
-    if (!latestBuild) {
-        return;
-    }
-    releaseJsonFile.removeCallback();
-
-    // Check whether the user actually needs to update by comparing version strings
-    if (!needsUpdate(util.packageJson['version'], latestBuild['name'])) {
-        return;
-    }
-
-    // Get the VSIX name to search for in latestBuild
-    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsixName: string = function(platformInfo): string {
-        switch (platformInfo.platform) {
-            case 'win32': return 'cpptools-win32.vsix';
-            case 'darwin': return 'cpptools-osx.vsix';
-            default: {
-                switch (platformInfo.architecture) {
-                    case 'x86': return 'cpptools-linux32.vsix';
-                    case 'x86_64': return 'cpptools-linux.vsix';
-                }
-            }
-        }
-    }(platformInfo);
-
-    // Get the URL to download the VSIX, using vsixName as a key
-    const downloadUrl: string = latestBuild['assets'].find((asset) => {
-        return asset['name'] === vsixName;
-    })['browser_download_url'];
-    if (!downloadUrl) {
-        return;
-    }
-
-    // Download the latest version
-    const vsixFile: any = tmp.fileSync({ postfix: '.vsix' });
-    await util.downloadFileToDestination(downloadUrl, vsixFile.name).catch(() => {
-        telemetry.logLanguageServerEvent('vsixDownloadFailure');
-    });
-
+async function installVsix(vsixLocation: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     const vsCodeCommandFile: string = await async function(platformInfo): Promise<string> {
         if (platformInfo.platform === 'win32') {
             const vscodeProcessPath: string = path.dirname(process.execPath);
@@ -378,13 +328,101 @@ async function checkAndApplyUpdate(): Promise<void> {
     }
 
     // Install the update
-    const command: string = vsCodeCommandFile + ' --install-extension ' + vsixFile.name;
+    const command: string = vsCodeCommandFile + ' --install-extension ' + vsixLocation;
     try {
         await execSync(command);
     } catch (error) {
         telemetry.logLanguageServerEvent("failedInstallCommand");
     }
+}
 
+async function getReleaseJson(): Promise<Release[]> {
+    const releaseJsonFile: any = tmp.fileSync();
+
+    // Download json from GitHub
+    await util.downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
+        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
+            telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
+        });
+
+    // Read + parse json from downloaded file
+    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name).catch(() => {
+        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
+    });
+
+    releaseJsonFile.removeCallback();
+
+    if (!isReleaseJson(parsedJson)) {
+        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
+        return null;
+    }
+
+    return parsedJson;
+}
+
+async function downloadUrlForPlatform(release: Release): Promise<string> {
+    // Get the VSIX name to search for in build
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const vsixName: string = function(platformInfo): string {
+        switch (platformInfo.platform) {
+            case 'win32': return 'cpptools-win32.vsix';
+            case 'darwin': return 'cpptools-osx.vsix';
+            default: {
+                switch (platformInfo.architecture) {
+                    case 'x86': return 'cpptools-linux32.vsix';
+                    case 'x86_64': return 'cpptools-linux.vsix';
+                }
+            }
+        }
+    }(platformInfo);
+
+    // Get the URL to download the VSIX, using vsixName as a key
+    const downloadUrl: string = release.assets.find((asset) => {
+        return asset.name === vsixName;
+    }).browserDownloadUrl;
+
+    return downloadUrl;
+}
+
+async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
+    // Get list of releases from GitHub API
+    const releaseJson: Release[] = await getReleaseJson();
+    if (!releaseJson) {
+        return;
+    }
+
+    // Get predicates to determine the build to install, if any
+    let needsUpdatePred: any;
+    let releasePred: any;
+    if (updateChannel === 'Insiders') {
+        needsUpdatePred = parsedVersionGreater;
+        releasePred = function(release: Release): boolean { return true; };
+    } else
+    if (updateChannel === 'Default') {
+        needsUpdatePred = function(v1, v2): boolean { return parsedVersionGreater(v2, v1); };
+        releasePred = function(release: Release): boolean { return release.name.indexOf('-') === -1; };
+    } else {
+        return;
+    }
+    // Get the build to install
+    const targetRelease: Release = releaseJson.find((release) => {
+        return releasePred(release);
+    });
+    // Check against targeted release to determine if the installation should happen
+    const userVersion: ParsedVersion = new ParsedVersion(util.packageJson.version);
+    const targetVersion: ParsedVersion = new ParsedVersion(targetRelease.name);
+    if (!needsUpdatePred(userVersion, targetVersion)) {
+        return;
+    }
+
+    const downloadUrl: string = await downloadUrlForPlatform(targetRelease);
+
+    // Download the target version and install it
+    const vsixFile: any = tmp.fileSync({ postfix: '.vsix' });
+    await util.downloadFileToDestination(downloadUrl, vsixFile.name).catch(() => {
+        telemetry.logLanguageServerEvent('vsixDownloadFailure');
+    });
+    installVsix(vsixFile.name);
     vsixFile.removeCallback();
 }
 
