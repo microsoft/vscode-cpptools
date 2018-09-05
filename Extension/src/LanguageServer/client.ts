@@ -553,7 +553,7 @@ class DefaultClient implements Client {
     }
     
     public getCustomConfigurationProviderId(): Thenable<string|undefined> {
-        return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.configurationProvider));
+        return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfigurationProvider));
     }
 
     public getCurrentConfigName(): Thenable<string> {
