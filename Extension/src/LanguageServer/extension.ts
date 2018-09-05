@@ -265,21 +265,46 @@ function needsUpdate(userVerStr: string, latestVerStr: string): boolean {
     return true;
 }
 
-function isReleaseJson(input: any): boolean {
-    const assetArr: any = input[0]['assets'];
-    if (!assetArr || assetArr.length < 4) { // Each asset being an object for mac, win, 32 + 64 bit linux (4 total)
+interface Asset {
+    name: string;
+    browserDownloadUrl: string;
+}
+
+interface Release {
+    version: ParsedVersion;
+    assets: Asset[];
+}
+
+interface ReleaseJson {
+    releases: Release[];
+}
+
+function isAsset(input: any): input is Asset {
+    return input && input.name && typeof(input.name) === "string" && input.browser_download_url && input.browser_download_url && typeof(input.browser_download_url) === "string"; 
+}
+
+function isRelease(input: any): input is Release {
+    return input && input.version && typeof(input.version) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
+}
+
+function isArrayOfAssets(input: any): input is Asset[] {
+    if (!(input instanceof Array)) {
         return false;
     }
-    const name: string = assetArr[0]['name'];
-    if (!name) {
-        return false;
-    }
-    const downloadUrl: string = assetArr[0]['browser_download_url'];
-    if (!downloadUrl) {
-        return false;
+    for (const item of input) {
+        if (!isAsset(item)) {
+            return false;
+        }
     }
 
     return true;
+}
+
+function isReleaseJson(input: any): input is ReleaseJson {
+    if (!input || !(input instanceof Array) || input.length === 0) {
+        return false;
+    }
+    return isRelease(input[0].assets);
 }
 
 async function checkAndApplyUpdate(): Promise<void> {
