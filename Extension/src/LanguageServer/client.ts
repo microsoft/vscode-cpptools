@@ -566,6 +566,9 @@ class DefaultClient implements Client {
                 }
             },
             (err) => {
+                if (err === `${providerName} is not ready`) {
+                    return;
+                }
                 let settings: CppSettings = new CppSettings(this.RootUri);
                 if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = "Dismiss";
