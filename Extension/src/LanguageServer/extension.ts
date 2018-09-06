@@ -346,8 +346,8 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     try {
         if (updateChannel === 'Default') {
             // Uninstall the current version, as the version to install is a previous version
-            const unInstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
-            await execSync(unInstallCommand);
+            const uninstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
+            await execSync(uninstallCommand);
         }
         await execSync(installCommand);
     } catch (error) {
