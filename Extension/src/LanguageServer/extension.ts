@@ -386,6 +386,7 @@ async function downloadUrlForPlatform(build: Build): Promise<string | undefined>
     return downloadUrl;
 }
 
+// Determines whether there exists a build that should be installed; returns the build if there is
 function getTargetBuild(releaseJson: Build[], updateChannel: string): Build | undefined {
     // Get predicates to determine the build to install, if any
     let needsUpdatePred: any;
@@ -409,7 +410,7 @@ function getTargetBuild(releaseJson: Build[], updateChannel: string): Build | un
         return;
     }
 
-    // Check against targeted build to determine if the installation should happen
+    // Check current version against target's version to determine if the installation should happen
     const userVersion: ParsedVersion = getParsedVersion(util.packageJson.version);
     const targetVersion: ParsedVersion = getParsedVersion(targetBuild.name);
     if (!userVersion || !targetVersion) {
