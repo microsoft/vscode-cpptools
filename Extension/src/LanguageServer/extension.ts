@@ -328,17 +328,17 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsCodeScriptPath: string | undefined = await async function(platformInfo): Promise<string> {
+    const vsCodeScriptPath: string | undefined = await async function(platformInfo): Promise<string | undefined> {
         if (platformInfo.platform === 'win32') {
-            const vscodeProcessPath: string = path.dirname(process.execPath);
-            return path.join(vscodeProcessPath, 'bin', 'code.cmd');
+            const vsCodeProcessPath: string = path.dirname(process.execPath);
+            return path.join(vsCodeProcessPath, 'bin', 'code.cmd');
         } else {
             const stdout: Buffer = await execSync("which code");
             return stdout.toString().trim();
         }
     }(platformInfo);
     if (!vsCodeScriptPath) {
-        telemetry.logLanguageServerEvent('cannotFindCodeScript');
+        telemetry.logLanguageServerEvent('findVsCodeScriptFailure');
         return;
     }
 
