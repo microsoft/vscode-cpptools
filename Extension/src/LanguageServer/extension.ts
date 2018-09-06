@@ -234,29 +234,34 @@ async function parseJsonAtPath(path: string): Promise<any> {
     }
 }
 
-class ParsedVersion {
-    public major: number = 0;
-    public minor: number = 0;
-    public patch: number = 0;
-    public suffix?: string;
+interface ParsedVersion {
+    major: number;
+    minor: number;
+    patch: number;
+    suffix?: string;
+}
 
-    constructor(versionStr: string) {
-        let tokens: string[] = versionStr.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
-        if (tokens.length < 3) {
-            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
-
-            return;
-        }
-
-        this.major = parseInt(tokens[0]);
-        this.minor = parseInt(tokens[1]);
-        this.patch = parseInt(tokens[2]);
-        this.suffix = tokens[3];
-
-        if (!this.major || !this.minor || !this.patch) {
-            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
-        }
+function getParsedVersion(versionStr: string): ParsedVersion | undefined {
+    let tokens: string[] = versionStr.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
+    if (tokens.length < 3) {
+        telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+        return;
     }
+
+    const parsedVersion: ParsedVersion = function(tokens): ParsedVersion {
+        let parsedVersion: ParsedVersion;
+        parsedVersion.major = parseInt(tokens[0]);
+        parsedVersion.minor = parseInt(tokens[1]);
+        parsedVersion.patch = parseInt(tokens[2]);
+        parsedVersion.suffix = tokens[3];
+        return parsedVersion;
+    }(tokens);
+
+    if (!parsedVersion.major || !parsedVersion.minor || !parsedVersion.patch) {
+        telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+    }
+
+    return parsedVersion;
 }
 
 function parsedVersionGreater(v1: ParsedVersion, v2: ParsedVersion): boolean {
@@ -286,7 +291,7 @@ interface Asset {
     browserDownloadUrl: string;
 }
 
-interface Release {
+interface Build {
     name: string;
     assets: Asset[];
 }
@@ -295,7 +300,7 @@ function isAsset(input: any): input is Asset {
     return input && input.name && typeof(input.name) === "string" && input.browser_download_url && input.browser_download_url && typeof(input.browser_download_url) === "string"; 
 }
 
-function isRelease(input: any): input is Release {
+function isBuild(input: any): input is Build {
     return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
 }
 
@@ -312,11 +317,11 @@ function isArrayOfAssets(input: any): input is Asset[] {
     return true;
 }
 
-function isReleaseJson(input: any): input is Release[] {
+function isReleaseJson(input: any): input is Build[] {
     if (!input || !(input instanceof Array) || input.length === 0) {
         return false;
     }
-    return isRelease(input[0]);
+    return isBuild(input[0]);
 }
 
 async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
@@ -354,7 +359,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     }
 }
 
-async function downloadUrlForPlatform(release: Release): Promise<string> {
+async function downloadUrlForPlatform(build: Build): Promise<string> {
     // Get the VSIX name to search for in build
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     const vsixName: string | undefined = function(platformInfo): string {
@@ -374,45 +379,50 @@ async function downloadUrlForPlatform(release: Release): Promise<string> {
     }
 
     // Get the URL to download the VSIX, using vsixName as a key
-    const downloadUrl: string | undefined = release.assets.find((asset) => {
+    const downloadUrl: string | undefined = build.assets.find((asset) => {
         return asset.name === vsixName;
     }).browserDownloadUrl;
 
     return downloadUrl;
 }
 
-function getTargetBuild(releaseJson: Release[], updateChannel: string): Release | undefined {
+function getTargetBuild(releaseJson: Build[], updateChannel: string): Build | undefined {
     // Get predicates to determine the build to install, if any
     let needsUpdatePred: any;
-    let releasePred: any;
+    let buildPred: any;
     if (updateChannel === 'Insiders') {
         needsUpdatePred = parsedVersionGreater;
-        releasePred = function(release: Release): boolean { return true; };
+        buildPred = function(build: Build): boolean { return true; };
     } else
     if (updateChannel === 'Default') {
         needsUpdatePred = function(v1: ParsedVersion, v2: ParsedVersion): boolean { return parsedVersionGreater(v2, v1); };
-        releasePred = function(release: Release): boolean { return release.name.indexOf('-') === -1; };
+        buildPred = function(build: Build): boolean { return build.name.indexOf('-') === -1; };
     } else {
         return;
     }
 
     // Get the build to install
-    const targetRelease: Release = releaseJson.find((release) => {
-        return releasePred(release);
+    const targetBuild: Build = releaseJson.find((build) => {
+        return buildPred(build);
     });
-    if (!targetRelease) {
+    if (!targetBuild) {
         return;
     }
 
-    // Check against targeted release to determine if the installation should happen
-    const userVersion: ParsedVersion = new ParsedVersion(util.packageJson.version);
-    const targetVersion: ParsedVersion = new ParsedVersion(targetRelease.name);
+    // Check against targeted build to determine if the installation should happen
+    const userVersion: ParsedVersion = getParsedVersion(util.packageJson.version);
+    const targetVersion: ParsedVersion = getParsedVersion(targetBuild.name);
+    if (!userVersion || !targetVersion) {
+        return;
+    }
     if (!needsUpdatePred(userVersion, targetVersion)) {
         return;
     }
+
+    return targetBuild;
 }
 
-async function getReleaseJson(): Promise<Release[]> | undefined {
+async function getReleaseJson(): Promise<Build[]> | undefined {
     const releaseJsonFile: any = tmp.fileSync();
 
     // Download json from GitHub
@@ -437,12 +447,12 @@ async function getReleaseJson(): Promise<Release[]> | undefined {
 }
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    const releaseJson: Release[] | undefined = await getReleaseJson();
+    const releaseJson: Build[] | undefined = await getReleaseJson();
     if (!releaseJson) {
         return;
     }
 
-    const targetRelease: Release | undefined = getTargetBuild(releaseJson, updateChannel);
+    const targetRelease: Build | undefined = getTargetBuild(releaseJson, updateChannel);
     if (!targetRelease) {
         return;
     }
