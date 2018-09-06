@@ -154,8 +154,7 @@ function onDidChangeSettings(): void {
     if (newUpdateChannel) {
         if (newUpdateChannel === 'Default') {
             // clearInterval(insiderUpdateTimer);
-        } else
-        if (newUpdateChannel === 'Insiders') {
+        } else if (newUpdateChannel === 'Insiders') {
             // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
 
@@ -268,14 +267,11 @@ function parsedVersionGreater(v1: ParsedVersion, v2: ParsedVersion): boolean {
     let diff: number = v2.major - v1.major;
     if (diff) {
         return diff > 0;
-    } else
-    if (diff = v2.minor - v1.minor) {
+    } else if (diff = v2.minor - v1.minor) {
         return diff > 0;
-    } else
-    if (diff = v2.patch - v1.patch) {
+    } else if (diff = v2.patch - v1.patch) {
         return diff > 0;
-    } else
-    if (!v2.suffix && v1.suffix === 'insiders') {
+    } else if (!v2.suffix && v1.suffix === 'insiders') {
         return true;
     }
     return false;
