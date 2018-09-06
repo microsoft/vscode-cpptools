@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.18.2-master",
+  "version": "0.18.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -39,29 +39,7 @@
     "Snippets"
   ],
   "activationEvents": [
-    "onLanguage:cpp",
-    "onLanguage:c",
-    "onCommand:extension.pickNativeProcess",
-    "onCommand:extension.pickRemoteNativeProcess",
-    "onCommand:C_Cpp.ConfigurationEdit",
-    "onCommand:C_Cpp.ConfigurationSelect",
-    "onCommand:C_Cpp.ConfigurationProviderSelect",
-    "onCommand:C_Cpp.SwitchHeaderSource",
-    "onCommand:C_Cpp.Navigate",
-    "onCommand:C_Cpp.GoToDeclaration",
-    "onCommand:C_Cpp.PeekDeclaration",
-    "onCommand:C_Cpp.ToggleErrorSquiggles",
-    "onCommand:C_Cpp.ToggleIncludeFallback",
-    "onCommand:C_Cpp.ToggleDimInactiveRegions",
-    "onCommand:C_Cpp.ToggleSnippets",
-    "onCommand:C_Cpp.ShowReleaseNotes",
-    "onCommand:C_Cpp.ResetDatabase",
-    "onCommand:C_Cpp.PauseParsing",
-    "onCommand:C_Cpp.ResumeParsing",
-    "onCommand:C_Cpp.ShowParsingCommands",
-    "onCommand:C_Cpp.TakeSurvey",
-    "onDebug",
-    "workspaceContains:/.vscode/c_cpp_properties.json"
+    "*"
   ],
   "main": "./out/src/main",
   "contributes": {
@@ -126,8 +104,7 @@
           "type": "string",
           "enum": [
             "Default",
-            "Tag Parser",
-            "Disabled"
+            "Tag Parser"
           ],
           "default": "Default",
           "description": "Controls the IntelliSense provider. \"Tag Parser\" provides \"fuzzy\" results that are not context-aware. \"Default\" provides context-aware results and is in preview mode - member list, hover tooltips, and error squiggles are currently implemented. Features not yet implemented in the new default engine will use the tag parser engine instead.",
@@ -1438,7 +1415,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2010302",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006256",
       "platforms": [
         "linux"
       ],
@@ -1452,7 +1429,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2010301",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006255",
       "platforms": [
         "linux"
       ],
@@ -1468,7 +1445,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2010303",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006254",
       "platforms": [
         "darwin"
       ],
@@ -1479,7 +1456,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2010204",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2006362",
       "platforms": [
         "win32"
       ],
