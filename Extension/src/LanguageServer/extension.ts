@@ -230,7 +230,6 @@ async function parseJsonAtPath(path: string): Promise<any> {
             return JSON.parse(fileContent);
         }
     } catch (error) {
-        return Promise.reject();
     }
 }
 
@@ -430,11 +429,12 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
         });
 
     // Read + parse json from downloaded file
-    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name).catch(() => {
-        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
-    });
-
+    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name);
     releaseJsonFile.removeCallback();
+    if (!parsedJson) {
+        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
+        return;
+    }
 
     if (!isReleaseJson(parsedJson)) {
         telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
