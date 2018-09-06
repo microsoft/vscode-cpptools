@@ -638,7 +638,7 @@ export class CppProperties {
             if (dirty) {
                 try {
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-                } catch {
+                } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
                     vscode.window.showWarningMessage('Attempt to update "' + this.propertiesFile.fsPath + '" failed (do you have write access?)');
                 }

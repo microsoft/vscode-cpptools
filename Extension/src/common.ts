@@ -551,7 +551,15 @@ export async function renamePromise(oldName: string, newName: string): Promise<v
     });
 }
 
-// TODO move this fn to a common area -- Replace abTesting's downloadCpptoolsJsonAsync with this fn
+export function promptForReloadWindowDueToSettingsChange(): void {
+    let reload: string = "Reload";
+    vscode.window.showInformationMessage("Reload the workspace for the settings change to take effect.", reload).then((value: string) => {
+        if (value === reload) {
+            vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
+    });
+}
+
 export function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         let parsedUrl: url.Url = url.parse(urlStr);
