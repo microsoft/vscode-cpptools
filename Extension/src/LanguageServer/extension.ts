@@ -359,7 +359,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     }
 }
 
-async function downloadUrlForPlatform(build: Build): Promise<string> {
+async function downloadUrlForPlatform(build: Build): Promise<string | undefined> {
     // Get the VSIX name to search for in build
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     const vsixName: string | undefined = function(platformInfo): string {
@@ -422,7 +422,7 @@ function getTargetBuild(releaseJson: Build[], updateChannel: string): Build | un
     return targetBuild;
 }
 
-async function getReleaseJson(): Promise<Build[]> | undefined {
+async function getReleaseJson(): Promise<Build[] | undefined> {
     const releaseJsonFile: any = tmp.fileSync();
 
     // Download json from GitHub
