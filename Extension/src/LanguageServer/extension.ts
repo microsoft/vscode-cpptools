@@ -250,8 +250,7 @@ class ParsedVersion {
 }
 
 function parsedVersionGreater(v1: ParsedVersion, v2: ParsedVersion): boolean {
-    // v1 does not need to update if their version has a suffix that isn't insiders (e.g. master)
-    // v1 also does not need to update if v2 has a suffix that isn't insiders
+    // ParsedVersions cannot be compared if either have a suffix that is not 'insiders'
     if ((v1.suffix && v1.suffix !== 'insiders') || (v2.suffix && v2.suffix !== 'insiders')) {
         return false;
     }
@@ -265,7 +264,11 @@ function parsedVersionGreater(v1: ParsedVersion, v2: ParsedVersion): boolean {
     } else
     if (diff = v2.patch - v1.patch) {
         return diff > 0;
+    } else
+    if (!v2.suffix && v1.suffix === 'insiders') {
+        return true;
     }
+    return false;
 }
 
 interface Asset {
@@ -310,7 +313,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsCodeScriptPath: string = await async function(platformInfo): Promise<string> {
+    const vsCodeScriptPath: string | undefined = await async function(platformInfo): Promise<string> {
         if (platformInfo.platform === 'win32') {
             const vscodeProcessPath: string = path.dirname(process.execPath);
             if (!vscodeProcessPath) {
@@ -344,7 +347,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 async function downloadUrlForPlatform(release: Release): Promise<string> {
     // Get the VSIX name to search for in build
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsixName: string = function(platformInfo): string {
+    const vsixName: string | undefined = function(platformInfo): string {
         switch (platformInfo.platform) {
             case 'win32': return 'cpptools-win32.vsix';
             case 'darwin': return 'cpptools-osx.vsix';
@@ -356,16 +359,19 @@ async function downloadUrlForPlatform(release: Release): Promise<string> {
             }
         }
     }(platformInfo);
+    if (!vsixName) {
+        return;
+    }
 
     // Get the URL to download the VSIX, using vsixName as a key
-    const downloadUrl: string = release.assets.find((asset) => {
+    const downloadUrl: string | undefined = release.assets.find((asset) => {
         return asset.name === vsixName;
     }).browserDownloadUrl;
 
     return downloadUrl;
 }
 
-function getTargetBuild(releaseJson: Release[], updateChannel: string): Release {
+function getTargetBuild(releaseJson: Release[], updateChannel: string): Release | undefined {
     // Get predicates to determine the build to install, if any
     let needsUpdatePred: any;
     let releasePred: any;
@@ -396,7 +402,7 @@ function getTargetBuild(releaseJson: Release[], updateChannel: string): Release 
     }
 }
 
-async function getReleaseJson(): Promise<Release[]> {
+async function getReleaseJson(): Promise<Release[]> | undefined {
     const releaseJsonFile: any = tmp.fileSync();
 
     // Download json from GitHub
@@ -414,24 +420,27 @@ async function getReleaseJson(): Promise<Release[]> {
 
     if (!isReleaseJson(parsedJson)) {
         telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
-        return null;
+        return;
     }
 
     return parsedJson;
 }
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    const releaseJson: Release[] = await getReleaseJson();
+    const releaseJson: Release[] | undefined = await getReleaseJson();
     if (!releaseJson) {
         return;
     }
 
-    const targetRelease: Release = getTargetBuild(releaseJson, updateChannel);
+    const targetRelease: Release | undefined = getTargetBuild(releaseJson, updateChannel);
     if (!targetRelease) {
         return;
     }
 
-    const downloadUrl: string = await downloadUrlForPlatform(targetRelease);
+    const downloadUrl: string | undefined = await downloadUrlForPlatform(targetRelease);
+    if (!downloadUrl) {
+        return;
+    }
 
     // Download the target version and install it
     const vsixFile: any = tmp.fileSync({ postfix: '.vsix' });
