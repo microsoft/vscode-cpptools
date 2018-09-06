@@ -4,12 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as url from 'url';
-import * as https from 'https';
-import { ClientRequest } from 'http';
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-
 import * as util from './common';
 import * as Telemetry from './telemetry';
 import { PersistentState } from './LanguageServer/persistentState';
@@ -61,7 +55,7 @@ export class ABTestSettings {
 
     private async updateSettingsAsync(): Promise<void> {
         const cpptoolsJsonFile: string = util.getExtensionFilePath(localConfigFile);
-    
+
         try {
             const exists: boolean = await util.checkFileExists(cpptoolsJsonFile);
             if (exists) {
@@ -93,6 +87,7 @@ export class ABTestSettings {
                 hasError = true;
             })
             .then(() => {
+                this.updateSettingsAsync();
                 telemetryProperties['success'] = (!hasError).toString();
                 Telemetry.logDebuggerEvent("cpptoolsJsonDownload", telemetryProperties);
             });

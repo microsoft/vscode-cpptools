@@ -588,7 +588,7 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
             let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
             response.on('data', (data) => { downloadedBytes += data.length; });
             response.on('end', () => { createdFile.close(); });
-            createdFile.on('close', () => { resolve(); this.updateSettingsAsync(); });
+            createdFile.on('close', () => { resolve(); });
             response.on('error', (error) => { reject(); });
             response.pipe(createdFile, { end: false });
         });
