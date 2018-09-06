@@ -235,14 +235,19 @@ async function parseJsonAtPath(path: string): Promise<any> {
 }
 
 class ParsedVersion {
-    public major: number;
-    public minor: number;
-    public patch: number;
+    public major: number = 0;
+    public minor: number = 0;
+    public patch: number = 0;
     public suffix?: string;
 
     constructor(versionStr: string) {
         let tokens: string[] = versionStr.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
-        // TODO add error checking. Assert? Log? Telemetry?
+        if (tokens.length < 3) {
+            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+
+            return;
+        }
+
         this.major = parseInt(tokens[0]);
         this.minor = parseInt(tokens[1]);
         this.patch = parseInt(tokens[2]);
@@ -345,7 +350,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         }
         await execSync(installCommand);
     } catch (error) {
-        telemetry.logLanguageServerEvent("failedInstallCommand");
+        telemetry.logLanguageServerEvent("installCommandFailure");
     }
 }
 
