@@ -296,23 +296,11 @@ function isBuild(input: any): input is Build {
 }
 
 function isArrayOfAssets(input: any): input is Asset[] {
-    if (!(input instanceof Array)) {
-        return false;
-    }
-    for (const item of input) {
-        if (!isAsset(item)) {
-            return false;
-        }
-    }
-
-    return true;
+    return input instanceof Array && input.every(item => isAsset(item));
 }
 
 function isReleaseJson(input: any): input is Build[] {
-    if (!input || !(input instanceof Array) || input.length === 0) {
-        return false;
-    }
-    return isBuild(input[0]);
+    return input && input instanceof Array && input.length !== 0 && input.every(item => isBuild(item));
 }
 
 async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
@@ -391,9 +379,7 @@ function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
     }
 
     // Get the build to install
-    const targetBuild: Build = releaseJson.find((build) => {
-        return buildPred(build);
-    });
+    const targetBuild: Build = releaseJson.find((build) => buildPred(build));
     if (!targetBuild) {
         return;
     }
