@@ -336,30 +336,6 @@ async function installVsix(vsixLocation: string): Promise<void> {
     }
 }
 
-async function getReleaseJson(): Promise<Release[]> {
-    const releaseJsonFile: any = tmp.fileSync();
-
-    // Download json from GitHub
-    await util.downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
-        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
-            telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
-        });
-
-    // Read + parse json from downloaded file
-    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name).catch(() => {
-        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
-    });
-
-    releaseJsonFile.removeCallback();
-
-    if (!isReleaseJson(parsedJson)) {
-        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
-        return null;
-    }
-
-    return parsedJson;
-}
-
 async function downloadUrlForPlatform(release: Release): Promise<string> {
     // Get the VSIX name to search for in build
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
@@ -413,6 +389,30 @@ function getTargetBuild(releaseJson: Release[], updateChannel: string): Release 
     if (!needsUpdatePred(userVersion, targetVersion)) {
         return;
     }
+}
+
+async function getReleaseJson(): Promise<Release[]> {
+    const releaseJsonFile: any = tmp.fileSync();
+
+    // Download json from GitHub
+    await util.downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
+        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
+            telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
+        });
+
+    // Read + parse json from downloaded file
+    const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name).catch(() => {
+        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
+    });
+
+    releaseJsonFile.removeCallback();
+
+    if (!isReleaseJson(parsedJson)) {
+        telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
+        return null;
+    }
+
+    return parsedJson;
 }
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
