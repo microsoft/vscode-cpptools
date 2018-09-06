@@ -365,21 +365,21 @@ async function downloadUrlForPlatform(build: Build): Promise<string> {
 // Determines whether there exists a build that should be installed; returns the build if there is
 function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
     // Get predicates to determine the build to install, if any
-    let needsUpdatePred: any;
-    let buildPred: any;
+    let needsUpdate: (v1: ParsedVersion, v2: ParsedVersion) => boolean;
+    let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdatePred = parsedVersionGreater;
-        buildPred = function(build: Build): boolean { return true; };
+        needsUpdate = parsedVersionGreater;
+        useBuild = function(build: Build): boolean { return true; };
     } else
     if (updateChannel === 'Default') {
-        needsUpdatePred = function(v1: ParsedVersion, v2: ParsedVersion): boolean { return parsedVersionGreater(v2, v1); };
-        buildPred = function(build: Build): boolean { return build.name.indexOf('-') === -1; };
+        needsUpdate = function(v1: ParsedVersion, v2: ParsedVersion): boolean { return parsedVersionGreater(v2, v1); };
+        useBuild = function(build: Build): boolean { return build.name.indexOf('-') === -1; };
     } else {
         return;
     }
 
     // Get the build to install
-    const targetBuild: Build = releaseJson.find((build) => buildPred(build));
+    const targetBuild: Build = releaseJson.find((build) => useBuild(build));
     if (!targetBuild) {
         return;
     }
@@ -390,7 +390,7 @@ function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
     if (!userVersion || !targetVersion) {
         return;
     }
-    if (!needsUpdatePred(userVersion, targetVersion)) {
+    if (!needsUpdate(userVersion, targetVersion)) {
         return;
     }
 
