@@ -401,10 +401,10 @@ async function getReleaseJson(): Promise<Build[]> {
     const releaseJsonFile: any = tmp.fileSync();
 
     // Download json from GitHub
-    await util.downloadFileToDestination('https://api.github.com/repos/Microsoft/vscode-cpptools/releases',
-        releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
+    const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
+    await util.downloadFileToDestination(releaseUrl, releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
             telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
-        });
+    });
 
     // Read + parse json from downloaded file
     const parsedJson: any = await parseJsonAtPath(releaseJsonFile.name);
