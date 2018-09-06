@@ -217,6 +217,11 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
 }
 
+function onInterval(): void {
+    // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
+    clients.ActiveClient.onInterval();
+}
+
 async function parseJsonAtPath(path: string): Promise<any> {
     try {
         const exists: boolean = await util.checkFileExists(path);
@@ -449,11 +454,6 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     });
     installVsix(vsixFile.name, updateChannel);
     vsixFile.removeCallback();
-}
-
-function onInterval(): void {
-    // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
-    clients.ActiveClient.onInterval();
 }
 
 /*********************************************
