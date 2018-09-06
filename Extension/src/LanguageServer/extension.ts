@@ -17,12 +17,9 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
-import { SettingsTracker, getTracker } from './settingsTracker';
 import { PlatformInformation } from '../platform';
-import { exec, execSync } from 'child_process';
+import { execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { isArray, isString } from 'util';
-import { parse } from 'jsonc-parser';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -327,12 +324,12 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsCodeScriptPath: string | undefined = await async function(platformInfo): Promise<string | undefined> {
+    const vsCodeScriptPath: string | undefined = function(platformInfo): string | undefined {
         if (platformInfo.platform === 'win32') {
             const vsCodeProcessPath: string = path.dirname(process.execPath);
             return path.join(vsCodeProcessPath, 'bin', 'code.cmd');
         } else {
-            const stdout: Buffer = await execSync("which code");
+            const stdout: Buffer = execSync("which code");
             return stdout.toString().trim();
         }
     }(platformInfo);
@@ -347,9 +344,9 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         if (updateChannel === 'Default') {
             // Uninstall the current version, as the version to install is a previous version
             const uninstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
-            await execSync(uninstallCommand);
+            execSync(uninstallCommand);
         }
-        await execSync(installCommand);
+        execSync(installCommand);
     } catch (error) {
         telemetry.logLanguageServerEvent("installCommandFailure");
     }
