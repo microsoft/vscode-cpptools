@@ -150,7 +150,6 @@ function onDidChangeSettings(): void {
     const changedActiveClientSettings: { [key: string] : string } = clients.ActiveClient.onDidChangeSettings();
     clients.forEach(client => client.onDidChangeSettings());
 
-    // Implicitly check whether user changed "updateChannel" setting to "Insiders"
     const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
     if (newUpdateChannel) {
         if (newUpdateChannel === 'Default') {
