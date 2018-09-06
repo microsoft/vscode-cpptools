@@ -384,13 +384,7 @@ async function downloadUrlForPlatform(release: Release): Promise<string> {
     return downloadUrl;
 }
 
-async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // Get list of releases from GitHub API
-    const releaseJson: Release[] = await getReleaseJson();
-    if (!releaseJson) {
-        return;
-    }
-
+function getTargetBuild(releaseJson: Release[], updateChannel: string): Release {
     // Get predicates to determine the build to install, if any
     let needsUpdatePred: any;
     let releasePred: any;
@@ -399,19 +393,36 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         releasePred = function(release: Release): boolean { return true; };
     } else
     if (updateChannel === 'Default') {
-        needsUpdatePred = function(v1, v2): boolean { return parsedVersionGreater(v2, v1); };
+        needsUpdatePred = function(v1: ParsedVersion, v2: ParsedVersion): boolean { return parsedVersionGreater(v2, v1); };
         releasePred = function(release: Release): boolean { return release.name.indexOf('-') === -1; };
     } else {
         return;
     }
+
     // Get the build to install
     const targetRelease: Release = releaseJson.find((release) => {
         return releasePred(release);
     });
+    if (!targetRelease) {
+        return;
+    }
+
     // Check against targeted release to determine if the installation should happen
     const userVersion: ParsedVersion = new ParsedVersion(util.packageJson.version);
     const targetVersion: ParsedVersion = new ParsedVersion(targetRelease.name);
     if (!needsUpdatePred(userVersion, targetVersion)) {
+        return;
+    }
+}
+
+async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
+    const releaseJson: Release[] = await getReleaseJson();
+    if (!releaseJson) {
+        return;
+    }
+
+    const targetRelease: Release = getTargetBuild(releaseJson, updateChannel);
+    if (!targetRelease) {
         return;
     }
 
