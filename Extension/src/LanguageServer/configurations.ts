@@ -611,7 +611,11 @@ export class CppProperties {
                 delete this.configurationJson.env['workspaceRoot'];
                 delete this.configurationJson.env['workspaceFolder'];
                 delete this.configurationJson.env['default'];
+            } else {
+                this.configurationJson.env = {};
             }
+
+            this.configurationJson.env["workspaceFolderBasename"] = path.basename(this.rootUri.fsPath);
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
             // the system includes were available.
