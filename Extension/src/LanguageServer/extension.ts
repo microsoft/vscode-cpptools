@@ -225,9 +225,11 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     const vsCodeScriptPath: string = function(platformInfo): string {
         if (platformInfo.platform === 'win32') {
             const vsCodeProcessPath: string = path.dirname(process.execPath);
-            return path.join(vsCodeProcessPath, 'bin', 'code.cmd');
+            const scriptName: string = path.basename(process.execPath) + '.cmd';
+            return path.join(vsCodeProcessPath, 'bin', scriptName);
         } else {
-            const stdout: Buffer = execSync("which code");
+            const scriptName: string = path.basename(process.execPath);
+            const stdout: Buffer = execSync("which " + scriptName);
             return stdout.toString().trim();
         }
     }(platformInfo);
