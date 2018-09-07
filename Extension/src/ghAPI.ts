@@ -131,6 +131,7 @@ async function getReleaseJson(): Promise<Build[]> {
     // Download json from GitHub
     const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
     await util.downloadFileToDestination(releaseUrl, releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
+            // TODO check internet connection before attempting? That way we can mitigate false positive telemetry
             telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
     });
 
