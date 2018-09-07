@@ -20,7 +20,7 @@ import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { ParsedVersion, getParsedVersion, parsedVersionGreater } from './packageVersion';
+import { PackageVersion } from './packageVersion';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -317,14 +317,13 @@ async function downloadUrlForPlatform(build: Build): Promise<string> {
 // Determines whether there exists a build that should be installed; returns the build if there is
 function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
     // Get predicates to determine the build to install, if any
-    let needsUpdate: (v1: ParsedVersion, v2: ParsedVersion) => boolean;
+    let needsUpdate: (v1: PackageVersion, v2: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdate = parsedVersionGreater;
+        needsUpdate = function(v1: PackageVersion, v2: PackageVersion): boolean { return v1.isGreaterThan(v2); };
         useBuild = function(build: Build): boolean { return true; };
-    } else
-    if (updateChannel === 'Default') {
-        needsUpdate = function(v1: ParsedVersion, v2: ParsedVersion): boolean { return parsedVersionGreater(v2, v1); };
+    } else if (updateChannel === 'Default') {
+        needsUpdate = function(v1: PackageVersion, v2: PackageVersion): boolean { return v2.isGreaterThan(v1); };
         useBuild = function(build: Build): boolean { return build.name.indexOf('-') === -1; };
     } else {
         return;
@@ -337,8 +336,8 @@ function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
     }
 
     // Check current version against target's version to determine if the installation should happen
-    const userVersion: ParsedVersion = getParsedVersion(util.packageJson.version);
-    const targetVersion: ParsedVersion = getParsedVersion(targetBuild.name);
+    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+    const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
     if (!userVersion || !targetVersion) {
         return;
     }

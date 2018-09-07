@@ -6,51 +6,51 @@
 
 import * as telemetry from '../telemetry';
 
-export interface ParsedVersion {
+export class PackageVersion {
     major: number;
     minor: number;
     patch: number;
     suffix?: string;
-}
+    isValid: boolean;
 
-export function getParsedVersion(versionStr: string): ParsedVersion {
-    let tokens: string[] = versionStr.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
-    if (tokens.length < 3) {
-        telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
-        return;
+    constructor(versionStr: string) {
+        let tokens: string[] = versionStr.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
+        if (tokens.length < 3) {
+            this.isValid = false;
+            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+            return;
+        }
+
+        this.major = parseInt(tokens[0]);
+        this.minor = parseInt(tokens[1]);
+        this.patch = parseInt(tokens[2]);
+        this.suffix = tokens[3];
+
+        if (!this.major || !this.minor || !this.patch) {
+            this.isValid = false;
+            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+            return;
+        }
+
+        this.isValid = true;
     }
 
-    const parsedVersion: ParsedVersion = function(tokens): ParsedVersion {
-        let parsedVersion: ParsedVersion;
-        parsedVersion.major = parseInt(tokens[0]);
-        parsedVersion.minor = parseInt(tokens[1]);
-        parsedVersion.patch = parseInt(tokens[2]);
-        parsedVersion.suffix = tokens[3];
-        return parsedVersion;
-    }(tokens);
+    public isGreaterThan(other: PackageVersion): boolean {
+        // PackageVersions cannot be compared if either have a suffix that is not 'insiders'
+        if ((this.suffix && this.suffix !== 'insiders') || (other.suffix && other.suffix !== 'insiders')) {
+            return false;
+        }
 
-    if (!parsedVersion.major || !parsedVersion.minor || !parsedVersion.patch) {
-        telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
-    }
-
-    return parsedVersion;
-}
-
-export function parsedVersionGreater(v1: ParsedVersion, v2: ParsedVersion): boolean {
-    // ParsedVersions cannot be compared if either have a suffix that is not 'insiders'
-    if ((v1.suffix && v1.suffix !== 'insiders') || (v2.suffix && v2.suffix !== 'insiders')) {
+        let diff: number = other.major - this.major;
+        if (diff) {
+            return diff > 0;
+        } else if (diff = other.minor - this.minor) {
+            return diff > 0;
+        } else if (diff = other.patch - this.patch) {
+            return diff > 0;
+        } else if (!other.suffix && this.suffix === 'insiders') {
+            return true;
+        }
         return false;
     }
-
-    let diff: number = v2.major - v1.major;
-    if (diff) {
-        return diff > 0;
-    } else if (diff = v2.minor - v1.minor) {
-        return diff > 0;
-    } else if (diff = v2.patch - v1.patch) {
-        return diff > 0;
-    } else if (!v2.suffix && v1.suffix === 'insiders') {
-        return true;
-    }
-    return false;
 }
