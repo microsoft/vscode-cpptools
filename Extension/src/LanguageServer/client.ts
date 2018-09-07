@@ -240,6 +240,10 @@ class DefaultClient implements Client {
         return this.trackedDocuments;
     }
 
+    private get AdditionalEnvironment(): { [key: string]: string | string[] } {
+        return { workspaceFolderBasename: this.Name };
+    }
+
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
         return workspaceFolder ? workspaceFolder.name : "untitled";
     }
@@ -337,7 +341,7 @@ class DefaultClient implements Client {
             },
             workspaceFolder: workspaceFolder,
             initializationOptions: {
-                clang_format_path: util.resolveVariables(settings.clangFormatPath, null),
+                clang_format_path: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
                 clang_format_style: settings.clangFormatStyle,
                 clang_format_fallbackStyle: settings.clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings.clangFormatSortIncludes,
@@ -405,7 +409,7 @@ class DefaultClient implements Client {
             }
             if (changedSettings["clang_format_path"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, null));
+                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
             }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);

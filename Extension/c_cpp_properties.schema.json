@@ -121,7 +121,7 @@
             "type": "object",
             "description": "Custom variables that can be reused anywhere in this file using the ${variable} or ${env:variable} syntax.",
             "patternProperties": {
-                "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^default$)(^.+$)": {
+                "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^workspaceFolderBasename$)(?!^default$)(^.+$)": {
                     "oneOf": [
                         {
                             "type": "string"
