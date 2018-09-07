@@ -20,7 +20,7 @@ import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { getTargetBuildURL } from './ghAPI';
+import { getTargetBuildURL } from '../ghAPI';
 
 let prevCrashFile: string;
 let clients: ClientCollection;

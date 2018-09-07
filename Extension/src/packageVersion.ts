@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as telemetry from '../telemetry';
+import * as telemetry from './telemetry';
 
 export class PackageVersion {
     major: number;

@@ -5,10 +5,10 @@
 'use strict';
 
 import { PackageVersion } from './packageVersion';
-import * as util from '../common';
+import * as util from './common';
 import * as tmp from 'tmp';
-import * as telemetry from '../telemetry';
-import { PlatformInformation } from '../platform';
+import * as telemetry from './telemetry';
+import { PlatformInformation } from './platform';
 
 async function parseJsonAtPath(path: string): Promise<any> {
     try {
@@ -115,7 +115,7 @@ function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
     // Check current version against target's version to determine if the installation should happen
     const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
-    if (!userVersion || !targetVersion) {
+    if (!userVersion.isValid || !targetVersion.isValid) {
         return;
     }
     if (!needsUpdate(userVersion, targetVersion)) {
