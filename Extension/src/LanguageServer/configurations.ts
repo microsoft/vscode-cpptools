@@ -145,7 +145,7 @@ export class CppProperties {
     public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
-    
+
     public get CurrentConfigurationProvider(): string|null {
         if (this.CurrentConfiguration.configurationProvider) {
             return this.CurrentConfiguration.configurationProvider;
@@ -202,6 +202,7 @@ export class CppProperties {
 
     private resetToDefaultSettings(resetIndex: boolean): void {
         this.configurationJson = getDefaultCppProperties();
+        this.extendConfigurationEnvironment();
         if (resetIndex || this.CurrentConfigurationIndex < 0 ||
             this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
             this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
@@ -250,6 +251,14 @@ export class CppProperties {
             }
             this.configurationIncomplete = false;
         }
+    }
+
+    private extendConfigurationEnvironment(): void {
+        if (!this.configurationJson.env) {
+            this.configurationJson.env = {};
+        }
+
+        this.configurationJson.env["workspaceFolderBasename"] = path.basename(this.rootUri.fsPath);
     }
 
     private async buildVcpkgIncludePath(): Promise<void> {
@@ -611,11 +620,9 @@ export class CppProperties {
                 delete this.configurationJson.env['workspaceRoot'];
                 delete this.configurationJson.env['workspaceFolder'];
                 delete this.configurationJson.env['default'];
-            } else {
-                this.configurationJson.env = {};
             }
 
-            this.configurationJson.env["workspaceFolderBasename"] = path.basename(this.rootUri.fsPath);
+            this.extendConfigurationEnvironment();
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
             // the system includes were available.
@@ -630,7 +637,7 @@ export class CppProperties {
                 if (this.configurationJson.version === 2) {
                     this.updateToVersion3();
                 }
-                
+
                 if (this.configurationJson.version === 3) {
                     this.updateToVersion4();
                 } else {
