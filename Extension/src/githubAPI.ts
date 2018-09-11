@@ -87,12 +87,12 @@ async function downloadUrlForPlatform(build: Build): Promise<string> {
 }
 
 export async function getTargetBuildURL(updateChannel: string): Promise<string> {
-    const releaseJson: Build[] = await getReleaseJson();
-    if (!releaseJson) {
+    const builds: Build[] = await getReleaseJson();
+    if (!builds) {
         return;
     }
 
-    const targetRelease: Build = getTargetBuild(releaseJson, updateChannel);
+    const targetRelease: Build = getTargetBuild(builds, updateChannel);
     if (!targetRelease) {
         return;
     }
@@ -102,7 +102,7 @@ export async function getTargetBuildURL(updateChannel: string): Promise<string> 
 }
 
 // Determines whether there exists a build that should be installed; returns the build if there is
-function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
+function getTargetBuild(builds: Build[], updateChannel: string): Build {
     // Get predicates to determine the build to install, if any
     let needsUpdate: (v1: PackageVersion, v2: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
@@ -117,7 +117,7 @@ function getTargetBuild(releaseJson: Build[], updateChannel: string): Build {
     }
 
     // Get the build to install
-    const targetBuild: Build = releaseJson.find((build) => useBuild(build));
+    const targetBuild: Build = builds.find((build) => useBuild(build));
     if (!targetBuild) {
         return;
     }
@@ -141,8 +141,7 @@ async function getReleaseJson(): Promise<Build[]> {
     // Download json from GitHub
     const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
     await util.downloadFileToDestination(releaseUrl, releaseJsonFile.name, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
-            // TODO check internet connection before attempting? That way we can mitigate false positive telemetry
-            telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
+        telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
     });
 
     // Read + parse json from downloaded file
