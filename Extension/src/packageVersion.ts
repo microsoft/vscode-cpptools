@@ -26,7 +26,7 @@ export class PackageVersion {
         this.patch = parseInt(tokens[2]);
         this.suffix = tokens[3];
 
-        if (!this.major || !this.minor || !this.patch) {
+        if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
             this.isValid = false;
             telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
             return;
