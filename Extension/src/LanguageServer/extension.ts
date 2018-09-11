@@ -228,8 +228,8 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             const scriptName: string = path.basename(process.execPath) + '.cmd';
             return path.join(vsCodeProcessPath, 'bin', scriptName);
         } else {
-            const scriptName: string = path.basename(process.execPath);
-            const stdout: Buffer = execSync("which " + scriptName);
+            const vsCodeProcessPath: string = path.basename(process.execPath);
+            const stdout: Buffer = execSync("which " + vsCodeProcessPath);
             return stdout.toString().trim();
         }
     }(platformInfo);
@@ -264,7 +264,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     await util.downloadFileToDestination(downloadUrl, vsixFile.name).catch(() => {
         telemetry.logLanguageServerEvent('vsixDownloadFailure');
     });
-    installVsix(vsixFile.name, updateChannel);
+    await installVsix(vsixFile.name, updateChannel);
     vsixFile.removeCallback();
 }
 
