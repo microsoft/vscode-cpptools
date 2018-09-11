@@ -23,7 +23,7 @@ async function parseJsonAtPath(path: string): Promise<any> {
 
 interface Asset {
     name: string;
-    browserDownloadUrl: string;
+    browser_download_url: string;
 }
 
 interface Build {
@@ -32,19 +32,31 @@ interface Build {
 }
 
 function isAsset(input: any): input is Asset {
-    return input && input.name && typeof(input.name) === "string" && input.browser_download_url && input.browser_download_url && typeof(input.browser_download_url) === "string"; 
+    const ok: boolean = input && input.name && typeof(input.name) === "string" && input.browser_download_url && typeof(input.browser_download_url) === "string";
+    return ok;
 }
 
+// Note that earlier Builds do not have 4 or greater assets (Mac, Win, Linux 32/64). Only call this on more recent Builds
 function isBuild(input: any): input is Build {
-    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
+    const ok: boolean = input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
+    return ok;
 }
 
 function isArrayOfAssets(input: any): input is Asset[] {
-    return input instanceof Array && input.every(item => isAsset(item));
+    const ok: boolean = input instanceof Array && input.every(item => isAsset(item));
+    return ok;
 }
 
 function isReleaseJson(input: any): input is Build[] {
-    return input && input instanceof Array && input.length !== 0 && input.every(item => isBuild(item));
+    let ok: boolean =  input && input instanceof Array && input.length !== 0;
+    // Only check the five most recent builds for validity -- no need to check all of them
+    for (let i: number = 0; i < 5 && i < input.length; i++) {
+        if (!ok) {
+            return false;
+        }
+        ok = ok && isBuild(input[i]);
+    }
+    return ok;
 }
 
 async function downloadUrlForPlatform(build: Build): Promise<string> {
@@ -69,7 +81,7 @@ async function downloadUrlForPlatform(build: Build): Promise<string> {
     // Get the URL to download the VSIX, using vsixName as a key
     const downloadUrl: string = build.assets.find((asset) => {
         return asset.name === vsixName;
-    }).browserDownloadUrl;
+    }).browser_download_url;
 
     return downloadUrl;
 }
@@ -86,9 +98,7 @@ export async function getTargetBuildURL(updateChannel: string): Promise<string> 
     }
 
     const downloadUrl: string = await downloadUrlForPlatform(targetRelease);
-    if (!downloadUrl) {
-        return;
-    }
+    return downloadUrl;
 }
 
 // Determines whether there exists a build that should be installed; returns the build if there is
