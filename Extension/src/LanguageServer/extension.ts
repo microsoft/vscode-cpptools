@@ -20,7 +20,8 @@ import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { getTargetBuildURL } from '../ghAPI';
+import { getTargetBuildURL } from '../githubAPI';
+import { promisify } from 'util';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -258,20 +259,17 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         return;
     }
 
-    // Download the target version and install it
-    tmp.file({ postfix: '.vsix' }, (err, vsixPath, fd, cleanupCallback) => {
-        if (err) {
-            telemetry.logLanguageServerEvent('vsixFileCreationFailure');
-            return;
-        }
+    // Create a temporary file, download the vsix to it, then install the vsix
+    const file: Function = promisify(tmp.file);
+    file({postfix: '.vsix'}).then(async (vsixPath, fd, cleanupCallback) => {
 
-        util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
-            telemetry.logLanguageServerEvent('vsixDownloadFailure');
-        }).then(() => {
-            installVsix(vsixPath, updateChannel).then(() => {
-                cleanupCallback();
-            });
-        });
+        await util.downloadFileToDestination(downloadUrl, vsixPath).then(() => {
+            installVsix(vsixPath, updateChannel);
+        }).catch(() => { telemetry.logLanguageServerEvent('vsixDownloadFailure'); });
+
+        cleanupCallback();
+    }).catch(() => {
+        telemetry.logLanguageServerEvent('vsixFileCreationFailure');
     });
 }
 
