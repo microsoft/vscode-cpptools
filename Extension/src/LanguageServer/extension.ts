@@ -253,7 +253,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 }
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // TODO query whether user has extensions.autoUpdate turned off?
     const downloadUrl: string = await getTargetBuildURL(updateChannel);
     if (!downloadUrl) {
         return;
