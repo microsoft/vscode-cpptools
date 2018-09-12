@@ -259,12 +259,20 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     }
 
     // Download the target version and install it
-    const vsixFile: any = tmp.fileSync({ postfix: '.vsix' });
-    await util.downloadFileToDestination(downloadUrl, vsixFile.name).catch(() => {
-        telemetry.logLanguageServerEvent('vsixDownloadFailure');
+    tmp.file({ postfix: '.vsix' }, (err, vsixPath, fd, cleanupCallback) => {
+        if (err) {
+            telemetry.logLanguageServerEvent('vsixFileCreationFailure');
+            return;
+        }
+
+        util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
+            telemetry.logLanguageServerEvent('vsixDownloadFailure');
+        }).then(() => {
+            installVsix(vsixPath, updateChannel).then(() => {
+                cleanupCallback();
+            });
+        });
     });
-    await installVsix(vsixFile.name, updateChannel);
-    vsixFile.removeCallback();
 }
 
 /*********************************************
