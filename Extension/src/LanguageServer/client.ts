@@ -114,7 +114,7 @@ const ResetDatabaseNotification: NotificationType<void, void> = new Notification
 const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
 const ResumeParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeParsing');
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
-const TextEditorSelectionChangeNotification: NotificationType<vscode.Position, void> = new NotificationType<vscode.Position, void>('cpptools/textEditorSelectionChange');
+const TextEditorSelectionChangeNotification: NotificationType<vscode.Range, void> = new NotificationType<vscode.Range, void>('cpptools/textEditorSelectionChange');
 const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, void> = new NotificationType<FolderSettingsParams, void>('cpptools/didChangeFolderSettings');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
@@ -171,7 +171,7 @@ export interface Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
-    selectionChanged(selection: vscode.Position): void;
+    selectionChanged(selection: vscode.Range): void;
     sendCustomConfigurations(configs: any): void;
     resetDatabase(): void;
     deactivate(): void;
@@ -976,7 +976,7 @@ class DefaultClient implements Client {
         this.resumeParsing();
     }
 
-    public selectionChanged(selection: vscode.Position): void {
+    public selectionChanged(selection: vscode.Range): void {
         this.notifyWhenReady(() => this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection));
     }
 
@@ -1194,7 +1194,7 @@ class NullClient implements Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
     activate(): void {}
-    selectionChanged(selection: vscode.Position): void {}
+    selectionChanged(selection: vscode.Range): void {}
     resetDatabase(): void {}
     deactivate(): void {}
     pauseParsing(): void {}
