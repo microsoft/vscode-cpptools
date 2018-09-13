@@ -263,12 +263,13 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     const file: Function = promisify(tmp.file);
     file({postfix: '.vsix'}).then(async (vsixPath, fd, cleanupCallback) => {
 
-        await util.downloadFileToDestination(downloadUrl, vsixPath).then(() => {
-            installVsix(vsixPath, updateChannel);
-        }).catch(() => { telemetry.logLanguageServerEvent('vsixDownloadFailure'); });
+        await util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
+            telemetry.logLanguageServerEvent('vsixDownloadFailure');
+        });
+        await installVsix(vsixPath, updateChannel).catch();
 
         cleanupCallback();
-    }).catch(() => {
+    }, () => {
         telemetry.logLanguageServerEvent('vsixFileCreationFailure');
     });
 }
