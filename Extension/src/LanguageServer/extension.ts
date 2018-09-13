@@ -131,7 +131,7 @@ function realActivation(): void {
 
     reportMacCrashes();
 
-    // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+    insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
     intervalTimer = setInterval(onInterval, 2500);
 }
 
@@ -154,9 +154,9 @@ function onDidChangeSettings(): void {
     const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
     if (newUpdateChannel) {
         if (newUpdateChannel === 'Default') {
-            // clearInterval(insiderUpdateTimer);
+            clearInterval(insiderUpdateTimer);
         } else if (newUpdateChannel === 'Insiders') {
-            // insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+            insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
 
         checkAndApplyUpdate(newUpdateChannel);
