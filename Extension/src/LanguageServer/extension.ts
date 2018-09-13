@@ -131,7 +131,12 @@ function realActivation(): void {
 
     reportMacCrashes();
 
-    insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    if (settings.updateChannel === 'Insiders') {
+        insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+        checkAndApplyUpdate(settings.updateChannel);
+    }
+
     intervalTimer = setInterval(onInterval, 2500);
 }
 
