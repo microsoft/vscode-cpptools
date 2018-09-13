@@ -10,7 +10,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
 } from 'vscode-languageclient';
-import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration } from 'vscode-cpptools';
+import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -540,13 +540,14 @@ class DefaultClient implements Client {
 
         let providerName: string = providerId;
         let configName: string = await this.getCurrentConfigName();
+        const notReadyMessage: string = `${providerName} is not ready`;
         let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
             // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
             try {
                 let provider: CustomConfigurationProvider1|null = providers.get(providerId);
                 if (provider) {
                     if (!provider.isReady) {
-                        return Promise.reject(`${providerName} is not ready`);
+                        return Promise.reject(notReadyMessage);
                     }
 
                     providerName = provider.name;
@@ -566,7 +567,7 @@ class DefaultClient implements Client {
                 }
             },
             (err) => {
-                if (err === `${providerName} is not ready`) {
+                if (err === notReadyMessage) {
                     return;
                 }
                 let settings: CppSettings = new CppSettings(this.RootUri);
