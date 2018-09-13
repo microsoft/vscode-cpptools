@@ -21,7 +21,6 @@ import { PlatformInformation } from '../platform';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildURL } from '../githubAPI';
-import { promisify } from 'util';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -222,56 +221,55 @@ function onInterval(): void {
 async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
-    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsCodeScriptPath: string = function(platformInfo): string {
-        if (platformInfo.platform === 'win32') {
-            const vsCodeProcessPath: string = path.dirname(process.execPath);
-            const scriptName: string = path.basename(process.execPath) + '.cmd';
-            return path.join(vsCodeProcessPath, 'bin', scriptName);
-        } else {
-            const vsCodeProcessPath: string = path.basename(process.execPath);
-            const stdout: Buffer = execSync("which " + vsCodeProcessPath);
-            return stdout.toString().trim();
+    return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
+        const vsCodeScriptPath: string = function(platformInfo): string {
+            if (platformInfo.platform === 'win32') {
+                const vsCodeProcessPath: string = path.dirname(process.execPath);
+                const scriptName: string = path.basename(process.execPath) + '.cmd';
+                return path.join(vsCodeProcessPath, 'bin', scriptName);
+            } else {
+                const vsCodeProcessPath: string = path.basename(process.execPath);
+                const stdout: Buffer = execSync("which " + vsCodeProcessPath);
+                return stdout.toString().trim();
+            }
+        }(platformInfo);
+        if (!vsCodeScriptPath) {
+            telemetry.logLanguageServerEvent('findVsCodeScriptFailure');
+            return Promise.reject();
         }
-    }(platformInfo);
-    if (!vsCodeScriptPath) {
-        telemetry.logLanguageServerEvent('findVsCodeScriptFailure');
-        return;
-    }
 
-    // Install the VSIX
-    const installCommand: string = vsCodeScriptPath + ' --install-extension ' + vsixLocation;
-    try {
-        if (updateChannel === 'Default') {
-            // Uninstall the current version, as the version to install is a previous version
-            const uninstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
-            execSync(uninstallCommand);
+        // Install the VSIX
+        const installCommand: string = vsCodeScriptPath + ' --install-extension ' + vsixLocation;
+        try {
+            if (updateChannel === 'Default') {
+                // Uninstall the current version, as the version to install is a previous version
+                const uninstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
+                execSync(uninstallCommand);
+            }
+            execSync(installCommand);
+            return Promise.resolve();
+        } catch (error) {
+            telemetry.logLanguageServerEvent("installCommandFailure");
+            return Promise.reject();
         }
-        execSync(installCommand);
-    } catch (error) {
-        telemetry.logLanguageServerEvent("installCommandFailure");
-    }
+    });
 }
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    const downloadUrl: string = await getTargetBuildURL(updateChannel);
-    if (!downloadUrl) {
-        return;
-    }
-
-    // Create a temporary file, download the vsix to it, then install the vsix
-    const file: Function = promisify(tmp.file);
-    file({postfix: '.vsix'}).then(async (vsixPath, fd, cleanupCallback) => {
-
-        await util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
-            telemetry.logLanguageServerEvent('vsixDownloadFailure');
+    return getTargetBuildURL(updateChannel).then((downloadUrl) => {
+        // Create a temporary file, download the vsix to it, then install the vsix
+        tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
+            if (err) {
+                telemetry.logLanguageServerEvent('vsixFileCreationFailure');
+                return Promise.reject();
+            }
+            await util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
+                telemetry.logLanguageServerEvent('vsixDownloadFailure');
+            });
+            await installVsix(vsixPath, updateChannel).catch();
+            cleanupCallback();
         });
-        await installVsix(vsixPath, updateChannel).catch();
-
-        cleanupCallback();
-    }, () => {
-        telemetry.logLanguageServerEvent('vsixFileCreationFailure');
-    });
+    }, () => { /* Do nothing */ });
 }
 
 /*********************************************
