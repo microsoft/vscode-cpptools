@@ -61,30 +61,29 @@ function isReleaseJson(input: any): input is Build[] {
 
 async function downloadUrlForPlatform(build: Build): Promise<string> {
     // Get the VSIX name to search for in build
-    return PlatformInformation.GetPlatformInformation().then(platformInfo => {
-        const vsixName: string = function(platformInfo): string {
-            switch (platformInfo.platform) {
-                case 'win32': return 'cpptools-win32.vsix';
-                case 'darwin': return 'cpptools-osx.vsix';
-                default: {
-                    switch (platformInfo.architecture) {
-                        case 'x86': return 'cpptools-linux32.vsix';
-                        case 'x86_64': return 'cpptools-linux.vsix';
-                    }
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const vsixName: string = function(platformInfo): string {
+        switch (platformInfo.platform) {
+            case 'win32': return 'cpptools-win32.vsix';
+            case 'darwin': return 'cpptools-osx.vsix';
+            default: {
+                switch (platformInfo.architecture) {
+                    case 'x86': return 'cpptools-linux32.vsix';
+                    case 'x86_64': return 'cpptools-linux.vsix';
                 }
             }
-        }(platformInfo);
-        if (!vsixName) {
-            return Promise.reject();
         }
+    }(platformInfo);
+    if (!vsixName) {
+        return Promise.reject();
+    }
 
-        // Get the URL to download the VSIX, using vsixName as a key
-        const downloadUrl: string = build.assets.find((asset) => {
-            return asset.name === vsixName;
-        }).browser_download_url;
+    // Get the URL to download the VSIX, using vsixName as a key
+    const downloadUrl: string = build.assets.find((asset) => {
+        return asset.name === vsixName;
+    }).browser_download_url;
 
-        return Promise.resolve(downloadUrl);
-    });
+    return Promise.resolve(downloadUrl);
 }
 
 export async function getTargetBuildURL(updateChannel: string): Promise<string> {
