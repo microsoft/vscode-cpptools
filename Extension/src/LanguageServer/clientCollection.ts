@@ -159,7 +159,7 @@ export class ClientCollection {
                         this.activeClient = this.getClientFor(this.activeDocument.uri);
                         this.activeClient.activeDocumentChanged(this.activeDocument);
                         // may not need this, the navigation UI should not have changed.
-                        // this.activeClient.selectionChanged(new vscode.Range(vscode.window.activeTextEditor.selection.start, vscode.window.activeTextEditor.selection.end);
+                        // this.activeClient.selectionChanged(Range.create(vscode.window.activeTextEditor.selection.start, vscode.window.activeTextEditor.selection.end);
                     }
 
                     client.dispose();

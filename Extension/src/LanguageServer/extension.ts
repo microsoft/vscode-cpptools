@@ -17,6 +17,7 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
+import { Range } from 'vscode-languageclient';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -169,7 +170,7 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(new vscode.Range(editor.selection.start, editor.selection.end));
+        clients.ActiveClient.selectionChanged(Range.create(editor.selection.start, editor.selection.end));
     }
     ui.activeDocumentChanged();
 }
@@ -187,7 +188,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();
     }
-    clients.ActiveClient.selectionChanged(new vscode.Range(event.selections[0].start, event.selections[0].end));
+    clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
