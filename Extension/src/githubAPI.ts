@@ -134,6 +134,7 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
 
 async function getReleaseJson(): Promise<Build[]> {
     return new Promise<Build[]>((resolve, reject) => {
+        // Create temp file to hold json
         tmp.file(async (err, releaseJsonPath, fd, cleanupCallback) => {
             if (err) {
                 telemetry.logLanguageServerEvent('releaseJsonFileCreationFailure');
