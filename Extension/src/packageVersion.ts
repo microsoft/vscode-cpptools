@@ -14,11 +14,11 @@ export class PackageVersion {
     suffixVersion: number;
     isValid: boolean;
 
-    constructor(versionStr: string) {
-        let tokens: string[] = versionStr.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
+    constructor(version: string) {
+        let tokens: string[] = version.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
         if (tokens.length < 3) {
             this.isValid = false;
-            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': version });
             return;
         }
 
@@ -30,7 +30,7 @@ export class PackageVersion {
 
         if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
             this.isValid = false;
-            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': versionStr });
+            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': version });
             return;
         }
 
