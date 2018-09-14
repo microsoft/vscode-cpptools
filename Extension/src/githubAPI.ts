@@ -38,7 +38,8 @@ function isAsset(input: any): input is Asset {
 
 // Note that earlier Builds do not have 4 or greater assets (Mac, Win, Linux 32/64). Only call this on more recent Builds
 function isBuild(input: any): input is Build {
-    const ok: boolean = input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
+    const ok: boolean = input && input.name && typeof(input.name) === "string" &&
+        isArrayOfAssets(input.assets) && input.assets.length >= 4;
     return ok;
 }
 
@@ -47,7 +48,7 @@ function isArrayOfAssets(input: any): input is Asset[] {
     return ok;
 }
 
-function isReleaseJson(input: any): input is Build[] {
+function isArrayOfBuilds(input: any): input is Build[] {
     let ok: boolean =  input && input instanceof Array && input.length !== 0;
     // Only check the five most recent builds for validity -- no need to check all of them
     for (let i: number = 0; i < 5 && i < input.length; i++) {
@@ -86,7 +87,7 @@ async function downloadUrlForPlatform(build: Build): Promise<string> {
     }).browser_download_url;
 
     if (!downloadUrl) {
-        return Promise.reject(new Error('Failed to find vsix: ' + vsixName + ' in build: ' + build.name));
+        return Promise.reject(new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + build.name));
     }
     return downloadUrl;
 }
@@ -145,7 +146,7 @@ async function getReleaseJson(): Promise<Build[]> {
             // Read + parse json from downloaded file
             let parsedJson: any = await parseJsonAtPath(releaseJsonPath);
             cleanupCallback();
-            if (!isReleaseJson(parsedJson)) {
+            if (!isArrayOfBuilds(parsedJson)) {
                 return reject(new Error('Failed to parse release json'));
             }
 
