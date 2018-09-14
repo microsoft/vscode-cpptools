@@ -18,7 +18,7 @@ export class PackageVersion {
         let tokens: string[] = version.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
         if (tokens.length < 3) {
             this.isValid = false;
-            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': version });
+            telemetry.logLanguageServerEvent('invalidPackageVersion', { 'value': version });
             return;
         }
 
@@ -30,7 +30,7 @@ export class PackageVersion {
 
         if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
             this.isValid = false;
-            telemetry.logLanguageServerEvent('versionParsingFailure', { 'versionString': version });
+            telemetry.logLanguageServerEvent('invalidPackageVersion', { 'value': version });
             return;
         }
 
