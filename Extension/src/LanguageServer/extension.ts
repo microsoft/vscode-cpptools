@@ -239,8 +239,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             }
         }(platformInfo);
         if (!vsCodeScriptPath) {
-            telemetry.logLanguageServerEvent('findVsCodeScriptFailure');
-            return Promise.reject();
+            return Promise.reject(new Error('Could not find VS Code script'));
         }
 
         // Install the VSIX
@@ -254,27 +253,29 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             execSync(installCommand);
             return Promise.resolve();
         } catch (error) {
-            telemetry.logLanguageServerEvent("installCommandFailure");
-            return Promise.reject();
+            return Promise.reject(new Error('Install command failed'));
         }
     });
 }
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     return getTargetBuildURL(updateChannel).then((downloadUrl) => {
+        if (!downloadUrl) {
+            return Promise.resolve();
+        }
         // Create a temporary file, download the vsix to it, then install the vsix
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
-                telemetry.logLanguageServerEvent('vsixFileCreationFailure');
-                return Promise.reject();
+                return Promise.reject(new Error('Failed to create vsix file'));
             }
             await util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
-                telemetry.logLanguageServerEvent('vsixDownloadFailure');
+                return Promise.reject(new Error('Failed to download vsix'));
             });
-            await installVsix(vsixPath, updateChannel).catch();
+            await installVsix(vsixPath, updateChannel);
             cleanupCallback();
+            telemetry.logLanguageServerEvent('installVsix', { 'Success': '' } );
         });
-    }, () => { /* Do nothing */ });
+    }, (error: Error) => { telemetry.logLanguageServerEvent('installVsix', { 'Error': error.message }); });
 }
 
 /*********************************************

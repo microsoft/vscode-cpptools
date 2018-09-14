@@ -7,7 +7,6 @@
 import { PackageVersion } from './packageVersion';
 import * as util from './common';
 import * as tmp from 'tmp';
-import * as telemetry from './telemetry';
 import { PlatformInformation } from './platform';
 
 async function parseJsonAtPath(path: string): Promise<any> {
@@ -32,7 +31,8 @@ interface Build {
 }
 
 function isAsset(input: any): input is Asset {
-    const ok: boolean = input && input.name && typeof(input.name) === "string" && input.browser_download_url && typeof(input.browser_download_url) === "string";
+    const ok: boolean = input && input.name && typeof(input.name) === "string" &&
+        input.browser_download_url && typeof(input.browser_download_url) === "string";
     return ok;
 }
 
@@ -61,7 +61,7 @@ function isReleaseJson(input: any): input is Build[] {
 
 async function downloadUrlForPlatform(build: Build): Promise<string> {
     // Get the VSIX name to search for in build
-    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     const vsixName: string = function(platformInfo): string {
         switch (platformInfo.platform) {
             case 'win32': return 'cpptools-win32.vsix';
@@ -73,9 +73,11 @@ async function downloadUrlForPlatform(build: Build): Promise<string> {
                 }
             }
         }
-    }(platformInfo);
+    }(info);
     if (!vsixName) {
-        return Promise.reject();
+        const distro: string = info.distribution ? ':' + info.distribution.name + '-' + info.distribution.version : '';
+        return Promise.reject(new Error('Failed to match VSIX name for: ' +
+            info.platform + distro + ':' + info.architecture));
     }
 
     // Get the URL to download the VSIX, using vsixName as a key
@@ -83,22 +85,20 @@ async function downloadUrlForPlatform(build: Build): Promise<string> {
         return asset.name === vsixName;
     }).browser_download_url;
 
-    return Promise.resolve(downloadUrl);
+    if (!downloadUrl) {
+        return Promise.reject(new Error('Failed to find vsix: ' + vsixName + ' in build: ' + build.name));
+    }
+    return downloadUrl;
 }
 
 export async function getTargetBuildURL(updateChannel: string): Promise<string> {
-    return getReleaseJson().then(builds => {
-        const targetRelease: Build = getTargetBuild(builds, updateChannel);
-        if (!targetRelease) {
-            return Promise.reject();
-        }
-
-        return downloadUrlForPlatform(targetRelease);
-    });
+    return getReleaseJson()
+        .then(builds => getTargetBuild(builds, updateChannel))
+        .then(build => { return build ? downloadUrlForPlatform(build) : Promise.resolve(undefined); } );
 }
 
 // Determines whether there exists a build that should be installed; returns the build if there is
-function getTargetBuild(builds: Build[], updateChannel: string): Build {
+function getTargetBuild(builds: Build[], updateChannel: string): Build | undefined {
     // Get predicates to determine the build to install, if any
     let needsUpdate: (v1: PackageVersion, v2: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
@@ -109,23 +109,20 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
         needsUpdate = function(v1: PackageVersion, v2: PackageVersion): boolean { return v1.isGreaterThan(v2); };
         useBuild = function(build: Build): boolean { return build.name.indexOf('-') === -1; };
     } else {
-        return;
+        throw new Error('Incorrect updateChannel setting provided');
     }
 
     // Get the build to install
     const targetBuild: Build = builds.find((build) => useBuild(build));
     if (!targetBuild) {
-        return;
+        throw new Error('Failed to determine installation candidate');
     }
 
     // Check current version against target's version to determine if the installation should happen
     const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
-    if (!userVersion.isValid || !targetVersion.isValid) {
-        return;
-    }
     if (!needsUpdate(userVersion, targetVersion)) {
-        return;
+        return undefined;
     }
 
     return targetBuild;
@@ -136,22 +133,20 @@ async function getReleaseJson(): Promise<Build[]> {
         // Create temp file to hold json
         tmp.file(async (err, releaseJsonPath, fd, cleanupCallback) => {
             if (err) {
-                telemetry.logLanguageServerEvent('releaseJsonFileCreationFailure');
-                return reject();
+                return reject(new Error('Failed to create release json file'));
             }
 
             // Download json from GitHub
             const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
             await util.downloadFileToDestination(releaseUrl, releaseJsonPath, { 'User-Agent': 'vscode-cpptools' }).catch(() => {
-                telemetry.logLanguageServerEvent('releaseJsonDownloadFailure');
+                return reject(new Error('Failed to download release json'));
             });
 
             // Read + parse json from downloaded file
             let parsedJson: any = await parseJsonAtPath(releaseJsonPath);
             cleanupCallback();
             if (!isReleaseJson(parsedJson)) {
-                telemetry.logLanguageServerEvent('releaseJsonParsingFailure');
-                return reject();
+                return reject(new Error('Failed to parse release json'));
             }
 
             return resolve(parsedJson);
