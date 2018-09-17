@@ -252,7 +252,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             execSync(installCommand);
             return Promise.resolve();
         } catch (error) {
-            return Promise.reject(new Error('Install command failed'));
+            return Promise.reject(new Error('Failed to install vsix'));
         }
     });
 }
@@ -260,23 +260,21 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     return getTargetBuildURL(updateChannel).then((downloadUrl) => {
         if (!downloadUrl) {
-            return Promise.resolve();
+            Promise.resolve();
         }
 
         // Create a temporary file, download the vsix to it, then install the vsix
-        tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
+        tmp.file({postfix: '.vsix'}, (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
-                cleanupCallback();
-                return Promise.reject(new Error('Failed to create vsix file'));
+                Promise.reject(new Error('Failed to create vsix file'));
             }
-            await util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
-                cleanupCallback();
-                return Promise.reject(new Error('Failed to download vsix'));
-            });
-            await installVsix(vsixPath, updateChannel).then(() => {
-                cleanupCallback();
-                telemetry.logLanguageServerEvent('installVsix', { 'Success': '' } );
-            }, error => { cleanupCallback(); return Promise.reject(error); });
+
+            const downloadVsix: any = util.downloadFileToDestination.bind(undefined, downloadUrl, vsixPath);
+            const boundInstallVsix: any = installVsix.bind(undefined, vsixPath, updateChannel);
+            const logSuccess: any = () => { telemetry.logLanguageServerEvent('installVsix', { 'Success': '' } ); };
+            return downloadVsix()
+                .then(boundInstallVsix)
+                .then(logSuccess);
         });
     }, (error: Error) => { telemetry.logLanguageServerEvent('installVsix', { 'Error': error.message }); });
 }

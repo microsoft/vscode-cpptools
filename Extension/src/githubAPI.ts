@@ -15,9 +15,19 @@ interface Asset {
     browser_download_url: string;
 }
 
-interface Build {
+class Build {
     name: string;
     assets: Asset[];
+
+    getDownloadUrl(vsixName: string): string {
+        const downloadUrl: string = this.assets.find(asset => {
+            return asset.name === vsixName;
+        }).browser_download_url;
+        if (!downloadUrl) {
+            throw new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + this.name);
+        }
+        return downloadUrl;
+    }
 }
 
 function isAsset(input: any): input is Asset {
@@ -65,43 +75,37 @@ function vsixNameForPlatform(info: PlatformInformation): string {
     }(info);
     if (!vsixName) {
         const distro: string = info.distribution ? (':' + info.distribution.name + '-' + info.distribution.version) : '';
-        throw (new Error('Failed to match VSIX name for: ' + info.platform + distro + ':' + info.architecture));
+        throw new Error('Failed to match VSIX name for: ' + info.platform + distro + ':' + info.architecture);
     }
     return vsixName;
 }
 
-async function downloadUrlForPlatform(build: Build): Promise<string> {
-    // Get the VSIX name to search for in build
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsixName: string = vsixNameForPlatform(info);
-
-    // Get the URL to download the VSIX, using vsixName as a key
-    const downloadUrl: string = build.assets.find((asset) => {
-        return asset.name === vsixName;
-    }).browser_download_url;
-
-    if (!downloadUrl) {
-        return Promise.reject(new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + build.name));
-    }
-    return downloadUrl;
-}
-
 export async function getTargetBuildURL(updateChannel: string): Promise<string> {
+    const boundGetTargetBuild: (builds: Build[]) => Build = getTargetBuild.bind(undefined, updateChannel);
+
     return getReleaseJson()
-        .then(builds => getTargetBuild(builds, updateChannel))
-        .then(build => { return build ? downloadUrlForPlatform(build) : Promise.resolve(undefined); } );
+        .then(boundGetTargetBuild)
+        .then(build => {
+            if (!build) {
+                return Promise.resolve(undefined);
+            }
+            const boundGetDownloadUrl: any = Build.prototype.getDownloadUrl.bind(build);
+            return PlatformInformation.GetPlatformInformation()
+                .then(vsixNameForPlatform)
+                .then(boundGetDownloadUrl);
+        });
 }
 
 // Determines whether there exists a build that should be installed; returns the build if there is
-function getTargetBuild(builds: Build[], updateChannel: string): Build {
+function getTargetBuild(updateChannel: string, builds: Build[]): Build {
     // Get predicates to determine the build to install, if any
-    let needsUpdate: (v1: PackageVersion, v2: PackageVersion) => boolean;
+    let needsUpdate: (installed: PackageVersion, other: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdate = function(v1: PackageVersion, v2: PackageVersion): boolean { return v2.isGreaterThan(v1); };
+        needsUpdate = (installed: PackageVersion, other: PackageVersion) => { return other.isGreaterThan(installed); };
         useBuild = function(build: Build): boolean { return true; };
     } else if (updateChannel === 'Default') {
-        needsUpdate = function(v1: PackageVersion, v2: PackageVersion): boolean { return v1.isGreaterThan(v2); };
+        needsUpdate = function(installed: PackageVersion, other: PackageVersion): boolean { return installed.isGreaterThan(other); };
         useBuild = function(build: Build): boolean { return build.name.indexOf('-') === -1; };
     } else {
         throw new Error('Incorrect updateChannel setting provided');
@@ -116,38 +120,36 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
     // Check current version against target's version to determine if the installation should happen
     const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
-    if (!needsUpdate(userVersion, targetVersion)) {
-        return undefined;
-    }
-
-    return targetBuild;
+    return needsUpdate(userVersion, targetVersion) ? targetBuild : undefined;
 }
 
 async function getReleaseJson(): Promise<Build[]> {
     return new Promise<Build[]>((resolve, reject) => {
         // Create temp file to hold json
-        tmp.file(async (err, releaseJsonPath, fd, cleanupCallback) => {
+        tmp.file((err, releaseJsonPath, fd, cleanupCallback) => {
             if (err) {
-                cleanupCallback();
-                reject(new Error('Failed to create release json file'));
+                return reject(new Error('Failed to create release json file'));
             }
 
             const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
             const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-            // Download release json
-            util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
-                .catch(() => { cleanupCallback(); reject(new Error('Failed to download release json')); })
-                // Read json
-                .then(() => { return util.readFileText(releaseJsonPath); })
-                .catch(() => { cleanupCallback(); reject(new Error('Failed to read release json file')); })
-                // Parse json
-                .then(fileContent => { cleanupCallback(); return Promise.resolve(fileContent); })
-                .then(JSON.parse)
-                .catch(() => { reject(new Error('Failed to parse release json')); })
-                // Type check and return
-                .then(releaseJson => {
-                    isArrayOfBuilds ? resolve(releaseJson) : reject('Release json is not Build[]');
-                });
+            const downloadReleaseJson: any = util.downloadFileToDestination.bind(undefined, releaseUrl, releaseJsonPath, header);
+            const rejectDownload: any = () => { return reject(new Error('Failed to download release json')); };
+
+            const readJson: any = util.readFileText.bind(undefined, releaseJsonPath);
+            const rejectRead: any = () => { return reject(new Error('Failed to read release json file')); };
+
+            const rejectParse: any = () => { return reject(new Error('Failed to parse release json')); };
+
+            const typeCheck: any = releaseJson => {
+                return isArrayOfBuilds(releaseJson) ? resolve(releaseJson) : reject('Release json is not Build[]');
+            };
+
+            return downloadReleaseJson()
+                .catch(rejectDownload)
+                .then(readJson, rejectRead)
+                .then(JSON.parse, rejectParse)
+                .then(typeCheck);
         });
     });
 }
