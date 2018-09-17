@@ -134,6 +134,7 @@ async function getReleaseJson(): Promise<Build[]> {
 
             const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
             const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
+            // Download release json
             util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
                 .catch(() => { cleanupCallback(); reject(new Error('Failed to download release json')); })
                 // Read json
