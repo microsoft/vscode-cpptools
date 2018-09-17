@@ -578,7 +578,7 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
                 } else {
                     redirectUrl = response.headers.location[0];
                 }
-                return resolve(downloadFileToDestination(redirectUrl, destinationPath));
+                return resolve(downloadFileToDestination(redirectUrl, destinationPath, headers));
             }
             if (response.statusCode !== 200) { // If request is not successful
                 return reject();
