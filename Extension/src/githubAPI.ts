@@ -93,7 +93,7 @@ export async function getTargetBuildURL(updateChannel: string): Promise<string> 
 }
 
 // Determines whether there exists a build that should be installed; returns the build if there is
-function getTargetBuild(builds: Build[], updateChannel: string): Build | undefined {
+function getTargetBuild(builds: Build[], updateChannel: string): Build {
     // Get predicates to determine the build to install, if any
     let needsUpdate: (v1: PackageVersion, v2: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
