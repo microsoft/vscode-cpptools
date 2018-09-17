@@ -250,6 +250,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 execSync(uninstallCommand);
             }
             execSync(installCommand);
+            clearInterval(insiderUpdateTimer);
             return Promise.resolve();
         } catch (error) {
             return Promise.reject(new Error('Failed to install vsix'));
@@ -258,25 +259,32 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 }
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    return getTargetBuildURL(updateChannel).then((downloadUrl) => {
-        if (!downloadUrl) {
-            Promise.resolve();
-        }
-
-        // Create a temporary file, download the vsix to it, then install the vsix
-        tmp.file({postfix: '.vsix'}, (err, vsixPath, fd, cleanupCallback) => {
-            if (err) {
-                Promise.reject(new Error('Failed to create vsix file'));
+    const p: Promise<void> = new Promise<void>((resolve, reject) => {
+        getTargetBuildURL(updateChannel).then((downloadUrl) => {
+            if (!downloadUrl) {
+                return resolve();
             }
 
-            const downloadVsix: any = util.downloadFileToDestination.bind(undefined, downloadUrl, vsixPath);
-            const boundInstallVsix: any = installVsix.bind(undefined, vsixPath, updateChannel);
-            const logSuccess: any = () => { telemetry.logLanguageServerEvent('installVsix', { 'Success': '' } ); };
-            return downloadVsix()
-                .then(boundInstallVsix)
-                .then(logSuccess);
+            // Create a temporary file, download the vsix to it, then install the vsix
+            tmp.file({postfix: '.vsix'}, (err, vsixPath, fd, cleanupCallback) => {
+                if (err) {
+                    return reject(new Error('Failed to create vsix file'));
+                }
+    
+                const downloadVsix: any = util.downloadFileToDestination.bind(undefined, downloadUrl, vsixPath);
+                const boundInstallVsix: any = installVsix.bind(undefined, vsixPath, updateChannel);
+                const logSuccess: any = () => { telemetry.logLanguageServerEvent('installVsix', { 'Success': 'true' } ); };
+                return downloadVsix()
+                    .then(boundInstallVsix)
+                    .then(logSuccess)
+                    .then(resolve, reject);
+            });
         });
-    }, (error: Error) => { telemetry.logLanguageServerEvent('installVsix', { 'Error': error.message }); });
+    });
+    return p.catch((error: Error) => {
+        telemetry.logLanguageServerEvent('installVsix', { 'Error': error.message, 'Success': 'false' });
+        return Promise.reject(error);
+    });
 }
 
 /*********************************************
