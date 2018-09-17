@@ -239,7 +239,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             }
         }(platformInfo);
         if (!vsCodeScriptPath) {
-            return Promise.reject(new Error('Could not find VS Code script'));
+            return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
         // Install the VSIX
@@ -263,17 +263,21 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         if (!downloadUrl) {
             return Promise.resolve();
         }
+
         // Create a temporary file, download the vsix to it, then install the vsix
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
+                cleanupCallback();
                 return Promise.reject(new Error('Failed to create vsix file'));
             }
             await util.downloadFileToDestination(downloadUrl, vsixPath).catch(() => {
+                cleanupCallback();
                 return Promise.reject(new Error('Failed to download vsix'));
             });
-            await installVsix(vsixPath, updateChannel);
-            cleanupCallback();
-            telemetry.logLanguageServerEvent('installVsix', { 'Success': '' } );
+            await installVsix(vsixPath, updateChannel).then(() => {
+                cleanupCallback();
+                telemetry.logLanguageServerEvent('installVsix', { 'Success': '' } );
+            }, error => { cleanupCallback(); return Promise.reject(error); });
         });
     }, (error: Error) => { telemetry.logLanguageServerEvent('installVsix', { 'Error': error.message }); });
 }
