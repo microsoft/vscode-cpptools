@@ -20,7 +20,7 @@ import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { getTargetBuildURL } from '../githubAPI';
+import { getTargetBuildUrl } from '../githubAPI';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -260,7 +260,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
-        getTargetBuildURL(updateChannel).then((downloadUrl) => {
+        getTargetBuildUrl(updateChannel).then((downloadUrl) => {
             if (!downloadUrl) {
                 return resolve();
             }

@@ -19,7 +19,7 @@ class Build {
     name: string;
     assets: Asset[];
 
-    getDownloadUrl(vsixName: string): string {
+    getVsixDownloadUrl(vsixName: string): string {
         const downloadUrl: string = this.assets.find(asset => {
             return asset.name === vsixName;
         }).browser_download_url;
@@ -77,7 +77,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
     return vsixName;
 }
 
-export async function getTargetBuildURL(updateChannel: string): Promise<string> {
+export async function getTargetBuildUrl(updateChannel: string): Promise<string> {
     const boundGetTargetBuild: (builds: Build[]) => Build = getTargetBuild.bind(undefined, updateChannel);
 
     return getReleaseJson()
@@ -86,7 +86,7 @@ export async function getTargetBuildURL(updateChannel: string): Promise<string> 
             if (!build) {
                 return Promise.resolve(undefined);
             }
-            const boundGetDownloadUrl: any = Build.prototype.getDownloadUrl.bind(build);
+            const boundGetDownloadUrl: any = Build.prototype.getVsixDownloadUrl.bind(build);
             return PlatformInformation.GetPlatformInformation()
                 .then(vsixNameForPlatform)
                 .then(boundGetDownloadUrl);
