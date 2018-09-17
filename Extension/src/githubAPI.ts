@@ -31,33 +31,30 @@ class Build {
 }
 
 function isAsset(input: any): input is Asset {
-    const ok: boolean = input && input.name && typeof(input.name) === "string" &&
+    return input && input.name && typeof(input.name) === "string" &&
         input.browser_download_url && typeof(input.browser_download_url) === "string";
-    return ok;
 }
 
 // Note that earlier Builds do not have 4 or greater assets (Mac, Win, Linux 32/64). Only call this on more recent Builds
 function isBuild(input: any): input is Build {
-    const ok: boolean = input && input.name && typeof(input.name) === "string" &&
-        isArrayOfAssets(input.assets) && input.assets.length >= 4;
-    return ok;
+    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
 }
 
 function isArrayOfAssets(input: any): input is Asset[] {
-    const ok: boolean = input instanceof Array && input.every(item => isAsset(item));
-    return ok;
+    return input instanceof Array && input.every(item => isAsset(item));
 }
 
 function isArrayOfBuilds(input: any): input is Build[] {
-    let ok: boolean =  input && input instanceof Array && input.length !== 0;
+    if (!input || !(input instanceof Array) || input.length === 0) {
+        return false;
+    }
     // Only check the five most recent builds for validity -- no need to check all of them
     for (let i: number = 0; i < 5 && i < input.length; i++) {
-        if (!ok) {
+        if (!isBuild(input[i])) {
             return false;
         }
-        ok = ok && isBuild(input[i]);
     }
-    return ok;
+    return true;
 }
 
 function vsixNameForPlatform(info: PlatformInformation): string {
