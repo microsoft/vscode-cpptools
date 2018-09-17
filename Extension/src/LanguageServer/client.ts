@@ -185,7 +185,7 @@ export interface Client {
     activate(): void;
     selectionChanged(selection: vscode.Position): void;
     sendCustomConfigurations(configs: any): void;
-    sendCustomBrowseConfiguration(config: any): void;
+    sendCustomBrowseConfiguration(config: any): Thenable<void>;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -439,6 +439,13 @@ class DefaultClient implements Client {
     }
 
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
+        let onRegistered: () => void = () => {
+            // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
+            // the provider has sent the correct browse.path value.
+            if (provider.version >= Version.v2) {
+                this.pauseParsing();
+            }
+        };
         return this.notifyWhenReady(() => {
             if (!this.RootPath) {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
@@ -458,6 +465,7 @@ class DefaultClient implements Client {
                             switch (result) {
                                 case allow: {
                                     this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
+                                        onRegistered();
                                         telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
                                     });
                                     ask.Value = false;
@@ -477,8 +485,10 @@ class DefaultClient implements Client {
                     () => ask.Value = false);
                 }
             } else if (selectedProvider === provider.extensionId) {
+                onRegistered();
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
             } else if (selectedProvider === provider.name) {
+                onRegistered();
                 this.configuration.updateCustomConfigurationProvider(provider.extensionId); // v0 -> v1 upgrade. Update the configurationProvider in c_cpp_properties.json
             }
         });
@@ -522,7 +532,12 @@ class DefaultClient implements Client {
                 }
                 return Promise.reject("");
             };
-            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(config => this.sendCustomBrowseConfiguration(config), () => {});
+            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(
+                async config => {
+                    await this.sendCustomBrowseConfiguration(config);
+                    this.resumeParsing();
+                },
+                () => {});
         });
     }
 
@@ -1114,22 +1129,22 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
     }
 
-    public sendCustomBrowseConfiguration(config: any): void {
+    public sendCustomBrowseConfiguration(config: any): Thenable<void> {
         // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!config || config instanceof Array) {
-            return;
+            return Promise.resolve();
         }
         let sanitized: WorkspaceBrowseConfiguration = <WorkspaceBrowseConfiguration>config;
         if (!util.isArrayOfString(sanitized.browsePath) || !util.isOptionalString(sanitized.compilerPath) ||
             !util.isOptionalString(sanitized.standard) || !util.isOptionalString(sanitized.windowsSdkVersion)) {
             console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
-            return;
+            return Promise.resolve();
         }
 
         let params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized
         };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
+        return this.notifyWhenReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
     }
 
     private clearCustomConfigurations(): void {
@@ -1259,7 +1274,7 @@ class NullClient implements Client {
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
     sendCustomConfigurations(configs: any): void {}
-    sendCustomBrowseConfiguration(config: any): void {}
+    sendCustomBrowseConfiguration(config: any): Thenable<void> { return Promise.resolve(); }
     requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
