@@ -272,25 +272,26 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
         getTargetBuildUrl(updateChannel).then(downloadUrl => {
             if (!downloadUrl) {
-                return resolve();
+                resolve();
+                return;
             }
 
             // Create a temporary file, download the vsix to it, then install the vsix
             tmp.file({postfix: '.vsix'}, (err, vsixPath, fd, cleanupCallback) => {
                 if (err) {
-                    return reject(new Error('Failed to create vsix file'));
+                    reject(new Error('Failed to create vsix file'));
+                    return;
                 }
 
-                const logSuccess: any = () => telemetry.logLanguageServerEvent('installVsix', { 'Success': 'true' });
-                return util.downloadFileToDestination(downloadUrl, vsixPath)
+                util.downloadFileToDestination(downloadUrl, vsixPath)
                     .then(() => installVsix(vsixPath, updateChannel))
-                    .then(() => logSuccess)
-                    .then(() => resolve, () => reject);
+                    .then(() => telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' }))
+                    .then(() => resolve(), () => reject());
             });
         }, error => reject(error));
     });
     return p.catch((error: Error) => {
-        telemetry.logLanguageServerEvent('installVsix', { 'Error': error.message, 'Success': 'false' });
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         return Promise.reject(error);
     });
 }

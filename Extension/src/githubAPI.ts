@@ -121,14 +121,14 @@ function vsixNameForPlatform(info: PlatformInformation): string {
  */
 export async function getTargetBuildUrl(updateChannel: string): Promise<string> {
     return getReleaseJson()
-        .then((builds) => getTargetBuild(builds, updateChannel))
+        .then(builds => getTargetBuild(builds, updateChannel))
         .then(build => {
             if (!build) {
                 return Promise.resolve(undefined);
             }
             return PlatformInformation.GetPlatformInformation()
                 .then(platformInfo => vsixNameForPlatform(platformInfo))
-                .then(vsixName => { return getVsixDownloadUrl(build, vsixName); });
+                .then(vsixName => getVsixDownloadUrl(build, vsixName));
         });
 }
 
