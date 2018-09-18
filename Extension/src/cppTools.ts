@@ -18,7 +18,8 @@ export class CppTools implements CppToolsTestApi {
 
     constructor(version: Version) {
         if (version > Version.latest) {
-            console.warn(`Version ${version} is not supported by this version of cpptools. Using ${Version.latest} instead.`);
+            console.warn(`version ${version} is not supported by this version of cpptools`);
+            console.warn(`  using ${Version.latest} instead`);
             version = Version.latest;
         }
         this.version = version;
