@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
-    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams
+    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range
 } from 'vscode-languageclient';
 import { SourceFileConfigurationItem } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
@@ -114,7 +114,7 @@ const ResetDatabaseNotification: NotificationType<void, void> = new Notification
 const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
 const ResumeParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeParsing');
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
-const TextEditorSelectionChangeNotification: NotificationType<vscode.Position, void> = new NotificationType<vscode.Position, void>('cpptools/textEditorSelectionChange');
+const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
 const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, void> = new NotificationType<FolderSettingsParams, void>('cpptools/didChangeFolderSettings');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
@@ -171,7 +171,7 @@ export interface Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
-    selectionChanged(selection: vscode.Position): void;
+    selectionChanged(selection: Range): void;
     sendCustomConfigurations(configs: any): void;
     resetDatabase(): void;
     deactivate(): void;
@@ -238,6 +238,10 @@ class DefaultClient implements Client {
     }
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
+    }
+
+    private get AdditionalEnvironment(): { [key: string]: string | string[] } {
+        return { workspaceFolderBasename: this.Name };
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -337,7 +341,7 @@ class DefaultClient implements Client {
             },
             workspaceFolder: workspaceFolder,
             initializationOptions: {
-                clang_format_path: util.resolveVariables(settings.clangFormatPath, null),
+                clang_format_path: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
                 clang_format_style: settings.clangFormatStyle,
                 clang_format_fallbackStyle: settings.clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings.clangFormatSortIncludes,
@@ -405,7 +409,7 @@ class DefaultClient implements Client {
             }
             if (changedSettings["clang_format_path"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, null));
+                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
             }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
@@ -974,7 +978,7 @@ class DefaultClient implements Client {
         this.resumeParsing();
     }
 
-    public selectionChanged(selection: vscode.Position): void {
+    public selectionChanged(selection: Range): void {
         this.notifyWhenReady(() => this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection));
     }
 
@@ -1192,7 +1196,7 @@ class NullClient implements Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
     activate(): void {}
-    selectionChanged(selection: vscode.Position): void {}
+    selectionChanged(selection: Range): void {}
     resetDatabase(): void {}
     deactivate(): void {}
     pauseParsing(): void {}

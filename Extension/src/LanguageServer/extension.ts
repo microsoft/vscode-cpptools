@@ -18,6 +18,7 @@ import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
+import { Range } from 'vscode-languageclient';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildUrl } from '../githubAPI';
@@ -193,7 +194,7 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(editor.selection.start);
+        clients.ActiveClient.selectionChanged(Range.create(editor.selection.start, editor.selection.end));
     }
     ui.activeDocumentChanged();
 }
@@ -211,7 +212,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();
     }
-    clients.ActiveClient.selectionChanged(event.selections[0].start);
+    clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
