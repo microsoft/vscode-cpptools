@@ -22,24 +22,24 @@ interface Asset {
  * The object representation of a release in the GitHub API's release JSON.
  * Named Build so as to reduce confusion between a "Release" release and "Insiders" release.
  */
-class Build {
+interface Build {
     name: string;
     assets: Asset[];
+}
 
-    /**
-    * Search each Asset by name to retrieve the download URL for a VSIX package
-    * @param vsixName The name of the VSIX to search for
-    * @return The download URL of the VSIX
-    */
-    getVsixDownloadUrl(vsixName: string): string {
-        const downloadUrl: string = this.assets.find(asset => {
-            return asset.name === vsixName;
-        }).browser_download_url;
-        if (!downloadUrl) {
-            throw new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + this.name);
-        }
-        return downloadUrl;
+/**
+* Search each Asset by name to retrieve the download URL for a VSIX package
+* @param vsixName The name of the VSIX to search for
+* @return The download URL of the VSIX
+*/
+function getVsixDownloadUrl(build: Build, vsixName: string): string {
+    const downloadUrl: string = build.assets.find(asset => {
+        return asset.name === vsixName;
+    }).browser_download_url;
+    if (!downloadUrl) {
+        throw new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + build.name);
     }
+    return downloadUrl;
 }
 
 /**
@@ -128,7 +128,7 @@ export async function getTargetBuildUrl(updateChannel: string): Promise<string> 
             }
             return PlatformInformation.GetPlatformInformation()
                 .then(platformInfo => vsixNameForPlatform(platformInfo))
-                .then(vsixName => build.getVsixDownloadUrl(vsixName));
+                .then(vsixName => { return getVsixDownloadUrl(build, vsixName); });
         });
 }
 
@@ -189,10 +189,9 @@ async function getReleaseJson(): Promise<Build[]> {
             const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
             const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
             return util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
-                .catch(() => rejectDownload)
-                .then(() => util.readFileText(releaseJsonPath), () => rejectRead)
-                .then(fileContent => JSON.parse(fileContent), () => rejectParse)
-                .then(parsedJson => typeCheck(parsedJson));
+                .then(() => util.readFileText(releaseJsonPath), () => { return rejectDownload(); })
+                .then(fileContent => JSON.parse(fileContent), () => { return rejectRead(); })
+                .then(releaseJson => typeCheck(releaseJson), () => { return rejectParse(); });
         });
     });
 }
