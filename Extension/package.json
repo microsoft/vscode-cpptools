@@ -63,7 +63,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "C/C++ Configuration",
+      "title": "C/C++",
       "properties": {
         "C_Cpp.clang_format_path": {
           "type": [

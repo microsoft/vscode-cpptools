@@ -1,6 +1,6 @@
 # Windows Subsystem for Linux
 
-> **Note:** If you are on **build 17110 of Windows or higher**, you must use version 0.17.0 or higher for IntelliSense to work. The Windows team turned on case-sensitive folders for the WSL environment and the C/C++ extension doesn't support case-sensitive folders until version 0.17.0.
+> **Note:** If you are on **build 17110 of Windows or higher**, you must use extension version 0.17.0 or higher for IntelliSense to work. The Windows team turned on case-sensitive folders for the WSL environment and the C/C++ extension doesn't support case-sensitive folders until version 0.17.0.
 
 To use the Windows Subsystem for Linux with this extension you need to add a configuration to your **c_cpp_properties.json** file which adds the necessary header paths from within the WSL filesystem to the `includePath`.
 
@@ -13,22 +13,12 @@ In **c_cpp_properties.json** you can directly address your WSL compiler and incl
 ```json
 {
     "name": "WSL",
-    "intelliSenseMode": "clang-x64",
+    "intelliSenseMode": "gcc-x64",
     "compilerPath": "/usr/bin/gcc",
     "includePath": [
-        "${workspaceFolder}",
-        "/mnt/c/libraries/lib1/include",
-        "C:/libraries/lib2/include"
+        "${workspaceFolder}/**"
     ],
     "defines": [],
-    "browse": {
-        "path": [
-            "${workspaceFolder}",
-            "/mnt/c/libraries"
-        ],
-        "limitSymbolsToIncludedHeaders": true,
-        "databaseFilename": ""
-    },
     "cStandard": "c11",
     "cppStandard": "c++17"
 }
