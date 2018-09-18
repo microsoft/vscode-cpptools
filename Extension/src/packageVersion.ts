@@ -22,10 +22,10 @@ export class PackageVersion {
         this.patch = parseInt(tokens[2]);
 
         if (tokens.length > 3) {
-            let p: number = tokens[3].search(new RegExp(/(\d)/));
-            if (p !== -1) {
-                this.suffix = tokens[3].substring(0, p);
-                this.suffixVersion = parseInt(tokens[3].substring(p));
+            let numOffset: number = tokens[3].search(new RegExp(/(\d)/));
+            if (numOffset !== -1) {
+                this.suffix = tokens[3].substring(0, numOffset);
+                this.suffixVersion = parseInt(tokens[3].substring(numOffset));
             }
         }
 
