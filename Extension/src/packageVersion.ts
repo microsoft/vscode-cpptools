@@ -20,8 +20,14 @@ export class PackageVersion {
         this.major = parseInt(tokens[0]);
         this.minor = parseInt(tokens[1]);
         this.patch = parseInt(tokens[2]);
-        this.suffix = tokens[3];
-        this.suffixVersion = tokens.length >= 5 ? parseInt(tokens[4]) : 0;
+
+        if (tokens.length > 3) {
+            let p: number = tokens[3].search(new RegExp(/(\d)/));
+            if (p !== -1) {
+                this.suffix = tokens[3].substring(0, p);
+                this.suffixVersion = parseInt(tokens[3].substring(p));
+            }
+        }
 
         if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
             throw new Error('Failed to parse version string: ' + version);
