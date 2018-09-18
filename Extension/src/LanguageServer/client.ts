@@ -1181,7 +1181,9 @@ class DefaultClient implements Client {
                     this.configuration.updateCustomConfigurationProvider(extensionId)
                         .then(() => {
                             if (extensionId) {
-                                this.updateCustomConfigurations(getCustomConfigProviders().get(extensionId));
+                                let provider: CustomConfigurationProvider1 = getCustomConfigProviders().get(extensionId);
+                                this.updateCustomConfigurations(provider);
+                                this.updateCustomBrowseConfiguration(provider);
                                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
                             } else {
                                 this.clearCustomConfigurations();
