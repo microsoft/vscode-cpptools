@@ -47,18 +47,10 @@ export class PackageVersion {
             return diff > 0;
         } else if (diff = this.patch - other.patch) {
             return diff > 0;
+        } else if (this.suffix) {
+            return (other.suffix && this.suffixVersion > other.suffixVersion);
         } else {
-            if (this.suffix) {
-                if (other.suffix) {
-                    return this.suffixVersion > other.suffixVersion;
-                } else {
-                    return false;
-                }
-            } else if (other.suffix) {
-                return true;
-            } else {
-                return false;
-            }
+            return other.suffix ? true : false;
         }
     }
 }
