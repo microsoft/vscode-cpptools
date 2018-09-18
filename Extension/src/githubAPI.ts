@@ -10,15 +10,27 @@ import * as tmp from 'tmp';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
 
+/**
+ * The object representation of a Build Asset. Each Asset corresponds to information about a release file on GitHub.
+ */
 interface Asset {
     name: string;
     browser_download_url: string;
 }
 
+/**
+ * The object representation of a release in the GitHub API's release JSON.
+ * Named Build so as to reduce confusion between a "Release" release and "Insiders" release.
+ */
 class Build {
     name: string;
     assets: Asset[];
 
+    /**
+    * Search each Asset by name to retrieve the download URL for a VSIX package
+    * @param vsixName The name of the VSIX to search for
+    * @return The download URL of the VSIX
+    */
     getVsixDownloadUrl(vsixName: string): string {
         const downloadUrl: string = this.assets.find(asset => {
             return asset.name === vsixName;
@@ -30,20 +42,40 @@ class Build {
     }
 }
 
+/**
+ * Determine whether an object is of type Asset.
+ * @param input Incoming object.
+ * @return Whether input is of type Asset.
+ */
 function isAsset(input: any): input is Asset {
     return input && input.name && typeof(input.name) === "string" &&
         input.browser_download_url && typeof(input.browser_download_url) === "string";
 }
 
-// Note that earlier Builds do not have 4 or greater assets (Mac, Win, Linux 32/64). Only call this on more recent Builds
+/**
+ * Determine whether an object is of type Build. Note that earlier releases of the extension
+ * do not have 4 or greater Assets (Mac, Win, Linux 32/64). Only call this on more recent Builds.
+ * @param input Incoming object.
+ * @return Whether input is of type Build.
+ */
 function isBuild(input: any): input is Build {
     return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
 }
 
+/**
+ * Determine whether an object is of type Asset[].
+ * @param input Incoming object.
+ * @return Whether input is of type Asset[].
+ */
 function isArrayOfAssets(input: any): input is Asset[] {
     return input instanceof Array && input.every(item => isAsset(item));
 }
 
+/**
+ * Determine whether an object is of type Build[].
+ * @param input Incoming object.
+ * @return Whether input is of type Build[].
+ */
 function isArrayOfBuilds(input: any): input is Build[] {
     if (!input || !(input instanceof Array) || input.length === 0) {
         return false;
@@ -57,6 +89,11 @@ function isArrayOfBuilds(input: any): input is Build[] {
     return true;
 }
 
+/**
+ * Match the user's platform information to the VSIX name relevant to them.
+ * @param info Information about the user's operating system.
+ * @return VSIX filename for the extension's releases matched to the user's platform.
+ */
 function vsixNameForPlatform(info: PlatformInformation): string {
     const vsixName: string = function(platformInfo): string {
         switch (platformInfo.platform) {
@@ -76,33 +113,41 @@ function vsixNameForPlatform(info: PlatformInformation): string {
     return vsixName;
 }
 
+/**
+ * Use the GitHub API to retrieve the download URL of the extension version the user should update to, if any.
+ * @param updateChannel The user's updateChannel setting.
+ * @return Download URL for the extension VSIX package that the user should install. If the user
+ * does not need to update, resolves to undefined.
+ */
 export async function getTargetBuildUrl(updateChannel: string): Promise<string> {
-    const boundGetTargetBuild: (builds: Build[]) => Build = getTargetBuild.bind(undefined, updateChannel);
-
     return getReleaseJson()
-        .then(boundGetTargetBuild)
+        .then((builds) => getTargetBuild(builds, updateChannel))
         .then(build => {
             if (!build) {
                 return Promise.resolve(undefined);
             }
-            const boundGetDownloadUrl: any = Build.prototype.getVsixDownloadUrl.bind(build);
             return PlatformInformation.GetPlatformInformation()
-                .then(vsixNameForPlatform)
-                .then(boundGetDownloadUrl);
+                .then(platformInfo => vsixNameForPlatform(platformInfo))
+                .then(vsixName => build.getVsixDownloadUrl(vsixName));
         });
 }
 
-// Determines whether there exists a build that should be installed; returns the build if there is
-function getTargetBuild(updateChannel: string, builds: Build[]): Build {
+/**
+ * Determines whether there exists a Build in the given Build[] that should be installed.
+ * @param builds The GitHub release list parsed as an array of Builds.
+ * @param updateChannel The user's updateChannel setting.
+ * @return The Build if the user should update to it, otherwise undefined.
+ */
+function getTargetBuild(builds: Build[], updateChannel: string): Build {
     // Get predicates to determine the build to install, if any
-    let needsUpdate: (installed: PackageVersion, other: PackageVersion) => boolean;
+    let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdate = (installed: PackageVersion, other: PackageVersion) => { return other.isGreaterThan(installed); };
-        useBuild = function(build: Build): boolean { return true; };
+        needsUpdate = (installed: PackageVersion, target: PackageVersion) => { return target.isGreaterThan(installed); };
+        useBuild = (build: Build): boolean => { return true; };
     } else if (updateChannel === 'Default') {
-        needsUpdate = function(installed: PackageVersion, other: PackageVersion): boolean { return installed.isGreaterThan(other); };
-        useBuild = function(build: Build): boolean { return build.name.indexOf('-') === -1; };
+        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
+        useBuild = (build: Build): boolean => { return build.name.indexOf('-') === -1; };
     } else {
         throw new Error('Incorrect updateChannel setting provided');
     }
@@ -119,33 +164,35 @@ function getTargetBuild(updateChannel: string, builds: Build[]): Build {
     return needsUpdate(userVersion, targetVersion) ? targetBuild : undefined;
 }
 
+/**
+ * Download and parse the release list JSON from the GitHub API into a Build[].
+ * @return Information about the released builds of the C/C++ extension.
+ */
 async function getReleaseJson(): Promise<Build[]> {
     return new Promise<Build[]>((resolve, reject) => {
-        // Create temp file to hold json
+        // Create temp file to hold JSON
         tmp.file((err, releaseJsonPath, fd, cleanupCallback) => {
             if (err) {
                 return reject(new Error('Failed to create release json file'));
             }
 
-            const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
-            const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-            const downloadReleaseJson: any = util.downloadFileToDestination.bind(undefined, releaseUrl, releaseJsonPath, header);
-            const rejectDownload: any = () => { return reject(new Error('Failed to download release json')); };
+            // Helper functions to handle promise rejection
+            const rejectDownload: any = () => { return reject(new Error('Failed to download release JSON')); };
+            const rejectRead: any = () => { return reject(new Error('Failed to read release JSON file')); };
+            const rejectParse: any = () => { return reject(new Error('Failed to parse release JSON')); };
 
-            const readJson: any = util.readFileText.bind(undefined, releaseJsonPath);
-            const rejectRead: any = () => { return reject(new Error('Failed to read release json file')); };
-
-            const rejectParse: any = () => { return reject(new Error('Failed to parse release json')); };
-
+            // Helper function to verify result of download + parse
             const typeCheck: any = releaseJson => {
-                return isArrayOfBuilds(releaseJson) ? resolve(releaseJson) : reject('Release json is not Build[]');
+                return isArrayOfBuilds(releaseJson) ? resolve(releaseJson) : reject('Release JSON is not Build[]');
             };
 
-            return downloadReleaseJson()
-                .catch(rejectDownload)
-                .then(readJson, rejectRead)
-                .then(JSON.parse, rejectParse)
-                .then(typeCheck);
+            const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
+            const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
+            return util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
+                .catch(() => rejectDownload)
+                .then(() => util.readFileText(releaseJsonPath), () => rejectRead)
+                .then(fileContent => JSON.parse(fileContent), () => rejectParse)
+                .then(parsedJson => typeCheck(parsedJson));
         });
     });
 }

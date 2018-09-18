@@ -224,6 +224,10 @@ function onInterval(): void {
     clients.ActiveClient.onInterval();
 }
 
+/**
+ * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
+ * @param updateChannel The user's updateChannel setting.
+ */
 async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
@@ -234,7 +238,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 return '"' + path.join(vsCodeProcessPath, 'bin', 'code.cmd') + '"';
             } else {
                 const vsCodeProcessPath: string = path.basename(process.execPath);
-                const stdout: Buffer = execSync("which " + vsCodeProcessPath);
+                const stdout: Buffer = execSync('which ' + vsCodeProcessPath);
                 return stdout.toString().trim();
             }
         }(platformInfo);
@@ -259,9 +263,14 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     });
 }
 
+/**
+ * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
+ * The update can be an upgrade or downgrade depending on the the updateChannel setting.
+ * @param updateChannel The user's updateChannel setting.
+ */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
-        getTargetBuildUrl(updateChannel).then((downloadUrl) => {
+        getTargetBuildUrl(updateChannel).then(downloadUrl => {
             if (!downloadUrl) {
                 return resolve();
             }
@@ -271,14 +280,12 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                 if (err) {
                     return reject(new Error('Failed to create vsix file'));
                 }
-    
-                const downloadVsix: any = util.downloadFileToDestination.bind(undefined, downloadUrl, vsixPath);
-                const boundInstallVsix: any = installVsix.bind(undefined, vsixPath, updateChannel);
-                const logSuccess: any = () => { telemetry.logLanguageServerEvent('installVsix', { 'Success': 'true' } ); };
-                return downloadVsix()
-                    .then(boundInstallVsix)
-                    .then(logSuccess)
-                    .then(resolve, reject);
+
+                const logSuccess: any = () => telemetry.logLanguageServerEvent('installVsix', { 'Success': 'true' });
+                return util.downloadFileToDestination(downloadUrl, vsixPath)
+                    .then(() => installVsix(vsixPath, updateChannel))
+                    .then(() => logSuccess)
+                    .then(() => resolve, () => reject);
             });
         });
     });
