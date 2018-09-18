@@ -258,7 +258,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             clearInterval(insiderUpdateTimer);
             return Promise.resolve();
         } catch (error) {
-            return Promise.reject(new Error('Failed to install vsix'));
+            return Promise.reject(new Error('Failed to install VSIX'));
         }
     });
 }
@@ -287,7 +287,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                     .then(() => logSuccess)
                     .then(() => resolve, () => reject);
             });
-        });
+        }, error => reject(error));
     });
     return p.catch((error: Error) => {
         telemetry.logLanguageServerEvent('installVsix', { 'Error': error.message, 'Success': 'false' });
