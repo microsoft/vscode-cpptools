@@ -7,6 +7,7 @@
 import { CustomConfigurationProvider, Version } from 'vscode-cpptools';
 import { CppToolsTestApi, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
 import { CustomConfigurationProvider1, getCustomConfigProviders, CustomConfigurationProviderCollection } from './LanguageServer/customProviders';
+import { getOutputChannel } from './logger';
 import * as LanguageServer from './LanguageServer/extension';
 import * as test from './testHook';
 
@@ -51,6 +52,7 @@ export class CppTools implements CppToolsTestApi {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.add(provider, this.version)) {
             let added: CustomConfigurationProvider1 = providers.get(provider);
+            getOutputChannel().appendLine(`Custom configuration provider '${added.name}' registered`);
             this.providers.push(added);
             LanguageServer.getClients().forEach(client => client.onRegisterCustomConfigurationProvider(added));
             this.addNotifyReadyTimer(added);
