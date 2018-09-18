@@ -71,8 +71,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
         }
     }(info);
     if (!vsixName) {
-        const distro: string = info.distribution ? (':' + info.distribution.name + '-' + info.distribution.version) : '';
-        throw new Error('Failed to match VSIX name for: ' + info.platform + distro + ':' + info.architecture);
+        throw new Error('Failed to match VSIX name for: ' + info.platform + ':' + info.architecture);
     }
     return vsixName;
 }
