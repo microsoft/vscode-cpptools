@@ -171,27 +171,33 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
 async function getReleaseJson(): Promise<Build[]> {
     return new Promise<Build[]>((resolve, reject) => {
         // Create temp file to hold JSON
-        tmp.file((err, releaseJsonPath, fd, cleanupCallback) => {
+        tmp.file(async (err, releaseJsonPath, fd, cleanupCallback) => {
             if (err) {
                 return reject(new Error('Failed to create release json file'));
             }
 
             // Helper functions to handle promise rejection
-            const rejectDownload: any = () => { return reject(new Error('Failed to download release JSON')); };
-            const rejectRead: any = () => { return reject(new Error('Failed to read release JSON file')); };
-            const rejectParse: any = () => { return reject(new Error('Failed to parse release JSON')); };
+            const rejectDownload: () => Error = () => { return new Error('Failed to download release JSON'); };
+            const rejectRead: () => Error = () => { return new Error('Failed to read release JSON file'); };
+            const rejectParse: () => Error = () => { return new Error('Failed to parse release JSON'); };
 
-            // Helper function to verify result of download + parse
-            const typeCheck: any = releaseJson => {
-                return isArrayOfBuilds(releaseJson) ? resolve(releaseJson) : reject('Release JSON is not Build[]');
-            };
+            try {
+                // Download release JSON
+                const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
+                const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
+                await util.downloadFileToDestination(releaseUrl, releaseJsonPath, header).catch(() => { throw rejectDownload(); });
 
-            const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
-            const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-            return util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
-                .then(() => util.readFileText(releaseJsonPath), () => { return rejectDownload(); })
-                .then(fileContent => JSON.parse(fileContent), () => { return rejectRead(); })
-                .then(releaseJson => typeCheck(releaseJson), () => { return rejectParse(); });
+                // Read the release JSON file
+                const fileContent: string = await util.readFileText(releaseJsonPath).catch(() => { throw rejectRead(); });
+
+                // Parse the file
+                const releaseJson: any = await JSON.parse(fileContent).catch(() => { throw rejectParse(); });
+
+                // Type check
+                return isArrayOfBuilds(releaseJson) ? resolve(releaseJson) : reject(releaseJson);
+            } catch (error) {
+                return reject(error);
+            }
         });
     });
 }
