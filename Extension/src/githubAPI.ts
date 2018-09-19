@@ -176,22 +176,20 @@ async function getReleaseJson(): Promise<Build[]> {
                 return reject(new Error('Failed to create release json file'));
             }
 
-            // Helper functions to handle promise rejection
-            const rejectDownload: () => Error = () => { return new Error('Failed to download release JSON'); };
-            const rejectRead: () => Error = () => { return new Error('Failed to read release JSON file'); };
-            const rejectParse: () => Error = () => { return new Error('Failed to parse release JSON'); };
-
             try {
                 // Download release JSON
                 const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
                 const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-                await util.downloadFileToDestination(releaseUrl, releaseJsonPath, header).catch(() => { throw rejectDownload(); });
+                await util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
+                    .catch(() => { throw new Error('Failed to download release JSON'); });
 
                 // Read the release JSON file
-                const fileContent: string = await util.readFileText(releaseJsonPath).catch(() => { throw rejectRead(); });
+                const fileContent: string = await util.readFileText(releaseJsonPath)
+                    .catch(() => { throw new Error('Failed to read release JSON file'); });
 
                 // Parse the file
-                const releaseJson: any = await JSON.parse(fileContent).catch(() => { throw rejectParse(); });
+                const releaseJson: any = await JSON.parse(fileContent)
+                    .catch(() => { throw new Error('Failed to parse release JSON'); });
 
                 // Type check
                 return isArrayOfBuilds(releaseJson) ? resolve(releaseJson) : reject(releaseJson);
