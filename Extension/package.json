@@ -456,6 +456,16 @@
           "default": null,
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
           "scope": "resource"
+        },
+        "C_Cpp.updateChannel": {
+          "type": "string",
+          "enum": [
+            "Default",
+            "Insiders"
+          ],
+          "default": "Default",
+          "description": "Set to “Insiders” to receive the latest Insiders builds, which include upcoming features and bug fixes.",
+          "scope": "resource"
         }
       }
     },

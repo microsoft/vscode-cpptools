@@ -17,7 +17,11 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
+import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
+import { execSync } from 'child_process';
+import * as tmp from 'tmp';
+import { getTargetBuildUrl } from '../githubAPI';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -26,9 +30,11 @@ let ui: UI;
 let disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
+let insiderUpdateTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
+const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 
 /**
  * activate: set up the extension for language services
@@ -126,6 +132,12 @@ function realActivation(): void {
 
     reportMacCrashes();
 
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    if (settings.updateChannel === 'Insiders') {
+        insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+        checkAndApplyUpdate(settings.updateChannel);
+    }
+
     intervalTimer = setInterval(onInterval, 2500);
 }
 
@@ -142,7 +154,19 @@ export function updateLanguageConfigurations(): void {
  *********************************************/
 
 function onDidChangeSettings(): void {
+    const changedActiveClientSettings: { [key: string] : string } = clients.ActiveClient.onDidChangeSettings();
     clients.forEach(client => client.onDidChangeSettings());
+
+    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
+    if (newUpdateChannel) {
+        if (newUpdateChannel === 'Default') {
+            clearInterval(insiderUpdateTimer);
+        } else if (newUpdateChannel === 'Insiders') {
+            insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+        }
+
+        checkAndApplyUpdate(newUpdateChannel);
+    }
 }
 
 let saveMessageShown: boolean = false;
@@ -198,6 +222,78 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
 function onInterval(): void {
     // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
     clients.ActiveClient.onInterval();
+}
+
+/**
+ * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
+ * @param updateChannel The user's updateChannel setting.
+ */
+async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+    // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
+    // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
+    return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
+        const vsCodeScriptPath: string = function(platformInfo): string {
+            if (platformInfo.platform === 'win32') {
+                const vsCodeProcessPath: string = path.dirname(process.execPath);
+                return '"' + path.join(vsCodeProcessPath, 'bin', 'code.cmd') + '"';
+            } else {
+                const vsCodeProcessPath: string = path.basename(process.execPath);
+                const stdout: Buffer = execSync('which ' + vsCodeProcessPath);
+                return stdout.toString().trim();
+            }
+        }(platformInfo);
+        if (!vsCodeScriptPath) {
+            return Promise.reject(new Error('Failed to find VS Code script'));
+        }
+
+        // Install the VSIX
+        const installCommand: string = vsCodeScriptPath + ' --install-extension ' + vsixLocation;
+        try {
+            if (updateChannel === 'Default') {
+                // Uninstall the current version, as the version to install is a previous version
+                const uninstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
+                execSync(uninstallCommand);
+            }
+            execSync(installCommand);
+            clearInterval(insiderUpdateTimer);
+            return Promise.resolve();
+        } catch (error) {
+            return Promise.reject(new Error('Failed to install VSIX'));
+        }
+    });
+}
+
+/**
+ * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
+ * The update can be an upgrade or downgrade depending on the the updateChannel setting.
+ * @param updateChannel The user's updateChannel setting.
+ */
+async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
+    const p: Promise<void> = new Promise<void>((resolve, reject) => {
+        getTargetBuildUrl(updateChannel).then(downloadUrl => {
+            if (!downloadUrl) {
+                resolve();
+                return;
+            }
+
+            // Create a temporary file, download the vsix to it, then install the vsix
+            tmp.file({postfix: '.vsix'}, (err, vsixPath, fd, cleanupCallback) => {
+                if (err) {
+                    reject(new Error('Failed to create vsix file'));
+                    return;
+                }
+
+                util.downloadFileToDestination(downloadUrl, vsixPath)
+                    .then(() => installVsix(vsixPath, updateChannel))
+                    .then(() => telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' }))
+                    .then(() => resolve(), () => reject());
+            });
+        }, error => reject(error));
+    });
+    return p.catch((error: Error) => {
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+        return Promise.reject(error);
+    });
 }
 
 /*********************************************
@@ -516,6 +612,7 @@ export function deactivate(): Thenable<void> {
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
+    clearInterval(insiderUpdateTimer);
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
     ui.dispose();

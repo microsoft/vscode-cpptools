@@ -165,7 +165,7 @@ export interface Client {
     RootUri: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    onDidChangeSettings(): void;
+    onDidChangeSettings(): { [key: string] : string };
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
@@ -413,8 +413,8 @@ class DefaultClient implements Client {
         return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
     }
 
-    public onDidChangeSettings(): void {
-        let changedSettings: { [key: string] : string} = this.settingsTracker.getChangedSettings();
+    public onDidChangeSettings(): { [key: string] : string } {
+        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
 
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
@@ -427,6 +427,8 @@ class DefaultClient implements Client {
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
         }
+
+        return changedSettings;
     }
 
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
@@ -1266,7 +1268,7 @@ class NullClient implements Client {
     RootUri: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    onDidChangeSettings(): void {}
+    onDidChangeSettings(): { [key: string] : string } { return {}; }
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
