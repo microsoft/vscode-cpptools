@@ -322,6 +322,12 @@ async function finalizeExtensionActivation(): Promise<void> {
         if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
             return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
         }
+    } else {
+        let packageJson: any = util.getRawPackageJson();
+        if (packageJson['C_Cpp.updateChannel'] === 'Default') {
+            packageJson['C_Cpp.updateChannel'] = 'Insiders';
+            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+        }
     }
 }
 

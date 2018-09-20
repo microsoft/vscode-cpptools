@@ -456,6 +456,16 @@
           "default": null,
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
           "scope": "resource"
+        },
+        "C_Cpp.updateChannel": {
+          "type": "string",
+          "enum": [
+            "Default",
+            "Insiders"
+          ],
+          "default": "Default",
+          "description": "Set to “Insiders” to receive the latest Insiders builds, which include upcoming features and bug fixes.",
+          "scope": "resource"
         }
       }
     },
@@ -1398,7 +1408,7 @@
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
-    "vscode-cpptools": "^1.2.2",
+    "vscode-cpptools": "2.1.1",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.0.11",

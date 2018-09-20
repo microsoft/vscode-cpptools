@@ -14,6 +14,8 @@ import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
+import * as https from 'https';
+import { ClientRequest, OutgoingHttpHeaders } from 'http';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -169,6 +171,26 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
+export function isUri(input: any): input is vscode.Uri {
+    return input && input instanceof vscode.Uri;
+}
+
+export function isString(input: any): input is string {
+    return input && typeof(input) === "string";
+}
+
+export function isOptionalString(input: any): input is string|undefined {
+    return input === undefined || typeof(input) === "string";
+}
+
+export function isArrayOfString(input: any): input is string[] {
+    return input && (input instanceof Array) && input.every(item => typeof(item) === "string");
+}
+
+export function isOptionalArrayOfString(input: any): input is string[]|undefined {
+    return input === undefined || ((input instanceof Array) && input.every(item => typeof(item) === "string"));
+}
+
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
@@ -193,9 +215,9 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
             switch (varType) {
                 case "env": {
                     let v: string | string[] = additionalEnvironment[name];
-                    if (typeof v === "string") {
+                    if (isString(v)) {
                         newValue = v;
-                    } else if (input === match && v instanceof Array) {
+                    } else if (input === match && isArrayOfString(v)) {
                         newValue = v.join(";");
                     }
                     if (!newValue) {
@@ -555,5 +577,42 @@ export function promptForReloadWindowDueToSettingsChange(): void {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
+    });
+}
+
+export function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        let parsedUrl: url.Url = url.parse(urlStr);
+        let request: ClientRequest = https.request({
+            host: parsedUrl.host,
+            path: parsedUrl.path,
+            agent: getHttpsProxyAgent(),
+            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
+            headers: headers
+        }, (response) => {
+            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
+                // Download from new location
+                let redirectUrl: string;
+                if (typeof response.headers.location === 'string') {
+                    redirectUrl = response.headers.location;
+                } else {
+                    redirectUrl = response.headers.location[0];
+                }
+                return resolve(downloadFileToDestination(redirectUrl, destinationPath, headers));
+            }
+            if (response.statusCode !== 200) { // If request is not successful
+                return reject();
+            }
+            // Write file using downloaded data
+            let downloadedBytes = 0; // tslint:disable-line
+            let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
+            response.on('data', (data) => { downloadedBytes += data.length; });
+            response.on('end', () => { createdFile.close(); });
+            createdFile.on('close', () => { resolve(); });
+            response.on('error', (error) => { reject(); });
+            response.pipe(createdFile, { end: false });
+        });
+        request.on('error', (error) => { reject(); });
+        request.end();
     });
 }
