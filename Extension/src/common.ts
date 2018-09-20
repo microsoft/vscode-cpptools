@@ -607,10 +607,9 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
             let downloadedBytes = 0; // tslint:disable-line
             let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
             response.on('data', (data) => { downloadedBytes += data.length; });
-            response.on('end', () => { createdFile.close(); });
-            createdFile.on('close', () => { resolve(); });
+            createdFile.on('finish', () => { resolve(); });
             response.on('error', (error) => { reject(); });
-            response.pipe(createdFile, { end: false });
+            response.pipe(createdFile);
         });
         request.on('error', (error) => { reject(); });
         request.end();
