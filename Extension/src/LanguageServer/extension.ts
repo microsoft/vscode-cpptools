@@ -244,6 +244,9 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 }
                 const vsCodeExeDir: string = path.dirname(process.execPath);
                 return '"' + path.join(vsCodeExeDir, 'bin', cmdFile) + '"';
+            } else if (platformInfo.platform === 'darwin') {
+                return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
+                    'Resources', 'app', 'bin', 'code') + '"';
             } else {
                 const stdout: Buffer = execSync('which ' + vsCodeBinName);
                 return stdout.toString().trim();
