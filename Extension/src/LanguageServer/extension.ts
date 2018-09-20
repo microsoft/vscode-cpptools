@@ -233,8 +233,8 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
         const vsCodeScriptPath: string = function(platformInfo): string {
-            const vsCodeBinName: string = path.basename(process.execPath);
             if (platformInfo.platform === 'win32') {
+                const vsCodeBinName: string = path.basename(process.execPath);
                 // Windows VS Code Insiders breaks VS Code naming conventions
                 let cmdFile: string;
                 if (vsCodeBinName === 'Code - Insiders.exe') {
@@ -248,6 +248,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
                     'Resources', 'app', 'bin', 'code') + '"';
             } else {
+                const vsCodeBinName: string = path.basename(process.execPath);
                 const stdout: Buffer = execSync('which ' + vsCodeBinName);
                 return stdout.toString().trim();
             }
