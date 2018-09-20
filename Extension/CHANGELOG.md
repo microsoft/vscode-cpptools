@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.19.0: September 26, 2018
+* Add support for v2 of the configuration provider API. [#2237](https://github.com/Microsoft/vscode-cpptools/issues/2237)
+* Add `C_Cpp.updateChannel` setting for easier access to Insider builds of the extension. [#1526](https://github.com/Microsoft/vscode-cpptools/issues/1526)
+* Fix bug with variable resolution. [#2532](https://github.com/Microsoft/vscode-cpptools/issues/2532)
+
 ## Version 0.18.1: August 17, 2018
 * Fix 0.18.0 regression causing non-MinGW compilers to use `-fms-extensions` on Windows. [#2424](https://github.com/Microsoft/vscode-cpptools/issues/2424), [#2425](https://github.com/Microsoft/vscode-cpptools/issues/2425)
 
