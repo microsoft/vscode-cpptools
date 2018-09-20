@@ -171,6 +171,26 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
+export function isUri(input: any): input is vscode.Uri {
+    return input && input instanceof vscode.Uri;
+}
+
+export function isString(input: any): input is string {
+    return input && typeof(input) === "string";
+}
+
+export function isOptionalString(input: any): input is string|undefined {
+    return input === undefined || typeof(input) === "string";
+}
+
+export function isArrayOfString(input: any): input is string[] {
+    return input && (input instanceof Array) && input.every(item => typeof(item) === "string");
+}
+
+export function isOptionalArrayOfString(input: any): input is string[]|undefined {
+    return input === undefined || ((input instanceof Array) && input.every(item => typeof(item) === "string"));
+}
+
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
@@ -195,9 +215,9 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
             switch (varType) {
                 case "env": {
                     let v: string | string[] = additionalEnvironment[name];
-                    if (typeof v === "string") {
+                    if (isString(v)) {
                         newValue = v;
-                    } else if (input === match && v instanceof Array) {
+                    } else if (input === match && isArrayOfString(v)) {
                         newValue = v.join(";");
                     }
                     if (!newValue) {
