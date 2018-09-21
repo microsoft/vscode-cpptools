@@ -258,22 +258,24 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         }
 
         // Install the VSIX
-        const installCommand: string = vsCodeScriptPath + ' --install-extension ' + vsixLocation;
-        try {
-            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
-            // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade
-            // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
-            let sentOverride: boolean = false;
-            process.stdout.on('data', (data: Buffer) => {
-                if (!sentOverride) {
-                    process.stdin.write('0\n');
-                    sentOverride = true;
-                }
-            });
-            return Promise.resolve();
-        } catch (error) {
-            return Promise.reject(new Error('Failed to install VSIX'));
-        }
+        return new Promise<void>((resolve, reject) => {
+            try {
+                let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+                // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade
+                // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
+                let sentOverride: boolean = false;
+                process.stdout.on('data', (data: Buffer) => {
+                    if (!sentOverride) {
+                        process.stdin.write('0\n');
+                        sentOverride = true;
+                        resolve();
+                        return;
+                    }
+                });
+            } catch (error) {
+                return reject(new Error('Failed to install VSIX'));
+            }
+        });
     });
 }
 
