@@ -114,21 +114,34 @@ function vsixNameForPlatform(info: PlatformInformation): string {
 }
 
 /**
+ * Interface for return value of getTargetBuildInfo containing the download URL and version of a Build.
+ */
+export interface BuildInfo {
+    downloadUrl: string;
+    name: string;
+}
+
+/**
  * Use the GitHub API to retrieve the download URL of the extension version the user should update to, if any.
  * @param updateChannel The user's updateChannel setting.
  * @return Download URL for the extension VSIX package that the user should install. If the user
  * does not need to update, resolves to undefined.
  */
-export async function getTargetBuildUrl(updateChannel: string): Promise<string> {
+export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo> {
     return getReleaseJson()
         .then(builds => getTargetBuild(builds, updateChannel))
-        .then(build => {
+        .then(async build => {
             if (!build) {
                 return Promise.resolve(undefined);
             }
-            return PlatformInformation.GetPlatformInformation()
-                .then(platformInfo => vsixNameForPlatform(platformInfo))
-                .then(vsixName => getVsixDownloadUrl(build, vsixName));
+            try {
+                const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+                const vsixName: string = vsixNameForPlatform(platformInfo);
+                const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
+                return { downloadUrl: downloadUrl, name: build.name };
+            } catch (error) {
+                return Promise.reject(error);
+            }
         });
 }
 
@@ -173,30 +186,37 @@ async function getReleaseJson(): Promise<Build[]> {
         // Create temp file to hold JSON
         tmp.file(async (err, releaseJsonPath, fd, cleanupCallback) => {
             if (err) {
-                return reject(new Error('Failed to create release json file'));
+                reject(new Error('Failed to create release json file'));
+                return;
             }
-
-            // Helper functions to handle promise rejection
-            const rejectDownload: () => Error = () => { return new Error('Failed to download release JSON'); };
-            const rejectRead: () => Error = () => { return new Error('Failed to read release JSON file'); };
-            const rejectParse: () => Error = () => { return new Error('Failed to parse release JSON'); };
 
             try {
                 // Download release JSON
                 const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
                 const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-                await util.downloadFileToDestination(releaseUrl, releaseJsonPath, header).catch(() => { throw rejectDownload(); });
+                await util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
+                    .catch(() => { throw new Error('Failed to download release JSON'); });
 
                 // Read the release JSON file
-                const fileContent: string = await util.readFileText(releaseJsonPath).catch(() => { throw rejectRead(); });
+                const fileContent: string = await util.readFileText(releaseJsonPath)
+                    .catch(() => { throw new Error('Failed to read release JSON file'); } );
 
                 // Parse the file
-                const releaseJson: any = await JSON.parse(fileContent).catch(() => { throw rejectParse(); });
+                let releaseJson: any;
+                try {
+                    releaseJson = JSON.parse(fileContent);
+                } catch (error) {
+                    throw new Error('Failed to parse release JSON');
+                }
 
                 // Type check
-                return isArrayOfBuilds(releaseJson) ? resolve(releaseJson) : reject(releaseJson);
+                if (isArrayOfBuilds(releaseJson)) {
+                    resolve(releaseJson);
+                } else {
+                    reject(releaseJson);
+                }
             } catch (error) {
-                return reject(error);
+                reject(error);
             }
         });
     });
