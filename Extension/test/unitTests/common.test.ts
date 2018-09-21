@@ -36,6 +36,14 @@ suite("Common Utility validation", () => {
                 .shouldResolveTo("foo;bar");
         });
 
+        test("solo env input with empty array env value", () => {
+            resolveVariablesWithInput("${empty}")
+                .withEnvironment({
+                    "empty": []
+                })
+                .shouldResolveTo("");
+        });
+
         test("mixed raw and env input resulting in array", () => {
             const input: string = "baz${test}";
             resolveVariablesWithInput(input)
