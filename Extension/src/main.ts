@@ -324,8 +324,8 @@ async function finalizeExtensionActivation(): Promise<void> {
         }
     } else {
         let packageJson: any = util.getRawPackageJson();
-        if (packageJson['C_Cpp.updateChannel'] === 'Default') {
-            packageJson['C_Cpp.updateChannel'] = 'Insiders';
+        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
+            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
             return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
         }
     }
