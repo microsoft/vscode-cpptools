@@ -114,7 +114,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
 }
 
 /**
- * Interface for return value of getTargetBuildInfo containing the download URL and version of a Build
+ * Interface for return value of getTargetBuildInfo containing the download URL and version of a Build.
  */
 export interface BuildInfo {
     downloadUrl: string;
@@ -130,14 +130,18 @@ export interface BuildInfo {
 export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo> {
     return getReleaseJson()
         .then(builds => getTargetBuild(builds, updateChannel))
-        .then(build => {
+        .then(async build => {
             if (!build) {
                 return Promise.resolve(undefined);
             }
-            return PlatformInformation.GetPlatformInformation()
-                .then(platformInfo => vsixNameForPlatform(platformInfo))
-                .then(vsixName => getVsixDownloadUrl(build, vsixName))
-                .then((downloadUrl) => { return { downloadUrl: downloadUrl, name: build.name }; });
+            try {
+                const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+                const vsixName: string = vsixNameForPlatform(platformInfo);
+                const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
+                return { downloadUrl: downloadUrl, name: build.name };
+            } catch (error) {
+                return Promise.reject(error);
+            }
         });
 }
 

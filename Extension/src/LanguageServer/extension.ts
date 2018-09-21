@@ -279,6 +279,12 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
+    // Helper fn to avoid code duplication
+    let logFailure: (error: Error) => void = (error: Error) => {
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+    };
+    // Wrap in new Promise to allow tmp.file callback to successfully resolve/reject
+    // as tmp.file does not do anything with the callback functions return value
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
         getTargetBuildInfo(updateChannel).then(buildInfo => {
             if (!buildInfo) {
@@ -293,25 +299,35 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                     return;
                 }
 
+                // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
+                // then the .catch call will return a resolved promise
+                // Thusly, the .catch call must also throw, as a return would simply return an unused promise
+                // instead of returning early from this function scope
                 try {
                     await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
-                        .catch(() => { throw new Error('Failed to download VSIX package.'); });
+                        .catch(() => { throw new Error('Failed to download VSIX package'); });
+                    await installVsix(vsixPath, updateChannel)
+                        .catch((error: Error) => { throw error; });
                 } catch (error) {
                     reject(error);
                     return;
                 }
-
-                await installVsix(vsixPath, updateChannel);
                 clearInterval(insiderUpdateTimer);
-                util.promptReloadWindow(`The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`);
+                util.promptReloadWindow(`The C/C++ Extension has been updated to version ${buildInfo.name}. \
+                    Please reload the window for the changes to take effect.`);
                 telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
 
                 resolve();
             });
-        }, error => reject(error));
+        }, (error: Error) => {
+            // Handle getTargetBuildInfo rejection
+            logFailure(error);
+            reject(error);
+        });
     });
     return p.catch((error: Error) => {
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+        // Handle .then following getTargetBuildInfo rejection
+        logFailure(error);
         return Promise.reject(error);
     });
 }
