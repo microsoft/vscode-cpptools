@@ -572,8 +572,12 @@ export async function renamePromise(oldName: string, newName: string): Promise<v
 }
 
 export function promptForReloadWindowDueToSettingsChange(): void {
+    promptReloadWindow("Reload the workspace for the settings change to take effect.");
+}
+
+export function promptReloadWindow(message: string): void {
     let reload: string = "Reload";
-    vscode.window.showInformationMessage("Reload the workspace for the settings change to take effect.", reload).then((value: string) => {
+    vscode.window.showInformationMessage(message, reload).then((value: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
