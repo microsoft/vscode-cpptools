@@ -290,9 +290,8 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
             });
         }, error => reject(error));
     });
-    return p.catch((error: Error) => {
+    await p.catch((error: Error) => {
         telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-        return Promise.reject(error);
     });
 }
 

@@ -523,6 +523,7 @@ class DefaultClient implements Client {
 
     public updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
+            console.log("updateCustomBrowseConfiguration");
             if (!this.configurationProvider) {
                 return;
             }
@@ -536,6 +537,7 @@ class DefaultClient implements Client {
                 if (await currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
                     return currentProvider.provideBrowseConfiguration(tokenSource.token);
                 }
+                console.warn("failed to provide browse configuration");
                 return Promise.reject("");
             };
             this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(
@@ -550,7 +552,7 @@ class DefaultClient implements Client {
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-
+        console.log("provideCustomConfiguration");
         if (providers.size === 0) {
             return Promise.resolve();
         }
@@ -578,6 +580,7 @@ class DefaultClient implements Client {
                 }
             } catch (err) {
             }
+            console.warn("failed to provide configuration");
             return Promise.reject("");
         };
 
@@ -651,22 +654,20 @@ class DefaultClient implements Client {
 
     public queueTask(task: () => Thenable<any>): Thenable<any> {
         if (this.isSupported) {
-            this.pendingRequests++;
             let nextTask: () => Thenable<any> = () => {
                 let result: Thenable<any> = task();
                 this.pendingRequests--;
-                if (this.pendingRequests === 0) {
-                    this.pendingTask = null;
-                }
                 return result;
             };
-
-            if (this.pendingTask) {
-                // We don't want the queue to stall because of a rejected promise.
-                return this.pendingTask.then(nextTask, nextTask);
-            } else {
+            
+            this.pendingRequests++;
+            console.assert(this.pendingRequests > 0);
+            if (this.pendingRequests === 1) {
                 this.pendingTask = nextTask();
                 return this.pendingTask;
+            } else {
+                // We don't want the queue to stall because of a rejected promise.
+                return this.pendingTask.then(nextTask, nextTask);
             }
         } else {
             return Promise.reject("Unsupported client");
@@ -1111,7 +1112,14 @@ class DefaultClient implements Client {
     public sendCustomConfigurations(configs: any): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
+            console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
             return;
+        }
+
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        let out: logger.Logger = logger.getOutputChannelLogger();
+        if (settings.loggingLevel == "Debug") {
+            out.appendLine("Custom configurations received:");
         }
         let sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
@@ -1120,6 +1128,10 @@ class DefaultClient implements Client {
                     uri: item.uri.toString(),
                     configuration: item.configuration
                 });
+                if (settings.loggingLevel === "Debug") {
+                    out.appendLine(`  uri: ${item.uri.toString()}`);
+                    out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
+                }
             } else {
                 console.warn("discarding invalid SourceFileConfigurationItem: " + item);
             }
@@ -1138,6 +1150,7 @@ class DefaultClient implements Client {
     public sendCustomBrowseConfiguration(config: any): Thenable<void> {
         // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!config || config instanceof Array) {
+            console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
             return Promise.resolve();
         }
         let sanitized: WorkspaceBrowseConfiguration = <WorkspaceBrowseConfiguration>config;
@@ -1145,6 +1158,12 @@ class DefaultClient implements Client {
             !util.isOptionalString(sanitized.standard) || !util.isOptionalString(sanitized.windowsSdkVersion)) {
             console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
             return Promise.resolve();
+        }
+
+        let settings: CppSettings = new CppSettings(this.RootUri);
+        let out: logger.Logger = logger.getOutputChannelLogger();
+        if (settings.loggingLevel == "Debug") {
+            out.appendLine(`Custom browse configuration received: ${JSON.stringify(sanitized, null, 2)}`);
         }
 
         let params: CustomBrowseConfigurationParams = {
