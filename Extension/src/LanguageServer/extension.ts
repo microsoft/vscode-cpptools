@@ -235,13 +235,21 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         const vsCodeScriptPath: string = function(platformInfo): string {
             if (platformInfo.platform === 'win32') {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                return '"' + path.join(vsCodeProcessPath, 'bin', 'code.cmd') + '"';
+                // Windows VS Code Insiders breaks VS Code naming conventions
+                let cmdFile: string;
+                if (vsCodeBinName === 'Code - Insiders.exe') {
+                    cmdFile = 'code-insiders.cmd';
+                } else {
+                    cmdFile = 'code.cmd';
+                }
+                const vsCodeExeDir: string = path.dirname(process.execPath);
+                return '"' + path.join(vsCodeExeDir, 'bin', cmdFile) + '"';
             } else if (platformInfo.platform === 'darwin') {
                 return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
                     'Resources', 'app', 'bin', 'code') + '"';
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                const stdout: Buffer = execSync('which ' + vsCodeProcessPath);
+                const stdout: Buffer = execSync('which ' + vsCodeBinName);
                 return stdout.toString().trim();
             }
         }(platformInfo);

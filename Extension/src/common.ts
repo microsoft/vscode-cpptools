@@ -176,19 +176,19 @@ export function isUri(input: any): input is vscode.Uri {
 }
 
 export function isString(input: any): input is string {
-    return typeof(input) === "string";
+    return input && typeof(input) === "string";
 }
 
 export function isOptionalString(input: any): input is string|undefined {
-    return input === undefined || isString(input);
+    return input === undefined || typeof(input) === "string";
 }
 
 export function isArrayOfString(input: any): input is string[] {
-    return (input instanceof Array) && input.every(item => isString(item));
+    return input && (input instanceof Array) && input.every(item => typeof(item) === "string");
 }
 
 export function isOptionalArrayOfString(input: any): input is string[]|undefined {
-    return input === undefined || isArrayOfString(input);
+    return input === undefined || ((input instanceof Array) && input.every(item => typeof(item) === "string"));
 }
 
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
@@ -211,7 +211,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
             if (varType === undefined) {
                 varType = "env";
             }
-            let newValue: string;
+            let newValue: string = undefined;
             switch (varType) {
                 case "env": {
                     let v: string | string[] = additionalEnvironment[name];
@@ -220,7 +220,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
                     } else if (input === match && isArrayOfString(v)) {
                         newValue = v.join(";");
                     }
-                    if (!isString(newValue)) {
+                    if (!newValue) {
                         newValue = process.env[name];
                     }
                     break;
@@ -246,7 +246,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
                 }
                 default: { assert.fail("unknown varType matched"); }
             }
-            return (isString(newValue)) ? newValue : match;
+            return (newValue) ? newValue : match;
         });
     }
 
