@@ -19,7 +19,7 @@ import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
-import { execSync } from 'child_process';
+import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
 
@@ -260,12 +260,16 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         // Install the VSIX
         const installCommand: string = vsCodeScriptPath + ' --install-extension ' + vsixLocation;
         try {
-            if (updateChannel === 'Default') {
-                // Uninstall the current version, as the version to install is a previous version
-                const uninstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
-                execSync(uninstallCommand);
-            }
-            execSync(installCommand);
+            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+            // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade
+            // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
+            let sentOverride: boolean = false;
+            process.stdout.on('data', (data: Buffer) => {
+                if (!sentOverride) {
+                    process.stdin.write('0\n');
+                    sentOverride = true;
+                }
+            });
             return Promise.resolve();
         } catch (error) {
             return Promise.reject(new Error('Failed to install VSIX'));
