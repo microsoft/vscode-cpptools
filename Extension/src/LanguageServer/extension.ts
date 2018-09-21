@@ -21,7 +21,7 @@ import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { getTargetBuildUrl } from '../githubAPI';
+import { getTargetBuildInfo } from '../githubAPI';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -262,7 +262,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 execSync(uninstallCommand);
             }
             execSync(installCommand);
-            clearInterval(insiderUpdateTimer);
             return Promise.resolve();
         } catch (error) {
             return Promise.reject(new Error('Failed to install VSIX'));
@@ -277,23 +276,33 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
-        getTargetBuildUrl(updateChannel).then(downloadUrl => {
-            if (!downloadUrl) {
+        getTargetBuildInfo(updateChannel).then(buildInfo => {
+            if (!buildInfo) {
                 resolve();
                 return;
             }
 
-            // Create a temporary file, download the vsix to it, then install the vsix
-            tmp.file({postfix: '.vsix'}, (err, vsixPath, fd, cleanupCallback) => {
+            // Create a temporary file, download the VSIX to it, then install the VSIX
+            tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
                 if (err) {
                     reject(new Error('Failed to create vsix file'));
                     return;
                 }
 
-                util.downloadFileToDestination(downloadUrl, vsixPath)
-                    .then(() => installVsix(vsixPath, updateChannel))
-                    .then(() => telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' }))
-                    .then(() => resolve(), () => reject());
+                try {
+                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
+                        .catch(() => { throw new Error('Failed to download VSIX package.'); });
+                } catch (error) {
+                    reject(error);
+                    return;
+                }
+
+                await installVsix(vsixPath, updateChannel);
+                clearInterval(insiderUpdateTimer);
+                util.promptReloadWindow(`The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`);
+                telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
+
+                resolve();
             });
         }, error => reject(error));
     });

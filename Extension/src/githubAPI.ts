@@ -114,12 +114,20 @@ function vsixNameForPlatform(info: PlatformInformation): string {
 }
 
 /**
+ * Interface for return value of getTargetBuildInfo containing the download URL and version of a Build
+ */
+export interface BuildInfo {
+    downloadUrl: string;
+    name: string;
+}
+
+/**
  * Use the GitHub API to retrieve the download URL of the extension version the user should update to, if any.
  * @param updateChannel The user's updateChannel setting.
  * @return Download URL for the extension VSIX package that the user should install. If the user
  * does not need to update, resolves to undefined.
  */
-export async function getTargetBuildUrl(updateChannel: string): Promise<string> {
+export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo> {
     return getReleaseJson()
         .then(builds => getTargetBuild(builds, updateChannel))
         .then(build => {
@@ -128,7 +136,8 @@ export async function getTargetBuildUrl(updateChannel: string): Promise<string> 
             }
             return PlatformInformation.GetPlatformInformation()
                 .then(platformInfo => vsixNameForPlatform(platformInfo))
-                .then(vsixName => getVsixDownloadUrl(build, vsixName));
+                .then(vsixName => getVsixDownloadUrl(build, vsixName))
+                .then((downloadUrl) => { return { downloadUrl: downloadUrl, name: build.name }; });
         });
 }
 
@@ -198,7 +207,7 @@ async function getReleaseJson(): Promise<Build[]> {
 
                 // Type check
                 if (isArrayOfBuilds(releaseJson)) {
-                    resolve(releaseJson)
+                    resolve(releaseJson);
                 } else {
                     reject(releaseJson);
                 }
