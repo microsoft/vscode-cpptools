@@ -171,7 +171,6 @@ export interface Client {
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
-    getCustomConfigurationProviderId(): Thenable<string|undefined>;
     getCurrentConfigName(): Thenable<string>;
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
@@ -620,7 +619,7 @@ class DefaultClient implements Client {
         return util.isHeader(document) && !document.uri.toString().startsWith(this.RootUri.toString());
     }
 
-    public getCustomConfigurationProviderId(): Thenable<string|undefined> {
+    private getCustomConfigurationProviderId(): Thenable<string|undefined> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfigurationProvider));
     }
 
@@ -654,10 +653,16 @@ class DefaultClient implements Client {
 
     public queueTask(task: () => Thenable<any>): Thenable<any> {
         if (this.isSupported) {
-            let nextTask: () => Thenable<any> = () => {
-                let result: Thenable<any> = task();
-                this.pendingRequests--;
-                return result;
+            let nextTask: () => Thenable<any> = async () => {
+                try {
+                    let result: any = await task();
+                    this.pendingRequests--;
+                    return result;
+                } catch (err) {
+                    console.error(err);
+                    this.pendingRequests--;
+                    throw err;
+                }
             };
             
             this.pendingRequests++;
@@ -1132,6 +1137,9 @@ class DefaultClient implements Client {
                     out.appendLine(`  uri: ${item.uri.toString()}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
                 }
+                if (item.configuration.includePath.some(path => path.endsWith('**'))) {
+                    console.warn("custom include paths should not use recursive includes ('**')");
+                }
             } else {
                 console.warn("discarding invalid SourceFileConfigurationItem: " + item);
             }
@@ -1293,7 +1301,6 @@ class NullClient implements Client {
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
-    getCustomConfigurationProviderId(): Thenable<string|undefined> { return Promise.resolve(undefined); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
