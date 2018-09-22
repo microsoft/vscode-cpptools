@@ -249,8 +249,12 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     'Resources', 'app', 'bin', 'code') + '"';
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                const stdout: Buffer = execSync('which ' + vsCodeBinName);
-                return stdout.toString().trim();
+                try {
+                    const stdout: Buffer = execSync('which ' + vsCodeBinName);
+                    return stdout.toString().trim();
+                } catch (error) {
+                    return undefined;
+                }
             }
         }(platformInfo);
         if (!vsCodeScriptPath) {
@@ -259,22 +263,30 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 
         // Install the VSIX
         return new Promise<void>((resolve, reject) => {
-            try {
-                let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
-                // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade
-                // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
-                let sentOverride: boolean = false;
-                process.stdout.on('data', (data: Buffer) => {
-                    if (!sentOverride) {
-                        process.stdin.write('0\n');
-                        sentOverride = true;
-                        resolve();
-                        return;
-                    }
-                });
-            } catch (error) {
-                return reject(new Error('Failed to install VSIX'));
+            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+            if (process.pid === undefined) {
+                reject(new Error('Failed to launch VS Code script process for installation'));
+                return;
             }
+
+            // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+            const timer: NodeJS.Timer = setTimeout(() => {
+                process.kill();
+                reject(new Error('VS Code script process for installation failed to respond within 1s.'));
+            }, 1000);
+
+            // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
+            // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
+            let sentOverride: boolean = false;
+            process.stdout.on('data', () => {
+                if (sentOverride) {
+                    return;
+                }
+                process.stdin.write('0\n');
+                sentOverride = true;
+                clearInterval(timer);
+                resolve();
+            });
         });
     });
 }
@@ -319,8 +331,9 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                     return;
                 }
                 clearInterval(insiderUpdateTimer);
-                util.promptReloadWindow(`The C/C++ Extension has been updated to version ${buildInfo.name}. \
-                    Please reload the window for the changes to take effect.`);
+                const message: string =
+                    `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
+                util.promptReloadWindow(message);
                 telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
 
                 resolve();
