@@ -77,7 +77,7 @@ export class CppTools implements CppToolsTestApi {
         } else if (this.failedRegistrations.find(p => p === provider)) {
             console.warn("provider not successfully registered, 'notifyReady' ignored");
         } else {
-            console.assert(false, "provider should be registered before signaling it's ready to provide configurations");
+            console.warn(false, "provider should be registered before signaling it's ready to provide configurations");
         }
     }
 
@@ -86,12 +86,12 @@ export class CppTools implements CppToolsTestApi {
         let p: CustomConfigurationProvider1 = providers.get(provider);
 
         if (p) {
-            console.assert(p.isReady, "didChangeCustomConfiguration was invoked before notifyReady");
+            console.warn(p.isReady, "didChangeCustomConfiguration was invoked before notifyReady");
             LanguageServer.getClients().forEach(client => client.updateCustomConfigurations(p));
         } else if (this.failedRegistrations.find(p => p === provider)) {
             console.warn("provider not successfully registered, 'didChangeCustomConfiguration' ignored");
         } else {
-            console.assert(false, "provider should be registered before sending config change messages");
+            console.warn(false, "provider should be registered before sending config change messages");
         }
     }
 
@@ -104,7 +104,7 @@ export class CppTools implements CppToolsTestApi {
         } else if (this.failedRegistrations.find(p => p === provider)) {
             console.warn("provider not successfully registered, 'didChangeCustomBrowseConfiguration' ignored");
         } else {
-            console.assert(false, "provider should be registered before sending config change messages");
+            console.warn(false, "provider should be registered before sending config change messages");
         }
     }
 

@@ -536,7 +536,9 @@ class DefaultClient implements Client {
                 if (await currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
                     return currentProvider.provideBrowseConfiguration(tokenSource.token);
                 }
-                console.warn("failed to provide browse configuration");
+                if (currentProvider.version >= Version.v2) {
+                    console.warn("failed to provide browse configuration");
+                }
                 return Promise.reject("");
             };
             this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(
