@@ -572,8 +572,12 @@ export async function renamePromise(oldName: string, newName: string): Promise<v
 }
 
 export function promptForReloadWindowDueToSettingsChange(): void {
+    promptReloadWindow("Reload the workspace for the settings change to take effect.");
+}
+
+export function promptReloadWindow(message: string): void {
     let reload: string = "Reload";
-    vscode.window.showInformationMessage("Reload the workspace for the settings change to take effect.", reload).then((value: string) => {
+    vscode.window.showInformationMessage(message, reload).then((value: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
@@ -604,13 +608,10 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
                 return reject();
             }
             // Write file using downloaded data
-            let downloadedBytes = 0; // tslint:disable-line
             let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
-            response.on('data', (data) => { downloadedBytes += data.length; });
-            response.on('end', () => { createdFile.close(); });
-            createdFile.on('close', () => { resolve(); });
+            createdFile.on('finish', () => { resolve(); });
             response.on('error', (error) => { reject(); });
-            response.pipe(createdFile, { end: false });
+            response.pipe(createdFile);
         });
         request.on('error', (error) => { reject(); });
         request.end();
