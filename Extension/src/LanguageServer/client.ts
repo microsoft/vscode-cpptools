@@ -667,13 +667,14 @@ class DefaultClient implements Client {
                 }
             };
             
-            this.pendingRequests++;
-            console.assert(this.pendingRequests > 0);
-            if (this.pendingRequests === 1) {
+            console.assert(this.pendingRequests >= 0);
+            if (this.pendingRequests === 0) {
+                this.pendingRequests++;
                 this.pendingTask = nextTask();
                 return this.pendingTask;
             } else {
                 // We don't want the queue to stall because of a rejected promise.
+                this.pendingRequests++;
                 return this.pendingTask.then(nextTask, nextTask);
             }
         } else {
@@ -1125,7 +1126,7 @@ class DefaultClient implements Client {
 
         let settings: CppSettings = new CppSettings(this.RootUri);
         let out: logger.Logger = logger.getOutputChannelLogger();
-        if (settings.loggingLevel == "Debug") {
+        if (settings.loggingLevel === "Debug") {
             out.appendLine("Custom configurations received:");
         }
         let sanitized: SourceFileConfigurationItemAdapter[] = [];
@@ -1172,7 +1173,7 @@ class DefaultClient implements Client {
 
         let settings: CppSettings = new CppSettings(this.RootUri);
         let out: logger.Logger = logger.getOutputChannelLogger();
-        if (settings.loggingLevel == "Debug") {
+        if (settings.loggingLevel === "Debug") {
             out.appendLine(`Custom browse configuration received: ${JSON.stringify(sanitized, null, 2)}`);
         }
 
