@@ -21,7 +21,7 @@ import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { getTargetBuildUrl } from '../githubAPI';
+import { getTargetBuildInfo } from '../githubAPI';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -234,11 +234,22 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
         const vsCodeScriptPath: string = function(platformInfo): string {
             if (platformInfo.platform === 'win32') {
-                const vsCodeProcessPath: string = path.dirname(process.execPath);
-                return '"' + path.join(vsCodeProcessPath, 'bin', 'code.cmd') + '"';
+                const vsCodeBinName: string = path.basename(process.execPath);
+                // Windows VS Code Insiders breaks VS Code naming conventions
+                let cmdFile: string;
+                if (vsCodeBinName === 'Code - Insiders.exe') {
+                    cmdFile = 'code-insiders.cmd';
+                } else {
+                    cmdFile = 'code.cmd';
+                }
+                const vsCodeExeDir: string = path.dirname(process.execPath);
+                return '"' + path.join(vsCodeExeDir, 'bin', cmdFile) + '"';
+            } else if (platformInfo.platform === 'darwin') {
+                return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
+                    'Resources', 'app', 'bin', 'code') + '"';
             } else {
-                const vsCodeProcessPath: string = path.basename(process.execPath);
-                const stdout: Buffer = execSync('which ' + vsCodeProcessPath);
+                const vsCodeBinName: string = path.basename(process.execPath);
+                const stdout: Buffer = execSync('which ' + vsCodeBinName);
                 return stdout.toString().trim();
             }
         }(platformInfo);
@@ -255,7 +266,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 execSync(uninstallCommand);
             }
             execSync(installCommand);
-            clearInterval(insiderUpdateTimer);
             return Promise.resolve();
         } catch (error) {
             return Promise.reject(new Error('Failed to install VSIX'));
@@ -269,29 +279,56 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
+    // Helper fn to avoid code duplication
+    let logFailure: (error: Error) => void = (error: Error) => {
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+    };
+    // Wrap in new Promise to allow tmp.file callback to successfully resolve/reject
+    // as tmp.file does not do anything with the callback functions return value
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
-        getTargetBuildUrl(updateChannel).then(downloadUrl => {
-            if (!downloadUrl) {
+        getTargetBuildInfo(updateChannel).then(buildInfo => {
+            if (!buildInfo) {
                 resolve();
                 return;
             }
 
-            // Create a temporary file, download the vsix to it, then install the vsix
-            tmp.file({postfix: '.vsix'}, (err, vsixPath, fd, cleanupCallback) => {
+            // Create a temporary file, download the VSIX to it, then install the VSIX
+            tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
                 if (err) {
                     reject(new Error('Failed to create vsix file'));
                     return;
                 }
 
-                util.downloadFileToDestination(downloadUrl, vsixPath)
-                    .then(() => installVsix(vsixPath, updateChannel))
-                    .then(() => telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' }))
-                    .then(() => resolve(), () => reject());
+                // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
+                // then the .catch call will return a resolved promise
+                // Thusly, the .catch call must also throw, as a return would simply return an unused promise
+                // instead of returning early from this function scope
+                try {
+                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
+                        .catch(() => { throw new Error('Failed to download VSIX package'); });
+                    await installVsix(vsixPath, updateChannel)
+                        .catch((error: Error) => { throw error; });
+                } catch (error) {
+                    reject(error);
+                    return;
+                }
+                clearInterval(insiderUpdateTimer);
+                util.promptReloadWindow(`The C/C++ Extension has been updated to version ${buildInfo.name}. \
+                    Please reload the window for the changes to take effect.`);
+                telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
+
+                resolve();
             });
-        }, error => reject(error));
+        }, (error: Error) => {
+            // Handle getTargetBuildInfo rejection
+            logFailure(error);
+            reject(error);
+        });
     });
     await p.catch((error: Error) => {
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+        // Handle .then following getTargetBuildInfo rejection
+        logFailure(error);
+        throw error;
     });
 }
 
