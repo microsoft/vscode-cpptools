@@ -325,10 +325,10 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
             reject(error);
         });
     });
-    return p.catch((error: Error) => {
+    await p.catch((error: Error) => {
         // Handle .then following getTargetBuildInfo rejection
         logFailure(error);
-        return Promise.reject(error);
+        throw error;
     });
 }
 
