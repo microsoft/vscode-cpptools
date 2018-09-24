@@ -235,8 +235,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         const vsCodeScriptPath: string = function(platformInfo): string {
             if (platformInfo.platform === 'win32') {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                // Windows VS Code Insiders breaks VS Code naming conventions
-                let cmdFile: string;
+                let cmdFile: string; // Windows VS Code Insiders breaks VS Code naming conventions
                 if (vsCodeBinName === 'Code - Insiders.exe') {
                     cmdFile = 'code-insiders.cmd';
                 } else {
@@ -257,9 +256,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 }
             }
         }(platformInfo);
-        if (!vsCodeScriptPath) {
-            return Promise.reject(new Error('Failed to find VS Code script'));
-        }
 
         // Install the VSIX
         return new Promise<void>((resolve, reject) => {
@@ -272,7 +268,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
             const timer: NodeJS.Timer = setTimeout(() => {
                 process.kill();
-                reject(new Error('VS Code script process for installation failed to respond within 1s.'));
+                reject(new Error('Failed to receive response from VS Code script process for installation within 1s.'));
             }, 1000);
 
             // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
