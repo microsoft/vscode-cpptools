@@ -256,6 +256,9 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 }
             }
         }(platformInfo);
+        if (!vsCodeScriptPath) {
+            return Promise.reject(new Error('Failed to find VS Code script'));
+        }
 
         // Install the VSIX
         return new Promise<void>((resolve, reject) => {
@@ -268,8 +271,8 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
             const timer: NodeJS.Timer = setTimeout(() => {
                 process.kill();
-                reject(new Error('Failed to receive response from VS Code script process for installation within 1s.'));
-            }, 1000);
+                reject(new Error('Failed to receive response from VS Code script process for installation within 10s.'));
+            }, 10000);
 
             // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
             // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
