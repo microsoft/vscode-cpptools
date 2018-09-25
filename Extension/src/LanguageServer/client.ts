@@ -403,7 +403,7 @@ class DefaultClient implements Client {
                     systemIncludePath: settings.defaultSystemIncludePath
                 },
                 vcpkg_root: util.getVcpkgRoot(),
-                goto_def_intelliSense: abTestSettings.UseGoToDefIntelliSense
+                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {
