@@ -15,20 +15,24 @@ const localConfigFile: string = "cpptools.json";
 interface Settings {
     defaultIntelliSenseEngine?: number;
     recursiveIncludes?: number;
+    gotoDefIntelliSense?: number;
 }
 
 export class ABTestSettings {
     private settings: Settings;
     private intelliSenseEngineDefault: PersistentState<number>;
     private recursiveIncludesDefault: PersistentState<number>;
+    private gotoDefIntelliSenseDefault: PersistentState<number>;
     private bucket: PersistentState<number>;
 
     constructor() {
         this.intelliSenseEngineDefault = new PersistentState<number>("ABTest.1", 100);
         this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
+        this.gotoDefIntelliSenseDefault = new PersistentState<number>("ABTest.3", 100);
         this.settings = {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
-            recursiveIncludes: this.recursiveIncludesDefault.Value
+            recursiveIncludes: this.recursiveIncludesDefault.Value,
+            gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value
         };
         this.bucket = new PersistentState<number>(userBucketString, -1);
         if (this.bucket.Value === -1) {
@@ -53,6 +57,10 @@ export class ABTestSettings {
         return this.settings.recursiveIncludes ? this.settings.recursiveIncludes >= this.bucket.Value : true;
     }
 
+    public get UseGoToDefIntelliSense(): boolean {
+        return this.settings.gotoDefIntelliSense ? this.settings.gotoDefIntelliSense >= this.bucket.Value : true;
+    }
+
     private async updateSettingsAsync(): Promise<void> {
         const cpptoolsJsonFile: string = util.getExtensionFilePath(localConfigFile);
 
@@ -67,9 +75,13 @@ export class ABTestSettings {
                 if (newSettings.recursiveIncludes) {
                     this.recursiveIncludesDefault.Value = newSettings.recursiveIncludes;
                 }
+                if (newSettings.gotoDefIntelliSense) {
+                    this.gotoDefIntelliSenseDefault.Value = newSettings.gotoDefIntelliSense;
+                }
                 this.settings = {
                     defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
-                    recursiveIncludes: this.recursiveIncludesDefault.Value
+                    recursiveIncludes: this.recursiveIncludesDefault.Value,
+                    gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value
                 };
             }
         } catch (error) {
