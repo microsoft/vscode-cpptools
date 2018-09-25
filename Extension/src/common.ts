@@ -179,6 +179,10 @@ export function isString(input: any): input is string {
     return typeof(input) === "string";
 }
 
+export function isNumber(input: any): input is number {
+    return typeof(input) === "number";
+}
+
 export function isOptionalString(input: any): input is string|undefined {
     return input === undefined || isString(input);
 }
