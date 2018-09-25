@@ -155,10 +155,11 @@ class BlockingTask<T> {
             try {
                 let result: T = await task();
                 resolve(result);
+                this.done = true;
             } catch (err) {
                 reject(err);
+                this.done = true;
             }
-            this.done = true;
         });
         this.dependency = dependency;
     }
@@ -545,10 +546,10 @@ class DefaultClient implements Client {
 
     public updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
-            console.log("updateCustomBrowseConfiguration");
             if (!this.configurationProvider) {
                 return;
             }
+            console.log("updateCustomBrowseConfiguration");
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
             if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
                 return;
@@ -576,10 +577,10 @@ class DefaultClient implements Client {
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-        console.log("provideCustomConfiguration");
         if (providers.size === 0) {
             return Promise.resolve();
         }
+        console.log("provideCustomConfiguration");
         let providerId: string|undefined = await this.getCustomConfigurationProviderId();
         if (!providerId) {
             return Promise.resolve();
