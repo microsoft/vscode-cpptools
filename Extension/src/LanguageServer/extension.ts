@@ -17,6 +17,11 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
+import { PlatformInformation } from '../platform';
+import { Range } from 'vscode-languageclient';
+import { ChildProcess, spawn, execSync } from 'child_process';
+import * as tmp from 'tmp';
+import { getTargetBuildInfo } from '../githubAPI';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -25,9 +30,11 @@ let ui: UI;
 let disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
+let insiderUpdateTimer: NodeJS.Timer;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
+const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 
 /**
  * activate: set up the extension for language services
@@ -125,6 +132,12 @@ function realActivation(): void {
 
     reportMacCrashes();
 
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    if (settings.updateChannel === 'Insiders') {
+        insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+        checkAndApplyUpdate(settings.updateChannel);
+    }
+
     intervalTimer = setInterval(onInterval, 2500);
 }
 
@@ -141,7 +154,19 @@ export function updateLanguageConfigurations(): void {
  *********************************************/
 
 function onDidChangeSettings(): void {
+    const changedActiveClientSettings: { [key: string] : string } = clients.ActiveClient.onDidChangeSettings();
     clients.forEach(client => client.onDidChangeSettings());
+
+    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
+    if (newUpdateChannel) {
+        if (newUpdateChannel === 'Default') {
+            clearInterval(insiderUpdateTimer);
+        } else if (newUpdateChannel === 'Insiders') {
+            insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+        }
+
+        checkAndApplyUpdate(newUpdateChannel);
+    }
 }
 
 let saveMessageShown: boolean = false;
@@ -169,7 +194,7 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(editor.selection.start);
+        clients.ActiveClient.selectionChanged(Range.create(editor.selection.start, editor.selection.end));
     }
     ui.activeDocumentChanged();
 }
@@ -187,7 +212,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();
     }
-    clients.ActiveClient.selectionChanged(event.selections[0].start);
+    clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
@@ -197,6 +222,132 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
 function onInterval(): void {
     // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
     clients.ActiveClient.onInterval();
+}
+
+/**
+ * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
+ * @param updateChannel The user's updateChannel setting.
+ */
+async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+    // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
+    // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
+    return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
+        const vsCodeScriptPath: string = function(platformInfo): string {
+            if (platformInfo.platform === 'win32') {
+                const vsCodeBinName: string = path.basename(process.execPath);
+                let cmdFile: string; // Windows VS Code Insiders breaks VS Code naming conventions
+                if (vsCodeBinName === 'Code - Insiders.exe') {
+                    cmdFile = 'code-insiders.cmd';
+                } else {
+                    cmdFile = 'code.cmd';
+                }
+                const vsCodeExeDir: string = path.dirname(process.execPath);
+                return '"' + path.join(vsCodeExeDir, 'bin', cmdFile) + '"';
+            } else if (platformInfo.platform === 'darwin') {
+                return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
+                    'Resources', 'app', 'bin', 'code') + '"';
+            } else {
+                const vsCodeBinName: string = path.basename(process.execPath);
+                try {
+                    const stdout: Buffer = execSync('which ' + vsCodeBinName);
+                    return stdout.toString().trim();
+                } catch (error) {
+                    return undefined;
+                }
+            }
+        }(platformInfo);
+        if (!vsCodeScriptPath) {
+            return Promise.reject(new Error('Failed to find VS Code script'));
+        }
+
+        // Install the VSIX
+        return new Promise<void>((resolve, reject) => {
+            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+            if (process.pid === undefined) {
+                reject(new Error('Failed to launch VS Code script process for installation'));
+                return;
+            }
+
+            // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+            const timer: NodeJS.Timer = setTimeout(() => {
+                process.kill();
+                reject(new Error('Failed to receive response from VS Code script process for installation within 10s.'));
+            }, 10000);
+
+            // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
+            // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
+            let sentOverride: boolean = false;
+            process.stdout.on('data', () => {
+                if (sentOverride) {
+                    return;
+                }
+                process.stdin.write('0\n');
+                sentOverride = true;
+                clearInterval(timer);
+                resolve();
+            });
+        });
+    });
+}
+
+/**
+ * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
+ * The update can be an upgrade or downgrade depending on the the updateChannel setting.
+ * @param updateChannel The user's updateChannel setting.
+ */
+async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
+    // Helper fn to avoid code duplication
+    let logFailure: (error: Error) => void = (error: Error) => {
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+    };
+    // Wrap in new Promise to allow tmp.file callback to successfully resolve/reject
+    // as tmp.file does not do anything with the callback functions return value
+    const p: Promise<void> = new Promise<void>((resolve, reject) => {
+        getTargetBuildInfo(updateChannel).then(buildInfo => {
+            if (!buildInfo) {
+                resolve();
+                return;
+            }
+
+            // Create a temporary file, download the VSIX to it, then install the VSIX
+            tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
+                if (err) {
+                    reject(new Error('Failed to create vsix file'));
+                    return;
+                }
+
+                // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
+                // then the .catch call will return a resolved promise
+                // Thusly, the .catch call must also throw, as a return would simply return an unused promise
+                // instead of returning early from this function scope
+                try {
+                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
+                        .catch(() => { throw new Error('Failed to download VSIX package'); });
+                    await installVsix(vsixPath, updateChannel)
+                        .catch((error: Error) => { throw error; });
+                } catch (error) {
+                    reject(error);
+                    return;
+                }
+                clearInterval(insiderUpdateTimer);
+                const message: string =
+                    `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
+                util.promptReloadWindow(message);
+                telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
+
+                resolve();
+            });
+        }, (error: Error) => {
+            // Handle getTargetBuildInfo rejection
+            logFailure(error);
+            reject(error);
+        });
+    });
+    await p.catch((error: Error) => {
+        // Handle .then following getTargetBuildInfo rejection
+        logFailure(error);
+        throw error;
+    });
 }
 
 /*********************************************
@@ -515,6 +666,7 @@ export function deactivate(): Thenable<void> {
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
+    clearInterval(insiderUpdateTimer);
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
     ui.dispose();

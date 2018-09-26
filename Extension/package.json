@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.18.1",
+  "version": "0.19.0",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -63,7 +63,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "C/C++ Configuration",
+      "title": "C/C++",
       "properties": {
         "C_Cpp.clang_format_path": {
           "type": [
@@ -455,6 +455,16 @@
           },
           "default": null,
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
+          "scope": "resource"
+        },
+        "C_Cpp.updateChannel": {
+          "type": "string",
+          "enum": [
+            "Default",
+            "Insiders"
+          ],
+          "default": "Default",
+          "description": "Set to \"Insiders\" to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
           "scope": "resource"
         }
       }
@@ -1396,7 +1406,7 @@
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
-    "vscode-cpptools": "^1.2.2",
+    "vscode-cpptools": "2.1.1",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.0.11",
@@ -1406,7 +1416,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2006256",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2010302",
       "platforms": [
         "linux"
       ],
@@ -1420,7 +1430,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2006255",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2010301",
       "platforms": [
         "linux"
       ],
@@ -1436,7 +1446,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2006254",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2010303",
       "platforms": [
         "darwin"
       ],
@@ -1447,7 +1457,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2006362",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2010204",
       "platforms": [
         "win32"
       ],

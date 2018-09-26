@@ -14,6 +14,8 @@ import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
+import * as https from 'https';
+import { ClientRequest, OutgoingHttpHeaders } from 'http';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -169,6 +171,30 @@ export function showReleaseNotes(): void {
     vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
 }
 
+export function isUri(input: any): input is vscode.Uri {
+    return input && input instanceof vscode.Uri;
+}
+
+export function isString(input: any): input is string {
+    return typeof(input) === "string";
+}
+
+export function isNumber(input: any): input is number {
+    return typeof(input) === "number";
+}
+
+export function isOptionalString(input: any): input is string|undefined {
+    return input === undefined || isString(input);
+}
+
+export function isArrayOfString(input: any): input is string[] {
+    return (input instanceof Array) && input.every(item => isString(item));
+}
+
+export function isOptionalArrayOfString(input: any): input is string[]|undefined {
+    return input === undefined || isArrayOfString(input);
+}
+
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
@@ -189,16 +215,16 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
             if (varType === undefined) {
                 varType = "env";
             }
-            let newValue: string = undefined;
+            let newValue: string;
             switch (varType) {
                 case "env": {
                     let v: string | string[] = additionalEnvironment[name];
-                    if (typeof v === "string") {
+                    if (isString(v)) {
                         newValue = v;
-                    } else if (input === match && v instanceof Array) {
+                    } else if (input === match && isArrayOfString(v)) {
                         newValue = v.join(";");
                     }
-                    if (!newValue) {
+                    if (!isString(newValue)) {
                         newValue = process.env[name];
                     }
                     break;
@@ -224,7 +250,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
                 }
                 default: { assert.fail("unknown varType matched"); }
             }
-            return (newValue) ? newValue : match;
+            return (isString(newValue)) ? newValue : match;
         });
     }
 
@@ -550,10 +576,48 @@ export async function renamePromise(oldName: string, newName: string): Promise<v
 }
 
 export function promptForReloadWindowDueToSettingsChange(): void {
+    promptReloadWindow("Reload the workspace for the settings change to take effect.");
+}
+
+export function promptReloadWindow(message: string): void {
     let reload: string = "Reload";
-    vscode.window.showInformationMessage("Reload the workspace for the settings change to take effect.", reload).then((value: string) => {
+    vscode.window.showInformationMessage(message, reload).then((value: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
+    });
+}
+
+export function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        let parsedUrl: url.Url = url.parse(urlStr);
+        let request: ClientRequest = https.request({
+            host: parsedUrl.host,
+            path: parsedUrl.path,
+            agent: getHttpsProxyAgent(),
+            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
+            headers: headers
+        }, (response) => {
+            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
+                // Download from new location
+                let redirectUrl: string;
+                if (typeof response.headers.location === 'string') {
+                    redirectUrl = response.headers.location;
+                } else {
+                    redirectUrl = response.headers.location[0];
+                }
+                return resolve(downloadFileToDestination(redirectUrl, destinationPath, headers));
+            }
+            if (response.statusCode !== 200) { // If request is not successful
+                return reject();
+            }
+            // Write file using downloaded data
+            let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
+            createdFile.on('finish', () => { resolve(); });
+            response.on('error', (error) => { reject(); });
+            response.pipe(createdFile);
+        });
+        request.on('error', (error) => { reject(); });
+        request.end();
     });
 }
