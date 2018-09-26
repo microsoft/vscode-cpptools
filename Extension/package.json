@@ -464,7 +464,7 @@
             "Insiders"
           ],
           "default": "Default",
-          "description": "Set to “Insiders” to receive the latest Insiders builds, which include upcoming features and bug fixes.",
+          "description": "Set to \"Insiders\" to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
           "scope": "resource"
         }
       }
