@@ -28,6 +28,7 @@ import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
+import { ABTestSettings, getABTestSettings } from '../abTesting';
 
 let ui: UI;
 const configProviderTimeout: number = 2000;
@@ -366,6 +367,7 @@ class DefaultClient implements Client {
             storagePath = path.join(storagePath, serverName);
         }
 
+        let abTestSettings: ABTestSettings = getABTestSettings();
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'cpp' },
@@ -400,7 +402,8 @@ class DefaultClient implements Client {
                 default: {
                     systemIncludePath: settings.defaultSystemIncludePath
                 },
-                vcpkg_root: util.getVcpkgRoot()
+                vcpkg_root: util.getVcpkgRoot(),
+                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {
