@@ -31,37 +31,39 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        // Fail if cppvsdbg type is running on non-Windows
-        if (config.type === 'cppvsdbg' && os.platform() !== 'win32') {
-            vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
-            return undefined;
-        }
-
-        // Modify WSL config for OpenDebugAD7
-        if (os.platform() === 'win32' &&
-            config.pipeTransport &&
-            config.pipeTransport.pipeProgram) {
-            let replacedPipeProgram: string = null;
-            const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
-
-            // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
-            replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
-
-            // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-            if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
-                const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
-                const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
-                
-                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
+        if (config) {
+            // Fail if cppvsdbg type is running on non-Windows
+            if (config.type === 'cppvsdbg' && os.platform() !== 'win32') {
+                vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
+                return undefined;
             }
 
-            if (replacedPipeProgram) {
-                config.pipeTransport.pipeProgram = replacedPipeProgram;
+            // Modify WSL config for OpenDebugAD7
+            if (os.platform() === 'win32' &&
+                config.pipeTransport &&
+                config.pipeTransport.pipeProgram) {
+                let replacedPipeProgram: string = null;
+                const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
+
+                // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
+                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
+
+                // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+                if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
+                    const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                    const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+
+                    replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
+                }
+
+                if (replacedPipeProgram) {
+                    config.pipeTransport.pipeProgram = replacedPipeProgram;
+                }
             }
         }
-
-        return config;
-    }   
+        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213 
+        return config && config.type ? config : null;
+    }
 }
 
 export class CppVsDbgConfigurationProvider extends CppConfigurationProvider {
@@ -71,7 +73,7 @@ export class CppVsDbgConfigurationProvider extends CppConfigurationProvider {
 }
 
 export class CppDbgConfigurationProvider extends CppConfigurationProvider {
-    public constructor(provider: IConfigurationAssetProvider)    {
+    public constructor(provider: IConfigurationAssetProvider) {
         super(provider, DebuggerType.cppdbg);
     }
 }
@@ -101,12 +103,12 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
 
     public getInitialConfigurations(debuggerType: DebuggerType): any {
         let configurationSnippet: IConfigurationSnippet[] = [];
-        
+
         // Only launch configurations are initial configurations
         this.configurations.forEach(configuration => {
-            configurationSnippet.push(configuration.GetLaunchConfiguration()); 
+            configurationSnippet.push(configuration.GetLaunchConfiguration());
         });
-        
+
         let initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
             .map(snippet => JSON.parse(snippet.bodyText));
 
@@ -141,7 +143,7 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock), 
+            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new WindowsConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new WSLConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
@@ -157,7 +159,7 @@ class OSXConfigurationProvider extends DefaultConfigurationProvider {
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram), 
+            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram),
         ];
     }
 }
@@ -177,7 +179,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock), 
+            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
         ];
     }
@@ -220,7 +222,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
 
             items.map((item) => {
                 item.insertText = item.insertText + ','; // Add comma 
-            });  
+            });
         }
 
         return Promise.resolve(new vscode.CompletionList(items, true));
