@@ -177,6 +177,54 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
     return needsUpdate(userVersion, targetVersion) ? targetBuild : undefined;
 }
 
+interface Rate {
+    remaining: number;
+}
+
+interface RateLimit {
+    rate: Rate;
+}
+
+function isRate(input: any): input is Rate {
+    return input && input.remaining && typeof(input.remaining) === 'number';
+}
+
+function isRateLimit(input: any): input is RateLimit {
+    return input && input.rate && isRate(input.rate);
+}
+
+async function getRateLimit(): Promise<RateLimit> {
+    try {
+        const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
+        let data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
+            .catch(() => { throw new Error('Failed to download rate limit JSON'); });
+
+        let rateLimit: any;
+        try {
+            rateLimit = JSON.parse(data);
+        } catch (error) {
+            throw new Error('Failed to parse rate limit JSON');
+        }
+
+        if (isRateLimit(rateLimit)) {
+            return Promise.resolve(rateLimit);
+        } else {
+            throw new Error('Rate limit JSON is not of type RateLimit');
+        }
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+async function rateLimitExceeded(): Promise<boolean> {
+    let rateLimit: RateLimit = await getRateLimit();
+    if (rateLimit.rate.remaining <= 0) {
+        return Promise.resolve(true);
+    } else {
+        return Promise.resolve(false);
+    }
+}
+
 /**
  * Download and parse the release list JSON from the GitHub API into a Build[].
  * @return Information about the released builds of the C/C++ extension.
@@ -191,6 +239,9 @@ async function getReleaseJson(): Promise<Build[]> {
             }
 
             try {
+                if (await rateLimitExceeded()) {
+                    throw new Error('Failed to stay within GitHub API rate limit');
+                }
                 // Download release JSON
                 const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
                 const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
@@ -213,7 +264,7 @@ async function getReleaseJson(): Promise<Build[]> {
                 if (isArrayOfBuilds(releaseJson)) {
                     resolve(releaseJson);
                 } else {
-                    reject(releaseJson);
+                    throw new Error('Release JSON is not of type Build[]');
                 }
             } catch (error) {
                 reject(error);
