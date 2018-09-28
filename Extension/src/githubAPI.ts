@@ -186,15 +186,14 @@ interface RateLimit {
 }
 
 function isRate(input: any): input is Rate {
-    return input && input.remaining && typeof(input.remaining) === 'number';
+    return input && input.remaining && util.isNumber(input.remaining);
 }
 
 function isRateLimit(input: any): input is RateLimit {
-    return input && input.rate && isRate(input.rate);
+    return input && isRate(input.rate);
 }
 
 async function getRateLimit(): Promise<RateLimit> {
-    try {
         const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
         const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
             .catch(() => { throw new Error('Failed to download rate limit JSON'); });
@@ -211,18 +210,11 @@ async function getRateLimit(): Promise<RateLimit> {
         } else {
             throw new Error('Rate limit JSON is not of type RateLimit');
         }
-    } catch (error) {
-        return Promise.reject(error);
-    }
 }
 
 async function rateLimitExceeded(): Promise<boolean> {
     const rateLimit: RateLimit = await getRateLimit();
-    if (rateLimit.rate.remaining <= 0) {
-        return Promise.resolve(true);
-    } else {
-        return Promise.resolve(false);
-    }
+    return rateLimit.rate.remaining <= 0;
 }
 
 /**
