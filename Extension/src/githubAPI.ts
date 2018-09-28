@@ -196,7 +196,7 @@ function isRateLimit(input: any): input is RateLimit {
 async function getRateLimit(): Promise<RateLimit> {
     try {
         const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-        let data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
+        const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
             .catch(() => { throw new Error('Failed to download rate limit JSON'); });
 
         let rateLimit: any;
@@ -217,7 +217,7 @@ async function getRateLimit(): Promise<RateLimit> {
 }
 
 async function rateLimitExceeded(): Promise<boolean> {
-    let rateLimit: RateLimit = await getRateLimit();
+    const rateLimit: RateLimit = await getRateLimit();
     if (rateLimit.rate.remaining <= 0) {
         return Promise.resolve(true);
     } else {
