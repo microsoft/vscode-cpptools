@@ -1,9 +1,21 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.19.0: September 26, 2018
-* Add support for v2 of the configuration provider API. [#2237](https://github.com/Microsoft/vscode-cpptools/issues/2237)
+## Version 0.19.0: September 27, 2018
+* Change the symbol database to update without needing to save. [#202](https://github.com/Microsoft/vscode-cpptools/issues/202)
+* Enable IntelliSense-based `Go to Definition` for the current translation unit, including local variables and overloaded operators. [#255](https://github.com/Microsoft/vscode-cpptools/issues/255), [#979](https://github.com/Microsoft/vscode-cpptools/issues/979)
+* Improved the `Go to Definition` performance with large workspaces and files with lots of `#include`s. [#273](https://github.com/Microsoft/vscode-cpptools/issues/273)
+* Disable `Go to Definition` for invalid tokens, e.g. comments, strings, keywords, etc. [#559](https://github.com/Microsoft/vscode-cpptools/issues/559)
 * Add `C_Cpp.updateChannel` setting for easier access to Insider builds of the extension. [#1526](https://github.com/Microsoft/vscode-cpptools/issues/1526)
+* Add support for v2 of the configuration provider API. [#2237](https://github.com/Microsoft/vscode-cpptools/issues/2237)
+* Fix bug with parsing definitions in `compile_commands.json`. [#2305](https://github.com/Microsoft/vscode-cpptools/issues/2305)
+* Fix `sh` failure when attaching to a remote Linux process. [#2444](https://github.com/Microsoft/vscode-cpptools/issues/2444)
+* Fix incorrect default `cl.exe` macro. [PR #2468](https://github.com/Microsoft/vscode-cpptools/issues/2468)
+* Fix multiple bugs with the symbols in the Outline view not updating correctly. [#2477](https://github.com/Microsoft/vscode-cpptools/issues/2477), [#2500](https://github.com/Microsoft/vscode-cpptools/issues/2500), [#2504](https://github.com/Microsoft/vscode-cpptools/issues/2504)
+* Add support for `workspaceFolderBasename` expansion. [#2491](https://github.com/Microsoft/vscode-cpptools/issues/2491)
+  * Gabriel Arjones (@g-arjones) [PR #2495](https://github.com/Microsoft/vscode-cpptools/pull/2495), [PR #2503](https://github.com/Microsoft/vscode-cpptools/pull/2503)
 * Fix bug with variable resolution. [#2532](https://github.com/Microsoft/vscode-cpptools/issues/2532)
+* Fix off-by-one bug with hover and `Go to Definition`. [#2535](https://github.com/Microsoft/vscode-cpptools/issues/2535)
+* Fix for [Microsoft/vscode#54213](https://github.com/Microsoft/vscode/issues/54213)
 
 ## Version 0.18.1: August 17, 2018
 * Fix 0.18.0 regression causing non-MinGW compilers to use `-fms-extensions` on Windows. [#2424](https://github.com/Microsoft/vscode-cpptools/issues/2424), [#2425](https://github.com/Microsoft/vscode-cpptools/issues/2425)
@@ -13,18 +25,18 @@
 * Add the `C_Cpp.intelliSenseEngine` setting value of `Disabled` (for users who only use the debugger). [#785](https://github.com/Microsoft/vscode-cpptools/issues/785)
 * Add `C_Cpp.workspaceSymbols` setting with default `Just My Code` to filter out system header symbols. [#1119](https://github.com/Microsoft/vscode-cpptools/issues/1119), [#2320](https://github.com/Microsoft/vscode-cpptools/issues/2320)
 * Add `C_Cpp.inactiveRegionForegroundColor` and `C_Cpp.inactiveRegionBackgroundColor` settings. [#1620](https://github.com/Microsoft/vscode-cpptools/issues/1620), [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
-  * John Patterson (@john-patterson) [PR 2308](https://github.com/Microsoft/vscode-cpptools/pull/2308)
+  * John Patterson (@john-patterson) [PR #2308](https://github.com/Microsoft/vscode-cpptools/pull/2308)
 * Add `gcc-x64` `intelliSenseMode` and send the correct clang or gcc version to our parser, fixing various IntelliSense errors. [#2112](https://github.com/Microsoft/vscode-cpptools/issues/2112), [#2175](https://github.com/Microsoft/vscode-cpptools/issues/2175), [#2260](https://github.com/Microsoft/vscode-cpptools/issues/2260), [#2299](https://github.com/Microsoft/vscode-cpptools/issues/2299), [#2317](https://github.com/Microsoft/vscode-cpptools/issues/2317)
 * Make `Go to Definition` on the definition go to the declaration instead. [#2298](https://github.com/Microsoft/vscode-cpptools/issues/2298)
 * Add multi-pass environment variable resolution allowing variables defined in terms of other variables. [#2057](https://github.com/Microsoft/vscode-cpptools/issues/2057)
-  * John Patterson (@john-patterson) [PR 2322](https://github.com/Microsoft/vscode-cpptools/pull/2322)
-* Allow users to use `~` for `${userProfile}` on Windows. [PR 2333](https://github.com/Microsoft/vscode-cpptools/pull/2333)
+  * John Patterson (@john-patterson) [PR #2322](https://github.com/Microsoft/vscode-cpptools/pull/2322)
+* Allow users to use `~` for `${userProfile}` on Windows. [PR #2333](https://github.com/Microsoft/vscode-cpptools/pull/2333)
 * Add support for compiler flags `-fms-extensions` and `-fno-ms-extensions` on Windows (the default for MinGW-based compilers). [#2363](https://github.com/Microsoft/vscode-cpptools/issues/2363)
 * Make completion "show more results" (i.e. inaccessible members) when invoked a 2nd time. [#2386](https://github.com/Microsoft/vscode-cpptools/issues/2386)
 
 ### Bug Fixes
 * Fix attach to process for systems without `bash` by using `sh` instead. [#569](https://github.com/Microsoft/vscode-cpptools/issues/569)
-  * Andy Neff (@andyneff) [PR 2340](https://github.com/Microsoft/vscode-cpptools/pull/2340)
+  * Andy Neff (@andyneff) [PR #2340](https://github.com/Microsoft/vscode-cpptools/pull/2340)
 * Fix IntelliSense crash after hover or completion with `_Complex` types. [#689](https://github.com/Microsoft/vscode-cpptools/issues/689), [#1112](https://github.com/Microsoft/vscode-cpptools/issues/1112)
 * Fix `files.exclude` not working to exclude non-workspace folders from symbol parsing. [#1066](https://github.com/Microsoft/vscode-cpptools/issues/1066)
 * Fix `Switch Header/Source` to give results that match the parent folder name before using just the file name. [#1085](https://github.com/Microsoft/vscode-cpptools/issues/1085)

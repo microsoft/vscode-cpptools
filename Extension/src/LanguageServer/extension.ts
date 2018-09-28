@@ -19,7 +19,7 @@ import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
-import { execSync } from 'child_process';
+import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
 
@@ -235,8 +235,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         const vsCodeScriptPath: string = function(platformInfo): string {
             if (platformInfo.platform === 'win32') {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                // Windows VS Code Insiders breaks VS Code naming conventions
-                let cmdFile: string;
+                let cmdFile: string; // Windows VS Code Insiders breaks VS Code naming conventions
                 if (vsCodeBinName === 'Code - Insiders.exe') {
                     cmdFile = 'code-insiders.cmd';
                 } else {
@@ -249,8 +248,12 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     'Resources', 'app', 'bin', 'code') + '"';
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                const stdout: Buffer = execSync('which ' + vsCodeBinName);
-                return stdout.toString().trim();
+                try {
+                    const stdout: Buffer = execSync('which ' + vsCodeBinName);
+                    return stdout.toString().trim();
+                } catch (error) {
+                    return undefined;
+                }
             }
         }(platformInfo);
         if (!vsCodeScriptPath) {
@@ -258,18 +261,32 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         }
 
         // Install the VSIX
-        const installCommand: string = vsCodeScriptPath + ' --install-extension ' + vsixLocation;
-        try {
-            if (updateChannel === 'Default') {
-                // Uninstall the current version, as the version to install is a previous version
-                const uninstallCommand: string = vsCodeScriptPath + ' --uninstall-extension ms-vscode.cpptools';
-                execSync(uninstallCommand);
+        return new Promise<void>((resolve, reject) => {
+            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+            if (process.pid === undefined) {
+                reject(new Error('Failed to launch VS Code script process for installation'));
+                return;
             }
-            execSync(installCommand);
-            return Promise.resolve();
-        } catch (error) {
-            return Promise.reject(new Error('Failed to install VSIX'));
-        }
+
+            // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+            const timer: NodeJS.Timer = setTimeout(() => {
+                process.kill();
+                reject(new Error('Failed to receive response from VS Code script process for installation within 10s.'));
+            }, 10000);
+
+            // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
+            // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
+            let sentOverride: boolean = false;
+            process.stdout.on('data', () => {
+                if (sentOverride) {
+                    return;
+                }
+                process.stdin.write('0\n');
+                sentOverride = true;
+                clearInterval(timer);
+                resolve();
+            });
+        });
     });
 }
 
@@ -313,8 +330,9 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                     return;
                 }
                 clearInterval(insiderUpdateTimer);
-                util.promptReloadWindow(`The C/C++ Extension has been updated to version ${buildInfo.name}. \
-                    Please reload the window for the changes to take effect.`);
+                const message: string =
+                    `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
+                util.promptReloadWindow(message);
                 telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
 
                 resolve();
@@ -324,10 +342,10 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
             reject(error);
         });
     });
-    return p.catch((error: Error) => {
+    await p.catch((error: Error) => {
         // Handle .then following getTargetBuildInfo rejection
         logFailure(error);
-        return Promise.reject(error);
+        throw error;
     });
 }
 
