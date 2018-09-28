@@ -321,7 +321,6 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
             });
         }, (error: Error) => {
             // Handle getTargetBuildInfo rejection
-            logFailure(error);
             reject(error);
         });
     });
