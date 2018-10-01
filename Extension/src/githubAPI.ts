@@ -222,45 +222,29 @@ async function rateLimitExceeded(): Promise<boolean> {
  * @return Information about the released builds of the C/C++ extension.
  */
 async function getReleaseJson(): Promise<Build[]> {
-    return new Promise<Build[]>((resolve, reject) => {
-        // Create temp file to hold JSON
-        tmp.file(async (err, releaseJsonPath, fd, cleanupCallback) => {
-            if (err) {
-                reject(new Error('Failed to create release json file'));
-                return;
-            }
+    if (await rateLimitExceeded()) {
+        throw new Error('Failed to stay within GitHub API rate limit');
+    }
 
-            try {
-                if (await rateLimitExceeded()) {
-                    throw new Error('Failed to stay within GitHub API rate limit');
-                }
-                // Download release JSON
-                const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
-                const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-                await util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
-                    .catch(() => { throw new Error('Failed to download release JSON'); });
+    // Download release JSON
+    const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
+    const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
 
-                // Read the release JSON file
-                const fileContent: string = await util.readFileText(releaseJsonPath)
-                    .catch(() => { throw new Error('Failed to read release JSON file'); } );
+    const data: string = await util.downloadFileToStr(releaseUrl, header)
+        .catch(() => { throw new Error('Failed to download release JSON'); });
 
-                // Parse the file
-                let releaseJson: any;
-                try {
-                    releaseJson = JSON.parse(fileContent);
-                } catch (error) {
-                    throw new Error('Failed to parse release JSON');
-                }
+    // Parse the file
+    let releaseJson: any;
+    try {
+        releaseJson = JSON.parse(data);
+    } catch (error) {
+        throw new Error('Failed to parse release JSON');
+    }
 
-                // Type check
-                if (isArrayOfBuilds(releaseJson)) {
-                    resolve(releaseJson);
-                } else {
-                    throw new Error('Release JSON is not of type Build[]');
-                }
-            } catch (error) {
-                reject(error);
-            }
-        });
-    });
+    // Type check
+    if (isArrayOfBuilds(releaseJson)) {
+        return releaseJson;
+    } else {
+        throw new Error('Release JSON is not of type Build[]');
+    }
 }
