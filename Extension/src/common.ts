@@ -183,12 +183,20 @@ export function isNumber(input: any): input is number {
     return typeof(input) === "number";
 }
 
+export function isBoolean(input: any): input is boolean {
+    return typeof(input) === "boolean";
+}
+
+export function isArray(input: any): input is any[] {
+    return input instanceof Array;
+}
+
 export function isOptionalString(input: any): input is string|undefined {
     return input === undefined || isString(input);
 }
 
 export function isArrayOfString(input: any): input is string[] {
-    return (input instanceof Array) && input.every(item => isString(item));
+    return isArray(input) && input.every(item => isString(item));
 }
 
 export function isOptionalArrayOfString(input: any): input is string[]|undefined {
