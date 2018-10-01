@@ -6,7 +6,6 @@
 
 import { PackageVersion } from './packageVersion';
 import * as util from './common';
-import * as tmp from 'tmp';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
 
