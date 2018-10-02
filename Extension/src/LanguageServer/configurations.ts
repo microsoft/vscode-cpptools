@@ -215,6 +215,10 @@ export class CppProperties {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             let configuration: Configuration = this.CurrentConfiguration;
             let settings: CppSettings = new CppSettings(this.rootUri);
+            let isUnset: (input: any) => boolean = (input: any) => {
+                // default values for "default" config settings is null.
+                return input === null;
+            };
 
             // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
             // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
@@ -222,32 +226,32 @@ export class CppProperties {
 
             // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
 
-            if (!settings.defaultIncludePath) {
+            if (isUnset(settings.defaultIncludePath)) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
                 let abTestSettings: ABTestSettings = getABTestSettings();
                 let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
                 configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
             }
             // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
-            if (!settings.defaultDefines) {
+            if (isUnset(settings.defaultDefines)) {
                 configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
             }
-            if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
+            if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
             }
-            if (!settings.defaultWindowsSdkVersion && this.defaultWindowsSdkVersion && process.platform === 'win32') {
+            if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
                 configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
-            if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
+            if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
             }
-            if (!settings.defaultCStandard && this.defaultCStandard) {
+            if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
                 configuration.cStandard = this.defaultCStandard;
             }
-            if (!settings.defaultCppStandard && this.defaultCppStandard) {
+            if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
                 configuration.cppStandard = this.defaultCppStandard;
             }
-            if (!settings.defaultIntelliSenseMode) {
+            if (isUnset(settings.defaultIntelliSenseMode)) {
                 configuration.intelliSenseMode = this.defaultIntelliSenseMode;
             }
             this.configurationIncomplete = false;
@@ -431,11 +435,11 @@ export class CppProperties {
     private updateConfiguration(property: string, defaultValue: string, env: Environment): string;
     private updateConfiguration(property: string | boolean, defaultValue: boolean, env: Environment): boolean;
     private updateConfiguration(property, defaultValue, env): any {
-        if (typeof property === "string" || typeof defaultValue === "string") {
+        if (util.isString(property) || util.isString(defaultValue)) {
             return this.resolveVariables(property, defaultValue, env);
-        } else if (typeof property === "boolean" || typeof defaultValue === "boolean") {
+        } else if (util.isBoolean(property) || util.isBoolean(defaultValue)) {
             return this.resolveVariables(property, defaultValue, env);
-        } else if (property instanceof Array || defaultValue instanceof Array) {
+        } else if (util.isArrayOfString(property) || util.isArrayOfString(defaultValue)) {
             if (property) {
                 return this.resolveAndSplit(property, defaultValue, env);
             } else if (property === undefined && defaultValue) {
