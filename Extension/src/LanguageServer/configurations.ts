@@ -238,7 +238,7 @@ export class CppProperties {
             if (!settings.defaultWindowsSdkVersion && this.defaultWindowsSdkVersion && process.platform === 'win32') {
                 configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
-            if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
+            if (settings.defaultCompilerPath === undefined && this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
             }
             if (!settings.defaultCStandard && this.defaultCStandard) {
@@ -697,7 +697,7 @@ export class CppProperties {
                 config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
             }
             // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
-            if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && !settings.defaultCompilerPath) {
+            if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && settings.defaultCompilerPath === undefined) {
                 config.compilerPath = this.defaultCompilerPath;
             }
             if (!config.cStandard && this.defaultCStandard && !settings.defaultCStandard) {
