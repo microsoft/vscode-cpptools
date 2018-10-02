@@ -227,6 +227,8 @@ export class CppProperties {
                 let abTestSettings: ABTestSettings = getABTestSettings();
                 let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
                 configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
+            } else {
+                configuration.includePath = settings.defaultIncludePath;
             }
             // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
             if (!settings.defaultDefines) {
@@ -240,6 +242,8 @@ export class CppProperties {
             }
             if (settings.defaultCompilerPath === undefined && this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
+            } else {
+                configuration.compilerPath = settings.defaultCompilerPath;
             }
             if (!settings.defaultCStandard && this.defaultCStandard) {
                 configuration.cStandard = this.defaultCStandard;
