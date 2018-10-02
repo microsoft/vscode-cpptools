@@ -227,6 +227,8 @@ export class CppProperties {
                 let abTestSettings: ABTestSettings = getABTestSettings();
                 let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
                 configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
+            } else {
+                configuration.includePath = settings.defaultIncludePath;
             }
             // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
             if (!settings.defaultDefines) {
@@ -238,8 +240,10 @@ export class CppProperties {
             if (!settings.defaultWindowsSdkVersion && this.defaultWindowsSdkVersion && process.platform === 'win32') {
                 configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
-            if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
+            if (settings.defaultCompilerPath === undefined && this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
+            } else {
+                configuration.compilerPath = settings.defaultCompilerPath;
             }
             if (!settings.defaultCStandard && this.defaultCStandard) {
                 configuration.cStandard = this.defaultCStandard;
@@ -697,7 +701,7 @@ export class CppProperties {
                 config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
             }
             // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
-            if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && !settings.defaultCompilerPath) {
+            if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && settings.defaultCompilerPath === undefined) {
                 config.compilerPath = this.defaultCompilerPath;
             }
             if (!config.cStandard && this.defaultCStandard && !settings.defaultCStandard) {
