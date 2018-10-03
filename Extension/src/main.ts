@@ -192,17 +192,6 @@ function handleError(error: any): void {
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
-        // If this is a WebResponse error, log the IP that it resolved from the package URL
-        if (error instanceof PackageManagerWebResponseError) {
-            let webRequestPackageError: PackageManagerWebResponseError = error;
-            if (webRequestPackageError.socket) {
-                let address: any = webRequestPackageError.socket.address();
-                if (address) {
-                    installationInformation.telemetryProperties['error.targetIP'] = address.address + ':' + address.port;
-                }
-            }
-        }
-
         let packageError: PackageManagerError = error;
 
         installationInformation.telemetryProperties['error.methodName'] = packageError.methodName;
