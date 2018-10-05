@@ -264,7 +264,7 @@ export class CppProperties {
             Object.assign(result, this.configurationJson.env);
         }
 
-        result["workspaceFolderBasename"] = path.basename(this.rootUri.fsPath);
+        result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
         return result;
     }
 
