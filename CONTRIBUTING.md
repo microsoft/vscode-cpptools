@@ -3,7 +3,7 @@
 ## Contribution Steps
 
 * [Build and debug the extension](Documentation/Building%20the%20Extension.md).
-* Before filling a new issue **check if the issue already exists in it.** 
+* Before filling a new issue **check if the issue already exists in [it](https://github.com/Microsoft/vscode-cpptools/tree/master/.github/ISSUE_TEMPLATE).** 
 * Then file an [issue](https://github.com/Microsoft/vscode-cpptools/issues) and a [pull request](https://github.com/Microsoft/vscode-cpptools/pulls) with the change and we will review it.
 * If the change affects functionality, add a line describing the change to [**CHANGELOG.md**](Extension/CHANGELOG.md).
 * Try and add a test in [**test/extension.test.ts**](Extension/test/unitTests/extension.test.ts).
