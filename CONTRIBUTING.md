@@ -3,7 +3,8 @@
 ## Contribution Steps
 
 * [Build and debug the extension](Documentation/Building%20the%20Extension.md).
-* File an [issue](https://github.com/Microsoft/vscode-cpptools/issues) and a [pull request](https://github.com/Microsoft/vscode-cpptools/pulls) with the change and we will review it.
+* Before filling a new issue **check if the issue already exists in it.** 
+* Then file an [issue](https://github.com/Microsoft/vscode-cpptools/issues) and a [pull request](https://github.com/Microsoft/vscode-cpptools/pulls) with the change and we will review it.
 * If the change affects functionality, add a line describing the change to [**CHANGELOG.md**](Extension/CHANGELOG.md).
 * Try and add a test in [**test/extension.test.ts**](Extension/test/unitTests/extension.test.ts).
 * Run tests via opening the [**Extension**](https://github.com/Microsoft/vscode-cpptools/tree/master/Extension) folder in Visual Studio Code, selecting the "Launch Tests" configuration in the Debug pane, and choosing "Start Debugging".
