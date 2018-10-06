@@ -9,7 +9,7 @@
 * Fix IntelliSense-based `Go to Definition` going to the wrong location after edits are made. [#2579](https://github.com/Microsoft/vscode-cpptools/issues/2579)
 * Fix `Go to Definition` when the `intelliSenseEngineFallback` is `Disabled` and `#include`s are missing. [#2583](https://github.com/Microsoft/vscode-cpptools/issues/2583)
 * Fix empty `C_Cpp.default.*` settings not being used. [#2584](https://github.com/Microsoft/vscode-cpptools/issues/2584)
-* Fix quoting around `ssh`'s command (for the debugger). [#2585] (https://github.com/Microsoft/vscode-cpptools/issues/2585)
+* Fix quoting around `ssh`'s command (for the debugger). [#2585](https://github.com/Microsoft/vscode-cpptools/issues/2585)
 * Fix crash on hover (and `Go to Definition`) when using the `Tag Parser`. [#2586](https://github.com/Microsoft/vscode-cpptools/issues/2586)
 * Fix errors when a workspace folder isn't open. [#2613](https://github.com/Microsoft/vscode-cpptools/issues/2613)
 
