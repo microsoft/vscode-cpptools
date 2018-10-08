@@ -16,7 +16,7 @@ import * as vscode from 'vscode';
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
-import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
+import { PackageManager, PackageManagerError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
 import { getInstallationInformation, InstallationInformation, setInstallationStage } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
@@ -24,6 +24,9 @@ import { CppTools1 } from './cppTools1';
 
 const releaseNotesVersion: number = 3;
 const cppTools: CppTools1 = new CppTools1();
+let languageServiceDisabled: boolean = false;
+let reloadMessageShown: boolean = false;
+let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     initializeTemporaryCommandRegistrar();
@@ -42,6 +45,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 export function deactivate(): Thenable<void> {
     DebuggerExtension.dispose();
     Telemetry.deactivate();
+    disposables.forEach(d => d.dispose());
+
+    if (languageServiceDisabled) {
+        return;
+    }
     return LanguageServer.deactivate();
 }
 
@@ -184,17 +192,6 @@ function handleError(error: any): void {
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
-        // If this is a WebResponse error, log the IP that it resolved from the package URL
-        if (error instanceof PackageManagerWebResponseError) {
-            let webRequestPackageError: PackageManagerWebResponseError = error;
-            if (webRequestPackageError.socket) {
-                let address: any = webRequestPackageError.socket.address();
-                if (address) {
-                    installationInformation.telemetryProperties['error.targetIP'] = address.address + ':' + address.port;
-                }
-            }
-        }
-
         let packageError: PackageManagerError = error;
 
         installationInformation.telemetryProperties['error.methodName'] = packageError.methodName;
@@ -279,6 +276,23 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
+    if (vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+        languageServiceDisabled = true;
+        getTemporaryCommandRegistrarInstance().disableLanguageServer();
+        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+            if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") !== "Disabled") {
+                reloadMessageShown = true;
+                util.promptForReloadWindowDueToSettingsChange();
+            }
+        }));
+        return;
+    }
+    disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+        if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+            reloadMessageShown = true;
+            util.promptForReloadWindowDueToSettingsChange();
+        }
+    }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
@@ -295,6 +309,12 @@ async function finalizeExtensionActivation(): Promise<void> {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
         }
         if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
+            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+        }
+    } else {
+        let packageJson: any = util.getRawPackageJson();
+        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
+            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
             return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
         }
     }

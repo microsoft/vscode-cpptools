@@ -15,6 +15,8 @@ import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
 const configVersion: number = 4;
 
+type Environment = { [key: string]: string | string[] };
+
 // No properties are set in the config since we want to apply vscode settings first (if applicable).
 // That code won't trigger if another value is already set.
 // The property defaults are moved down to applyDefaultIncludePathsAndFrameworks.
@@ -145,7 +147,7 @@ export class CppProperties {
     public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
-    
+
     public get CurrentConfigurationProvider(): string|null {
         if (this.CurrentConfiguration.configurationProvider) {
             return this.CurrentConfiguration.configurationProvider;
@@ -213,6 +215,10 @@ export class CppProperties {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             let configuration: Configuration = this.CurrentConfiguration;
             let settings: CppSettings = new CppSettings(this.rootUri);
+            let isUnset: (input: any) => boolean = (input: any) => {
+                // default values for "default" config settings is null.
+                return input === null;
+            };
 
             // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
             // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
@@ -220,36 +226,46 @@ export class CppProperties {
 
             // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
 
-            if (!settings.defaultIncludePath) {
+            if (isUnset(settings.defaultIncludePath)) {
                 // We don't add system includes to the includePath anymore. The language server has this information.
                 let abTestSettings: ABTestSettings = getABTestSettings();
                 let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
                 configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
             }
             // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
-            if (!settings.defaultDefines) {
+            if (isUnset(settings.defaultDefines)) {
                 configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
             }
-            if (!settings.defaultMacFrameworkPath && process.platform === 'darwin') {
+            if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
                 configuration.macFrameworkPath = this.defaultFrameworks;
             }
-            if (!settings.defaultWindowsSdkVersion && this.defaultWindowsSdkVersion && process.platform === 'win32') {
+            if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
                 configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
-            if (!settings.defaultCompilerPath && this.defaultCompilerPath) {
+            if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
             }
-            if (!settings.defaultCStandard && this.defaultCStandard) {
+            if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
                 configuration.cStandard = this.defaultCStandard;
             }
-            if (!settings.defaultCppStandard && this.defaultCppStandard) {
+            if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
                 configuration.cppStandard = this.defaultCppStandard;
             }
-            if (!settings.defaultIntelliSenseMode) {
+            if (isUnset(settings.defaultIntelliSenseMode)) {
                 configuration.intelliSenseMode = this.defaultIntelliSenseMode;
             }
             this.configurationIncomplete = false;
         }
+    }
+
+    private get ExtendedEnvironment(): Environment {
+        let result: Environment = {};
+        if (this.configurationJson.env) {
+            Object.assign(result, this.configurationJson.env);
+        }
+
+        result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
+        return result;
     }
 
     private async buildVcpkgIncludePath(): Promise<void> {
@@ -393,11 +409,11 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[]): string[] {
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[], env: Environment): string[] {
         let result: string[] = [];
         if (paths) {
             paths.forEach(entry => {
-                let entries: string[] = util.resolveVariables(entry, this.configurationJson.env).split(";").filter(e => e);
+                let entries: string[] = util.resolveVariables(entry, env).split(";").filter(e => e);
                 entries = this.resolveDefaults(entries, defaultValue);
                 result = result.concat(entries);
             });
@@ -405,29 +421,29 @@ export class CppProperties {
         return result;
     }
 
-    private resolveVariables(input: string | boolean, defaultValue: string | boolean): string | boolean {
+    private resolveVariables(input: string | boolean, defaultValue: string | boolean, env: Environment): string | boolean {
         if (input === undefined || input === "${default}") {
             input = defaultValue;
         }
         if (typeof input === "boolean") {
             return input;
         }
-        return util.resolveVariables(input, this.configurationJson.env);
+        return util.resolveVariables(input, env);
     }
 
-    private updateConfiguration(property: string[], defaultValue: string[]): string[];
-    private updateConfiguration(property: string, defaultValue: string): string;
-    private updateConfiguration(property: string | boolean, defaultValue: boolean): boolean;
-    private updateConfiguration(property, defaultValue): any {
-        if (typeof property === "string" || typeof defaultValue === "string") {
-            return this.resolveVariables(property, defaultValue);
-        } else if (typeof property === "boolean" || typeof defaultValue === "boolean") {
-            return this.resolveVariables(property, defaultValue);
-        } else if (property instanceof Array || defaultValue instanceof Array) {
+    private updateConfiguration(property: string[], defaultValue: string[], env: Environment): string[];
+    private updateConfiguration(property: string, defaultValue: string, env: Environment): string;
+    private updateConfiguration(property: string | boolean, defaultValue: boolean, env: Environment): boolean;
+    private updateConfiguration(property, defaultValue, env): any {
+        if (util.isString(property) || util.isString(defaultValue)) {
+            return this.resolveVariables(property, defaultValue, env);
+        } else if (util.isBoolean(property) || util.isBoolean(defaultValue)) {
+            return this.resolveVariables(property, defaultValue, env);
+        } else if (util.isArrayOfString(property) || util.isArrayOfString(defaultValue)) {
             if (property) {
-                return this.resolveAndSplit(property, defaultValue);
+                return this.resolveAndSplit(property, defaultValue, env);
             } else if (property === undefined && defaultValue) {
-                return this.resolveAndSplit(defaultValue, []);
+                return this.resolveAndSplit(defaultValue, [], env);
             }
         }
         return property;
@@ -435,20 +451,21 @@ export class CppProperties {
 
     private updateServerOnFolderSettingsChange(): void {
         let settings: CppSettings = new CppSettings(this.rootUri);
+        let env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let configuration: Configuration = this.configurationJson.configurations[i];
 
-            configuration.includePath = this.updateConfiguration(configuration.includePath, settings.defaultIncludePath);
-            configuration.defines = this.updateConfiguration(configuration.defines, settings.defaultDefines);
-            configuration.macFrameworkPath = this.updateConfiguration(configuration.macFrameworkPath, settings.defaultMacFrameworkPath);
-            configuration.windowsSdkVersion = this.updateConfiguration(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion);
-            configuration.forcedInclude = this.updateConfiguration(configuration.forcedInclude, settings.defaultForcedInclude);
-            configuration.compileCommands = this.updateConfiguration(configuration.compileCommands, settings.defaultCompileCommands);
-            configuration.compilerPath = this.updateConfiguration(configuration.compilerPath, settings.defaultCompilerPath);
-            configuration.cStandard = this.updateConfiguration(configuration.cStandard, settings.defaultCStandard);
-            configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard);
-            configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode);
-            configuration.configurationProvider = this.updateConfiguration(configuration.configurationProvider, settings.defaultConfigurationProvider);
+            configuration.includePath = this.updateConfiguration(configuration.includePath, settings.defaultIncludePath, env);
+            configuration.defines = this.updateConfiguration(configuration.defines, settings.defaultDefines, env);
+            configuration.macFrameworkPath = this.updateConfiguration(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
+            configuration.windowsSdkVersion = this.updateConfiguration(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
+            configuration.forcedInclude = this.updateConfiguration(configuration.forcedInclude, settings.defaultForcedInclude, env);
+            configuration.compileCommands = this.updateConfiguration(configuration.compileCommands, settings.defaultCompileCommands, env);
+            configuration.compilerPath = this.updateConfiguration(configuration.compilerPath, settings.defaultCompilerPath, env);
+            configuration.cStandard = this.updateConfiguration(configuration.cStandard, settings.defaultCStandard, env);
+            configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard, env);
+            configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
+            configuration.configurationProvider = this.updateConfiguration(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
             if (!configuration.browse) {
                 configuration.browse = {};
@@ -467,11 +484,11 @@ export class CppProperties {
                     }
                 }
             } else {
-                configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath);
+                configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath, env);
             }
 
-            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfiguration(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders);
-            configuration.browse.databaseFilename = this.updateConfiguration(configuration.browse.databaseFilename, settings.defaultDatabaseFilename);
+            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfiguration(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
+            configuration.browse.databaseFilename = this.updateConfiguration(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
         }
 
         this.updateCompileCommandsFileWatchers();
@@ -610,6 +627,7 @@ export class CppProperties {
             if (this.configurationJson.env) {
                 delete this.configurationJson.env['workspaceRoot'];
                 delete this.configurationJson.env['workspaceFolder'];
+                delete this.configurationJson.env['workspaceFolderBasename'];
                 delete this.configurationJson.env['default'];
             }
 
@@ -626,7 +644,7 @@ export class CppProperties {
                 if (this.configurationJson.version === 2) {
                     this.updateToVersion3();
                 }
-                
+
                 if (this.configurationJson.version === 3) {
                     this.updateToVersion4();
                 } else {
@@ -638,7 +656,7 @@ export class CppProperties {
             if (dirty) {
                 try {
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-                } catch {
+                } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
                     vscode.window.showWarningMessage('Attempt to update "' + this.propertiesFile.fsPath + '" failed (do you have write access?)');
                 }

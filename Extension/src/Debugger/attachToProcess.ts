@@ -120,10 +120,10 @@ export class RemoteAttachPicker {
 
     private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
         // Commands to get OS and processes
-        const command: string = `sh -c 'uname && if [ $(uname) == "Linux" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) == "Darwin" ] ; ` +
+        const command: string = `sh -c 'uname && if [ $(uname) = "Linux" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = "Darwin" ] ; ` +
             `then ${PsProcessParser.psDarwinCommand}; fi'`;
 
-        return execChildProcess(`${pipeCmd} "${command}"`, null, this._channel).then(output => {
+        return execChildProcess(`${pipeCmd} '${command}'`, null, this._channel).then(output => {
             // OS will be on first line
             // Processess will follow if listed
             let lines: string[] = output.split(/\r?\n/);
