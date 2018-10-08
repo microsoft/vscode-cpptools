@@ -1,8 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.19.1-insiders: October 11th, 2018
+## Version 0.19.1-insiders: October 9th, 2018
 * Fix IntelliSense-based `Go to Definition` on overloads. [#1071](https://github.com/Microsoft/vscode-cpptools/issues/1071)
 * Fix IntelliSense failing if recursive includes removes all paths. [#2442](https://github.com/Microsoft/vscode-cpptools/issues/2442)
+* Fix incorrect IntelliSense errors with MinGW (stop using `-fms-extensions` by default). [#2443](https://github.com/Microsoft/vscode-cpptools/issues/2443), [#2623](https://github.com/Microsoft/vscode-cpptools/issues/2623)
 * Fix error squiggles sometimes not updating after typing. [#2448](https://github.com/Microsoft/vscode-cpptools/issues/2448)
 * Fix IntelliSense-based `Go to Definition` on the identifier of a definition with no declaration. [#2573](https://github.com/Microsoft/vscode-cpptools/issues/2573)
 * Fix IntelliSense-based `Go to Definition` not falling back to the declaration (in certain cases). [#2574](https://github.com/Microsoft/vscode-cpptools/issues/2574)
