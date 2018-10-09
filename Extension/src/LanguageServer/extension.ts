@@ -301,10 +301,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // Helper fn to avoid code duplication
-    let logFailure: (error: Error) => void = (error: Error) => {
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-    };
     // Wrap in new Promise to allow tmp.file callback to successfully resolve/reject
     // as tmp.file does not do anything with the callback functions return value
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
@@ -349,7 +345,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     });
     await p.catch((error: Error) => {
         // Handle .then following getTargetBuildInfo rejection
-        logFailure(error);
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         throw error;
     });
 }
