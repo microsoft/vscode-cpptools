@@ -262,7 +262,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 
         // Install the VSIX
         return new Promise<void>((resolve, reject) => {
-            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation], {shell: true});
             if (process.pid === undefined) {
                 reject(new Error('Failed to launch VS Code script process for installation'));
                 return;
