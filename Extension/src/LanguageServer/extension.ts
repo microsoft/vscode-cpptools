@@ -266,7 +266,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             try {
                 process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation], {shell: true});
                 if (process.pid === undefined) {
-                    throw new Error;
+                    throw new Error();
                 }
             } catch (error) {
                 reject(new Error('Failed to launch VS Code script process for installation'));
@@ -345,7 +345,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     });
     await p.catch((error: Error) => {
         // Handle .then following getTargetBuildInfo rejection'
-        if (error.message.indexOf('/') != -1 || error.message.indexOf('\\') != -1) {
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
         }
         telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
