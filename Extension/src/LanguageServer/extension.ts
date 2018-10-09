@@ -344,7 +344,10 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         });
     });
     await p.catch((error: Error) => {
-        // Handle .then following getTargetBuildInfo rejection
+        // Handle .then following getTargetBuildInfo rejection'
+        if (error.message.indexOf('/') != -1 || error.message.indexOf('\\') != -1) {
+            error.message = "Potential PII hidden";
+        }
         telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         throw error;
     });
