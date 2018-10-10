@@ -242,10 +242,10 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     cmdFile = 'code.cmd';
                 }
                 const vsCodeExeDir: string = path.dirname(process.execPath);
-                return '"' + path.join(vsCodeExeDir, 'bin', cmdFile) + '"';
+                return path.join(vsCodeExeDir, 'bin', cmdFile);
             } else if (platformInfo.platform === 'darwin') {
-                return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
-                    'Resources', 'app', 'bin', 'code') + '"';
+                return path.join(process.execPath, '..', '..', '..', '..', '..',
+                    'Resources', 'app', 'bin', 'code');
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
                 try {
@@ -264,7 +264,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         return new Promise<void>((resolve, reject) => {
             let process: ChildProcess;
             try {
-                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation], {shell: true});
+                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
                 if (process.pid === undefined) {
                     throw new Error();
                 }
@@ -344,12 +344,11 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         });
     });
     await p.catch((error: Error) => {
-        // Handle .then following getTargetBuildInfo rejection'
+        // Handle .then following getTargetBuildInfo rejection
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
         }
         telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-        throw error;
     });
 }
 
