@@ -100,8 +100,10 @@ function vsixNameForPlatform(info: PlatformInformation): string {
             case 'darwin': return 'cpptools-osx.vsix';
             default: {
                 switch (platformInfo.architecture) {
-                    case 'x86': return 'cpptools-linux32.vsix';
                     case 'x86_64': return 'cpptools-linux.vsix';
+                    case 'x86':
+                    case 'i386':
+                    case 'i686': return 'cpptools-linux32.vsix';
                 }
             }
         }
