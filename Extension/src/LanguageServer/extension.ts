@@ -349,7 +349,6 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
             error.message = "Potential PII hidden";
         }
         telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-        throw error;
     });
 }
 
