@@ -242,10 +242,10 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     cmdFile = 'code.cmd';
                 }
                 const vsCodeExeDir: string = path.dirname(process.execPath);
-                return '"' + path.join(vsCodeExeDir, 'bin', cmdFile) + '"';
+                return path.join(vsCodeExeDir, 'bin', cmdFile);
             } else if (platformInfo.platform === 'darwin') {
-                return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
-                    'Resources', 'app', 'bin', 'code') + '"';
+                return path.join(process.execPath, '..', '..', '..', '..', '..',
+                    'Resources', 'app', 'bin', 'code');
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
                 try {
@@ -264,7 +264,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         return new Promise<void>((resolve, reject) => {
             let process: ChildProcess;
             try {
-                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation], {shell: true});
+                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
                 if (process.pid === undefined) {
                     throw new Error;
                 }
