@@ -1,10 +1,13 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.19.1-insiders2: October 11th, 2018
+## Version 0.19.1-insiders2: October 12, 2018
 * Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
 * Unify Visual Studio Code debug protocol parsing by using a shared library with Visual Studio.
+* Fix `-isystem` without a space after getting ignored in `compile_comamands.json`. [#2629](https://github.com/Microsoft/vscode-cpptools/issues/2629)
+* Fix Insiders update channel installation failure on Windows/Mac. [#2636](https://github.com/Microsoft/vscode-cpptools/issues/2636)
+* Fix IntelliSense-based `Go to Declaration` falling back to the Tag Parser if the definition is also in the TU. [#2642](https://github.com/Microsoft/vscode-cpptools/issues/2642)
 
-## Version 0.19.1-insiders: October 9th, 2018
+## Version 0.19.1-insiders: October 9, 2018
 * Fix IntelliSense-based `Go to Definition` on overloads. [#1071](https://github.com/Microsoft/vscode-cpptools/issues/1071)
 * Fix IntelliSense failing if recursive includes removes all paths. [#2442](https://github.com/Microsoft/vscode-cpptools/issues/2442)
 * Fix incorrect IntelliSense errors with MinGW (stop using `-fms-extensions` by default). [#2443](https://github.com/Microsoft/vscode-cpptools/issues/2443), [#2623](https://github.com/Microsoft/vscode-cpptools/issues/2623)
@@ -515,7 +518,7 @@
 * Switch between header and source.
 * Control which files are processed under include path.
 
-## Version 0.6.1: June 03, 2016
+## Version 0.6.1: June 3, 2016
 * Bug fixes.
 
 ## Version 0.6.0: May 24, 2016
