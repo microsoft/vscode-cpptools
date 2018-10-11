@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.19.1-insiders2: October 11th, 2018
+* Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
+* Unify Visual Studio Code debug protocol parsing by using a shared library with Visual Studio.
+
 ## Version 0.19.1-insiders: October 9th, 2018
 * Fix IntelliSense-based `Go to Definition` on overloads. [#1071](https://github.com/Microsoft/vscode-cpptools/issues/1071)
 * Fix IntelliSense failing if recursive includes removes all paths. [#2442](https://github.com/Microsoft/vscode-cpptools/issues/2442)

@@ -1511,7 +1511,7 @@
     },
     {
       "description": "Mono Framework Assemblies",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=816539",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=2027135",
       "platforms": [
         "linux",
         "darwin"
@@ -1520,7 +1520,7 @@
     },
     {
       "description": "Mono Runtime (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=816540",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=2027410",
       "platforms": [
         "linux"
       ],
@@ -1535,7 +1535,7 @@
     },
     {
       "description": "Mono Runtime (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=816541",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=2027416",
       "platforms": [
         "linux"
       ],
@@ -1548,7 +1548,7 @@
     },
     {
       "description": "Mono Runtime (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=816542",
+      "url": "https://go.microsoft.com/fwlink/?LinkId=2027403",
       "platforms": [
         "darwin"
       ],
