@@ -129,6 +129,8 @@ function copyBinaryDependencies(): void {
     copy(openDebugRoot, DebugAdapterBinPath, "OpenDebugAD7.exe.config");
     copy(openDebugRoot, DebugAdapterBinPath, "OpenDebugAD7.exe.mdb");
     copy(openDebugRoot, DebugAdapterBinPath, "Newtonsoft.Json.dll");
+    copy(openDebugRoot, DebugAdapterBinPath, "WindowsDebugLauncher.exe");
+    copy(openDebugRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.dll");
 }
 
 function copyMonoDependencies(): void {
