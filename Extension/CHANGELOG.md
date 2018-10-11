@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.19.1-insiders2: October 11th, 2018
+## Version 0.19.1-insiders2: October 12th, 2018
 * Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
 * Unify Visual Studio Code debug protocol parsing by using a shared library with Visual Studio.
 * Fix `-isystem` without a space after getting ignored in `compile_comamands.json`. [#2629](https://github.com/Microsoft/vscode-cpptools/issues/2629)
