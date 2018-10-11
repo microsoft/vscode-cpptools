@@ -118,6 +118,7 @@ function copyBinaryDependencies(): void {
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MIDebugEngine.dll");
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MIDebugEngine.dll.mdb");
     copy(miEngineRoot, DebugAdapterBinPath, "osxlaunchhelper.scpt");
+    copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Debugger.Interop.15.0.dll");
 
     copy(openDebugRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Debugger.Interop.10.0.dll");
     copy(openDebugRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Debugger.Interop.11.0.dll");
