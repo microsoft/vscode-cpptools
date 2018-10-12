@@ -472,88 +472,88 @@
     "commands": [
       {
         "command": "C_Cpp.ConfigurationSelect",
-        "title": "Select a Configuration...",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.configurationSelect.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ConfigurationProviderSelect",
-        "title": "Change Configuration Provider...",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.configurationProviderSelect.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ConfigurationEdit",
-        "title": "Edit Configurations...",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.configurationEdit.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.GoToDeclaration",
-        "title": "Go to Declaration",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.goToDeclaration.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.PeekDeclaration",
-        "title": "Peek Declaration",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.peekDeclaration.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.SwitchHeaderSource",
-        "title": "Switch Header/Source",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.switchHeaderSource.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.Navigate",
-        "title": "Navigate...",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.navigate.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ToggleSnippets",
-        "title": "Toggle Snippets",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.toggleSnippets.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ToggleErrorSquiggles",
-        "title": "Toggle Error Squiggles",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.toggleErrorSquiggles.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ToggleIncludeFallback",
-        "title": "Toggle IntelliSense Engine Fallback on Include Errors",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.toggleIncludeFallback.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ToggleDimInactiveRegions",
-        "title": "Toggle Inactive Region Colorization",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.toggleDimInactiveRegions.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ShowReleaseNotes",
-        "title": "Show Release Notes",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.showReleaseNotes.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ResetDatabase",
-        "title": "Reset IntelliSense Database",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.resetDatabase.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.PauseParsing",
-        "title": "Pause Parsing",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.pauseParsing.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ResumeParsing",
-        "title": "Resume Parsing",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.resumeParsing.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ShowParsingCommands",
-        "title": "Show Parsing Commands",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.showParsingCommands.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.TakeSurvey",
-        "title": "Take Survey",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.takeSurvey.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
