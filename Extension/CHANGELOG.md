@@ -3,7 +3,7 @@
 ## Version 0.19.1-insiders2: October 16, 2018
 * Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
 * Unify Visual Studio Code debug protocol parsing by using a shared library with Visual Studio.
-* Fix `#include` completion not working with `compile_commands.json` or custom configuration providers. [#2242](https://github.com/Microsoft/vscode-cpptools/issues/2242)
+* Fix `#include` completion not working with `compile_commands.json` and custom configuration providers. [#2242](https://github.com/Microsoft/vscode-cpptools/issues/2242)
 * Fix Intellisense-based `Go to Definition` falling back to the Tag Parser for definitions not in the TU. [#2536](https://github.com/Microsoft/vscode-cpptools/issues/2536)
 * Fix `-isystem` without a space after getting ignored in `compile_comamands.json`. [#2629](https://github.com/Microsoft/vscode-cpptools/issues/2629)
 * Fix Insiders update channel installation failure on Windows/Mac. [#2636](https://github.com/Microsoft/vscode-cpptools/issues/2636)
