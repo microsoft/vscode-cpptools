@@ -28,11 +28,11 @@ export class PackageVersion {
                 this.suffixVersion = parseInt(tokens[3].substring(firstDigitOffset));
             } else {
                 this.suffix = tokens[3];
-                this.suffixVersion = 0;
+                this.suffixVersion = 1;
             }
         } else {
-            this.suffix = tokens[3];
-            this.suffixVersion = 0;
+            this.suffix = undefined;
+            this.suffixVersion = 1;
         }
 
         if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
