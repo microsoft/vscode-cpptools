@@ -32,7 +32,7 @@ export class PackageVersion {
             }
         } else {
             this.suffix = undefined;
-            this.suffixVersion = 1;
+            this.suffixVersion = 0;
         }
 
         if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
