@@ -105,6 +105,10 @@ function onActivationEvent(): void {
 }
 
 function realActivation(): void {
+    if (new CppSettings().intelliSenseEngine === "Disabled") {
+        throw new Error("Do not activate the extension when IntelliSense is disabled.");
+    }
+
     realActivationOccurred = true;
     console.log("starting language server");
     clients = new ClientCollection();
