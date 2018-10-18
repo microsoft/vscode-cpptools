@@ -4,8 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CustomConfigurationProvider, Version, SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import * as vscode from 'vscode';
+import { CustomConfigurationProvider, Version, SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { CppSettings } from './settings';
 
 /**
  * An interface that is guaranteed to be backward compatible with version 0
@@ -135,6 +136,11 @@ export class CustomConfigurationProviderCollection {
     }
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
+        if (new CppSettings().intelliSenseEngine === "Disabled") {
+            console.warn("IntelliSense is disabled. Provider will not be registered.");
+            return false;
+        }
+
         let wrapper: CustomProviderWrapper = new CustomProviderWrapper(provider, version);
         if (!wrapper.isValid) {
             this.logProblems(provider, version);
