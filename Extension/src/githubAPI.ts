@@ -131,6 +131,10 @@ export interface BuildInfo {
 export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo> {
     return getReleaseJson()
         .then(builds => {
+            if (!builds || builds.length === 0) {
+                return undefined;
+            }
+
             // If the user version is greater than or incomparable to the latest available verion then there is no need to update
             // Allows testing pre-releases without accidentally downgrading to the latest version
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
@@ -159,6 +163,7 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
 /**
  * Determines whether there exists a Build in the given Build[] that should be installed.
  * @param builds The GitHub release list parsed as an array of Builds.
+ * @param userVersion The verion of the extension that the user is running.
  * @param updateChannel The user's updateChannel setting.
  * @return The Build if the user should update to it, otherwise undefined.
  */
