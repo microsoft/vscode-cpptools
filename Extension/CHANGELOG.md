@@ -1,15 +1,21 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.19.1-insiders3: October 19, 2018
+* Fix `#include` completion not working with `compile_commands.json` or custom configuration providers. [#2242](https://github.com/Microsoft/vscode-cpptools/issues/2242)
+* Fix `-isystem` without a space after getting ignored in `compile_comamands.json`. [#2629](https://github.com/Microsoft/vscode-cpptools/issues/2629)
+* Fix the `Disabled` `intelliSenseEngine` setting not working with custom configuration providers. [#2656](https://github.com/Microsoft/vscode-cpptools/issues/2656)
+* Fix IntelliSense-based `Go to Definition` returning results with non-matching signatures. [#2677](https://github.com/Microsoft/vscode-cpptools/issues/2677)
+* Fix Insiders update channel not working for `0.19.1-insiders`. [#2685](https://github.com/Microsoft/vscode-cpptools/issues/2685)
+
 ## Version 0.19.1-insiders2: October 16, 2018
 * Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
 * Unify Visual Studio Code debug protocol parsing by using a shared library with Visual Studio.
 * Fix Intellisense-based `Go to Definition` falling back to the Tag Parser for definitions not in the TU. [#2536](https://github.com/Microsoft/vscode-cpptools/issues/2536)
-* Fix `-isystem` without a space after getting ignored in `compile_comamands.json`. [#2629](https://github.com/Microsoft/vscode-cpptools/issues/2629)
 * Fix Insiders update channel installation failure on Windows/Mac. [#2636](https://github.com/Microsoft/vscode-cpptools/issues/2636)
 * Fix IntelliSense-based `Go to Declaration` falling back to the Tag Parser if the definition is also in the TU. [#2642](https://github.com/Microsoft/vscode-cpptools/issues/2642)
 
 ## Version 0.19.1-insiders: October 9, 2018
-* Fix IntelliSense-based `Go to Definition` on overloads. [#1071](https://github.com/Microsoft/vscode-cpptools/issues/1071)
+* Fix IntelliSense-based `Go to Definition` on overloads (in the same TU). [#1071](https://github.com/Microsoft/vscode-cpptools/issues/1071)
 * Fix IntelliSense failing if recursive includes removes all paths. [#2442](https://github.com/Microsoft/vscode-cpptools/issues/2442)
 * Fix incorrect IntelliSense errors with MinGW (stop using `-fms-extensions` by default). [#2443](https://github.com/Microsoft/vscode-cpptools/issues/2443), [#2623](https://github.com/Microsoft/vscode-cpptools/issues/2623)
 * Fix error squiggles sometimes not updating after typing. [#2448](https://github.com/Microsoft/vscode-cpptools/issues/2448)
@@ -20,7 +26,7 @@
 * Fix empty `C_Cpp.default.*` settings not being used. [#2584](https://github.com/Microsoft/vscode-cpptools/issues/2584)
 * Fix quoting around `ssh`'s command (for the debugger). [#2585](https://github.com/Microsoft/vscode-cpptools/issues/2585)
 * Fix crash on hover (and `Go to Definition`) when using the `Tag Parser`. [#2586](https://github.com/Microsoft/vscode-cpptools/issues/2586)
-* Fix errors when a workspace folder isn't open. [#2613](https://github.com/Microsoft/vscode-cpptools/issues/2613)
+* Fix errors when a workspace folder isn't open. [#2613](https://github.com/Microsoft/vscode-cpptools/issues/2613), [#2691](https://github.com/Microsoft/vscode-cpptools/issues/2691)
 
 ## Version 0.19.0: September 27, 2018
 * Change the symbol database to update without needing to save. [#202](https://github.com/Microsoft/vscode-cpptools/issues/202)
