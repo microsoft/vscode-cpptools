@@ -12,30 +12,40 @@ const mocha = require('gulp-mocha');
 const fs = require('fs');
 const optionsSchemaGenerator = require('./out/tools/GenerateOptionsSchema');
 
-gulp.task('unitTests', () => {
+gulp.task('unitTests', (done) => {
     env.set({
             CODE_TESTS_PATH: "./out/test/unitTests",
         });
 
-    gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
+    return gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
         .pipe(mocha({ ui: "tdd" }))
-        .once('error', err => process.exit(1))
-        .once('end', () => process.exit())
+        .once('error', err => {
+            done();
+            process.exit(1);
+        })
+        .once('end', () => {
+            done();
+            process.exit();
+        });
 });
 
-gulp.task('integrationTests', () => {
+gulp.task('integrationTests', (done) => {
     env.set({
             CODE_TESTS_PATH: "./out/test/integrationTests",
             CODE_TESTS_WORKSPACE: "./test/integrationTests/testAssets/SimpleCppProject"
         });
 
-    gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
+    return gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
         .pipe(mocha({ ui: "tdd" }))
-        .once('error', err => process.exit(1))
-        .once('end', () => process.exit())
+        .once('error', err => {
+            done();
+            process.exit(1);
+        })
+        .once('end', () => {
+            done();
+            process.exit();
+        });
 });
-
-gulp.task('allTests', ['unitTests', 'integrationTests']);
 
 /// Misc Tasks
 const allTypeScript = [
@@ -55,7 +65,7 @@ const lintReporter = (output, file, options) => {
 };
 
 gulp.task('tslint', () => {
-    gulp.src(allTypeScript)
+    return gulp.src(allTypeScript)
         .pipe(tslint({
             program: require('tslint').Linter.createProgram("./tsconfig.json"),
             configuration: "./tslint.json"
@@ -66,14 +76,19 @@ gulp.task('tslint', () => {
         }))
 });
 
-gulp.task('pr-check', () => {
+gulp.task('pr-check', (done) => {
     const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
     if (packageJson.activationEvents.length !== 1 && packageJson.activationEvents[0] !== '*') {
         console.log('Please make sure to not check in package.json that has been rewritten by the extension activation. If you intended to have changes in package.json, please only check-in your changes. If you did not, please run `git checkout -- package.json`.');
+        done();
         process.exit(1);
     }
+
+    done();
 });
 
-gulp.task('generateOptionsSchema', () => {
+gulp.task('generateOptionsSchema', (done) => {
     optionsSchemaGenerator.generateOptionsSchema();
+
+    done();
 });
