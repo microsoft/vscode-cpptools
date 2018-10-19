@@ -130,7 +130,21 @@ export interface BuildInfo {
  */
 export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo> {
     return getReleaseJson()
-        .then(builds => getTargetBuild(builds, updateChannel))
+        .then(builds => {
+            if (!builds || builds.length === 0) {
+                return undefined;
+            }
+
+            // If the user version is greater than or incomparable to the latest available verion then there is no need to update
+            // Allows testing pre-releases without accidentally downgrading to the latest version
+            const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+            const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
+            if (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders')) {
+                return undefined;
+            }
+
+            return getTargetBuild(builds, userVersion, updateChannel);
+        })
         .then(async build => {
             if (!build) {
                 return Promise.resolve(undefined);
@@ -149,10 +163,11 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
 /**
  * Determines whether there exists a Build in the given Build[] that should be installed.
  * @param builds The GitHub release list parsed as an array of Builds.
+ * @param userVersion The verion of the extension that the user is running.
  * @param updateChannel The user's updateChannel setting.
  * @return The Build if the user should update to it, otherwise undefined.
  */
-function getTargetBuild(builds: Build[], updateChannel: string): Build {
+function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build {
     // Get predicates to determine the build to install, if any
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
@@ -173,7 +188,6 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
     }
 
     // Check current version against target's version to determine if the installation should happen
-    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
     return needsUpdate(userVersion, targetVersion) ? targetBuild : undefined;
 }
