@@ -118,6 +118,7 @@ function copyBinaryDependencies(): void {
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MIDebugEngine.dll");
     copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.MIDebugEngine.dll.mdb");
     copy(miEngineRoot, DebugAdapterBinPath, "osxlaunchhelper.scpt");
+    copy(miEngineRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Debugger.Interop.15.0.dll");
 
     copy(openDebugRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Debugger.Interop.10.0.dll");
     copy(openDebugRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Debugger.Interop.11.0.dll");
@@ -129,6 +130,8 @@ function copyBinaryDependencies(): void {
     copy(openDebugRoot, DebugAdapterBinPath, "OpenDebugAD7.exe.config");
     copy(openDebugRoot, DebugAdapterBinPath, "OpenDebugAD7.exe.mdb");
     copy(openDebugRoot, DebugAdapterBinPath, "Newtonsoft.Json.dll");
+    copy(openDebugRoot, DebugAdapterBinPath, "WindowsDebugLauncher.exe");
+    copy(openDebugRoot, DebugAdapterBinPath, "Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.dll");
 }
 
 function copyMonoDependencies(): void {

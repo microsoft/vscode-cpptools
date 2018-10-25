@@ -183,12 +183,20 @@ export function isNumber(input: any): input is number {
     return typeof(input) === "number";
 }
 
+export function isBoolean(input: any): input is boolean {
+    return typeof(input) === "boolean";
+}
+
+export function isArray(input: any): input is any[] {
+    return input instanceof Array;
+}
+
 export function isOptionalString(input: any): input is string|undefined {
     return input === undefined || isString(input);
 }
 
 export function isArrayOfString(input: any): input is string[] {
-    return (input instanceof Array) && input.every(item => isString(item));
+    return isArray(input) && input.every(item => isString(item));
 }
 
 export function isOptionalArrayOfString(input: any): input is string[]|undefined {
@@ -616,6 +624,39 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
             createdFile.on('finish', () => { resolve(); });
             response.on('error', (error) => { reject(); });
             response.pipe(createdFile);
+        });
+        request.on('error', (error) => { reject(); });
+        request.end();
+    });
+}
+
+export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders): Promise<any> {
+    return new Promise<string>((resolve, reject) => {
+        let parsedUrl: url.Url = url.parse(urlStr);
+        let request: ClientRequest = https.request({
+            host: parsedUrl.host,
+            path: parsedUrl.path,
+            agent: getHttpsProxyAgent(),
+            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
+            headers: headers
+        }, (response) => {
+            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
+                // Download from new location
+                let redirectUrl: string;
+                if (typeof response.headers.location === 'string') {
+                    redirectUrl = response.headers.location;
+                } else {
+                    redirectUrl = response.headers.location[0];
+                }
+                return resolve(downloadFileToStr(redirectUrl, headers));
+            }
+            if (response.statusCode !== 200) { // If request is not successful
+                return reject();
+            }
+            let downloadedData: string = '';
+            response.on('data', (data) => { downloadedData += data; });
+            response.on('error', (error) => { reject(); });
+            response.on('end', () => { resolve(downloadedData); });
         });
         request.on('error', (error) => { reject(); });
         request.end();

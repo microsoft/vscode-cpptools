@@ -68,7 +68,11 @@
   A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.
 
 * #### `compilerPath` (optional)
-  The absolute path to the compiler you use to build your project. The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense. Args can be added to modify the includes/defines used, e.g. `-nostdinc++`, `-m32`, etc., but paths with spaces must be surrounded by double quotes (`"`) if args are used.
+  The absolute path to the compiler you use to build your project. The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.
+  
+  Args can be added to modify the includes/defines used, e.g. `-nostdinc++`, `-m32`, `-fno-ms-extensions`, etc., but paths with spaces must be surrounded by double quotes (`"`) if args are used.
+  
+  If you want to disable automatic querying of system include paths and defines, set this value to the emptry string `""`. This is generally not recommended, but there are some cases where automatic querying of system includes and defines is undesirable.
 
 * #### `cStandard`
   The C standard revision to use for IntelliSense in your project.

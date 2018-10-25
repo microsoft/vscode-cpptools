@@ -105,6 +105,10 @@ function onActivationEvent(): void {
 }
 
 function realActivation(): void {
+    if (new CppSettings().intelliSenseEngine === "Disabled") {
+        throw new Error("Do not activate the extension when IntelliSense is disabled.");
+    }
+
     realActivationOccurred = true;
     console.log("starting language server");
     clients = new ClientCollection();
@@ -242,10 +246,10 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     cmdFile = 'code.cmd';
                 }
                 const vsCodeExeDir: string = path.dirname(process.execPath);
-                return '"' + path.join(vsCodeExeDir, 'bin', cmdFile) + '"';
+                return path.join(vsCodeExeDir, 'bin', cmdFile);
             } else if (platformInfo.platform === 'darwin') {
-                return '"' + path.join(process.execPath, '..', '..', '..', '..', '..',
-                    'Resources', 'app', 'bin', 'code') + '"';
+                return path.join(process.execPath, '..', '..', '..', '..', '..',
+                    'Resources', 'app', 'bin', 'code');
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
                 try {
@@ -262,8 +266,13 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
 
         // Install the VSIX
         return new Promise<void>((resolve, reject) => {
-            let process: ChildProcess = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
-            if (process.pid === undefined) {
+            let process: ChildProcess;
+            try {
+                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+                if (process.pid === undefined) {
+                    throw new Error();
+                }
+            } catch (error) {
                 reject(new Error('Failed to launch VS Code script process for installation'));
                 return;
             }
@@ -296,10 +305,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // Helper fn to avoid code duplication
-    let logFailure: (error: Error) => void = (error: Error) => {
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-    };
     // Wrap in new Promise to allow tmp.file callback to successfully resolve/reject
     // as tmp.file does not do anything with the callback functions return value
     const p: Promise<void> = new Promise<void>((resolve, reject) => {
@@ -339,14 +344,15 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
             });
         }, (error: Error) => {
             // Handle getTargetBuildInfo rejection
-            logFailure(error);
             reject(error);
         });
     });
     await p.catch((error: Error) => {
         // Handle .then following getTargetBuildInfo rejection
-        logFailure(error);
-        throw error;
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
     });
 }
 
@@ -658,6 +664,11 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     if (data.length > 16384) {
         data = data.substr(0, 16384) + "...";
     }
+    if (data.length < 2) {
+        return; // Don't send telemetry if there's no call stack.
+    }
+    // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
+    data = data.replace(/0x................ /g, "");
     crashObject["CrashingThreadCallStack"] = data;
     telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
 }

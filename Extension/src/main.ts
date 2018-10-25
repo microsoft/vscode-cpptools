@@ -16,7 +16,7 @@ import * as vscode from 'vscode';
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
-import { PackageManager, PackageManagerError, PackageManagerWebResponseError, IPackage } from './packageManager';
+import { PackageManager, PackageManagerError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
 import { getInstallationInformation, InstallationInformation, setInstallationStage } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
@@ -192,17 +192,6 @@ function handleError(error: any): void {
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
-        // If this is a WebResponse error, log the IP that it resolved from the package URL
-        if (error instanceof PackageManagerWebResponseError) {
-            let webRequestPackageError: PackageManagerWebResponseError = error;
-            if (webRequestPackageError.socket) {
-                let address: any = webRequestPackageError.socket.address();
-                if (address) {
-                    installationInformation.telemetryProperties['error.targetIP'] = address.address + ':' + address.port;
-                }
-            }
-        }
-
         let packageError: PackageManagerError = error;
 
         installationInformation.telemetryProperties['error.methodName'] = packageError.methodName;

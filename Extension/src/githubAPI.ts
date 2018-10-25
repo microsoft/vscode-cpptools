@@ -6,7 +6,6 @@
 
 import { PackageVersion } from './packageVersion';
 import * as util from './common';
-import * as tmp from 'tmp';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
 
@@ -101,8 +100,10 @@ function vsixNameForPlatform(info: PlatformInformation): string {
             case 'darwin': return 'cpptools-osx.vsix';
             default: {
                 switch (platformInfo.architecture) {
-                    case 'x86': return 'cpptools-linux32.vsix';
                     case 'x86_64': return 'cpptools-linux.vsix';
+                    case 'x86':
+                    case 'i386':
+                    case 'i686': return 'cpptools-linux32.vsix';
                 }
             }
         }
@@ -129,7 +130,21 @@ export interface BuildInfo {
  */
 export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo> {
     return getReleaseJson()
-        .then(builds => getTargetBuild(builds, updateChannel))
+        .then(builds => {
+            if (!builds || builds.length === 0) {
+                return undefined;
+            }
+
+            // If the user version is greater than or incomparable to the latest available verion then there is no need to update
+            // Allows testing pre-releases without accidentally downgrading to the latest version
+            const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+            const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
+            if (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders')) {
+                return undefined;
+            }
+
+            return getTargetBuild(builds, userVersion, updateChannel);
+        })
         .then(async build => {
             if (!build) {
                 return Promise.resolve(undefined);
@@ -148,10 +163,11 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
 /**
  * Determines whether there exists a Build in the given Build[] that should be installed.
  * @param builds The GitHub release list parsed as an array of Builds.
+ * @param userVersion The verion of the extension that the user is running.
  * @param updateChannel The user's updateChannel setting.
  * @return The Build if the user should update to it, otherwise undefined.
  */
-function getTargetBuild(builds: Build[], updateChannel: string): Build {
+function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build {
     // Get predicates to determine the build to install, if any
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
@@ -172,9 +188,48 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
     }
 
     // Check current version against target's version to determine if the installation should happen
-    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
     return needsUpdate(userVersion, targetVersion) ? targetBuild : undefined;
+}
+
+interface Rate {
+    remaining: number;
+}
+
+interface RateLimit {
+    rate: Rate;
+}
+
+function isRate(input: any): input is Rate {
+    return input && input.remaining && util.isNumber(input.remaining);
+}
+
+function isRateLimit(input: any): input is RateLimit {
+    return input && isRate(input.rate);
+}
+
+async function getRateLimit(): Promise<RateLimit> {
+    const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
+    const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
+        .catch(() => { throw new Error('Failed to download rate limit JSON'); });
+
+    let rateLimit: any;
+    try {
+        rateLimit = JSON.parse(data);
+    } catch (error) {
+        throw new Error('Failed to parse rate limit JSON');
+    }
+
+    if (isRateLimit(rateLimit)) {
+        return Promise.resolve(rateLimit);
+    } else {
+        throw new Error('Rate limit JSON is not of type RateLimit');
+    }
+}
+
+async function rateLimitExceeded(): Promise<boolean> {
+    const rateLimit: RateLimit = await getRateLimit();
+    return rateLimit.rate.remaining <= 0;
 }
 
 /**
@@ -182,42 +237,29 @@ function getTargetBuild(builds: Build[], updateChannel: string): Build {
  * @return Information about the released builds of the C/C++ extension.
  */
 async function getReleaseJson(): Promise<Build[]> {
-    return new Promise<Build[]>((resolve, reject) => {
-        // Create temp file to hold JSON
-        tmp.file(async (err, releaseJsonPath, fd, cleanupCallback) => {
-            if (err) {
-                reject(new Error('Failed to create release json file'));
-                return;
-            }
+    if (await rateLimitExceeded()) {
+        throw new Error('Failed to stay within GitHub API rate limit');
+    }
 
-            try {
-                // Download release JSON
-                const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
-                const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-                await util.downloadFileToDestination(releaseUrl, releaseJsonPath, header)
-                    .catch(() => { throw new Error('Failed to download release JSON'); });
+    // Download release JSON
+    const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
+    const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
 
-                // Read the release JSON file
-                const fileContent: string = await util.readFileText(releaseJsonPath)
-                    .catch(() => { throw new Error('Failed to read release JSON file'); } );
+    const data: string = await util.downloadFileToStr(releaseUrl, header)
+        .catch(() => { throw new Error('Failed to download release JSON'); });
 
-                // Parse the file
-                let releaseJson: any;
-                try {
-                    releaseJson = JSON.parse(fileContent);
-                } catch (error) {
-                    throw new Error('Failed to parse release JSON');
-                }
+    // Parse the file
+    let releaseJson: any;
+    try {
+        releaseJson = JSON.parse(data);
+    } catch (error) {
+        throw new Error('Failed to parse release JSON');
+    }
 
-                // Type check
-                if (isArrayOfBuilds(releaseJson)) {
-                    resolve(releaseJson);
-                } else {
-                    reject(releaseJson);
-                }
-            } catch (error) {
-                reject(error);
-            }
-        });
-    });
+    // Type check
+    if (isArrayOfBuilds(releaseJson)) {
+        return releaseJson;
+    } else {
+        throw new Error('Release JSON is not of type Build[]');
+    }
 }
