@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.20.0: October 29, 2018
-* Add IntegratedTerminal suport for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
+* Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
 * Unify Visual Studio Code debug protocol parsing by using a shared library with Visual Studio.
 * Fix IntelliSense-based `Go to Definition` on overloads (in the same TU). [#1071](https://github.com/Microsoft/vscode-cpptools/issues/1071)
 * Fix inactive regions not being disabled when falling back to the Tag Parser. [#2181](https://github.com/Microsoft/vscode-cpptools/issues/2181)
@@ -10,7 +10,7 @@
 * Fix incorrect IntelliSense errors with MinGW (stop using `-fms-extensions` by default). [#2443](https://github.com/Microsoft/vscode-cpptools/issues/2443), [#2623](https://github.com/Microsoft/vscode-cpptools/issues/2623)
 * Fix error squiggles sometimes not updating after typing. [#2448](https://github.com/Microsoft/vscode-cpptools/issues/2448)
 * Add support for Mac framework paths in `compile_commands.json`. [#2508](https://github.com/Microsoft/vscode-cpptools/issues/2508)
-* Fix Intellisense-based `Go to Definition` falling back to the Tag Parser for definitions not in the TU. [#2536](https://github.com/Microsoft/vscode-cpptools/issues/2536), [#2677](https://github.com/Microsoft/vscode-cpptools/issues/2677)
+* Fix IntelliSense-based `Go to Definition` falling back to the Tag Parser for definitions not in the TU. [#2536](https://github.com/Microsoft/vscode-cpptools/issues/2536), [#2677](https://github.com/Microsoft/vscode-cpptools/issues/2677)
 * Fix IntelliSense-based `Go to Definition` on the identifier of a definition with no declaration. [#2573](https://github.com/Microsoft/vscode-cpptools/issues/2573)
 * Fix IntelliSense-based `Go to Definition` not falling back to the declaration (in certain cases). [#2574](https://github.com/Microsoft/vscode-cpptools/issues/2574)
 * Fix IntelliSense-based `Go to Definition` going to the wrong location after edits are made. [#2579](https://github.com/Microsoft/vscode-cpptools/issues/2579)
