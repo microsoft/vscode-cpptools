@@ -22,7 +22,9 @@ Set or change the following options to control VS Code's behavior during debuggi
   Tells _GDB or LLDB_ what paths to search for .so files. Separate multiple paths with a semicolon. Example: `"/Users/user/dir1;/Users/user/dir2"`.
 
 * #### `externalConsole`
-  If set to `true`, launches an external console for the application. If `false`, no console is launched and VS Code's debugging console is used. Note this option is ignored in some cases for technical reasons.
+  Windows: When set to true, it will spawn an external console. When set to false, it will use VS Code's integratedTerminal.
+  Linux: When set to true, it will notify VS Code to spawn an external console. When set to false, it will use VS Code's integratedTerminal
+  macOS: When set to true, it will spawn an external console through `lldb-mi`. When set to false, the output can be seen in VS Code's debugConsole. Due to limitations within `lldb-mi`, integratedTerminal support is not available.
 
 * #### `logging`
   Optional flags to determine what types of messages should be logged to the Debug Console.
