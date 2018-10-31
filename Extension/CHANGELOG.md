@@ -1,6 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.20.0: October 29, 2018
+## Version 0.20.1: October 31, 2018
+* Fix IntelliSense-based `Go to Declaration` when there's only a definition in a TU. [#2743](https://github.com/Microsoft/vscode-cpptools/issues/2743)
+* Fix `#include` completion for standalone header files. [#2744](https://github.com/Microsoft/vscode-cpptools/issues/2744)
+
+## Version 0.20.0: October 30, 2018
 * Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
 * Unify Visual Studio Code debug protocol parsing by using a shared library with Visual Studio.
 * Fix IntelliSense-based `Go to Definition` on overloads (in the same TU). [#1071](https://github.com/Microsoft/vscode-cpptools/issues/1071)
