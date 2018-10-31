@@ -4,7 +4,7 @@
 * Fix IntelliSense-based `Go to Declaration` when there's only a definition in a TU. [#2743](https://github.com/Microsoft/vscode-cpptools/issues/2743)
 * Fix `#include` completion for standalone header files. [#2744](https://github.com/Microsoft/vscode-cpptools/issues/2744)
 * Fix the highest hitting main process crash.
-* Fix IntelliSense process crashing with completion.
+* Fix IntelliSense process crash with completion.
 
 ## Version 0.20.0: October 30, 2018
 * Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
@@ -79,7 +79,7 @@
 * Fix IntelliSense crash when the gcc-8 type_traits header is used. [#2323](https://github.com/Microsoft/vscode-cpptools/issues/2323), [#2328](https://github.com/Microsoft/vscode-cpptools/issues/2328)
 * Limit configuration popups to one at a time. [#2324](https://github.com/Microsoft/vscode-cpptools/issues/2324)
 * Don't show `includePath` code actions if compile commands or custom configuration providers are used. [#2334](https://github.com/Microsoft/vscode-cpptools/issues/2334)
-* Fix `Cpp.clang_format_path` not accepting environment variables. [#2344](https://github.com/Microsoft/vscode-cpptools/issues/2344)
+* Fix `C_Cpp.clang_format_path` not accepting environment variables. [#2344](https://github.com/Microsoft/vscode-cpptools/issues/2344)
 * Fix IntelliSense not working with non-ASCII characters in the WSL install path. [#2351](https://github.com/Microsoft/vscode-cpptools/issues/2351)
 * Filter out buggy IntelliSense error `"= delete" can only appear on the first declaration of a function`. [#2352](https://github.com/Microsoft/vscode-cpptools/issues/2352)
 * Fix IntelliSense failing with WSL if gcc is installed bug g++ isn't. [#2360](https://github.com/Microsoft/vscode-cpptools/issues/2360)
