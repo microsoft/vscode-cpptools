@@ -661,8 +661,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
         endCrash = data.length - 1;
     }
     data = data.substr(startCrash, endCrash - startCrash);
-    if (data.length > 16384) {
-        data = data.substr(0, 16384) + "...";
+    if (data.length > 8192) { // The API has an 8k limit.
+        data = data.substr(0, 8189) + "...";
     }
     if (data.length < 2) {
         return; // Don't send telemetry if there's no call stack.
