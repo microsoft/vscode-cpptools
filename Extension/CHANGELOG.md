@@ -3,6 +3,7 @@
 ## Version 0.20.1: October 31, 2018
 * Fix IntelliSense-based `Go to Declaration` when there's only a definition in a TU. [#2743](https://github.com/Microsoft/vscode-cpptools/issues/2743)
 * Fix `#include` completion for standalone header files. [#2744](https://github.com/Microsoft/vscode-cpptools/issues/2744)
+* Fix the highest hitting main process crash.
 
 ## Version 0.20.0: October 30, 2018
 * Add IntegratedTerminal support for Linux and Windows. [#35](https://github.com/microsoft/vscode-cpptools/issues/35)
