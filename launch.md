@@ -2,27 +2,29 @@
 
 The **launch.json** file is used to configure the debugger in Visual Studio Code.
 
-Visual Studio Code generates a **launch.json** with almost all of the required information.  To get started
+Visual Studio Code generates a **launch.json** with almost all of the required information. To get started
 debugging you need to fill in the `program` field with the path to the executable you plan to debug. This must be specified for
 both the launch and attach (if you plan to attach to a running instance at any point) configurations.
 
-The generated file contains two sections.  One that configures debugging for launch and a second that configures debugging for attach.
+The generated file contains two sections. One that configures debugging for launch and a second that configures debugging for attach.
 
 # Configure VS Code's debugging behavior
 
-Set or change the following options to control VS Code's behavior during debugging
+Set or change the following options to control VS Code's behavior during debugging:
 
 * #### `program` (required)
   Specifies the full path to executable the debugger will launch or attach to.
 
 * #### `symbolSearchPath`
-  Tells the _Visual Studio Windows Debugger_ what paths to search for symbol (.pdb) files.  Separate multiple paths with a semicolon. Example `"C:\\Symbols;C:\\SymbolDir2"`
+  Tells the _Visual Studio Windows Debugger_ what paths to search for symbol (.pdb) files. Separate multiple paths with a semicolon. Example `"C:\\Symbols;C:\\SymbolDir2"`.
 
 * #### `additionalSOLibSearchPath`
   Tells _GDB or LLDB_ what paths to search for .so files. Separate multiple paths with a semicolon. Example: `"/Users/user/dir1;/Users/user/dir2"`.
 
 * #### `externalConsole`
-  If set to `true`, launches an external console for the application. If `false`, no console is launched and VS Code's debugging console is used. Note this option is ignored in some cases for technical reasons.
+  Windows: When set to true, it will spawn an external console. When set to false, it will use VS Code's integratedTerminal.
+  Linux: When set to true, it will notify VS Code to spawn an external console. When set to false, it will use VS Code's integratedTerminal.
+  macOS: When set to true, it will spawn an external console through `lldb-mi`. When set to false, the output can be seen in VS Code's debugConsole. Due to limitations within `lldb-mi`, integratedTerminal support is not available.
 
 * #### `logging`
   Optional flags to determine what types of messages should be logged to the Debug Console.
@@ -94,10 +96,10 @@ The following options enable you to modify the state of the target application w
 
 ## Customizing GDB or LLDB
 
-You can change the behavior of GDB or LLDB by setting the following options.
+You can change the behavior of GDB or LLDB by setting the following options:
 
 * #### `MIMode`
-  Indicates the debugger that VS Code will connect to. Must be set to `gdb` or `lldb`.  This is pre-configured on a per-operating system basis and can be changed as needed.
+  Indicates the debugger that VS Code will connect to. Must be set to `gdb` or `lldb`. This is pre-configured on a per-operating system basis and can be changed as needed.
 
 * #### `miDebuggerPath`
   The path to the debugger (such as gdb). When only the executable is specified, it will search the operating system's PATH variable for a debugger (GDB on Linux and Windows, LLDB on OS X).
@@ -152,7 +154,7 @@ The C/C++ extension enables debugging dump files on Windows and core dump files 
   If you want to debug a Windows dump file, set this to the path to the dump file to start debugging in the `launch` configuration.
 
 * #### `coreDumpPath`
-  Full path to a core dump file to debug for the specified program.  Set this to the path to the core dump file to start debugging in the `launch` configuration.
+  Full path to a core dump file to debug for the specified program. Set this to the path to the core dump file to start debugging in the `launch` configuration.
 _Note: core dump debugging is not supported with MinGw._
 
 ## Remote debugging or debugging with a local debugger server
@@ -175,7 +177,7 @@ _Note: core dump debugging is not supported with MinGw._
 ## Additional properties
 
 * #### `processId`
-  Defaults to `${command.pickProcess}` which will display a list of available processes the debugger can attach to.  It is recommended to leave this default, but the property can be explicitly set to a specific process ID for the debugger to attach to.
+  Defaults to `${command.pickProcess}` which will display a list of available processes the debugger can attach to. It is recommended to leave this default, but the property can be explicitly set to a specific process ID for the debugger to attach to.
 
 * #### `request`
   Indicates whether the configuration section is intended to `launch` the program or `attach` to an already running instance.
@@ -184,7 +186,7 @@ _Note: core dump debugging is not supported with MinGw._
   `Deprecated` This option is no longer needed as the target architecture is automatically detected.
 
 * #### `type`
-  Indicates the underlying debugger being used. Must be `cppvsdbg` when using the Visual Studio Windows debugger, and `cppdbg` when using GDB or LLDB.  This is automatically set to the correct value when the
+  Indicates the underlying debugger being used. Must be `cppvsdbg` when using the Visual Studio Windows debugger, and `cppdbg` when using GDB or LLDB. This is automatically set to the correct value when the
 **launch.json** file is created.
 
 * #### `sourceFileMap`
