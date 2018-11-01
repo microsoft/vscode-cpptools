@@ -645,32 +645,64 @@ function reportMacCrashes(): void {
     }
 }
 
-function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
+function logCrashTelemetry(data: string): void {
     let crashObject: { [key: string]: string } = {};
+    crashObject["CrashingThreadCallStack"] = data;
+    telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
+}
+
+function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     if (err) {
-        crashObject["readFile: err.code"] = err.code;
-        telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
-        return;
+        return logCrashTelemetry("readFile: " + err.code);
     }
-    let startCrash: number = data.indexOf(" Crashed:");
+
+    // Extract the crashing thread's call stack.
+    const crashStart: string = " Crashed:";
+    let startCrash: number = data.indexOf(crashStart);
     if (startCrash < 0) {
-        startCrash = 0;
+        return logCrashTelemetry("No crash start");
     }
+    startCrash += crashStart.length + 1; // Skip past crashStart.
     let endCrash: number = data.indexOf("Thread ", startCrash);
-    if (endCrash < startCrash) {
-        endCrash = data.length - 1;
+    if (endCrash < 0) {
+        endCrash = data.length - 1; // Not expected, but just in case.
+    }
+    if (endCrash <= startCrash) {
+        return logCrashTelemetry("No crash end");
     }
     data = data.substr(startCrash, endCrash - startCrash);
+    
+    // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
+    data = data.replace(/0x................ /g, "");
+
+    // Get rid of the process names on each line and just add it to the start.
+    const process1: string = "Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin\t";
+    const process2: string = "Microsoft.VSCode.CPP.Extension.darwin\t";
+    if (data.includes(process1)) {
+        data = data.replace(new RegExp(process1, "g"), "");
+        data = process1 + "\n" + data;
+    } else if (data.includes(process2)) {
+        data = data.replace(new RegExp(process2, "g"), "");
+        data = process2 + "\n" + data;
+    } else {
+        return logCrashTelemetry("No process"); // Not expected, but just in case.
+    }
+
+    // Remove runtime lines because they can be different on different machines.
+    let lines: string[] = data.split("\n");
+    data = "";
+    lines.forEach((line: string) => {
+        if (!line.includes(".dylib") && !line.includes("???")) {
+            data += (line + "\n");
+        }
+    });
+    data = data.trimRight();
+
     if (data.length > 8192) { // The API has an 8k limit.
         data = data.substr(0, 8189) + "...";
     }
-    if (data.length < 2) {
-        return; // Don't send telemetry if there's no call stack.
-    }
-    // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
-    data = data.replace(/0x................ /g, "");
-    crashObject["CrashingThreadCallStack"] = data;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
+
+    logCrashTelemetry(data);
 }
 
 export function deactivate(): Thenable<void> {
