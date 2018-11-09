@@ -2,8 +2,8 @@
 
 ## Version 0.21.0-insiders: November 8, 2018
 * Add support for `__int128_t` and `__uint128_t` types. [#1815](https://github.com/Microsoft/vscode-cpptools/issues/1815)
-* Fix for several incorrect IntelliSense error squiggles. [#1942](https://github.com/Microsoft/vscode-cpptools/issues/1942), [#2478](https://github.com/Microsoft/vscode-cpptools/issues/2478), [#2763](https://github.com/Microsoft/vscode-cpptools/issues/2763)
-* Fix for several crashes. [#2505](https://github.com/Microsoft/vscode-cpptools/issues/2505), [#2768](https://github.com/Microsoft/vscode-cpptools/issues/2768)
+* Fix several incorrect IntelliSense error squiggles. [#1942](https://github.com/Microsoft/vscode-cpptools/issues/1942), [#2478](https://github.com/Microsoft/vscode-cpptools/issues/2478), [#2763](https://github.com/Microsoft/vscode-cpptools/issues/2763)
+* Fix several crashes. [#2505](https://github.com/Microsoft/vscode-cpptools/issues/2505), [#2768](https://github.com/Microsoft/vscode-cpptools/issues/2768)
 * Fix completion not working in template specializations. [#2620](https://github.com/Microsoft/vscode-cpptools/issues/2620)
 * Fix IntelliSense-based `Go to Definition` with overloads that return a template with a default param (e.g. vector) [#2736](https://github.com/Microsoft/vscode-cpptools/issues/2736)
 * Fix memory "leak" when parsing a large workspace. [#2737](https://github.com/Microsoft/vscode-cpptools/issues/2737)
