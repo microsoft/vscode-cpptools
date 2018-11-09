@@ -55,7 +55,7 @@
   * Gabriel Arjones (@g-arjones) [PR #2495](https://github.com/Microsoft/vscode-cpptools/pull/2495), [PR #2503](https://github.com/Microsoft/vscode-cpptools/pull/2503)
 * Fix bug with variable resolution. [#2532](https://github.com/Microsoft/vscode-cpptools/issues/2532)
 * Fix off-by-one bug with hover and `Go to Definition`. [#2535](https://github.com/Microsoft/vscode-cpptools/issues/2535)
-* Fix for [Microsoft/vscode#54213](https://github.com/Microsoft/vscode/issues/54213)
+* Fix [Microsoft/vscode#54213](https://github.com/Microsoft/vscode/issues/54213)
 
 ## Version 0.18.1: August 17, 2018
 * Fix 0.18.0 regression causing non-MinGW compilers to use `-fms-extensions` on Windows. [#2424](https://github.com/Microsoft/vscode-cpptools/issues/2424), [#2425](https://github.com/Microsoft/vscode-cpptools/issues/2425)
@@ -119,10 +119,10 @@
 * Fix variables not resolving in `macFrameworkPath`. [#2234](https://github.com/Microsoft/vscode-cpptools/issues/2234)
 * Fix `Go to Definition` not working for macros followed by `.` or `->`. [#2245](https://github.com/Microsoft/vscode-cpptools/issues/2245)
 * Fix `#include` autocomplete with Mac framework headers. [#2251](https://github.com/Microsoft/vscode-cpptools/issues/2251)
-* Fix for debugging to support empty arguments for debuggee. [#2258](https://github.com/Microsoft/vscode-cpptools/issues/2258)
+* Fix debugging to support empty arguments for debuggee. [#2258](https://github.com/Microsoft/vscode-cpptools/issues/2258)
 * Fix `Go to Definition` bug (missing symbols outside the workspace). [#2281](https://github.com/Microsoft/vscode-cpptools/issues/2281)
 * Add a setting to silence configuration provider warnings. [#2292](https://github.com/Microsoft/vscode-cpptools/issues/2292)
-* Fix for debugging async Visual C++ causing debugger to hang.
+* Fix debugging async Visual C++ causing debugger to hang.
 * Fix `main` snippet.
 
 ## Version 0.17.6: July 2, 2018
@@ -157,7 +157,7 @@
 * On Windows, `compilerPath` now populates with the guessed `cl.exe` path, and the `MSVC` include path is based on the `cl.exe` path.
 * Fix files under a non-recursive `browse.path` being removed from the database.
 * Fix `*` not working in `browse.path` with WSL.
-* Fix for -break-insert main returning multiple bind points. [#729](https://github.com/Microsoft/MIEngine/pull/729)
+* Fix -break-insert main returning multiple bind points. [#729](https://github.com/Microsoft/MIEngine/pull/729)
 * Use -- instead of -x for gnome-terminal. [#733](https://github.com/Microsoft/MIEngine/pull/733)
 * Added `miDebuggerArgs` in order to pass arguments to the program in `miDebuggerPath`. [#720](https://github.com/Microsoft/MIEngine/pull/720)
 
@@ -264,9 +264,9 @@
 * Add `C_Cpp.exclusionPolicy` default to `checkFolders` to avoid expensive `files.exclude` checking on every file.
 
 ## Version 0.14.5: December 18, 2017
-* Fix for stackwalk `NullReferenceException`. [#1339](https://github.com/Microsoft/vscode-cpptools/issues/1339)
-* Fix for `-isystem` (or `-I`) not being used in `compile_commands.json` if there's a space after it. [#1343](https://github.com/Microsoft/vscode-cpptools/issues/1343)
-* Fix for header switching from `.cc` to `.hpp` files (and other cases). [#1341](https://github.com/Microsoft/vscode-cpptools/issues/1341)
+* Fix stackwalk `NullReferenceException`. [#1339](https://github.com/Microsoft/vscode-cpptools/issues/1339)
+* Fix `-isystem` (or `-I`) not being used in `compile_commands.json` if there's a space after it. [#1343](https://github.com/Microsoft/vscode-cpptools/issues/1343)
+* Fix header switching from `.cc` to `.hpp` files (and other cases). [#1341](https://github.com/Microsoft/vscode-cpptools/issues/1341)
 * Fix reload prompts not appearing in debugging scenarios (after the initial installation). [#1344](https://github.com/Microsoft/vscode-cpptools/issues/1344)
 * Add a "wait" message when commands are invoked during download/installation. [#1344](https://github.com/Microsoft/vscode-cpptools/issues/1344)
 * Prevent blank "C/C++ Configuration" from appearing when debugging is started but the language service is not. [#1353](https://github.com/Microsoft/vscode-cpptools/issues/1353)
@@ -285,9 +285,9 @@
 * Improve performance for fetching call stacks with large arguments. [#363](https://github.com/Microsoft/vscode-cpptools/issues/363)
 
 ## Version 0.14.3: November 27, 2017
-* Fix for disappearing parameter hints tooltip. [#1165](https://github.com/Microsoft/vscode-cpptools/issues/1165)
-* Fix for parameter hints only showing up after the opening parenthesis. [#902](https://github.com/Microsoft/vscode-cpptools/issues/902), [#819](https://github.com/Microsoft/vscode-cpptools/issues/819)
-* Fix for customer reported crashes in the TypeScript extension code. [#1240](https://github.com/Microsoft/vscode-cpptools/issues/1240), [#1245](https://github.com/Microsoft/vscode-cpptools/issues/1245)
+* Fix disappearing parameter hints tooltip. [#1165](https://github.com/Microsoft/vscode-cpptools/issues/1165)
+* Fix parameter hints only showing up after the opening parenthesis. [#902](https://github.com/Microsoft/vscode-cpptools/issues/902), [#819](https://github.com/Microsoft/vscode-cpptools/issues/819)
+* Fix customer reported crashes in the TypeScript extension code. [#1240](https://github.com/Microsoft/vscode-cpptools/issues/1240), [#1245](https://github.com/Microsoft/vscode-cpptools/issues/1245)
 * Fix .browse.VC-#.db files being unnecessarily created when an shm file exists. [#1234](https://github.com/Microsoft/vscode-cpptools/issues/1234)
 * Fix language service to only activate after a C/C++ file is opened or a C/Cpp command is used (not onDebug).
 * Fix database resetting if shutdown got blocked by an IntelliSense operation. [#1260](https://github.com/Microsoft/vscode-cpptools/issues/1260)
@@ -355,7 +355,7 @@
 * Support `${env:VAR}` syntax for environment variables in `c_cpp_properties.json`. [#1000](https://github.com/Microsoft/vscode-cpptools/issues/1000)
 * Support semicolon delimiters for include paths in `c_cpp_properties.json` to better support environment variables. [#1001](https://github.com/Microsoft/vscode-cpptools/issues/1001)
 * Add `__LITTLE_ENDIAN__=1` to default defines so that "endian.h" is not needed on Mac projects. [#1005](https://github.com/Microsoft/vscode-cpptools/issues/1005)
-* Fix for source code files on Windows with incorrect casing. [#984](https://github.com/Microsoft/vscode-cpptools/issues/984)
+* Fix source code files on Windows with incorrect casing. [#984](https://github.com/Microsoft/vscode-cpptools/issues/984)
 
 ## Version 0.12.3: August 17, 2017
 * Fix regression for paths containing multibyte characters. [#958](https://github.com/Microsoft/vscode-cpptools/issues/958)
@@ -408,8 +408,8 @@
 * Fix `Go to Definition` not working until all `browse.path` files are re-scanned. [#788](https://github.com/Microsoft/vscode-cpptools/issues/788)
 
 ## Version 0.11.4: June 2, 2017
-* Fix for `System.Xml.Serialization.XmlSerializationReader threw an exception` when debugging on Linux. [#792](https://github.com/Microsoft/vscode-cpptools/issues/792)
-* Fix for escaping for `${workspaceRoot}` in `launch.json`.
+* Fix `System.Xml.Serialization.XmlSerializationReader threw an exception` when debugging on Linux. [#792](https://github.com/Microsoft/vscode-cpptools/issues/792)
+* Fix escaping for `${workspaceRoot}` in `launch.json`.
 
 ## Version 0.11.3: May 31, 2017
 * Fix `x86_64-pc-linux-gnu` and `x86_64-linux-gnu` paths missing from the default `includePath`.
@@ -457,7 +457,7 @@
 
 ## Version 0.10.5: March 21, 2017
 * Fix a crash that randomly occurred when the size of a document increased. [#430](https://github.com/Microsoft/vscode-cpptools/issues/430)
-* Fix for browsing not working for Linux/Mac stdlib.h functions. [#578](https://github.com/Microsoft/vscode-cpptools/issues/578)
+* Fix browsing not working for Linux/Mac stdlib.h functions. [#578](https://github.com/Microsoft/vscode-cpptools/issues/578)
 * Additional fixes for switch header/source not respecting `files.exclude`. [#485](https://github.com/Microsoft/vscode-cpptools/issues/485)
 * Made `editor.quickSuggestions` dependent on `C_Cpp.autocomplete`. [#572](https://github.com/Microsoft/vscode-cpptools/issues/572)
   * We recommend you close and reopen your settings.json file anytime you change the `C_Cpp.autocomplete` setting. [More info here](https://github.com/Microsoft/vscode-cpptools/releases).
