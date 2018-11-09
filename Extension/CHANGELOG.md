@@ -5,6 +5,7 @@
 * Fix for several incorrect IntelliSense error squiggles. [#1942](https://github.com/Microsoft/vscode-cpptools/issues/1942), [#2478](https://github.com/Microsoft/vscode-cpptools/issues/2478), [#2763](https://github.com/Microsoft/vscode-cpptools/issues/2763)
 * Fix for several crashes. [#2505](https://github.com/Microsoft/vscode-cpptools/issues/2505), [#2768](https://github.com/Microsoft/vscode-cpptools/issues/2768)
 * Fix completion not working in template specializations. [#2620](https://github.com/Microsoft/vscode-cpptools/issues/2620)
+* Fix IntelliSense-based `Go to Definition` with overloads that return a template with a default param (e.g. vector) [#2736](https://github.com/Microsoft/vscode-cpptools/issues/2736)
 * Fix memory "leak" when parsing a large workspace. [#2737](https://github.com/Microsoft/vscode-cpptools/issues/2737)
 * Fix `Go to Definition` when `__catch()`, `_NO_EXCEPT_DEBUG`, or `_LIBCPP_BEGIN_NAMESPACE_STD` is used. [#2761](https://github.com/Microsoft/vscode-cpptools/issues/2761), [#2766](https://github.com/Microsoft/vscode-cpptools/issues/2766)
 * Fix compiler in `compile_commands.json` not taking precedence over the `Cpp.default.compilerPath`. [#2793](https://github.com/Microsoft/vscode-cpptools/issues/2793)
