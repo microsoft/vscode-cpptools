@@ -213,7 +213,7 @@ async function getRateLimit(): Promise<RateLimit> {
     const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
         .catch((error) => {
             if (error.code && error.code !== "ENOENT") {
-                // Only throw if the user is not connected to the Internet.
+                // Only throw if the user is connected to the Internet.
                 throw new Error('Failed to download rate limit JSON');
             }
         });
@@ -256,7 +256,7 @@ async function getReleaseJson(): Promise<Build[]> {
     const data: string = await util.downloadFileToStr(releaseUrl, header)
         .catch((error) => {
             if (error.code && error.code !== "ENOENT") {
-                // Only throw if the user is not connected to the Internet.
+                // Only throw if the user is connected to the Internet.
                 throw new Error('Failed to download release JSON');
             }
         });
