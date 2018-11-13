@@ -211,7 +211,15 @@ function isRateLimit(input: any): input is RateLimit {
 async function getRateLimit(): Promise<RateLimit> {
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
     const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
-        .catch(() => { throw new Error('Failed to download rate limit JSON'); });
+        .catch((error) => {
+            if (error.code && error.code !== "ENOENT") {
+                // Only throw if the user is connected to the Internet.
+                throw new Error('Failed to download rate limit JSON');
+            }
+        });
+    if (!data) {
+        return Promise.resolve(null);
+    }
 
     let rateLimit: any;
     try {
@@ -229,7 +237,7 @@ async function getRateLimit(): Promise<RateLimit> {
 
 async function rateLimitExceeded(): Promise<boolean> {
     const rateLimit: RateLimit = await getRateLimit();
-    return rateLimit.rate.remaining <= 0;
+    return rateLimit && rateLimit.rate.remaining <= 0;
 }
 
 /**
@@ -246,7 +254,15 @@ async function getReleaseJson(): Promise<Build[]> {
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
 
     const data: string = await util.downloadFileToStr(releaseUrl, header)
-        .catch(() => { throw new Error('Failed to download release JSON'); });
+        .catch((error) => {
+            if (error.code && error.code !== "ENOENT") {
+                // Only throw if the user is connected to the Internet.
+                throw new Error('Failed to download release JSON');
+            }
+        });
+    if (!data) {
+        return Promise.resolve(null);
+    }
 
     // Parse the file
     let releaseJson: any;
