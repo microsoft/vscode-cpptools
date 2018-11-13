@@ -20,6 +20,8 @@ When you set the `compilerPath` property and change `intelliSenseMode` to `clang
 }
 ```
 
+For Cygwin, the `compilerPath` should be set to something like "C:/cygwin64/bin/g++.exe".
+
 ## Extension version 0.16.1 and earlier:
 
 If you have an older version of the C/C++ extension installed, use [these instructions](Archive/MinGW.md) instead.
