@@ -693,6 +693,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     data = "";
     lines.forEach((line: string) => {
         if (!line.includes(".dylib") && !line.includes("???")) {
+            line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
             data += (line + "\n");
         }
     });
