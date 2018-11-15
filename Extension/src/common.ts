@@ -630,10 +630,10 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
             // Write file using downloaded data
             let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
             createdFile.on('finish', () => { resolve(); });
-            response.on('error', (error) => { reject(); });
+            response.on('error', (error) => { reject(error); });
             response.pipe(createdFile);
         });
-        request.on('error', (error) => { reject(); });
+        request.on('error', (error) => { reject(error); });
         request.end();
     });
 }
@@ -663,10 +663,10 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
             }
             let downloadedData: string = '';
             response.on('data', (data) => { downloadedData += data; });
-            response.on('error', (error) => { reject(); });
+            response.on('error', (error) => { reject(error); });
             response.on('end', () => { resolve(downloadedData); });
         });
-        request.on('error', (error) => { reject(); });
+        request.on('error', (error) => { reject(error); });
         request.end();
     });
 }
