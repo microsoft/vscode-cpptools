@@ -24,7 +24,7 @@
                 "clear": false
             },
             "windows": {
-                "command": "F:\\MinGW\\bin\\g++.exe"
+                "command": "C:\\MinGW\\bin\\g++.exe"
             },
             "problemMatcher": [
                 "$gcc"
