@@ -5,7 +5,6 @@
     "tasks": [
         {
             "label": "TypeScript Compile",
-            "identifier": "compile",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -29,7 +28,6 @@
         },
         {
             "label": "TypeScript Lint",
-            "identifier": "tslint",
             "group": "build",
             "isBackground": false,
             "type": "shell",
@@ -53,7 +51,7 @@
                 ]
             },
             "dependsOn": [
-                "compile"
+                "TypeScript Compile"
             ]
         }
     ]

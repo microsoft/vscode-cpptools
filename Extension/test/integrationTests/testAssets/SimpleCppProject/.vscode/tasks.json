@@ -1,16 +1,34 @@
 {
-    "version": "0.1.0",
+    "version": "2.0.0",
 	"tasks": [
         {
-            "taskName": "build",
-			"command": "g++",
-			"isShellCommand": true,
-			"args": ["main.cpp", "-g", "-o", "program"],
-			"showOutput": "always",
-			"isBuildCommand": true,
-			"windows": {
-				"command": "C:\\MinGW\\bin\\g++.exe"
-			}
+            "label": "build",
+            "command": "g++",
+            "type": "shell",
+            "args": [
+                "main.cpp",
+                "-g",
+                "-o",
+                "program"
+            ],
+            "group":{
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "windows": {
+                "command": "F:\\MinGW\\bin\\g++.exe"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ]
 }
