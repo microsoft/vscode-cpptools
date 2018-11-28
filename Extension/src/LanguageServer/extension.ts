@@ -282,8 +282,8 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
             const timer: NodeJS.Timer = setTimeout(() => {
                 process.kill();
-                reject(new Error('Failed to receive response from VS Code script process for installation within 10s.'));
-            }, 10000);
+                reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
+            }, 30000);
 
             // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
             // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
