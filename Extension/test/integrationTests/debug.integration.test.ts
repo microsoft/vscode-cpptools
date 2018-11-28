@@ -6,10 +6,10 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
  
-suite(`Debug Integration Test: `, function() {
-    suiteSetup(async function() { 
-        let extension = vscode.extensions.getExtension("ms-vscode.cpptools"); 
-        if (!extension.isActive) { 
+suite(`Debug Integration Test: `, function(): void {
+    suiteSetup(async function(): Promise<void> { 
+        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
+        if (!extension.isActive) {
             await extension.activate(); 
         }
     }); 
@@ -17,14 +17,14 @@ suite(`Debug Integration Test: `, function() {
     test("Starting (gdb) Launch from the workspace root should create an Active Debug Session", async () => { 
         await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "(gdb) Launch");
 
-        let debugSessionTerminated = new Promise(resolve => {
+        let debugSessionTerminated: Promise<void> = new Promise(resolve => {
             vscode.debug.onDidTerminateDebugSession((e) => resolve());
         });
 
         try {
             assert.equal(vscode.debug.activeDebugSession.type, "cppdbg");
         } catch (e) {
-            assert.fail("Debugger failed to launch. Did the extension activate correctly?")
+            assert.fail("Debugger failed to launch. Did the extension activate correctly?");
         }
 
         await debugSessionTerminated;

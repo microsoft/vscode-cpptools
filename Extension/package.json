@@ -1407,6 +1407,7 @@
     "vscode": "^1.1.18"
   },
   "dependencies": {
+    "@types/minimatch": "^3.0.3",
     "http-proxy-agent": "~2.1.0",
     "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
