@@ -728,8 +728,12 @@
                   "type": "object",
                   "default": {},
                   "properties": {
-                    "name": "string",
-                    "value": "string"
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
                   }
                 },
                 "default": []
@@ -1145,8 +1149,12 @@
                   "type": "object",
                   "default": {},
                   "properties": {
-                    "name": "string",
-                    "value": "string"
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
                   }
                 },
                 "default": []
