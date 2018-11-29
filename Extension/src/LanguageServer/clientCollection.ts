@@ -119,7 +119,7 @@ export class ClientCollection {
                 this.languageClients.set(key, cpptools.createNullClient());
             }
 
-            if (this.activeClient === client) {
+            if (this.activeClient === client && this.activeDocument) {
                 this.activeClient = this.getClientFor(this.activeDocument.uri);
                 this.activeClient.activeDocumentChanged(this.activeDocument);
             }
@@ -154,7 +154,7 @@ export class ClientCollection {
                     client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
                     client.TrackedDocuments.clear();
 
-                    if (this.activeClient === client) {
+                    if (this.activeClient === client && this.activeDocument) {
                         // Need to make a different client the active client.
                         this.activeClient = this.getClientFor(this.activeDocument.uri);
                         this.activeClient.activeDocumentChanged(this.activeDocument);
