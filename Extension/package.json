@@ -308,6 +308,19 @@
           "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
           "scope": "resource"
         },
+        "C_Cpp.intelliSense.cachePath": {
+          "type": "string",
+          "default": "${workspaceFolder}/.vscode/ipch",
+          "description": "Defines the folder path for cached precompiled headers. The default path is \"${workspaceFolder}/.vscode/ipch\" folder",
+          "scope": "resource"
+        },
+        "C_Cpp.intelliSense.cacheSize": {
+          "type": "number",
+          "default": 5120,
+          "description": "Maximum size of the per-workspace hard drive space in megabytes for cached precompiled headers; the actual usage may fluctuate around this value. The default size is 5120 MB. Precompiled header caching is disabled when the size is 0.",
+          "scope": "resource",
+          "minimum": 0
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
