@@ -32,19 +32,31 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
             quickPick.items = processEntries;
             quickPick.buttons = [new RefreshButton()];
 
+            let disposables: vscode.Disposable[] = [];
+
             quickPick.onDidTriggerButton(button => {
                 getAttachItems().then(processEntries => quickPick.items = processEntries);
-            });
+            }, undefined, disposables);
 
             quickPick.onDidAccept(() => {
                 if (quickPick.selectedItems.length !== 1) {
                     reject(new Error("Process not selected"));
                 }
 
-                resolve(quickPick.selectedItems[0].id);
-            });
+                let selectedId: string = quickPick.selectedItems[0].id;
 
-            quickPick.onDidHide(() => reject(new Error("Process not selected.")));
+                disposables.forEach(item => item.dispose());
+                quickPick.dispose();
+
+                resolve(selectedId);
+            }, undefined, disposables);
+
+            quickPick.onDidHide(() => {
+                disposables.forEach(item => item.dispose());
+                quickPick.dispose();
+
+                reject(new Error("Process not selected."));
+            }, undefined, disposables);
 
             quickPick.show();
         });
