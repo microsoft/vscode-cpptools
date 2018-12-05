@@ -1,5 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
+* Add refresh button to process picker. [#2885](https://github.com/Microsoft/vscode-cpptools/issues/2885)
+
 ## Version 0.21.0-insiders2: November 20, 2018
 * Fix some IntelliSense process crashes. [#1785](https://github.com/Microsoft/vscode-cpptools/issues/1785)
 * Fix incorrect IntelliSense error with Mac clang 10.0 libraries. [#2608](https://github.com/Microsoft/vscode-cpptools/issues/2608)
