@@ -7,9 +7,14 @@ import * as util from '../common';
 import * as vscode from 'vscode';
 
 class RefreshButton implements vscode.QuickInputButton {
-    get iconPath(): vscode.Uri {
-        const refreshImagePath: string = util.getExtensionFilePath("assets/Refresh_inverse.svg");
-        return vscode.Uri.file(refreshImagePath);
+    get iconPath(): { dark: vscode.Uri; light: vscode.Uri } {
+        const refreshImagePathDark: string = util.getExtensionFilePath("assets/Refresh_inverse.svg");
+        const refreshImagePathLight: string = util.getExtensionFilePath("assets/Refresh.svg");
+
+        return {
+            dark: vscode.Uri.file(refreshImagePathDark),
+            light: vscode.Uri.file(refreshImagePathLight)
+        };
     }
 
     get tooltip(): string {
