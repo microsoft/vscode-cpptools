@@ -5,7 +5,8 @@
 
 import * as child_process from 'child_process';
 import * as os from 'os';
-import { AttachItem, AttachItemsProvider } from './attachToProcess';
+import { AttachItemsProvider } from './attachToProcess';
+import { AttachItem } from './attachQuickPick';
 
 class Process {
     constructor(public name: string, public pid: string, public commandLine: string) { }

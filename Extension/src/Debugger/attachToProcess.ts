@@ -5,6 +5,7 @@
 
 import { execChildProcess } from '../common';
 import { PsProcessParser } from './nativeAttach';
+import { AttachItem, showQuickPick } from './attachQuickPick';
 
 import * as debugUtils from './utils';
 import * as fs from 'fs';
@@ -12,10 +13,6 @@ import * as os from 'os';
 import * as path from 'path';
 import * as util from '../common';
 import * as vscode from 'vscode';
-
-export interface AttachItem extends vscode.QuickPickItem {
-    id: string;
-}
 
 export interface AttachItemsProvider {
     getAttachItems(): Promise<AttachItem[]>;
@@ -29,19 +26,7 @@ export class AttachPicker {
             if (!ready) {
                 util.displayExtensionNotReadyPrompt();
             } else {
-                return this.attachItemsProvider.getAttachItems()
-                    .then(processEntries => {
-                        let attachPickOptions: vscode.QuickPickOptions = {
-                            matchOnDescription: true,
-                            matchOnDetail: true,
-                            placeHolder: "Select the process to attach to"
-                        };
-
-                        return vscode.window.showQuickPick(processEntries, attachPickOptions)
-                            .then(chosenProcess => {
-                                return chosenProcess ? chosenProcess.id : Promise.reject<string>(new Error("Process not selected."));
-                            });
-                    });
+                return showQuickPick(() => this.attachItemsProvider.getAttachItems());
             }
         });
     }
@@ -74,7 +59,7 @@ export class RemoteAttachPicker {
                     !fs.existsSync(pipeTransport.pipeProgram)) {
                     const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
                     const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch];
-                    
+
                     // Check for pipeProgram
                     if (!fs.existsSync(config.pipeTransport.pipeProgram)) {
                         pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
@@ -84,7 +69,7 @@ export class RemoteAttachPicker {
                     if (!pipeProgram && config.pipeTransport.pipeCwd) {
                         const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
                         const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
-                        
+
                         if (!fs.existsSync(newPipeProgramStr)) {
                             pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
                         }
