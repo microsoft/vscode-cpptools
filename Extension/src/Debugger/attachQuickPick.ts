@@ -30,6 +30,7 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
     return getAttachItems().then(processEntries => {
         return new Promise<string>((resolve, reject) => {
             let quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();
+            quickPick.title = "Attach to process";
             quickPick.canSelectMany = false;
             quickPick.matchOnDescription = true;
             quickPick.matchOnDetail = true;
