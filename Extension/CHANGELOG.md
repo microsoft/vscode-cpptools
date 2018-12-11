@@ -1,6 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.21.0-insiders2: December 11, 2018
+* Add documentation comments for hover, completion, and signature help. [#399](https://github.com/Microsoft/vscode-cpptools/issues/399)
 * Fix bugs when UTF-8 characters > 1 byte are used. [#1525](https://github.com/Microsoft/vscode-cpptools/issues/1525), [#2883](https://github.com/Microsoft/vscode-cpptools/issues/2883)
 * Fix some IntelliSense process crashes. [#1785](https://github.com/Microsoft/vscode-cpptools/issues/1785)
 * Fix some incorrect IntelliSense error squiggles. [#2422](https://github.com/Microsoft/vscode-cpptools/issues/2422), [#2597](https://github.com/Microsoft/vscode-cpptools/issues/2597)
@@ -12,7 +13,7 @@
 * Support `C_Cpp.updateChannel` for VS Code Exploration builds.
 * Add icons for operators, structs/unions, enum values, template arguments, and macros. [#2849](https://github.com/Microsoft/vscode-cpptools/issues/2849)
 * Add text `(declaration)`, `(typedef)`, `(type alias)`, and `(union)` to symbols. [#2851](https://github.com/Microsoft/vscode-cpptools/issues/2851)
-* Fix problem with empty recurisve includes path. [#2855](https://github.com/Microsoft/vscode-cpptools/issues/2855)
+* Fix problem with empty recursive include paths. [#2855](https://github.com/Microsoft/vscode-cpptools/issues/2855)
 * Add a refresh button to the `Attach to Process` picker. [#2885](https://github.com/Microsoft/vscode-cpptools/issues/2885)
   * Matt Bise (@mbise1993) [PR #2895](https://github.com/Microsoft/vscode-cpptools/pull/2895)
 
