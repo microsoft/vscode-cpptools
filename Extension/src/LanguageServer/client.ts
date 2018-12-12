@@ -398,8 +398,6 @@ class DefaultClient implements Client {
                 tab_size: other.editorTabSize,
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
-                cachePath: settings.cachePath,
-                cacheSize: settings.cacheSize,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
                 dimInactiveRegions: settings.dimInactiveRegions,
@@ -411,6 +409,10 @@ class DefaultClient implements Client {
                 preferredPathSeparator: settings.preferredPathSeparator,
                 default: {
                     systemIncludePath: settings.defaultSystemIncludePath
+                },
+                intelliSense: {
+                    cachePath: settings.intelliSenseCachePath,
+                    cacheSize: settings.intelliSenseCacheSize,
                 },
                 vcpkg_root: util.getVcpkgRoot(),
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense
