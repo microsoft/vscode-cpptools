@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.26.0"
+    "vscode": "^1.30.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -608,7 +608,6 @@
             "cpp"
           ]
         },
-        "adapterExecutableCommand": "extension.cppdbgAdapterExecutableCommand",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
@@ -1105,7 +1104,6 @@
             "cpp"
           ]
         },
-        "adapterExecutableCommand": "extension.cppvsdbgAdapterExecutableCommand",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
@@ -1412,7 +1410,7 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.18"
+    "vscode": "^1.1.26"
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
