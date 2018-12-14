@@ -47,7 +47,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
             }
         },
 
-        provideCompletionItem: invoke3,
+        provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
         provideHover: invoke3,
         provideSignatureHelp: invoke3,

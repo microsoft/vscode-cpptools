@@ -1,13 +1,22 @@
 # C/C++ for Visual Studio Code Change Log
 
-* Add refresh button to process picker. [#2885](https://github.com/Microsoft/vscode-cpptools/issues/2885)
-
-## Version 0.21.0-insiders2: November 20, 2018
-* Fix some IntelliSense process crashes. [#1785](https://github.com/Microsoft/vscode-cpptools/issues/1785)
+## Version 0.21.0-insiders2: December 13, 2018
+* Add documentation comments for hover, completion, and signature help. [#399](https://github.com/Microsoft/vscode-cpptools/issues/399)
+* Fix bugs when UTF-8 characters > 1 byte are used. [#1504](https://github.com/Microsoft/vscode-cpptools/issues/1504), [#1525](https://github.com/Microsoft/vscode-cpptools/issues/1525), [#2034](https://github.com/Microsoft/vscode-cpptools/issues/2034), [#2082](https://github.com/Microsoft/vscode-cpptools/issues/2082), [#2883](https://github.com/Microsoft/vscode-cpptools/issues/2883)
+* Fix some IntelliSense process crashes. [#1785](https://github.com/Microsoft/vscode-cpptools/issues/1785), [#2913](https://github.com/Microsoft/vscode-cpptools/issues/2913)
+* Fix some incorrect IntelliSense error squiggles. [#2422](https://github.com/Microsoft/vscode-cpptools/issues/2422), [#2597](https://github.com/Microsoft/vscode-cpptools/issues/2597)
 * Fix incorrect IntelliSense error with Mac clang 10.0 libraries. [#2608](https://github.com/Microsoft/vscode-cpptools/issues/2608)
+* Add Italian translations for command titles.
+  * Julien Russo (@Dotpys) [PR #2663](https://github.com/Microsoft/vscode-cpptools/pull/2663)
 * Fix `Go to Definition` when `method(void)` is used. [#2802](https://github.com/Microsoft/vscode-cpptools/issues/2802)
 * Fix PowerShell bug on Win7. [#2822](https://github.com/Microsoft/vscode-cpptools/issues/2822)
 * Support `C_Cpp.updateChannel` for VS Code Exploration builds.
+* Add icons for operators, structs/unions, enum values, template arguments, and macros. [#2849](https://github.com/Microsoft/vscode-cpptools/issues/2849)
+* Add text `(declaration)`, `(typedef)`, `(type alias)`, and `(union)` to symbols. [#2851](https://github.com/Microsoft/vscode-cpptools/issues/2851)
+* Fix problem with empty recursive include paths. [#2855](https://github.com/Microsoft/vscode-cpptools/issues/2855)
+* Fix `NullReferenceException` on debugger launch with VS Code Insiders. [#2858](https://github.com/Microsoft/vscode-cpptools/issues/2858), [PR Microsoft/MIEngine#810](https://github.com/Microsoft/MIEngine/pull/810)
+* Add a refresh button to the `Attach to Process` picker. [#2885](https://github.com/Microsoft/vscode-cpptools/issues/2885)
+  * Matt Bise (@mbise1993) [PR #2895](https://github.com/Microsoft/vscode-cpptools/pull/2895)
 
 ## Version 0.21.0-insiders: November 8, 2018
 * Add support for `__int128_t` and `__uint128_t` types. [#1815](https://github.com/Microsoft/vscode-cpptools/issues/1815)
@@ -166,9 +175,9 @@
 * On Windows, `compilerPath` now populates with the guessed `cl.exe` path, and the `MSVC` include path is based on the `cl.exe` path.
 * Fix files under a non-recursive `browse.path` being removed from the database.
 * Fix `*` not working in `browse.path` with WSL.
-* Fix -break-insert main returning multiple bind points. [#729](https://github.com/Microsoft/MIEngine/pull/729)
-* Use -- instead of -x for gnome-terminal. [#733](https://github.com/Microsoft/MIEngine/pull/733)
-* Added `miDebuggerArgs` in order to pass arguments to the program in `miDebuggerPath`. [#720](https://github.com/Microsoft/MIEngine/pull/720)
+* Fix -break-insert main returning multiple bind points. [PR Microsoft/MIEngine#729](https://github.com/Microsoft/MIEngine/pull/729)
+* Use -- instead of -x for gnome-terminal. [PR Microsoft/MIEngine#733](https://github.com/Microsoft/MIEngine/pull/733)
+* Added `miDebuggerArgs` in order to pass arguments to the program in `miDebuggerPath`. [PR Microsoft/MIEngine#720](https://github.com/Microsoft/MIEngine/pull/720)
 
 ## Version 0.17.4: May 31, 2018
 * Fix infinite loop (caused by deadlock) when using recursive includes. [#2043](https://github.com/Microsoft/vscode-cpptools/issues/2043)
@@ -400,7 +409,7 @@
 * Update Microsoft Visual C++ debugger to Visual Studio 2017 released components.
   * Fix issue with showing wrong thread. [#550](https://github.com/Microsoft/vscode-cpptools/issues/550)
   * Fix issue with binaries compiled with /FASTLINK causing debugger to hang. [#484](https://github.com/Microsoft/vscode-cpptools/issues/484)
-* Fix issue in MinGW/Cygwin debugging where stop debugging causes VS Code to hang. [Microsoft/MIEngine#636](https://github.com/Microsoft/MIEngine/pull/636)
+* Fix issue in MinGW/Cygwin debugging where stop debugging causes VS Code to hang. [PR Microsoft/MIEngine#636](https://github.com/Microsoft/MIEngine/pull/636)
 
 ## Version 0.12.0: June 26, 2017
 * The default IntelliSense engine now provides semantic-aware autocomplete suggestions for `.`, `->`, and `::` operators. [#13](https://github.com/Microsoft/vscode-cpptools/issues/13)
