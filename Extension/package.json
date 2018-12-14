@@ -1424,7 +1424,7 @@
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.1.0",
-    "vscode-languageclient": "3.5.1",
+    "vscode-languageclient": "5.1.1",
     "yauzl": "~2.8.0"
   },
   "runtimeDependencies": [
