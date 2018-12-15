@@ -625,6 +625,16 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
                 return resolve(downloadFileToDestination(redirectUrl, destinationPath, headers));
             }
             if (response.statusCode !== 200) { // If request is not successful
+                // Try again with proxySupport "off".
+                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+                if (config.get('http.proxySupport') !== "off") {
+                    let workspaceValue = config.inspect('http.proxySupport').workspaceValue;
+                    config.update('http.proxySupport', "off", false); // Save the existing workspace setting.
+                    return resolve(downloadFileToDestination(urlStr, destinationPath, headers).then((result) => {
+                        config.update('http.proxySupport', workspaceValue, false); // Restore the workspace setting.
+                        return result;
+                    }));
+                }
                 return reject();
             }
             // Write file using downloaded data
