@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.21.0-insiders2: December 14, 2018
+## Version 0.21.0-insiders2: December 17, 2018
 * Add documentation comments for hover, completion, and signature help. [#399](https://github.com/Microsoft/vscode-cpptools/issues/399)
 * Fix bugs when UTF-8 characters > 1 byte are used. [#1504](https://github.com/Microsoft/vscode-cpptools/issues/1504), [#1525](https://github.com/Microsoft/vscode-cpptools/issues/1525), [#2034](https://github.com/Microsoft/vscode-cpptools/issues/2034), [#2082](https://github.com/Microsoft/vscode-cpptools/issues/2082), [#2883](https://github.com/Microsoft/vscode-cpptools/issues/2883)
 * Fix some IntelliSense process crashes. [#1785](https://github.com/Microsoft/vscode-cpptools/issues/1785), [#2913](https://github.com/Microsoft/vscode-cpptools/issues/2913)
