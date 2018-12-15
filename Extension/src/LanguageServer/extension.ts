@@ -242,7 +242,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
                 if (vsCodeBinName === 'Code - Insiders.exe') {
                     cmdFile = 'code-insiders.cmd';
-                } if (vsCodeBinName === 'Code - Exploration.exe') {
+                } else if (vsCodeBinName === 'Code - Exploration.exe') {
                     cmdFile = 'code-exploration.cmd';
                 } else {
                     cmdFile = 'code.cmd';
