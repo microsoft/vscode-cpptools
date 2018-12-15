@@ -335,8 +335,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                             .catch(() => { throw new Error('Failed to download VSIX package'); });
                     } catch (error) {
                         // Try again with the proxySupport to "off".
-                        let currentProxySupport = config.inspect<string>('http.proxySupport').globalValue;
-                        if (currentProxySupport !== originalProxySupport) {
+                        if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
                             config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
                             reject(error); // Changing the proxySupport didn't help.
                             return;
@@ -348,8 +347,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                         reject(error);
                         return;
                     }
-                    let currentProxySupport = config.inspect<string>('http.proxySupport').globalValue;
-                    if (currentProxySupport !== originalProxySupport) {
+                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
                         config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
                     }
                     break;
