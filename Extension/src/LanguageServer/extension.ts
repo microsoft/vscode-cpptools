@@ -327,11 +327,36 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                 // then the .catch call will return a resolved promise
                 // Thusly, the .catch call must also throw, as a return would simply return an unused promise
                 // instead of returning early from this function scope
+                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+                let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
+                while (true) { // Might need to try again with a different http.proxySupport setting.
+                    try {
+                        await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
+                            .catch(() => { throw new Error('Failed to download VSIX package'); });
+                    } catch (error) {
+                        // Try again with the proxySupport to "off".
+                        let currentProxySupport = config.inspect<string>('http.proxySupport').globalValue;
+                        if (currentProxySupport !== originalProxySupport) {
+                            config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                            reject(error); // Changing the proxySupport didn't help.
+                            return;
+                        }
+                        if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
+                            config.update('http.proxySupport', "off", true);
+                            continue;
+                        }
+                        reject(error);
+                        return;
+                    }
+                    let currentProxySupport = config.inspect<string>('http.proxySupport').globalValue;
+                    if (currentProxySupport !== originalProxySupport) {
+                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                    }
+                    break;
+                }
                 try {
-                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
-                        .catch(() => { throw new Error('Failed to download VSIX package'); });
                     await installVsix(vsixPath, updateChannel)
-                        .catch((error: Error) => { throw error; });
+                            .catch((error: Error) => { throw error; });
                 } catch (error) {
                     reject(error);
                     return;
