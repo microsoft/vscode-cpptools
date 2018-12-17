@@ -21,7 +21,7 @@ The symbol files are as follows:
 
 **On Windows** 
 * Microsoft.MICore.pdb
-* Microsoft.MIDebugEngine.dll
+* Microsoft.MIDebugEngine.pdb
 * vscode\OpenDebugAD7.pdb
 * vscode\Microsoft.DebugEngineHost.pdb
 
