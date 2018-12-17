@@ -331,31 +331,29 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                 let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
                 while (true) { // Might need to try again with a different http.proxySupport setting.
                     try {
-                        await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
-                            .catch(() => { throw new Error('Failed to download VSIX package'); });
-                    } catch (error) {
+                        await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
+                    } catch {
                         // Try again with the proxySupport to "off".
                         if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
                             config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                            reject(error); // Changing the proxySupport didn't help.
+                            reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
                             return;
                         }
                         if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
                             config.update('http.proxySupport', "off", true);
                             continue;
                         }
-                        reject(error);
+                        reject(new Error('Failed to download VSIX package'));
                         return;
                     }
                     if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
                         config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                        telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with http.proxySupport off", 'success': 'true' });
+                        telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
                     }
                     break;
                 }
                 try {
-                    await installVsix(vsixPath, updateChannel)
-                            .catch((error: Error) => { throw error; });
+                    await installVsix(vsixPath, updateChannel);
                 } catch (error) {
                     reject(error);
                     return;
