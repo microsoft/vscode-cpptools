@@ -349,6 +349,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                     }
                     if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
                         config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                        telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with http.proxySupport off", 'success': 'true' });
                     }
                     break;
                 }
