@@ -242,7 +242,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
                 if (vsCodeBinName === 'Code - Insiders.exe') {
                     cmdFile = 'code-insiders.cmd';
-                } if (vsCodeBinName === 'Code - Exploration.exe') {
+                } else if (vsCodeBinName === 'Code - Exploration.exe') {
                     cmdFile = 'code-exploration.cmd';
                 } else {
                     cmdFile = 'code.cmd';
@@ -327,11 +327,33 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                 // then the .catch call will return a resolved promise
                 // Thusly, the .catch call must also throw, as a return would simply return an unused promise
                 // instead of returning early from this function scope
+                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+                let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
+                while (true) { // Might need to try again with a different http.proxySupport setting.
+                    try {
+                        await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
+                    } catch {
+                        // Try again with the proxySupport to "off".
+                        if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                            config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                            reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
+                            return;
+                        }
+                        if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
+                            config.update('http.proxySupport', "off", true);
+                            continue;
+                        }
+                        reject(new Error('Failed to download VSIX package'));
+                        return;
+                    }
+                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                        telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
+                    }
+                    break;
+                }
                 try {
-                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
-                        .catch(() => { throw new Error('Failed to download VSIX package'); });
-                    await installVsix(vsixPath, updateChannel)
-                        .catch((error: Error) => { throw error; });
+                    await installVsix(vsixPath, updateChannel);
                 } catch (error) {
                     reject(error);
                     return;

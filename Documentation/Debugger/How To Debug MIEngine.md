@@ -15,12 +15,13 @@ You can open the solution file **MIDebugEngine.sln** located under **src** and c
 * Microsoft.MIDebugEngine.dll
 * vscode\OpenDebugAD7.exe
 * vscode\Microsoft.DebugEngineHost.dll
+* vscode\Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.dll
 
 The symbol files are as follows:
 
 **On Windows** 
 * Microsoft.MICore.pdb
-* Microsoft.MIDebugEngine.dll
+* Microsoft.MIDebugEngine.pdb
 * vscode\OpenDebugAD7.pdb
 * vscode\Microsoft.DebugEngineHost.pdb
 
@@ -51,11 +52,13 @@ This will cause the debugger to look like it has hung once you start debugging, 
 
 ### Debugging MIEngine running on Linux or Mac OS X
 
+#### With MonoDevelop
+
 On Linux and Mac OS X, we use `mono` as our framework. You can download Xamarin Studio v5.10.1.6 and remotely attach to your Mac or Linux box to debug there.
 
-#### Install Prerequisites
-1. Install [GTK](http://www.mono-project.com/download/)
-2. Install [Xamarin Studio v5.10.1.6](http://download.xamarin.com/studio/Windows/XamarinStudio-5.10.1.6-0.msi)
+##### Install Prerequisites
+1. Install [GTK](http://www.mono-project.com/download/).
+2. Install [Xamarin Studio v5.10.1.6](http://download.xamarin.com/studio/Windows/XamarinStudio-5.10.1.6-0.msi).
 
 Remote attach functionality behind a flag.  You can run it like this:
 ```PowerShell
@@ -64,26 +67,60 @@ set MONODEVELOP_SDB_TEST=1
 MonoDevelop.exe
 ```
 
-#### Create an empty project for attaching (one-time setup)
+##### Create an empty project for attaching (one-time setup)
 
-1. Launch MonoDevelop
-2. File -> New Solution
-3. Misc/Generic Project
-4. Name project and hit "Create"
-5. Right-click the project node (blue square) and do "Options"
+1. Launch MonoDevelop.
+2. File -> New Solution.
+3. Misc/Generic Project.
+4. Name project and hit "Create".
+5. Right-click the project node (blue square) and do "Options".
 6. Under Run -> Custom Commands, select "Execute" in the lower dropdown and choose a command (I use `c:\windows\notepad.exe` - it doesn't matter what the command is, but MonoDevelop requires it to exist before it'll light up the Run menu).
 
-#### Configure the extension to enable remote debugging
+##### Configure the extension to enable remote debugging
 
 Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/OpenDebugAD7** file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from Xamarin Studio. 
 
-#### Attach the remote debugger
+##### Attach the remote debugger
 
-In MonoDevelop: Run -> Run With -> Custom Command Mono Soft Debugger
-Fill in the IP and port of the Linux/Mac OS X machine and hit "Connect" to start debugging
+In MonoDevelop: Run -> Run With -> Custom Command Mono Soft Debugger.
+Fill in the IP and port of the Linux/Mac OS X machine and hit "Connect" to start debugging.
 
 After you've done this once, you can hit the MonoDevelop "Play" button or <kbd>F5</kbd> to bring up the connect dialog again.
 
-Note: If you are debugging to CentOS, you will need to make an exception in the firewall
+#### With VS Code + Mono Debug
+
+##### Install Prerequisites
+1. Install [VS Code](https://code.visualstudio.com/Download).
+2. Install Mono Debug extension for VS Code.
+
+##### Create an empty project (one-time setup)
+1. Open to a new folder and create `.vscode/launch.json`.
+2. Create the following configuration in launch.json.
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Mono",
+            "request": "attach",
+            "type": "mono",
+            "address": "<INSERT_MACHINE_IP_ADDRESS_HERE>",
+            "port": 1234
+        }
+    ]
+}
+```
+
+##### Configure the extension to enable remote debugging
+
+Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/OpenDebugAD7** file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from VS Code. 
+
+##### Attach the remote debugger
+
+Selet the `Attach to Mono` configuration and hit F5.
+
+#### Additional Notes
+
+Note: If you are debugging to CentOS, you will need to make an exception in the firewall.
 * `sudo firewall-cmd --zone=public --add-port=1234/tcp --permanent`
 * `sudo firewall-cmd --reload`
