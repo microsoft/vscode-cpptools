@@ -541,15 +541,6 @@ function onToggleSquiggles(): void {
     settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
 }
 
-function showReloadPrompt(msg: string): void { 
-    let reload: string = "Reload"; 
-    vscode.window.showInformationMessage(msg, reload).then(value => { 
-       if (value === reload) { 
-          vscode.commands.executeCommand("workbench.action.reloadWindow"); 
-       } 
-    }); 
- } 
-
 function onToggleIncludeFallback(): void {
     onActivationEvent();
     // This only applies to the active client.
