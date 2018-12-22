@@ -5,6 +5,7 @@
 * Add macro expansions to hover. [#1734](https://github.com/Microsoft/vscode-cpptools/issues/1734)
 * Fix incorrect completions after Enter is used after struct, class, etc. [#2734](https://github.com/Microsoft/vscode-cpptools/issues/2734)
 * Fix Tag Parser completion details missing keywords (i.e. `using`, `class`, `#define`, etc.). [#2850](https://github.com/Microsoft/vscode-cpptools/issues/2850)
+* Fix missing `(declaration)` on symbols. [#2851](https://github.com/Microsoft/vscode-cpptools/issues/2851)
 * Add back `File:` info for completions with doc comments. [#2938](https://github.com/Microsoft/vscode-cpptools/issues/2938)
 * Fix snippet completions being offered when they shouldn't be. [#2942](https://github.com/Microsoft/vscode-cpptools/issues/2942)
 * Set the `editor.wordBasedSuggestions` to `false` by default to prevent incorrect completions. [#2943](https://github.com/Microsoft/vscode-cpptools/issues/2943)
