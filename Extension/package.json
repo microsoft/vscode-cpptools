@@ -1367,10 +1367,10 @@
     },
     "configurationDefaults": {
       "[cpp]": {
-        "editor.autoIndent": false
+        "editor.wordBasedSuggestions": false
       },
       "[c]": {
-        "editor.autoIndent": false
+        "editor.wordBasedSuggestions": false
       }
     },
     "snippets": [
