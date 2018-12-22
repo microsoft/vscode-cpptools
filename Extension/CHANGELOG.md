@@ -1,5 +1,17 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.21.0-insiders3: December 27, 2018
+* Add completion committing for methods after `(`. [#882](https://github.com/Microsoft/vscode-cpptools/issues/882), [#1184](https://github.com/Microsoft/vscode-cpptools/issues/1184)
+* Add macro expansions to hover. [#1734](https://github.com/Microsoft/vscode-cpptools/issues/1734)
+* Fix incorrect completions after Enter is used after struct, class, etc. [#2734](https://github.com/Microsoft/vscode-cpptools/issues/2734)
+* Fix Tag Parser completion details missing keywords (i.e. `using`, `class`, `#define`, etc.). [#2850](https://github.com/Microsoft/vscode-cpptools/issues/2850)
+* Add back `File:` info for completions with doc comments. [#2938](https://github.com/Microsoft/vscode-cpptools/issues/2938)
+* Fix snippet completions being offered when they shouldn't be. [#2942](https://github.com/Microsoft/vscode-cpptools/issues/2942)
+* Set the `editor.wordBasedSuggestions` to `false` by default to prevent incorrect completions. [#2943](https://github.com/Microsoft/vscode-cpptools/issues/2943)
+* Fix incorrect signature help parameter selection when formal parameters are missing or substrings. [#2952](https://github.com/Microsoft/vscode-cpptools/issues/2952)
+* Add completion committing for templates after `<`. [#2953](https://github.com/Microsoft/vscode-cpptools/issues/2953)
+* Fix 3 crashes found with 0.21.0-insiders2.
+
 ## Version 0.21.0-insiders2: December 17, 2018
 * Add documentation comments for hover, completion, and signature help. [#399](https://github.com/Microsoft/vscode-cpptools/issues/399)
 * Fix bugs when UTF-8 characters > 1 byte are used. [#1504](https://github.com/Microsoft/vscode-cpptools/issues/1504), [#1525](https://github.com/Microsoft/vscode-cpptools/issues/1525), [#2034](https://github.com/Microsoft/vscode-cpptools/issues/2034), [#2082](https://github.com/Microsoft/vscode-cpptools/issues/2082), [#2883](https://github.com/Microsoft/vscode-cpptools/issues/2883)
@@ -10,7 +22,6 @@
   * Julien Russo (@Dotpys) [PR #2663](https://github.com/Microsoft/vscode-cpptools/pull/2663)
 * Fix `Go to Definition` when `method(void)` is used. [#2802](https://github.com/Microsoft/vscode-cpptools/issues/2802)
 * Fix PowerShell bug on Win7. [#2822](https://github.com/Microsoft/vscode-cpptools/issues/2822)
-* Support `C_Cpp.updateChannel` for VS Code Exploration builds.
 * Add icons for operators, structs/unions, enum values, template arguments, and macros. [#2849](https://github.com/Microsoft/vscode-cpptools/issues/2849)
 * Add text `(declaration)`, `(typedef)`, `(type alias)`, and `(union)` to symbols. [#2851](https://github.com/Microsoft/vscode-cpptools/issues/2851)
 * Fix problem with empty recursive include paths. [#2855](https://github.com/Microsoft/vscode-cpptools/issues/2855)
@@ -18,6 +29,7 @@
 * Add a refresh button to the `Attach to Process` picker. [#2885](https://github.com/Microsoft/vscode-cpptools/issues/2885)
   * Matt Bise (@mbise1993) [PR #2895](https://github.com/Microsoft/vscode-cpptools/pull/2895)
 * Retry Insider VSIX downloading with `http.proxySupport` `"off"`. [#2927](https://github.com/Microsoft/vscode-cpptools/issues/2927)
+* Support `C_Cpp.updateChannel` for VS Code Exploration builds.
 
 ## Version 0.21.0-insiders: November 8, 2018
 * Add support for `__int128_t` and `__uint128_t` types. [#1815](https://github.com/Microsoft/vscode-cpptools/issues/1815)
