@@ -6,7 +6,6 @@
     "c_cpp.command.peekDeclaration.title": "Peek declaration",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
     "c_cpp.command.navigate.title": "Navigate...",
-    "c_cpp.command.toggleSnippets.title": "Toggle snippets",
     "c_cpp.command.toggleErrorSquiggles.title": "Toggle error squiggles",
     "c_cpp.command.toggleIncludeFallback.title": "Toggle IntelliSense engine fallback on include errors",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle inactive region colorization",
