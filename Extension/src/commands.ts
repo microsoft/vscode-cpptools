@@ -24,7 +24,6 @@ class TemporaryCommandRegistrar {
         "C_Cpp.ToggleErrorSquiggles",
         "C_Cpp.ToggleIncludeFallback",
         "C_Cpp.ToggleDimInactiveRegions",
-        "C_Cpp.ToggleSnippets",
         "C_Cpp.ShowReleaseNotes",
         "C_Cpp.ResetDatabase",
         "C_Cpp.PauseParsing",
