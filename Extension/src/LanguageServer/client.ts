@@ -355,7 +355,7 @@ class DefaultClient implements Client {
     private createLanguageClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): LanguageClient {
         let serverModule: string = getLanguageServerFileName();
         let exeExists: boolean = fs.existsSync(serverModule);
-        if (exeExists) {
+        if (!exeExists) {
             throw String('Missing binary at ' + serverModule);
         }
         let serverName: string = this.getName(workspaceFolder);
