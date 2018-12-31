@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.21.0-insiders3: January 2, 2018
+## Version 0.21.0-insiders3: January 2, 2019
 * Add completion committing for methods after `(`. [#882](https://github.com/Microsoft/vscode-cpptools/issues/882), [#1184](https://github.com/Microsoft/vscode-cpptools/issues/1184)
 * Add macro expansions to hover. [#1734](https://github.com/Microsoft/vscode-cpptools/issues/1734)
 * Fix incorrect completions after Enter is used after struct, class, etc. [#2734](https://github.com/Microsoft/vscode-cpptools/issues/2734)
