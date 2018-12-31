@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.21.0-insiders3: December 31, 2018
+## Version 0.21.0-insiders3: January 2, 2018
 * Add completion committing for methods after `(`. [#882](https://github.com/Microsoft/vscode-cpptools/issues/882), [#1184](https://github.com/Microsoft/vscode-cpptools/issues/1184)
 * Add macro expansions to hover. [#1734](https://github.com/Microsoft/vscode-cpptools/issues/1734)
 * Fix incorrect completions after Enter is used after struct, class, etc. [#2734](https://github.com/Microsoft/vscode-cpptools/issues/2734)
@@ -10,6 +10,7 @@
 * Fix snippet completions being offered when they shouldn't be. [#2942](https://github.com/Microsoft/vscode-cpptools/issues/2942)
 * Set the `editor.wordBasedSuggestions` to `false` by default to prevent incorrect completions. [#2943](https://github.com/Microsoft/vscode-cpptools/issues/2943)
 * Add completion committing for templates after `<`. [#2953](https://github.com/Microsoft/vscode-cpptools/issues/2953)
+* Fix IntelliSense-based `Go to Definition` for functions with function pointer parameters. [#2981](https://github.com/Microsoft/vscode-cpptools/issues/2981)
 * Fix 3 crashes found with 0.21.0-insiders2.
 
 ## Version 0.21.0-insiders2: December 17, 2018
