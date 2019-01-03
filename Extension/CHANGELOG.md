@@ -5,6 +5,7 @@
 * Add the Microsoft digital signature to Windows binaries to avoid getting incorrectly flagged by virus scanners. [#1103](https://github.com/Microsoft/vscode-cpptools/issues/1103), [#2970](https://github.com/Microsoft/vscode-cpptools/issues/2970)
 * Add macro expansions to hover. [#1734](https://github.com/Microsoft/vscode-cpptools/issues/1734)
 * Fix incorrect completions after Enter is used after struct, class, etc. [#2734](https://github.com/Microsoft/vscode-cpptools/issues/2734)
+* Fix quotes around defines not supported for custom configuration providers. [#2820](https://github.com/Microsoft/vscode-cpptools/issues/2820)
 * Fix Tag Parser completion details missing keywords (i.e. `using`, `class`, `#define`, etc.). [#2850](https://github.com/Microsoft/vscode-cpptools/issues/2850)
 * Fix missing `(declaration)` on symbols. [#2851](https://github.com/Microsoft/vscode-cpptools/issues/2851)
 * Fix IntelliSense errors with template argument deduction. [#2907](https://github.com/Microsoft/vscode-cpptools/issues/2907), [#2912](https://github.com/Microsoft/vscode-cpptools/issues/2912)
