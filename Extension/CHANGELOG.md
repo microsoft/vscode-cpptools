@@ -2,6 +2,7 @@
 
 ## Version 0.21.0-insiders3: January 3, 2019
 * Add completion committing for methods after `(`. [#882](https://github.com/Microsoft/vscode-cpptools/issues/882), [#1184](https://github.com/Microsoft/vscode-cpptools/issues/1184)
+* Add the Microsoft digital signature to Windows binaries to avoid getting flagged by virus scanners. [#1103](https://github.com/Microsoft/vscode-cpptools/issues/1103), [#2970](https://github.com/Microsoft/vscode-cpptools/issues/2970)
 * Add macro expansions to hover. [#1734](https://github.com/Microsoft/vscode-cpptools/issues/1734)
 * Fix incorrect completions after Enter is used after struct, class, etc. [#2734](https://github.com/Microsoft/vscode-cpptools/issues/2734)
 * Fix Tag Parser completion details missing keywords (i.e. `using`, `class`, `#define`, etc.). [#2850](https://github.com/Microsoft/vscode-cpptools/issues/2850)
