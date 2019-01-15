@@ -36,6 +36,8 @@ let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 
+let taskProvider: vscode.Disposable;
+
 /**
  * activate: set up the extension for language services
  */
@@ -54,7 +56,7 @@ export function activate(activationEventOccurred: boolean): void {
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
     // Check if an activation event has already occurred.
-    if (activationEventOccurred) {
+    if (activationEventOccurred) { 
         onActivationEvent();
         return;
     }
@@ -70,6 +72,19 @@ export function activate(activationEventOccurred: boolean): void {
         }
     }
 
+    let buildPromise: Thenable<vscode.Task[]> | undefined = undefined;
+    taskProvider = vscode.tasks.registerTaskProvider('shell', {
+        provideTasks: () => {
+            if (!buildPromise) {
+                buildPromise = getBuildTasks();
+            }
+            return buildPromise;
+        },
+        resolveTask(task: vscode.Task): vscode.Task {
+            return undefined;
+        }
+    });
+
     // handle "onLanguage:cpp" and "onLanguage:c" activation events.
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
@@ -80,6 +95,30 @@ export function activate(activationEventOccurred: boolean): void {
             }
         }
     }
+}
+
+async function getBuildTasks(): Promise<vscode.Task[]> {
+    
+    let compiler: string;
+    if (true /*g++ detected*/) {
+        compiler = 'gcc';
+    }
+    
+    const kind: vscode.TaskDefinition = {
+        type: 'shell',
+        label: 'build',
+        command: compiler,
+    };
+    
+    let command: vscode.ShellExecution = new vscode.ShellExecution(compiler, ['-g', 'main.cpp', '-o', 'main']);
+    let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), 'build', 'C/C++', command, '$gcc');
+    task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
+    task.group = vscode.TaskGroup.Build;
+    
+    let result: vscode.Task[] = [];
+    result.push(task);
+
+    return result;
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
@@ -717,6 +756,9 @@ export function deactivate(): Thenable<void> {
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
     ui.dispose();
+    if (taskProvider) {
+        taskProvider.dispose();
+    }
     return clients.dispose();
 }
 
