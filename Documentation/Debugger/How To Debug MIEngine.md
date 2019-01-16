@@ -117,7 +117,7 @@ Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/Ope
 
 ##### Attach the remote debugger
 
-Selet the `Attach to Mono` configuration and hit F5.
+Select the `Attach to Mono` configuration and hit F5.
 
 #### Additional Notes
 
