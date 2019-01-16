@@ -27,7 +27,7 @@ Set or change the following options to control VS Code's behavior during debuggi
   macOS: When set to true, it will spawn an external console through `lldb-mi`. When set to false, the output can be seen in VS Code's debugConsole. Due to limitations within `lldb-mi`, integratedTerminal support is not available.
 
 * #### `avoidWindowsConsoleRedirection`
-  In order to support VSCode's Integrated terminal with gdb on Windows, the extension adds console redirection commands to the debugger's arguments to have console input and output show up in the integrated terminal. Setting this option to `true` will disable it.
+  In order to support VSCode's Integrated terminal with gdb on Windows, the extension adds console redirection commands to the debuggee's arguments to have console input and output show up in the integrated terminal. Setting this option to `true` will disable it.
 
 * #### `logging`
   Optional flags to determine what types of messages should be logged to the Debug Console.
