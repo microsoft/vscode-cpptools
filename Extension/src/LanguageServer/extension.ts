@@ -107,9 +107,10 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         type: 'shell',
         label: 'build',
         command: compiler,
+        args: ['-g', '${fileBasename}', '-o', '${fileBasenameNoExtension}']
     };
 
-    const command: vscode.ShellExecution = new vscode.ShellExecution(compiler, ['-g', 'main.cpp', '-o', 'main']);
+    const command: vscode.ShellExecution = new vscode.ShellExecution(compiler);
     let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), 'build', 'C/C++', command, '$gcc');
     task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
     task.group = vscode.TaskGroup.Build;
