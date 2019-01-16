@@ -99,19 +99,27 @@ export function activate(activationEventOccurred: boolean): void {
 
 async function getBuildTasks(): Promise<vscode.Task[]> {
     let compiler: string;
+
+    // TODO Find compiler. If only one compiler is found, only generate one task w/ the found compiler
+    // If more than one compiler is found, create multiple tasks w/ each compiler
     if (true /*g++ detected*/) {
-        compiler = 'gcc';
+        compiler = 'g++'; // TODO get full compiler path? In case the compiler is not in $PATH
+    } else {
+        // TODO no compiler found. Show a dialog message prompting the user to install a compiler
     }
 
+    const taskName: string = "build active file";
+    // TODO consider adding -std=c++1z or equivalent for other compilers
+    const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/${fileBasenameNoExtension}'];
     const kind: vscode.TaskDefinition = {
         type: 'shell',
-        label: 'build',
+        label: taskName,
         command: compiler,
-        args: ['-g', '${fileBasename}', '-o', '${fileBasenameNoExtension}']
+        args: args,
     };
 
-    const command: vscode.ShellExecution = new vscode.ShellExecution(compiler);
-    let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), 'build', 'C/C++', command, '$gcc');
+    const command: vscode.ShellExecution = new vscode.ShellExecution(compiler, args);
+    let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), taskName, 'C/C++', command, '$gcc');
     task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
     task.group = vscode.TaskGroup.Build;
 
