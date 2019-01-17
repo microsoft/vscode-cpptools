@@ -78,7 +78,7 @@ The following options enable you to modify the state of the target application w
   JSON array of command line arguments to pass to the program when it is launched. Example `["arg1", "arg2"]`. If you are escaping characters you will need to double escape them. For example `["{\\\"arg\\\": true}]` will send `{"arg1": true}` to your application.
 
 * #### `cwd`
-  Sets the the working directory of the application launched by the debugger.
+  Sets the working directory of the application launched by the debugger.
 
 * #### `environment`
   Environment variables to add to the environment for the program. Example: `[ { "name": "squid", "value": "clam" } ]`.
@@ -169,7 +169,7 @@ _Note: core dump debugging is not supported with MinGw._
   Full path to debug server to launch.
 
 * #### `debugServerArgs`
-  Arguments for the the debugger server.
+  Arguments for the debugger server.
 
 * #### `serverStarted`
   Server-started pattern to look for in the debug server output.
