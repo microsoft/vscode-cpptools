@@ -22,6 +22,7 @@ import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
+import * as configs from './configurations';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -61,17 +62,6 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
-            let config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
-            if (fs.existsSync(config)) {
-                onActivationEvent();
-                return;
-            }
-        }
-    }
-
     let buildPromise: Thenable<vscode.Task[]> | undefined = undefined;
     taskProvider = vscode.tasks.registerTaskProvider('shell', {
         provideTasks: () => {
@@ -84,6 +74,17 @@ export function activate(activationEventOccurred: boolean): void {
             return undefined;
         }
     });
+
+    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+            let config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            if (fs.existsSync(config)) {
+                onActivationEvent();
+                return;
+            }
+        }
+    }
 
     // handle "onLanguage:cpp" and "onLanguage:c" activation events.
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
@@ -108,23 +109,30 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         // TODO no compiler found. Show a dialog message prompting the user to install a compiler
     }
 
-    const taskName: string = "build active file";
-    // TODO consider adding -std=c++1z or equivalent for other compilers
-    const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/${fileBasenameNoExtension}'];
-    const kind: vscode.TaskDefinition = {
-        type: 'shell',
-        label: taskName,
-        command: compiler,
-        args: args,
-    };
-
-    const command: vscode.ShellExecution = new vscode.ShellExecution(compiler, args);
-    let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), taskName, 'C/C++', command, '$gcc');
-    task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
-    task.group = vscode.TaskGroup.Build;
-
+    let activeClient: Client = getActiveClient();
     let result: vscode.Task[] = [];
-    result.push(task);
+    let compilerPaths: string[] = await activeClient.getCurrentConfigCompilerPaths();
+    compilerPaths.forEach(compilerPath => {
+        let compilerName: string = path.basename(compilerPath);
+        const taskName: string = compilerName + " build active file";
+
+        // TODO consider adding -std=c++1z or equivalent for other compilers
+        const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/${fileBasenameNoExtension}'];
+
+        const kind: vscode.TaskDefinition = {
+            type: 'shell',
+            label: taskName,
+            command: compilerPath,
+            args: args,
+        };
+
+        const command: vscode.ShellExecution = new vscode.ShellExecution(compiler, args);
+        let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), taskName, 'C/Cpp', command, '$gcc');
+        task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
+        task.group = vscode.TaskGroup.Build;
+
+        result.push(task);
+    });
 
     return result;
 }
