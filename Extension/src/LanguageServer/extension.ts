@@ -279,7 +279,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                         throw new Error();
                     }
                 } catch (error) {
-                    reject(new Error('Failed to launch VS Code script process for installation with Code version greater than or equal to  1.28.0'));
+                    reject(new Error('Failed to launch VS Code script process for installation'));
                     return;
                 }
                 resolve();
@@ -294,7 +294,7 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     throw new Error();
                 }
             } catch (error) {
-                reject(new Error('Failed to launch VS Code script process for installation with Code version less than 1.28.0'));
+                reject(new Error('Failed to launch VS Code script process for installation'));
                 return;
             }
 
