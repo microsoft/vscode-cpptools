@@ -22,6 +22,7 @@ import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
+import { PackageVersion } from '../packageVersion';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -266,7 +267,25 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
-        // Install the VSIX
+        // 1.28.0 changes the CLI for making installations
+        let userVersion: PackageVersion = new PackageVersion(vscode.version);
+        let breakingVersion: PackageVersion = new PackageVersion('1.28.0');
+        if (userVersion.isGreaterThan(breakingVersion, 'insider')) {
+            return new Promise<void>((resolve, reject) => {
+                let process: ChildProcess;
+                try {
+                    process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+                    if (process.pid === undefined) {
+                        throw new Error();
+                    }
+                } catch (error) {
+                    reject(new Error('Failed to launch VS Code script process for installation'));
+                    return;
+                }
+                resolve();
+            });
+        }
+
         return new Promise<void>((resolve, reject) => {
             let process: ChildProcess;
             try {
