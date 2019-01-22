@@ -22,6 +22,7 @@ import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
+import { PackageVersion } from '../packageVersion';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -239,9 +240,11 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         const vsCodeScriptPath: string = function(platformInfo): string {
             if (platformInfo.platform === 'win32') {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                let cmdFile: string; // Windows VS Code Insiders breaks VS Code naming conventions
+                let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
                 if (vsCodeBinName === 'Code - Insiders.exe') {
                     cmdFile = 'code-insiders.cmd';
+                } else if (vsCodeBinName === 'Code - Exploration.exe') {
+                    cmdFile = 'code-exploration.cmd';
                 } else {
                     cmdFile = 'code.cmd';
                 }
@@ -264,7 +267,25 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
-        // Install the VSIX
+        // 1.28.0 changes the CLI for making installations
+        let userVersion: PackageVersion = new PackageVersion(vscode.version);
+        let breakingVersion: PackageVersion = new PackageVersion('1.28.0');
+        if (userVersion.isGreaterThan(breakingVersion, 'insider')) {
+            return new Promise<void>((resolve, reject) => {
+                let process: ChildProcess;
+                try {
+                    process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+                    if (process.pid === undefined) {
+                        throw new Error();
+                    }
+                } catch (error) {
+                    reject(new Error('Failed to launch VS Code script process for installation'));
+                    return;
+                }
+                resolve();
+            });
+        }
+
         return new Promise<void>((resolve, reject) => {
             let process: ChildProcess;
             try {
@@ -280,8 +301,8 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
             const timer: NodeJS.Timer = setTimeout(() => {
                 process.kill();
-                reject(new Error('Failed to receive response from VS Code script process for installation within 10s.'));
-            }, 10000);
+                reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
+            }, 30000);
 
             // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
             // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
@@ -325,11 +346,33 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
                 // then the .catch call will return a resolved promise
                 // Thusly, the .catch call must also throw, as a return would simply return an unused promise
                 // instead of returning early from this function scope
+                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+                let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
+                while (true) { // Might need to try again with a different http.proxySupport setting.
+                    try {
+                        await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
+                    } catch {
+                        // Try again with the proxySupport to "off".
+                        if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                            config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                            reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
+                            return;
+                        }
+                        if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
+                            config.update('http.proxySupport', "off", true);
+                            continue;
+                        }
+                        reject(new Error('Failed to download VSIX package'));
+                        return;
+                    }
+                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                        telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
+                    }
+                    break;
+                }
                 try {
-                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath)
-                        .catch(() => { throw new Error('Failed to download VSIX package'); });
-                    await installVsix(vsixPath, updateChannel)
-                        .catch((error: Error) => { throw error; });
+                    await installVsix(vsixPath, updateChannel);
                 } catch (error) {
                     reject(error);
                     return;
@@ -371,7 +414,6 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleSnippets', onToggleSnippets));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
@@ -518,47 +560,6 @@ function onToggleSquiggles(): void {
     settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
 }
 
-function onToggleSnippets(): void {
-    onActivationEvent();
-
-    // This will apply to all clients as it's a global toggle. It will require a reload.
-    const snippetsCatName: string  = "Snippets";
-    let newPackageJson: any = util.getRawPackageJson();
-
-    if (newPackageJson.categories.findIndex(cat => cat === snippetsCatName) === -1) {
-        // Add the Snippet category and snippets node. 
-
-        newPackageJson.categories.push(snippetsCatName);
-        newPackageJson.contributes.snippets = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
-
-        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
-            showReloadPrompt("Reload Window to finish enabling C++ snippets");
-        });
-        
-    } else {
-        // Remove the category and snippets node.
-        let ndxCat: number = newPackageJson.categories.indexOf(snippetsCatName);
-        if (ndxCat !== -1) {
-            newPackageJson.categories.splice(ndxCat, 1);
-        }
-
-        delete newPackageJson.contributes.snippets;
-
-        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
-            showReloadPrompt("Reload Window to finish disabling C++ snippets");
-        });
-    }
-}
-
-function showReloadPrompt(msg: string): void { 
-    let reload: string = "Reload"; 
-    vscode.window.showInformationMessage(msg, reload).then(value => { 
-       if (value === reload) { 
-          vscode.commands.executeCommand("workbench.action.reloadWindow"); 
-       } 
-    }); 
- } 
-
 function onToggleIncludeFallback(): void {
     onActivationEvent();
     // This only applies to the active client.
@@ -645,32 +646,66 @@ function reportMacCrashes(): void {
     }
 }
 
-function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
+function logCrashTelemetry(data: string): void {
     let crashObject: { [key: string]: string } = {};
+    crashObject["CrashingThreadCallStack"] = data;
+    telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
+}
+
+function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     if (err) {
-        crashObject["readFile: err.code"] = err.code;
-        telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
-        return;
+        return logCrashTelemetry("readFile: " + err.code);
     }
-    let startCrash: number = data.indexOf(" Crashed:");
+
+    // Extract the crashing thread's call stack.
+    const crashStart: string = " Crashed:";
+    let startCrash: number = data.indexOf(crashStart);
     if (startCrash < 0) {
-        startCrash = 0;
+        return logCrashTelemetry("No crash start");
     }
+    startCrash += crashStart.length + 1; // Skip past crashStart.
     let endCrash: number = data.indexOf("Thread ", startCrash);
-    if (endCrash < startCrash) {
-        endCrash = data.length - 1;
+    if (endCrash < 0) {
+        endCrash = data.length - 1; // Not expected, but just in case.
+    }
+    if (endCrash <= startCrash) {
+        return logCrashTelemetry("No crash end");
     }
     data = data.substr(startCrash, endCrash - startCrash);
+    
+    // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
+    data = data.replace(/0x................ /g, "");
+
+    // Get rid of the process names on each line and just add it to the start.
+    const process1: string = "Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin\t";
+    const process2: string = "Microsoft.VSCode.CPP.Extension.darwin\t";
+    if (data.includes(process1)) {
+        data = data.replace(new RegExp(process1, "g"), "");
+        data = process1 + "\n" + data;
+    } else if (data.includes(process2)) {
+        data = data.replace(new RegExp(process2, "g"), "");
+        data = process2 + "\n" + data;
+    } else {
+        return logCrashTelemetry("No process"); // Not expected, but just in case.
+    }
+
+    // Remove runtime lines because they can be different on different machines.
+    let lines: string[] = data.split("\n");
+    data = "";
+    lines.forEach((line: string) => {
+        if (!line.includes(".dylib") && !line.includes("???")) {
+            line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
+            line = line.replace(/std::__1::/g, "std::");  // __1:: is not helpful.
+            data += (line + "\n");
+        }
+    });
+    data = data.trimRight();
+
     if (data.length > 8192) { // The API has an 8k limit.
         data = data.substr(0, 8189) + "...";
     }
-    if (data.length < 2) {
-        return; // Don't send telemetry if there's no call stack.
-    }
-    // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
-    data = data.replace(/0x................ /g, "");
-    crashObject["CrashingThreadCallStack"] = data;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
+
+    logCrashTelemetry(data);
 }
 
 export function deactivate(): Thenable<void> {

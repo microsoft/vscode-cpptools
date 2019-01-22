@@ -110,8 +110,12 @@
       "type": "object",
       "default": {},
       "properties": {
-        "name": "string",
-        "value": "string"
+        "name": {
+            "type": "string"
+        },
+        "value": {
+            "type": "string"
+        }
       }
     },
     "CppdbgLaunchOptions": {
@@ -259,7 +263,12 @@
         },
         "externalConsole": {
           "type": "boolean",
-          "description": "If true, a console is launched for the debuggee. If false, no console is launched. Note this option is ignored in some cases for technical reasons.",
+          "description": "If true, a console is launched for the debuggee. If false, on Linux and Windows, it will appear in the Integrated Console.",
+          "default": false
+        },
+        "avoidWindowsConsoleRedirection": {
+          "type": "boolean",
+          "description": "If true, disables debuggee console redirection that is required for Integrated Terminal support.",
           "default": false
         },
         "sourceFileMap": {

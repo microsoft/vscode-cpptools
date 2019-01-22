@@ -29,6 +29,7 @@ import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
+import * as fs from 'fs';
 
 let ui: UI;
 const configProviderTimeout: number = 2000;
@@ -353,6 +354,10 @@ class DefaultClient implements Client {
 
     private createLanguageClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): LanguageClient {
         let serverModule: string = getLanguageServerFileName();
+        let exeExists: boolean = fs.existsSync(serverModule);
+        if (!exeExists) {
+            throw String('Missing binary at ' + serverModule);
+        }
         let serverName: string = this.getName(workspaceFolder);
 
         let serverOptions: ServerOptions = {

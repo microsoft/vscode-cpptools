@@ -167,8 +167,16 @@ export function getProgressExecutableSuccess(): number { return progressExecutab
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
-export function showReleaseNotes(): void {
-    vscode.commands.executeCommand('vscode.previewHtml', vscode.Uri.file(getExtensionFilePath("ReleaseNotes.html")), vscode.ViewColumn.One, "C/C++ Extension Release Notes");
+let releaseNotesPanel: vscode.WebviewPanel = undefined;
+
+export async function showReleaseNotes(): Promise<void> {
+    if (releaseNotesPanel) {
+        releaseNotesPanel.reveal();
+    } else {
+        releaseNotesPanel = vscode.window.createWebviewPanel('releaseNotes', "C/C++ Extension Release Notes", vscode.ViewColumn.One);
+        releaseNotesPanel.webview.html = await readFileText(getExtensionFilePath("ReleaseNotes.html"));
+        releaseNotesPanel.onDidDispose(() => releaseNotesPanel = undefined, null, extensionContext.subscriptions);
+    }
 }
 
 export function isUri(input: any): input is vscode.Uri {
@@ -622,10 +630,10 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
             // Write file using downloaded data
             let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
             createdFile.on('finish', () => { resolve(); });
-            response.on('error', (error) => { reject(); });
+            response.on('error', (error) => { reject(error); });
             response.pipe(createdFile);
         });
-        request.on('error', (error) => { reject(); });
+        request.on('error', (error) => { reject(error); });
         request.end();
     });
 }
@@ -655,10 +663,10 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
             }
             let downloadedData: string = '';
             response.on('data', (data) => { downloadedData += data; });
-            response.on('error', (error) => { reject(); });
+            response.on('error', (error) => { reject(error); });
             response.on('end', () => { resolve(downloadedData); });
         });
-        request.on('error', (error) => { reject(); });
+        request.on('error', (error) => { reject(error); });
         request.end();
     });
 }

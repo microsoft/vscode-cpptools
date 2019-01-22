@@ -299,7 +299,7 @@ async function finalizeExtensionActivation(): Promise<void> {
     // (this may result in rewriting the package.json file)
     
     let packageJsonPath: string = util.getExtensionFilePath("package.json");
-    if (!packageJsonPath.includes(".vscode-insiders")) {
+    if (!packageJsonPath.includes(".vscode-insiders") && !packageJsonPath.includes(".vscode-exploration")) {
         let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
         let packageJson: any = util.getRawPackageJson();
         let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
@@ -339,7 +339,6 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ToggleErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
-        "onCommand:C_Cpp.ToggleSnippets",
         "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
         "onCommand:C_Cpp.PauseParsing",

@@ -15,7 +15,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "compile",
+			"preLaunchTask": "TypeScript Compile",
 		},
 		{
 			"name": "Launch Tests",
@@ -31,7 +31,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
 			],
-			"preLaunchTask": "compile"
+			"preLaunchTask": "TypeScript Compile"
 		},
 		{
 			"name": "Node Attach",

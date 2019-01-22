@@ -1,0 +1,18 @@
+{
+    "c_cpp.command.configurationSelect.title": "Select a configuration...",
+    "c_cpp.command.configurationProviderSelect.title": "Change configuration provider...",
+    "c_cpp.command.configurationEdit.title": "Edit configurations...",
+    "c_cpp.command.goToDeclaration.title": "Go to declaration",
+    "c_cpp.command.peekDeclaration.title": "Peek declaration",
+    "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
+    "c_cpp.command.navigate.title": "Navigate...",
+    "c_cpp.command.toggleErrorSquiggles.title": "Toggle error squiggles",
+    "c_cpp.command.toggleIncludeFallback.title": "Toggle IntelliSense engine fallback on include errors",
+    "c_cpp.command.toggleDimInactiveRegions.title": "Toggle inactive region colorization",
+    "c_cpp.command.showReleaseNotes.title": "Show release notes",
+    "c_cpp.command.resetDatabase.title": "Reset IntelliSense database",
+    "c_cpp.command.pauseParsing.title": "Pause parsing",
+    "c_cpp.command.resumeParsing.title": "Resume parsing",
+    "c_cpp.command.showParsingCommands.title": "Show parsing commands",
+    "c_cpp.command.takeSurvey.title": "Take survey"
+}

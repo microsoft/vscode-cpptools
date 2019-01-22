@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.23.0"
+    "vscode": "^1.26.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -472,88 +472,83 @@
     "commands": [
       {
         "command": "C_Cpp.ConfigurationSelect",
-        "title": "Select a Configuration...",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.configurationSelect.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ConfigurationProviderSelect",
-        "title": "Change Configuration Provider...",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.configurationProviderSelect.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ConfigurationEdit",
-        "title": "Edit Configurations...",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.configurationEdit.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.GoToDeclaration",
-        "title": "Go to Declaration",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.goToDeclaration.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.PeekDeclaration",
-        "title": "Peek Declaration",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.peekDeclaration.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.SwitchHeaderSource",
-        "title": "Switch Header/Source",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.switchHeaderSource.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.Navigate",
-        "title": "Navigate...",
-        "category": "C/Cpp"
-      },
-      {
-        "command": "C_Cpp.ToggleSnippets",
-        "title": "Toggle Snippets",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.navigate.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ToggleErrorSquiggles",
-        "title": "Toggle Error Squiggles",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.toggleErrorSquiggles.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ToggleIncludeFallback",
-        "title": "Toggle IntelliSense Engine Fallback on Include Errors",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.toggleIncludeFallback.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ToggleDimInactiveRegions",
-        "title": "Toggle Inactive Region Colorization",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.toggleDimInactiveRegions.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ShowReleaseNotes",
-        "title": "Show Release Notes",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.showReleaseNotes.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ResetDatabase",
-        "title": "Reset IntelliSense Database",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.resetDatabase.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.PauseParsing",
-        "title": "Pause Parsing",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.pauseParsing.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ResumeParsing",
-        "title": "Resume Parsing",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.resumeParsing.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.ShowParsingCommands",
-        "title": "Show Parsing Commands",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.showParsingCommands.title%",
+        "category": "C/C++"
       },
       {
         "command": "C_Cpp.TakeSurvey",
-        "title": "Take Survey",
-        "category": "C/Cpp"
+        "title": "%c_cpp.command.takeSurvey.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
@@ -728,8 +723,12 @@
                   "type": "object",
                   "default": {},
                   "properties": {
-                    "name": "string",
-                    "value": "string"
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
                   }
                 },
                 "default": []
@@ -801,7 +800,12 @@
               },
               "externalConsole": {
                 "type": "boolean",
-                "description": "If true, a console is launched for the debuggee. If false, no console is launched. Note this option is ignored in some cases for technical reasons.",
+                "description": "If true, a console is launched for the debuggee. If false, on Linux and Windows, it will appear in the Integrated Console.",
+                "default": false
+              },
+              "avoidWindowsConsoleRedirection": {
+                "type": "boolean",
+                "description": "If true, disables debuggee console redirection that is required for Integrated Terminal support.",
                 "default": false
               },
               "sourceFileMap": {
@@ -1140,8 +1144,12 @@
                   "type": "object",
                   "default": {},
                   "properties": {
-                    "name": "string",
-                    "value": "string"
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
                   }
                 },
                 "default": []
@@ -1354,22 +1362,12 @@
     },
     "configurationDefaults": {
       "[cpp]": {
-        "editor.autoIndent": false
+        "editor.wordBasedSuggestions": false
       },
       "[c]": {
-        "editor.autoIndent": false
+        "editor.wordBasedSuggestions": false
       }
-    },
-    "snippets": [
-      {
-        "language": "cpp",
-        "path": "./cpp_snippets.json"
-      },
-      {
-        "language": "c",
-        "path": "./cpp_snippets.json"
-      }
-    ]
+    }
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
@@ -1402,6 +1400,7 @@
     "vscode": "^1.1.18"
   },
   "dependencies": {
+    "@types/minimatch": "^3.0.3",
     "http-proxy-agent": "~2.1.0",
     "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
@@ -1411,14 +1410,14 @@
     "vscode-cpptools": "2.1.1",
     "vscode-debugadapter": "~1.24.0",
     "vscode-debugprotocol": "~1.24.0",
-    "vscode-extension-telemetry": "~0.0.22",
-    "vscode-languageclient": "3.5.1",
+    "vscode-extension-telemetry": "~0.1.0",
+    "vscode-languageclient": "5.1.1",
     "yauzl": "~2.8.0"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2036673",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2037608",
       "platforms": [
         "linux"
       ],
@@ -1432,7 +1431,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2036672",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2037526",
       "platforms": [
         "linux"
       ],
@@ -1448,7 +1447,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2036674",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2037527",
       "platforms": [
         "darwin"
       ],
@@ -1459,7 +1458,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2036671",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2037609",
       "platforms": [
         "win32"
       ],

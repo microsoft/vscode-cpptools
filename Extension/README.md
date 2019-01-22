@@ -2,7 +2,7 @@
 This preview release of the extension adds language support for C/C++ to Visual Studio Code including:
 * Language service
   * Code Formatting (clang-format)
-  * Auto-Completion (experimental)
+  * Auto-Completion
   * Symbol Searching
   * Go to Definition/Declaration
   * Peek Definition/Declaration
