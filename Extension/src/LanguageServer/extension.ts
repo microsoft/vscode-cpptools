@@ -22,6 +22,7 @@ import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
+import { PackageVersion } from '../packageVersion';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -266,7 +267,25 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
             return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
-        // Install the VSIX
+        // 1.28.0 changes the CLI for making installations
+        let userVersion: PackageVersion = new PackageVersion(vscode.version);
+        let breakingVersion: PackageVersion = new PackageVersion('1.28.0');
+        if (userVersion.isGreaterThan(breakingVersion, 'insider')) {
+            return new Promise<void>((resolve, reject) => {
+                let process: ChildProcess;
+                try {
+                    process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+                    if (process.pid === undefined) {
+                        throw new Error();
+                    }
+                } catch (error) {
+                    reject(new Error('Failed to launch VS Code script process for installation'));
+                    return;
+                }
+                resolve();
+            });
+        }
+
         return new Promise<void>((resolve, reject) => {
             let process: ChildProcess;
             try {
@@ -395,7 +414,6 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleSnippets', onToggleSnippets));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
@@ -541,47 +559,6 @@ function onToggleSquiggles(): void {
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
 }
-
-function onToggleSnippets(): void {
-    onActivationEvent();
-
-    // This will apply to all clients as it's a global toggle. It will require a reload.
-    const snippetsCatName: string  = "Snippets";
-    let newPackageJson: any = util.getRawPackageJson();
-
-    if (newPackageJson.categories.findIndex(cat => cat === snippetsCatName) === -1) {
-        // Add the Snippet category and snippets node. 
-
-        newPackageJson.categories.push(snippetsCatName);
-        newPackageJson.contributes.snippets = [{"language": "cpp", "path": "./cpp_snippets.json"}, {"language": "c", "path": "./cpp_snippets.json"}];
-
-        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
-            showReloadPrompt("Reload Window to finish enabling C++ snippets");
-        });
-        
-    } else {
-        // Remove the category and snippets node.
-        let ndxCat: number = newPackageJson.categories.indexOf(snippetsCatName);
-        if (ndxCat !== -1) {
-            newPackageJson.categories.splice(ndxCat, 1);
-        }
-
-        delete newPackageJson.contributes.snippets;
-
-        fs.writeFile(util.getPackageJsonPath(), util.stringifyPackageJson(newPackageJson), () => {
-            showReloadPrompt("Reload Window to finish disabling C++ snippets");
-        });
-    }
-}
-
-function showReloadPrompt(msg: string): void { 
-    let reload: string = "Reload"; 
-    vscode.window.showInformationMessage(msg, reload).then(value => { 
-       if (value === reload) { 
-          vscode.commands.executeCommand("workbench.action.reloadWindow"); 
-       } 
-    }); 
- } 
 
 function onToggleIncludeFallback(): void {
     onActivationEvent();

@@ -506,11 +506,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ToggleSnippets",
-        "title": "%c_cpp.command.toggleSnippets.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.ToggleErrorSquiggles",
         "title": "%c_cpp.command.toggleErrorSquiggles.title%",
         "category": "C/C++"
@@ -1370,17 +1365,7 @@
       "[c]": {
         "editor.wordBasedSuggestions": false
       }
-    },
-    "snippets": [
-      {
-        "language": "cpp",
-        "path": "./cpp_snippets.json"
-      },
-      {
-        "language": "c",
-        "path": "./cpp_snippets.json"
-      }
-    ]
+    }
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
@@ -1425,7 +1410,7 @@
     "vscode-debugprotocol": "~1.24.0",
     "vscode-extension-telemetry": "~0.1.0",
     "vscode-languageclient": "5.1.1",
-    "yauzl": "~2.8.0"
+    "yauzl": "~2.10.0"
   },
   "runtimeDependencies": [
     {

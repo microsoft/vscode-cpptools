@@ -23,7 +23,7 @@ When you start debugging, if it is showing that your breakpoints aren't bound (s
 
 ### Debugging starts but all the lines in my stack trace are grey
 
-If your debugger is showing a grey stacktrace or won't stop at a breakpoint,or the symbols in the call stack are grey then your executable was compiled without [debug symbols](#how-to-enable-debug-symbols).
+If your debugger is showing a grey stacktrace or won't stop at a breakpoint, or the symbols in the call stack are grey then your executable was compiled without [debug symbols](#how-to-enable-debug-symbols).
 
 ## How to enable debug symbols?
 
