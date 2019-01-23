@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.21.0 January 17, 2019
+## Version 0.21.0 January 23, 2019
 ### New Features
 * Add documentation comments for hover, completion, and signature help. [#399](https://github.com/Microsoft/vscode-cpptools/issues/399)
 * Add completion committing for methods after `(`. [#1184](https://github.com/Microsoft/vscode-cpptools/issues/1184)
