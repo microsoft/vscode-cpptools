@@ -62,13 +62,10 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    let buildPromise: Thenable<vscode.Task[]> | undefined = undefined;
+    // let buildPromise: Thenable<vscode.Task[]> | undefined = undefined;
     taskProvider = vscode.tasks.registerTaskProvider('shell', {
         provideTasks: () => {
-            if (!buildPromise) {
-                buildPromise = getBuildTasks();
-            }
-            return buildPromise;
+            return getBuildTasks();
         },
         resolveTask(task: vscode.Task): vscode.Task {
             return undefined;
@@ -99,34 +96,38 @@ export function activate(activationEventOccurred: boolean): void {
 }
 
 async function getBuildTasks(): Promise<vscode.Task[]> {
-    let compiler: string;
-
-    // TODO Find compiler. If only one compiler is found, only generate one task w/ the found compiler
-    // If more than one compiler is found, create multiple tasks w/ each compiler
-    if (true /*g++ detected*/) {
-        compiler = 'g++'; // TODO get full compiler path? In case the compiler is not in $PATH
-    } else {
-        // TODO no compiler found. Show a dialog message prompting the user to install a compiler
+    const activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+        return;
     }
 
-    let activeClient: Client = getActiveClient();
+    // Do not show build tasks for header files
+    const activeFileExt: string = path.extname(activeEditor.document.fileName);
+    const headerExt: string[] = [".hpp", ".hh", ".hxx", ".h"];
+    if (!headerExt.every(ext => { return activeFileExt !== ext; })) {
+        return;
+    }
+
+    const activeClient: Client = getActiveClient();
     let result: vscode.Task[] = [];
-    let compilerPaths: string[] = await activeClient.getCurrentConfigCompilerPaths();
-    compilerPaths.forEach(compilerPath => {
-        let compilerName: string = path.basename(compilerPath);
-        const taskName: string = compilerName + " build active file";
+    const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
 
-        // TODO consider adding -std=c++1z or equivalent for other compilers
+    compilerInfo.forEach(compilerInfo => {
+        // Only show C++ compilers for C++ files; C compilers for C files
+        if (compilerInfo.languageAssociation !== activeEditor.document.languageId) {
+            return;
+        }
+
+        const taskName: string = path.basename(compilerInfo.path) + " build active file";
         const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/${fileBasenameNoExtension}'];
-
         const kind: vscode.TaskDefinition = {
             type: 'shell',
             label: taskName,
-            command: compilerPath,
+            command: compilerInfo,
             args: args,
         };
 
-        const command: vscode.ShellExecution = new vscode.ShellExecution(compiler, args);
+        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerInfo.path, args);
         let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), taskName, 'C/Cpp', command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
         task.group = vscode.TaskGroup.Build;
