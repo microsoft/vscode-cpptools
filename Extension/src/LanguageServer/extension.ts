@@ -95,6 +95,9 @@ export function activate(activationEventOccurred: boolean): void {
     }
 }
 
+/**
+ * Generate tasks to build the current file based on the user's detected compilers and the current file's extension
+ */
 async function getBuildTasks(): Promise<vscode.Task[]> {
     const activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
@@ -108,13 +111,22 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return;
     }
 
+    // Don't offer tasks if the active file's extension is not a recognized C/C++ extension
+    let cppExtensions: string[] = [".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".h", ".mm", ".ino", ".inl"];
+    const activeFileIsCpp: boolean = cppExtensions.find(ext => ext === activeFileExt) !== undefined;
+    const activeFileIsC: boolean = activeFileExt === '.c';
+    if (!activeFileIsCpp && activeFileExt !== '.c') {
+        return;
+    }
+
     const activeClient: Client = getActiveClient();
     let result: vscode.Task[] = [];
     const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
 
     compilerInfo.forEach(compilerInfo => {
         // Only show C++ compilers for C++ files; C compilers for C files
-        if (compilerInfo.languageAssociation !== activeEditor.document.languageId) {
+        if ((compilerInfo.languageAssociation === 'cpp' && !activeFileIsCpp) ||
+            (compilerInfo.languageAssociation === 'c' && !activeFileIsC)) {
             return;
         }
 
@@ -123,12 +135,13 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         const kind: vscode.TaskDefinition = {
             type: 'shell',
             label: taskName,
-            command: compilerInfo,
+            command: compilerInfo.path,
             args: args,
         };
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerInfo.path, args);
-        let task: vscode.Task = new vscode.Task(kind, vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri), taskName, 'C/Cpp', command, '$gcc');
+        const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
+        let task: vscode.Task = new vscode.Task(kind, target, taskName, 'C/Cpp', command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
         task.group = vscode.TaskGroup.Build;
 
