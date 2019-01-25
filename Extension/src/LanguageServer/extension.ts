@@ -14,7 +14,7 @@ import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
-import { PersistentWorkspaceState } from './persistentState';
+import { PersistentState, PersistentWorkspaceState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
@@ -121,16 +121,31 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
     const activeClient: Client = getActiveClient();
     let result: vscode.Task[] = [];
+
+    // Get the found compilers via the whitelisted locations sent over from C++ side, displaying a message if none are found
     const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
     if (!compilerInfo) {
         const dontShowAgain: string = "Don't Show Again";
         const learnMore: string = "Learn More";
         const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
-        vscode.window.showInformationMessage(message, learnMore, dontShowAgain).then(selection => {
-            if (selection === learnMore) {
-                console.log("foo");
-            }
-        });
+
+        let showNoCompilerFoundMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showNoCompilerFoundMessage", true);
+        if (showNoCompilerFoundMessage) {
+            vscode.window.showInformationMessage(message, learnMore, dontShowAgain).then(selection => {
+                switch (selection) {
+                    case learnMore:
+                        const uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
+                        vscode.commands.executeCommand('vscode.open', uri);
+                        break;
+                    case dontShowAgain:
+                        showNoCompilerFoundMessage.Value = false;
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            });
+        }
         return;
     }
 
