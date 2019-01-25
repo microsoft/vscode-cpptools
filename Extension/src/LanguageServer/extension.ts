@@ -122,6 +122,17 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     const activeClient: Client = getActiveClient();
     let result: vscode.Task[] = [];
     const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
+    if (!compilerInfo) {
+        const dontShowAgain: string = "Don't Show Again";
+        const learnMore: string = "Learn More";
+        const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
+        vscode.window.showInformationMessage(message, learnMore, dontShowAgain).then(selection => {
+            if (selection === learnMore) {
+                console.log("foo");
+            }
+        });
+        return;
+    }
 
     compilerInfo.forEach(compilerInfo => {
         // Only show C++ compilers for C++ files; C compilers for C files
