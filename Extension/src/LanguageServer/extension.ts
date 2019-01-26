@@ -109,10 +109,10 @@ function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error("Do not activate the extension when IntelliSense is disabled.");
     } else {
-        let clangCommandAdapterEnabled: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean => {
+        let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean => {
             return extension.isActive && extension.id === "mitaki28.vscode-clang";
         });
-        if (clangCommandAdapterEnabled) {
+        if (clangCommandAdapterActive) {
             vscode.window.showWarningMessage("Disable the C/C++ Clang Command Adapter extension or set C_Cpp.intelliSenseEngine to Disabled.");
         }
     }
