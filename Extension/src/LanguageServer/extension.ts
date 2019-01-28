@@ -96,7 +96,7 @@ export function activate(activationEventOccurred: boolean): void {
 }
 
 /**
- * Generate tasks to build the current file based on the user's detected compilers and the current file's extension
+ * Generate tasks to build the current file based on the user's detected compilers, the user's set compiler path, and the current file's extension
  */
 async function getBuildTasks(): Promise<vscode.Task[]> {
     const activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
@@ -106,8 +106,8 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
     // Do not show build tasks for header files
     const activeFileExt: string = path.extname(activeEditor.document.fileName);
-    const headerExt: string[] = [".hpp", ".hh", ".hxx", ".h"];
-    if (!headerExt.every(ext => { return activeFileExt !== ext; })) {
+    const isHeader: boolean = ![".hpp", ".hh", ".hxx", ".h"].every(ext => { return activeFileExt !== ext; });
+    if (isHeader) {
         return;
     }
 
@@ -119,12 +119,22 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return;
     }
 
+    // Get the found compilers via the whitelisted locations sent over from C++ side, selecting the compilers appropriate for this file type
     const activeClient: Client = getActiveClient();
-    let result: vscode.Task[] = [];
-
-    // Get the found compilers via the whitelisted locations sent over from C++ side, displaying a message if none are found
     const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
-    if (!compilerInfo) {
+    let filtered: configs.CompilerInfo[] = compilerInfo.filter(info => {
+        return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
+    });
+
+    // Map CompilerInfo.path => string[]; Add user's compiler path if it's not found within the whitelist
+    const compilerPaths: string[] = filtered.map<string>(info => { return info.path; });
+    const userCompilerPath: string = await activeClient.getCompilerPath();
+    if (!compilerPaths.find(path => { return path === userCompilerPath; })) {
+        compilerPaths.push(userCompilerPath);
+    }
+
+    // Display a message if no paths are found
+    if (!compilerPaths) {
         const dontShowAgain: string = "Don't Show Again";
         const learnMore: string = "Learn More";
         const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
@@ -149,23 +159,19 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return;
     }
 
-    compilerInfo.forEach(compilerInfo => {
-        // Only show C++ compilers for C++ files; C compilers for C files
-        if ((compilerInfo.languageAssociation === 'cpp' && !activeFileIsCpp) ||
-            (compilerInfo.languageAssociation === 'c' && !activeFileIsC)) {
-            return;
-        }
-
-        const taskName: string = path.basename(compilerInfo.path) + " build active file";
+    // Generate tasks
+    let result: vscode.Task[] = [];
+    compilerPaths.forEach(compilerPath => {
+        const taskName: string = path.basename(compilerPath) + " build active file";
         const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/${fileBasenameNoExtension}'];
         const kind: vscode.TaskDefinition = {
             type: 'shell',
             label: taskName,
-            command: compilerInfo.path,
+            command: compilerPath,
             args: args,
         };
 
-        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerInfo.path, args);
+        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, args);
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
         let task: vscode.Task = new vscode.Task(kind, target, taskName, 'C/Cpp', command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
@@ -173,7 +179,6 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
         result.push(task);
     });
-
     return result;
 }
 

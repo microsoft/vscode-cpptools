@@ -201,6 +201,7 @@ export interface Client {
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
+    getCompilerPath(): Thenable<string>;
     getCompilerInfo(): Thenable<configs.CompilerInfo[]>;
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
@@ -655,6 +656,10 @@ class DefaultClient implements Client {
 
     public getCurrentConfigName(): Thenable<string> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
+    }
+
+    public getCompilerPath(): Thenable<string> {
+        return this.queueTask(() => Promise.resolve(this.configuration.CompilerPath));
     }
 
     public getCompilerInfo(): Thenable<configs.CompilerInfo[]> {
@@ -1349,6 +1354,7 @@ class NullClient implements Client {
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
+    getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
     getCompilerInfo(): Thenable<configs.CompilerInfo[]> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }

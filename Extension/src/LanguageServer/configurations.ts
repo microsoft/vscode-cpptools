@@ -162,6 +162,7 @@ export class CppProperties {
     public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
+    public get CompilerPath(): string { return this.CurrentConfiguration.compilerPath; }
     public get CompilerInfo(): CompilerInfo[] { return this.compilerInfo; }
 
     public get CurrentConfigurationProvider(): string|null {
