@@ -14,7 +14,7 @@ import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
-import { PersistentWorkspaceState } from './persistentState';
+import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
@@ -105,18 +105,19 @@ function onActivationEvent(): void {
     activatedPreviously.Value = true;
 }
 
-const conflictingExtensionsStr: string = "CPP." + util.packageJson.version + ".ConflictingExtensions";
-
 function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error("Do not activate the extension when IntelliSense is disabled.");
-    } else if (util.extensionContext.globalState.get<boolean>(conflictingExtensionsStr, true)) {
-        util.extensionContext.globalState.update(conflictingExtensionsStr, false);
-        let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean => {
-            return extension.isActive && extension.id === "mitaki28.vscode-clang";
-        });
-        if (clangCommandAdapterActive) {
-            telemetry.logLanguageServerEvent("conflictingExtension");
+    } else {
+        let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP.checkForConflictingExtensions", true);
+        if (checkForConflictingExtensions.Value) {
+            checkForConflictingExtensions.Value = false;
+            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean => {
+                return extension.isActive && extension.id === "mitaki28.vscode-clang";
+            });
+            if (clangCommandAdapterActive) {
+                telemetry.logLanguageServerEvent("conflictingExtension");
+            }
         }
     }
 
