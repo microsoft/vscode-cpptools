@@ -105,15 +105,18 @@ function onActivationEvent(): void {
     activatedPreviously.Value = true;
 }
 
+const conflictingExtensionsStr: string = "CPP." + util.packageJson.version + ".ConflictingExtensions";
+
 function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error("Do not activate the extension when IntelliSense is disabled.");
-    } else {
+    } else if (util.extensionContext.globalState.get<boolean>(conflictingExtensionsStr, true)) {
+        util.extensionContext.globalState.update(conflictingExtensionsStr, false);
         let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean => {
             return extension.isActive && extension.id === "mitaki28.vscode-clang";
         });
         if (clangCommandAdapterActive) {
-            vscode.window.showWarningMessage("Disable the C/C++ Clang Command Adapter extension or set C_Cpp.intelliSenseEngine to Disabled.");
+            telemetry.logLanguageServerEvent("conflictingExtension");
         }
     }
 
