@@ -34,6 +34,6 @@ about: 'Issues pertaining to IntelliSense, autocomplete, code editing, etc. '
 
 **Additional context**
 <!--
-*Call Stacks: For bugs like crashes, deadlocks, infinite loops, etc. that we are not able to repro and for which the call stack may be useful, please attach a debugger and/or create a dmp and provide the call stacks. Starting with 0.17.3, Windows binaries have symbols available in VS Code by setting your "symbolSearchPath" to "http://msdl.microsoft.com/download/symbols".*
-Add any other context about the problem here including log messages in your Output window ("C_Cpp.loggingLevel": "Debug" in settings.json).
+* Call Stacks: For bugs like crashes, deadlocks, infinite loops, etc. that we are not able to repro and for which the call stack may be useful, please attach a debugger and/or create a dmp and provide the call stacks. Windows binaries have symbols available in VS Code by setting your "symbolSearchPath" to "https://msdl.microsoft.com/download/symbols".
+* Add any other context about the problem here including log messages in your Output window ("C_Cpp.loggingLevel": "Debug" in settings.json).
 -->
