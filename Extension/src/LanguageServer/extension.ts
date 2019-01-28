@@ -104,18 +104,17 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return;
     }
 
-    // Do not show build tasks for header files
+    // Don't offer tasks for header files
     const activeFileExt: string = path.extname(activeEditor.document.fileName);
-    const isHeader: boolean = ![".hpp", ".hh", ".hxx", ".h"].every(ext => { return activeFileExt !== ext; });
+    const isHeader: boolean = ![".hpp", ".hh", ".hxx", ".h"].every(ext => activeFileExt !== ext);
     if (isHeader) {
         return;
     }
 
     // Don't offer tasks if the active file's extension is not a recognized C/C++ extension
-    let cppExtensions: string[] = [".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".h", ".mm", ".ino", ".inl"];
-    const activeFileIsCpp: boolean = cppExtensions.find(ext => ext === activeFileExt) !== undefined;
+    const activeFileIsCpp: boolean = [".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".h", ".mm", ".ino", ".inl"].find(ext => activeFileExt === ext) !== undefined;
     const activeFileIsC: boolean = activeFileExt === '.c';
-    if (!activeFileIsCpp && activeFileExt !== '.c') {
+    if (!activeFileIsCpp && !activeFileIsC) {
         return;
     }
 
