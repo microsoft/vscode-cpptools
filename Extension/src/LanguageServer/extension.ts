@@ -71,6 +71,7 @@ export function activate(activationEventOccurred: boolean): void {
             return undefined;
         }
     });
+    vscode.tasks.onDidStartTask(event => { console.log(event.execution.task.name); });
 
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
@@ -101,38 +102,48 @@ export function activate(activationEventOccurred: boolean): void {
 async function getBuildTasks(): Promise<vscode.Task[]> {
     const activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!activeEditor) {
-        return;
+        return [];
     }
 
     // Don't offer tasks for header files
     const activeFileExt: string = path.extname(activeEditor.document.fileName);
     const isHeader: boolean = ![".hpp", ".hh", ".hxx", ".h"].every(ext => activeFileExt !== ext);
     if (isHeader) {
-        return;
+        return [];
     }
 
     // Don't offer tasks if the active file's extension is not a recognized C/C++ extension
     const activeFileIsCpp: boolean = [".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".h", ".mm", ".ino", ".inl"].find(ext => activeFileExt === ext) !== undefined;
     const activeFileIsC: boolean = activeFileExt === '.c';
     if (!activeFileIsCpp && !activeFileIsC) {
-        return;
+        return [];
     }
 
-    // Get the found compilers via the whitelisted locations sent over from C++ side, selecting the compilers appropriate for this file type
+    // Populate TaskPrimitive's based on found whitelisted-compilers, as well as user's set "compilerPath" c_cpp_property
+    let compilerPaths: string[];
     const activeClient: Client = getActiveClient();
-    const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
-    let filtered: configs.CompilerInfo[] = compilerInfo.filter(info => {
-        return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
-    });
-
-    // Map CompilerInfo.path => string[]; Add user's compiler path if it's not found within the whitelist
-    const compilerPaths: string[] = filtered.map<string>(info => { return info.path; });
+    let compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
+    if (compilerInfo) {
+        // Process CompilerInfo's by filtering out those with inappropriate language associations for this file,
+        // then map those that are left into TaskPrimitives
+        const languageAssociationFilter: (info: configs.CompilerInfo) => boolean = (info: configs.CompilerInfo): boolean => {
+            return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
+        };
+        compilerPaths = compilerInfo.filter(languageAssociationFilter).map<string>(info => { return info.path; });
+    }
     const userCompilerPath: string = await activeClient.getCompilerPath();
-    if (!compilerPaths.find(path => { return path === userCompilerPath; })) {
-        compilerPaths.push(userCompilerPath);
+    if (userCompilerPath) {
+        if (compilerPaths) {
+            // Only add the compilerPath if it doesn't already exist within the list
+            if (compilerPaths.find(path => { return path === userCompilerPath; })) {
+                compilerPaths.push(userCompilerPath);
+            }
+        } else {
+            compilerPaths = [userCompilerPath];
+        }
     }
 
-    // Display a message if no paths are found
+    // Display a message prompting the user to install compilers if none were found
     if (!compilerPaths) {
         const dontShowAgain: string = "Don't Show Again";
         const learnMore: string = "Learn More";
@@ -152,10 +163,9 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
                     default:
                         break;
                 }
-                return true;
             });
         }
-        return;
+        return [];
     }
 
     // Generate tasks

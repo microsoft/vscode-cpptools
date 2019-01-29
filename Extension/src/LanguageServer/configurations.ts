@@ -66,13 +66,6 @@ export interface Browse {
     databaseFilename?: string;
 }
 
-export namespace CompilerInfo {
-    export enum language_association {
-        c,
-        cpp
-    }
-}
-
 export interface CompilerInfo {
     path: string;
     languageAssociation: string;
