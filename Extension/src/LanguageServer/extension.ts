@@ -71,7 +71,11 @@ export function activate(activationEventOccurred: boolean): void {
             return undefined;
         }
     });
-    vscode.tasks.onDidStartTask(event => { console.log(event.execution.task.name); });
+    vscode.tasks.onDidStartTask(event => {
+        if (event.execution.task.source === 'C/Cpp') {
+            telemetry.logLanguageServerEvent('buildTaskStarted');
+        }
+    });
 
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
@@ -125,7 +129,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     let compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
     if (compilerInfo) {
         // Process CompilerInfo's by filtering out those with inappropriate language associations for this file,
-        // then map those that are left into TaskPrimitives
+        // then map those that are left into compilerPaths
         const languageAssociationFilter: (info: configs.CompilerInfo) => boolean = (info: configs.CompilerInfo): boolean => {
             return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
         };
@@ -134,8 +138,8 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     const userCompilerPath: string = await activeClient.getCompilerPath();
     if (userCompilerPath) {
         if (compilerPaths) {
-            // Only add the compilerPath if it doesn't already exist within the list
-            if (compilerPaths.find(path => { return path === userCompilerPath; })) {
+            // Only add the path if it doesn't already exist within compilerPaths
+            if (!compilerPaths.find(path => { return path === userCompilerPath; })) {
                 compilerPaths.push(userCompilerPath);
             }
         } else {
