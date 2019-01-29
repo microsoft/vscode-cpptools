@@ -109,7 +109,7 @@ function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error("Do not activate the extension when IntelliSense is disabled.");
     } else {
-        let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP.checkForConflictingExtensions", true);
+        let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
             let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean => {
