@@ -57,12 +57,11 @@ export function activate(activationEventOccurred: boolean): void {
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
     // Check if an activation event has already occurred.
-    if (activationEventOccurred) { 
+    if (activationEventOccurred) {
         onActivationEvent();
         return;
     }
 
-    // let buildPromise: Thenable<vscode.Task[]> | undefined = undefined;
     taskProvider = vscode.tasks.registerTaskProvider('shell', {
         provideTasks: () => {
             return getBuildTasks();
