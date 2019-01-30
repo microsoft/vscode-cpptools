@@ -149,34 +149,45 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
     // Display a message prompting the user to install compilers if none were found
     if (!compilerPaths) {
-        const dontShowAgain: string = "Don't Show Again";
-        const learnMore: string = "Learn More";
-        const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
+        telemetry.logLanguageServerEvent('noCompilerFound');
+        // const dontShowAgain: string = "Don't Show Again";
+        // const learnMore: string = "Learn More";
+        // const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
 
-        let showNoCompilerFoundMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showNoCompilerFoundMessage", true);
-        if (showNoCompilerFoundMessage) {
-            vscode.window.showInformationMessage(message, learnMore, dontShowAgain).then(selection => {
-                switch (selection) {
-                    case learnMore:
-                        const uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
-                        vscode.commands.executeCommand('vscode.open', uri);
-                        break;
-                    case dontShowAgain:
-                        showNoCompilerFoundMessage.Value = false;
-                        break;
-                    default:
-                        break;
-                }
-            });
-        }
-        return [];
+        // let showNoCompilerFoundMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showNoCompilerFoundMessage", true);
+        // if (showNoCompilerFoundMessage) {
+        //     vscode.window.showInformationMessage(message, learnMore, dontShowAgain).then(selection => {
+        //         switch (selection) {
+        //             case learnMore:
+        //                 const uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
+        //                 vscode.commands.executeCommand('vscode.open', uri);
+        //                 break;
+        //             case dontShowAgain:
+        //                 showNoCompilerFoundMessage.Value = false;
+        //                 break;
+        //             default:
+        //                 break;
+        //         }
+        //     });
+        // }
+        // return [];
+    }
+
+    // The build task output file should include a '.exe' extension on Windows
+    let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    let exeName: string;
+    if (platformInfo.platform === 'win32') {
+        exeName = '${fileBasenameNoExtension}';
+    } else {
+        exeName = '${fileBasename}';
     }
 
     // Generate tasks
     let result: vscode.Task[] = [];
     compilerPaths.forEach(compilerPath => {
         const taskName: string = path.basename(compilerPath) + " build active file";
-        const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/${fileBasenameNoExtension}'];
+        // TODO: query OS to determine whether '.exe' should be aplied to the end of fileBasenameNoExtension
+        const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/' + exeName];
         const kind: vscode.TaskDefinition = {
             type: 'shell',
             label: taskName,
