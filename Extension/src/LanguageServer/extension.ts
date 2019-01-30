@@ -174,7 +174,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     }
 
     // Remove redundant compiler entries based on the compiler's name (not path)
-    compilerPaths.filter((value, index, self) => {
+    compilerPaths = compilerPaths.filter((value, index, self) => {
         return index === self.findIndex(searchValue => { return path.basename(value) === path.basename(searchValue); });
     });
 
@@ -182,16 +182,15 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     let exeName: string;
     if (platformInfo.platform === 'win32') {
-        exeName = '${fileBasenameNoExtension}';
+        exeName = '${fileBasenameNoExtension}.exe';
     } else {
-        exeName = '${fileBasename}';
+        exeName = '${fileBasenameNoExtension}';
     }
 
     // Generate tasks
     let result: vscode.Task[] = [];
     compilerPaths.forEach(compilerPath => {
         const taskName: string = path.basename(compilerPath) + " build active file";
-        // TODO: query OS to determine whether '.exe' should be aplied to the end of fileBasenameNoExtension
         const args: string[] = ['-g', '${fileDirname}/${fileBasename}', '-o', '${fileDirname}/' + exeName];
         const kind: vscode.TaskDefinition = {
             type: 'shell',
