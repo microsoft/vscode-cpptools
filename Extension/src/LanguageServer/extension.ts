@@ -124,36 +124,31 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     }
 
     // Get a list of compilers found from the C++ side, then filter them based on the file type to get a reduced list appropriate for the active file
+    // then finally remove duplicate compiler names
     let compilerPaths: string[];
     const activeClient: Client = getActiveClient();
+    const userCompilerPath: string = await activeClient.getCompilerPath();
     let compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
     if (compilerInfo) {
         const languageAssociationFilter: (info: configs.CompilerInfo) => boolean = (info: configs.CompilerInfo): boolean => {
             return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
         };
         compilerPaths = compilerInfo.filter(languageAssociationFilter).map<string>(info => { return info.path; });
-    }
 
-    // Add the user's compilerPath setting to compilerPaths if it is not a duplicate
-    const userCompilerPath: string = await activeClient.getCompilerPath();
-    if (userCompilerPath) {
-        if (compilerPaths) {
-            if (!compilerPaths.find(path => { return path === userCompilerPath; })) {
-                compilerPaths.push(userCompilerPath);
-            }
-        } else {
-            compilerPaths = [userCompilerPath];
+        if (userCompilerPath) {
+            compilerPaths.push(userCompilerPath);
         }
-    }
 
-    // Remove redundant compiler entries based on the compiler's name (not path)
-    if (compilerPaths) {
         compilerPaths = compilerPaths.filter((value, index, self) => {
-            // N^2 "unique" algorithm. Iterate over array. Compare current element to another element that happens to have the same basename.
-            // If the indices don't match, there must be a duplicate. Remove the current element.
+            // N^2 "unique" algorithm. Iterate over array. Compare current element to other elements looking for one with an equivalent basename
+            // If found and the indices don't match, there must be a duplicate. Remove the current element.
             return index === self.findIndex(searchValue => { return path.basename(value) === path.basename(searchValue); });
         });
+    } else if (userCompilerPath) {
+        compilerPaths = [userCompilerPath];
     }
+
+
 
     if (!compilerPaths) {
         telemetry.logLanguageServerEvent('noCompilerFound'); // Don't prompt a message yet until we can make a data-based decision
