@@ -170,8 +170,13 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         //         }
         //     });
         // }
-        // return [];
+        return [];
     }
+
+    // Remove redundant compiler entries based on the compiler's name (not path)
+    compilerPaths.filter((value, index, self) => {
+        return index === self.findIndex(searchValue => { return path.basename(value) === path.basename(searchValue); });
+    });
 
     // The build task output file should include a '.exe' extension on Windows
     let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
