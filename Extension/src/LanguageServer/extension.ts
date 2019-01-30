@@ -140,7 +140,8 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
         let map: Map<string, string> = new Map<string, string>();
         compilerPaths.forEach(value => {
-            map.has(path.basename(value)) ? map[path.basename(value)] = value : map.set(path.basename(value), value);
+            const basename: string = path.basename(value);
+            map.has(basename) ? map[basename] = value : map.set(basename, value);
         });
         compilerPaths = [...map.values()];
     } else if (userCompilerPath) {
