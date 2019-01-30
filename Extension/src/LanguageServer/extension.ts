@@ -147,8 +147,6 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         compilerPaths = [userCompilerPath];
     }
 
-
-
     if (!compilerPaths) {
         telemetry.logLanguageServerEvent('noCompilerFound'); // Don't prompt a message yet until we can make a data-based decision
         // Display a message prompting the user to install compilers if none were found
