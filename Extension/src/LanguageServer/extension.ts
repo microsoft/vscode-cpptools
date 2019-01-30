@@ -101,7 +101,7 @@ export function activate(activationEventOccurred: boolean): void {
 }
 
 /**
- * Generate tasks to build the current file based on the user's detected compilers, the user's set compiler path, and the current file's extension
+ * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension
  */
 async function getBuildTasks(): Promise<vscode.Task[]> {
     const activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
@@ -123,22 +123,21 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return [];
     }
 
-    // Populate TaskPrimitive's based on found whitelisted-compilers, as well as user's set "compilerPath" c_cpp_property
+    // Get a list of compilers found from the C++ side, then filter them based on the file type to get a reduced list appropriate for the active file
     let compilerPaths: string[];
     const activeClient: Client = getActiveClient();
     let compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
     if (compilerInfo) {
-        // Process CompilerInfo's by filtering out those with inappropriate language associations for this file,
-        // then map those that are left into compilerPaths
         const languageAssociationFilter: (info: configs.CompilerInfo) => boolean = (info: configs.CompilerInfo): boolean => {
             return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
         };
         compilerPaths = compilerInfo.filter(languageAssociationFilter).map<string>(info => { return info.path; });
     }
+
+    // Add the user's compilerPath setting to compilerPaths if it is not a duplicate
     const userCompilerPath: string = await activeClient.getCompilerPath();
     if (userCompilerPath) {
         if (compilerPaths) {
-            // Only add the path if it doesn't already exist within compilerPaths
             if (!compilerPaths.find(path => { return path === userCompilerPath; })) {
                 compilerPaths.push(userCompilerPath);
             }
@@ -147,9 +146,18 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         }
     }
 
-    // Display a message prompting the user to install compilers if none were found
+    // Remove redundant compiler entries based on the compiler's name (not path)
+    if (compilerPaths) {
+        compilerPaths = compilerPaths.filter((value, index, self) => {
+            // N^2 "unique" algorithm. Iterate over array. Compare current element to another element that happens to have the same basename.
+            // If the indices don't match, there must be a duplicate. Remove the current element.
+            return index === self.findIndex(searchValue => { return path.basename(value) === path.basename(searchValue); });
+        });
+    }
+
     if (!compilerPaths) {
-        telemetry.logLanguageServerEvent('noCompilerFound');
+        telemetry.logLanguageServerEvent('noCompilerFound'); // Don't prompt a message yet until we can make a data-based decision
+        // Display a message prompting the user to install compilers if none were found
         // const dontShowAgain: string = "Don't Show Again";
         // const learnMore: string = "Learn More";
         // const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
@@ -173,11 +181,6 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return [];
     }
 
-    // Remove redundant compiler entries based on the compiler's name (not path)
-    compilerPaths = compilerPaths.filter((value, index, self) => {
-        return index === self.findIndex(searchValue => { return path.basename(value) === path.basename(searchValue); });
-    });
-
     // The build task output file should include a '.exe' extension on Windows
     let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     let exeName: string;
@@ -199,7 +202,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
             args: args,
         };
 
-        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, args);
+        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, args, { cwd: path.dirname(compilerPath) });
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
         let task: vscode.Task = new vscode.Task(kind, target, taskName, 'C/Cpp', command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning
