@@ -138,11 +138,11 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
             compilerPaths.push(userCompilerPath);
         }
 
-        compilerPaths = compilerPaths.filter((value, index, self) => {
-            // N^2 "unique" algorithm. Iterate over array. Compare current element to other elements looking for one with an equivalent basename
-            // If found and the indices don't match, there must be a duplicate. Remove the current element.
-            return index === self.findIndex(searchValue => { return path.basename(value) === path.basename(searchValue); });
+        let map: Map<string, string> = new Map<string, string>();
+        compilerPaths.forEach(value => {
+            map.has(path.basename(value)) ? map[path.basename(value)] = value : map.set(path.basename(value), value);
         });
+        compilerPaths = [...map.values()];
     } else if (userCompilerPath) {
         compilerPaths = [userCompilerPath];
     }
