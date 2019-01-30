@@ -128,7 +128,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     let compilerPaths: string[];
     const activeClient: Client = getActiveClient();
     const userCompilerPath: string = await activeClient.getCompilerPath();
-    let compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
+    const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
     if (compilerInfo) {
         const languageAssociationFilter: (info: configs.CompilerInfo) => boolean = (info: configs.CompilerInfo): boolean => {
             return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
