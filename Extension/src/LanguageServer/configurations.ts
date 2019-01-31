@@ -481,7 +481,7 @@ export class CppProperties {
                     // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
                     configuration.browse.path = configuration.includePath.slice(0);
                     if (-1 === configuration.includePath.findIndex((value: string, index: number) => {
-                        return !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\|\\\*\*|\/|\/\*\*)?$/g);
+                        return !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\\*{0,2}|\/\*{0,2})?$/g);
                     })) {
                         configuration.browse.path.push("${workspaceFolder}");
                     }

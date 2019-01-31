@@ -1,5 +1,8 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Pull Request
+* Allow the workspace root to be a non-recursive includePath. [#3121](https://github.com/Microsoft/vscode-cpptools/issues/3121)
+
 ## Version 0.22.0-insiders February 5, 2019
 * Fix signature help active parameter selection when parameter names are missing or subsets of each other. [#2952](https://github.com/Microsoft/vscode-cpptools/issues/2952)
 * Render macro hover expansions as C/C++. [#3075](https://github.com/Microsoft/vscode-cpptools/issues/3075)
