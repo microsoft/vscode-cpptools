@@ -116,7 +116,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     }
 
     // Don't offer tasks if the active file's extension is not a recognized C/C++ extension
-    const activeFileIsCpp: boolean = [".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".h", ".mm", ".ino", ".inl"].indexOf(activeFileExt) !== -1;
+    const activeFileIsCpp: boolean = [".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => activeFileExt === ext);
     const activeFileIsC: boolean = activeFileExt === '.c';
     if (!activeFileIsCpp && !activeFileIsC) {
         return [];
