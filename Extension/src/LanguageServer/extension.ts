@@ -122,8 +122,8 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return [];
     }
 
-    // Get a list of compilers found from the C++ side, then filter them based on the file type to get a reduced list appropriate for the active file
-    // then finally remove duplicate compiler names
+    // Get a list of compilers found from the C++ side, then filter them based on the file type to get a reduced list appropriate
+    // for the active file, remove duplicate compiler names, then finally add the user's compilerPath setting
     let compilerPaths: string[];
     const activeClient: Client = getActiveClient();
     const userCompilerPath: string = await activeClient.getCompilerPath();
@@ -134,15 +134,18 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         };
         compilerPaths = compilerInfo.filter(languageAssociationFilter).map<string>(info => { return info.path; });
 
+        let map: Map<string, string> = new Map<string, string>();
+        const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
+            const basename: string = path.basename(compilerPath);
+            map.has(basename) ? map[basename] = compilerPath : map.set(basename, compilerPath);
+        };
+        compilerPaths.forEach(insertOrAssignEntry);
+
+        // Ensure that the user's compilerPath setting is used by inserting/assigning last
         if (userCompilerPath) {
-            compilerPaths.push(userCompilerPath);
+            insertOrAssignEntry(userCompilerPath);
         }
 
-        let map: Map<string, string> = new Map<string, string>();
-        compilerPaths.forEach(value => {
-            const basename: string = path.basename(value);
-            map.has(basename) ? map[basename] = value : map.set(basename, value);
-        });
         compilerPaths = [...map.values()];
     } else if (userCompilerPath) {
         compilerPaths = [userCompilerPath];
