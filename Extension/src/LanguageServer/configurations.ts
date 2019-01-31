@@ -253,7 +253,10 @@ export class CppProperties {
             if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
                 configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
             }
-            if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath) {
+            if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
+                isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
+                // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
+                // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.defaultCompilerPath;
             }
             if (this.compilerInfo) {

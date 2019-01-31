@@ -40,9 +40,8 @@ export class PackageVersion {
         }
     }
 
-    public isGreaterThan(other: PackageVersion): boolean {
-        // PackageVersions cannot be compared if either have a suffix that is not 'insiders'
-        if ((this.suffix && !this.suffix.startsWith('insiders')) || (other.suffix && !other.suffix.startsWith('insiders'))) {
+    public isGreaterThan(other: PackageVersion, suffixStr: string = 'insiders'): boolean {
+        if ((this.suffix && !this.suffix.startsWith(suffixStr)) || (other.suffix && !other.suffix.startsWith(suffixStr))) {
             return false;
         }
 
