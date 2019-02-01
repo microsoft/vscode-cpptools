@@ -3,6 +3,8 @@
 ## Version 0.22.0-insiders February 5, 2019
 * Fix signature help active parameter selection when parameter names are missing or subsets of each other. [#2952](https://github.com/Microsoft/vscode-cpptools/issues/2952)
 * Render macro hover expansions as C/C++. [#3075](https://github.com/Microsoft/vscode-cpptools/issues/3075)
+* Allow * in includePath to apply to browse.path when browse.path is not specified. [#3121](https://github.com/Microsoft/vscode-cpptools/issues/3121)
+  * Tucker Kern (@mill1000) [PR #3122](https://github.com/Microsoft/vscode-cpptools/pull/3122)
 
 ## Version 0.21.0 January 23, 2019
 ### New Features
