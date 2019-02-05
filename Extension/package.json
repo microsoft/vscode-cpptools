@@ -466,13 +466,13 @@
           "default": "Default",
           "description": "Set to \"Insiders\" to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
           "scope": "resource"
+        },
+        "C_Cpp.suggestSnippets": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, snippets are provided from the language server.",
+            "scope": "resource"
         }
-      },
-      "C_Cpp.suggestSnippets": {
-          "type": "boolean",
-          "default": true,
-          "description": "If true, snippets are provided from the language server.",
-          "scope": "resource"
       }
     },
     "commands": [
