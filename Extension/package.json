@@ -470,7 +470,7 @@
         "C_Cpp.suggestSnippets": {
             "type": "boolean",
             "default": true,
-            "description": "If true, snippets are provided from the language server.",
+            "description": "If true, snippets are provided by the language server.",
             "scope": "resource"
         }
       }
