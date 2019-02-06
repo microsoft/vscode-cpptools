@@ -1,10 +1,20 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.22.0-insiders February 5, 2019
+## Version 0.22.0-insiders February 6, 2019
+* Fix crash on Windows when 8.3 filenames are used. [#2453](https://github.com/Microsoft/vscode-cpptools/issues/2453), [#3104](https://github.com/Microsoft/vscode-cpptools/issues/3104)
 * Fix signature help active parameter selection when parameter names are missing or subsets of each other. [#2952](https://github.com/Microsoft/vscode-cpptools/issues/2952)
+* Fix `--enable-pretty-printing` with `gdb` for complex objects used as keys in maps. [#3024](https://github.com/Microsoft/vscode-cpptools/issues/3024)
+* Fix IntelliSense-based `Go to Definition` not working with `noexcept` methods. [#3060](https://github.com/Microsoft/vscode-cpptools/issues/3060)
 * Render macro hover expansions as C/C++. [#3075](https://github.com/Microsoft/vscode-cpptools/issues/3075)
-* Allow * in includePath to apply to browse.path when browse.path is not specified. [#3121](https://github.com/Microsoft/vscode-cpptools/issues/3121)
+* Enable completion after `struct` when manually invoked. [#3080](https://github.com/Microsoft/vscode-cpptools/issues/3080)
+* Add `C_Cpp.suggestSnippets` setting to disable language server snippets. [#3083](https://github.com/Microsoft/vscode-cpptools/issues/3083)
+* Fix `compilerPath` not getting priority over the `compile_commands.json` compiler. [#3102](https://github.com/Microsoft/vscode-cpptools/issues/3102)
+* Fix Linux `compile_commands.json` compiler querying with relative paths. [#3112](https://github.com/Microsoft/vscode-cpptools/issues/3112)
+* Allow `*` in `includePath` to apply to `browse.path` when `browse.path` is not specified. [#3121](https://github.com/Microsoft/vscode-cpptools/issues/3121)
   * Tucker Kern (@mill1000) [PR #3122](https://github.com/Microsoft/vscode-cpptools/pull/3122)
+* Disable `(` an `<` completion commit characters. [#3127](https://github.com/Microsoft/vscode-cpptools/issues/3127)
+* Add Chinese translations for command titles. [PR #3128](https://github.com/Microsoft/vscode-cpptools/pull/3128)
+* Fix other unreported IntelliSense engine bugs.
 
 ## Version 0.21.0 January 23, 2019
 ### New Features
