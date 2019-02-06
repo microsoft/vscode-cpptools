@@ -12,7 +12,7 @@
 * Fix Linux `compile_commands.json` compiler querying with relative paths. [#3112](https://github.com/Microsoft/vscode-cpptools/issues/3112)
 * Allow `*` in `includePath` to apply to `browse.path` when `browse.path` is not specified. [#3121](https://github.com/Microsoft/vscode-cpptools/issues/3121)
   * Tucker Kern (@mill1000) [PR #3122](https://github.com/Microsoft/vscode-cpptools/pull/3122)
-* Disable `(` an `<` completion commit characters. [#3127](https://github.com/Microsoft/vscode-cpptools/issues/3127)
+* Disable `(` and `<` completion commit characters. [#3127](https://github.com/Microsoft/vscode-cpptools/issues/3127)
 * Add Chinese translations for command titles. [PR #3128](https://github.com/Microsoft/vscode-cpptools/pull/3128)
 * Fix other unreported IntelliSense engine bugs.
 
