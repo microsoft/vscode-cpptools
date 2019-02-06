@@ -4,7 +4,7 @@
 * Fix crash on Windows when 8.3 filenames are used. [#2453](https://github.com/Microsoft/vscode-cpptools/issues/2453), [#3104](https://github.com/Microsoft/vscode-cpptools/issues/3104)
 * Fix signature help active parameter selection when parameter names are missing or subsets of each other. [#2952](https://github.com/Microsoft/vscode-cpptools/issues/2952)
 * Fix `--enable-pretty-printing` with `gdb` when complex objects are used as keys in maps. [#3024](https://github.com/Microsoft/vscode-cpptools/issues/3024)
-* Fix IntelliSense-based `Go to Definition` not working with `noexcept` methods. [#3060](https://github.com/Microsoft/vscode-cpptools/issues/3060)
+* Fix IntelliSense-based `Go to Definition` for `noexcept` methods. [#3060](https://github.com/Microsoft/vscode-cpptools/issues/3060)
 * Render macro hover expansions as C/C++. [#3075](https://github.com/Microsoft/vscode-cpptools/issues/3075)
 * Enable completion after `struct` when manually invoked. [#3080](https://github.com/Microsoft/vscode-cpptools/issues/3080)
 * Add `C_Cpp.suggestSnippets` setting to disable language server snippets. [#3083](https://github.com/Microsoft/vscode-cpptools/issues/3083)
