@@ -4,17 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from "vscode";
-import * as util from '../common';
 import * as path from 'path';
-import * as os from 'os';
 
-// Registers DebugAdapterDescriptorFactory for `cppdbg` and `cppvsdbg`. If it is not ready, it will prompt a wait for the download dialog.
-// NOTE: This file is not automatically tested.
+// import * as util from '../src/common' <- DO NOT USE. Also do not use anything with relative paths, it will break during hijacking in test/debug.integration.test.ts
 
 abstract class DebugAdapterDescriptorFactoryWithContext implements vscode.DebugAdapterDescriptorFactory {
     protected readonly context: vscode.ExtensionContext;
 
-    // This is important for the Mock Debugger since it can not use src/common
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
@@ -30,20 +26,9 @@ export class CppdbgDebugAdapterDescriptorFactory extends DebugAdapterDescriptorF
     }
 
     createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
-        return util.isExtensionReady().then(ready => {
-            if (ready) {
-                let command: string = path.join(this.context.extensionPath, './debugAdapters/OpenDebugAD7');
+        console.warn("This should only appear in a test scenario.");
 
-                // Windows has the exe in debugAdapters/bin.
-                if (os.platform() === 'win32') {
-                    command = path.join(this.context.extensionPath, "./debugAdapters/bin/OpenDebugAD7.exe");
-                }
-
-                return new vscode.DebugAdapterExecutable(command, []);
-            } else {
-                throw new Error(util.extensionNotReadyString);
-            }
-        });
+        return new vscode.DebugAdapterExecutable('node', [path.join(this.context.extensionPath, './out/test/integrationTests/MockDebugger/mockDebug.js')]);
     }
 }
 
@@ -55,20 +40,8 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends DebugAdapterDescripto
     }
 
     createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
-        if (os.platform() !== 'win32') {
-            vscode.window.showErrorMessage("Debugger type 'cppvsdbg' is not avaliable for non-Windows machines.");
-            return null;
-        } else {
-            return util.isExtensionReady().then(ready => {
-                if (ready) {
-                    return new vscode.DebugAdapterExecutable(
-                        path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
-                        ['--interpreter=vscode']
-                    );
-                } else {
-                    throw new Error(util.extensionNotReadyString);
-                }
-            });
-        }
+        console.warn("This should only appear in a test scenario.");
+
+        return new vscode.DebugAdapterExecutable('node', [path.join(this.context.extensionPath, './out/test/integrationTests/MockDebugger/mockDebug.js')]);
     }
 }
