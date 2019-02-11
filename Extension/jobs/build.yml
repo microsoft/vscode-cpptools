@@ -11,13 +11,27 @@ jobs:
     displayName: Use Node 8.x'
     inputs:
       versionSpec: 8.x
-  - script: npm install
-    workingDirectory: 'Extension'
+
+  - task: Npm@1
+    displayName: 'Install dependencies'
+    inputs:
+      verbose: false
+
+  - task: Npm@1
+    displayName: 'Compile sources'
+    inputs:
+      command: custom
+      verbose: false
+      customCommand: 'run compile'
+
   - script: npm run pr-check
+    displayName: 'Make sure Extension/package.json's activationEvents is set to [*]'
     workingDirectory: 'Extension'
+
   - script: npm run tslint
+    displayName: 'Run Linter'
     workingDirectory: 'Extension'
-  - script: npm run compile
-    workingDirectory: 'Extension'
+
   - script: npm run test
+    displayName: 'Run Tests'
     workingDirectory: 'Extension'
