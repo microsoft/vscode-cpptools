@@ -487,10 +487,10 @@
           "scope": "resource"
         },
         "C_Cpp.suggestSnippets": {
-            "type": "boolean",
-            "default": true,
-            "description": "If true, snippets are provided by the language server.",
-            "scope": "resource"
+          "type": "boolean",
+          "default": true,
+          "description": "If true, snippets are provided by the language server.",
+          "scope": "resource"
         }
       }
     },
@@ -1420,7 +1420,8 @@
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.26"
+    "vscode": "^1.1.26",
+    "extend": "3.0.2"
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
