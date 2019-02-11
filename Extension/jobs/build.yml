@@ -12,7 +12,12 @@ jobs:
     inputs:
       versionSpec: 8.x
   - script: npm install
+    workingDirectory: 'Extension'
   - script: npm run pr-check
+    workingDirectory: 'Extension'
   - script: npm run tslint
+    workingDirectory: 'Extension'
   - script: npm run compile
+    workingDirectory: 'Extension'
   - script: npm run test
+    workingDirectory: 'Extension'

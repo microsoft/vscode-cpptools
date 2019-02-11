@@ -2,19 +2,19 @@ name: $(Date:yyyMMddd).$(Rev:.r)
 pr: 
 - 'master'
 jobs:
-- template: jobs/build.yml 
+- template: Extension/jobs/build.yml 
   parameters:
     name: macOS
     pool:
       vmImage: 'macOS-10.13'
 
-- template: jobs/build.yml
+- template: Extension/jobs/build.yml
   parameters:
     name: Linux
     pool:
       vmImage: 'ubuntu-16.04'
 
-- template: jobs/build.yml
+- template: Extension/jobs/build.yml
   parameters:
     name: Windows
     pool:
