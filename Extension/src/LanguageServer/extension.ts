@@ -110,16 +110,21 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     }
 
     // Don't offer tasks for header files.
-    const activeFileExt: string = path.extname(activeEditor.document.fileName).toLowerCase();
-    const isHeader: boolean = [".hpp", ".hh", ".hxx", ".h", ""].some(ext => activeFileExt === ext);
+    const activeFileExt: string = path.extname(activeEditor.document.fileName);
+    const activeFileExtLower: string = activeFileExt.toLowerCase();
+    const isHeader: boolean = [".hpp", ".hh", ".hxx", ".h", ""].some(ext => activeFileExtLower === ext);
     if (isHeader) {
         return [];
     }
 
     // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
-    const activeFileIsCpp: boolean = [".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => activeFileExt === ext);
-    const activeFileIsC: boolean = activeFileExt === '.c';
-    if (!activeFileIsCpp && !activeFileIsC) {
+    let activeFileLanguage: string;
+    const activeFileIsCpp: boolean = [".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => activeFileExtLower === ext);
+    if (activeFileIsCpp) {
+        activeFileLanguage = 'cpp';
+    } else if (activeFileExt === '.c') {
+        activeFileLanguage = 'c';
+    } else if (activeFileExt !== '.C') { // Ambiguous file extension
         return [];
     }
 
@@ -131,7 +136,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     const knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         const languageAssociationFilter: (info: configs.KnownCompiler) => boolean = (info: configs.KnownCompiler): boolean => {
-            return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
+            return !activeFileLanguage || info.languageAssociation === activeFileLanguage;
         };
         compilerPaths = knownCompilers.filter(languageAssociationFilter).map<string>(info => { return info.path; });
 
