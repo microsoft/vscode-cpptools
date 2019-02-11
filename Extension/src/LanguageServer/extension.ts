@@ -128,12 +128,12 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     let compilerPaths: string[];
     const activeClient: Client = getActiveClient();
     const userCompilerPath: string = await activeClient.getCompilerPath();
-    const compilerInfo: configs.CompilerInfo[] = await activeClient.getCompilerInfo();
-    if (compilerInfo) {
-        const languageAssociationFilter: (info: configs.CompilerInfo) => boolean = (info: configs.CompilerInfo): boolean => {
+    const knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
+    if (knownCompilers) {
+        const languageAssociationFilter: (info: configs.KnownCompiler) => boolean = (info: configs.KnownCompiler): boolean => {
             return (info.languageAssociation === 'cpp' && activeFileIsCpp) || (info.languageAssociation === 'c' && activeFileIsC);
         };
-        compilerPaths = compilerInfo.filter(languageAssociationFilter).map<string>(info => { return info.path; });
+        compilerPaths = knownCompilers.filter(languageAssociationFilter).map<string>(info => { return info.path; });
 
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {

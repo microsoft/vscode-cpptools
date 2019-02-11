@@ -203,7 +203,7 @@ export interface Client {
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
     getCompilerPath(): Thenable<string>;
-    getCompilerInfo(): Thenable<configs.CompilerInfo[]>;
+    getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
     requestWhenReady(request: () => Thenable<any>): Thenable<any>;
@@ -668,8 +668,8 @@ class DefaultClient implements Client {
         return this.queueTask(() => Promise.resolve(this.configuration.CompilerPath));
     }
 
-    public getCompilerInfo(): Thenable<configs.CompilerInfo[]> {
-        return this.queueTask(() => Promise.resolve(this.configuration.CompilerInfo));
+    public getKnownCompilers(): Thenable<configs.KnownCompiler[]> {
+        return this.queueTask(() => Promise.resolve(this.configuration.KnownCompiler));
     }
 
     /**
@@ -1361,7 +1361,7 @@ class NullClient implements Client {
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
-    getCompilerInfo(): Thenable<configs.CompilerInfo[]> { return Promise.resolve([]); }
+    getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
