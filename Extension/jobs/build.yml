@@ -12,17 +12,13 @@ jobs:
     inputs:
       versionSpec: 8.x
 
-  - task: Npm@1
-    displayName: 'Install dependencies'
-    inputs:
-      verbose: false
-
-  - task: Npm@1
-    displayName: 'Compile sources'
-    inputs:
-      command: custom
-      verbose: false
-      customCommand: 'run compile'
+  - script: npm install
+    displayName: "Install Dependencies"
+    workingDirectory: 'Extension'
+      
+  - script: npm run compile
+    displayName: "Compile Sources"
+    workingDirectory: 'Extension'
 
   - script: npm run pr-check
     displayName: 'Validate Extension/package.json'
