@@ -128,7 +128,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         activeFileLanguage = 'cpp';
     } else if (activeFileExt === '.c') {
         activeFileLanguage = 'c';
-    } else if (activeFileExt !== '.C') { // Ambiguous file extension
+    } else if (activeFileExt !== '.C') { // Ambiguous file extension.
         return [];
     }
 
