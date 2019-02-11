@@ -25,7 +25,7 @@ jobs:
       customCommand: 'run compile'
 
   - script: npm run pr-check
-    displayName: 'Make sure Extension/package.json\'s activationEvents is unchanged.'
+    displayName: 'Validate Extension/package.json'
     workingDirectory: 'Extension'
 
   - script: npm run tslint
