@@ -1,0 +1,18 @@
+parameters:
+  name: ''
+  pool: ''
+  sign: false
+
+jobs:
+- job: ${{ parameters.name }}
+  pool: ${{ parameters.pool }}
+  steps:
+  - task: NodeTool@0
+    displayName: Use Node 8.x'
+    inputs:
+      versionSpec: 8.x
+  - script: npm install
+  - script: npm run pr-check
+  - script: npm run tslint
+  - script: npm run compile
+  - script: npm run test
