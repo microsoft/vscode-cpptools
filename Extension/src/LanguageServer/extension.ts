@@ -109,8 +109,12 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return [];
     }
 
-    // Don't offer tasks for header files.
     const activeFileExt: string = path.extname(activeEditor.document.fileName);
+    if (!activeFileExt) {
+        return;
+    }
+
+    // Don't offer tasks for header files.
     const activeFileExtLower: string = activeFileExt.toLowerCase();
     const isHeader: boolean = [".hpp", ".hh", ".hxx", ".h", ""].some(ext => activeFileExtLower === ext);
     if (isHeader) {
