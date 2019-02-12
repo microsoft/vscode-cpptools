@@ -128,7 +128,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         activeFileLanguage = 'cpp';
     } else if (activeFileExt === '.c') {
         activeFileLanguage = 'c';
-    } else if (activeFileExt !== '.C') { // Ambiguous file extension.
+    } else if (activeFileExt !== '.C') { // Ambiguous file extension. Show both C and C++ compilers for .C files.
         return [];
     }
 
@@ -163,7 +163,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
     if (!compilerPaths) {
         // Don't prompt a message yet until we can make a data-based decision.
-        telemetry.logLanguageServerEvent('noCompilerFound');
+        telemetry.logLanguageServerEvent('buildTaskNoCompiler');
         // Display a message prompting the user to install compilers if none were found.
         // const dontShowAgain: string = "Don't Show Again";
         // const learnMore: string = "Learn More";
