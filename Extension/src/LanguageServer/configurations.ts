@@ -68,7 +68,7 @@ export interface Browse {
 
 export interface KnownCompiler {
     path: string;
-    languageAssociation: string;
+    isC: boolean;
 }
 
 export interface CompilerDefaults {

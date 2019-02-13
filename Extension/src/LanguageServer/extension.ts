@@ -104,31 +104,34 @@ export function activate(activationEventOccurred: boolean): void {
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
 async function getBuildTasks(): Promise<vscode.Task[]> {
-    const activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-    if (!activeEditor) {
+    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+    if (!editor) {
         return [];
     }
 
-    const activeFileExt: string = path.extname(activeEditor.document.fileName);
-    if (!activeFileExt) {
+    const fileExt: string = path.extname(editor.document.fileName);
+    if (!fileExt) {
         return;
     }
 
     // Don't offer tasks for header files.
-    const activeFileExtLower: string = activeFileExt.toLowerCase();
-    const isHeader: boolean = [".hpp", ".hh", ".hxx", ".h", ""].some(ext => activeFileExtLower === ext);
+    const fileExtLower: string = fileExt.toLowerCase();
+    const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h", ""].some(ext => fileExtLower === ext);
     if (isHeader) {
         return [];
     }
 
     // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
-    let activeFileLanguage: string;
-    const activeFileIsCpp: boolean = [".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => activeFileExtLower === ext);
-    if (activeFileIsCpp) {
-        activeFileLanguage = 'cpp';
-    } else if (activeFileExt === '.c') {
-        activeFileLanguage = 'c';
-    } else if (activeFileExt !== '.C') { // Ambiguous file extension. Show both C and C++ compilers for .C files.
+    let fileIsCpp: boolean;
+    let fileIsC: boolean;
+    if (fileExt === ".C") { // ".C" file extensions are both C and C++.
+        fileIsCpp = true;
+        fileIsC = true;
+    } else {
+        fileIsCpp = [".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
+        fileIsC = fileExtLower === ".c";
+    }
+    if (!(fileIsCpp || fileIsC)) {
         return [];
     }
 
@@ -137,12 +140,10 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     let compilerPaths: string[];
     const activeClient: Client = getActiveClient();
     const userCompilerPath: string = await activeClient.getCompilerPath();
-    const knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
+    let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
-        const languageAssociationFilter: (info: configs.KnownCompiler) => boolean = (info: configs.KnownCompiler): boolean => {
-            return !activeFileLanguage || info.languageAssociation === activeFileLanguage;
-        };
-        compilerPaths = knownCompilers.filter(languageAssociationFilter).map<string>(info => { return info.path; });
+        knownCompilers = knownCompilers.filter(info => { return (fileIsCpp && !info.isC) || (fileIsC && info.isC); });
+        compilerPaths = knownCompilers.map<string>(info => { return info.path; });
 
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
@@ -163,7 +164,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
     if (!compilerPaths) {
         // Don't prompt a message yet until we can make a data-based decision.
-        telemetry.logLanguageServerEvent('buildTaskNoCompiler');
+        telemetry.logLanguageServerEvent('noCompilerFound');
         // Display a message prompting the user to install compilers if none were found.
         // const dontShowAgain: string = "Don't Show Again";
         // const learnMore: string = "Learn More";
