@@ -56,8 +56,8 @@
           "args": {
             "type": "array"
           },
-          "cwd": {
-            "type": "string"
+          "options": {
+            "type": "array"
           }
         }
       }

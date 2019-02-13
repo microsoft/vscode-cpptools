@@ -68,6 +68,7 @@ export function activate(activationEventOccurred: boolean): void {
             return getBuildTasks();
         },
         resolveTask(task: vscode.Task): vscode.Task {
+            // Currently cannot implement because VS Code does not call this. Can implement custom output file directory when enabled.
             return undefined;
         }
     });
@@ -209,7 +210,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
             label: taskName,
             command: compilerPath,
             args: args,
-            cwd: cwd
+            options: {"cwd": cwd}
         };
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
