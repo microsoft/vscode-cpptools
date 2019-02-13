@@ -13,6 +13,7 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
+import { stringify } from 'querystring';
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
@@ -98,6 +99,7 @@ export class CppProperties {
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
     private selectionChanged = new vscode.EventEmitter<number>();
     private compileCommandsChanged = new vscode.EventEmitter<string>();
+    private diagnosticCollection: vscode.DiagnosticCollection;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -109,6 +111,7 @@ export class CppProperties {
         let rootPath: string = rootUri ? rootUri.fsPath : "";
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
+        this.diagnosticCollection = vscode.languages.createDiagnosticCollection("cppPropertiesDiagnostics");
 
         let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
         if (fs.existsSync(configFilePath)) {
@@ -664,6 +667,22 @@ export class CppProperties {
                     vscode.window.showWarningMessage('Attempt to update "' + this.propertiesFile.fsPath + '" failed (do you have write access?)');
                 }
             }
+            
+            vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                let name_str: string = '"name"';
+                let index_of_current_config_name: number = document.getText().search(new RegExp(name_str + "\\s*:\\s*\"" + this.CurrentConfiguration.name + "\""));
+                if (this.CurrentConfiguration.compilerPath === undefined && this.CurrentConfiguration.compileCommands === undefined
+                        && this.CurrentConfiguration.configurationProvider === undefined) {
+                    let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(index_of_current_config_name),
+                            document.positionAt(index_of_current_config_name + name_str.length)),
+                        'At least one of "compilerPath", "compileCommands", or "configurationProvider" is expected.', vscode.DiagnosticSeverity.Warning);
+                    let diagnostics: vscode.Diagnostic[] = [ diagnostic ];
+                    this.diagnosticCollection.set(this.propertiesFile, diagnostics);
+                } else {
+                    this.diagnosticCollection.clear();
+                }
+            });
         } catch (err) {
             vscode.window.showErrorMessage('Failed to parse "' + this.propertiesFile.fsPath + '": ' + err.message);
             throw err;
