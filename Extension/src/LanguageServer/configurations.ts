@@ -13,7 +13,6 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
-import { stringify } from 'querystring';
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
