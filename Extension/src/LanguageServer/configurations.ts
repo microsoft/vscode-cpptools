@@ -667,15 +667,15 @@ export class CppProperties {
                 }
             }
             
+            // This is just prototype code (not expected to be shipped).
             vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
                 let name_str: string = '"name"';
-                let index_of_current_config_name: number = document.getText().search(new RegExp(name_str + "\\s*:\\s*\"" + this.CurrentConfiguration.name + "\""));
+                let offsetOfConfig: number = document.getText().search(new RegExp("{\\s*" + name_str + "\\s*:\\s*\"" + this.CurrentConfiguration.name + "\""));
                 if (this.CurrentConfiguration.compilerPath === undefined && this.CurrentConfiguration.compileCommands === undefined
                         && this.CurrentConfiguration.configurationProvider === undefined) {
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(index_of_current_config_name),
-                            document.positionAt(index_of_current_config_name + name_str.length)),
-                        'At least one of "compilerPath", "compileCommands", or "configurationProvider" is expected.', vscode.DiagnosticSeverity.Warning);
+                        new vscode.Range(document.positionAt(offsetOfConfig), document.positionAt(offsetOfConfig + 1)),
+                        'Missing one of propeties "compilerPath", "compileCommands", or "configurationProvider".', vscode.DiagnosticSeverity.Warning);
                     let diagnostics: vscode.Diagnostic[] = [ diagnostic ];
                     this.diagnosticCollection.set(this.propertiesFile, diagnostics);
                 } else {
