@@ -24,6 +24,7 @@ import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
+import { getTemporaryCommandRegistrarInstance } from '../commands';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -556,6 +557,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
  *********************************************/
 
 function registerCommands(): void {
+    getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToDeclaration', onGoToDeclaration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PeekDeclaration', onPeekDeclaration));
