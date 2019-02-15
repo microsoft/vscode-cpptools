@@ -59,11 +59,6 @@ class TemporaryCommandRegistrar {
     public activateLanguageServer(): void {
         // Main activation code.
         LanguageServer.activate(this.delayedCommandsToExecute.size > 0);
-        
-        this.delayedCommandsToExecute.forEach((command) => {
-            vscode.commands.executeCommand(command);
-        });
-        this.delayedCommandsToExecute.clear();
     }
     
     public clearTempCommands(): void {
@@ -71,6 +66,13 @@ class TemporaryCommandRegistrar {
             command.dispose();
         });
         this.tempCommands = [];
+    }
+
+    public executeDelayedCommands(): void {
+        this.delayedCommandsToExecute.forEach((command) => {
+            vscode.commands.executeCommand(command);
+        });
+        this.delayedCommandsToExecute.clear();
     }
 }
 

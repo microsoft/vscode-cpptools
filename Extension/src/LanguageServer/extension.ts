@@ -55,7 +55,6 @@ export function activate(activationEventOccurred: boolean): void {
         realActivation();
     }
 
-    registerCommands();
     tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
 
     // Check if an activation event has already occurred.
@@ -555,8 +554,13 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
 /*********************************************
  * registered commands
  *********************************************/
+let commandsRegistered: boolean = false;
 
-function registerCommands(): void {
+export function registerCommands(): void {
+    if (commandsRegistered) {
+        return;
+    }
+    commandsRegistered = true;
     getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToDeclaration', onGoToDeclaration));
@@ -575,6 +579,7 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
+    getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
 function onNavigate(): void {
