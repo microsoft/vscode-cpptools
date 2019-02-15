@@ -46,6 +46,7 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPath?: string;
+    knownCompilers?: KnownCompiler[];
     cStandard?: string;
     cppStandard?: string;
     includePath?: string[];
@@ -65,8 +66,14 @@ export interface Browse {
     databaseFilename?: string;
 }
 
+export interface KnownCompiler {
+    path: string;
+    isC: boolean;
+}
+
 export interface CompilerDefaults {
     compilerPath: string;
+    knownCompilers: KnownCompiler[];
     cStandard: string;
     cppStandard: string;
     includes: string[];
@@ -85,6 +92,7 @@ export class CppProperties {
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandFileWatchers: fs.FSWatcher[] = [];
     private defaultCompilerPath: string = null;
+    private knownCompilers: KnownCompiler[] = null;
     private defaultCStandard: string = null;
     private defaultCppStandard: string = null;
     private defaultIncludes: string[] = null;
@@ -149,6 +157,8 @@ export class CppProperties {
     public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
+    public get CompilerPath(): string { return this.CurrentConfiguration.compilerPath; }
+    public get KnownCompiler(): KnownCompiler[] { return this.knownCompilers; }
 
     public get CurrentConfigurationProvider(): string|null {
         if (this.CurrentConfiguration.configurationProvider) {
@@ -165,6 +175,7 @@ export class CppProperties {
 
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
         this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.knownCompilers = compilerDefaults.knownCompilers;
         this.defaultCStandard = compilerDefaults.cStandard;
         this.defaultCppStandard = compilerDefaults.cppStandard;
         this.defaultIncludes = compilerDefaults.includes;
@@ -249,6 +260,9 @@ export class CppProperties {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.defaultCompilerPath;
+            }
+            if (this.knownCompilers) {
+                configuration.knownCompilers = this.knownCompilers;
             }
             if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
                 configuration.cStandard = this.defaultCStandard;
