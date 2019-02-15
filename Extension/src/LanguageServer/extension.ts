@@ -45,7 +45,9 @@ let taskProvider: vscode.Disposable;
  * activate: set up the extension for language services
  */
 export function activate(activationEventOccurred: boolean): void {
-    console.log("activating extension");
+    if (realActivationOccurred) {
+        return; // Occurs if multiple delayed commands occur before the real commands are registered.
+    }
 
     // Activate immediately if an activation event occurred in the previous workspace session.
     // If onActivationEvent doesn't occur, it won't auto-activate next time.
@@ -55,7 +57,9 @@ export function activate(activationEventOccurred: boolean): void {
         realActivation();
     }
 
-    tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
+    if (tempCommands.length === 0) { // Only needs to be added once.
+        tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
+    }
 
     // Check if an activation event has already occurred.
     if (activationEventOccurred) {
@@ -250,6 +254,7 @@ function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error("Do not activate the extension when IntelliSense is disabled.");
     } else {
+        console.log("activating extension");
         let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
