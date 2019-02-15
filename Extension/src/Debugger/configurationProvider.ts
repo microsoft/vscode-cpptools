@@ -160,6 +160,7 @@ class OSXConfigurationProvider extends DefaultConfigurationProvider {
         super();
         this.configurations = [
             new MIConfigurations(this.MIMode, this.executable, this.pipeProgram),
+            new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, null)
         ];
     }
 }
