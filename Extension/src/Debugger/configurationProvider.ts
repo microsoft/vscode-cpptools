@@ -7,9 +7,16 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { getBuildTasks, BuildTaskDefinition } from '../LanguageServer/extension';
+import * as util from '../common';
+import * as fs from 'fs';
 
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
+
+interface MenuItem extends vscode.QuickPickItem {
+    compilerPath: string;
+}
 
 abstract class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private type: DebuggerType;
@@ -23,8 +30,64 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
     /**
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
-    provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration[]> {
-        return this.provider.getInitialConfigurations(this.type);
+    async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+        return new Promise<vscode.DebugConfiguration[]>(async (resolve, reject) => {
+            const tasks: vscode.Task[] = await getBuildTasks();
+            if (!tasks.length) {
+                return this.provider.getInitialConfigurations(this.type);
+            }
+
+            let menuItems: MenuItem[] = tasks.map<MenuItem>(task => {
+                let definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
+                return {label: task.name, compilerPath: definition.compilerPath};
+            });
+
+            vscode.window.showQuickPick(menuItems, {placeHolder: "Select a task to build the active file."}).then(async selection => {
+                let rawTasksJson: any = await util.getRawTasksJson();
+
+                // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+                if (!rawTasksJson.tasks) {
+                    rawTasksJson.tasks = new Array();
+                }
+                if (!rawTasksJson.tasks.find(task => task.label === selection.label)) {
+                    const foundTask: vscode.Task = tasks.find((task: vscode.Task) => { return task.name === selection.label; });
+                    let definition: BuildTaskDefinition = foundTask.definition as BuildTaskDefinition;
+                    delete definition.compilerPath; // TODO add desired properties to empty object, don't delete.
+                    rawTasksJson.tasks.push(foundTask.definition);
+                    util.writeFileText(util.getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
+                }
+
+                // Configure the default configuration for the selected task.
+                let defaultConfig: any = this.provider.getInitialConfigurations(this.type)[0];
+                defaultConfig.program = "${fileDirname}/${fileBasenameNoExtension}";
+                defaultConfig.preLaunchTask = selection.label;
+                defaultConfig.externalConsole = false;
+
+                const compilerBaseName: string = path.basename(selection.compilerPath);
+                if (!compilerBaseName.startsWith("clang")) {
+                    defaultConfig.name = "(gdb) Build Active File and Launch";
+                    resolve(defaultConfig);
+                }
+                
+                defaultConfig.name = "(lldb) Build Active File and Launch";
+                defaultConfig.MIMode = "lldb";
+                delete defaultConfig.setupCommands;
+                let index: number = compilerBaseName.indexOf('-');
+                let lldbMIPath: string = path.dirname(selection.compilerPath) + '/lldb-mi';
+                if (index !== -1) {
+                    const versionStr: string = compilerBaseName.substr(index);
+                    lldbMIPath += versionStr;
+                }
+                fs.stat(lldbMIPath, (err, stats: fs.Stats) => {
+                    if (stats && stats.isFile) {
+                        defaultConfig.miDebuggerPath = lldbMIPath;
+                    } else {
+                        defaultConfig.miDebuggerPath = '/usr/bin/lldb-mi';
+                    }
+                    resolve(defaultConfig);
+                });
+            });
+        });
     }
 
     /**

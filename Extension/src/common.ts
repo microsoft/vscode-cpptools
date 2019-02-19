@@ -36,6 +36,20 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
+let rawTasksJson: any = null;
+export function getRawTasksJson(): any {
+    if (rawTasksJson === null) {
+        const path: string = getTasksJsonPath();
+        const fileContents: Buffer = fs.readFileSync(path);
+        try {
+            rawPackageJson = JSON.parse(fileContents.toString());
+        } catch (error) {
+            rawPackageJson = {};
+        }
+    }
+    return rawPackageJson;
+}
+
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.
@@ -49,6 +63,11 @@ export function getExtensionFilePath(extensionfile: string): string {
 
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
+}
+
+export function getTasksJsonPath(): string {
+    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+    return vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath + "/.vscode/tasks.json";
 }
 
 export function getVcpkgPathDescriptorFile(): string {

@@ -101,10 +101,14 @@ export function activate(activationEventOccurred: boolean): void {
     }
 }
 
+export interface BuildTaskDefinition extends vscode.TaskDefinition {
+    compilerPath: string;
+}
+
 /**
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
-async function getBuildTasks(): Promise<vscode.Task[]> {
+export async function getBuildTasks(): Promise<vscode.Task[]> {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!editor) {
         return [];
@@ -205,12 +209,13 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         const taskName: string = path.basename(compilerPath) + " build active file";
         const args: string[] = ['-g', '${file}', '-o', '${fileDirname}/' + exeName];
         const cwd: string = path.dirname(compilerPath);
-        const kind: vscode.TaskDefinition = {
+        const kind: BuildTaskDefinition = {
             type: 'shell',
             label: taskName,
             command: compilerPath,
             args: args,
-            options: {"cwd": cwd}
+            options: {"cwd": cwd},
+            compilerPath: compilerPath
         };
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
