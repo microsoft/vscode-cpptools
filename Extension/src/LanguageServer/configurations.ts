@@ -82,6 +82,13 @@ export interface CompilerDefaults {
     intelliSenseMode: string;
 }
 
+enum SquiggleType {
+    None,
+    PathDoesNotExist,
+    IsNotAFile,
+    IsNotADirectory
+}
+
 export class CppProperties {
     private rootUri: vscode.Uri;
     private propertiesFile: vscode.Uri = null;
@@ -119,32 +126,6 @@ export class CppProperties {
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection("cppPropertiesDiagnostics");
-
-        let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
-        if (fs.existsSync(configFilePath)) {
-            this.propertiesFile = vscode.Uri.file(configFilePath);
-            this.parsePropertiesFile();
-        }
-        if (!this.configurationJson) {
-            this.resetToDefaultSettings(this.CurrentConfigurationIndex === -1);
-        }
-
-        this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
-        this.disposables.push(this.configFileWatcher);
-        this.configFileWatcher.onDidCreate((uri) => {
-            this.propertiesFile = uri;
-            this.handleConfigurationChange();
-        });
-
-        this.configFileWatcher.onDidDelete(() => {
-            this.propertiesFile = null;
-            this.resetToDefaultSettings(true);
-            this.handleConfigurationChange();
-        });
-
-        this.configFileWatcher.onDidChange(() => {
-            this.handleConfigurationChange();
-        });
 
         this.buildVcpkgIncludePath();
 
@@ -185,6 +166,28 @@ export class CppProperties {
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
+        let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
+        if (fs.existsSync(configFilePath)) {
+            this.propertiesFile = vscode.Uri.file(configFilePath);
+        }
+        
+        this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
+        this.disposables.push(this.configFileWatcher);
+        this.configFileWatcher.onDidCreate((uri) => {
+            this.propertiesFile = uri;
+            this.handleConfigurationChange();
+        });
+
+        this.configFileWatcher.onDidDelete(() => {
+            this.propertiesFile = null;
+            this.resetToDefaultSettings(true);
+            this.handleConfigurationChange();
+        });
+
+        this.configFileWatcher.onDidChange(() => {
+            this.handleConfigurationChange();
+        });
+
         this.handleConfigurationChange();
     }
 
@@ -614,6 +617,10 @@ export class CppProperties {
                 return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
             }
 
+            // Replace all \<escape character> with \\<character>.
+            // Otherwise, the JSON.parse result will have the \<escape character> missing.
+            readResults = readResults.replace(/\\/g, '\\\\');
+
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
@@ -681,17 +688,65 @@ export class CppProperties {
                 }
             }
             
-            // This is just prototype code (not expected to be shipped).
             vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                let name_str: string = '"name"';
-                let offsetOfConfig: number = document.getText().search(new RegExp("{\\s*" + name_str + "\\s*:\\s*\"" + this.CurrentConfiguration.name + "\""));
-                if (this.CurrentConfiguration.compilerPath === undefined && this.CurrentConfiguration.compileCommands === undefined
-                        && this.CurrentConfiguration.configurationProvider === undefined) {
-                    let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(offsetOfConfig), document.positionAt(offsetOfConfig + 1)),
-                        'Missing one of propeties "compilerPath", "compileCommands", or "configurationProvider".', vscode.DiagnosticSeverity.Warning);
-                    let diagnostics: vscode.Diagnostic[] = [ diagnostic ];
-                    this.diagnosticCollection.set(this.propertiesFile, diagnostics);
+                let paths: Set<string> = new Set<string>();
+                let pathArrays: Array<Array<string>> = [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
+                    this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ];
+                for (let pathArray of pathArrays) {
+                    if (pathArray) {
+                        for (let path of pathArray) {
+                            paths.add(path);
+                        }
+                    }
+                }
+                if (this.CurrentConfiguration.compileCommands) {
+                    paths.add(this.CurrentConfiguration.compileCommands);
+                }
+                let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
+                let curText: string = document.getText();
+                let forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
+                let forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
+                for (let path of paths) {
+                    if (path === "${default}") {
+                        // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
+                        continue;
+                    }
+                    let resolvedPath: string = util.resolveVariables(path, this.ExtendedEnvironment);
+                    if (resolvedPath.includes("${workspaceFolder}")) {
+                        resolvedPath = resolvedPath.replace("${workspaceFolder}", this.rootUri.fsPath);
+                    }
+                    if (resolvedPath.includes("${workspaceRoot}")) {
+                        resolvedPath = resolvedPath.replace("${workspaceRoot}", this.rootUri.fsPath);
+                    }
+                    let squiggleType: SquiggleType = SquiggleType.None;
+                    if (!fs.existsSync(resolvedPath)) {
+                        squiggleType = SquiggleType.PathDoesNotExist;
+                    }
+                    for (let curOffset: number = curText.indexOf(path); curOffset !== -1; curOffset = curText.indexOf(path, curOffset + path.length + 1)) {
+                        let message: string;
+                        if (squiggleType === SquiggleType.PathDoesNotExist) {
+                            message = "Cannot find " + resolvedPath + ". Please check the spelling and try again.";
+                        } else {
+                            if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) {
+                                if (util.checkFileExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+                                message = "Path is not a file: " + resolvedPath;
+                            } else {
+                                if (util.checkDirectoryExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+                                message = "Path is not a directory: " + resolvedPath;
+                            }
+                        }
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(curOffset), document.positionAt(curOffset + path.length)),
+                                message, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                    }
+                }
+                if (diagnostics.length !== 0) {
+                    this.diagnosticCollection.set(document.uri, diagnostics);
                 } else {
                     this.diagnosticCollection.clear();
                 }
