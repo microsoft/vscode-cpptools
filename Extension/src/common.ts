@@ -40,6 +40,10 @@ let rawTasksJson: any = null;
 export function getRawTasksJson(): any {
     if (rawTasksJson === null) {
         const path: string = getTasksJsonPath();
+        if (!fs.existsSync(path)) {
+            rawPackageJson = {};
+            return rawPackageJson;
+        }
         const fileContents: Buffer = fs.readFileSync(path);
         try {
             rawPackageJson = JSON.parse(fileContents.toString());
@@ -67,7 +71,9 @@ export function getPackageJsonPath(): string {
 
 export function getTasksJsonPath(): string {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
-    return vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.fsPath + "/.vscode/tasks.json";
+    const folder:any  = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    // TODO fix bug with file outside of workspace
+    return folder.uri.fsPath + "/.vscode/tasks.json";
 }
 
 export function getVcpkgPathDescriptorFile(): string {
