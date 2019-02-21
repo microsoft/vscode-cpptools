@@ -699,13 +699,13 @@ export class CppProperties {
                 for (let pathArray of [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
                         this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
                     if (pathArray) {
-                        for (let path of pathArray) {
-                            paths.add(path);
+                        for (let curPath of pathArray) {
+                            paths.add('"' + curPath + '"');
                         }
                     }
                 }
                 if (this.CurrentConfiguration.compileCommands) {
-                    paths.add(this.CurrentConfiguration.compileCommands);
+                    paths.add('"' + this.CurrentConfiguration.compileCommands + '"');
                 }
 
                 // Get the start/end for properties that are file-only.
@@ -714,13 +714,14 @@ export class CppProperties {
                 let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
                 let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
 
-                for (let path of paths) {
+                for (let curPath of paths) {
+                    let resolvedPath: string = curPath.substr(1, curPath.length - 2);
                     // Resolve special path cases.
-                    if (path === "${default}") {
+                    if (resolvedPath === "${default}") {
                         // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
                         continue;
                     }
-                    let resolvedPath: string = util.resolveVariables(path, this.ExtendedEnvironment);
+                    resolvedPath = util.resolveVariables(resolvedPath, this.ExtendedEnvironment);
                     if (resolvedPath.includes("${workspaceFolder}")) {
                         resolvedPath = resolvedPath.replace("${workspaceFolder}", this.rootUri.fsPath);
                     }
@@ -736,12 +737,18 @@ export class CppProperties {
 
                     let pathExists: boolean = true;
                     if (!fs.existsSync(resolvedPath)) {
-                        pathExists = false;
+                        // Check again for a relative path.
+                        let relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
+                        if (!fs.existsSync(relativePath)) {
+                            pathExists = false;
+                        } else {
+                            resolvedPath = relativePath;
+                        }
                     }
-                    for (let curOffset: number = curText.indexOf(path); curOffset !== -1; curOffset = curText.indexOf(path, curOffset + path.length + 1)) {
+                    for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
                         let message: string;
                         if (!pathExists) {
-                            message = 'Cannot find \"' + resolvedPath + '\".';
+                            message = 'Cannot find "' + resolvedPath + '".';
                         } else {
                             // Check for file versus path mismatches.
                             if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
@@ -749,16 +756,16 @@ export class CppProperties {
                                 if (util.checkFileExistsSync(resolvedPath)) {
                                     continue;
                                 }
-                                message = "Path is not a file: " + resolvedPath;
+                                message = 'Path is not a file: "' + resolvedPath + '".';
                             } else {
                                 if (util.checkDirectoryExistsSync(resolvedPath)) {
                                     continue;
                                 }
-                                message = "Path is not a directory: " + resolvedPath;
+                                message = 'Path is not a directory: "' + resolvedPath + '".';
                             }
                         }
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                            new vscode.Range(document.positionAt(curOffset), document.positionAt(curOffset + path.length)),
+                            new vscode.Range(document.positionAt(curOffset + 1), document.positionAt(curOffset + curPath.length - 1)),
                             message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
                     }
