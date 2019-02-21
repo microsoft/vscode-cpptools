@@ -82,13 +82,6 @@ export interface CompilerDefaults {
     intelliSenseMode: string;
 }
 
-enum SquiggleType {
-    None,
-    PathDoesNotExist,
-    IsNotAFile,
-    IsNotADirectory
-}
-
 export class CppProperties {
     private rootUri: vscode.Uri;
     private propertiesFile: vscode.Uri = null;
@@ -688,11 +681,17 @@ export class CppProperties {
                 }
             }
             
+            // Handle squiggles for c_cpp_properties.json.
             vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
+                let curText: string = document.getText();
+
+                // TODO: Add other squiggles.
+
+                // Check for path-related squiggles.
                 let paths: Set<string> = new Set<string>();
-                let pathArrays: Array<Array<string>> = [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
-                    this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ];
-                for (let pathArray of pathArrays) {
+                for (let pathArray of [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
+                        this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
                     if (pathArray) {
                         for (let path of pathArray) {
                             paths.add(path);
@@ -702,11 +701,15 @@ export class CppProperties {
                 if (this.CurrentConfiguration.compileCommands) {
                     paths.add(this.CurrentConfiguration.compileCommands);
                 }
-                let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
-                let curText: string = document.getText();
+
+                // Get the start/end for properties that are file-only.
                 let forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
                 let forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
+                let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
+                let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+
                 for (let path of paths) {
+                    // Resolve special path cases.
                     if (path === "${default}") {
                         // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
                         continue;
@@ -718,16 +721,22 @@ export class CppProperties {
                     if (resolvedPath.includes("${workspaceRoot}")) {
                         resolvedPath = resolvedPath.replace("${workspaceRoot}", this.rootUri.fsPath);
                     }
-                    let squiggleType: SquiggleType = SquiggleType.None;
+                    if (resolvedPath.includes("*")) {
+                        resolvedPath = resolvedPath.replace(/\*/g, "");
+                    }
+
+                    let pathExists: boolean = true;
                     if (!fs.existsSync(resolvedPath)) {
-                        squiggleType = SquiggleType.PathDoesNotExist;
+                        pathExists = false;
                     }
                     for (let curOffset: number = curText.indexOf(path); curOffset !== -1; curOffset = curText.indexOf(path, curOffset + path.length + 1)) {
                         let message: string;
-                        if (squiggleType === SquiggleType.PathDoesNotExist) {
-                            message = "Cannot find " + resolvedPath + ". Please check the spelling and try again.";
+                        if (!pathExists) {
+                            message = 'Cannot find \"' + resolvedPath + '\".';
                         } else {
-                            if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) {
+                            // Check for file versus path mismatches.
+                            if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
+                                (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
                                 if (util.checkFileExistsSync(resolvedPath)) {
                                     continue;
                                 }
@@ -741,7 +750,7 @@ export class CppProperties {
                         }
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curOffset), document.positionAt(curOffset + path.length)),
-                                message, vscode.DiagnosticSeverity.Warning);
+                            message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
                     }
                 }
