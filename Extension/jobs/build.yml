@@ -41,7 +41,7 @@ jobs:
 
   - script: |
       cp $(Build.SourcesDirectory)/Extension/out/test/integrationTests/MockDebugger/debugAdapterDescriptorFactory.js $(Build.SourcesDirectory)/Extension/out/src/Debugger/debugAdapterDescriptorFactory.js
-    displayName: Copy debugger hijack
+    displayName: Replace Debug Adapter Descriptor Factory
 
   - script: 'node node_modules/vscode/bin/test'
     displayName: 'Run debug integration tests'
