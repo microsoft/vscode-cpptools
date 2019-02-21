@@ -118,7 +118,7 @@ export class CppProperties {
         let rootPath: string = rootUri ? rootUri.fsPath : "";
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
-        this.diagnosticCollection = vscode.languages.createDiagnosticCollection("cppPropertiesDiagnostics");
+        this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
 
         this.buildVcpkgIncludePath();
 
@@ -465,6 +465,9 @@ export class CppProperties {
     }
 
     private updateServerOnFolderSettingsChange(): void {
+        if (!this.configurationJson) {
+            return;
+        }
         let settings: CppSettings = new CppSettings(this.rootUri);
         let env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
@@ -560,7 +563,10 @@ export class CppProperties {
                             });
                             settings.update("default.configurationProvider", undefined); // delete the setting
                         }
+                        let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
+                        this.configurationJson.configurations[0].knownCompilers = undefined;
                         edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
+                        this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
                         vscode.workspace.applyEdit(edit).then((status) => {
                             // Fix for issue 163
                             // https://github.com/Microsoft/vscppsamples/issues/163
@@ -586,7 +592,7 @@ export class CppProperties {
             this.parsePropertiesFile();
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
-            if (this.configurationJson !== undefined) {
+            if (this.configurationJson !== null) {
                 if (this.CurrentConfigurationIndex < 0 ||
                     this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
                     // If the index is out of bounds (during initialization or due to removal of configs), fix it.
@@ -595,7 +601,7 @@ export class CppProperties {
             }
         }
 
-        if (this.configurationJson === undefined) {
+        if (this.configurationJson === null) {
             this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
         }
 
@@ -720,6 +726,9 @@ export class CppProperties {
                     }
                     if (resolvedPath.includes("${workspaceRoot}")) {
                         resolvedPath = resolvedPath.replace("${workspaceRoot}", this.rootUri.fsPath);
+                    }
+                    if (resolvedPath.includes("${vcpkgRoot}")) {
+                        resolvedPath = resolvedPath.replace("${vcpkgRoot}", util.getVcpkgRoot());
                     }
                     if (resolvedPath.includes("*")) {
                         resolvedPath = resolvedPath.replace(/\*/g, "");
