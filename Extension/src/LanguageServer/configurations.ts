@@ -13,6 +13,7 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
+import * as os from 'os';
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
@@ -80,11 +81,12 @@ export interface CompilerDefaults {
     frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
+    rootfs: string;
 }
 
 export class CppProperties {
     private rootUri: vscode.Uri;
-    private propertiesFile: vscode.Uri = null;
+    private propertiesFile: vscode.Uri = undefined;
     private readonly configFolder: string;
     private configurationJson: ConfigurationJson = null;
     private currentConfigurationIndex: PersistentFolderState<number>;
@@ -108,6 +110,7 @@ export class CppProperties {
     private compileCommandsChanged = new vscode.EventEmitter<string>();
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
+    private rootfs: string = null;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -157,6 +160,7 @@ export class CppProperties {
         this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+        this.rootfs = compilerDefaults.rootfs;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
@@ -589,6 +593,9 @@ export class CppProperties {
     }
 
     private handleConfigurationChange(): void {
+        if (this.propertiesFile === undefined) {
+            return; // Occurs when propertiesFile hasn't been checked yet.
+        }
         this.configFileWatcherFallbackTime = new Date();
         if (this.propertiesFile) {
             this.parsePropertiesFile();
@@ -772,6 +779,19 @@ export class CppProperties {
                     resolvedPath = resolvedPath.replace(/\*/g, "");
                 }
 
+                // Handle WSL paths.
+                if (resolvedPath.startsWith("/") && os.platform() === 'win32') {
+                    const mntStr: string = "/mnt/";
+                    if (resolvedPath.length > "/mnt/c/".length && resolvedPath.substr(0, mntStr.length) === mntStr) {
+                        resolvedPath = resolvedPath.substr(mntStr.length);
+                        resolvedPath = resolvedPath.substr(0, 1) + ":" + resolvedPath.substr(1);
+                    } else if (this.rootfs && this.rootfs.length > 0) {
+                        resolvedPath = this.rootfs + resolvedPath.substr(1);
+                        resolvedPath = resolvedPath.replace(/\//g, path.sep);
+                        // TODO: Handle WSL symlinks.
+                    }
+                }
+
                 let pathExists: boolean = true;
                 if (!fs.existsSync(resolvedPath)) {
                     // Check again for a relative path.
@@ -782,6 +802,8 @@ export class CppProperties {
                         resolvedPath = relativePath;
                     }
                 }
+
+                // Iterate through the text and apply squiggles.
                 for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
                     let message: string;
                     if (!pathExists) {
