@@ -1,0 +1,58 @@
+parameters:
+  name: ''
+  pool: ''
+
+jobs:
+- job: Windows
+  pool:
+    vmImage: 'vs2017-win2016'
+
+  steps:
+  - task: NodeTool@0
+    displayName: 'Use Node 8.x'
+    inputs:
+      versionSpec: 8.x
+
+  - script: npm install
+    displayName: "Install Dependencies"
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+      
+  - script: npm run compile
+    displayName: "Compile Sources"
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+
+  - script: npm run pr-check
+    displayName: 'Validate Extension/package.json'
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+
+  - script: npm run tslint
+    displayName: 'Run Linter'
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+
+  - script: 'npm run unitTests'
+    displayName: 'Run unit tests'
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+    continueOnError: true
+
+  - script: 'copy "$(Build.SourcesDirectory)\Extension\out\test\integrationTests\MockDebugger\debugAdapterDescriptorFactory.js" "$(Build.SourcesDirectory)\Extension\out\src\Debugger\debugAdapterDescriptorFactory.js" /Y'
+    displayName: Replace Debug Adapter Descriptor Factory
+
+  - script: 'node node_modules/vscode/bin/test'
+    displayName: 'Run debug integration tests'
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+    continueOnError: true
+    env:
+      CODE_TESTS_PATH: '$(Build.SourcesDirectory)\Extension\out\test\integrationTests\debug'
+      CODE_EXTENSIONS_PATH: '$(Build.SourcesDirectory)\Extension'
+      CODE_TESTS_WORKSPACE: '$(Build.SourcesDirectory)\Extension\test\integrationTests\testAssets\SimpleCppProject'
+      CODE_DISABLE_EXTENSIONS: 1
+
+  - script: 'node node_modules/vscode/bin/test'
+    displayName: 'Run languageServer integration tests'
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+    continueOnError: true
+    env:
+      CODE_TESTS_PATH: '$(Build.SourcesDirectory)\Extension\out\test\integrationTests\languageServer'
+      CODE_EXTENSIONS_PATH: '$(Build.SourcesDirectory)\Extension'
+      CODE_TESTS_WORKSPACE: '$(Build.SourcesDirectory)\Extension\test\integrationTests\testAssets\SimpleCppProject'
+      CODE_DISABLE_EXTENSIONS: 1
