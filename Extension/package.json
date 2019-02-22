@@ -311,7 +311,7 @@
         "C_Cpp.intelliSenseCachePath": {
           "type": "string",
           "default": "${workspaceFolder}/.vscode/ipch/",
-          "description": "Defines the folder path for cached precompiled headers. The default path is \"${workspaceFolder}/.vscode/ipch/\"",
+          "description": "Defines the folder path for cached precompiled headers. The default path \"${workspaceFolder}/.vscode/ipch/\" will be used if a specified path is invalid.",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseCacheSize": {
