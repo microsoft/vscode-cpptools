@@ -23,7 +23,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations } from './extension';
+import { updateLanguageConfigurations, registerCommands } from './extension';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
@@ -321,6 +321,10 @@ class DefaultClient implements Client {
                     // The event handlers must be set before this happens.
                     languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
                         this.configuration.CompilerDefaults = compilerDefaults;
+                        
+                        // Only register the real commands after the extension has finished initializing,
+                        // e.g. prevents empty c_cpp_properties.json from generation.
+                        registerCommands();
                     });
 
                     this.languageClient = languageClient;
