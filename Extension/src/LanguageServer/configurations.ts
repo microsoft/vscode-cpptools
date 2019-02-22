@@ -107,6 +107,7 @@ export class CppProperties {
     private selectionChanged = new vscode.EventEmitter<number>();
     private compileCommandsChanged = new vscode.EventEmitter<string>();
     private diagnosticCollection: vscode.DiagnosticCollection;
+    private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -194,6 +195,7 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
+        this.handleSquiggles();
     }
 
     private onCompileCommandsChanged(path: string): void {
@@ -683,103 +685,154 @@ export class CppProperties {
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
                 } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
-                    vscode.window.showWarningMessage('Attempt to update "' + this.propertiesFile.fsPath + '" failed (do you have write access?)');
+                    vscode.window.showWarningMessage(`Attempt to update "${this.propertiesFile.fsPath}" failed (do you have write access?)`);
                 }
             }
-            
-            // Handle squiggles for c_cpp_properties.json.
-            vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
-                let curText: string = document.getText();
 
-                // TODO: Add other squiggles.
-
-                // Check for path-related squiggles.
-                let paths: Set<string> = new Set<string>();
-                for (let pathArray of [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
-                        this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
-                    if (pathArray) {
-                        for (let curPath of pathArray) {
-                            paths.add('"' + curPath + '"');
-                        }
-                    }
-                }
-                if (this.CurrentConfiguration.compileCommands) {
-                    paths.add('"' + this.CurrentConfiguration.compileCommands + '"');
-                }
-
-                // Get the start/end for properties that are file-only.
-                let forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
-                let forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
-                let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
-                let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
-
-                for (let curPath of paths) {
-                    let resolvedPath: string = curPath.substr(1, curPath.length - 2);
-                    // Resolve special path cases.
-                    if (resolvedPath === "${default}") {
-                        // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
-                        continue;
-                    }
-                    resolvedPath = util.resolveVariables(resolvedPath, this.ExtendedEnvironment);
-                    if (resolvedPath.includes("${workspaceFolder}")) {
-                        resolvedPath = resolvedPath.replace("${workspaceFolder}", this.rootUri.fsPath);
-                    }
-                    if (resolvedPath.includes("${workspaceRoot}")) {
-                        resolvedPath = resolvedPath.replace("${workspaceRoot}", this.rootUri.fsPath);
-                    }
-                    if (resolvedPath.includes("${vcpkgRoot}")) {
-                        resolvedPath = resolvedPath.replace("${vcpkgRoot}", util.getVcpkgRoot());
-                    }
-                    if (resolvedPath.includes("*")) {
-                        resolvedPath = resolvedPath.replace(/\*/g, "");
-                    }
-
-                    let pathExists: boolean = true;
-                    if (!fs.existsSync(resolvedPath)) {
-                        // Check again for a relative path.
-                        let relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
-                        if (!fs.existsSync(relativePath)) {
-                            pathExists = false;
-                        } else {
-                            resolvedPath = relativePath;
-                        }
-                    }
-                    for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
-                        let message: string;
-                        if (!pathExists) {
-                            message = 'Cannot find "' + resolvedPath + '".';
-                        } else {
-                            // Check for file versus path mismatches.
-                            if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                                (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
-                                if (util.checkFileExistsSync(resolvedPath)) {
-                                    continue;
-                                }
-                                message = 'Path is not a file: "' + resolvedPath + '".';
-                            } else {
-                                if (util.checkDirectoryExistsSync(resolvedPath)) {
-                                    continue;
-                                }
-                                message = 'Path is not a directory: "' + resolvedPath + '".';
-                            }
-                        }
-                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                            new vscode.Range(document.positionAt(curOffset + 1), document.positionAt(curOffset + curPath.length - 1)),
-                            message, vscode.DiagnosticSeverity.Warning);
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                if (diagnostics.length !== 0) {
-                    this.diagnosticCollection.set(document.uri, diagnostics);
-                } else {
-                    this.diagnosticCollection.clear();
-                }
-            });
+            this.handleSquiggles();
         } catch (err) {
-            vscode.window.showErrorMessage('Failed to parse "' + this.propertiesFile.fsPath + '": ' + err.message);
+            vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
             throw err;
         }
+    }
+
+    private handleSquiggles(): void {
+        // Handle squiggles for c_cpp_properties.json.
+        vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+            let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
+
+            // Get the text of the current configuration.
+            let curText: string = document.getText();
+            let curTextStartOffset: number = 0;
+            let configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${this.CurrentConfiguration.name}"`));
+            if (configStart === -1) {
+                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
+                return;
+            }
+            curTextStartOffset = configStart + 1;
+            curText = curText.substr(curTextStartOffset); // Remove earlier configs.
+            let nameEnd: number = curText.indexOf(":");
+            curTextStartOffset += nameEnd + 1;
+            curText = curText.substr(nameEnd + 1);
+            let nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
+            if (nextNameStart !== -1) {
+                curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
+                let nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
+                if (nextNameStart2 === -1) {
+                    telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
+                    return;
+                }
+                curText = curText.substr(0, nextNameStart2);
+            }
+
+            // TODO: Add other squiggles.
+
+            // Check for path-related squiggles.
+            let paths: Set<string> = new Set<string>();
+            for (let pathArray of [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
+                    this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
+                if (pathArray) {
+                    for (let curPath of pathArray) {
+                        paths.add(`"${curPath}"`);
+                    }
+                }
+            }
+            if (this.CurrentConfiguration.compileCommands) {
+                paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
+            }
+
+            // Get the start/end for properties that are file-only.
+            let forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
+            let forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
+            let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
+            let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+
+            if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
+                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
+            }
+            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
+
+            for (let curPath of paths) {
+                let resolvedPath: string = curPath.substr(1, curPath.length - 2);
+                // Resolve special path cases.
+                if (resolvedPath === "${default}") {
+                    // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
+                    continue;
+                }
+                resolvedPath = util.resolveVariables(resolvedPath, this.ExtendedEnvironment);
+                if (resolvedPath.includes("${workspaceFolder}")) {
+                    resolvedPath = resolvedPath.replace("${workspaceFolder}", this.rootUri.fsPath);
+                }
+                if (resolvedPath.includes("${workspaceRoot}")) {
+                    resolvedPath = resolvedPath.replace("${workspaceRoot}", this.rootUri.fsPath);
+                }
+                if (resolvedPath.includes("${vcpkgRoot}")) {
+                    resolvedPath = resolvedPath.replace("${vcpkgRoot}", util.getVcpkgRoot());
+                }
+                if (resolvedPath.includes("*")) {
+                    resolvedPath = resolvedPath.replace(/\*/g, "");
+                }
+
+                let pathExists: boolean = true;
+                if (!fs.existsSync(resolvedPath)) {
+                    // Check again for a relative path.
+                    let relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
+                    if (!fs.existsSync(relativePath)) {
+                        pathExists = false;
+                    } else {
+                        resolvedPath = relativePath;
+                    }
+                }
+                for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
+                    let message: string;
+                    if (!pathExists) {
+                        message = `Cannot find "${resolvedPath}".`;
+                        newSquiggleMetrics.PathNonExistent++;
+                    } else {
+                        // Check for file versus path mismatches.
+                        if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
+                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                            if (util.checkFileExistsSync(resolvedPath)) {
+                                continue;
+                            }
+                            message = `Path is not a file: "${resolvedPath}".`;
+                            newSquiggleMetrics.PathNotAFile++;
+                        } else {
+                            if (util.checkDirectoryExistsSync(resolvedPath)) {
+                                continue;
+                            }
+                            message = `Path is not a directory: "${resolvedPath}".`;
+                            newSquiggleMetrics.PathNotADirectory++;
+                        }
+                    }
+                    let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + curPath.length - 1)),
+                        message, vscode.DiagnosticSeverity.Warning);
+                    diagnostics.push(diagnostic);
+                }
+            }
+            if (diagnostics.length !== 0) {
+                this.diagnosticCollection.set(document.uri, diagnostics);
+            } else {
+                this.diagnosticCollection.clear();
+            }
+
+            // Send telemetry on squiggle changes.
+            let changedSquiggleMetrics: { [key: string]: number } = {};
+            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNonExistent) {
+                changedSquiggleMetrics.PathNonExistent = newSquiggleMetrics.PathNonExistent;
+            }
+            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNotAFile) {
+                changedSquiggleMetrics.PathNotAFile = newSquiggleMetrics.PathNotAFile;
+            }
+            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNotADirectory) {
+                changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
+            }
+            if (Object.keys(changedSquiggleMetrics).length > 0) {
+                telemetry.logLanguageServerEvent("ConfigSquiggles", null, changedSquiggleMetrics);
+            }
+            this.prevSquiggleMetrics[this.CurrentConfiguration.name] = newSquiggleMetrics;
+        });
     }
 
     private updateToVersion2(): void {
