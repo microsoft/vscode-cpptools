@@ -697,7 +697,6 @@ export class CppProperties {
     }
 
     private handleSquiggles(): void {
-        // Handle squiggles for c_cpp_properties.json.
         vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
             let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 
