@@ -570,7 +570,7 @@ export class CppProperties {
                             settings.update("default.configurationProvider", undefined); // delete the setting
                         }
                         let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
-                        this.configurationJson.configurations[0].knownCompilers = undefined;
+                        delete this.configurationJson.configurations[0].knownCompilers;
                         edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
                         this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
                         vscode.workspace.applyEdit(edit).then((status) => {
@@ -601,7 +601,7 @@ export class CppProperties {
             this.parsePropertiesFile();
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
-            if (this.configurationJson !== null) {
+            if (this.configurationJson) {
                 if (this.CurrentConfigurationIndex < 0 ||
                     this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
                     // If the index is out of bounds (during initialization or due to removal of configs), fix it.
@@ -610,7 +610,7 @@ export class CppProperties {
             }
         }
 
-        if (this.configurationJson === null) {
+        if (!this.configurationJson) {
             this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
         }
 
@@ -704,6 +704,9 @@ export class CppProperties {
     }
 
     private handleSquiggles(): void {
+        if (!this.propertiesFile) {
+            return;
+        }
         vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
             let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 
