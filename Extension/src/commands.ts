@@ -11,7 +11,8 @@ class TemporaryCommandRegistrar {
     // Used to save/re-execute commands used before the extension has activated (e.g. delayed by dependency downloading).
     private delayedCommandsToExecute: Set<string>;
     private tempCommands: vscode.Disposable[]; // Need to save this to unregister/dispose the temporary commands.
-    private isLanguageServerDisabled: boolean;
+    private isLanguageServerDisabled: boolean = false;
+    private isActivationReady: boolean = false;
 
     private commandsToRegister: string[] = [
         "C_Cpp.ConfigurationEdit",
@@ -49,6 +50,9 @@ class TemporaryCommandRegistrar {
                 return;
             }
             this.delayedCommandsToExecute.add(command);
+            if (this.isActivationReady) {
+                LanguageServer.activate(true);
+            }
         }));
     }
 
@@ -58,13 +62,18 @@ class TemporaryCommandRegistrar {
 
     public activateLanguageServer(): void {
         // Main activation code.
+        LanguageServer.activate(this.delayedCommandsToExecute.size > 0);
+        this.isActivationReady = true;
+    }
+    
+    public clearTempCommands(): void {
         this.tempCommands.forEach((command) => {
             command.dispose();
         });
         this.tempCommands = [];
+    }
 
-        LanguageServer.activate(this.delayedCommandsToExecute.size > 0);
-        
+    public executeDelayedCommands(): void {
         this.delayedCommandsToExecute.forEach((command) => {
             vscode.commands.executeCommand(command);
         });
