@@ -910,13 +910,13 @@ export class CppProperties {
         let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
-                if (this.propertiesFile !== null) {
+                if (this.propertiesFile) {
                     this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
                 }
             } else if (stats.mtime > this.configFileWatcherFallbackTime) {
-                if (this.propertiesFile === null) {
+                if (!this.propertiesFile) {
                     this.propertiesFile = vscode.Uri.file(propertiesFile); // File created.
                 }
                 this.handleConfigurationChange();
