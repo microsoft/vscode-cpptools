@@ -167,6 +167,8 @@ export class CppProperties {
         let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
         if (fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
+        } else {
+            this.propertiesFile = null;
         }
         
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
