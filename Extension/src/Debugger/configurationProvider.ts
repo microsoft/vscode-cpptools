@@ -7,7 +7,7 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getBuildTasks, BuildTaskDefinition, getClients } from '../LanguageServer/extension';
+import { getBuildTasks, BuildTaskDefinition } from '../LanguageServer/extension';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as assert from 'assert';
