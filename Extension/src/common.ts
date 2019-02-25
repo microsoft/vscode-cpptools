@@ -117,7 +117,7 @@ export function getTasksJsonPath(): string {
     if (!folder) {
         return undefined;
     }
-    return folder.uri.fsPath + "/.vscode/tasks.json";
+    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
 }
 
 export function getVcpkgPathDescriptorFile(): string {
