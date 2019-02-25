@@ -932,5 +932,7 @@ export class CppProperties {
 
         this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
         this.compileCommandFileWatchers = []; //reset it
+
+        this.diagnosticCollection.dispose();
     }
 }
