@@ -15,7 +15,7 @@ import * as Telemetry from '../telemetry';
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
 let disposables: vscode.Disposable[] = [];
 
-export function initialize(): void {
+export function initialize(context: vscode.ExtensionContext): void {
     // Activate Process Picker Commands
     let attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
     let attacher: AttachPicker = new AttachPicker(attachItemsProvider);
@@ -104,8 +104,8 @@ export function initialize(): void {
     disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(configurationProvider)));
 
     // Register Debug Adapters
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppvsdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppvsdbgDebugAdapterDescriptorFactory()));
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppdbgDebugAdapterDescriptorFactory()));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppvsdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppvsdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppdbgDebugAdapterDescriptorFactory(context)));
 
     vscode.Disposable.from(...disposables);
 }
