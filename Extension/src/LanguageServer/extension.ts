@@ -147,7 +147,10 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     const userCompilerPath: string = await activeClient.getCompilerPath();
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
-        knownCompilers = knownCompilers.filter(info => { return (fileIsCpp && !info.isC) || (fileIsC && info.isC); });
+        knownCompilers = knownCompilers.filter(info => {
+            // TODO cl not supported yet due to lack of vcvarsall.bat support.
+            return (fileIsCpp && !info.isC) || (fileIsC && info.isC) || path.basename(info.path).startsWith("cl");
+        });
         compilerPaths = knownCompilers.map<string>(info => { return info.path; });
 
         let map: Map<string, string> = new Map<string, string>();
@@ -204,29 +207,28 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     }
 
     // Generate tasks.
-    let result: vscode.Task[] = [];
-    compilerPaths.forEach(compilerPath => {
+    return compilerPaths.map<vscode.Task>(compilerPath => {
+        const compilerName: string = path.basename(compilerPath); // Allow compiler to be resolved by PATH.
         const taskName: string = path.basename(compilerPath) + " build active file";
-        const args: string[] = ['-g', '${file}', '-o', '${fileDirname}/' + exeName]; // TODO path.join
+        const args: string[] = ['-g', '${file}', '-o', path.join('${fileDirname}', exeName)];
         const cwd: string = path.dirname(compilerPath);
         const kind: BuildTaskDefinition = {
             type: 'shell',
             label: taskName,
-            command: compilerPath,
+            command: compilerName,
             args: args,
             options: {"cwd": cwd},
             compilerPath: compilerPath
         };
 
-        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
+        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerName, [...args], { cwd: cwd });
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
         let task: vscode.Task = new vscode.Task(kind, target, taskName, 'C/Cpp', command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
 
-        result.push(task);
+        return task;
     });
-    return result;
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {

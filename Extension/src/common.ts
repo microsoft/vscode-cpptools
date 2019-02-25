@@ -38,21 +38,29 @@ export function getRawPackageJson(): any {
 }
 
 let rawTasksJson: any = null;
-export function getRawTasksJson(): any {
-    if (rawTasksJson === null) {
-        const path: string = getTasksJsonPath();
-        if (!fs.existsSync(path)) {
-            rawPackageJson = {};
-            return rawPackageJson;
-        }
-        const fileContents: Buffer = fs.readFileSync(path);
-        try {
-            rawPackageJson = JSON.parse(fileContents.toString());
-        } catch (error) {
-            rawPackageJson = {};
-        }
+export function getRawTasksJson(): Promise<any> {
+    if (rawTasksJson) {
+        return Promise.resolve(rawTasksJson);
     }
-    return rawPackageJson;
+    const path: string = getTasksJsonPath();
+    if (!path) {
+        return undefined;
+    }
+    return new Promise<any>(async resolve => {
+        fs.exists(path, async exists => {
+            if (!exists) {
+                rawPackageJson = {};
+                return resolve(rawPackageJson);
+            }
+            const fileContents: Buffer = fs.readFileSync(path);
+            try {
+                rawPackageJson = JSON.parse(fileContents.toString());
+            } catch (error) {
+                rawPackageJson = {};
+            }
+            resolve(rawPackageJson);
+        });
+    });
 }
 
 export async function ensureBuildTaskExists(taskName: string): Promise<void> {
@@ -83,6 +91,11 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
 }
 
+export function fileIsCOrCppSource(file: string): boolean {
+    const fileExtLower: string = path.extname(file).toLowerCase();
+    return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
+}
+
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.
@@ -100,8 +113,10 @@ export function getPackageJsonPath(): string {
 
 export function getTasksJsonPath(): string {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
-    const folder:any  = vscode.workspace.getWorkspaceFolder(editor.document.uri);
-    // TODO fix bug with file outside of workspace
+    const folder: vscode.WorkspaceFolder  = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    if (!folder) {
+        return undefined;
+    }
     return folder.uri.fsPath + "/.vscode/tasks.json";
 }
 
