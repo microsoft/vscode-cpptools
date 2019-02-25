@@ -1396,8 +1396,6 @@
           "command": "C_Cpp.BuildAndDebugActiveFile",
           "group": "other@5"
         }
-      ],
-      "explorer/context": [
       ]
     },
     "configurationDefaults": {
