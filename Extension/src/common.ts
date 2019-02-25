@@ -37,28 +37,23 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
-let rawTasksJson: any = null;
 export function getRawTasksJson(): Promise<any> {
-    if (rawTasksJson) {
-        return Promise.resolve(rawTasksJson);
-    }
     const path: string = getTasksJsonPath();
     if (!path) {
         return undefined;
     }
-    return new Promise<any>(async resolve => {
-        fs.exists(path, async exists => {
+    return new Promise<any>((resolve, reject) => {
+        fs.exists(path, exists => {
             if (!exists) {
-                rawPackageJson = {};
-                return resolve(rawPackageJson);
+                return resolve({});
             }
             const fileContents: Buffer = fs.readFileSync(path);
+            let rawTasks: any = {};
             try {
-                rawPackageJson = JSON.parse(fileContents.toString());
+                rawTasks = JSON.parse(fileContents.toString()); 
             } catch (error) {
-                rawPackageJson = {};
             }
-            resolve(rawPackageJson);
+            resolve(rawTasks);
         });
     });
 }
@@ -84,10 +79,11 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     let definition: vscode.TaskDefinition = selectedTask.definition as vscode.TaskDefinition;
     if (definition && definition.compilerPath) {
-         // TODO add desired properties to empty object, don't delete.
+         // TODO: add desired properties to empty object, don't delete.
         delete definition.compilerPath;
      }
     rawTasksJson.tasks.push(selectedTask.definition);
+    // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
 }
 
@@ -113,7 +109,7 @@ export function getPackageJsonPath(): string {
 
 export function getTasksJsonPath(): string {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
-    const folder: vscode.WorkspaceFolder  = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
     if (!folder) {
         return undefined;
     }
