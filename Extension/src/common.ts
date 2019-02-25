@@ -451,6 +451,23 @@ export function checkDirectoryExists(dirPath: string): Promise<boolean> {
     });
 }
 
+export function checkFileExistsSync(filePath: string): boolean {
+    try {
+        return fs.statSync(filePath).isFile();
+    } catch (e) {
+    }
+    return false;
+}
+
+/** Test whether a directory exists */
+export function checkDirectoryExistsSync(dirPath: string): boolean {
+    try {
+        return fs.statSync(dirPath).isDirectory();
+    } catch (e) {
+    }
+    return false;
+}
+
 /** Read the files in a directory */
 export function readDir(dirPath: string): Promise<string[]> {
     return new Promise((resolve) => {
