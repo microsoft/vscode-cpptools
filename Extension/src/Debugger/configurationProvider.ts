@@ -10,15 +10,56 @@ import * as vscode from 'vscode';
 import { getBuildTasks, BuildTaskDefinition, getClients } from '../LanguageServer/extension';
 import * as util from '../common';
 import * as fs from 'fs';
+import * as assert from 'assert';
 
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
+import { PlatformInformation } from '../platform';
 
-interface MenuItem extends vscode.QuickPickItem {
-    preLaunchTask: vscode.Task;
+/*
+ * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.
+ * Ensures that the selected configuration's preLaunchTask (if existent) is populated in the user's task.json.
+ * Automatically starts debugging for "Build and Debug" configurations.
+ */
+export class QuickPickConfigurationProvider implements vscode.DebugConfigurationProvider {
+    private underlyingProvider: vscode.DebugConfigurationProvider;
+
+    public constructor(provider: CppConfigurationProvider) {
+        this.underlyingProvider = provider;
+    }
+
+    async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+        const configurations: vscode.DebugConfiguration[] = await this.underlyingProvider.provideDebugConfigurations(folder, token);
+        if (configurations.length <= 1) {
+            return configurations;
+        }
+        interface MenuItem extends vscode.QuickPickItem {
+            configuration: vscode.DebugConfiguration;
+        }
+
+        const items: MenuItem[] = configurations.map<MenuItem>(config => {
+            let label: string = config.name;
+            // Rename the menu item for the default configuration as its name is non-descriptive.
+            if (label.indexOf("(gdb) Launch") !== -1) {
+                label = "Default Configuration";
+            }
+            return {label: label, configuration: config};
+        });
+
+        return vscode.window.showQuickPick(items).then(selection => {
+            if (selection.configuration.preLaunchTask) {
+                util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+            }
+            return Promise.resolve([selection.configuration]);
+        });
+    }
+
+    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        return this.underlyingProvider.resolveDebugConfiguration(folder, config, token);
+    }
 }
 
-abstract class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
+class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private type: DebuggerType;
     private provider: IConfigurationAssetProvider;
 
@@ -31,82 +72,121 @@ abstract class CppConfigurationProvider implements vscode.DebugConfigurationProv
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        return new Promise<vscode.DebugConfiguration[]>(async (resolve, reject) => {
             const buildTasks: vscode.Task[] = await getBuildTasks();
             if (!buildTasks.length) {
-                return resolve(this.provider.getInitialConfigurations(this.type));
+                return Promise.resolve(this.provider.getInitialConfigurations(this.type));
             }
-
-            const defaultDebugConfiguration: string = 'Default Debug Configuration';
-            let menuItems: MenuItem[] = buildTasks.map<MenuItem>(task => {
-                let definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
-                return {label: path.basename(definition.compilerPath) + " Build and Debug active file", preLaunchTask: task};
+            const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
+                return config.name === "(gdb) Launch";
             });
-            menuItems.push({label: defaultDebugConfiguration, preLaunchTask: undefined});
-            vscode.window.showQuickPick(menuItems, {placeHolder: "Select a debug configuration"}).then(async selection => {
-                if (!selection) {
-                    return resolve([]);
-                }
-                if (selection.label === defaultDebugConfiguration) {
-                    return resolve(this.provider.getInitialConfigurations(this.type));
+            assert(defaultConfig, "Could not find default debug configuration.");
+
+            const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+            const platform: string = platformInfo.platform;
+
+            // Generate new configurations for each build task
+            // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve
+            let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
+                const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
+                const compilerName: string = path.basename(definition.compilerPath);
+                const compilerDirname: string = path.dirname(definition.compilerPath);
+
+                let newConfig: vscode.DebugConfiguration = Object.assign({}, defaultConfig); // Copy enumerables and properties
+
+                newConfig.name = compilerName + " Build and Debug active file";
+                newConfig.preLaunchTask = task.name;
+                newConfig.externalConsole = false;
+                const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
+                newConfig.program = platform === "win32" ? path.join(exeName, ".exe") : exeName;
+
+                let debuggerName: string;
+                if (compilerName.startsWith("clang")) {
+                    newConfig.MIMode = "lldb";
+                    const suffix: string = compilerName.substr(compilerName.indexOf("-"));
+                    debuggerName = (platform === "darwin" ? "lldb" : "lldb-mi") + suffix;
+                } else {
+                    debuggerName = "gdb";
                 }
 
-                let rawTasksJson: any = await util.getRawTasksJson();
+                const debuggerPath: string = path.join(compilerDirname, debuggerName);
+                return new Promise<vscode.DebugConfiguration>(resolve => {
+                    fs.stat(debuggerPath, (err, stats: fs.Stats) => {
+                        if (!err && stats && stats.isFile) {
+                            newConfig.miDebuggerPath = debuggerPath;
+                        } else {
+                            // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
+                            newConfig.miDebuggerPath = path.join("usr", "bin", debuggerName);
+                        }
 
-                // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
-                if (!rawTasksJson.tasks) {
-                    rawTasksJson.tasks = new Array();
-                }
-                // Find or create the task which should be created based on the selected "debug configuration"
-                let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => {
-                    return task.label === selection.preLaunchTask.name;
-                });
-                if (!selectedTask) {
-                    selectedTask = buildTasks.find((task: vscode.Task) => {
-                        return task.name === selection.preLaunchTask.name;
+                        return resolve(newConfig);
                     });
-                    let definition: BuildTaskDefinition = selectedTask.definition as BuildTaskDefinition;
-                    delete definition.compilerPath; // TODO add desired properties to empty object, don't delete.
-                    rawTasksJson.tasks.push(selectedTask.definition);
-                    await util.writeFileText(util.getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
-                }
-
-                // Configure the default configuration for the selected task.
-                let defaultConfig: any = this.provider.getInitialConfigurations(this.type)[0];
-                defaultConfig.program = "${fileDirname}/${fileBasenameNoExtension}"; // TODO add exeName to BuildTaskDefinition and use here
-                defaultConfig.preLaunchTask = selectedTask.name;
-                defaultConfig.externalConsole = false;
-                defaultConfig.name = "Build and Debug active file";
-
-                if (!selection.preLaunchTask.name.startsWith("clang")) {
-                    resolve(defaultConfig);
-                    const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(getClients().ActiveClient.RootUri);
-                    vscode.debug.startDebugging(target, defaultConfig);
-                    return;
-                }
-
-                defaultConfig.MIMode = "lldb";
-                delete defaultConfig.setupCommands;
-                const definition: BuildTaskDefinition = selectedTask.definition as BuildTaskDefinition;
-                const compilerBaseName: string = path.basename(selection.preLaunchTask.definition.compilerPath);
-                let index: number = compilerBaseName.indexOf('-');
-                let lldbMIPath: string = path.dirname(selection.preLaunchTask.definition.compilerPath) + '/lldb-mi';
-                if (index !== -1) {
-                    const versionStr: string = compilerBaseName.substr(index);
-                    lldbMIPath += versionStr;
-                }
-                fs.stat(lldbMIPath, (err, stats: fs.Stats) => {
-                    if (stats && stats.isFile) {
-                        defaultConfig.miDebuggerPath = lldbMIPath;
-                    } else {
-                        defaultConfig.miDebuggerPath = '/usr/bin/lldb-mi';
-                    }
-                    resolve(defaultConfig);
-                    const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(getClients().ActiveClient.RootUri);
-                    vscode.debug.startDebugging(target, defaultConfig);
                 });
-            });
-        });
+            }));
+            configs.push(defaultConfig);
+            return configs;
+
+            // return resolve(this.provider.getInitialConfigurations(this.type));
+            //     if (!selection) {
+            //         return resolve([]);
+            //     }
+            //     if (selection.label === defaultDebugConfiguration) {
+            //         return resolve(this.provider.getInitialConfigurations(this.type));
+            //     }
+
+            //     let rawTasksJson: any = await util.getRawTasksJson();
+
+            //     // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+            //     if (!rawTasksJson.tasks) {
+            //         rawTasksJson.tasks = new Array();
+            //     }
+            //     // Find or create the task which should be created based on the selected "debug configuration"
+            //     let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => {
+            //         return task.label === selection.preLaunchTask.name;
+            //     });
+            //     if (!selectedTask) {
+            //         selectedTask = buildTasks.find((task: vscode.Task) => {
+            //             return task.name === selection.preLaunchTask.name;
+            //         });
+            //         let definition: BuildTaskDefinition = selectedTask.definition as BuildTaskDefinition;
+            //         delete definition.compilerPath; // TODO add desired properties to empty object, don't delete.
+            //         rawTasksJson.tasks.push(selectedTask.definition);
+            //         await util.writeFileText(util.getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
+            //     }
+
+            //     // Configure the default configuration for the selected task.
+            //     let defaultConfig: any = this.provider.getInitialConfigurations(this.type)[0];
+            //     defaultConfig.program = "${fileDirname}/${fileBasenameNoExtension}"; // TODO add exeName to BuildTaskDefinition and use here
+            //     defaultConfig.preLaunchTask = selectedTask.name;
+            //     defaultConfig.externalConsole = false;
+            //     defaultConfig.name = "Build and Debug active file";
+
+            //     if (!selection.preLaunchTask.name.startsWith("clang")) {
+            //         resolve(defaultConfig);
+            //         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(getClients().ActiveClient.RootUri);
+            //         vscode.debug.startDebugging(target, defaultConfig);
+            //         return;
+            //     }
+
+            //     defaultConfig.MIMode = "lldb";
+            //     delete defaultConfig.setupCommands;
+            //     const compilerBaseName: string = path.basename(selection.preLaunchTask.definition.compilerPath);
+            //     let index: number = compilerBaseName.indexOf('-');
+            //     let lldbMIPath: string = path.dirname(selection.preLaunchTask.definition.compilerPath) + '/lldb-mi'; // TODO should be 'lldb' for Mac
+            //     if (index !== -1) {
+            //         const versionStr: string = compilerBaseName.substr(index);
+            //         lldbMIPath += versionStr;
+            //     }
+            //     fs.stat(lldbMIPath, (err, stats: fs.Stats) => {
+            //         if (stats && stats.isFile) {
+            //             defaultConfig.miDebuggerPath = lldbMIPath;
+            //         } else {
+            //             defaultConfig.miDebuggerPath = '/usr/bin/lldb-mi';
+            //         }
+            //         resolve(defaultConfig);
+            //         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(getClients().ActiveClient.RootUri);
+            //         vscode.debug.startDebugging(target, defaultConfig);
+            //     });
+            // });
     }
 
     /**

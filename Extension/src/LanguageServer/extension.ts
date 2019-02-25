@@ -207,7 +207,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     let result: vscode.Task[] = [];
     compilerPaths.forEach(compilerPath => {
         const taskName: string = path.basename(compilerPath) + " build active file";
-        const args: string[] = ['-g', '${file}', '-o', '${fileDirname}/' + exeName];
+        const args: string[] = ['-g', '${file}', '-o', '${fileDirname}/' + exeName]; // TODO path.join
         const cwd: string = path.dirname(compilerPath);
         const kind: BuildTaskDefinition = {
             type: 'shell',

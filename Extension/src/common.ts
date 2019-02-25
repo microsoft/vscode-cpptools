@@ -16,6 +16,7 @@ import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
 import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
+import { getBuildTasks } from './LanguageServer/extension';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -52,6 +53,34 @@ export function getRawTasksJson(): any {
         }
     }
     return rawPackageJson;
+}
+
+export async function ensureBuildTaskExists(taskName: string): Promise<void> {
+    let rawTasksJson: any = await getRawTasksJson();
+
+    // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+    if (!rawTasksJson.tasks) {
+        rawTasksJson.tasks = new Array();
+    }
+    // Find or create the task which should be created based on the selected "debug configuration".
+    let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => {
+        return task.label && task.label === task;
+    });
+    if (selectedTask) {
+        return;
+    }
+
+    const buildTasks: vscode.Task[] = await getBuildTasks();
+    selectedTask = buildTasks.find(task => task.name === taskName);
+    assert(selectedTask);
+
+    let definition: vscode.TaskDefinition = selectedTask.definition as vscode.TaskDefinition;
+    if (definition && definition.compilerPath) {
+         // TODO add desired properties to empty object, don't delete.
+        delete definition.compilerPath;
+     }
+    rawTasksJson.tasks.push(selectedTask.definition);
+    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
 }
 
 // This function is used to stringify the rawPackageJson.
