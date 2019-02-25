@@ -175,7 +175,8 @@ export class ClientCollection {
     }
 
     private onDidOpenTextDocument(document: vscode.TextDocument): void {
-        if (document.languageId === "c" || document.languageId === "cpp") {
+        if (document.languageId === "c" || document.languageId === "cpp"
+            || document.languageId === "json" && document.uri.fsPath.endsWith("c_cpp_properties.json")) {
             // Make sure a client exists for this document's workspace.
             this.getClientFor(document.uri);
         }
