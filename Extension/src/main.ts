@@ -35,7 +35,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.setProgress(0);
 
     // Initialize the DebuggerExtension and register the related commands and providers.
-    DebuggerExtension.initialize();
+    DebuggerExtension.initialize(context);
 
     await processRuntimeDependencies();
 
