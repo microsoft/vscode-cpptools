@@ -116,7 +116,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             let debuggerName: string;
             if (compilerName.startsWith("clang")) {
                 newConfig.MIMode = "lldb";
-                const suffix: string = compilerName.substr(compilerName.indexOf("-"));
+                const suffixIndex: number = compilerName.indexOf("-");
+                const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
                 debuggerName = (platform === "darwin" ? "lldb" : "lldb-mi") + suffix;
             } else {
                 debuggerName = "gdb";
