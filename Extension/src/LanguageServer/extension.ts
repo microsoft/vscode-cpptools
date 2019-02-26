@@ -584,7 +584,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
-    disposables.push(vscode.commands.registerCommand('cpptools.activeConfig', onGetActiveConfig));
+    disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
@@ -766,7 +766,7 @@ function onTakeSurvey(): void {
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
-function onGetActiveConfig(): Thenable<string> {
+function onGetActiveConfigName(): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigName();
 }
 
