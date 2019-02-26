@@ -44,7 +44,7 @@ export function initialize(context: vscode.ExtensionContext): void {
         }
 
         if (!util.fileIsCOrCppSource(textEditor.document.uri.fsPath)) {
-            vscode.window.showErrorMessage('The command is disabled because the active file is not a C or C++ source file.');
+            vscode.window.showErrorMessage('Cannot build and debug because the active file is not a C or C++ source file.');
             return Promise.resolve();
         }
         let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
@@ -60,6 +60,9 @@ export function initialize(context: vscode.ExtensionContext): void {
         });
 
         vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
+            if (!selection) {
+                return; // User canceled it.
+            }
             if (selection.configuration.preLaunchTask) {
                 if (folder) {
                     try {
