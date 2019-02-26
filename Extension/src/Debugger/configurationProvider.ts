@@ -34,7 +34,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
-            const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return config.name === "(gdb) Launch"; });
+            const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return config.name === "(gdb) Launch" || config.name === "(lldb) Launch"; });
             assert(defaultConfig);
             return [defaultConfig];
         }
@@ -45,7 +45,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         const items: MenuItem[] = configs.map<MenuItem>(config => {
             let label: string = config.name;
             // Rename the menu item for the default configuration as its name is non-descriptive.
-            if (label.indexOf("(gdb) Launch") !== -1) {
+            if (label.indexOf("(gdb) Launch") !== -1 || label.indexOf("(lldb) Launch") !== -1) {
                 label = "Default Configuration";
             }
             return {label: label, configuration: config};
@@ -91,7 +91,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
-            return config.name === "(gdb) Launch";
+            return config.name === "(gdb) Launch" || config.name === "(lldb) Launch";
         });
         assert(defaultConfig, "Could not find default debug configuration.");
 
