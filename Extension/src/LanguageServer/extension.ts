@@ -587,6 +587,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
+    disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
@@ -766,6 +767,10 @@ function onTakeSurvey(): void {
     telemetry.logLanguageServerEvent("onTakeSurvey");
     let uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
     vscode.commands.executeCommand('vscode.open', uri);
+}
+
+function onGetActiveConfigName(): Thenable<string> {
+    return clients.ActiveClient.getCurrentConfigName();
 }
 
 function reportMacCrashes(): void {
