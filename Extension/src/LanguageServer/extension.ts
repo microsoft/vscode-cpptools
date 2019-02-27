@@ -148,13 +148,17 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     // Get a list of compilers found from the C++ side, then filter them based on the file type to get a reduced list appropriate
     // for the active file, remove duplicate compiler names, then finally add the user's compilerPath setting.
     let compilerPaths: string[];
+    const isWindows: boolean = os.platform() === 'win32';
     const activeClient: Client = getActiveClient();
-    const userCompilerPath: string = await activeClient.getCompilerPath();
+    let userCompilerPath: string = await activeClient.getCompilerPath();
+    if (isWindows && (userCompilerPath.startsWith("/") || userCompilerPath.endsWith("cl.exe"))) { // TODO: Add WSL/cl.exe compiler support.
+        userCompilerPath = null;
+    }
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info => {
             return ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
-                (os.platform() !== 'win32' || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
+                (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
         });
         compilerPaths = knownCompilers.map<string>(info => { return info.path; });
 
@@ -202,20 +206,11 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
         return [];
     }
 
-    // The build task output file should include a '.exe' extension on Windows.
-    let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    let exeName: string;
-    if (platformInfo.platform === 'win32') {
-        exeName = '${fileBasenameNoExtension}.exe';
-    } else {
-        exeName = '${fileBasenameNoExtension}';
-    }
-
     // Generate tasks.
     return compilerPaths.map<vscode.Task>(compilerPath => {
         const compilerName: string = path.basename(compilerPath); // Allow compiler to be resolved by PATH.
         const taskName: string = path.basename(compilerPath) + " build active file";
-        const args: string[] = ['-g', '${file}', '-o', path.join('${fileDirname}', exeName)];
+        const args: string[] = ['-g', '${file}', '-o', path.join('${fileDirname}', '${fileBasenameNoExtension}' + (isWindows ? '.exe' : ''))];
         const cwd: string = path.dirname(compilerPath);
         const kind: BuildTaskDefinition = {
             type: 'shell',
