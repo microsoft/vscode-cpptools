@@ -126,7 +126,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
 
     // Don't offer tasks for header files.
     const fileExtLower: string = fileExt.toLowerCase();
-    const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h", ""].some(ext => fileExtLower === ext);
+    const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h", ".inl", ""].some(ext => fileExtLower === ext);
     if (isHeader) {
         return [];
     }
@@ -138,7 +138,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
         fileIsCpp = true;
         fileIsC = true;
     } else {
-        fileIsCpp = [".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
+        fileIsCpp = [".cpp", ".cc", ".cxx", ".mm", ".ino"].some(ext => fileExtLower === ext);
         fileIsC = fileExtLower === ".c";
     }
     if (!(fileIsCpp || fileIsC)) {
