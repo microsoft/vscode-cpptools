@@ -996,12 +996,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
@@ -1277,12 +1277,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
