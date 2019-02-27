@@ -15,6 +15,10 @@ import * as Telemetry from '../telemetry';
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
 let disposables: vscode.Disposable[] = [];
 
+export function buildAndDebugActiveFileStr(): string {
+    return " build and debug active file";
+}
+
 export function initialize(context: vscode.ExtensionContext): void {
     // Activate Process Picker Commands
     let attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
@@ -48,7 +52,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             return Promise.resolve();
         }
         let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
-            return config.name.indexOf("Build and Debug active file") !== -1;
+            return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
         });
 
         interface MenuItem extends vscode.QuickPickItem {

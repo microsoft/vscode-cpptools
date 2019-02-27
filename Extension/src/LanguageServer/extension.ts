@@ -38,6 +38,7 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
+const taskSourceStr: string = "C/C++";
 
 let taskProvider: vscode.Disposable;
 
@@ -67,7 +68,7 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    taskProvider = vscode.tasks.registerTaskProvider('C/Cpp', {
+    taskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
         provideTasks: () => {
             return getBuildTasks();
         },
@@ -77,7 +78,7 @@ export function activate(activationEventOccurred: boolean): void {
         }
     });
     vscode.tasks.onDidStartTask(event => {
-        if (event.execution.task.source === 'C/Cpp') {
+        if (event.execution.task.source === taskSourceStr) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
     });
@@ -180,7 +181,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
         // Display a message prompting the user to install compilers if none were found.
         // const dontShowAgain: string = "Don't Show Again";
         // const learnMore: string = "Learn More";
-        // const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
+        // const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/C++: build active file tasks.";
 
         // let showNoCompilerFoundMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showNoCompilerFoundMessage", true);
         // if (showNoCompilerFoundMessage) {
@@ -227,7 +228,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerName, [...args], { cwd: cwd });
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
-        let task: vscode.Task = new vscode.Task(kind, target, taskName, 'C/Cpp', command, '$gcc');
+        let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
 

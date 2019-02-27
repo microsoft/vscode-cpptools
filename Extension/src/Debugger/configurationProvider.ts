@@ -12,10 +12,15 @@ import * as util from '../common';
 import * as fs from 'fs';
 import * as assert from 'assert';
 import * as Telemetry from '../telemetry';
+import { buildAndDebugActiveFileStr } from './extension';
 
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
 import { PlatformInformation } from '../platform';
+
+function isDebugLaunchStr(str: string): boolean {
+    return str === "(gdb) Launch" || str === "(lldb) Launch";
+}
 
 /*
  * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.
@@ -34,7 +39,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
-            const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return config.name === "(gdb) Launch" || config.name === "(lldb) Launch"; });
+            const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return isDebugLaunchStr(config.name); });
             assert(defaultConfig);
             return [defaultConfig];
         }
@@ -45,7 +50,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         const items: MenuItem[] = configs.map<MenuItem>(config => {
             let label: string = config.name;
             // Rename the menu item for the default configuration as its name is non-descriptive.
-            if (label.indexOf("(gdb) Launch") !== -1 || label.indexOf("(lldb) Launch") !== -1) {
+            if (isDebugLaunchStr(label)) {
                 label = "Default Configuration";
             }
             return {label: label, configuration: config};
@@ -54,7 +59,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         return vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
             // Wrap in new Promise to make sure task kicks off before VS Code switches the active document to launch.json
             return new Promise<vscode.DebugConfiguration[]>(async resolve => {
-                if (selection.label.indexOf("Build and Debug active file") !== -1 && selection.configuration.preLaunchTask) {
+                if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
                     try {
                         await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                         await vscode.debug.startDebugging(folder, selection.configuration);
@@ -91,7 +96,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
-            return config.name === "(gdb) Launch" || config.name === "(lldb) Launch";
+            return isDebugLaunchStr(config.name);
         });
         assert(defaultConfig, "Could not find default debug configuration.");
 
@@ -107,7 +112,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
             let newConfig: vscode.DebugConfiguration = Object.assign({}, defaultConfig); // Copy enumerables and properties
 
-            newConfig.name = compilerName + " Build and Debug active file";
+            newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
             newConfig.externalConsole = false;
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
