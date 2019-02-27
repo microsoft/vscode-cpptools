@@ -81,8 +81,18 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     if (definition && definition.compilerPath) {
          // TODO: add desired properties to empty object, don't delete.
         delete definition.compilerPath;
-     }
-    rawTasksJson.tasks.push(selectedTask.definition);
+    }
+    
+    let isDuplicateTask: boolean = false;
+    for (let task of rawTasksJson.tasks) {
+        if (task.label === selectedTask.definition.label) {
+            isDuplicateTask = true;
+        }
+    }
+    if (!isDuplicateTask) {
+        rawTasksJson.tasks.push(selectedTask.definition);
+    }
+    
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
 }
