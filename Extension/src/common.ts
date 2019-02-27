@@ -75,7 +75,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     const buildTasks: vscode.Task[] = await getBuildTasks();
     selectedTask = buildTasks.find(task => task.name === taskName);
-    assert(selectedTask);
+    console.assert(selectedTask);
 
     let definition: vscode.TaskDefinition = selectedTask.definition as vscode.TaskDefinition;
     if (definition && definition.compilerPath) {

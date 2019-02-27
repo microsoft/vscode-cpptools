@@ -40,7 +40,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
             const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return isDebugLaunchStr(config.name); });
-            assert(defaultConfig);
+            console.assert(defaultConfig);
             return [defaultConfig];
         }
         interface MenuItem extends vscode.QuickPickItem {
@@ -98,7 +98,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
             return isDebugLaunchStr(config.name);
         });
-        assert(defaultConfig, "Could not find default debug configuration.");
+        console.assert(defaultConfig, "Could not find default debug configuration.");
 
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
