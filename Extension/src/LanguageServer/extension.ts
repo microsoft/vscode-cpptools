@@ -153,8 +153,8 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info => {
-            // TODO cl not supported yet due to lack of vcvarsall.bat support.
-            return (fileIsCpp && !info.isC) || (fileIsC && info.isC) || path.basename(info.path).startsWith("cl");
+            return ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+                (os.platform() !== 'win32' || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
         });
         compilerPaths = knownCompilers.map<string>(info => { return info.path; });
 
