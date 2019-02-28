@@ -762,3 +762,31 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
         request.end();
     });
 }
+
+export interface CompilerPathAndArgs {
+    compilerPath: string;
+    additionalArgs: string[];
+}
+
+export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
+    let compilerPath: string = inputCompilerPath;
+    let additionalArgs: string[];
+    if (compilerPath) {
+        if (compilerPath.startsWith("\"")) {
+            let endQuote: number = compilerPath.substr(1).search("\"") + 1;
+            if (endQuote !== -1) {
+                additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
+                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; });
+                compilerPath = compilerPath.substr(1, endQuote - 1);
+            }
+        } else {
+            if (compilerPath.includes(" ") && !fs.existsSync(compilerPath)) {
+                let argStart: number = compilerPath.search(" ");
+                additionalArgs = compilerPath.substr(argStart + 1).split(" ");
+                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; });
+                compilerPath = compilerPath.substr(0, argStart);
+            }
+        }
+    }
+    return { compilerPath, additionalArgs };
+}

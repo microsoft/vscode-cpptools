@@ -151,9 +151,11 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     const isWindows: boolean = os.platform() === 'win32';
     const activeClient: Client = getActiveClient();
     let userCompilerPath: string = await activeClient.getCompilerPath();
+    userCompilerPath = userCompilerPath.trim();
     if (isWindows && (userCompilerPath.startsWith("/") || userCompilerPath.endsWith("cl.exe"))) { // TODO: Add WSL/cl.exe compiler support.
         userCompilerPath = null;
     }
+    userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info => {
@@ -165,7 +167,8 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
             const basename: string = path.basename(compilerPath);
-            map.has(basename) ? map[basename] = compilerPath : map.set(basename, compilerPath);
+            //map.has(basename) ? map.basename] = compilerPath : 
+            map.set(basename, compilerPath);
         };
         compilerPaths.forEach(insertOrAssignEntry);
 
@@ -208,20 +211,25 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
 
     // Generate tasks.
     return compilerPaths.map<vscode.Task>(compilerPath => {
-        const compilerName: string = path.basename(compilerPath); // Allow compiler to be resolved by PATH.
+        // Handle compiler args in compilerPath.
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
+        compilerPath = compilerPathAndArgs.compilerPath;
         const taskName: string = path.basename(compilerPath) + " build active file";
-        const args: string[] = ['-g', '${file}', '-o', path.join('${fileDirname}', '${fileBasenameNoExtension}' + (isWindows ? '.exe' : ''))];
+        let args: string[] = ['-g', '${file}', '-o', path.join('${fileDirname}', '${fileBasenameNoExtension}' + (isWindows ? '.exe' : ''))];
+        if (compilerPathAndArgs.additionalArgs) {
+            args = args.concat(compilerPathAndArgs.additionalArgs);
+        }
         const cwd: string = path.dirname(compilerPath);
         const kind: BuildTaskDefinition = {
             type: 'shell',
             label: taskName,
-            command: compilerName,
+            command: compilerPath,
             args: args,
             options: {"cwd": cwd},
             compilerPath: compilerPath
         };
 
-        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerName, [...args], { cwd: cwd });
+        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
         let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning.
