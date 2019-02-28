@@ -499,7 +499,7 @@ async function suggestInsidersChannel(): Promise<void> {
     const yes: string = "Yes";
     const askLater: string = "Ask Me Later";
     const dontShowAgain: string = "Don't Show Again";
-    let selection = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
+    let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
             // Cache buidinfo.
