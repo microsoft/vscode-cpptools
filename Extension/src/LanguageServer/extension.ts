@@ -489,7 +489,7 @@ async function suggestInsidersChannel(): Promise<void> {
     let buildInfo: BuildInfo;
     try {
         buildInfo = await getTargetBuildInfo("Insiders");
-    } catch(error) {
+    } catch (error) {
         telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
     }
     if (!buildInfo) {
