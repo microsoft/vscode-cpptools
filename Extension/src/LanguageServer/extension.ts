@@ -303,7 +303,7 @@ function realActivation(): void {
             if (!buildInfo) {
                 return;
             }
-            const message: string = `The insider version (${buildInfo.name}) is available, switch to the insider channel?`;
+            const message: string = `Insiders version: ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
             const yes: string = "Yes";
             const askLater: string = "Ask Me Later";
             const dontShowAgain: string = "Don't Show Again";
