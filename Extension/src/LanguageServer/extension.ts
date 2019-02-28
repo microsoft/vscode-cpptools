@@ -330,6 +330,7 @@ function onDidChangeSettings(): void {
         } else if (newUpdateChannel === 'Insiders') {
             insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
+        
         checkAndApplyUpdate(newUpdateChannel);
     }
 }
@@ -506,6 +507,7 @@ async function suggestInsidersChannel(): Promise<void> {
             buildInfoCache = buildInfo;
             // It will call onDidChangeSettings.
             vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", true);
+            break;
         case dontShowAgain:
             suggestInsiders.Value = false;
             break;
