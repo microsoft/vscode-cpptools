@@ -63,7 +63,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             return {label: config.name, configuration: config};
         });
 
-        vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
+        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? "No compiler found" : "Select a compiler" )}).then(async selection => {
             if (!selection) {
                 return; // User canceled it.
             }

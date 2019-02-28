@@ -36,11 +36,10 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         const configs: vscode.DebugConfiguration[] = await this.underlyingProvider.provideDebugConfigurations(folder, token);
-        
+        const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return isDebugLaunchStr(config.name); });
+        console.assert(defaultConfig);
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
-            const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return isDebugLaunchStr(config.name); });
-            console.assert(defaultConfig);
             return [defaultConfig];
         }
         interface MenuItem extends vscode.QuickPickItem {
@@ -48,19 +47,19 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            let label: string = config.name;
+            let menuItem: MenuItem = {label: config.name, configuration: config};
             // Rename the menu item for the default configuration as its name is non-descriptive.
-            if (isDebugLaunchStr(label)) {
-                label = "Default Configuration";
+            if (isDebugLaunchStr(menuItem.label)) {
+                menuItem.label = "Default Configuration";
             }
-            return {label: label, configuration: config};
+            return menuItem;
         });
 
         return vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
             // Wrap in new Promise to make sure task kicks off before VS Code switches the active document to launch.json
-            return new Promise<vscode.DebugConfiguration[]>(async (resolve, reject) => {
+            return new Promise<vscode.DebugConfiguration[]>(async resolve => {
                 if (!selection) {
-                    return reject();
+                    return resolve([defaultConfig]); // User canceled it. Choose the default config?
                 }
                 if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
                     try {
