@@ -19,7 +19,7 @@ import { parse } from 'jsonc-parser';
 import { PlatformInformation } from '../platform';
 
 function isDebugLaunchStr(str: string): boolean {
-    return str === "(gdb) Launch" || str === "(lldb) Launch";
+    return str === "(gdb) Launch" || str === "(lldb) Launch" || str === "(Windows) Launch";
 }
 
 /*
@@ -93,8 +93,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        const buildTasks: vscode.Task[] = await getBuildTasks();
-        if (!buildTasks.length) {
+        let buildTasks: vscode.Task[]; // = await getBuildTasks(); // TODO
+        if (!buildTasks || buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {

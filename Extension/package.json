@@ -587,11 +587,6 @@
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
         "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.BuildAndDebugActiveFile",
-        "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
-        "category": "C/C++"
       }
     ],
     "keybindings": [
@@ -1398,16 +1393,6 @@
           "when": "editorLangId == cpp",
           "command": "workbench.action.showAllSymbols",
           "group": "other@4"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other@5"
-        },
-        {
-          "when": "editorLangId == c",
-          "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other@5"
         }
       ]
     },
