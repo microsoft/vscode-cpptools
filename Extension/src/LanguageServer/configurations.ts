@@ -773,7 +773,7 @@ export class CppProperties {
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
 
             for (let curPath of paths) {
-                let resolvedPath: string = curPath.substr(1, (curPath.endsWith("\"") ? curPath.length - 2 : curPath.length - 1));
+                let resolvedPath: string = curPath.substr(1, (curPath.endsWith('"') ? curPath.length - 2 : curPath.length - 1));
                 // Resolve special path cases.
                 if (resolvedPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
@@ -842,7 +842,7 @@ export class CppProperties {
                         }
                     }
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + (curPath.endsWith("\"") ? curPath.length - 1 : curPath.length))),
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + (curPath.endsWith('"') ? curPath.length - 1 : curPath.length))),
                         message, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }

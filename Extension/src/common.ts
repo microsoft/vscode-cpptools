@@ -83,13 +83,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         delete definition.compilerPath;
     }
     
-    let isDuplicateTask: boolean = false;
-    for (let task of rawTasksJson.tasks) {
-        if (task.label === selectedTask.definition.label) {
-            isDuplicateTask = true;
-        }
-    }
-    if (!isDuplicateTask) {
+    if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
         rawTasksJson.tasks.push(selectedTask.definition);
     }
     
