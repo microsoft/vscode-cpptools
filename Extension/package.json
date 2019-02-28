@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.30.0"
+    "vscode": "^1.31.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -307,6 +307,19 @@
           "default": "Enabled",
           "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
           "scope": "resource"
+        },
+        "C_Cpp.intelliSenseCachePath": {
+          "type": "string",
+          "default": "${workspaceFolder}/.vscode/",
+          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default path \"${workspaceFolder}/.vscode/\" will be used if a specified path is invalid.",
+          "scope": "resource"
+        },
+        "C_Cpp.intelliSenseCacheSize": {
+          "type": "number",
+          "default": 5120,
+          "description": "Maximum size of the per-workspace hard drive space in megabytes for cached precompiled headers; the actual usage may fluctuate around this value. The default size is 5120 MB. Precompiled header caching is disabled when the size is 0.",
+          "scope": "resource",
+          "minimum": 0
         },
         "C_Cpp.default.includePath": {
           "type": [
@@ -978,12 +991,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
@@ -1259,12 +1272,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
@@ -1406,21 +1419,22 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/mocha": "^2.2.43",
+    "@types/mocha": "^5.2.6",
     "@types/node": "^8.0.46",
+    "await-notify": "^1.0.1",
     "async-child-process": "^1.1.1",
     "child-process": "^1.0.2",
     "gulp": "^4.0.0",
     "gulp-env": "0.4.0",
     "gulp-mocha": "5.0.0",
     "gulp-tslint": "8.1.2",
-    "mocha": "^4.0.1",
+    "mocha": "^5.2.0",
     "tslint": "5.8.0",
     "tslint-microsoft-contrib": "5.0.1",
     "tslint-no-unused-expression-chai": "0.0.3",
     "typescript": "^2.5.3",
     "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.26",
+    "vscode": "^1.1.29",
     "extend": "3.0.2"
   },
   "dependencies": {
@@ -1432,8 +1446,8 @@
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
     "vscode-cpptools": "2.1.1",
-    "vscode-debugadapter": "~1.24.0",
-    "vscode-debugprotocol": "~1.24.0",
+    "vscode-debugadapter": "~1.33.0",
+    "vscode-debugprotocol": "~1.33.0",
     "vscode-extension-telemetry": "~0.1.0",
     "vscode-languageclient": "5.1.1",
     "yauzl": "~2.10.0"

@@ -39,6 +39,8 @@ export class CppSettings extends Settings {
     public get suggestSnippets(): boolean { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string { return super.Section.get<string>("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }
+    public get intelliSenseCachePath(): string { return super.Section.get<string>("intelliSenseCachePath"); }
+    public get intelliSenseCacheSize(): number { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
     public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }

@@ -24,6 +24,7 @@ import * as tmp from 'tmp';
 import { getTargetBuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
+import { getTemporaryCommandRegistrarInstance } from '../commands';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -44,7 +45,9 @@ let taskProvider: vscode.Disposable;
  * activate: set up the extension for language services
  */
 export function activate(activationEventOccurred: boolean): void {
-    console.log("activating extension");
+    if (realActivationOccurred) {
+        return; // Occurs if multiple delayed commands occur before the real commands are registered.
+    }
 
     // Activate immediately if an activation event occurred in the previous workspace session.
     // If onActivationEvent doesn't occur, it won't auto-activate next time.
@@ -54,8 +57,9 @@ export function activate(activationEventOccurred: boolean): void {
         realActivation();
     }
 
-    registerCommands();
-    tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
+    if (tempCommands.length === 0) { // Only needs to be added once.
+        tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
+    }
 
     // Check if an activation event has already occurred.
     if (activationEventOccurred) {
@@ -250,6 +254,7 @@ function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error("Do not activate the extension when IntelliSense is disabled.");
     } else {
+        console.log("activating extension");
         let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
@@ -554,8 +559,14 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
 /*********************************************
  * registered commands
  *********************************************/
+let commandsRegistered: boolean = false;
 
-function registerCommands(): void {
+export function registerCommands(): void {
+    if (commandsRegistered) {
+        return;
+    }
+    commandsRegistered = true;
+    getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToDeclaration', onGoToDeclaration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PeekDeclaration', onPeekDeclaration));
@@ -573,6 +584,8 @@ function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
+    disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
+    getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
 function onNavigate(): void {
@@ -751,6 +764,10 @@ function onTakeSurvey(): void {
     telemetry.logLanguageServerEvent("onTakeSurvey");
     let uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
     vscode.commands.executeCommand('vscode.open', uri);
+}
+
+function onGetActiveConfigName(): Thenable<string> {
+    return clients.ActiveClient.getCurrentConfigName();
 }
 
 function reportMacCrashes(): void {

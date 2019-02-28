@@ -13,6 +13,7 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
+import * as os from 'os';
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
@@ -80,11 +81,12 @@ export interface CompilerDefaults {
     frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
+    rootfs: string;
 }
 
 export class CppProperties {
     private rootUri: vscode.Uri;
-    private propertiesFile: vscode.Uri = null;
+    private propertiesFile: vscode.Uri = undefined;
     private readonly configFolder: string;
     private configurationJson: ConfigurationJson = null;
     private currentConfigurationIndex: PersistentFolderState<number>;
@@ -106,6 +108,9 @@ export class CppProperties {
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
     private selectionChanged = new vscode.EventEmitter<number>();
     private compileCommandsChanged = new vscode.EventEmitter<string>();
+    private diagnosticCollection: vscode.DiagnosticCollection;
+    private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
+    private rootfs: string = null;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -117,32 +122,7 @@ export class CppProperties {
         let rootPath: string = rootUri ? rootUri.fsPath : "";
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
-
-        let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
-        if (fs.existsSync(configFilePath)) {
-            this.propertiesFile = vscode.Uri.file(configFilePath);
-            this.parsePropertiesFile();
-        }
-        if (!this.configurationJson) {
-            this.resetToDefaultSettings(this.CurrentConfigurationIndex === -1);
-        }
-
-        this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
-        this.disposables.push(this.configFileWatcher);
-        this.configFileWatcher.onDidCreate((uri) => {
-            this.propertiesFile = uri;
-            this.handleConfigurationChange();
-        });
-
-        this.configFileWatcher.onDidDelete(() => {
-            this.propertiesFile = null;
-            this.resetToDefaultSettings(true);
-            this.handleConfigurationChange();
-        });
-
-        this.configFileWatcher.onDidChange(() => {
-            this.handleConfigurationChange();
-        });
+        this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
 
         this.buildVcpkgIncludePath();
 
@@ -180,9 +160,34 @@ export class CppProperties {
         this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+        this.rootfs = compilerDefaults.rootfs;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
+        let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
+        if (fs.existsSync(configFilePath)) {
+            this.propertiesFile = vscode.Uri.file(configFilePath);
+        } else {
+            this.propertiesFile = null;
+        }
+        
+        this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
+        this.disposables.push(this.configFileWatcher);
+        this.configFileWatcher.onDidCreate((uri) => {
+            this.propertiesFile = uri;
+            this.handleConfigurationChange();
+        });
+
+        this.configFileWatcher.onDidDelete(() => {
+            this.propertiesFile = null;
+            this.resetToDefaultSettings(true);
+            this.handleConfigurationChange();
+        });
+
+        this.configFileWatcher.onDidChange(() => {
+            this.handleConfigurationChange();
+        });
+
         this.handleConfigurationChange();
     }
 
@@ -196,6 +201,7 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
+        this.handleSquiggles();
     }
 
     private onCompileCommandsChanged(path: string): void {
@@ -467,6 +473,9 @@ export class CppProperties {
     }
 
     private updateServerOnFolderSettingsChange(): void {
+        if (!this.configurationJson) {
+            return;
+        }
         let settings: CppSettings = new CppSettings(this.rootUri);
         let env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
@@ -562,7 +571,10 @@ export class CppProperties {
                             });
                             settings.update("default.configurationProvider", undefined); // delete the setting
                         }
+                        let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
+                        delete this.configurationJson.configurations[0].knownCompilers;
                         edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
+                        this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
                         vscode.workspace.applyEdit(edit).then((status) => {
                             // Fix for issue 163
                             // https://github.com/Microsoft/vscppsamples/issues/163
@@ -583,12 +595,15 @@ export class CppProperties {
     }
 
     private handleConfigurationChange(): void {
+        if (this.propertiesFile === undefined) {
+            return; // Occurs when propertiesFile hasn't been checked yet.
+        }
         this.configFileWatcherFallbackTime = new Date();
         if (this.propertiesFile) {
             this.parsePropertiesFile();
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
-            if (this.configurationJson !== undefined) {
+            if (this.configurationJson) {
                 if (this.CurrentConfigurationIndex < 0 ||
                     this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
                     // If the index is out of bounds (during initialization or due to removal of configs), fix it.
@@ -597,7 +612,7 @@ export class CppProperties {
             }
         }
 
-        if (this.configurationJson === undefined) {
+        if (!this.configurationJson) {
             this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
         }
 
@@ -611,6 +626,10 @@ export class CppProperties {
             if (readResults === "") {
                 return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
             }
+
+            // Replace all \<escape character> with \\<character>.
+            // Otherwise, the JSON.parse result will have the \<escape character> missing.
+            readResults = readResults.replace(/\\/g, '\\\\');
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
@@ -675,13 +694,171 @@ export class CppProperties {
                     fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
                 } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
-                    vscode.window.showWarningMessage('Attempt to update "' + this.propertiesFile.fsPath + '" failed (do you have write access?)');
+                    vscode.window.showWarningMessage(`Attempt to update "${this.propertiesFile.fsPath}" failed (do you have write access?)`);
                 }
             }
+
+            this.handleSquiggles();
         } catch (err) {
-            vscode.window.showErrorMessage('Failed to parse "' + this.propertiesFile.fsPath + '": ' + err.message);
+            vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
             throw err;
         }
+    }
+
+    private handleSquiggles(): void {
+        if (!this.propertiesFile) {
+            return;
+        }
+        vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+            let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
+
+            // Get the text of the current configuration.
+            let curText: string = document.getText();
+            let curTextStartOffset: number = 0;
+            let configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${this.CurrentConfiguration.name}"`));
+            if (configStart === -1) {
+                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
+                return;
+            }
+            curTextStartOffset = configStart + 1;
+            curText = curText.substr(curTextStartOffset); // Remove earlier configs.
+            let nameEnd: number = curText.indexOf(":");
+            curTextStartOffset += nameEnd + 1;
+            curText = curText.substr(nameEnd + 1);
+            let nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
+            if (nextNameStart !== -1) {
+                curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
+                let nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
+                if (nextNameStart2 === -1) {
+                    telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
+                    return;
+                }
+                curText = curText.substr(0, nextNameStart2);
+            }
+
+            // TODO: Add other squiggles.
+
+            // Check for path-related squiggles.
+            let paths: Set<string> = new Set<string>();
+            for (let pathArray of [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
+                    this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
+                if (pathArray) {
+                    for (let curPath of pathArray) {
+                        paths.add(`"${curPath}"`);
+                    }
+                }
+            }
+            if (this.CurrentConfiguration.compileCommands) {
+                paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
+            }
+
+            // Get the start/end for properties that are file-only.
+            let forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
+            let forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
+            let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
+            let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+
+            if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
+                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
+            }
+            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
+
+            for (let curPath of paths) {
+                let resolvedPath: string = curPath.substr(1, curPath.length - 2);
+                // Resolve special path cases.
+                if (resolvedPath === "${default}") {
+                    // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
+                    continue;
+                }
+                resolvedPath = util.resolveVariables(resolvedPath, this.ExtendedEnvironment);
+                if (resolvedPath.includes("${workspaceFolder}")) {
+                    resolvedPath = resolvedPath.replace("${workspaceFolder}", this.rootUri.fsPath);
+                }
+                if (resolvedPath.includes("${workspaceRoot}")) {
+                    resolvedPath = resolvedPath.replace("${workspaceRoot}", this.rootUri.fsPath);
+                }
+                if (resolvedPath.includes("${vcpkgRoot}")) {
+                    resolvedPath = resolvedPath.replace("${vcpkgRoot}", util.getVcpkgRoot());
+                }
+                if (resolvedPath.includes("*")) {
+                    resolvedPath = resolvedPath.replace(/\*/g, "");
+                }
+
+                // Handle WSL paths.
+                if (resolvedPath.startsWith("/") && os.platform() === 'win32') {
+                    const mntStr: string = "/mnt/";
+                    if (resolvedPath.length > "/mnt/c/".length && resolvedPath.substr(0, mntStr.length) === mntStr) {
+                        resolvedPath = resolvedPath.substr(mntStr.length);
+                        resolvedPath = resolvedPath.substr(0, 1) + ":" + resolvedPath.substr(1);
+                    } else if (this.rootfs && this.rootfs.length > 0) {
+                        resolvedPath = this.rootfs + resolvedPath.substr(1);
+                        resolvedPath = resolvedPath.replace(/\//g, path.sep);
+                        // TODO: Handle WSL symlinks.
+                    }
+                }
+
+                let pathExists: boolean = true;
+                if (!fs.existsSync(resolvedPath)) {
+                    // Check again for a relative path.
+                    let relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
+                    if (!fs.existsSync(relativePath)) {
+                        pathExists = false;
+                    } else {
+                        resolvedPath = relativePath;
+                    }
+                }
+
+                // Iterate through the text and apply squiggles.
+                for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
+                    let message: string;
+                    if (!pathExists) {
+                        message = `Cannot find "${resolvedPath}".`;
+                        newSquiggleMetrics.PathNonExistent++;
+                    } else {
+                        // Check for file versus path mismatches.
+                        if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
+                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                            if (util.checkFileExistsSync(resolvedPath)) {
+                                continue;
+                            }
+                            message = `Path is not a file: "${resolvedPath}".`;
+                            newSquiggleMetrics.PathNotAFile++;
+                        } else {
+                            if (util.checkDirectoryExistsSync(resolvedPath)) {
+                                continue;
+                            }
+                            message = `Path is not a directory: "${resolvedPath}".`;
+                            newSquiggleMetrics.PathNotADirectory++;
+                        }
+                    }
+                    let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + curPath.length - 1)),
+                        message, vscode.DiagnosticSeverity.Warning);
+                    diagnostics.push(diagnostic);
+                }
+            }
+            if (diagnostics.length !== 0) {
+                this.diagnosticCollection.set(document.uri, diagnostics);
+            } else {
+                this.diagnosticCollection.clear();
+            }
+
+            // Send telemetry on squiggle changes.
+            let changedSquiggleMetrics: { [key: string]: number } = {};
+            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNonExistent) {
+                changedSquiggleMetrics.PathNonExistent = newSquiggleMetrics.PathNonExistent;
+            }
+            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNotAFile) {
+                changedSquiggleMetrics.PathNotAFile = newSquiggleMetrics.PathNotAFile;
+            }
+            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNotADirectory) {
+                changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
+            }
+            if (Object.keys(changedSquiggleMetrics).length > 0) {
+                telemetry.logLanguageServerEvent("ConfigSquiggles", null, changedSquiggleMetrics);
+            }
+            this.prevSquiggleMetrics[this.CurrentConfiguration.name] = newSquiggleMetrics;
+        });
     }
 
     private updateToVersion2(): void {
@@ -735,13 +912,13 @@ export class CppProperties {
         let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
-                if (this.propertiesFile !== null) {
+                if (this.propertiesFile) {
                     this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
                 }
             } else if (stats.mtime > this.configFileWatcherFallbackTime) {
-                if (this.propertiesFile === null) {
+                if (!this.propertiesFile) {
                     this.propertiesFile = vscode.Uri.file(propertiesFile); // File created.
                 }
                 this.handleConfigurationChange();
@@ -755,5 +932,7 @@ export class CppProperties {
 
         this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
         this.compileCommandFileWatchers = []; //reset it
+
+        this.diagnosticCollection.dispose();
     }
 }
