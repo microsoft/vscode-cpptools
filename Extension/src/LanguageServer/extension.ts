@@ -38,7 +38,7 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
-let shouldCheckAndApplyUpdate: boolean = true;
+let buildInfoCache: BuildInfo | null = null;
 
 let taskProvider: vscode.Disposable;
 
@@ -296,40 +296,9 @@ function realActivation(): void {
     reportMacCrashes();
     
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    let suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
     
-    if (suggestInsiders.Value && settings.updateChannel === 'Default') {
-        getTargetBuildInfo("Insiders").then(buildInfo => {
-            if (!buildInfo) {
-                return;
-            }
-            const message: string = `Insiders version: ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
-            const yes: string = "Yes";
-            const askLater: string = "Ask Me Later";
-            const dontShowAgain: string = "Don't Show Again";
-            vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain).then(selection => {
-                switch (selection) {
-                    case yes:
-                        // Avoid double calling applyUpdate
-                        shouldCheckAndApplyUpdate = false;
-                        vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", true);
-                        return applyUpdate(buildInfo, 'Insiders');
-                    case dontShowAgain:
-                        suggestInsiders.Value = false;
-                        break;
-                    case askLater:
-                        break;
-                    default:
-                        break;
-                }
-            });
-        }).catch(error => {
-            // Handle .then following getTargetBuildInfo rejection
-            if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
-                error.message = "Potential PII hidden";
-            }
-            telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-        });
+    if (settings.updateChannel === 'Default') {
+        suggestInsidersChannel();
     } else if (settings.updateChannel === 'Insiders') {
         insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
         checkAndApplyUpdate(settings.updateChannel);
@@ -361,11 +330,7 @@ function onDidChangeSettings(): void {
         } else if (newUpdateChannel === 'Insiders') {
             insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
-        if (shouldCheckAndApplyUpdate) {
-            checkAndApplyUpdate(newUpdateChannel);
-        } else {
-            shouldCheckAndApplyUpdate = true;
-        }
+        checkAndApplyUpdate(newUpdateChannel);
     }
 }
 
@@ -515,8 +480,44 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     });
 }
 
+async function suggestInsidersChannel(): Promise<void> {
+    let suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
+
+    if (!suggestInsiders.Value) {
+        return;
+    }
+    let buildInfo: BuildInfo;
+    try {
+        buildInfo = await getTargetBuildInfo("Insiders");
+    } catch(error) {
+        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
+    }
+    if (!buildInfo) {
+        return;
+    }
+    const message: string = `Insiders version: ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
+    const yes: string = "Yes";
+    const askLater: string = "Ask Me Later";
+    const dontShowAgain: string = "Don't Show Again";
+    let selection = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
+    switch (selection) {
+        case yes:
+            // Cache buidinfo.
+            buildInfoCache = buildInfo;
+            // It will call onDidChangeSettings.
+            vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", true);
+        case dontShowAgain:
+            suggestInsiders.Value = false;
+            break;
+        case askLater:
+            break;
+        default:
+            break;
+    }
+}
+
 async function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
-    const p: Promise<void> = new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
                 reject(new Error('Failed to create vsix file'));
@@ -565,8 +566,12 @@ async function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise
             telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
             resolve();
         });
+    }).catch(error => {
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
     });
-    return p;
 }
 
 /**
@@ -575,19 +580,23 @@ async function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    let buildInfo: BuildInfo;
-    try {
-        buildInfo = await getTargetBuildInfo(updateChannel);
-        if (!buildInfo) {
-            return undefined;
+    let buildInfo: BuildInfo | null = null;
+    // If we have buildinfo cache, we should use it.
+    if (buildInfoCache) {
+        buildInfo = buildInfoCache;
+        // clear buildinfo cache.
+        buildInfoCache = null;
+    } else {
+        try {
+            buildInfo = await getTargetBuildInfo(updateChannel);
+        } catch (error) {
+            telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
         }
-        await applyUpdate(buildInfo, updateChannel);
-    } catch (error) {
-        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
-            error.message = "Potential PII hidden";
-        }
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
     }
+    if (!buildInfo) {
+        return;
+    }
+    await applyUpdate(buildInfo, updateChannel);
 }
 
 /*********************************************
