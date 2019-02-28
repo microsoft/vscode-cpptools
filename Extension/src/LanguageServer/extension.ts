@@ -580,13 +580,12 @@ async function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    let buildInfo: BuildInfo | null = null;
     // If we have buildinfo cache, we should use it.
-    if (buildInfoCache) {
-        buildInfo = buildInfoCache;
-        // clear buildinfo cache.
-        buildInfoCache = null;
-    } else {
+    let buildInfo: BuildInfo | null = buildInfoCache;
+    // clear buildinfo cache.
+    buildInfoCache = null;
+    
+    if (!buildInfo) {
         try {
             buildInfo = await getTargetBuildInfo(updateChannel);
         } catch (error) {
