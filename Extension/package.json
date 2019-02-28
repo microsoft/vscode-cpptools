@@ -308,6 +308,19 @@
           "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
           "scope": "resource"
         },
+        "C_Cpp.intelliSenseCachePath": {
+          "type": "string",
+          "default": "${workspaceFolder}/.vscode/",
+          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default path \"${workspaceFolder}/.vscode/\" will be used if a specified path is invalid.",
+          "scope": "resource"
+        },
+        "C_Cpp.intelliSenseCacheSize": {
+          "type": "number",
+          "default": 5120,
+          "description": "Maximum size of the per-workspace hard drive space in megabytes for cached precompiled headers; the actual usage may fluctuate around this value. The default size is 5120 MB. Precompiled header caching is disabled when the size is 0.",
+          "scope": "resource",
+          "minimum": 0
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
@@ -978,12 +991,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
@@ -1259,12 +1272,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
