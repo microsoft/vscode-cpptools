@@ -11,7 +11,7 @@ import * as os from 'os';
 // Registers DebugAdapterDescriptorFactory for `cppdbg` and `cppvsdbg`. If it is not ready, it will prompt a wait for the download dialog.
 // NOTE: This file is not automatically tested.
 
-abstract class DebugAdapterDescriptorFactoryWithContext implements vscode.DebugAdapterDescriptorFactory {
+abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
     protected readonly context: vscode.ExtensionContext;
 
     // This is important for the Mock Debugger since it can not use src/common
@@ -22,7 +22,7 @@ abstract class DebugAdapterDescriptorFactoryWithContext implements vscode.DebugA
     abstract createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor>;
 }
 
-export class CppdbgDebugAdapterDescriptorFactory extends DebugAdapterDescriptorFactoryWithContext {
+export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
     public static DEBUG_TYPE : string = "cppdbg";
 
     constructor(context: vscode.ExtensionContext) {
@@ -47,7 +47,7 @@ export class CppdbgDebugAdapterDescriptorFactory extends DebugAdapterDescriptorF
     }
 }
 
-export class CppvsdbgDebugAdapterDescriptorFactory extends DebugAdapterDescriptorFactoryWithContext {
+export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
     public static DEBUG_TYPE : string = "cppvsdbg";
 
     constructor(context: vscode.ExtensionContext) {
