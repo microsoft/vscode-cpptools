@@ -58,7 +58,10 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
         return vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
             // Wrap in new Promise to make sure task kicks off before VS Code switches the active document to launch.json
-            return new Promise<vscode.DebugConfiguration[]>(async resolve => {
+            return new Promise<vscode.DebugConfiguration[]>(async (resolve, reject) => {
+                if (!selection) {
+                    return reject();
+                }
                 if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
                     try {
                         await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
@@ -116,7 +119,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.preLaunchTask = task.name;
             newConfig.externalConsole = false;
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
-            newConfig.program = platform === "win32" ? path.join(exeName, ".exe") : exeName;
+            newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
 
             let debuggerName: string;
             if (compilerName.startsWith("clang")) {
