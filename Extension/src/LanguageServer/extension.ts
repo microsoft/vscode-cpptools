@@ -151,11 +151,15 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     const isWindows: boolean = os.platform() === 'win32';
     const activeClient: Client = getActiveClient();
     let userCompilerPath: string = await activeClient.getCompilerPath();
-    userCompilerPath = userCompilerPath.trim();
-    if (isWindows && (userCompilerPath.startsWith("/") || userCompilerPath.endsWith("cl.exe"))) { // TODO: Add WSL/cl.exe compiler support.
-        userCompilerPath = null;
+    if (userCompilerPath) {
+        userCompilerPath = userCompilerPath.trim();
+        if (isWindows && (userCompilerPath.startsWith("/") || userCompilerPath.endsWith("cl.exe"))) { // TODO: Add WSL/cl.exe compiler support.
+            userCompilerPath = null;
+        } else {
+            userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
+        }
     }
-    userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
+
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info => {
