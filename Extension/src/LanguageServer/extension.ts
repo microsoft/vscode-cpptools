@@ -506,7 +506,7 @@ async function suggestInsidersChannel(): Promise<void> {
             // Cache buidinfo.
             buildInfoCache = buildInfo;
             // It will call onDidChangeSettings.
-            vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", true);
+            vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
             break;
         case dontShowAgain:
             suggestInsiders.Value = false;
@@ -518,7 +518,7 @@ async function suggestInsidersChannel(): Promise<void> {
     }
 }
 
-async function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
+function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
@@ -591,7 +591,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         try {
             buildInfo = await getTargetBuildInfo(updateChannel);
         } catch (error) {
-            telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
+            telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         }
     }
     if (!buildInfo) {
