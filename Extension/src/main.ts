@@ -329,6 +329,7 @@ function rewriteManifest(): Promise<void> {
         "onLanguage:c",
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
+        //"onCommand:C_Cpp.BuildAndDebugActiveFile", // TODO
         "onCommand:C_Cpp.ConfigurationEdit",
         "onCommand:C_Cpp.ConfigurationSelect",
         "onCommand:C_Cpp.ConfigurationProviderSelect",
