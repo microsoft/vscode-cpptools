@@ -814,7 +814,7 @@ export class CppProperties {
                 }
 
                 let pathExists: boolean = true;
-                let existsWithExeAdded: (string) => boolean = (path: string) => {
+                let existsWithExeAdded: (path: string) => boolean = (path: string) => {
                     return isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
                 };
                 if (!fs.existsSync(resolvedPath)) {
