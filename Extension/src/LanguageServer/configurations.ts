@@ -630,6 +630,7 @@ export class CppProperties {
             // Replace all \<escape character> with \\<character>.
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
             readResults = readResults.replace(/\\/g, '\\\\');
+            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \".
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
@@ -752,11 +753,19 @@ export class CppProperties {
                 paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
             }
 
+            let compilerPathAndArgs: util.CompilerPathAndArgs;
+            if (this.CurrentConfiguration.compilerPath) {
+                compilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
+                paths.add(`"${compilerPathAndArgs.compilerPath}`); // It may not end with ".
+            }
+
             // Get the start/end for properties that are file-only.
             let forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
             let forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
             let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
             let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+            let compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
+            let compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1);
 
             if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
                 this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
@@ -764,7 +773,7 @@ export class CppProperties {
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
 
             for (let curPath of paths) {
-                let resolvedPath: string = curPath.substr(1, curPath.length - 2);
+                let resolvedPath: string = curPath.substr(1, (curPath.endsWith('"') ? curPath.length - 2 : curPath.length - 1));
                 // Resolve special path cases.
                 if (resolvedPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
@@ -817,7 +826,8 @@ export class CppProperties {
                     } else {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
+                            (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
                             if (util.checkFileExistsSync(resolvedPath)) {
                                 continue;
                             }
@@ -832,7 +842,7 @@ export class CppProperties {
                         }
                     }
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + curPath.length - 1)),
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + (curPath.endsWith('"') ? curPath.length - 1 : curPath.length))),
                         message, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }

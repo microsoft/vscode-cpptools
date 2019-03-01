@@ -16,6 +16,7 @@ import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
 import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
+import { getBuildTasks } from './LanguageServer/extension';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -36,6 +37,65 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
+export function getRawTasksJson(): Promise<any> {
+    const path: string = getTasksJsonPath();
+    if (!path) {
+        return undefined;
+    }
+    return new Promise<any>((resolve, reject) => {
+        fs.exists(path, exists => {
+            if (!exists) {
+                return resolve({});
+            }
+            const fileContents: Buffer = fs.readFileSync(path);
+            let rawTasks: any = {};
+            try {
+                rawTasks = JSON.parse(fileContents.toString()); 
+            } catch (error) {
+            }
+            resolve(rawTasks);
+        });
+    });
+}
+
+export async function ensureBuildTaskExists(taskName: string): Promise<void> {
+    let rawTasksJson: any = await getRawTasksJson();
+
+    // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+    if (!rawTasksJson.tasks) {
+        rawTasksJson.tasks = new Array();
+    }
+    // Find or create the task which should be created based on the selected "debug configuration".
+    let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => {
+        return task.label && task.label === task;
+    });
+    if (selectedTask) {
+        return;
+    }
+
+    const buildTasks: vscode.Task[] = await getBuildTasks();
+    selectedTask = buildTasks.find(task => task.name === taskName);
+    console.assert(selectedTask);
+
+    let definition: vscode.TaskDefinition = selectedTask.definition as vscode.TaskDefinition;
+    if (definition && definition.compilerPath) {
+         // TODO: add desired properties to empty object, don't delete.
+        delete definition.compilerPath;
+    }
+    
+    if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
+        rawTasksJson.tasks.push(selectedTask.definition);
+    }
+    
+    // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
+    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
+}
+
+export function fileIsCOrCppSource(file: string): boolean {
+    const fileExtLower: string = path.extname(file).toLowerCase();
+    return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
+}
+
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.
@@ -49,6 +109,15 @@ export function getExtensionFilePath(extensionfile: string): string {
 
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
+}
+
+export function getTasksJsonPath(): string {
+    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+    const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    if (!folder) {
+        return undefined;
+    }
+    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
 }
 
 export function getVcpkgPathDescriptorFile(): string {
@@ -686,4 +755,32 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
         request.on('error', (error) => { reject(error); });
         request.end();
     });
+}
+
+export interface CompilerPathAndArgs {
+    compilerPath: string;
+    additionalArgs: string[];
+}
+
+export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
+    let compilerPath: string = inputCompilerPath;
+    let additionalArgs: string[];
+    if (compilerPath) {
+        if (compilerPath.startsWith("\"")) {
+            let endQuote: number = compilerPath.substr(1).search("\"") + 1;
+            if (endQuote !== -1) {
+                additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
+                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; });
+                compilerPath = compilerPath.substr(1, endQuote - 1);
+            }
+        } else {
+            if (compilerPath.includes(" ") && !fs.existsSync(compilerPath)) {
+                let argStart: number = compilerPath.search(" ");
+                additionalArgs = compilerPath.substr(argStart + 1).split(" ");
+                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; });
+                compilerPath = compilerPath.substr(0, argStart);
+            }
+        }
+    }
+    return { compilerPath, additionalArgs };
 }

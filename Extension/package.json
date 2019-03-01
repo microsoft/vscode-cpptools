@@ -1420,10 +1420,11 @@
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",
-    "@types/node": "^8.0.46",
-    "await-notify": "^1.0.1",
+    "@types/node": "^8.10.40",
     "async-child-process": "^1.1.1",
+    "await-notify": "^1.0.1",
     "child-process": "^1.0.2",
+    "extend": "3.0.2",
     "gulp": "^4.0.0",
     "gulp-env": "0.4.0",
     "gulp-mocha": "5.0.0",
@@ -1432,10 +1433,9 @@
     "tslint": "5.8.0",
     "tslint-microsoft-contrib": "5.0.1",
     "tslint-no-unused-expression-chai": "0.0.3",
-    "typescript": "^2.5.3",
-    "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.29",
-    "extend": "3.0.2"
+    "typescript": "^2.9.2",
+    "vrsource-tslint-rules": "^5.8.3",
+    "vscode": "^1.1.30"
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
@@ -1448,7 +1448,7 @@
     "vscode-cpptools": "2.1.1",
     "vscode-debugadapter": "~1.33.0",
     "vscode-debugprotocol": "~1.33.0",
-    "vscode-extension-telemetry": "~0.1.0",
+    "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "5.1.1",
     "yauzl": "~2.10.0"
   },
