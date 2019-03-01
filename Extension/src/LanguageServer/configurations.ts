@@ -756,7 +756,7 @@ export class CppProperties {
             let compilerPathAndArgs: util.CompilerPathAndArgs;
             if (this.CurrentConfiguration.compilerPath) {
                 compilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
-                paths.add(`"${compilerPathAndArgs.compilerPath}`); // It may not end with ".
+                paths.add(`${compilerPathAndArgs.compilerPath}`); // It may not start or end with ".
             }
 
             // Get the start/end for properties that are file-only.
@@ -765,7 +765,7 @@ export class CppProperties {
             let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
             let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
             let compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
-            let compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1);
+            let compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
             if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
                 this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
@@ -773,7 +773,7 @@ export class CppProperties {
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
 
             for (let curPath of paths) {
-                let resolvedPath: string = curPath.substr(1, (curPath.endsWith('"') ? curPath.length - 2 : curPath.length - 1));
+                let resolvedPath: string = curPath.substr((curPath.startsWith('"') ? 1 : 0), (curPath.endsWith('"') ? curPath.length - 2 : curPath.length));
                 // Resolve special path cases.
                 if (resolvedPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
@@ -842,7 +842,8 @@ export class CppProperties {
                         }
                     }
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + (curPath.endsWith('"') ? curPath.length - 1 : curPath.length))),
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
+                            document.positionAt(curTextStartOffset + curOffset + (curPath.endsWith('"') ? curPath.length - 1 : curPath.length))),
                         message, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }
