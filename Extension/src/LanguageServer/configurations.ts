@@ -753,8 +753,9 @@ export class CppProperties {
                 paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
             }
 
-            let compilerPathAndArgs: util.CompilerPathAndArgs;
-            if (this.CurrentConfiguration.compilerPath) {
+            if (this.CurrentConfiguration.compilerPath &&
+                    !(os.platform() === 'win32' && this.CurrentConfiguration.compilerPath.startsWith("cl.exe"))) { // Skip this special case.
+                let compilerPathAndArgs: util.CompilerPathAndArgs;
                 compilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
                 paths.add(`${compilerPathAndArgs.compilerPath}`); // It may not start or end with ".
             }
