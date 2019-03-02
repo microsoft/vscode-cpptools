@@ -7,10 +7,9 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { /*getBuildTasks,*/ BuildTaskDefinition } from '../LanguageServer/extension';
+import { getBuildTasks, BuildTaskDefinition } from '../LanguageServer/extension';
 import * as util from '../common';
 import * as fs from 'fs';
-//import * as assert from 'assert';
 import * as Telemetry from '../telemetry';
 import { buildAndDebugActiveFileStr } from './extension';
 
@@ -57,9 +56,9 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
         return vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
             // Wrap in new Promise to make sure task kicks off before VS Code switches the active document to launch.json
-            return new Promise<vscode.DebugConfiguration[]>(async resolve => {
+            return new Promise<vscode.DebugConfiguration[]>(async (resolve, reject) => {
                 if (!selection) {
-                    return resolve([defaultConfig]); // User canceled it. Choose the default config?
+                    return reject([]); // User canceled it.
                 }
                 if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
                     try {
@@ -93,8 +92,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[]; // = await getBuildTasks(); // TODO
-        if (!buildTasks || buildTasks.length === 0) {
+        let buildTasks: vscode.Task[] = await getBuildTasks(); // TODO
+        if (buildTasks.length === 0 || this.type === DebuggerType.cppvsdbg) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
@@ -127,7 +126,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
                 debuggerName = (platform === "darwin" ? "lldb" : "lldb-mi") + suffix;
             } else {
-                debuggerName = "gdb";
+                debuggerName = platform === "win32" ? "gdb.exe" : "gdb";
             }
 
             const debuggerPath: string = path.join(compilerDirname, debuggerName);
