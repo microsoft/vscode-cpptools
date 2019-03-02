@@ -12,6 +12,7 @@
 * Add C/C++ compiler build tasks for compiling the active source file. [PR #3118](https://github.com/Microsoft/vscode-cpptools/pull/3118)
 * Fix command not found and empty `c_cpp_properties.json` if activation is too slow. [#3160](https://github.com/Microsoft/vscode-cpptools/issues/3160), [#3176](https://github.com/Microsoft/vscode-cpptools/issues/3176)
 * Add AutoPCH support to reduce IntelliSense parsing time, with `C_Cpp.intelliSenseCachePath` and `C_Cpp.intelliSenseCacheSize` settings. [PR #3184](https://github.com/Microsoft/vscode-cpptools/pull/3184)
+* Fix `cppvsdbg` debugger showing `"An unspecified error has occurred."` for structured binding variables. [#3197](https://github.com/Microsoft/vscode-cpptools/issues/3197)
 
 ## Version 0.22.0-insiders: February 6, 2019
 * Fix crash on Windows when 8.3 filenames are used. [#2453](https://github.com/Microsoft/vscode-cpptools/issues/2453), [#3104](https://github.com/Microsoft/vscode-cpptools/issues/3104)
