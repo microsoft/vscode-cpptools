@@ -765,20 +765,36 @@ export interface CompilerPathAndArgs {
 export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
     let compilerPath: string = inputCompilerPath;
     let additionalArgs: string[];
+    let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
+        compilerPath = compilerPath.trim();
         if (compilerPath.startsWith("\"")) {
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
-                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; });
+                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
                 compilerPath = compilerPath.substr(1, endQuote - 1);
             }
         } else {
-            if (compilerPath.includes(" ") && !fs.existsSync(compilerPath)) {
-                let argStart: number = compilerPath.search(" ");
-                additionalArgs = compilerPath.substr(argStart + 1).split(" ");
-                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; });
-                compilerPath = compilerPath.substr(0, argStart);
+            // Go from right to left checking if a valid path is to the left of a space.
+            let spaceStart: number = compilerPath.lastIndexOf(" ");
+            if (spaceStart !== -1 && !fs.existsSync(compilerPath)) {
+                let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
+                while ((!isWindows || !potentialCompilerPath.endsWith("cl.exe")) && !fs.existsSync(potentialCompilerPath)) {
+                    spaceStart = potentialCompilerPath.lastIndexOf(" ");
+                    if (spaceStart === -1) {
+                        // Reached the start without finding a valid path. Use the original value.
+                        potentialCompilerPath = compilerPath;
+                        break;
+                    }
+                    potentialCompilerPath = potentialCompilerPath.substr(0, spaceStart);
+                }
+                if (compilerPath !== potentialCompilerPath) {
+                    // Found a valid compilerPath and args.
+                    additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
+                    additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
+                    compilerPath = potentialCompilerPath;
+                }
             }
         }
     }

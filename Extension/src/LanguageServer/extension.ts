@@ -903,6 +903,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     
     // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
     data = data.replace(/0x................ /g, "");
+    data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
     const process1: string = "Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin\t";

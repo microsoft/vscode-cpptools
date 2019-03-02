@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.22.0-insiders2: February 28, 2019
+## Version 0.22.0-insiders2: March 1, 2019
 * Fix IntelliSense not working on Windows when the username has a space in it and file `C:\Users\<firstname>` exists. [#1377](https://github.com/Microsoft/vscode-cpptools/issues/1377), [#2114](https://github.com/Microsoft/vscode-cpptools/issues/2114), [#2176](https://github.com/Microsoft/vscode-cpptools/issues/2176), [#3052](https://github.com/Microsoft/vscode-cpptools/issues/3052), [#3139](https://github.com/Microsoft/vscode-cpptools/issues/3139)
 * Enable `${command:cpptools.activeConfigName}` in tasks. [#1524](https://github.com/Microsoft/vscode-cpptools/issues/1524)
 * Fix completion when the start of an identifier matches a keyword. [#1986](https://github.com/Microsoft/vscode-cpptools/issues/1986)
@@ -11,7 +11,7 @@
 * Fix bug with manual completion invocation after `struct`. [#3080](https://github.com/Microsoft/vscode-cpptools/issues/3080)
 * Add C/C++ compiler build tasks for compiling the active source file. [PR #3118](https://github.com/Microsoft/vscode-cpptools/pull/3118)
 * Fix command not found and empty `c_cpp_properties.json` if activation is too slow. [#3160](https://github.com/Microsoft/vscode-cpptools/issues/3160), [#3176](https://github.com/Microsoft/vscode-cpptools/issues/3176)
-* Add AutoPch support to reduce IntelliSense parsing time, with `C_Cpp.intelliSenseCachePath` and `C_Cpp.intelliSenseCacheSize` settings. [PR #3184](https://github.com/Microsoft/vscode-cpptools/pull/3184)
+* Add AutoPCH support to reduce IntelliSense parsing time, with `C_Cpp.intelliSenseCachePath` and `C_Cpp.intelliSenseCacheSize` settings. [PR #3184](https://github.com/Microsoft/vscode-cpptools/pull/3184)
 
 ## Version 0.22.0-insiders: February 6, 2019
 * Fix crash on Windows when 8.3 filenames are used. [#2453](https://github.com/Microsoft/vscode-cpptools/issues/2453), [#3104](https://github.com/Microsoft/vscode-cpptools/issues/3104)

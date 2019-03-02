@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.31.0"
+    "vscode": "^1.30.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -310,8 +310,8 @@
         },
         "C_Cpp.intelliSenseCachePath": {
           "type": "string",
-          "default": "${workspaceFolder}/.vscode/",
-          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default path \"${workspaceFolder}/.vscode/\" will be used if a specified path is invalid.",
+          "default": "${workspaceFolder}/.vscode",
+          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default path \"${workspaceFolder}/.vscode\" will be used if a specified path is invalid.",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseCacheSize": {
