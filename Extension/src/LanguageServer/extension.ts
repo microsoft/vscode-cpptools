@@ -449,11 +449,17 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
         if (userVersion.isGreaterThan(breakingVersion, 'insider')) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
-                let exitCode: number = null;
                 try {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+                    
+                    // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+                    const timer: NodeJS.Timer = setTimeout(() => {
+                        process.kill();
+                        reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
+                    }, 30000);
+                    
                     process.on('exit', (code: number) => {
-                        exitCode = code;
+                        clearInterval(timer);
                         if (code !== 0) {
                             reject(new Error(`VS Code script exited with error code ${code}`));
                         } else {
@@ -467,15 +473,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     reject(new Error('Failed to launch VS Code script process for installation'));
                     return;
                 }
-
-                // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-                const timer: NodeJS.Timer = setTimeout(() => {
-                    if (exitCode !== null) {
-                        return;
-                    }
-                    process.kill();
-                    reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
-                }, 30000);
             });
         }
 
