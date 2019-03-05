@@ -40,7 +40,8 @@ let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
-
+const noBuildInfoStr: string = 'Failed to get build info';
+const cppInstallVsixStr: string = 'C/C++ install vsix: ';
 let taskProvider: vscode.Disposable;
 
 /**
@@ -523,23 +524,25 @@ async function suggestInsidersChannel(): Promise<void> {
     try {
         buildInfo = await getTargetBuildInfo("Insiders");
     } catch (error) {
-        console.log(`C/C++ install vsix: ${error.message}`);
+        console.log(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
         }
         telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
     }
     if (!buildInfo) {
+        console.log(`${cppInstallVsixStr}${noBuildInfoStr}`);
+        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': noBuildInfoStr, 'success': 'false' });
         return;
     }
-    const message: string = `Insiders version: ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
+    const message: string = `Insiders version ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
     const yes: string = "Yes";
     const askLater: string = "Ask Me Later";
     const dontShowAgain: string = "Don't Show Again";
     let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
-            // Cache buidinfo.
+            // Cache buildinfo.
             buildInfoCache = buildInfo;
             // It will call onDidChangeSettings.
             vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
@@ -605,7 +608,7 @@ function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void>
             resolve();
         });
     }).catch(error => {
-        console.error(`C/C++ install vsix: ${error.message}`);
+        console.error(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
         }
@@ -632,6 +635,8 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         }
     }
     if (!buildInfo) {
+        console.log(`${cppInstallVsixStr}${noBuildInfoStr}`);
+        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': noBuildInfoStr, 'success': 'false' });
         return;
     }
     await applyUpdate(buildInfo, updateChannel);
