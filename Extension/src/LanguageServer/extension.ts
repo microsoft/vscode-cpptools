@@ -530,7 +530,7 @@ async function suggestInsidersChannel(): Promise<void> {
         telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
     }
     if (!buildInfo) {
-        return;
+        return; // No need to update.
     }
     const message: string = `Insiders version ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
     const yes: string = "Yes";
@@ -632,7 +632,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         }
     }
     if (!buildInfo) {
-        return;
+        return; // No need to update.
     }
     await applyUpdate(buildInfo, updateChannel);
 }

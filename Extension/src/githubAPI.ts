@@ -189,7 +189,10 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
 
     // Check current version against target's version to determine if the installation should happen
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
-    return needsUpdate(userVersion, targetVersion) ? targetBuild : undefined;
+    if (needsUpdate(userVersion, targetVersion)) {
+        return targetBuild;
+    }
+    return undefined;
 }
 
 interface Rate {
