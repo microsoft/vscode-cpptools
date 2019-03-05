@@ -54,24 +54,20 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
             return menuItem;
         });
 
-        return vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
-            // Wrap in new Promise to make sure task kicks off before VS Code switches the active document to launch.json
-            return new Promise<vscode.DebugConfiguration[]>(async (resolve, reject) => {
-                if (!selection) {
-                    return reject([]); // User canceled it.
-                }
-                if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
-                    try {
-                        await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
-                        await vscode.debug.startDebugging(folder, selection.configuration);
-                        Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
-                    } catch (e) {
-                        Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-                    }
-                }
-                return resolve([selection.configuration]);
-            });
-        });
+        const selection: MenuItem = await vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"});
+        if (!selection) {
+            throw new Error(); // User canceled it.
+        }
+        if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
+            try {
+                await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                await vscode.debug.startDebugging(folder, selection.configuration);
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
+            } catch (e) {
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+            }
+        }
+        return [selection.configuration];
     }
 
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
