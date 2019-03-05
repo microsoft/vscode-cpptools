@@ -409,7 +409,7 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
