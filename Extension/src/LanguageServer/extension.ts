@@ -21,7 +21,7 @@ import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { getTargetBuildInfo } from '../githubAPI';
+import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
@@ -38,6 +38,7 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
+let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
 
 let taskProvider: vscode.Disposable;
@@ -308,9 +309,12 @@ function realActivation(): void {
     updateLanguageConfigurations();
 
     reportMacCrashes();
-
+    
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    if (settings.updateChannel === 'Insiders') {
+    
+    if (settings.updateChannel === 'Default') {
+        suggestInsidersChannel();
+    } else if (settings.updateChannel === 'Insiders') {
         insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
         checkAndApplyUpdate(settings.updateChannel);
     }
@@ -341,7 +345,7 @@ function onDidChangeSettings(): void {
         } else if (newUpdateChannel === 'Insiders') {
             insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
-
+        
         checkAndApplyUpdate(newUpdateChannel);
     }
 }
@@ -509,84 +513,124 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     });
 }
 
+async function suggestInsidersChannel(): Promise<void> {
+    let suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
+
+    if (!suggestInsiders.Value) {
+        return;
+    }
+    let buildInfo: BuildInfo;
+    try {
+        buildInfo = await getTargetBuildInfo("Insiders");
+    } catch (error) {
+        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
+    }
+    if (!buildInfo) {
+        return;
+    }
+    const message: string = `Insiders version: ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
+    const yes: string = "Yes";
+    const askLater: string = "Ask Me Later";
+    const dontShowAgain: string = "Don't Show Again";
+    let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
+    switch (selection) {
+        case yes:
+            // Cache buidinfo.
+            buildInfoCache = buildInfo;
+            // It will call onDidChangeSettings.
+            vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
+            break;
+        case dontShowAgain:
+            suggestInsiders.Value = false;
+            break;
+        case askLater:
+            break;
+        default:
+            break;
+    }
+}
+
+function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
+            if (err) {
+                reject(new Error('Failed to create vsix file'));
+                return;
+            }
+    
+            // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
+            // then the .catch call will return a resolved promise
+            // Thusly, the .catch call must also throw, as a return would simply return an unused promise
+            // instead of returning early from this function scope
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+            let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
+            while (true) { // Might need to try again with a different http.proxySupport setting.
+                try {
+                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
+                } catch {
+                    // Try again with the proxySupport to "off".
+                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                        reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
+                        return;
+                    }
+                    if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
+                        config.update('http.proxySupport', "off", true);
+                        continue;
+                    }
+                    reject(new Error('Failed to download VSIX package'));
+                    return;
+                }
+                if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                    config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                    telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
+                }
+                break;
+            }
+            try {
+                await installVsix(vsixPath, updateChannel);
+            } catch (error) {
+                reject(error);
+                return;
+            }
+            clearInterval(insiderUpdateTimer);
+            const message: string =
+                `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
+            util.promptReloadWindow(message);
+            telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
+            resolve();
+        });
+    }).catch(error => {
+        console.error(`C/C++ install vsix: ${error.message}`);
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+    });
+}
+
 /**
  * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
  * The update can be an upgrade or downgrade depending on the the updateChannel setting.
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // Wrap in new Promise to allow tmp.file callback to successfully resolve/reject
-    // as tmp.file does not do anything with the callback functions return value
-    const p: Promise<void> = new Promise<void>((resolve, reject) => {
-        getTargetBuildInfo(updateChannel).then(buildInfo => {
-            if (!buildInfo) {
-                resolve();
-                return;
-            }
-
-            // Create a temporary file, download the VSIX to it, then install the VSIX
-            tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
-                if (err) {
-                    reject(new Error('Failed to create vsix file'));
-                    return;
-                }
-
-                // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
-                // then the .catch call will return a resolved promise
-                // Thusly, the .catch call must also throw, as a return would simply return an unused promise
-                // instead of returning early from this function scope
-                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-                let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
-                while (true) { // Might need to try again with a different http.proxySupport setting.
-                    try {
-                        await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
-                    } catch {
-                        // Try again with the proxySupport to "off".
-                        if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
-                            config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                            reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
-                            return;
-                        }
-                        if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
-                            config.update('http.proxySupport', "off", true);
-                            continue;
-                        }
-                        reject(new Error('Failed to download VSIX package'));
-                        return;
-                    }
-                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
-                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                        telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
-                    }
-                    break;
-                }
-                try {
-                    await installVsix(vsixPath, updateChannel);
-                } catch (error) {
-                    reject(error);
-                    return;
-                }
-                clearInterval(insiderUpdateTimer);
-                const message: string =
-                    `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
-                util.promptReloadWindow(message);
-                telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
-
-                resolve();
-            });
-        }, (error: Error) => {
-            // Handle getTargetBuildInfo rejection
-            reject(error);
-        });
-    });
-    await p.catch((error: Error) => {
-        console.error(`C/C++ install vsix: ${error.message}`);
-        // Handle .then following getTargetBuildInfo rejection
-        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
-            error.message = "Potential PII hidden";
+    // If we have buildinfo cache, we should use it.
+    let buildInfo: BuildInfo | null = buildInfoCache;
+    // clear buildinfo cache.
+    buildInfoCache = null;
+    
+    if (!buildInfo) {
+        try {
+            buildInfo = await getTargetBuildInfo(updateChannel);
+        } catch (error) {
+            telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         }
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-    });
+    }
+    if (!buildInfo) {
+        return;
+    }
+    await applyUpdate(buildInfo, updateChannel);
 }
 
 /*********************************************
