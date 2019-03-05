@@ -92,7 +92,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await getBuildTasks(); // TODO
+        let buildTasks: vscode.Task[] = await getBuildTasks(); 
         if (buildTasks.length === 0 || this.type === DebuggerType.cppvsdbg) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
@@ -126,7 +126,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
                 debuggerName = (platform === "darwin" ? "lldb" : "lldb-mi") + suffix;
             } else {
-                debuggerName = platform === "win32" ? "gdb.exe" : "gdb";
+                debuggerName = "gdb";
+            }
+
+            if (platform === "win32") {
+                debuggerName += ".exe";
             }
 
             const debuggerPath: string = path.join(compilerDirname, debuggerName);
