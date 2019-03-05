@@ -539,7 +539,7 @@ async function suggestInsidersChannel(): Promise<void> {
     let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
-            // Cache buildinfo.
+            // Cache buildInfo.
             buildInfoCache = buildInfo;
             // It will call onDidChangeSettings.
             vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
@@ -619,9 +619,9 @@ function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void>
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // If we have buildinfo cache, we should use it.
+    // If we have buildInfo cache, we should use it.
     let buildInfo: BuildInfo | null = buildInfoCache;
-    // clear buildinfo cache.
+    // clear buildInfo cache.
     buildInfoCache = null;
     
     if (!buildInfo) {
