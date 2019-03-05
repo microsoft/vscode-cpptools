@@ -40,7 +40,6 @@ let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
-const noBuildInfoStr: string = 'Failed to get build info';
 const cppInstallVsixStr: string = 'C/C++ install vsix: ';
 let taskProvider: vscode.Disposable;
 
@@ -531,8 +530,6 @@ async function suggestInsidersChannel(): Promise<void> {
         telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
     }
     if (!buildInfo) {
-        console.log(`${cppInstallVsixStr}${noBuildInfoStr}`);
-        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': noBuildInfoStr, 'success': 'false' });
         return;
     }
     const message: string = `Insiders version ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
@@ -635,8 +632,6 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         }
     }
     if (!buildInfo) {
-        console.log(`${cppInstallVsixStr}${noBuildInfoStr}`);
-        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': noBuildInfoStr, 'success': 'false' });
         return;
     }
     await applyUpdate(buildInfo, updateChannel);
