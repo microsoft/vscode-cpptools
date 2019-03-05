@@ -523,6 +523,10 @@ async function suggestInsidersChannel(): Promise<void> {
     try {
         buildInfo = await getTargetBuildInfo("Insiders");
     } catch (error) {
+        console.log(`C/C++ install vsix: ${error.message}`);
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
         telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
     }
     if (!buildInfo) {

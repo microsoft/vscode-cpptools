@@ -201,7 +201,7 @@ interface RateLimit {
 }
 
 function isRate(input: any): input is Rate {
-    return input && input.remaining && util.isNumber(input.remaining);
+    return input && util.isNumber(input.remaining);
 }
 
 function isRateLimit(input: any): input is RateLimit {
