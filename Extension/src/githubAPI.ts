@@ -9,6 +9,8 @@ import * as util from './common';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
 
+const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
+
 /**
  * The object representation of a Build Asset. Each Asset corresponds to information about a release file on GitHub.
  */
@@ -139,7 +141,7 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
             // Allows testing pre-releases without accidentally downgrading to the latest version
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
             const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-            if (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders')) {
+            if (!testingInsidersVsixInstall && (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders'))) {
                 return undefined;
             }
 
@@ -172,7 +174,7 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdate = (installed: PackageVersion, target: PackageVersion) => { return target.isGreaterThan(installed); };
+        needsUpdate = (installed: PackageVersion, target: PackageVersion) => { return testingInsidersVsixInstall || target.isGreaterThan(installed); };
         useBuild = (build: Build): boolean => { return true; };
     } else if (updateChannel === 'Default') {
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
