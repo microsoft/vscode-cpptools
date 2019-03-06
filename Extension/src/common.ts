@@ -83,6 +83,8 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         delete definition.compilerPath;
     }
     
+    rawTasksJson.version = "2.0.0";
+
     if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
         rawTasksJson.tasks.push(selectedTask.definition);
     }

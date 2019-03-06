@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { /*QuickPickConfigurationProvider,*/ ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
+import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
 import * as util from '../common';
 import * as Telemetry from '../telemetry';
@@ -35,7 +35,7 @@ export function initialize(context: vscode.ExtensionContext): void {
         disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new CppVsDbgConfigurationProvider(configurationProvider)));
     }
     const provider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
-    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', provider)); //new QuickPickConfigurationProvider(provider))); // TODO
+    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
 
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugActiveFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
         const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
