@@ -21,7 +21,7 @@ import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
-import { getTargetBuildInfo } from '../githubAPI';
+import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
@@ -38,7 +38,9 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
-
+let buildInfoCache: BuildInfo | null = null;
+const taskSourceStr: string = "C/C++";
+const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 
 /**
@@ -67,7 +69,7 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    taskProvider = vscode.tasks.registerTaskProvider('C/Cpp', {
+    taskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
         provideTasks: () => {
             return getBuildTasks();
         },
@@ -77,7 +79,7 @@ export function activate(activationEventOccurred: boolean): void {
         }
     });
     vscode.tasks.onDidStartTask(event => {
-        if (event.execution.task.source === 'C/Cpp') {
+        if (event.execution.task.source === taskSourceStr) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
     });
@@ -105,10 +107,14 @@ export function activate(activationEventOccurred: boolean): void {
     }
 }
 
+export interface BuildTaskDefinition extends vscode.TaskDefinition {
+    compilerPath: string;
+}
+
 /**
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
-async function getBuildTasks(): Promise<vscode.Task[]> {
+export async function getBuildTasks(): Promise<vscode.Task[]> {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!editor) {
         return [];
@@ -121,7 +127,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
 
     // Don't offer tasks for header files.
     const fileExtLower: string = fileExt.toLowerCase();
-    const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h", ""].some(ext => fileExtLower === ext);
+    const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h", ".inl", ""].some(ext => fileExtLower === ext);
     if (isHeader) {
         return [];
     }
@@ -133,7 +139,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         fileIsCpp = true;
         fileIsC = true;
     } else {
-        fileIsCpp = [".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
+        fileIsCpp = [".cpp", ".cc", ".cxx", ".mm", ".ino"].some(ext => fileExtLower === ext);
         fileIsC = fileExtLower === ".c";
     }
     if (!(fileIsCpp || fileIsC)) {
@@ -143,17 +149,31 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
     // Get a list of compilers found from the C++ side, then filter them based on the file type to get a reduced list appropriate
     // for the active file, remove duplicate compiler names, then finally add the user's compilerPath setting.
     let compilerPaths: string[];
+    const isWindows: boolean = os.platform() === 'win32';
     const activeClient: Client = getActiveClient();
-    const userCompilerPath: string = await activeClient.getCompilerPath();
+    let userCompilerPath: string = await activeClient.getCompilerPath();
+    if (userCompilerPath) {
+        userCompilerPath = userCompilerPath.trim();
+        if (isWindows && (userCompilerPath.startsWith("/") || userCompilerPath.endsWith("cl.exe"))) { // TODO: Add WSL/cl.exe compiler support.
+            userCompilerPath = null;
+        } else {
+            userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
+        }
+    }
+
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
-        knownCompilers = knownCompilers.filter(info => { return (fileIsCpp && !info.isC) || (fileIsC && info.isC); });
+        knownCompilers = knownCompilers.filter(info => {
+            return ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+                (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
+        });
         compilerPaths = knownCompilers.map<string>(info => { return info.path; });
 
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
             const basename: string = path.basename(compilerPath);
-            map.has(basename) ? map[basename] = compilerPath : map.set(basename, compilerPath);
+            //map.has(basename) ? map.basename] = compilerPath : 
+            map.set(basename, compilerPath);
         };
         compilerPaths.forEach(insertOrAssignEntry);
 
@@ -173,7 +193,7 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         // Display a message prompting the user to install compilers if none were found.
         // const dontShowAgain: string = "Don't Show Again";
         // const learnMore: string = "Learn More";
-        // const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/Cpp: build active file tasks.";
+        // const message: string = "No C/C++ compiler found on the system. Please install a C/C++ compiler to use the C/C++: build active file tasks.";
 
         // let showNoCompilerFoundMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showNoCompilerFoundMessage", true);
         // if (showNoCompilerFoundMessage) {
@@ -194,38 +214,34 @@ async function getBuildTasks(): Promise<vscode.Task[]> {
         return [];
     }
 
-    // The build task output file should include a '.exe' extension on Windows.
-    let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    let exeName: string;
-    if (platformInfo.platform === 'win32') {
-        exeName = '${fileBasenameNoExtension}.exe';
-    } else {
-        exeName = '${fileBasenameNoExtension}';
-    }
-
     // Generate tasks.
-    let result: vscode.Task[] = [];
-    compilerPaths.forEach(compilerPath => {
+    return compilerPaths.map<vscode.Task>(compilerPath => {
+        // Handle compiler args in compilerPath.
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
+        compilerPath = compilerPathAndArgs.compilerPath;
         const taskName: string = path.basename(compilerPath) + " build active file";
-        const args: string[] = ['-g', '${file}', '-o', '${fileDirname}/' + exeName];
+        let args: string[] = ['-g', '${file}', '-o', path.join('${fileDirname}', '${fileBasenameNoExtension}' + (isWindows ? '.exe' : ''))];
+        if (compilerPathAndArgs.additionalArgs) {
+            args = args.concat(compilerPathAndArgs.additionalArgs);
+        }
         const cwd: string = path.dirname(compilerPath);
-        const kind: vscode.TaskDefinition = {
+        const kind: BuildTaskDefinition = {
             type: 'shell',
             label: taskName,
             command: compilerPath,
             args: args,
-            options: {"cwd": cwd}
+            options: {"cwd": cwd},
+            compilerPath: compilerPath
         };
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
-        let task: vscode.Task = new vscode.Task(kind, target, taskName, 'C/Cpp', command, '$gcc');
+        let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
 
-        result.push(task);
+        return task;
     });
-    return result;
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
@@ -293,9 +309,12 @@ function realActivation(): void {
     updateLanguageConfigurations();
 
     reportMacCrashes();
-
+    
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    if (settings.updateChannel === 'Insiders') {
+    
+    if (settings.updateChannel === 'Default') {
+        suggestInsidersChannel();
+    } else if (settings.updateChannel === 'Insiders') {
         insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
         checkAndApplyUpdate(settings.updateChannel);
     }
@@ -326,7 +345,7 @@ function onDidChangeSettings(): void {
         } else if (newUpdateChannel === 'Insiders') {
             insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
-
+        
         checkAndApplyUpdate(newUpdateChannel);
     }
 }
@@ -390,7 +409,7 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
@@ -432,6 +451,21 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 let process: ChildProcess;
                 try {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+                    
+                    // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+                    const timer: NodeJS.Timer = setTimeout(() => {
+                        process.kill();
+                        reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
+                    }, 30000);
+                    
+                    process.on('exit', (code: number) => {
+                        clearInterval(timer);
+                        if (code !== 0) {
+                            reject(new Error(`VS Code script exited with error code ${code}`));
+                        } else {
+                            resolve();
+                        }
+                    });
                     if (process.pid === undefined) {
                         throw new Error();
                     }
@@ -439,7 +473,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     reject(new Error('Failed to launch VS Code script process for installation'));
                     return;
                 }
-                resolve();
             });
         }
 
@@ -477,83 +510,128 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
     });
 }
 
+async function suggestInsidersChannel(): Promise<void> {
+    let suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
+
+    if (!suggestInsiders.Value) {
+        return;
+    }
+    let buildInfo: BuildInfo;
+    try {
+        buildInfo = await getTargetBuildInfo("Insiders");
+    } catch (error) {
+        console.log(`${cppInstallVsixStr}${error.message}`);
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
+        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
+    }
+    if (!buildInfo) {
+        return; // No need to update.
+    }
+    const message: string = `Insiders version ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
+    const yes: string = "Yes";
+    const askLater: string = "Ask Me Later";
+    const dontShowAgain: string = "Don't Show Again";
+    let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
+    switch (selection) {
+        case yes:
+            // Cache buildInfo.
+            buildInfoCache = buildInfo;
+            // It will call onDidChangeSettings.
+            vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
+            break;
+        case dontShowAgain:
+            suggestInsiders.Value = false;
+            break;
+        case askLater:
+            break;
+        default:
+            break;
+    }
+}
+
+function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
+            if (err) {
+                reject(new Error('Failed to create vsix file'));
+                return;
+            }
+    
+            // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
+            // then the .catch call will return a resolved promise
+            // Thusly, the .catch call must also throw, as a return would simply return an unused promise
+            // instead of returning early from this function scope
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+            let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
+            while (true) { // Might need to try again with a different http.proxySupport setting.
+                try {
+                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
+                } catch {
+                    // Try again with the proxySupport to "off".
+                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                        reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
+                        return;
+                    }
+                    if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
+                        config.update('http.proxySupport', "off", true);
+                        continue;
+                    }
+                    reject(new Error('Failed to download VSIX package'));
+                    return;
+                }
+                if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                    config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                    telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
+                }
+                break;
+            }
+            try {
+                await installVsix(vsixPath, updateChannel);
+            } catch (error) {
+                reject(error);
+                return;
+            }
+            clearInterval(insiderUpdateTimer);
+            const message: string =
+                `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
+            util.promptReloadWindow(message);
+            telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
+            resolve();
+        });
+    }).catch(error => {
+        console.error(`${cppInstallVsixStr}${error.message}`);
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
+    });
+}
+
 /**
  * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
  * The update can be an upgrade or downgrade depending on the the updateChannel setting.
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // Wrap in new Promise to allow tmp.file callback to successfully resolve/reject
-    // as tmp.file does not do anything with the callback functions return value
-    const p: Promise<void> = new Promise<void>((resolve, reject) => {
-        getTargetBuildInfo(updateChannel).then(buildInfo => {
-            if (!buildInfo) {
-                resolve();
-                return;
-            }
-
-            // Create a temporary file, download the VSIX to it, then install the VSIX
-            tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
-                if (err) {
-                    reject(new Error('Failed to create vsix file'));
-                    return;
-                }
-
-                // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
-                // then the .catch call will return a resolved promise
-                // Thusly, the .catch call must also throw, as a return would simply return an unused promise
-                // instead of returning early from this function scope
-                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-                let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
-                while (true) { // Might need to try again with a different http.proxySupport setting.
-                    try {
-                        await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
-                    } catch {
-                        // Try again with the proxySupport to "off".
-                        if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
-                            config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                            reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
-                            return;
-                        }
-                        if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
-                            config.update('http.proxySupport', "off", true);
-                            continue;
-                        }
-                        reject(new Error('Failed to download VSIX package'));
-                        return;
-                    }
-                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
-                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                        telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
-                    }
-                    break;
-                }
-                try {
-                    await installVsix(vsixPath, updateChannel);
-                } catch (error) {
-                    reject(error);
-                    return;
-                }
-                clearInterval(insiderUpdateTimer);
-                const message: string =
-                    `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
-                util.promptReloadWindow(message);
-                telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
-
-                resolve();
-            });
-        }, (error: Error) => {
-            // Handle getTargetBuildInfo rejection
-            reject(error);
-        });
-    });
-    await p.catch((error: Error) => {
-        // Handle .then following getTargetBuildInfo rejection
-        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
-            error.message = "Potential PII hidden";
+    // If we have buildInfo cache, we should use it.
+    let buildInfo: BuildInfo | null = buildInfoCache;
+    // clear buildInfo cache.
+    buildInfoCache = null;
+    
+    if (!buildInfo) {
+        try {
+            buildInfo = await getTargetBuildInfo(updateChannel);
+        } catch (error) {
+            telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         }
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-    });
+    }
+    if (!buildInfo) {
+        return; // No need to update.
+    }
+    await applyUpdate(buildInfo, updateChannel);
 }
 
 /*********************************************
@@ -844,6 +922,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     
     // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
     data = data.replace(/0x................ /g, "");
+    data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
     const process1: string = "Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin\t";

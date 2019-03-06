@@ -8,7 +8,7 @@ import * as path from 'path';
 
 // import * as util from '../src/common' <- DO NOT USE. Also do not use anything with relative paths, it will break during replacing in test/integrationTests/debug/integration.test.ts
 
-abstract class DebugAdapterDescriptorFactoryWithContext implements vscode.DebugAdapterDescriptorFactory {
+abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
     protected readonly context: vscode.ExtensionContext;
 
     constructor(context: vscode.ExtensionContext) {
@@ -18,7 +18,7 @@ abstract class DebugAdapterDescriptorFactoryWithContext implements vscode.DebugA
     abstract createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor>;
 }
 
-export class CppdbgDebugAdapterDescriptorFactory extends DebugAdapterDescriptorFactoryWithContext {
+export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
     public static DEBUG_TYPE : string = "cppdbg";
 
     constructor(context: vscode.ExtensionContext) {
@@ -32,7 +32,7 @@ export class CppdbgDebugAdapterDescriptorFactory extends DebugAdapterDescriptorF
     }
 }
 
-export class CppvsdbgDebugAdapterDescriptorFactory extends DebugAdapterDescriptorFactoryWithContext {
+export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
     public static DEBUG_TYPE : string = "cppvsdbg";
 
     constructor(context: vscode.ExtensionContext) {

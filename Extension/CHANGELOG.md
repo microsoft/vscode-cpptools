@@ -1,6 +1,20 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.22.0-insiders February 6, 2019
+## Version 0.22.0-insiders2: March 1, 2019
+* Fix IntelliSense not working on Windows when the username has a space in it and file `C:\Users\<firstname>` exists. [#1377](https://github.com/Microsoft/vscode-cpptools/issues/1377), [#2114](https://github.com/Microsoft/vscode-cpptools/issues/2114), [#2176](https://github.com/Microsoft/vscode-cpptools/issues/2176), [#3052](https://github.com/Microsoft/vscode-cpptools/issues/3052), [#3139](https://github.com/Microsoft/vscode-cpptools/issues/3139)
+* Enable `${command:cpptools.activeConfigName}` in tasks. [#1524](https://github.com/Microsoft/vscode-cpptools/issues/1524)
+* Fix completion when the start of an identifier matches a keyword. [#1986](https://github.com/Microsoft/vscode-cpptools/issues/1986)
+* Fix auto-removal of compiler-provided paths in `includePath`. [#2177](https://github.com/Microsoft/vscode-cpptools/issues/2177)
+* Add support for `Scope::Member` scoped symbol searches. [#2484](https://github.com/Microsoft/vscode-cpptools/issues/2484)
+* Fix remote process picker bug. [#2585](https://github.com/Microsoft/vscode-cpptools/issues/2585), [#3150](https://github.com/Microsoft/vscode-cpptools/issues/3150)
+* Add warning squiggles to `c_cpp_properties.json` for invalid paths. [#2799](https://github.com/Microsoft/vscode-cpptools/issues/2799)
+* Fix bug with manual completion invocation after `struct`. [#3080](https://github.com/Microsoft/vscode-cpptools/issues/3080)
+* Add C/C++ compiler build tasks for compiling the active source file. [PR #3118](https://github.com/Microsoft/vscode-cpptools/pull/3118)
+* Fix command not found and empty `c_cpp_properties.json` if activation is too slow. [#3160](https://github.com/Microsoft/vscode-cpptools/issues/3160), [#3176](https://github.com/Microsoft/vscode-cpptools/issues/3176)
+* Add AutoPCH support to reduce IntelliSense parsing time, with `C_Cpp.intelliSenseCachePath` and `C_Cpp.intelliSenseCacheSize` settings. [PR #3184](https://github.com/Microsoft/vscode-cpptools/pull/3184)
+* Fix `cppvsdbg` debugger showing `"An unspecified error has occurred."` for structured binding variables. [#3197](https://github.com/Microsoft/vscode-cpptools/issues/3197)
+
+## Version 0.22.0-insiders: February 6, 2019
 * Fix crash on Windows when 8.3 filenames are used. [#2453](https://github.com/Microsoft/vscode-cpptools/issues/2453), [#3104](https://github.com/Microsoft/vscode-cpptools/issues/3104)
 * Fix signature help active parameter selection when parameter names are missing or subsets of each other. [#2952](https://github.com/Microsoft/vscode-cpptools/issues/2952)
 * Fix `--enable-pretty-printing` with `gdb` when complex objects are used as keys in maps. [#3024](https://github.com/Microsoft/vscode-cpptools/issues/3024)
@@ -16,7 +30,7 @@
 * Add Chinese translations for command titles. [PR #3128](https://github.com/Microsoft/vscode-cpptools/pull/3128)
 * Fix other unreported IntelliSense engine bugs.
 
-## Version 0.21.0 January 23, 2019
+## Version 0.21.0: January 23, 2019
 ### New Features
 * Add documentation comments for hover, completion, and signature help. [#399](https://github.com/Microsoft/vscode-cpptools/issues/399)
 * Add completion committing for methods after `(`. [#1184](https://github.com/Microsoft/vscode-cpptools/issues/1184)

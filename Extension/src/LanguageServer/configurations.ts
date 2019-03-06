@@ -630,6 +630,7 @@ export class CppProperties {
             // Replace all \<escape character> with \\<character>.
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
             readResults = readResults.replace(/\\/g, '\\\\');
+            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \".
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
@@ -715,20 +716,20 @@ export class CppProperties {
             // Get the text of the current configuration.
             let curText: string = document.getText();
             let curTextStartOffset: number = 0;
-            let configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${this.CurrentConfiguration.name}"`));
+            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${this.CurrentConfiguration.name}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
                 return;
             }
             curTextStartOffset = configStart + 1;
             curText = curText.substr(curTextStartOffset); // Remove earlier configs.
-            let nameEnd: number = curText.indexOf(":");
+            const nameEnd: number = curText.indexOf(":");
             curTextStartOffset += nameEnd + 1;
             curText = curText.substr(nameEnd + 1);
-            let nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
+            const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
             if (nextNameStart !== -1) {
                 curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
-                let nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
+                const nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
                 if (nextNameStart2 === -1) {
                     telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
                     return;
@@ -752,11 +753,24 @@ export class CppProperties {
                 paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
             }
 
+            const isWindows: boolean = os.platform() === 'win32';
+            if (this.CurrentConfiguration.compilerPath) {
+                let compilerPathAndArgs: util.CompilerPathAndArgs;
+                compilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
+                if (!(isWindows && compilerPathAndArgs.compilerPath.endsWith("cl.exe"))) {
+                    // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace.
+                    // This is checked to determine if the path is a compilerPath later on.
+                    paths.add(`${compilerPathAndArgs.compilerPath}`);
+                }
+            }
+
             // Get the start/end for properties that are file-only.
-            let forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
-            let forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
-            let compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
-            let compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+            const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
+            const forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
+            const compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
+            const compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+            const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
+            const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
             if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
                 this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
@@ -764,7 +778,8 @@ export class CppProperties {
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
 
             for (let curPath of paths) {
-                let resolvedPath: string = curPath.substr(1, curPath.length - 2);
+                const isCompilerPath: boolean = !curPath.startsWith('"'); // This check probably will need to change later.
+                let resolvedPath: string = curPath.substr((!isCompilerPath ? 1 : 0), curPath.length + (!isCompilerPath ? - 2 : 0));
                 // Resolve special path cases.
                 if (resolvedPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
@@ -785,7 +800,8 @@ export class CppProperties {
                 }
 
                 // Handle WSL paths.
-                if (resolvedPath.startsWith("/") && os.platform() === 'win32') {
+                const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
+                if (isWSL) {
                     const mntStr: string = "/mnt/";
                     if (resolvedPath.length > "/mnt/c/".length && resolvedPath.substr(0, mntStr.length) === mntStr) {
                         resolvedPath = resolvedPath.substr(mntStr.length);
@@ -798,13 +814,24 @@ export class CppProperties {
                 }
 
                 let pathExists: boolean = true;
+                let existsWithExeAdded: (path: string) => boolean = (path: string) => {
+                    return isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
+                };
                 if (!fs.existsSync(resolvedPath)) {
-                    // Check again for a relative path.
-                    let relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
-                    if (!fs.existsSync(relativePath)) {
-                        pathExists = false;
+                    if (existsWithExeAdded(resolvedPath)) {
+                        resolvedPath += ".exe";
                     } else {
-                        resolvedPath = relativePath;
+                        // Check again for a relative path.
+                        const relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
+                        if (!fs.existsSync(relativePath)) {
+                            if (existsWithExeAdded(resolvedPath)) {
+                                resolvedPath += ".exe";
+                            } else {
+                                pathExists = false;
+                            }
+                        } else {
+                            resolvedPath = relativePath;
+                        }
                     }
                 }
 
@@ -817,7 +844,8 @@ export class CppProperties {
                     } else {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
+                            (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
                             if (util.checkFileExistsSync(resolvedPath)) {
                                 continue;
                             }
@@ -832,7 +860,8 @@ export class CppProperties {
                         }
                     }
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset + 1), document.positionAt(curTextStartOffset + curOffset + curPath.length - 1)),
+                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
+                            document.positionAt(curTextStartOffset + curOffset + curPath.length + (!isCompilerPath ? - 1 : 0))),
                         message, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }
