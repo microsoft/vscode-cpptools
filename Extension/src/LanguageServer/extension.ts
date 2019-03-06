@@ -40,7 +40,7 @@ let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
-
+const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 
 /**
@@ -409,7 +409,7 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-async function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
@@ -451,6 +451,21 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                 let process: ChildProcess;
                 try {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+                    
+                    // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+                    const timer: NodeJS.Timer = setTimeout(() => {
+                        process.kill();
+                        reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
+                    }, 30000);
+                    
+                    process.on('exit', (code: number) => {
+                        clearInterval(timer);
+                        if (code !== 0) {
+                            reject(new Error(`VS Code script exited with error code ${code}`));
+                        } else {
+                            resolve();
+                        }
+                    });
                     if (process.pid === undefined) {
                         throw new Error();
                     }
@@ -458,7 +473,6 @@ async function installVsix(vsixLocation: string, updateChannel: string): Promise
                     reject(new Error('Failed to launch VS Code script process for installation'));
                     return;
                 }
-                resolve();
             });
         }
 
@@ -506,19 +520,23 @@ async function suggestInsidersChannel(): Promise<void> {
     try {
         buildInfo = await getTargetBuildInfo("Insiders");
     } catch (error) {
+        console.log(`${cppInstallVsixStr}${error.message}`);
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
         telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
     }
     if (!buildInfo) {
-        return;
+        return; // No need to update.
     }
-    const message: string = `Insiders version: ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
+    const message: string = `Insiders version ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
     const yes: string = "Yes";
     const askLater: string = "Ask Me Later";
     const dontShowAgain: string = "Don't Show Again";
     let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
-            // Cache buidinfo.
+            // Cache buildInfo.
             buildInfoCache = buildInfo;
             // It will call onDidChangeSettings.
             vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
@@ -584,6 +602,7 @@ function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void>
             resolve();
         });
     }).catch(error => {
+        console.error(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
         }
@@ -597,9 +616,9 @@ function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void>
  * @param updateChannel The user's updateChannel setting.
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
-    // If we have buildinfo cache, we should use it.
+    // If we have buildInfo cache, we should use it.
     let buildInfo: BuildInfo | null = buildInfoCache;
-    // clear buildinfo cache.
+    // clear buildInfo cache.
     buildInfoCache = null;
     
     if (!buildInfo) {
@@ -610,7 +629,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
         }
     }
     if (!buildInfo) {
-        return;
+        return; // No need to update.
     }
     await applyUpdate(buildInfo, updateChannel);
 }
