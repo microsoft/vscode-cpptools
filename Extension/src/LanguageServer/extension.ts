@@ -40,7 +40,7 @@ let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
-const cppInstallVsixStr: string = 'C/C++ install vsix: ';
+const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 
 /**
