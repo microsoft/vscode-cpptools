@@ -7,10 +7,9 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { /*getBuildTasks,*/ BuildTaskDefinition } from '../LanguageServer/extension';
+import { getBuildTasks, BuildTaskDefinition } from '../LanguageServer/extension';
 import * as util from '../common';
 import * as fs from 'fs';
-//import * as assert from 'assert';
 import * as Telemetry from '../telemetry';
 import { buildAndDebugActiveFileStr } from './extension';
 
@@ -55,24 +54,20 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
             return menuItem;
         });
 
-        return vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"}).then(async selection => {
-            // Wrap in new Promise to make sure task kicks off before VS Code switches the active document to launch.json
-            return new Promise<vscode.DebugConfiguration[]>(async resolve => {
-                if (!selection) {
-                    return resolve([defaultConfig]); // User canceled it. Choose the default config?
-                }
-                if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
-                    try {
-                        await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
-                        await vscode.debug.startDebugging(folder, selection.configuration);
-                        Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
-                    } catch (e) {
-                        Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-                    }
-                }
-                return resolve([selection.configuration]);
-            });
-        });
+        const selection: MenuItem = await vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"});
+        if (!selection) {
+            throw new Error(); // User canceled it.
+        }
+        if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
+            try {
+                await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                await vscode.debug.startDebugging(folder, selection.configuration);
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
+            } catch (e) {
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+            }
+        }
+        return [selection.configuration];
     }
 
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
@@ -93,8 +88,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[]; // = await getBuildTasks(); // TODO
-        if (!buildTasks || buildTasks.length === 0) {
+        let buildTasks: vscode.Task[] = await getBuildTasks(); 
+        if (buildTasks.length === 0 || this.type === DebuggerType.cppvsdbg) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
@@ -130,6 +125,10 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 debuggerName = "gdb";
             }
 
+            if (platform === "win32") {
+                debuggerName += ".exe";
+            }
+
             const debuggerPath: string = path.join(compilerDirname, debuggerName);
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 fs.stat(debuggerPath, (err, stats: fs.Stats) => {
@@ -137,7 +136,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                         newConfig.miDebuggerPath = debuggerPath;
                     } else {
                         // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
-                        newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
+                        newConfig.miDebuggerPath = (platform === "darwin" ? undefined : path.join("/usr", "bin", debuggerName));
                     }
 
                     return resolve(newConfig);
