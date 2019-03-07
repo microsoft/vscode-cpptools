@@ -120,7 +120,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 newConfig.MIMode = "lldb";
                 const suffixIndex: number = compilerName.indexOf("-");
                 const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
-                debuggerName = (platform === "darwin" ? "lldb" : "lldb-mi") + suffix;
+                debuggerName = "lldb-mi" + suffix;
             } else {
                 debuggerName = "gdb";
             }
@@ -131,16 +131,21 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
             const debuggerPath: string = path.join(compilerDirname, debuggerName);
             return new Promise<vscode.DebugConfiguration>(resolve => {
-                fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                    if (!err && stats && stats.isFile) {
-                        newConfig.miDebuggerPath = debuggerPath;
-                    } else {
-                        // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
-                        newConfig.miDebuggerPath = (platform === "darwin" ? undefined : path.join("/usr", "bin", debuggerName));
-                    }
-
+                if (platform === "darwin") {
+                    newConfig.miDebuggerPath = undefined;
                     return resolve(newConfig);
-                });
+                } else {
+                    fs.stat(debuggerPath, (err, stats: fs.Stats) => {
+                        if (!err && stats && stats.isFile) {
+                            newConfig.miDebuggerPath = debuggerPath;
+                        } else {
+                            // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
+                            newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
+                        }
+
+                        return resolve(newConfig);
+                    });
+                }
             });
         }));
         configs.push(defaultConfig);
