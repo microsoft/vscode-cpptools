@@ -67,6 +67,12 @@ export function initialize(context: vscode.ExtensionContext): void {
             if (!selection) {
                 return; // User canceled it.
             }
+            if (selection.label.startsWith("cl.exe")) {
+                if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
+                    vscode.window.showErrorMessage('cl.exe build and debug is only usable when Code is run from the Developer Command Prompt for VS.');
+                    return;
+                }
+            }
             if (selection.configuration.preLaunchTask) {
                 if (folder) {
                     try {

@@ -154,7 +154,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     let userCompilerPath: string = await activeClient.getCompilerPath();
     if (userCompilerPath) {
         userCompilerPath = userCompilerPath.trim();
-        if (isWindows && (userCompilerPath.startsWith("/") || userCompilerPath.endsWith("cl.exe"))) { // TODO: Add WSL/cl.exe compiler support.
+        if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
             userCompilerPath = null;
         } else {
             userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
