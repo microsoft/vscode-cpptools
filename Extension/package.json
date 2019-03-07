@@ -1435,7 +1435,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",
-    "@types/node": "^8.10.40",
+    "@types/node": "^8.10.43",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "child-process": "^1.0.2",
