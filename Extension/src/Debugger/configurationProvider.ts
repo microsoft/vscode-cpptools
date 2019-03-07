@@ -132,7 +132,6 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const debuggerPath: string = path.join(compilerDirname, debuggerName);
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
-                    newConfig.miDebuggerPath = undefined;
                     return resolve(newConfig);
                 } else {
                     fs.stat(debuggerPath, (err, stats: fs.Stats) => {
