@@ -30,6 +30,7 @@ import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
+import * as os from 'os';
 
 let ui: UI;
 const configProviderTimeout: number = 2000;
@@ -379,6 +380,16 @@ class DefaultClient implements Client {
         }
 
         let abTestSettings: ABTestSettings = getABTestSettings();
+        
+        let intelliSenseCacheDisabled: boolean = false;
+        if (os.platform() === "darwin") {
+            const releaseParts: string[] = os.release().split(".");
+            if (releaseParts.length >= 1) {
+                // AutoPCH doesn't work for older Mac OS's.
+                intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+            }
+        }
+
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'cpp' },
@@ -402,6 +413,7 @@ class DefaultClient implements Client {
                 tab_size: other.editorTabSize,
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
+                intelliSenseCacheDisabled: intelliSenseCacheDisabled,
                 intelliSenseCachePath : settings.intelliSenseCachePath,
                 intelliSenseCacheSize : settings.intelliSenseCacheSize,
                 autocomplete: settings.autoComplete,
