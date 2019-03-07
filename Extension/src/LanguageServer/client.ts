@@ -386,7 +386,7 @@ class DefaultClient implements Client {
             const releaseParts: string[] = os.release().split(".");
             if (releaseParts.length >= 1) {
                 // AutoPCH doesn't work for older Mac OS's.
-                intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 18;
+                intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
             }
         }
 
