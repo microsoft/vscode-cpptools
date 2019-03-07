@@ -780,9 +780,9 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
         } else {
             // Go from right to left checking if a valid path is to the left of a space.
             let spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (spaceStart !== -1 && !fs.existsSync(compilerPath)) {
+            if (spaceStart !== -1 && (!isWindows || !compilerPath.endsWith("cl.exe")) && !checkFileExistsSync(compilerPath)) {
                 let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
-                while ((!isWindows || !potentialCompilerPath.endsWith("cl.exe")) && !fs.existsSync(potentialCompilerPath)) {
+                while ((!isWindows || !potentialCompilerPath.endsWith("cl.exe")) && !checkFileExistsSync(potentialCompilerPath)) {
                     spaceStart = potentialCompilerPath.lastIndexOf(" ");
                     if (spaceStart === -1) {
                         // Reached the start without finding a valid path. Use the original value.
