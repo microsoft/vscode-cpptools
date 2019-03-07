@@ -105,7 +105,6 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
             const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
             const compilerName: string = path.basename(definition.compilerPath);
-            const compilerDirname: string = path.dirname(definition.compilerPath);
 
             let newConfig: vscode.DebugConfiguration = Object.assign({}, defaultConfig); // Copy enumerables and properties
 
@@ -115,25 +114,28 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
 
-            let debuggerName: string;
-            if (compilerName.startsWith("clang")) {
-                newConfig.MIMode = "lldb";
-                const suffixIndex: number = compilerName.indexOf("-");
-                const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
-                debuggerName = "lldb-mi" + suffix;
-            } else {
-                debuggerName = "gdb";
-            }
-
-            if (platform === "win32") {
-                debuggerName += ".exe";
-            }
-
-            const debuggerPath: string = path.join(compilerDirname, debuggerName);
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
                     return resolve(newConfig);
                 } else {
+                    let debuggerName: string;
+                    if (compilerName.startsWith("clang")) {
+                        newConfig.MIMode = "lldb";
+                        const suffixIndex: number = compilerName.indexOf("-");
+                        const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
+                        debuggerName = "lldb-mi" + suffix;
+                    } else if (compilerName === "cl.exe") {
+                        newConfig.miDebuggerPath = undefined;
+                    } else {
+                        debuggerName = "gdb";
+                    }
+        
+                    if (platform === "win32") {
+                        debuggerName += ".exe";
+                    }
+        
+                    const compilerDirname: string = path.dirname(definition.compilerPath);
+                    const debuggerPath: string = path.join(compilerDirname, debuggerName);
                     fs.stat(debuggerPath, (err, stats: fs.Stats) => {
                         if (!err && stats && stats.isFile) {
                             newConfig.miDebuggerPath = debuggerPath;
@@ -141,7 +143,6 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                             // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
                             newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
                         }
-
                         return resolve(newConfig);
                     });
                 }
