@@ -132,10 +132,10 @@ export class CppProperties {
     public get ConfigurationsChanged(): vscode.Event<Configuration[]> { return this.configurationsChanged.event; }
     public get SelectionChanged(): vscode.Event<number> { return this.selectionChanged.event; }
     public get CompileCommandsChanged(): vscode.Event<string> { return this.compileCommandsChanged.event; }
-    public get Configurations(): Configuration[] { return this.configurationJson.configurations; }
+    public get Configurations(): Configuration[] { return this.configurationJson ? this.configurationJson.configurations : null; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
-    public get CurrentConfiguration(): Configuration { return this.Configurations[this.CurrentConfigurationIndex]; }
-    public get CompilerPath(): string { return this.CurrentConfiguration.compilerPath; }
+    public get CurrentConfiguration(): Configuration { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : null; }
+    public get CompilerPath(): string { return this.CurrentConfiguration ? this.CurrentConfiguration.compilerPath : null; }
     public get KnownCompiler(): KnownCompiler[] { return this.knownCompilers; }
 
     public get CurrentConfigurationProvider(): string|null {
