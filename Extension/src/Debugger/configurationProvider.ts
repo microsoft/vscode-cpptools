@@ -126,6 +126,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                         debuggerName = "lldb-mi" + suffix;
                     } else if (compilerName === "cl.exe") {
                         newConfig.miDebuggerPath = undefined;
+                        newConfig.type = "cppvsdbg";
                     } else {
                         debuggerName = "gdb";
                     }
