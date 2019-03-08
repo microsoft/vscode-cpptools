@@ -223,7 +223,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
         const compilerPathBase: string = path.basename(compilerPath);
         const taskName: string = compilerPathBase + " build active file";
         const isCl: boolean = taskName.startsWith("cl.exe");
-        let args: string[] = isCl ? [ '${file}', '/Zi' ] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+        let args: string[] = isCl ? [ '${file}', '/Zi', '/EHsc' ] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
         if (compilerPathAndArgs.additionalArgs) {
             args = args.concat(compilerPathAndArgs.additionalArgs);
         }
