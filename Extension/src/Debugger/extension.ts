@@ -32,7 +32,8 @@ export function initialize(context: vscode.ExtensionContext): void {
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
     if (os.platform() === 'win32') {
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new CppVsDbgConfigurationProvider(configurationProvider)));
+        const provider: CppDbgConfigurationProvider = new CppVsDbgConfigurationProvider(configurationProvider);
+        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(provider)));
     }
     const provider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));

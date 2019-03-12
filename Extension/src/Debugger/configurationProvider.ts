@@ -58,6 +58,12 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         if (!selection) {
             throw new Error(); // User canceled it.
         }
+        if (selection.label.startsWith("cl.exe")) {
+            if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
+                vscode.window.showErrorMessage('cl.exe build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.');
+                throw new Error();
+            }
+        }
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
             try {
                 await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
