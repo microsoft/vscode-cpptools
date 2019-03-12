@@ -112,9 +112,11 @@
                                     "type": "string"
                                 }
                             }
-                        }
+                        },
+                        "additionalProperties": false
                     }
-                }
+                },
+                "additionalProperties": false
             }
         },
         "env": {
@@ -156,5 +158,6 @@
     "required": [
         "configurations",
         "version"
-    ]
+    ],
+    "additionalProperties": false
 }
