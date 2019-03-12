@@ -106,6 +106,20 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
 
+        // Filter out build tasks that don't match the currently selectede debug configuration type.
+        buildTasks = buildTasks.filter((task: vscode.Task) => {
+            if (defaultConfig.name === "(Windows) Launch") {
+                if (task.name.startsWith("cl.exe")) {
+                    return true;
+                }
+            } else {
+                if (!task.name.startsWith("cl.exe")) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
