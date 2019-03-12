@@ -58,6 +58,12 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         if (!selection) {
             throw new Error(); // User canceled it.
         }
+        if (selection.label.startsWith("cl.exe")) {
+            if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
+                vscode.window.showErrorMessage('cl.exe build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.');
+                throw new Error();
+            }
+        }
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
             try {
                 await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
@@ -89,7 +95,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         let buildTasks: vscode.Task[] = await getBuildTasks(); 
-        if (buildTasks.length === 0 || this.type === DebuggerType.cppvsdbg) {
+        if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
@@ -100,12 +106,25 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
 
+        // Filter out build tasks that don't match the currently selectede debug configuration type.
+        buildTasks = buildTasks.filter((task: vscode.Task) => {
+            if (defaultConfig.name === "(Windows) Launch") {
+                if (task.name.startsWith("cl.exe")) {
+                    return true;
+                }
+            } else {
+                if (!task.name.startsWith("cl.exe")) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
             const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
             const compilerName: string = path.basename(definition.compilerPath);
-            const compilerDirname: string = path.dirname(definition.compilerPath);
 
             let newConfig: vscode.DebugConfiguration = Object.assign({}, defaultConfig); // Copy enumerables and properties
 
@@ -115,25 +134,30 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
 
-            let debuggerName: string;
-            if (compilerName.startsWith("clang")) {
-                newConfig.MIMode = "lldb";
-                const suffixIndex: number = compilerName.indexOf("-");
-                const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
-                debuggerName = "lldb-mi" + suffix;
-            } else {
-                debuggerName = "gdb";
-            }
-
-            if (platform === "win32") {
-                debuggerName += ".exe";
-            }
-
-            const debuggerPath: string = path.join(compilerDirname, debuggerName);
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
                     return resolve(newConfig);
                 } else {
+                    let debuggerName: string;
+                    if (compilerName.startsWith("clang")) {
+                        newConfig.MIMode = "lldb";
+                        const suffixIndex: number = compilerName.indexOf("-");
+                        const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
+                        debuggerName = "lldb-mi" + suffix;
+                    } else if (compilerName === "cl.exe") {
+                        newConfig.miDebuggerPath = undefined;
+                        newConfig.type = "cppvsdbg";
+                        return resolve(newConfig);
+                    } else {
+                        debuggerName = "gdb";
+                    }
+        
+                    if (platform === "win32") {
+                        debuggerName += ".exe";
+                    }
+        
+                    const compilerDirname: string = path.dirname(definition.compilerPath);
+                    const debuggerPath: string = path.join(compilerDirname, debuggerName);
                     fs.stat(debuggerPath, (err, stats: fs.Stats) => {
                         if (!err && stats && stats.isFile) {
                             newConfig.miDebuggerPath = debuggerPath;
@@ -141,7 +165,6 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                             // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
                             newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
                         }
-
                         return resolve(newConfig);
                     });
                 }

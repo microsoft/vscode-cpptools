@@ -154,7 +154,7 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
     let userCompilerPath: string = await activeClient.getCompilerPath();
     if (userCompilerPath) {
         userCompilerPath = userCompilerPath.trim();
-        if (isWindows && (userCompilerPath.startsWith("/") || userCompilerPath.endsWith("cl.exe"))) { // TODO: Add WSL/cl.exe compiler support.
+        if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
             userCompilerPath = null;
         } else {
             userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
@@ -219,19 +219,22 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
         // Handle compiler args in compilerPath.
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
         compilerPath = compilerPathAndArgs.compilerPath;
-        const taskName: string = path.basename(compilerPath) + " build active file";
-        let args: string[] = ['-g', '${file}', '-o', path.join('${fileDirname}', '${fileBasenameNoExtension}' + (isWindows ? '.exe' : ''))];
+        const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+        const compilerPathBase: string = path.basename(compilerPath);
+        const taskName: string = compilerPathBase + " build active file";
+        const isCl: boolean = taskName.startsWith("cl.exe");
+        let args: string[] = isCl ? [ '/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'  ] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
         if (compilerPathAndArgs.additionalArgs) {
             args = args.concat(compilerPathAndArgs.additionalArgs);
         }
-        const cwd: string = path.dirname(compilerPath);
+        const cwd: string = isCl ? "" : path.dirname(compilerPath);
         const kind: BuildTaskDefinition = {
             type: 'shell',
             label: taskName,
-            command: compilerPath,
+            command: isCl ? compilerPathBase : compilerPath,
             args: args,
-            options: {"cwd": cwd},
-            compilerPath: compilerPath
+            options: isCl ? undefined : {"cwd": cwd},
+            compilerPath: isCl ? compilerPathBase : compilerPath
         };
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });

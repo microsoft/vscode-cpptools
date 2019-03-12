@@ -31,8 +31,10 @@ export function initialize(context: vscode.ExtensionContext): void {
     let configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
+    let vsdbgProvider: CppVsDbgConfigurationProvider = null;
     if (os.platform() === 'win32') {
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new CppVsDbgConfigurationProvider(configurationProvider)));
+        vsdbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
+        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(vsdbgProvider)));
     }
     const provider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
@@ -51,9 +53,19 @@ export function initialize(context: vscode.ExtensionContext): void {
             vscode.window.showErrorMessage('Cannot build and debug because the active file is not a C or C++ source file.');
             return Promise.resolve();
         }
+        
         let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
             return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
         });
+
+        if (vsdbgProvider) {
+            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config => {
+                return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
+            });
+            if (vsdbgConfigs) {
+                configs.push(...vsdbgConfigs);
+            }
+        }
 
         interface MenuItem extends vscode.QuickPickItem {
             configuration: vscode.DebugConfiguration;
@@ -66,6 +78,12 @@ export function initialize(context: vscode.ExtensionContext): void {
         vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? "No compiler found" : "Select a compiler" )}).then(async selection => {
             if (!selection) {
                 return; // User canceled it.
+            }
+            if (selection.label.startsWith("cl.exe")) {
+                if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
+                    vscode.window.showErrorMessage('cl.exe build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.');
+                    return;
+                }
             }
             if (selection.configuration.preLaunchTask) {
                 if (folder) {
