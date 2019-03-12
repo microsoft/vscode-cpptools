@@ -89,7 +89,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         let buildTasks: vscode.Task[] = await getBuildTasks(); 
-        if (buildTasks.length === 0 || this.type === DebuggerType.cppvsdbg) {
+        if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
@@ -127,6 +127,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     } else if (compilerName === "cl.exe") {
                         newConfig.miDebuggerPath = undefined;
                         newConfig.type = "cppvsdbg";
+                        return resolve(newConfig);
                     } else {
                         debuggerName = "gdb";
                     }
