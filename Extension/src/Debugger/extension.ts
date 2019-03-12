@@ -31,9 +31,10 @@ export function initialize(context: vscode.ExtensionContext): void {
     let configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
+    let vsdbgProvider: CppVsDbgConfigurationProvider = null;
     if (os.platform() === 'win32') {
-        const provider: CppDbgConfigurationProvider = new CppVsDbgConfigurationProvider(configurationProvider);
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(provider)));
+        vsdbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
+        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(vsdbgProvider)));
     }
     const provider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
@@ -52,9 +53,19 @@ export function initialize(context: vscode.ExtensionContext): void {
             vscode.window.showErrorMessage('Cannot build and debug because the active file is not a C or C++ source file.');
             return Promise.resolve();
         }
+        
         let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
             return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
         });
+
+        if (vsdbgProvider) {
+            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config => {
+                return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
+            });
+            if (vsdbgConfigs) {
+                configs.push(...vsdbgConfigs);
+            }
+        }
 
         interface MenuItem extends vscode.QuickPickItem {
             configuration: vscode.DebugConfiguration;
