@@ -205,8 +205,23 @@
                         <tr>
                             <td>
                                 <div>
-                                    <h2 class="caption">January 2019 Update</h2>
-                                    <div>Thank you for installing the C/C++ extension. In the January update, we added documentation comments for hover, completion, and signature help.<br/>
+                                    <h2 class="caption">March 2019 Update</h2>
+                                    <div>Thank you for installing the C/C++ extension! We're excited to announce the following features in the March update:<br/>
+                                        <h3 style="font-weight: 600">IntelliSense caching</h3>
+                                        The extension will now cache IntelliSense parsing information to improve loading and rescanning speed for your code files.<br/>
+                                        <br/>
+                                        <em style="font-weight: 600">Please Note:</em> The extension writes the cache to disk in order to achieve this performance improvement. By default the cache files will be stored in your workspace
+                                        folder's ".vscode" folder, but you can change this location by using the <code>"C_Cpp.intelliSenseCachePath"</code> setting. You can also control how much disk space will be
+                                        allocated for the cache with the <code>"C_Cpp.intelliSenseCacheSize"</code> setting. The default is 5120 MB as the caches for individual translation units can be large,
+                                        depending on the size and number of included headers.<br/>
+                                        <h3 style="font-weight: 600">Build and Debug the active source file</h3>
+                                        We've added a command to help you generate build and debug tasks for single code files. Since this feature writes out tasks.json and launch.json files, it currently requires
+                                        that a workspace folder be opened in VS Code first. After that, you can press F5 or select the command from the context menu to configure the tasks or kick off a build and debug
+                                        session.
+                                        <h3 style="font-weight: 600">Configuration squiggles</h3>
+                                        We have added additional validation to the <code>c_cpp_properties.json</code> file to assist in diagnosing potential configuration mistakes. They will show up as problems in the
+                                        problems window.<br/>
+                                        <br/>
                                         <br/>
                                         Additional features and bug fixes are detailed in the <a href="https://github.com/Microsoft/vscode-cpptools/releases">full release notes</a>.</div>
                                 </div>
@@ -231,10 +246,9 @@
                             <td>
                                 <div>
                                     <h3 class="caption">Blog Posts</h3>
-                                    <div><a href="https://blogs.msdn.microsoft.com/vcblog/2018/12/05/visual-studio-code-cpp-extension-october-2018-update-and-a-simplified-insiders-program/">October 2018 Update</a></div>
-                                    <div><a href="https://blogs.msdn.microsoft.com/vcblog/2018/08/23/visual-studio-code-c-c-extension-august-2018-update/">August 2018 Update</a></div>
-                                    <div><a href="https://blogs.msdn.microsoft.com/vcblog/2018/07/25/visual-studio-code-cc-extension-july-2018-update-and-intellisense-auto-configuration-for-cmake/">July 2018 Update</a></div>
-                                    <div><a href="https://blogs.msdn.microsoft.com/vcblog/2016/03/31/cc-extension-for-visual-studio-code/">C/C++ Extension anouncement</a></div>
+                                    <div><a href="https://devblogs.microsoft.com/cppblog/vs-code-cpp-extension-january-2019-update/">January 2019 Update</a></div>
+                                    <div><a href="https://devblogs.microsoft.com/cppblog/visual-studio-code-cpp-extension-october-2018-update-and-a-simplified-insiders-program/">October 2018 Update</a></div>
+                                    <div><a href="https://devblogs.microsoft.com/cppblog/visual-studio-code-c-c-extension-august-2018-update/">August 2018 Update</a></div>
                                 </div>
                             </td>
                         </tr>
