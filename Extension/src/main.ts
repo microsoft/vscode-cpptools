@@ -22,7 +22,7 @@ import { getInstallationInformation, InstallationInformation, setInstallationSta
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
-const releaseNotesVersion: number = 3;
+const releaseNotesVersion: number = 4;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
