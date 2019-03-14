@@ -43,25 +43,6 @@
   ],
   "main": "./out/src/main",
   "contributes": {
-    "taskDefinitions": [
-      {
-        "type": "shell",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "command": {
-            "type": "string"
-          },
-          "args": {
-            "type": "array"
-          },
-          "options": {
-            "type": "array"
-          }
-        }
-      }
-    ],
     "problemMatchers": [
       {
         "name": "gcc",
