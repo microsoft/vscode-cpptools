@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.22.0-insiders3: March 14, 2019
+* Fix bugs with squiggles and IntelliSense updating after edits. [#1779](https://github.com/Microsoft/vscode-cpptools/issues/1779), [#3124](https://github.com/Microsoft/vscode-cpptools/issues/3124), [#3260](https://github.com/Microsoft/vscode-cpptools/issues/3260)
+* Fix formatting (and other non-IntelliSense operations) being blocked by IntelliSense processing. [#1928](https://github.com/Microsoft/vscode-cpptools/issues/1928)
+* Show a prompt for changing `C_Cpp.updateChannel` to `Insiders`. [#3089](https://github.com/Microsoft/vscode-cpptools/issues/3089)
+  * lh123 (@lh123) [PR #3221](https://github.com/Microsoft/vscode-cpptools/pull/3221)
+* Fix bugs with the Insider reload prompt appearing when it shouldn't. [#3206](https://github.com/Microsoft/vscode-cpptools/issues/3206)
+* Enable `F5` and the `Build and Debug Active File` context menu command. [PR #3244](https://github.com/Microsoft/vscode-cpptools/pull/3244)
+* Fix IntelliSense process crashing with Mac Sierra 10.12 or earlier. [#3256](https://github.com/Microsoft/vscode-cpptools/issues/3256)
+* Fix incorrect `c_cpp_properties.json` squiggles with `cl.exe`. [#3263](https://github.com/Microsoft/vscode-cpptools/pull/3263)
+* Add `cl.exe` build and debug support. [PR #3264](https://github.com/Microsoft/vscode-cpptools/pull/3264)
+* Fix debugging not working for Windows 32-bit programs. [#3258](https://github.com/Microsoft/vscode-cpptools/issues/3258)
+* Add warning squiggles for invalid properties in `c_cpp_properties.json`. [PR #3283](https://github.com/Microsoft/vscode-cpptools/pull/3283)
+* Fix AutoPCH performance on Windows and Linux.
+
 ## Version 0.22.0-insiders2: March 1, 2019
 * Fix IntelliSense not working on Windows when the username has a space in it and file `C:\Users\<firstname>` exists. [#1377](https://github.com/Microsoft/vscode-cpptools/issues/1377), [#2114](https://github.com/Microsoft/vscode-cpptools/issues/2114), [#2176](https://github.com/Microsoft/vscode-cpptools/issues/2176), [#3052](https://github.com/Microsoft/vscode-cpptools/issues/3052), [#3139](https://github.com/Microsoft/vscode-cpptools/issues/3139)
 * Enable `${command:cpptools.activeConfigName}` in tasks. [#1524](https://github.com/Microsoft/vscode-cpptools/issues/1524)
@@ -7,7 +21,7 @@
 * Fix auto-removal of compiler-provided paths in `includePath`. [#2177](https://github.com/Microsoft/vscode-cpptools/issues/2177)
 * Add support for `Scope::Member` scoped symbol searches. [#2484](https://github.com/Microsoft/vscode-cpptools/issues/2484)
 * Fix remote process picker bug. [#2585](https://github.com/Microsoft/vscode-cpptools/issues/2585), [#3150](https://github.com/Microsoft/vscode-cpptools/issues/3150)
-* Add warning squiggles to `c_cpp_properties.json` for invalid paths. [#2799](https://github.com/Microsoft/vscode-cpptools/issues/2799)
+* Add warning squiggles for invalid paths in `c_cpp_properties.json`. [#2799](https://github.com/Microsoft/vscode-cpptools/issues/2799)
 * Fix bug with manual completion invocation after `struct`. [#3080](https://github.com/Microsoft/vscode-cpptools/issues/3080)
 * Add C/C++ compiler build tasks for compiling the active source file. [PR #3118](https://github.com/Microsoft/vscode-cpptools/pull/3118)
 * Fix command not found and empty `c_cpp_properties.json` if activation is too slow. [#3160](https://github.com/Microsoft/vscode-cpptools/issues/3160), [#3176](https://github.com/Microsoft/vscode-cpptools/issues/3176)
