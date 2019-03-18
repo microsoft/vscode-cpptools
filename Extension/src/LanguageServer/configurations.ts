@@ -435,9 +435,9 @@ export class CppProperties {
     private resolveAndSplit(paths: string[] | undefined, defaultValue: string[], env: Environment): string[] {
         let result: string[] = [];
         if (paths) {
+            paths = this.resolveDefaults(paths, defaultValue);
             paths.forEach(entry => {
                 let entries: string[] = util.resolveVariables(entry, env).split(";").filter(e => e);
-                entries = this.resolveDefaults(entries, defaultValue);
                 result = result.concat(entries);
             });
         }
