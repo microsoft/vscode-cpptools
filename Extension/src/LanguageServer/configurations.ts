@@ -745,15 +745,16 @@ export class CppProperties {
                     this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
-                        paths.add(`${curPath}`);
+                        paths.add(`"${curPath}"`);
                     }
                 }
             }
             if (this.CurrentConfiguration.compileCommands) {
-                paths.add(`${this.CurrentConfiguration.compileCommands}`);
+                paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
             }
 
             if (this.CurrentConfiguration.compilerPath) {
+                // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
                 paths.add(`${this.CurrentConfiguration.compilerPath}`);
             }
 
@@ -773,7 +774,7 @@ export class CppProperties {
 
             for (let curPath of paths) {
                 const isCompilerPath: boolean = curPath === this.CurrentConfiguration.compilerPath;
-                let resolvedPath: string = curPath;
+                let resolvedPath: string = isCompilerPath ? curPath : curPath.substr(1, curPath.length - 2); // Remove the surrounding quotes.
                 // Resolve special path cases.
                 if (resolvedPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
@@ -841,7 +842,6 @@ export class CppProperties {
                 }
 
                 // Iterate through the text and apply squiggles.
-                // TODO: This may incorrectly squiggle text that happens to match an invalid path.
                 for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
                     let message: string;
                     if (!pathExists) {
@@ -867,7 +867,7 @@ export class CppProperties {
                     }
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                            document.positionAt(curTextStartOffset + curOffset + curPath.length)),
+                            document.positionAt(curTextStartOffset + curOffset + curPath.length + (!isCompilerPath ? -1 : 0))),
                         message, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }
