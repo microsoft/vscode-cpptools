@@ -745,23 +745,16 @@ export class CppProperties {
                     this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
-                        paths.add(`"${curPath}"`);
+                        paths.add(`${curPath}`);
                     }
                 }
             }
             if (this.CurrentConfiguration.compileCommands) {
-                paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
+                paths.add(`${this.CurrentConfiguration.compileCommands}`);
             }
 
-            const isWindows: boolean = os.platform() === 'win32';
             if (this.CurrentConfiguration.compilerPath) {
-                let compilerPathAndArgs: util.CompilerPathAndArgs;
-                compilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
-                if (!(isWindows && compilerPathAndArgs.compilerPath.endsWith("cl.exe"))) {
-                    // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace.
-                    // This is checked to determine if the path is a compilerPath later on.
-                    paths.add(`${compilerPathAndArgs.compilerPath}`);
-                }
+                paths.add(`${this.CurrentConfiguration.compilerPath}`);
             }
 
             // Get the start/end for properties that are file-only.
@@ -776,10 +769,11 @@ export class CppProperties {
                 this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
             }
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
+            const isWindows: boolean = os.platform() === 'win32';
 
             for (let curPath of paths) {
-                const isCompilerPath: boolean = !curPath.startsWith('"'); // This check probably will need to change later.
-                let resolvedPath: string = curPath.substr((!isCompilerPath ? 1 : 0), curPath.length + (!isCompilerPath ? - 2 : 0));
+                const isCompilerPath: boolean = curPath === this.CurrentConfiguration.compilerPath;
+                let resolvedPath: string = curPath;
                 // Resolve special path cases.
                 if (resolvedPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
@@ -799,6 +793,8 @@ export class CppProperties {
                     resolvedPath = resolvedPath.replace(/\*/g, "");
                 }
 
+                // TODO: Invalid paths created from environment variables are not detected.
+
                 // Handle WSL paths.
                 const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
                 if (isWSL) {
@@ -811,6 +807,15 @@ export class CppProperties {
                         resolvedPath = resolvedPath.replace(/\//g, path.sep);
                         // TODO: Handle WSL symlinks.
                     }
+                }
+
+                if (isCompilerPath) {
+                    let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedPath);
+                    if (isWindows && compilerPathAndArgs.compilerPath.endsWith("cl.exe")) {
+                        continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
+                    }
+                    resolvedPath = compilerPathAndArgs.compilerPath;
+                    curPath = curPath.replace(/\"/g, `\\"`);
                 }
 
                 let pathExists: boolean = true;
@@ -836,6 +841,7 @@ export class CppProperties {
                 }
 
                 // Iterate through the text and apply squiggles.
+                // TODO: This may incorrectly squiggle text that happens to match an invalid path.
                 for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
                     let message: string;
                     if (!pathExists) {
@@ -861,7 +867,7 @@ export class CppProperties {
                     }
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                            document.positionAt(curTextStartOffset + curOffset + curPath.length + (!isCompilerPath ? - 1 : 0))),
+                            document.positionAt(curTextStartOffset + curOffset + curPath.length)),
                         message, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }
