@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.22.0: March 18, 2019
+## Version 0.22.0: March 19, 2019
 ### Major Changes
 * Add warning squiggles for invalid properties and paths in `c_cpp_properties.json`. [#2799](https://github.com/Microsoft/vscode-cpptools/issues/2799), [PR #3283](https://github.com/Microsoft/vscode-cpptools/pull/3283)
 * Add C/C++ compiler build tasks for compiling the active source file, with support for `F5` debugging and the `Build and Debug Active File` context menu command. [PR #3118](https://github.com/Microsoft/vscode-cpptools/pull/3118), [PR #3244](https://github.com/Microsoft/vscode-cpptools/pull/3244)
