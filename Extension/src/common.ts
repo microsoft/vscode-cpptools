@@ -16,6 +16,7 @@ import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
 import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
+import { getBuildTasks } from './LanguageServer/extension';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -36,6 +37,67 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
+export function getRawTasksJson(): Promise<any> {
+    const path: string = getTasksJsonPath();
+    if (!path) {
+        return undefined;
+    }
+    return new Promise<any>((resolve, reject) => {
+        fs.exists(path, exists => {
+            if (!exists) {
+                return resolve({});
+            }
+            const fileContents: Buffer = fs.readFileSync(path);
+            let rawTasks: any = {};
+            try {
+                rawTasks = JSON.parse(fileContents.toString()); 
+            } catch (error) {
+            }
+            resolve(rawTasks);
+        });
+    });
+}
+
+export async function ensureBuildTaskExists(taskName: string): Promise<void> {
+    let rawTasksJson: any = await getRawTasksJson();
+
+    // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+    if (!rawTasksJson.tasks) {
+        rawTasksJson.tasks = new Array();
+    }
+    // Find or create the task which should be created based on the selected "debug configuration".
+    let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => {
+        return task.label && task.label === task;
+    });
+    if (selectedTask) {
+        return;
+    }
+
+    const buildTasks: vscode.Task[] = await getBuildTasks();
+    selectedTask = buildTasks.find(task => task.name === taskName);
+    console.assert(selectedTask);
+
+    let definition: vscode.TaskDefinition = selectedTask.definition as vscode.TaskDefinition;
+    if (definition && definition.compilerPath) {
+         // TODO: add desired properties to empty object, don't delete.
+        delete definition.compilerPath;
+    }
+    
+    rawTasksJson.version = "2.0.0";
+
+    if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
+        rawTasksJson.tasks.push(selectedTask.definition);
+    }
+    
+    // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
+    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
+}
+
+export function fileIsCOrCppSource(file: string): boolean {
+    const fileExtLower: string = path.extname(file).toLowerCase();
+    return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
+}
+
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.
@@ -49,6 +111,15 @@ export function getExtensionFilePath(extensionfile: string): string {
 
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
+}
+
+export function getTasksJsonPath(): string {
+    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+    const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    if (!folder) {
+        return undefined;
+    }
+    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
 }
 
 export function getVcpkgPathDescriptorFile(): string {
@@ -386,6 +457,23 @@ export function checkDirectoryExists(dirPath: string): Promise<boolean> {
     });
 }
 
+export function checkFileExistsSync(filePath: string): boolean {
+    try {
+        return fs.statSync(filePath).isFile();
+    } catch (e) {
+    }
+    return false;
+}
+
+/** Test whether a directory exists */
+export function checkDirectoryExistsSync(dirPath: string): boolean {
+    try {
+        return fs.statSync(dirPath).isDirectory();
+    } catch (e) {
+    }
+    return false;
+}
+
 /** Read the files in a directory */
 export function readDir(dirPath: string): Promise<string[]> {
     return new Promise((resolve) => {
@@ -669,4 +757,48 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
         request.on('error', (error) => { reject(error); });
         request.end();
     });
+}
+
+export interface CompilerPathAndArgs {
+    compilerPath: string;
+    additionalArgs: string[];
+}
+
+export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
+    let compilerPath: string = inputCompilerPath;
+    let additionalArgs: string[];
+    let isWindows: boolean = os.platform() === 'win32';
+    if (compilerPath) {
+        compilerPath = compilerPath.trim();
+        if (compilerPath.startsWith("\"")) {
+            let endQuote: number = compilerPath.substr(1).search("\"") + 1;
+            if (endQuote !== -1) {
+                additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
+                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
+                compilerPath = compilerPath.substr(1, endQuote - 1);
+            }
+        } else {
+            // Go from right to left checking if a valid path is to the left of a space.
+            let spaceStart: number = compilerPath.lastIndexOf(" ");
+            if (spaceStart !== -1 && (!isWindows || !compilerPath.endsWith("cl.exe")) && !checkFileExistsSync(compilerPath)) {
+                let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
+                while ((!isWindows || !potentialCompilerPath.endsWith("cl.exe")) && !checkFileExistsSync(potentialCompilerPath)) {
+                    spaceStart = potentialCompilerPath.lastIndexOf(" ");
+                    if (spaceStart === -1) {
+                        // Reached the start without finding a valid path. Use the original value.
+                        potentialCompilerPath = compilerPath;
+                        break;
+                    }
+                    potentialCompilerPath = potentialCompilerPath.substr(0, spaceStart);
+                }
+                if (compilerPath !== potentialCompilerPath) {
+                    // Found a valid compilerPath and args.
+                    additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
+                    additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
+                    compilerPath = potentialCompilerPath;
+                }
+            }
+        }
+    }
+    return { compilerPath, additionalArgs };
 }

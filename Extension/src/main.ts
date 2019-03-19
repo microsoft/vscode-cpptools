@@ -22,7 +22,7 @@ import { getInstallationInformation, InstallationInformation, setInstallationSta
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
-const releaseNotesVersion: number = 3;
+const releaseNotesVersion: number = 4;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
@@ -35,7 +35,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.setProgress(0);
 
     // Initialize the DebuggerExtension and register the related commands and providers.
-    DebuggerExtension.initialize();
+    DebuggerExtension.initialize(context);
 
     await processRuntimeDependencies();
 
@@ -329,6 +329,7 @@ function rewriteManifest(): Promise<void> {
         "onLanguage:c",
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
+        "onCommand:C_Cpp.BuildAndDebugActiveFile",
         "onCommand:C_Cpp.ConfigurationEdit",
         "onCommand:C_Cpp.ConfigurationSelect",
         "onCommand:C_Cpp.ConfigurationProviderSelect",

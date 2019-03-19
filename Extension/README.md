@@ -23,5 +23,12 @@ This preview release of the extension adds language support for C/C++ to Visual 
 
 You can find more detailed information about C/C++ support for Visual Studio Code at our [GitHub page](https://github.com/Microsoft/vscode-cpptools/tree/master/Documentation) and our [VS Code documentation page](https://code.visualstudio.com/docs/languages/cpp).
 
+## Installation
+The extension has OS-specific binary dependencies, so installation via the Marketplace requires an Internet connection so that these additional dependencies can be downloaded. If you are working on a computer that does not have access to the Internet or is behind a strict firewall, you may need to use our OS-specific packages and install them by invoking VS Code's `"Install from VSIX..."` command. These "offline' packages are available at: https://github.com/Microsoft/vscode-cpptools/releases.
+* `cpptools-linux.vsix` - for 64-bit Linux
+* `cpptools-linux32.vsix` - for 32-bit Linux
+* `cpptools-osx.vsix` - for macOS
+* `cpptools-win32.vsix` - for 64-bit & 32-bit Windows
+
 ## Contact Us
-If you run into any issues or have suggestions for us, please file [issues and suggestions on GitHub](https://github.com/Microsoft/vscode-cpptools/issues). If you haven’t already provided us feedback, please take this [quick survey](https://www.research.net/r/VBVV6C6) to help shape this extension for your needs.
+If you run into any issues or have suggestions for us, please file [issues and suggestions on GitHub](https://github.com/Microsoft/vscode-cpptools/issues). If you haven’t already provided us feedback, please take this [quick survey](https://www.research.net/r/VBVV6C6) and let us know what you think!

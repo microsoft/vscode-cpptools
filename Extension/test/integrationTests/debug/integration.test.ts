@@ -7,14 +7,19 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
  
 suite(`Debug Integration Test: `, function(): void {
-    suiteSetup(async function(): Promise<void> { 
+    let origFactoryFile: string;
+    let tempFactoryFile: string;
+    let hijackedFactoryFile: string;
+
+    suiteSetup(async function(): Promise<void> {
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
         if (!extension.isActive) {
             await extension.activate(); 
         }
-    }); 
+    });
  
-    test("Starting (gdb) Launch from the workspace root should create an Active Debug Session", async () => { 
+    test("Starting (gdb) Launch from the workspace root should create an Active Debug Session", async function() { 
+        // If it is failing on startDebugging. Investigate the SimpleCppProject's tasks.json or launch.json.
         await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "(gdb) Launch");
 
         let debugSessionTerminated: Promise<void> = new Promise(resolve => {

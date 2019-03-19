@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.26.0"
+    "vscode": "^1.30.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -289,6 +289,19 @@
           "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
           "scope": "resource"
         },
+        "C_Cpp.intelliSenseCachePath": {
+          "type": "string",
+          "default": "${workspaceFolder}/.vscode",
+          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default path \"${workspaceFolder}/.vscode\" will be used if a specified path is invalid.",
+          "scope": "resource"
+        },
+        "C_Cpp.intelliSenseCacheSize": {
+          "type": "number",
+          "default": 5120,
+          "description": "Maximum size of the per-workspace hard drive space in megabytes for cached precompiled headers; the actual usage may fluctuate around this value. The default size is 5120 MB. Precompiled header caching is disabled when the size is 0.",
+          "scope": "resource",
+          "minimum": 0
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
@@ -466,6 +479,12 @@
           "default": "Default",
           "description": "Set to \"Insiders\" to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
           "scope": "resource"
+        },
+        "C_Cpp.suggestSnippets": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, snippets are provided by the language server.",
+          "scope": "resource"
         }
       }
     },
@@ -549,6 +568,11 @@
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.BuildAndDebugActiveFile",
+        "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
@@ -603,7 +627,6 @@
             "cpp"
           ]
         },
-        "adapterExecutableCommand": "extension.cppdbgAdapterExecutableCommand",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
@@ -954,12 +977,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
@@ -1100,7 +1123,6 @@
             "cpp"
           ]
         },
-        "adapterExecutableCommand": "extension.cppvsdbgAdapterExecutableCommand",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
@@ -1236,12 +1258,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcesss}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
                     "default": 0
                   }
                 ]
@@ -1321,42 +1343,52 @@
         {
           "when": "editorLangId == c",
           "command": "C_Cpp.SwitchHeaderSource",
-          "group": "other@1"
+          "group": "other1_navigation@1"
         },
         {
           "when": "editorLangId == cpp",
           "command": "C_Cpp.SwitchHeaderSource",
-          "group": "other@1"
+          "group": "other1_navigation@1"
         },
         {
           "when": "editorLangId == c",
           "command": "C_Cpp.Navigate",
-          "group": "other@2"
+          "group": "other1_navigation@2"
         },
         {
           "when": "editorLangId == cpp",
           "command": "C_Cpp.Navigate",
-          "group": "other@2"
+          "group": "other1_navigation@2"
         },
         {
           "when": "editorLangId == c",
           "command": "workbench.action.gotoSymbol",
-          "group": "other@3"
+          "group": "other1_navigation@3"
         },
         {
           "when": "editorLangId == cpp",
           "command": "workbench.action.gotoSymbol",
-          "group": "other@3"
+          "group": "other1_navigation@3"
         },
         {
           "when": "editorLangId == c",
           "command": "workbench.action.showAllSymbols",
-          "group": "other@4"
+          "group": "other1_navigation@4"
         },
         {
           "when": "editorLangId == cpp",
           "command": "workbench.action.showAllSymbols",
-          "group": "other@4"
+          "group": "other1_navigation@4"
+        },
+        {
+          "when": "editorLangId == cpp",
+          "command": "C_Cpp.BuildAndDebugActiveFile",
+          "group": "other2_debug@1"
+        },
+        {
+          "when": "editorLangId == c",
+          "command": "C_Cpp.BuildAndDebugActiveFile",
+          "group": "other2_debug@1"
         }
       ]
     },
@@ -1383,21 +1415,23 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/mocha": "^2.2.43",
-    "@types/node": "^8.0.46",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^8.10.43",
     "async-child-process": "^1.1.1",
+    "await-notify": "^1.0.1",
     "child-process": "^1.0.2",
+    "extend": "3.0.2",
     "gulp": "^4.0.0",
     "gulp-env": "0.4.0",
     "gulp-mocha": "5.0.0",
     "gulp-tslint": "8.1.2",
-    "mocha": "^4.0.1",
+    "mocha": "^5.2.0",
     "tslint": "5.8.0",
     "tslint-microsoft-contrib": "5.0.1",
     "tslint-no-unused-expression-chai": "0.0.3",
-    "typescript": "^2.5.3",
-    "vrsource-tslint-rules": "^5.8.2",
-    "vscode": "^1.1.18"
+    "typescript": "^2.9.2",
+    "vrsource-tslint-rules": "^5.8.3",
+    "vscode": "^1.1.30"
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
@@ -1408,16 +1442,16 @@
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
     "vscode-cpptools": "2.1.1",
-    "vscode-debugadapter": "~1.24.0",
-    "vscode-debugprotocol": "~1.24.0",
-    "vscode-extension-telemetry": "~0.1.0",
+    "vscode-debugadapter": "~1.33.0",
+    "vscode-debugprotocol": "~1.33.0",
+    "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "5.1.1",
     "yauzl": "~2.10.0"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2037608",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2065016",
       "platforms": [
         "linux"
       ],
@@ -1431,7 +1465,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2037526",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2065017",
       "platforms": [
         "linux"
       ],
@@ -1447,7 +1481,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2037527",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2064955",
       "platforms": [
         "darwin"
       ],
@@ -1458,7 +1492,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2037609",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2065027",
       "platforms": [
         "win32"
       ],
@@ -1572,7 +1606,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=872985",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2082216",
       "platforms": [
         "win32"
       ],

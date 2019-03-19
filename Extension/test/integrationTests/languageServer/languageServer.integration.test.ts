@@ -5,13 +5,13 @@
 
 import * as vscode from 'vscode';
 import * as assert from 'assert';
-import { getLanguageConfigFromPatterns } from '../../src/LanguageServer/languageConfig';
-import * as util from '../../src/common';
+import { getLanguageConfigFromPatterns } from '../../../src/LanguageServer/languageConfig';
+import * as util from '../../../src/common';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
-import * as config from '../../src/LanguageServer/configurations';
-import { CppSettings } from '../../src/LanguageServer/settings';
-import { getActiveClient } from '../../src/LanguageServer/extension';
+import * as config from '../../../src/LanguageServer/configurations';
+import { CppSettings } from '../../../src/LanguageServer/settings';
+import { getActiveClient } from '../../../src/LanguageServer/extension';
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> { 

@@ -23,13 +23,14 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations } from './extension';
+import { updateLanguageConfigurations, registerCommands } from './extension';
 import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
+import * as os from 'os';
 
 let ui: UI;
 const configProviderTimeout: number = 2000;
@@ -202,6 +203,8 @@ export interface Client {
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
+    getCompilerPath(): Thenable<string>;
+    getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
     requestWhenReady(request: () => Thenable<any>): Thenable<any>;
@@ -319,6 +322,10 @@ class DefaultClient implements Client {
                     // The event handlers must be set before this happens.
                     languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
                         this.configuration.CompilerDefaults = compilerDefaults;
+                        
+                        // Only register the real commands after the extension has finished initializing,
+                        // e.g. prevents empty c_cpp_properties.json from generation.
+                        registerCommands();
                     });
 
                     this.languageClient = languageClient;
@@ -373,6 +380,18 @@ class DefaultClient implements Client {
         }
 
         let abTestSettings: ABTestSettings = getABTestSettings();
+        
+        let intelliSenseCacheDisabled: boolean = false;
+        if (os.platform() === "darwin") {
+            intelliSenseCacheDisabled = true;
+            // TODO: Re-enable this after the performance is improved on Mac.
+            //const releaseParts: string[] = os.release().split(".");
+            //if (releaseParts.length >= 1) {
+            //    // AutoPCH doesn't work for older Mac OS's.
+            //    intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+            //}
+        }
+
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'cpp' },
@@ -396,9 +415,13 @@ class DefaultClient implements Client {
                 tab_size: other.editorTabSize,
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
+                intelliSenseCacheDisabled: intelliSenseCacheDisabled,
+                intelliSenseCachePath : settings.intelliSenseCachePath,
+                intelliSenseCacheSize : settings.intelliSenseCacheSize,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
                 dimInactiveRegions: settings.dimInactiveRegions,
+                suggestSnippets: settings.suggestSnippets,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
                 workspaceSymbols: settings.workspaceSymbols,
@@ -659,6 +682,14 @@ class DefaultClient implements Client {
 
     public getCurrentConfigName(): Thenable<string> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
+    }
+
+    public getCompilerPath(): Thenable<string> {
+        return this.queueTask(() => Promise.resolve(this.configuration.CompilerPath));
+    }
+
+    public getKnownCompilers(): Thenable<configs.KnownCompiler[]> {
+        return this.queueTask(() => Promise.resolve(this.configuration.KnownCompiler));
     }
 
     /**
@@ -1349,6 +1380,8 @@ class NullClient implements Client {
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
+    getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
+    getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
