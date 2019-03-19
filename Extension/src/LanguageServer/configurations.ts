@@ -805,7 +805,6 @@ export class CppProperties {
                         resolvedPath = resolvedPath.substr(0, 1) + ":" + resolvedPath.substr(1);
                     } else if (this.rootfs && this.rootfs.length > 0) {
                         resolvedPath = this.rootfs + resolvedPath.substr(1);
-                        resolvedPath = resolvedPath.replace(/\//g, path.sep);
                         // TODO: Handle WSL symlinks.
                     }
                 }
@@ -839,6 +838,13 @@ export class CppProperties {
                             resolvedPath = relativePath;
                         }
                     }
+                }
+
+                // Normalize path separators.
+                if (path.sep === "/") {
+                    resolvedPath = resolvedPath.replace(/\\/g, path.sep);
+                } else {
+                    resolvedPath = resolvedPath.replace(/\//g, path.sep);
                 }
 
                 // Iterate through the text and apply squiggles.
