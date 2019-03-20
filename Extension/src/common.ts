@@ -50,7 +50,7 @@ export function getRawTasksJson(): Promise<any> {
                 return resolve({});
             }
             let fileContents: string = fs.readFileSync(path).toString();
-            fileContents = fileContents.replace(/^\s*\/\/.*/gm, ""); // Remove // comments.
+            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove // comments.
             let rawTasks: any = {};
             try {
                 rawTasks = JSON.parse(fileContents); 
