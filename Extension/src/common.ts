@@ -23,7 +23,7 @@ export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
 }
 
-export const failedToParseTasksJson: string = "Failed to parse tasks.json, possibly due to multi-line comments or trailing commas.";
+export const failedToParseTasksJson: string = "Failed to parse tasks.json, possibly due to comments or trailing commas.";
 
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
@@ -50,7 +50,7 @@ export function getRawTasksJson(): Promise<any> {
                 return resolve({});
             }
             let fileContents: string = fs.readFileSync(path).toString();
-            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove // comments.
+            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
             let rawTasks: any = {};
             try {
                 rawTasks = JSON.parse(fileContents); 
