@@ -81,8 +81,6 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
 
-    let definition: vscode.TaskDefinition = selectedTask.definition as vscode.TaskDefinition;
-    
     rawTasksJson.version = "2.0.0";
 
     if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
