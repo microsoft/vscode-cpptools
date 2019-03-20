@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.22.1: March 20, 2019
+* Fix `tasks.json` with single-line comments being overwritten when `Build and Debug Active File` is used. [#3327](https://github.com/Microsoft/vscode-cpptools/issues/3327)
+* Fix an invalid `compilerPath` property getting added to `tasks.json` after doing `Configure Task` with a C/C++ compiler.
+
 ## Version 0.22.0: March 19, 2019
 ### Major Changes
 * Add warning squiggles for invalid properties and paths in `c_cpp_properties.json`. [#2799](https://github.com/Microsoft/vscode-cpptools/issues/2799), [PR #3283](https://github.com/Microsoft/vscode-cpptools/pull/3283)

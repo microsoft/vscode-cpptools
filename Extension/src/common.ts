@@ -23,6 +23,8 @@ export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
 }
 
+export const failedToParseTasksJson: string = "Failed to parse tasks.json, possibly due to comments or trailing commas.";
+
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
 
@@ -47,11 +49,13 @@ export function getRawTasksJson(): Promise<any> {
             if (!exists) {
                 return resolve({});
             }
-            const fileContents: Buffer = fs.readFileSync(path);
+            let fileContents: string = fs.readFileSync(path).toString();
+            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
             let rawTasks: any = {};
             try {
-                rawTasks = JSON.parse(fileContents.toString()); 
+                rawTasks = JSON.parse(fileContents); 
             } catch (error) {
+                return reject(new Error(failedToParseTasksJson));
             }
             resolve(rawTasks);
         });
@@ -73,16 +77,10 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         return;
     }
 
-    const buildTasks: vscode.Task[] = await getBuildTasks();
+    const buildTasks: vscode.Task[] = await getBuildTasks(false);
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
 
-    let definition: vscode.TaskDefinition = selectedTask.definition as vscode.TaskDefinition;
-    if (definition && definition.compilerPath) {
-         // TODO: add desired properties to empty object, don't delete.
-        delete definition.compilerPath;
-    }
-    
     rawTasksJson.version = "2.0.0";
 
     if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
