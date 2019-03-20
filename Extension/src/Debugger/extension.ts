@@ -91,12 +91,15 @@ export function initialize(context: vscode.ExtensionContext): void {
                         await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                         Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
                     } catch (e) {
+                        if (e === util.failedToParseTasksJson) {
+                            vscode.window.showErrorMessage(util.failedToParseTasksJson);
+                        }
                         return Promise.resolve();
                     }
                 } else {
                     return Promise.resolve();
                     // TODO uncomment this when single file mode works correctly.
-                    // const buildTasks: vscode.Task[] = await getBuildTasks();
+                    // const buildTasks: vscode.Task[] = await getBuildTasks(true);
                     // const task: vscode.Task = buildTasks.find(task => task.name === selection.configuration.preLaunchTask);
                     // await vscode.tasks.executeTask(task);
                     // delete selection.configuration.preLaunchTask;

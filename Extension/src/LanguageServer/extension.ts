@@ -71,7 +71,7 @@ export function activate(activationEventOccurred: boolean): void {
 
     taskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
         provideTasks: () => {
-            return getBuildTasks();
+            return getBuildTasks(false);
         },
         resolveTask(task: vscode.Task): vscode.Task {
             // Currently cannot implement because VS Code does not call this. Can implement custom output file directory when enabled.
@@ -114,7 +114,7 @@ export interface BuildTaskDefinition extends vscode.TaskDefinition {
 /**
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
-export async function getBuildTasks(): Promise<vscode.Task[]> {
+export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.Task[]> {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!editor) {
         return [];
@@ -242,6 +242,10 @@ export async function getBuildTasks(): Promise<vscode.Task[]> {
         let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, '$gcc');
         task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
+
+        if (!returnComplerPath) {
+            delete task.definition.compilerPath;
+        }
 
         return task;
     });
