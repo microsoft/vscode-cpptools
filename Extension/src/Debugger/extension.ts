@@ -91,7 +91,7 @@ export function initialize(context: vscode.ExtensionContext): void {
                         await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                         Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
                     } catch (e) {
-                        if (e === util.failedToParseTasksJson) {
+                        if (e && e.message === util.failedToParseTasksJson) {
                             vscode.window.showErrorMessage(util.failedToParseTasksJson);
                         }
                         return Promise.resolve();

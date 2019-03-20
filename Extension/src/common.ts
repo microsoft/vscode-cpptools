@@ -55,7 +55,7 @@ export function getRawTasksJson(): Promise<any> {
             try {
                 rawTasks = JSON.parse(fileContents); 
             } catch (error) {
-                return reject(failedToParseTasksJson);
+                return reject(new Error(failedToParseTasksJson));
             }
             resolve(rawTasks);
         });
