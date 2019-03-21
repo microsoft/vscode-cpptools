@@ -383,13 +383,11 @@ class DefaultClient implements Client {
         
         let intelliSenseCacheDisabled: boolean = false;
         if (os.platform() === "darwin") {
-            intelliSenseCacheDisabled = true;
-            // TODO: Re-enable this after the performance is improved on Mac.
-            //const releaseParts: string[] = os.release().split(".");
-            //if (releaseParts.length >= 1) {
-            //    // AutoPCH doesn't work for older Mac OS's.
-            //    intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
-            //}
+            const releaseParts: string[] = os.release().split(".");
+            if (releaseParts.length >= 1) {
+                // AutoPCH doesn't work for older Mac OS's.
+                intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+            }
         }
 
         let clientOptions: LanguageClientOptions = {
