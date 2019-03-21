@@ -1,8 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.22.1: March 20, 2019
+## Version 0.22.1: March 21, 2019
 * Fix `tasks.json` with single-line comments being overwritten when `Build and Debug Active File` is used. [#3327](https://github.com/Microsoft/vscode-cpptools/issues/3327)
 * Fix an invalid `compilerPath` property getting added to `tasks.json` after doing `Configure Task` with a C/C++ compiler.
+* Add IntelliSense caching for macOS 10.13 or later (0.22.0 only supported Windows and Linux).
 
 ## Version 0.22.0: March 19, 2019
 ### Major Changes
