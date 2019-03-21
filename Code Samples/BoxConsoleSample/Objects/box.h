@@ -5,7 +5,7 @@
  * Box object
  * Defines Box and its properties
  */
-class Box {
+struct Box {
    public:
       int length;
       int width;
