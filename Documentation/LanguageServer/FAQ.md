@@ -31,7 +31,7 @@ If you want IntelliSense to operate on your files even when all #include directi
 The most common reason for this is missing include paths and defines. The easiest way to fix this on each platform is as follows:
 
 **Linux/Mac**
-* Set `"intelliSenseMode": "clang-x64"` and `"compilerPath"` in **c_cpp_properties.json** to the path to your compiler.
+* Set `"intelliSenseMode": "clang-x64"` or `"intelliSenseMode": "gcc-x64"` and `"compilerPath"` in **c_cpp_properties.json** to the path to your compiler.
 
 **Windows**
 * If you are using a Microsoft compiler from Visual Studio, set `"intelliSenseMode": "msvc-x64"`, but don't add the `"compilerPath"` property to **c_cpp_properties.json**.
