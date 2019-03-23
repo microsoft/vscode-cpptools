@@ -11,6 +11,10 @@ jobs:
     displayName: 'Use Node 8.x'
     inputs:
       versionSpec: 8.x
+  
+  - task: ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    condition: ne(variables['System.PullRequest.IsFork'], 'True')
 
   - script: npm install
     displayName: "Install Dependencies"
