@@ -171,8 +171,13 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
 
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
-            const basename: string = path.basename(compilerPath);
-            //map.has(basename) ? map.basename] = compilerPath : 
+            let basename: string = compilerPath;
+            if (compilerPath === userCompilerPath) {
+                // Make sure the compiler args are not part of the basename.
+                const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
+                basename = compilerPathAndArgs.compilerPath;
+            }
+            basename = path.basename(basename);
             map.set(basename, compilerPath);
         };
         compilerPaths.forEach(insertOrAssignEntry);
