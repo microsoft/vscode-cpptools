@@ -2,19 +2,18 @@
 #define BOX_H
 
 /**
- * Box object
- * Defines Box and its properties
+ * Definition of a box object with three dimensions.
  */
-struct Box {
-   public:
-      int length;
-      int width;
-      int height;
-   
-      int volume(int length, int width, int height){
+struct box
+{
+    int length;
+    int width;
+    int height;
+
+    int volume()
+    {
         return length * width * height;
-      }
+    }
 };
 
 #endif
-
