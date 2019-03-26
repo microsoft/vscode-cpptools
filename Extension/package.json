@@ -39,9 +39,31 @@
     "Snippets"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onCommand:extension.pickNativeProcess",
+    "onCommand:extension.pickRemoteNativeProcess",
+    "onCommand:C_Cpp.BuildAndDebugActiveFile",
+    "onCommand:C_Cpp.ConfigurationEdit",
+    "onCommand:C_Cpp.ConfigurationSelect",
+    "onCommand:C_Cpp.ConfigurationProviderSelect",
+    "onCommand:C_Cpp.SwitchHeaderSource",
+    "onCommand:C_Cpp.Navigate",
+    "onCommand:C_Cpp.GoToDeclaration",
+    "onCommand:C_Cpp.PeekDeclaration",
+    "onCommand:C_Cpp.ToggleErrorSquiggles",
+    "onCommand:C_Cpp.ToggleIncludeFallback",
+    "onCommand:C_Cpp.ToggleDimInactiveRegions",
+    "onCommand:C_Cpp.ShowReleaseNotes",
+    "onCommand:C_Cpp.ResetDatabase",
+    "onCommand:C_Cpp.PauseParsing",
+    "onCommand:C_Cpp.ResumeParsing",
+    "onCommand:C_Cpp.ShowParsingCommands",
+    "onCommand:C_Cpp.TakeSurvey",
+    "onDebug",
+    "workspaceContains:/.vscode/c_cpp_properties.json"
   ],
-  "main": "./out/src/main",
+  "main": "./dist/main",
   "contributes": {
     "problemMatchers": [
       {
@@ -1432,7 +1454,8 @@
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
     "vscode:prepublish": "node ./src/Support/prepublish.js",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "webpack": "webpack --mode development"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",
@@ -1449,6 +1472,7 @@
     "tslint": "5.8.0",
     "tslint-microsoft-contrib": "5.0.1",
     "tslint-no-unused-expression-chai": "0.0.3",
+    "ts-loader": "^5.3.3",
     "typescript": "^2.9.2",
     "vrsource-tslint-rules": "^5.8.3",
     "vscode": "^1.1.33"
@@ -1462,11 +1486,13 @@
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
-    "vscode-cpptools": "2.1.1",
+    "vscode-cpptools": "^2.1.2",
     "vscode-debugadapter": "~1.33.0",
     "vscode-debugprotocol": "~1.33.0",
     "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "5.1.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
     "yauzl": "~2.10.0"
   },
   "runtimeDependencies": [
