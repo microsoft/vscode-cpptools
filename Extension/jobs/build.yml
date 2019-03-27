@@ -66,6 +66,6 @@ jobs:
       CODE_TESTS_WORKSPACE: '$(Build.SourcesDirectory)/Extension/test/integrationTests/testAssets/SimpleCppProject'
       CODE_DISABLE_EXTENSIONS: 1
 
-- task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-  displayName: 'Component Detection'
-  continueOnError: true
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    continueOnError: true
