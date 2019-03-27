@@ -476,7 +476,8 @@ class DefaultClient implements Client {
             if (changedSettings["clang_format_path"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
                 this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
-            } else if (changedSettings["intelliSenseCachePath"]) {
+            }
+            if (changedSettings["intelliSenseCachePath"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
                 this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveVariables(settings.intelliSenseCachePath, this.AdditionalEnvironment));
             }
