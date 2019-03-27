@@ -767,7 +767,6 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
     let additionalArgs: string[];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
-        compilerPath = compilerPath.trim();
         if (compilerPath.startsWith("\"")) {
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {

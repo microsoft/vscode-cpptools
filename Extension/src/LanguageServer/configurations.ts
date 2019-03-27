@@ -767,9 +767,9 @@ export class CppProperties {
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
             if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
-                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
+                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0 };
             }
-            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0 };
+            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0 };
             const isWindows: boolean = os.platform() === 'win32';
 
             for (let curPath of paths) {
@@ -809,11 +809,15 @@ export class CppProperties {
                     }
                 }
 
+                let compilerPathNeedsQuotes: boolean = false;
                 if (isCompilerPath) {
+                    resolvedPath = resolvedPath.trim();
                     let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedPath);
                     if (isWindows && compilerPathAndArgs.compilerPath.endsWith("cl.exe")) {
                         continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
                     }
+                    // Squiggle when the compiler's path has spaces without quotes but args are used.
+                    compilerPathNeedsQuotes = compilerPathAndArgs.additionalArgs && !resolvedPath.startsWith('"') && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
                     curPath = curPath.replace(/\"/g, `\\"`);
                 }
@@ -858,11 +862,16 @@ export class CppProperties {
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
                             (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
                             (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
-                            if (util.checkFileExistsSync(resolvedPath)) {
-                                continue;
+                            if (compilerPathNeedsQuotes) {
+                                message = `Compiler path with spaces and arguments is missing \\" around the path.`;
+                                newSquiggleMetrics.CompilerPathMissingQuotes++;
+                            } else {
+                                if (util.checkFileExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+                                message = `Path is not a file: "${resolvedPath}".`;
+                                newSquiggleMetrics.PathNotAFile++;
                             }
-                            message = `Path is not a file: "${resolvedPath}".`;
-                            newSquiggleMetrics.PathNotAFile++;
                         } else {
                             if (util.checkDirectoryExistsSync(resolvedPath)) {
                                 continue;
@@ -894,6 +903,9 @@ export class CppProperties {
             }
             if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNotADirectory) {
                 changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
+            }
+            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].CompilerPathMissingQuotes) {
+                changedSquiggleMetrics.CompilerPathMissingQuotes = newSquiggleMetrics.CompilerPathMissingQuotes;
             }
             if (Object.keys(changedSquiggleMetrics).length > 0) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", null, changedSquiggleMetrics);
