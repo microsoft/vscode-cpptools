@@ -113,10 +113,22 @@ interface CompileCommandsPaths {
     paths: string[];
 }
 
+interface QueryTranslationUnitSourceParams {
+    uri: string;
+}
+
+interface QueryTranslationUnitSourceResult {
+    uri: string;
+    is_header: boolean;
+    is_system_header: boolean;
+    is_tu_loaded: boolean;
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
+const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 
 // Notifications to the server
@@ -604,6 +616,16 @@ class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
+
+        let params: QueryTranslationUnitSourceParams = {
+            uri: document.uri.fsPath
+        };
+        let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
+        if (response.is_system_header == true || response.is_tu_loaded == true) {
+            return Promise.resolve();
+        }
+
+        let uri: vscode.Uri = vscode.Uri.file(response.uri);
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.size === 0) {
@@ -628,8 +650,8 @@ class DefaultClient implements Client {
                     }
 
                     providerName = provider.name;
-                    if (await provider.canProvideConfiguration(document.uri, tokenSource.token)) {
-                        return provider.provideConfigurations([document.uri], tokenSource.token);
+                    if (await provider.canProvideConfiguration(uri, tokenSource.token)) {
+                        return provider.provideConfigurations([uri], tokenSource.token);
                     }
                 }
             } catch (err) {
@@ -649,10 +671,10 @@ class DefaultClient implements Client {
                     return;
                 }
                 let settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document) && !vscode.debug.activeDebugSession) {
+                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(uri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = "Dismiss";
                     const disable: string = "Disable Warnings";
-                    let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                    let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${uri.fsPath}'. ` +
                         `Settings from the '${configName}' configuration will be used instead.`;
                     if (err) {
                         message += ` (${err})`;
@@ -670,8 +692,8 @@ class DefaultClient implements Client {
             });
     }
 
-    private isExternalHeader(document: vscode.TextDocument): boolean {
-        return util.isHeader(document) && !document.uri.toString().startsWith(this.RootUri.toString());
+    private isExternalHeader(uri: vscode.Uri): boolean {
+        return util.isHeader(uri) && !uri.toString().startsWith(this.RootUri.toString());
     }
 
     private getCustomConfigurationProviderId(): Thenable<string|undefined> {

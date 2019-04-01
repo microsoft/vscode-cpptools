@@ -149,8 +149,8 @@ export function getVcpkgRoot(): string {
  * For the purposes of this function, a header file has no extension, or an extension that begins with the letter 'h'.
  * @param document The document to check.
  */
-export function isHeader(document: vscode.TextDocument): boolean {
-    let ext: string = path.extname(document.uri.fsPath);
+export function isHeader(uri: vscode.Uri): boolean {
+    let ext: string = path.extname(uri.fsPath);
     return !ext || ext.startsWith(".h") || ext.startsWith(".H");
 }
 
