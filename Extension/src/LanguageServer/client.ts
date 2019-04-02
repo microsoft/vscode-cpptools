@@ -319,16 +319,6 @@ class DefaultClient implements Client {
                     this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
                     this.disposables.push(this.configuration);
 
-                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                    // The event handlers must be set before this happens.
-                    languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
-                        this.configuration.CompilerDefaults = compilerDefaults;
-                        
-                        // Only register the real commands after the extension has finished initializing,
-                        // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-                    });
-
                     this.languageClient = languageClient;
                     this.settingsTracker = getTracker(this.RootUri);
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
@@ -337,6 +327,16 @@ class DefaultClient implements Client {
                     // Listen for messages from the language server.
                     this.registerNotifications();
                     this.registerFileWatcher();
+
+                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                    // The event handlers must be set before this happens.
+                    return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                        this.configuration.CompilerDefaults = compilerDefaults;
+                            
+                        // Only register the real commands after the extension has finished initializing,
+                        // e.g. prevents empty c_cpp_properties.json from generation.
+                        registerCommands();
+                    });
                 },
                 (err) => {
                     this.isSupported = false;   // Running on an OS we don't support yet.
