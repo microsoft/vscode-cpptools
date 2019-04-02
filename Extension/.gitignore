@@ -18,4 +18,3 @@ install.lock
 
 # ignore vscode test
 .vscode-test/
-browse*db*
