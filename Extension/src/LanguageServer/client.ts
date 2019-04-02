@@ -621,7 +621,7 @@ class DefaultClient implements Client {
             uri: document.uri.fsPath
         };
         let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-        if (response.is_system_header == true || response.is_tu_loaded == true) {
+        if (response.is_system_header === true || response.is_tu_loaded === true) {
             return Promise.resolve();
         }
 
