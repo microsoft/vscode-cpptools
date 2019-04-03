@@ -700,10 +700,17 @@ export class CppProperties {
                 }
             }
 
-            if (!this.configurationJson.disableCppPropertiesSquiggles) {
+            if (this.configurationJson.disableCppPropertiesSquiggles) {
+                this.diagnosticCollection.clear();
+            } else if (this.configurationJson.disableCppPropertiesSquiggles === false) {
                 this.handleSquiggles();
             } else {
-                this.diagnosticCollection.clear();
+                const settings: CppSettings = new CppSettings(this.rootUri);
+                if (settings.defaultDisableCppPropertiesSquiggles) {
+                    this.diagnosticCollection.clear();
+                } else {
+                    this.handleSquiggles();
+                }
             }
         } catch (err) {
             vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);

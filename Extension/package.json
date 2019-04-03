@@ -470,6 +470,15 @@
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
           "scope": "resource"
         },
+        "C_Cpp.default.disableCppPropertiesSquiggles": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null,
+          "description": "Set to false to disable squiggles for c_cpp_properties.json.",
+          "scope": "resource"
+        },
         "C_Cpp.updateChannel": {
           "type": "string",
           "enum": [
