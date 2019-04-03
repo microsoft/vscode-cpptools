@@ -175,6 +175,7 @@ const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = ne
 const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
+const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
 
 class BlockingTask<T> {
     private dependency: BlockingTask<any>;
@@ -346,16 +347,6 @@ class DefaultClient implements Client {
                     this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
                     this.disposables.push(this.configuration);
 
-                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                    // The event handlers must be set before this happens.
-                    languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
-                        this.configuration.CompilerDefaults = compilerDefaults;
-                        
-                        // Only register the real commands after the extension has finished initializing,
-                        // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-                    });
-
                     this.languageClient = languageClient;
                     this.settingsTracker = getTracker(this.RootUri);
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
@@ -364,6 +355,16 @@ class DefaultClient implements Client {
                     // Listen for messages from the language server.
                     this.registerNotifications();
                     this.registerFileWatcher();
+
+                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                    // The event handlers must be set before this happens.
+                    return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                        this.configuration.CompilerDefaults = compilerDefaults;
+                            
+                        // Only register the real commands after the extension has finished initializing,
+                        // e.g. prevents empty c_cpp_properties.json from generation.
+                        registerCommands();
+                    });
                 },
                 (err) => {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -442,7 +443,7 @@ class DefaultClient implements Client {
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                intelliSenseCachePath : settings.intelliSenseCachePath,
+                intelliSenseCachePath : util.resolveVariables(settings.intelliSenseCachePath, this.AdditionalEnvironment),
                 intelliSenseCacheSize : settings.intelliSenseCacheSize,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
@@ -503,6 +504,10 @@ class DefaultClient implements Client {
             if (changedSettings["clang_format_path"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
                 this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
+            }
+            if (changedSettings["intelliSenseCachePath"]) {
+                let settings: CppSettings = new CppSettings(this.RootUri);
+                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveVariables(settings.intelliSenseCachePath, this.AdditionalEnvironment));
             }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);

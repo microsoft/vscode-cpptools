@@ -1,0 +1,7 @@
+# ignore cache files for sample projects
+.vscode/ipch
+browse*.db*
+*.obj
+*.pdb
+*.exe
+*.ilk
