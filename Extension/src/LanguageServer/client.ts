@@ -632,7 +632,6 @@ class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
-
         let params: QueryTranslationUnitSourceParams = {
             uri: document.uri.toString()
         };
