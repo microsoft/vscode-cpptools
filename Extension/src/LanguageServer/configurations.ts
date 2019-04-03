@@ -42,6 +42,7 @@ export interface ConfigurationJson {
     configurations: Configuration[];
     env?: {[key: string]: string | string[]};
     version: number;
+    disableCppPropertiesSquiggles?: boolean;
 }
 
 export interface Configuration {
@@ -699,7 +700,11 @@ export class CppProperties {
                 }
             }
 
-            this.handleSquiggles();
+            if (!this.configurationJson.disableCppPropertiesSquiggles) {
+                this.handleSquiggles();
+            } else {
+                this.diagnosticCollection.clear();
+            }
         } catch (err) {
             vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
             throw err;
