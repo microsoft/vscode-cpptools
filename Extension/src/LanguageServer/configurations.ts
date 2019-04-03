@@ -42,7 +42,7 @@ export interface ConfigurationJson {
     configurations: Configuration[];
     env?: {[key: string]: string | string[]};
     version: number;
-    disableCppPropertiesSquiggles?: boolean;
+    enableCppPropertiesSquiggles?: boolean;
 }
 
 export interface Configuration {
@@ -700,13 +700,13 @@ export class CppProperties {
                 }
             }
 
-            if (this.configurationJson.disableCppPropertiesSquiggles) {
+            if (this.configurationJson.enableCppPropertiesSquiggles === false) {
                 this.diagnosticCollection.clear();
-            } else if (this.configurationJson.disableCppPropertiesSquiggles === false) {
+            } else if (this.configurationJson.enableCppPropertiesSquiggles === true) {
                 this.handleSquiggles();
             } else {
                 const settings: CppSettings = new CppSettings(this.rootUri);
-                if (settings.defaultDisableCppPropertiesSquiggles) {
+                if (settings.defaultEnableCppPropertiesSquiggles === false) {
                     this.diagnosticCollection.clear();
                 } else {
                     this.handleSquiggles();
