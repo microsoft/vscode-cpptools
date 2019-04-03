@@ -117,11 +117,27 @@ interface QueryTranslationUnitSourceParams {
     uri: string;
 }
 
+export enum QueryTranslationUnitSourceConfigDisposition {
+
+    /**
+     * No custom config needed for this file
+     */
+    ConfigNotNeeded = 0,
+
+    /**
+     * Custom config is needed for this file
+     */
+    ConfigNeeded = 1,
+
+    /**
+     * Custom config is needed for the ancestor file returned in uri
+     */
+    AncestorConfigNeeded = 2
+}
+
 interface QueryTranslationUnitSourceResult {
     uri: string;
-    is_header: boolean;
-    is_system_header: boolean;
-    is_tu_loaded: boolean;
+    configDisposition: QueryTranslationUnitSourceConfigDisposition;
 }
 
 // Requests
@@ -618,14 +634,14 @@ class DefaultClient implements Client {
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
 
         let params: QueryTranslationUnitSourceParams = {
-            uri: document.uri.fsPath
+            uri: document.uri.toString()
         };
         let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-        if (response.is_system_header === true || response.is_tu_loaded === true) {
+        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
             return Promise.resolve();
         }
 
-        let uri: vscode.Uri = vscode.Uri.file(response.uri);
+        let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.size === 0) {
@@ -650,8 +666,8 @@ class DefaultClient implements Client {
                     }
 
                     providerName = provider.name;
-                    if (await provider.canProvideConfiguration(uri, tokenSource.token)) {
-                        return provider.provideConfigurations([uri], tokenSource.token);
+                    if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+                        return provider.provideConfigurations([tuUri], tokenSource.token);
                     }
                 }
             } catch (err) {
@@ -664,6 +680,11 @@ class DefaultClient implements Client {
             (configs: SourceFileConfigurationItem[]) => {
                 if (configs && configs.length > 0) {
                     this.sendCustomConfigurations(configs, true);
+                    if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.AncestorConfigNeeded) {
+                        // replacing uri with original uri
+                        let newConfig: SourceFileConfigurationItem =  { uri: document.uri, configuration: configs[0].configuration };
+                        this.sendCustomConfigurations([newConfig], true);
+                    }
                 }
             },
             (err) => {
@@ -671,10 +692,10 @@ class DefaultClient implements Client {
                     return;
                 }
                 let settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(uri) && !vscode.debug.activeDebugSession) {
+                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document.uri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = "Dismiss";
                     const disable: string = "Disable Warnings";
-                    let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${uri.fsPath}'. ` +
+                    let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
                         `Settings from the '${configName}' configuration will be used instead.`;
                     if (err) {
                         message += ` (${err})`;
