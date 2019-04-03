@@ -1206,6 +1206,9 @@ class DefaultClient implements Client {
         }).then(() => {
             let newProvider: string = this.configuration.CurrentConfigurationProvider;
             if (this.configurationProvider !== newProvider) {
+                if (this.configurationProvider !== undefined) {
+                    this.clearCustomConfigurations();
+                }
                 this.configurationProvider = newProvider;
                 this.updateCustomConfigurations();
                 this.updateCustomBrowseConfiguration();
