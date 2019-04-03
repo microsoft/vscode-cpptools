@@ -42,6 +42,7 @@ export interface ConfigurationJson {
     configurations: Configuration[];
     env?: {[key: string]: string | string[]};
     version: number;
+    enableConfigurationSquiggles?: boolean;
 }
 
 export interface Configuration {
@@ -699,7 +700,18 @@ export class CppProperties {
                 }
             }
 
-            this.handleSquiggles();
+            if (this.configurationJson.enableConfigurationSquiggles === false) {
+                this.diagnosticCollection.clear();
+            } else if (this.configurationJson.enableConfigurationSquiggles === true) {
+                this.handleSquiggles();
+            } else {
+                const settings: CppSettings = new CppSettings(this.rootUri);
+                if (settings.defaultEnableConfigurationSquiggles === false) {
+                    this.diagnosticCollection.clear();
+                } else {
+                    this.handleSquiggles();
+                }
+            }
         } catch (err) {
             vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
             throw err;
