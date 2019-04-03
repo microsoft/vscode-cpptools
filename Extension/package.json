@@ -476,7 +476,7 @@
             "null"
           ],
           "default": null,
-          "description": "Set to false to disable squiggles for c_cpp_properties.json.",
+          "description": "Controls whether the extension will report errors detected in c_cpp_properties.json.",
           "scope": "resource"
         },
         "C_Cpp.updateChannel": {
