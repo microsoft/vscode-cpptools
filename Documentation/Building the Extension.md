@@ -3,7 +3,8 @@
 These steps will allow you to debug the TypeScript code that is part of the Microsoft CppTools extension for Visual Studio Code.
 
 Prerequisite steps:
-  * Clone [this](https://github.com/Microsoft/vscode-cpptools) repository.
+  * Clone the release branch of [this](https://github.com/Microsoft/vscode-cpptools) repository.
+      * git clone -b release https://github.com/Microsoft/vscode-cpptools
   * Install [npm](https://nodejs.org).
   * From a command line, run the following commands from the **Extension** folder in the root of the repository:
       * `npm install` will install the dependencies needed to build the extension.
