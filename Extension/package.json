@@ -117,7 +117,7 @@
             "Enabled",
             "Disabled"
           ],
-          "default": "Enabled",
+          "default": "Disabled",
           "description": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing #include errors.",
           "scope": "resource"
         },
@@ -135,7 +135,8 @@
           "type": "string",
           "enum": [
             "Enabled",
-            "Disabled"
+            "Disabled",
+            "IncludesOnly"
           ],
           "default": "Enabled",
           "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. Warnings about #includes that could not be located will always be reported to the editor. This setting is ignored by the Tag Parser engine.",
