@@ -10,7 +10,7 @@
 * Fix the default `AccessModifierOffset` used when formatting. [#3376](https://github.com/Microsoft/vscode-cpptools/issues/3376)
 * Fix null reference during initialization when using custom configuration providers. [PR #3377](https://github.com/Microsoft/vscode-cpptools/pull/3377)
 * Fix symbol parsing when `__MINGW_ATTRIB_*` is used. [#3390](https://github.com/Microsoft/vscode-cpptools/issues/3390)
-* Fix `compile_commands.json` confiuguration prompt being disabled per user instead of per folder. [PR #3399](https://github.com/Microsoft/vscode-cpptools/pull/3399)
+* Fix `compile_commands.json` configuration prompt being disabled per user instead of per folder. [PR #3399](https://github.com/Microsoft/vscode-cpptools/pull/3399)
 * Add `enableConfigurationSquiggles` setting to allow squiggles to be disabled for `c_cpp_properties.json`. [#3403](https://github.com/Microsoft/vscode-cpptools/issues/3403)
 
 ## Version 0.22.1: March 21, 2019
