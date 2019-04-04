@@ -252,6 +252,10 @@ export class UI {
         this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
     }
 
+    public resetConfigurationUI(): void {
+        this.configurationUIPromise = null;
+    }
+
     private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
         let showPrompt: () => Thenable<ConfigurationResult> = async () => {
             let configured: boolean = await prompt();
@@ -263,7 +267,7 @@ export class UI {
 
         if (this.configurationUIPromise) {
             this.configurationUIPromise = this.configurationUIPromise.then(result => {
-                if (priority > result.priority) {
+                if (priority >= result.priority) {
                     return showPrompt();
                 } else if (!result.configured) {
                     return showPrompt();

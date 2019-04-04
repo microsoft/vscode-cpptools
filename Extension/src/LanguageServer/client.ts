@@ -279,6 +279,8 @@ class DefaultClient implements Client {
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
     private configurationProvider: string;
+    private compileCommandsPathsForPrompt: CompileCommandsPaths;
+    private customConfigurationProviderForPrompt: CustomConfigurationProvider1;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -343,6 +345,7 @@ class DefaultClient implements Client {
                 () => {
                     this.configuration = new configs.CppProperties(this.RootUri);
                     this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
+                    this.configuration.ConfigurationsDeleted(() => this.onConfigurationsDeleted());
                     this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
                     this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
                     this.disposables.push(this.configuration);
@@ -529,60 +532,69 @@ class DefaultClient implements Client {
         }
     }
 
+    private onRegisteredCustomConfigurationProviderHelper(provider: CustomConfigurationProvider1): void {
+        // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
+        // the provider has sent the correct browse.path value.
+        if (provider.version >= Version.v2) {
+            this.pauseParsing();
+        }
+    }
+
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
-        let onRegistered: () => void = () => {
-            // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
-            // the provider has sent the correct browse.path value.
-            if (provider.version >= Version.v2) {
-                this.pauseParsing();
-            }
-        };
         return this.notifyWhenReady(() => {
             if (!this.RootPath) {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
             }
             let selectedProvider: string = this.configuration.CurrentConfigurationProvider;
+            this.customConfigurationProviderForPrompt = provider;
             if (!selectedProvider) {
-                let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
-                if (ask.Value) {
-                    ui.showConfigureCustomProviderMessage(() => {
-                        let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
-                        const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
-                        const allow: string = "Allow";
-                        const dontAllow: string = "Don't Allow";
-                        const askLater: string = "Ask Me Later";
-
-                        return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(result => {
-                            switch (result) {
-                                case allow: {
-                                    this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
-                                        onRegistered();
-                                        telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                                    });
-                                    ask.Value = false;
-                                    return true;
-                                }
-                                case dontAllow: {
-                                    ask.Value = false;
-                                    break;
-                                }
-                                default: {
-                                    break;
-                                }
-                            }
-                            return false;
-                        });
-                    },
-                    () => ask.Value = false);
-                }
+                this.promptCustomConfigurationProvider(provider);
             } else if (selectedProvider === provider.extensionId) {
-                onRegistered();
+                this.onRegisteredCustomConfigurationProviderHelper(provider);
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
             } else if (selectedProvider === provider.name) {
-                onRegistered();
+                this.onRegisteredCustomConfigurationProviderHelper(provider);
                 this.configuration.updateCustomConfigurationProvider(provider.extensionId); // v0 -> v1 upgrade. Update the configurationProvider in c_cpp_properties.json
             }
         });
+    }
+
+    private promptCustomConfigurationProvider(provider: CustomConfigurationProvider1) : void {
+        if (!provider) {
+            return;
+        }
+        let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
+        if (ask.Value) {
+            ui.showConfigureCustomProviderMessage(() => {
+                let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
+                const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
+                const allow: string = "Allow";
+                const dontAllow: string = "Don't Allow";
+                const askLater: string = "Ask Me Later";
+
+                return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(result => {
+                    switch (result) {
+                        case allow: {
+                            this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
+                                this.onRegisteredCustomConfigurationProviderHelper(provider);
+                                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+                            });
+                            ask.Value = false;
+                            return true;
+                        }
+                        case dontAllow: {
+                            ask.Value = false;
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                    return false;
+                });
+            },
+            () => ask.Value = false);
+        }
     }
 
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
@@ -637,84 +649,85 @@ class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
-        let params: QueryTranslationUnitSourceParams = {
-            uri: document.uri.toString()
-        };
-        let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
-            return Promise.resolve();
-        }
-
-        let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
-        let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-        if (providers.size === 0) {
-            return Promise.resolve();
-        }
-        console.log("provideCustomConfiguration");
-        let providerId: string|undefined = await this.getCustomConfigurationProviderId();
-        if (!providerId) {
-            return Promise.resolve();
-        }
-
-        let providerName: string = providerId;
-        let configName: string = await this.getCurrentConfigName();
-        const notReadyMessage: string = `${providerName} is not ready`;
-        let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
-            // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
-            try {
-                let provider: CustomConfigurationProvider1|null = providers.get(providerId);
-                if (provider) {
-                    if (!provider.isReady) {
-                        return Promise.reject(notReadyMessage);
-                    }
-
-                    providerName = provider.name;
-                    if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                        return provider.provideConfigurations([tuUri], tokenSource.token);
-                    }
-                }
-            } catch (err) {
+            let params: QueryTranslationUnitSourceParams = {
+                uri: document.uri.toString()
+            };
+            
+            let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
+            if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
+                return Promise.resolve();
             }
-            console.warn("failed to provide configuration");
-            return Promise.reject("");
-        };
 
-        return this.queueTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
-            (configs: SourceFileConfigurationItem[]) => {
-                if (configs && configs.length > 0) {
-                    this.sendCustomConfigurations(configs, true);
-                    if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.AncestorConfigNeeded) {
-                        // replacing uri with original uri
-                        let newConfig: SourceFileConfigurationItem =  { uri: document.uri, configuration: configs[0].configuration };
-                        this.sendCustomConfigurations([newConfig], true);
-                    }
-                }
-            },
-            (err) => {
-                if (err === notReadyMessage) {
-                    return;
-                }
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document.uri) && !vscode.debug.activeDebugSession) {
-                    const dismiss: string = "Dismiss";
-                    const disable: string = "Disable Warnings";
-                    let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
-                        `Settings from the '${configName}' configuration will be used instead.`;
-                    if (err) {
-                        message += ` (${err})`;
-                    }
+            let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
+            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+            let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+            if (providers.size === 0) {
+                return Promise.resolve();
+            }
+            console.log("provideCustomConfiguration");
+            let providerId: string|undefined = await this.getCustomConfigurationProviderId();
+            if (!providerId) {
+                return Promise.resolve();
+            }
 
-                    vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
-                            switch (response) {
-                                case disable: {
-                                    settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
-                                    break;
+            let providerName: string = providerId;
+            let configName: string = await this.getCurrentConfigName();
+            const notReadyMessage: string = `${providerName} is not ready`;
+            let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
+                // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
+                try {
+                    let provider: CustomConfigurationProvider1|null = providers.get(providerId);
+                    if (provider) {
+                        if (!provider.isReady) {
+                            return Promise.reject(notReadyMessage);
+                        }
+
+                        providerName = provider.name;
+                        if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+                            return provider.provideConfigurations([tuUri], tokenSource.token);
+                        }
+                    }
+                } catch (err) {
+                }
+                console.warn("failed to provide configuration");
+                return Promise.reject("");
+            };
+
+            return this.queueTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
+                (configs: SourceFileConfigurationItem[]) => {
+                    if (configs && configs.length > 0) {
+                        this.sendCustomConfigurations(configs, true);
+                        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.AncestorConfigNeeded) {
+                            // replacing uri with original uri
+                            let newConfig: SourceFileConfigurationItem =  { uri: document.uri, configuration: configs[0].configuration };
+                            this.sendCustomConfigurations([newConfig], true);
+                        }
+                    }
+                },
+                (err) => {
+                    if (err === notReadyMessage) {
+                        return;
+                    }
+                    let settings: CppSettings = new CppSettings(this.RootUri);
+                    if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document.uri) && !vscode.debug.activeDebugSession) {
+                        const dismiss: string = "Dismiss";
+                        const disable: string = "Disable Warnings";
+                        let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                            `Settings from the '${configName}' configuration will be used instead.`;
+                        if (err) {
+                            message += ` (${err})`;
+                        }
+
+                        vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
+                                switch (response) {
+                                    case disable: {
+                                        settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+                                        break;
+                                    }
                                 }
-                            }
-                        });
-                }
-            });
+                            });
+                    }
+                });
     }
 
     private isExternalHeader(uri: vscode.Uri): boolean {
@@ -852,7 +865,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
-        this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
+        this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => { this.compileCommandsPathsForPrompt = e; this.promptCompileCommands(e); });
         this.setupOutputHandlers();
     }
 
@@ -1081,6 +1094,9 @@ class DefaultClient implements Client {
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
+        if (!params) {
+            return;
+        }
         if (this.configuration.CurrentConfiguration.compileCommands !== undefined) {
             return;
         }
@@ -1193,6 +1209,12 @@ class DefaultClient implements Client {
 
     public resumeParsing(): void {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
+    }
+
+    private onConfigurationsDeleted(): void {
+        ui.resetConfigurationUI();
+        this.promptCustomConfigurationProvider(this.customConfigurationProviderForPrompt);
+        this.promptCompileCommands(this.compileCommandsPathsForPrompt);
     }
 
     private onConfigurationsChanged(configurations: configs.Configuration[]): void {

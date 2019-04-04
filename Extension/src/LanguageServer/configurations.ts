@@ -107,6 +107,7 @@ export class CppProperties {
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
+    private configurationsDeleted = new vscode.EventEmitter<void>();
     private selectionChanged = new vscode.EventEmitter<number>();
     private compileCommandsChanged = new vscode.EventEmitter<string>();
     private diagnosticCollection: vscode.DiagnosticCollection;
@@ -131,6 +132,7 @@ export class CppProperties {
     }
 
     public get ConfigurationsChanged(): vscode.Event<Configuration[]> { return this.configurationsChanged.event; }
+    public get ConfigurationsDeleted(): vscode.Event<void> { return this.configurationsDeleted.event; }
     public get SelectionChanged(): vscode.Event<number> { return this.selectionChanged.event; }
     public get CompileCommandsChanged(): vscode.Event<string> { return this.compileCommandsChanged.event; }
     public get Configurations(): Configuration[] { return this.configurationJson ? this.configurationJson.configurations : null; }
@@ -180,9 +182,17 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidDelete(() => {
+            // Enable the config prompts to re-appear after c_cpp_properties.json is deleted.
+            let rootPath: string = this.rootUri ? this.rootUri.fsPath : "";
+            let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootPath);
+            ask.Value = true;
+            ask = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootPath);
+            ask.Value = true;
+            
             this.propertiesFile = null;
             this.resetToDefaultSettings(true);
             this.handleConfigurationChange();
+            this.onConfigurationsDeleted();
         });
 
         this.configFileWatcher.onDidChange(() => {
@@ -198,6 +208,10 @@ export class CppProperties {
 
     private onConfigurationsChanged(): void {
         this.configurationsChanged.fire(this.Configurations);
+    }
+
+    private onConfigurationsDeleted(): void {
+        this.configurationsDeleted.fire();
     }
 
     private onSelectionChanged(): void {
