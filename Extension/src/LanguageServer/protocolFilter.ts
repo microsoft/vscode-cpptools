@@ -23,10 +23,12 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-                me.provideCustomConfiguration(document).then(() => {
-                    sendMessage(document);
-                }, () => {
-                    sendMessage(document);
+                me.notifyWhenReady(() => {
+                    me.provideCustomConfiguration(document).then(() => {
+                        sendMessage(document);
+                    }, () => {
+                        sendMessage(document);
+                    });
                 });
             }
         },
