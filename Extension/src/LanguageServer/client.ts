@@ -640,7 +640,7 @@ class DefaultClient implements Client {
         let params: QueryTranslationUnitSourceParams = {
             uri: document.uri.toString()
         };
-        let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
+        let response: QueryTranslationUnitSourceResult = await this.requestWhenReady(() => this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params));
         if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
             return Promise.resolve();
         }
