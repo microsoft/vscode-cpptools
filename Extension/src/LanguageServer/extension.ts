@@ -812,7 +812,7 @@ function onToggleSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
+    settings.toggleSetting("errorSquiggles", "Disabled", "Enabled");
 }
 
 function onToggleIncludeFallback(): void {
