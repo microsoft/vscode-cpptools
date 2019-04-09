@@ -549,53 +549,54 @@ export class CppProperties {
         }
     }
 
-    public handleConfigurationEditCommandWebview(): void {
-        SettingsPanel.CreateOrShow();
-    }
-
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
-        if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
-            vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                onSuccess(document);
-            });
+        let settings: CppSettings = new CppSettings(this.rootUri);
+        if (settings.useSettingsUI) {
+            SettingsPanel.CreateOrShow();
         } else {
-            fs.mkdir(this.configFolder, (e: NodeJS.ErrnoException) => {
-                if (!e || e.code === 'EEXIST') {
-                    let fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
-                    let filePath: vscode.Uri = vscode.Uri.file(fullPathToFile).with({ scheme: "untitled" });
-                    vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
-                        let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                        if (this.configurationJson) {
-                            this.resetToDefaultSettings(true);
-                        }
-                        this.applyDefaultIncludePathsAndFrameworks();
-                        let settings: CppSettings = new CppSettings(this.rootUri);
-                        if (settings.defaultConfigurationProvider) {
-                            this.configurationJson.configurations.forEach(config => {
-                                config.configurationProvider = settings.defaultConfigurationProvider;
-                            });
-                            settings.update("default.configurationProvider", undefined); // delete the setting
-                        }
-                        let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
-                        delete this.configurationJson.configurations[0].knownCompilers;
-                        edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
-                        this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
-                        vscode.workspace.applyEdit(edit).then((status) => {
-                            // Fix for issue 163
-                            // https://github.com/Microsoft/vscppsamples/issues/163
-                            // Save the file to disk so that when the user tries to re-open the file it exists.
-                            // Before this fix the file existed but was unsaved, so we went through the same
-                            // code path and reapplied the edit.
-                            document.save().then(() => {
-                                this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
-                                vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                                    onSuccess(document);
+            if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
+                vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                    onSuccess(document);
+                });
+            } else {
+                fs.mkdir(this.configFolder, (e: NodeJS.ErrnoException) => {
+                    if (!e || e.code === 'EEXIST') {
+                        let fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
+                        let filePath: vscode.Uri = vscode.Uri.file(fullPathToFile).with({ scheme: "untitled" });
+                        vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
+                            let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                            if (this.configurationJson) {
+                                this.resetToDefaultSettings(true);
+                            }
+                            this.applyDefaultIncludePathsAndFrameworks();
+                            let settings: CppSettings = new CppSettings(this.rootUri);
+                            if (settings.defaultConfigurationProvider) {
+                                this.configurationJson.configurations.forEach(config => {
+                                    config.configurationProvider = settings.defaultConfigurationProvider;
+                                });
+                                settings.update("default.configurationProvider", undefined); // delete the setting
+                            }
+                            let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
+                            delete this.configurationJson.configurations[0].knownCompilers;
+                            edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
+                            this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
+                            vscode.workspace.applyEdit(edit).then((status) => {
+                                // Fix for issue 163
+                                // https://github.com/Microsoft/vscppsamples/issues/163
+                                // Save the file to disk so that when the user tries to re-open the file it exists.
+                                // Before this fix the file existed but was unsaved, so we went through the same
+                                // code path and reapplied the edit.
+                                document.save().then(() => {
+                                    this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
+                                    vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                                        onSuccess(document);
+                                    });
                                 });
                             });
                         });
-                    });
-                }
-            });
+                    }
+                });
+            }
         }
     }
 

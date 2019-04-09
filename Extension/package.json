@@ -302,6 +302,12 @@
           "scope": "resource",
           "minimum": 0
         },
+        "C_Cpp.useSettingsUI": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, settings open in settings UI.  If false, settings files are opened directly.",
+          "scope": "resource"
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
