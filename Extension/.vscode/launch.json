@@ -15,7 +15,7 @@
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "TypeScript Compile",
+			"preLaunchTask": "Compile Dev",
 		},
 		{
 			"name": "Launch Tests",

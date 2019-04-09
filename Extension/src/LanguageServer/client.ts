@@ -332,7 +332,6 @@ class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         try {
-            console.log('create LanguageClient');
             let languageClient: LanguageClient = this.createLanguageClient(allClients, workspaceFolder);
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
@@ -344,7 +343,6 @@ class DefaultClient implements Client {
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(() => languageClient.onReady().then(
                 () => {
-                    console.log('client ready');
                     this.configuration = new configs.CppProperties(this.RootUri);
                     this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                     this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));

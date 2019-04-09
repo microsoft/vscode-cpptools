@@ -3,6 +3,7 @@ node_modules
 
 # ignore compliled typescript
 out
+dist
 
 # ignore downloaded extension files and folders
 server
