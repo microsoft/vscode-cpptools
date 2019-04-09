@@ -13,6 +13,7 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
+import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 const configVersion: number = 4;
 
@@ -546,6 +547,10 @@ export class CppProperties {
             // The file watcher limit is hit.
             // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
         }
+    }
+
+    public handleConfigurationEditCommandWebview(): void {
+        SettingsPanel.CreateOrShow();
     }
 
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {

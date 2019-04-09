@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+  </head>
+
+  <!-- todo: create .css for styles -->
+  <style>
+    th, td {
+      padding: 10px;
+      font-family: verdana, sans-serif;
+      font-size: 15px;
+    }
+  </style>
+
+  <body>
+
+  <!-- todo: change table into div elements -->
+  <table>
+
+  <!-- row 0 -->
+  <!-- Header -->
+  <tr>
+      <td>
+        <table>
+          <td>
+            <img src="{{root}}/ui/LanguageCCPP_color_128x.png" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension">
+          </td>
+          <td>
+               Microsoft <br>
+               C/C++ Extension
+          </td>
+        </table>
+      </td>
+  </tr>
+
+  <!-- row 1 -->
+  <!-- Save -->
+  <tr>
+      <td>
+          Saves to active config in c_cpp_properties.json
+      </td>
+  </tr>
+
+  <!-- row 2 -->
+  <!-- compiler path -->
+    <tr>
+      <td>
+        Compiler path
+       <p>
+         <input type="text" id="compilerPath" name="compilerPath" size="54"><br>
+       </p>
+      </td>
+    </tr>
+
+  <!-- row 4 -->
+  <!-- IntelliSense mode -->
+  <tr>
+      <td>
+          IntelliSense mode
+        <p>
+          <select id="intelliSenseMode" name="intelliSenseMode">
+            <option value="msvc-x64">msvc-x64 (Windows default)</option>
+            <option value="gcc-x64">gcc-x64 (Linux default)</option>
+            <option value="clang-x64">clang-x64 (Mac default)</option>
+          </select>
+        </p>
+      </td>
+    </tr>
+
+  <!-- row 5 -->
+  <!-- includes -->
+  <tr>
+    <td>Include path
+        <p>
+          <textarea id="includePath" name="includePath" rows="4" cols="54" placeholder="specify one include path per line"></textarea> <br>
+        </p>
+    </td>
+  </tr>
+
+  <!-- row 6 -->
+  <!-- defines -->
+  <tr>
+    <td>Defines
+      <p>
+        <textarea id="defines" name="defines" rows="4" cols="30" placeholder="specify one define per line"></textarea>
+      </p>
+    </td>
+  </tr>
+
+  <!-- row 7 -->
+  <!-- C Standard -->
+  <tr>
+    <td>C Standard
+        <p id="demo">selection is</p>
+      <p>
+        <select id="cStandard" name="cStandard" style="width: 75px">
+          <option value="c11">C11</option>
+          <option value="c99">C99</option>
+          <option value="c89">C89</option>
+        </select>
+      </p>
+    </td>
+  </tr>
+
+  <!-- row 8 -->
+  <!-- C++ Standard -->
+  <tr>
+    <td>
+      C++ Standard
+      <p>
+        <select id="cppStandard" name="cppStandard" style="width: 75px">
+          <option value="c++17">C++17</option>
+          <option value="c++14">C++14</option>
+          <option value="c++11">C++11</option>
+        </select>
+      </p>
+    </td>
+  </tr>
+  </table>
+
+
+  <script src="{{root}}/ui/settings.js"></script>
+
+  <!-- <script>
+
+    <script scr="{{root}}/ui/settings.js"></script>
+const vscode = acquireVsCodeApi();
+
+window.addEventListener('message', event => {
+        const message = event.data; // The json data that the extension sent
+        switch (message.command) {
+            case 'setDefault':
+            document.getElementById("demo").innerHTML = "setDefault";
+                break;
+        }
+    })
+
+
+document.getElementById("cStandard").addEventListener("change", myFunction);
+function myFunction() {
+var y = document.getElementById("cStandard");
+document.getElementById("demo").innerHTML = y.value;
+
+
+     vscode.postMessage({
+         command: "alert",
+         text: "selected: " + y.value
+     });
+}
+
+      </script>-->
+  </body>
+</html>

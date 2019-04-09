@@ -1317,7 +1317,8 @@ class DefaultClient implements Client {
     }
 
     public handleConfigurationEditCommand(): void {
-        this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommandWebview());
+        //this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
     }
 
     public handleAddToIncludePathCommand(path: string): void {
