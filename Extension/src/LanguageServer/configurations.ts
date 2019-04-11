@@ -630,9 +630,7 @@ export class CppProperties {
 
             // Replace all \<escape character> with \\<character>.
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
-            readResults = readResults.replace(/\\/g, '\\\\');
-            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \".
-            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to do it again for \\".
+            readResults = readResults.replace(/([^\\])\\([^\"\\])/g, '$1\\\\$2'); // Exclude \" and \\.
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
