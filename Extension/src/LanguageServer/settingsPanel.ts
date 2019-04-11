@@ -7,11 +7,24 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../common';
+import * as config from './configurations';
+//import { ElementId } from '../../ui/settings';
+
+// TODO: import or export. share between SettingsPanel and SettingsApp
+const ElementId = {
+    ActiveConfig: "activeConfig",
+    CompilerPath: "compilerPath",
+    IntelliSenseMode: "intelliSenseMode", 
+    IncludePath: "includePath",
+    Defines: "defines",
+    cStandard: "cStandard",
+    cppStandard: "cppStandard"
+}
 
 export class SettingsPanel {
 
     public static currentPanel: SettingsPanel | undefined;
-
+    private configValues: config.Configuration;
     private readonly _panel: vscode.WebviewPanel;
     private _disposables: vscode.Disposable[] = [];
     
@@ -36,19 +49,21 @@ export class SettingsPanel {
                 // Enable javascript in the webview
                 enableScripts: true,
 
-                // And restrict the webview to only loading content from our extension's `UI` directory.
-                localResourceRoots: [vscode.Uri.file(path.join(util.extensionContext.extensionPath, 'ui'))]
+                // And restrict the webview to only loading content from our extension's `ui` and 'out/ui' directories.
+                localResourceRoots: [
+                    vscode.Uri.file(path.join(util.extensionContext.extensionPath, 'ui')), 
+                    vscode.Uri.file(path.join(util.extensionContext.extensionPath, 'out', 'ui'))]
             }
         );
+
+        // SettingsPanel.currentPanel.ShowPanel();
         SettingsPanel.currentPanel = new SettingsPanel(panel);
     }
 
     public dispose(): void {
-        SettingsPanel.currentPanel._panel.webview.postMessage({ command: 'values' });
-
         SettingsPanel.currentPanel = undefined;
 
-        // Clean up our resources
+        // Clean up resources
         this._panel.dispose();
 
         while (this._disposables.length) {
@@ -59,20 +74,19 @@ export class SettingsPanel {
         }
     }
 
-    public static setDefault(): void {
-        // Send a message to the webview webview.
+    public updateWebview() {
+        // Send a message to the webview webview to update the settings from json.
+        // configuration will either send whatever values are set in json
         if (SettingsPanel.currentPanel)
         {
-            SettingsPanel.currentPanel._panel.webview.postMessage({ command: 'setDefault' });
+            SettingsPanel.currentPanel._panel.webview.postMessage({ command: 'update' });
         }
     }
 
     private constructor(panel: vscode.WebviewPanel) {
         this._panel = panel;
-
         this.setContentAsync();
-
-        //this.setDefault();
+        this.configValues = { name: undefined };
 
         // Listen for when the panel is disposed
         // This happens when the user closes the panel or when the panel is closed programatically
@@ -89,12 +103,10 @@ export class SettingsPanel {
         this._panel.webview.onDidReceiveMessage(
             message => {
                 switch (message.command) {
-                    case 'alert':
-                        vscode.window.showErrorMessage(message.text);
+                    case 'change':
+                        this.updateConfigs(message);
+                        vscode.window.showErrorMessage(message.key + ": " + message.value);
                         return;
-                    case 'values':
-                    vscode.window.showErrorMessage(message.includePath + " " + message.cStandard);
-                    return;
                 }
             },
             null,
@@ -102,9 +114,38 @@ export class SettingsPanel {
         );
     }
 
+    private updateConfigs(message: any) {
+        let entries: string[];
+
+        switch (message.key) {
+            case ElementId.ActiveConfig:
+                this.configValues.name = message.value;
+                return;
+            case ElementId.CompilerPath:
+                this.configValues.compilerPath = message.value;
+                return;
+            case ElementId.IncludePath:
+                entries = message.value.split("\n");
+                this.configValues.includePath = entries;
+                return;
+            case ElementId.Defines:
+                entries = message.value.split("\n");
+                this.configValues.defines = entries;
+                return;
+            case ElementId.IntelliSenseMode:
+                this.configValues.intelliSenseMode = message.value;
+                return;
+            case ElementId.cStandard:
+                this.configValues.cStandard = message.value;
+                return;
+            case ElementId.cppStandard:
+                this.configValues.cppStandard = message.value;
+        }
+    }
+
     private async setContentAsync(): Promise<void> {
         let content: string | undefined;
-        content = await util.readFileText(util.getExtensionFilePath("UI/settings.html"));
+        content = await util.readFileText(util.getExtensionFilePath("ui/settings.html"));
 
         let c = content.replace(
             /{{root}}/g, 
