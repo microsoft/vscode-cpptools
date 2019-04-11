@@ -551,7 +551,7 @@ export class CppProperties {
 
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
         let settings: CppSettings = new CppSettings(this.rootUri);
-        if (settings.useSettingsUI) {
+        if (vscode.workspace.getConfiguration("workbench.settings").get<string>("editor") === "ui") {
             SettingsPanel.CreateOrShow();
         } else {
             if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
