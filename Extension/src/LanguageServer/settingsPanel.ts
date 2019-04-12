@@ -147,23 +147,26 @@ export class SettingsPanel {
         let content: string | undefined;
         content = await util.readFileText(util.getExtensionFilePath("ui/settings.html"));
 
-        let c = content.replace(
+        content = content.replace(
             /{{root}}/g, 
             vscode.Uri.file(util.extensionContext.extensionPath)
             .with({ scheme: 'vscode-resource' })
             .toString());
 
-            // let text = '';
-            // const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            // for (let i = 0; i < 32; i++) {
-            //     text += possible.charAt(Math.floor(Math.random() * possible.length));
-            // }
+        content = content.replace(
+            /{{nonce}}/g, 
+            this.getNouce());
 
-        // this._panel.webview.html = c.replace(
-        //     /{{nonce}}/g, 
-        //     text);
+        this._panel.webview.html = content;
+    }
 
-        this._panel.webview.html = c;
+    private getNouce(): string {
+        let nouce: string;
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            nouce += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return nouce;
     }
 }
 
