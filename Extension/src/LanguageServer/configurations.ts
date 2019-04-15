@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
-import { CppSettings } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
@@ -550,8 +550,8 @@ export class CppProperties {
     }
 
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
-        let settings: CppSettings = new CppSettings(this.rootUri);
-        if (vscode.workspace.getConfiguration("workbench.settings").get<string>("editor") === "ui") {
+        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
+        if (otherSettings.settingsEditor === "ui") {
             SettingsPanel.CreateOrShow();
         } else {
             if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
