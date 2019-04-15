@@ -3,6 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource:; script-src 'nonce-{{nonce}}';">
   </head>
 
   <!-- todo: create .css for styles -->
@@ -39,7 +40,8 @@
   <!-- Save -->
   <tr>
       <td>
-          Saves to active config in c_cpp_properties.json
+          Saves to active config in c_cpp_properties.json<br>
+          <input type="text" id="activeConfig" name="activeConfig" size="54">
       </td>
   </tr>
 
@@ -93,7 +95,6 @@
   <!-- C Standard -->
   <tr>
     <td>C Standard
-        <p id="demo">selection is</p>
       <p>
         <select id="cStandard" name="cStandard" style="width: 75px">
           <option value="c11">C11</option>
@@ -114,42 +115,15 @@
           <option value="c++17">C++17</option>
           <option value="c++14">C++14</option>
           <option value="c++11">C++11</option>
+          <option value="c++03">C++03</option>
+          <option value="c++98">C++98</option>
         </select>
       </p>
     </td>
   </tr>
   </table>
 
+  <script nonce="{{nonce}}" src="{{root}}/out/ui/settings.js"></script>
 
-  <script src="{{root}}/ui/settings.js"></script>
-
-  <!-- <script>
-
-    <script scr="{{root}}/ui/settings.js"></script>
-const vscode = acquireVsCodeApi();
-
-window.addEventListener('message', event => {
-        const message = event.data; // The json data that the extension sent
-        switch (message.command) {
-            case 'setDefault':
-            document.getElementById("demo").innerHTML = "setDefault";
-                break;
-        }
-    })
-
-
-document.getElementById("cStandard").addEventListener("change", myFunction);
-function myFunction() {
-var y = document.getElementById("cStandard");
-document.getElementById("demo").innerHTML = y.value;
-
-
-     vscode.postMessage({
-         command: "alert",
-         text: "selected: " + y.value
-     });
-}
-
-      </script>-->
   </body>
 </html>
