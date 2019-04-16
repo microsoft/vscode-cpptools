@@ -505,6 +505,16 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.ConfigurationEditJSON",
+        "title": "%c_cpp.command.configurationEditJSON.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.ConfigurationEditUI",
+        "title": "%c_cpp.command.configurationEditUI.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.GoToDeclaration",
         "title": "%c_cpp.command.goToDeclaration.title%",
         "category": "C/C++"

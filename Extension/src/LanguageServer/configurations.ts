@@ -601,6 +601,15 @@ export class CppProperties {
     }
 
     public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
+        if (otherSettings.settingsEditor === "ui") {
+            this.handleConfigurationEditUICommand();
+        } else {
+            this.handleConfigurationEditJSONCommand(onSuccess);
+        }
+    }
+
+    public handleConfigurationEditJSONCommand(onSuccess: (document: vscode.TextDocument) => void): void {
         // First create or get properties file
         this.SetPropertiesFile().then(() => {
             // Then open json properties

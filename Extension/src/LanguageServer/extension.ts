@@ -665,6 +665,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', onSelectConfigurationProvider));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', onEditConfigurationJSON));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', onEditConfigurationUI));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
@@ -795,7 +796,16 @@ function onEditConfiguration(): void {
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
+    }
+}
+
+function onEditConfigurationJSON(): void {
+    onActivationEvent();
+    if (!isFolderOpen()) {
+        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+    } else {
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
     }
 }
 

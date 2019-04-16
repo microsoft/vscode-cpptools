@@ -224,6 +224,8 @@ export interface Client {
     handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
+    handleConfigurationEditCommand(): void;
+    handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
     onInterval(): void;
@@ -1321,6 +1323,10 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
     }
 
+    public handleConfigurationEditJSONCommand(): void {
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditJSONCommand(vscode.window.showTextDocument));
+    }
+
     public handleConfigurationEditUICommand(): void {
         this.notifyWhenReady(() => this.configuration.handleConfigurationEditUICommand());
     }
@@ -1408,6 +1414,8 @@ class NullClient implements Client {
     handleConfigurationProviderSelectCommand(): void {}
     handleShowParsingCommands(): void {}
     handleConfigurationEditCommand(): void {}
+    handleConfigurationEditJSONCommand(): void {}
+    handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void {}
     onInterval(): void {}
     dispose(): Thenable<void> {

@@ -16,6 +16,8 @@ class TemporaryCommandRegistrar {
 
     private commandsToRegister: string[] = [
         "C_Cpp.ConfigurationEdit",
+        "C_Cpp.ConfigurationEditJSON",
+        "C_Cpp.ConfigurationEditUI",
         "C_Cpp.ConfigurationSelect",
         "C_Cpp.ConfigurationProviderSelect",
         "C_Cpp.SwitchHeaderSource",
