@@ -637,15 +637,6 @@ class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
-        let params: QueryTranslationUnitSourceParams = {
-            uri: document.uri.toString()
-        };
-        let response: QueryTranslationUnitSourceResult = await this.requestWhenReady(() => this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params));
-        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
-            return Promise.resolve();
-        }
-
-        let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
         let tokenSource: CancellationTokenSource = new CancellationTokenSource();
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.size === 0) {
@@ -658,6 +649,15 @@ class DefaultClient implements Client {
         }
 
         let providerName: string = providerId;
+        let params: QueryTranslationUnitSourceParams = {
+            uri: document.uri.toString()
+        };
+        let response: QueryTranslationUnitSourceResult = await this.requestWhenReady(() => this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params));
+        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
+            return Promise.resolve();
+        }
+
+        let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
         let configName: string = await this.getCurrentConfigName();
         const notReadyMessage: string = `${providerName} is not ready`;
         let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {

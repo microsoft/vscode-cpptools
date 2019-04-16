@@ -1,10 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.22.2-insiders: April 4, 2019
+## Version 0.22.2-insiders: April 9, 2019
 * Fix various IntelliSense parsing bugs. [#2824](https://github.com/Microsoft/vscode-cpptools/issues/2824), [#3110](https://github.com/Microsoft/vscode-cpptools/issues/3110), [#3168](https://github.com/Microsoft/vscode-cpptools/issues/3168)
 * Enable `-fms-extensions` to be used as an argument to `compilerPath` on Linux/Mac. [#3063](https://github.com/Microsoft/vscode-cpptools/issues/3063)
 * Fix duplicate compiler build tasks appearing when `compilerPath` has arguments. [PR #3360](https://github.com/Microsoft/vscode-cpptools/pull/3360)
-* Add squiggle when `compilerPath` uses spaces and arguments without `\\"`. [#3357](https://github.com/Microsoft/vscode-cpptools/issues/3357)
+* Add squiggle when `compilerPath` uses spaces and arguments without `"`. [#3357](https://github.com/Microsoft/vscode-cpptools/issues/3357)
 * Fix environment variables not resolving with `C_Cpp.intelliSenseCachePath`. [#3367](https://github.com/Microsoft/vscode-cpptools/issues/3367)
 * Fix the formatting of snippets text. [#3376](https://github.com/Microsoft/vscode-cpptools/issues/3376)
 * Fix the default `AccessModifierOffset` used when formatting. [#3376](https://github.com/Microsoft/vscode-cpptools/issues/3376)
