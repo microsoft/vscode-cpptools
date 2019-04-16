@@ -5,10 +5,10 @@
 'use strict';
 
 import * as path from 'path';
+import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as util from '../common';
 import * as config from './configurations';
-//import { ElementId } from '../../ui/settings';
 
 // TODO: import or export. share between SettingsPanel and SettingsApp
 const ElementId = {
@@ -21,32 +21,43 @@ const ElementId = {
     cppStandard: "cppStandard"
 }
 
+export interface ViewStateEvent {
+    isActive: boolean;
+}
+
 export class SettingsPanel {
 
-    public static currentPanel: SettingsPanel | undefined;
     private configValues: config.Configuration;
-    private readonly _panel: vscode.WebviewPanel;
-    private _disposables: vscode.Disposable[] = [];
-    
-    public static CreateOrShow(): void {
+    private configDirty: boolean = false;
+    private settingsPanelViewStateChanged = new vscode.EventEmitter<ViewStateEvent>(); 
+    private panel: vscode.WebviewPanel;
+    private disposable: vscode.Disposable = undefined;
+    private disposablesPanel: vscode.Disposable = undefined;
+
+    constructor() {
+        this.configValues = { name: undefined };
+        this.disposable = vscode.Disposable.from(this.settingsPanelViewStateChanged);
+    }
+
+    public CreateOrShow(activeConfiguration: config.Configuration): void {
         const column = vscode.window.activeTextEditor
                 ? vscode.window.activeTextEditor.viewColumn
                 : undefined;
 
         // Show existing panel
-        if (SettingsPanel.currentPanel)
+        if (this.panel)
         {
-            SettingsPanel.currentPanel._panel.reveal(column);
+            this.panel.reveal(column, false);
             return;
         }
 
         // Create new panel
-        const panel = vscode.window.createWebviewPanel(
+        this.panel = vscode.window.createWebviewPanel(
             "settings",
             'C/C++ Configurations',
             column || vscode.ViewColumn.One,
             {
-                // Enable javascript in the webview
+                // enableCommandUris = true;
                 enableScripts: true,
 
                 // And restrict the webview to only loading content from our extension's `ui` and 'out/ui' directories.
@@ -56,96 +67,115 @@ export class SettingsPanel {
             }
         );
 
-        // SettingsPanel.currentPanel.ShowPanel();
-        SettingsPanel.currentPanel = new SettingsPanel(panel);
+        this.panel.iconPath = vscode.Uri.file(util.getExtensionFilePath("ui/LanguageCCPP_color_128x.png"));
+
+        this.disposablesPanel = vscode.Disposable.from(
+            this.panel,
+            this.panel.onDidDispose(this.onPanelDisposed, this),
+            this.panel.onDidChangeViewState(this.onViewStateChanged, this),
+            this.panel.webview.onDidReceiveMessage(this.onMessageReceived, this)
+        );
+
+        this.panel.webview.html = this.getHtml();
+
+        this.updateWebview(activeConfiguration);
+    }
+
+    public GetLastValuesFromConfigUI(): config.Configuration {
+        return this.configValues;
+    }
+
+    public get SettingsPanelViewStateChanged(): vscode.Event<ViewStateEvent> { 
+        return this.settingsPanelViewStateChanged.event;
+    }
+
+    public UpdateConfigUI(configuration: config.Configuration) {
+        if (this.panel) {
+            this.updateWebview(configuration);
+        }
     }
 
     public dispose(): void {
-        SettingsPanel.currentPanel = undefined;
-
         // Clean up resources
-        this._panel.dispose();
+        this.panel.dispose();
 
-        while (this._disposables.length) {
-            const x = this._disposables.pop();
-            if (x) {
-                x.dispose();
-            }
-        }
+        this.disposable && this.disposable.dispose();
+        this.disposablesPanel && this.disposablesPanel.dispose();
     }
 
-    public updateWebview() {
+    private onPanelDisposed() {
+        // Notify listener config panel is not active
+        if (this.configDirty) {
+            let viewState: ViewStateEvent = { isActive: false };
+            this.settingsPanelViewStateChanged.fire(viewState);
+            this.configDirty = false;
+        }
+
+        this.disposablesPanel && this.disposablesPanel.dispose();
+        this.panel = undefined;
+    }
+
+    private updateWebview(configuration: config.Configuration) {
+        this.configValues = configuration;
         // Send a message to the webview webview to update the settings from json.
-        // configuration will either send whatever values are set in json
-        if (SettingsPanel.currentPanel)
-        {
-            SettingsPanel.currentPanel._panel.webview.postMessage({ command: 'update' });
+        if (this.panel) {
+           this.panel.webview.postMessage({ command: 'update', config: configuration });
         }
     }
 
-    private constructor(panel: vscode.WebviewPanel) {
-        this._panel = panel;
-        this.setContentAsync();
-        this.configValues = { name: undefined };
-
-        // Listen for when the panel is disposed
-        // This happens when the user closes the panel or when the panel is closed programatically
-        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-
-        // Update the content based on view changes
-        this._panel.onDidChangeViewState(
-            e => {},
-            null,
-            this._disposables
-        );
-
-        // Handle messages from the webview
-        this._panel.webview.onDidReceiveMessage(
-            message => {
-                switch (message.command) {
-                    case 'change':
-                        this.updateConfigs(message);
-                        vscode.window.showErrorMessage(message.key + ": " + message.value);
-                        return;
-                }
-            },
-            null,
-            this._disposables
-        );
+    private onViewStateChanged(e: vscode.WebviewPanelOnDidChangeViewStateEvent)
+    {
+        let viewState: ViewStateEvent = { isActive: e.webviewPanel.active };
+        if (this.configDirty || e.webviewPanel.active) {
+            this.settingsPanelViewStateChanged.fire(viewState);
+            this.configDirty = false;
+        }
     }
 
-    private updateConfigs(message: any) {
+    private onMessageReceived(message: any) {
+        if (message == null) return;
+
+        switch (message.command) {
+            case 'change':
+                this.updateConfig(message);
+                vscode.window.showErrorMessage(message.key + ": " + message.value);
+        }
+    }
+
+    private updateConfig(message: any) {
         let entries: string[];
+        this.configDirty = true;
 
         switch (message.key) {
             case ElementId.ActiveConfig:
                 this.configValues.name = message.value;
-                return;
+                break;
             case ElementId.CompilerPath:
                 this.configValues.compilerPath = message.value;
-                return;
+                break;
             case ElementId.IncludePath:
                 entries = message.value.split("\n");
                 this.configValues.includePath = entries;
-                return;
+                break;
             case ElementId.Defines:
                 entries = message.value.split("\n");
                 this.configValues.defines = entries;
-                return;
+                break;
             case ElementId.IntelliSenseMode:
                 this.configValues.intelliSenseMode = message.value;
-                return;
+                break;
             case ElementId.cStandard:
                 this.configValues.cStandard = message.value;
-                return;
+                break;
             case ElementId.cppStandard:
                 this.configValues.cppStandard = message.value;
+                break;
         }
     }
 
-    private async setContentAsync(): Promise<void> {
+    private getHtml(): string {
         let content: string | undefined;
-        content = await util.readFileText(util.getExtensionFilePath("ui/settings.html"));
+        content = fs.readFileSync(util.getExtensionFilePath("ui/settings.html")).toString();
 
         content = content.replace(
             /{{root}}/g, 
@@ -157,7 +187,7 @@ export class SettingsPanel {
             /{{nonce}}/g, 
             this.getNouce());
 
-        this._panel.webview.html = content;
+        return content;
     }
 
     private getNouce(): string {

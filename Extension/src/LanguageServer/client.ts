@@ -224,6 +224,7 @@ export interface Client {
     handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
+    handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
     onInterval(): void;
     dispose(): Thenable<void>;
@@ -1318,6 +1319,10 @@ class DefaultClient implements Client {
 
     public handleConfigurationEditCommand(): void {
         this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
+    }
+
+    public handleConfigurationEditUICommand(): void {
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditUICommand());
     }
 
     public handleAddToIncludePathCommand(path: string): void {

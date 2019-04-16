@@ -40,8 +40,7 @@
   <!-- Save -->
   <tr>
       <td>
-          Saves to active config in c_cpp_properties.json<br>
-          <input type="text" id="activeConfig" name="activeConfig" size="54">
+          <p>Saves to active configuration <code id=activeConfig></code> in c_cpp_properties.json</p>
       </td>
   </tr>
 
@@ -51,7 +50,7 @@
       <td>
         Compiler path
        <p>
-         <input type="text" id="compilerPath" name="compilerPath" size="54"><br>
+         <input type="text" id="compilerPath" size="54"><br>
        </p>
       </td>
     </tr>
@@ -62,10 +61,10 @@
       <td>
           IntelliSense mode
         <p>
-          <select id="intelliSenseMode" name="intelliSenseMode">
-            <option value="msvc-x64">msvc-x64 (Windows default)</option>
-            <option value="gcc-x64">gcc-x64 (Linux default)</option>
-            <option value="clang-x64">clang-x64 (Mac default)</option>
+          <select id="intelliSenseMode">
+            <option value="msvc-x64">msvc-x64</option>
+            <option value="gcc-x64">gcc-x64</option>
+            <option value="clang-x64">clang-x64</option>
           </select>
         </p>
       </td>
@@ -76,7 +75,7 @@
   <tr>
     <td>Include path
         <p>
-          <textarea id="includePath" name="includePath" rows="4" cols="54" placeholder="specify one include path per line"></textarea> <br>
+          <textarea id="includePath" rows="4" cols="54" placeholder="specify one include path per line"></textarea> <br>
         </p>
     </td>
   </tr>
@@ -86,7 +85,7 @@
   <tr>
     <td>Defines
       <p>
-        <textarea id="defines" name="defines" rows="4" cols="30" placeholder="specify one define per line"></textarea>
+        <textarea id="defines" rows="4" cols="30" placeholder="specify one define per line"></textarea>
       </p>
     </td>
   </tr>
@@ -96,7 +95,7 @@
   <tr>
     <td>C Standard
       <p>
-        <select id="cStandard" name="cStandard" style="width: 75px">
+        <select id="cStandard" style="width: 75px">
           <option value="c11">C11</option>
           <option value="c99">C99</option>
           <option value="c89">C89</option>
@@ -111,7 +110,7 @@
     <td>
       C++ Standard
       <p>
-        <select id="cppStandard" name="cppStandard" style="width: 75px">
+        <select id="cppStandard" style="width: 75px">
           <option value="c++17">C++17</option>
           <option value="c++14">C++14</option>
           <option value="c++11">C++11</option>

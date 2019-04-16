@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 'use strict';
-//import { ElementId } from '../src/LanguageServer/settingsPanel';
-//import * as config from '../src/LanguageServer/configurations';
 
 const ElementId = {
     ActiveConfig: "activeConfig",
@@ -46,29 +44,42 @@ class SettingsApp {
     }
 
     private onChanged(id: string) {
+        if (this.updating) return;
+
         var x = document.getElementById(id);
         this.vsCodeApi.postMessage({
             command: "change",
             key: id,
             value: x.value
         });
-        document.getElementById(ElementId.ActiveConfig).value = "setDefault";
     }
 
     private onMessageReceived(e: MessageEvent) {
         const message = e.data; // The json data that the extension sent
         switch (message.command) {
             case 'update':
-                this.updateValues(message);
+                this.update(message.config);
                 break;
         }
     }
 
-    private updateValues(values: any) {
-        document.getElementById("defines").innerHTML = "setDefault";
-        document.getElementById("includePath").innerHTML = "setDefault";
-        document.getElementById("compilerPath").value = "setDefault";
-        document.getElementById(ElementId.ActiveConfig).value = "name";
+    private update(config: any) {
+        this.updating = true;
+        try {
+            document.getElementById(ElementId.ActiveConfig).innerHTML = config.name;
+
+            document.getElementById(ElementId.CompilerPath).value = config.compilerPath;
+            document.getElementById(ElementId.IntelliSenseMode).value = config.intelliSenseMode;
+
+            document.getElementById(ElementId.IncludePath).innerHTML = (config.includePath.length > 0) ? config.includePath.join("\n") : "";
+            document.getElementById(ElementId.Defines).innerHTML = (config.defines.length > 0 ) ? config.defines.join("\n") : "";
+
+            document.getElementById(ElementId.cStandard).value = config.cStandard;
+            document.getElementById(ElementId.cppStandard).value = config.cppStandard;
+        }
+        finally {
+            this.updating = false;
+        }
     }
 }
 
