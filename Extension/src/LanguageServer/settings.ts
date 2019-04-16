@@ -72,6 +72,7 @@ export class CppSettings extends Settings {
     public get defaultDatabaseFilename(): string { return super.Section.get<string>("default.browse.databaseFilename"); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] { return super.Section.get<string[]>("default.systemIncludePath"); }
+    public get defaultEnableConfigurationSquiggles(): boolean { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);

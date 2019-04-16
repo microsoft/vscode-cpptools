@@ -43,6 +43,7 @@ export interface ConfigurationJson {
     configurations: Configuration[];
     env?: {[key: string]: string | string[]};
     version: number;
+    enableConfigurationSquiggles?: boolean;
 }
 
 export interface Configuration {
@@ -358,7 +359,7 @@ export class CppProperties {
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             telemetry.logLanguageServerEvent("addToIncludePath");
-            this.parsePropertiesFileAndHandleSquiggles; // Clear out any modifications we may have made internally.
+            this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             if (config.includePath === undefined) {
                 config.includePath = ["${default}"];
@@ -774,6 +775,18 @@ export class CppProperties {
         if (!this.propertiesFile) {
             return;
         }
+
+        if (this.configurationJson.enableConfigurationSquiggles === false) {
+            this.diagnosticCollection.clear();
+            return;
+        }
+
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        if (settings.defaultEnableConfigurationSquiggles === false) {
+            this.diagnosticCollection.clear();
+            return;
+        }
+
         vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
             let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 

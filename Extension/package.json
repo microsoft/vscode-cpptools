@@ -77,13 +77,13 @@
         "C_Cpp.clang_format_style": {
           "type": "string",
           "default": "file",
-          "description": "Coding style, currently supports: Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit. Use \"file\" to load the style from a .clang-format file in the current or parent directory. Use \"{key: value, ...}\" to set specific parameters, e.g.: \"{ BasedOnStyle: LLVM, IndentWidth: 8 }\"",
+          "description": "Coding style, currently supports: Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit. Use \"file\" to load the style from a .clang-format file in the current or parent directory. Use {key: value, ...} to set specific parameters. For example, the \"Visual Studio\" style is similar to: { BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4 }",
           "scope": "resource"
         },
         "C_Cpp.clang_format_fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
-          "description": "Name of the predefined style used as a fallback in case clang-format is invoked with style \"file\" but the .clang-format file is not found. Possible values are Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit, none, or use \"{key: value, ...}\" to set specific parameters, e.g.: \"{ BasedOnStyle: LLVM, IndentWidth: 8 }\"",
+          "description": "Name of the predefined style used as a fallback in case clang-format is invoked with style \"file\" but the .clang-format file is not found. Possible values are Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit, none, or use {key: value, ...} to set specific parameters. For example, the \"Visual Studio\" style is similar to: { BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4 }",
           "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
@@ -468,6 +468,15 @@
           },
           "default": null,
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
+          "scope": "resource"
+        },
+        "C_Cpp.default.enableConfigurationSquiggles": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null,
+          "description": "Controls whether the extension will report errors detected in c_cpp_properties.json.",
           "scope": "resource"
         },
         "C_Cpp.updateChannel": {
