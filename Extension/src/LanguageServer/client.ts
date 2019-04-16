@@ -224,7 +224,6 @@ export interface Client {
     handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
-    handleConfigurationEditCommand(): void;
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
