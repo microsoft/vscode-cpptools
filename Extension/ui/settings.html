@@ -40,7 +40,7 @@
   <!-- Save -->
   <tr>
       <td>
-          <p>Saves to active configuration <code id=activeConfig></code> in c_cpp_properties.json</p>
+          <p>Saves to active configuration <span id=activeConfig></span> in <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a></p>
       </td>
   </tr>
 
@@ -50,8 +50,10 @@
       <td>
         Compiler path
        <p>
-         <input type="text" id="compilerPath" size="54"><br>
+          <!--<span id="compilerPathInvalid">compiler path is invalid.</span><br>-->
+          <input type="text" id="compilerPath" size="54">
        </p>
+       <p>
       </td>
     </tr>
 
@@ -75,6 +77,7 @@
   <tr>
     <td>Include path
         <p>
+            <!--<span id="includePathInvalid">one or more include paths is invalid.</span><br>-->
           <textarea id="includePath" rows="4" cols="54" placeholder="specify one include path per line"></textarea> <br>
         </p>
     </td>

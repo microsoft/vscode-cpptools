@@ -792,6 +792,7 @@ function onSelectConfigurationProvider(): void {
 
 function onEditConfigurationJSON(): void {
     onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, null);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
@@ -801,6 +802,7 @@ function onEditConfigurationJSON(): void {
 
 function onEditConfigurationUI(): void {
     onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, null);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {

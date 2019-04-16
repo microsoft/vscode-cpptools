@@ -12,6 +12,8 @@ const ElementId = {
     Defines: "defines",
     cStandard: "cStandard",
     cppStandard: "cppStandard"
+    // compilerPathInvalid: "compilerPathInvalid",
+    // includePathInvalid: "includePathInvalid"
 }
 
 interface VsCodeApi {
@@ -41,6 +43,9 @@ class SettingsApp {
 
         document.getElementById(ElementId.cStandard).addEventListener("change", this.onChanged.bind(this, ElementId.cStandard));
         document.getElementById(ElementId.cppStandard).addEventListener("change", this.onChanged.bind(this, ElementId.cppStandard));
+
+        // document.getElementById(ElementId.compilerPathInvalid).style.visibility = "hidden";
+        // document.getElementById(ElementId.includePathInvalid).style.visibility = "hidden";
     }
 
     private onChanged(id: string) {
@@ -60,6 +65,13 @@ class SettingsApp {
             case 'update':
                 this.update(message.config);
                 break;
+            //TODO: validate input paths
+            // case 'validatecompilerPath':
+            //     this.validateInput(ElementId.compilerPathInvalid, message.invalid);
+            //     break;
+            // case 'validateincludePath':
+            //     this.validateInput(ElementId.includePathInvalid, message.invalid);
+            //     break;
         }
     }
 
@@ -81,6 +93,10 @@ class SettingsApp {
             this.updating = false;
         }
     }
+
+    // private validateInput(elementID: string, invalid: boolean) {
+    //     document.getElementById(elementID).style.visibility = invalid ? "visible" : "hidden";
+    // }
 }
 
 new SettingsApp();

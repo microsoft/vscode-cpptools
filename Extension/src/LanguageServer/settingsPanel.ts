@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as config from './configurations';
 
-// TODO: import or export. share between SettingsPanel and SettingsApp
+// TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp used for HTML cannot import/export
 const ElementId = {
     ActiveConfig: "activeConfig",
     CompilerPath: "compilerPath",
@@ -45,8 +45,7 @@ export class SettingsPanel {
                 : undefined;
 
         // Show existing panel
-        if (this.panel)
-        {
+        if (this.panel) {
             this.panel.reveal(column, false);
             return;
         }
@@ -57,7 +56,7 @@ export class SettingsPanel {
             'C/C++ Configurations',
             column || vscode.ViewColumn.One,
             {
-                // enableCommandUris = true;
+                enableCommandUris: true,
                 enableScripts: true,
 
                 // And restrict the webview to only loading content from our extension's `ui` and 'out/ui' directories.
@@ -81,12 +80,12 @@ export class SettingsPanel {
         this.updateWebview(activeConfiguration);
     }
 
-    public GetLastValuesFromConfigUI(): config.Configuration {
-        return this.configValues;
-    }
-
     public get SettingsPanelViewStateChanged(): vscode.Event<ViewStateEvent> { 
         return this.settingsPanelViewStateChanged.event;
+    }
+
+    public GetLastValuesFromConfigUI(): config.Configuration {
+        return this.configValues;
     }
 
     public UpdateConfigUI(configuration: config.Configuration) {
@@ -94,6 +93,13 @@ export class SettingsPanel {
             this.updateWebview(configuration);
         }
     }
+
+    //TODO: validate input paths
+    // public validatePaths(invalid: boolean) {
+    //     if (this.panel) {
+    //         this.panel.webview.postMessage({ command: 'validatecompilerPath', invalid: invalid });
+    //      }
+    // }
 
     public dispose(): void {
         // Clean up resources
@@ -138,7 +144,6 @@ export class SettingsPanel {
         switch (message.command) {
             case 'change':
                 this.updateConfig(message);
-                vscode.window.showErrorMessage(message.key + ": " + message.value);
         }
     }
 
