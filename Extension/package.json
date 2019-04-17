@@ -139,7 +139,7 @@
             "EnabledIfIncludesResolve"
           ],
           "default": "EnabledIfIncludesResolve",
-          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor.",
+          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
         },
         "C_Cpp.dimInactiveRegions": {
