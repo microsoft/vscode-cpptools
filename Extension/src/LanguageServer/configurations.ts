@@ -639,7 +639,7 @@ export class CppProperties {
         });
     }
 
-    private onSettingsPanelViewStateChanged(e: ViewStateEvent) {
+    private onSettingsPanelViewStateChanged(e: ViewStateEvent): void {
         if (e.isActive && this.configurationJson) {
             // The settings UI became visible or active.
             // Ensure settingsPanel is referencing current configuration
@@ -679,8 +679,9 @@ export class CppProperties {
     }
 
     private parsePropertiesFileAndHandleSquiggles(): void {
-        if (this.parsePropertiesFile())
+        if (this.parsePropertiesFile()) {
             this.handleSquiggles();
+        }
     }
 
     private parsePropertiesFile(): boolean {

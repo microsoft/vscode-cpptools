@@ -19,7 +19,7 @@ const ElementId = {
     Defines: "defines",
     cStandard: "cStandard",
     cppStandard: "cppStandard"
-}
+};
 
 export interface ViewStateEvent {
     isActive: boolean;
@@ -40,7 +40,7 @@ export class SettingsPanel {
     }
 
     public CreateOrShow(activeConfiguration: config.Configuration): void {
-        const column = vscode.window.activeTextEditor
+        const column: vscode.ViewColumn = vscode.window.activeTextEditor
                 ? vscode.window.activeTextEditor.viewColumn
                 : undefined;
 
@@ -88,7 +88,7 @@ export class SettingsPanel {
         return this.configValues;
     }
 
-    public UpdateConfigUI(configuration: config.Configuration) {
+    public UpdateConfigUI(configuration: config.Configuration): void {
         if (this.panel) {
             this.updateWebview(configuration);
         }
@@ -105,11 +105,16 @@ export class SettingsPanel {
         // Clean up resources
         this.panel.dispose();
 
-        this.disposable && this.disposable.dispose();
-        this.disposablesPanel && this.disposablesPanel.dispose();
+        if (this.disposable) {
+            this.disposable.dispose();
+        }
+
+        if (this.disposablesPanel) { 
+            this.disposablesPanel.dispose(); 
+        }
     }
 
-    private onPanelDisposed() {
+    private onPanelDisposed(): void {
         // Notify listener config panel is not active
         if (this.configDirty) {
             let viewState: ViewStateEvent = { isActive: false };
@@ -117,11 +122,13 @@ export class SettingsPanel {
             this.configDirty = false;
         }
 
-        this.disposablesPanel && this.disposablesPanel.dispose();
-        this.panel = undefined;
+        if (this.disposablesPanel) { 
+            this.disposablesPanel.dispose(); 
+            this.panel = undefined;
+        }
     }
 
-    private updateWebview(configuration: config.Configuration) {
+    private updateWebview(configuration: config.Configuration): void {
         this.configValues = configuration;
         // Send a message to the webview webview to update the settings from json.
         if (this.panel) {
@@ -129,8 +136,7 @@ export class SettingsPanel {
         }
     }
 
-    private onViewStateChanged(e: vscode.WebviewPanelOnDidChangeViewStateEvent)
-    {
+    private onViewStateChanged(e: vscode.WebviewPanelOnDidChangeViewStateEvent): void {
         let viewState: ViewStateEvent = { isActive: e.webviewPanel.active };
         if (this.configDirty || e.webviewPanel.active) {
             this.settingsPanelViewStateChanged.fire(viewState);
@@ -138,16 +144,17 @@ export class SettingsPanel {
         }
     }
 
-    private onMessageReceived(message: any) {
-        if (message == null) return;
-
+    private onMessageReceived(message: any): void {
+        if (message == null) {
+            return;
+        }
         switch (message.command) {
             case 'change':
                 this.updateConfig(message);
         }
     }
 
-    private updateConfig(message: any) {
+    private updateConfig(message: any): void {
         let entries: string[];
         this.configDirty = true;
 
@@ -197,8 +204,8 @@ export class SettingsPanel {
 
     private getNouce(): string {
         let nouce: string;
-        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 32; i++) {
+        const possible: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i: number = 0; i < 32; i++) {
             nouce += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         return nouce;
