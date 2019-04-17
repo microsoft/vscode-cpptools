@@ -356,6 +356,14 @@ export class CppProperties {
         }
     }
 
+    private isCompilerIntelliSenseModeCompatible(): boolean {
+        // Check if intelliSenseMode and compilerPath are compatible
+        // cl.exe and msvc mode should be used together
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
+        return compilerPathAndArgs.compilerPath.endsWith("cl.exe") === (this.CurrentConfiguration.intelliSenseMode === "msvc-x64");
+    }
+
+
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             telemetry.logLanguageServerEvent("addToIncludePath");
@@ -748,26 +756,27 @@ export class CppProperties {
                 }
                 curText = curText.substr(0, nextNameStart2);
             }
+            const isWindows: boolean = os.platform() === 'win32';
+            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
 
             // TODO: Add other squiggles.
 
             // Check if intelliSenseMode and compilerPath are compatible
-            if (os.platform() === 'win32') {
+            if (isWindows) {
                 // cl.exe is only available on Windows
                 const intelliSenseModeStart: number = curText.search(/\s*\"intelliSenseMode\"\s*:\s*\"/);
                 if (intelliSenseModeStart !== -1) {
                     const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
-                    // cl.exe and msvc mode should be used together
-                    let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
-                    if (compilerPathAndArgs.compilerPath.endsWith("cl.exe") !== (this.CurrentConfiguration.intelliSenseMode === "msvc-x64")) {
+                    if (!this.isCompilerIntelliSenseModeCompatible()) {
                         let message: string = `IntelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
                             message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
+                        newSquiggleMetrics.CompilerModeMismatch++;
                     }
                 }
             }
@@ -800,10 +809,8 @@ export class CppProperties {
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
             if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
-                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0 };
+                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
             }
-            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0 };
-            const isWindows: boolean = os.platform() === 'win32';
 
             for (let curPath of paths) {
                 const isCompilerPath: boolean = curPath === this.CurrentConfiguration.compilerPath;
