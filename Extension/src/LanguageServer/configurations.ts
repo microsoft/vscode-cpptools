@@ -14,6 +14,7 @@ import { CppSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
 import * as os from 'os';
+import escapeStringRegExp = require('escape-string-regexp');
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
@@ -728,7 +729,7 @@ export class CppProperties {
             // Get the text of the current configuration.
             let curText: string = document.getText();
             let curTextStartOffset: number = 0;
-            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${this.CurrentConfiguration.name}"`));
+            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(this.CurrentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
                 return;
