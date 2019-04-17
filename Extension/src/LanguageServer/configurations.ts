@@ -364,7 +364,6 @@ export class CppProperties {
         return compilerPathAndArgs.compilerPath.endsWith("cl.exe") === (this.CurrentConfiguration.intelliSenseMode === "msvc-x64");
     }
 
-
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             telemetry.logLanguageServerEvent("addToIncludePath");
