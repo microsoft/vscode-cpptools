@@ -757,7 +757,7 @@ export class CppProperties {
                 const intelliSenseModeStart: number = curText.search(/\s*\"intelliSenseMode\"\s*:\s*\"/);
                 if (intelliSenseModeStart !== -1) {
                     const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
-                    const intelliSenseModeEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
+                    const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
                     // cl.exe and msvc mode should be used together
                     let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
@@ -765,7 +765,7 @@ export class CppProperties {
                         let message: string = `IntelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
-                                document.positionAt(curTextStartOffset + intelliSenseModeEnd)),
+                                document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
                             message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
                     }
