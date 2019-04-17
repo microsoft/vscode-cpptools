@@ -11,7 +11,7 @@ import * as util from '../common';
 import * as config from './configurations';
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp used for HTML cannot import/export
-const ElementId: {[key:string]: string} = {
+const ElementId: { [key: string]: string } = {
     ActiveConfig: "activeConfig",
     CompilerPath: "compilerPath",
     IntelliSenseMode: "intelliSenseMode", 
@@ -145,7 +145,7 @@ export class SettingsPanel {
     }
 
     private onMessageReceived(message: any): void {
-        if (message == null) {
+        if (message === null) {
             return;
         }
         switch (message.command) {

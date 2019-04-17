@@ -623,7 +623,7 @@ export class CppProperties {
             if (this.propertiesFile) {
                 if (this.parsePropertiesFile()) {
                     // Parse successful, show UI
-                    if (this.settingsPanel == undefined) {
+                    if (this.settingsPanel === undefined) {
                         this.settingsPanel = new SettingsPanel();
                         this.settingsPanel.SettingsPanelViewStateChanged((e) => this.onSettingsPanelViewStateChanged(e));
                         this.disposables.push(this.settingsPanel);
