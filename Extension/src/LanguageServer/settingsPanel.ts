@@ -10,13 +10,13 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as config from './configurations';
 
-// TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp used for HTML cannot import/export
-const ElementId: { [key: string]: string } = {
-    ActiveConfig: "activeConfig",
-    CompilerPath: "compilerPath",
-    IntelliSenseMode: "intelliSenseMode", 
-    IncludePath: "includePath",
-    Defines: "defines",
+// TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
+const elementId: { [key: string]: string } = {
+    activeConfig: "activeConfig",
+    compilerPath: "compilerPath",
+    intelliSenseMode: "intelliSenseMode", 
+    includePath: "includePath",
+    defines: "defines",
     cStandard: "cStandard",
     cppStandard: "cppStandard"
 };
@@ -26,20 +26,24 @@ export interface ViewStateEvent {
 }
 
 export class SettingsPanel {
-
     private configValues: config.Configuration;
     private configDirty: boolean = false;
     private settingsPanelViewStateChanged = new vscode.EventEmitter<ViewStateEvent>(); 
     private panel: vscode.WebviewPanel;
     private disposable: vscode.Disposable = undefined;
     private disposablesPanel: vscode.Disposable = undefined;
+    private static readonly viewType: string = 'settingsPanel';
+    private static readonly title: string = 'C/C++ Configurations';
 
     constructor() {
         this.configValues = { name: undefined };
-        this.disposable = vscode.Disposable.from(this.settingsPanelViewStateChanged);
+        this.disposable = vscode.Disposable.from(
+            this.settingsPanelViewStateChanged,
+            vscode.window.onDidChangeWindowState(this.onWindowStateChanged, this)
+        );
     }
 
-    public CreateOrShow(activeConfiguration: config.Configuration): void {
+    public createOrShow(activeConfiguration: config.Configuration): void {
         const column: vscode.ViewColumn = vscode.window.activeTextEditor
                 ? vscode.window.activeTextEditor.viewColumn
                 : undefined;
@@ -52,21 +56,22 @@ export class SettingsPanel {
 
         // Create new panel
         this.panel = vscode.window.createWebviewPanel(
-            "settings",
-            'C/C++ Configurations',
+            SettingsPanel.viewType,
+            SettingsPanel.title,
             column || vscode.ViewColumn.One,
             {
                 enableCommandUris: true,
                 enableScripts: true,
 
-                // And restrict the webview to only loading content from our extension's `ui` and 'out/ui' directories.
+                // Restrict the webview to only loading content from these directories
                 localResourceRoots: [
+                    vscode.Uri.file(util.extensionContext.extensionPath), 
                     vscode.Uri.file(path.join(util.extensionContext.extensionPath, 'ui')), 
                     vscode.Uri.file(path.join(util.extensionContext.extensionPath, 'out', 'ui'))]
             }
         );
 
-        this.panel.iconPath = vscode.Uri.file(util.getExtensionFilePath("ui/LanguageCCPP_color_128x.png"));
+        this.panel.iconPath = vscode.Uri.file(util.getExtensionFilePath("LanguageCCPP_color_128x.png"));
 
         this.disposablesPanel = vscode.Disposable.from(
             this.panel,
@@ -84,11 +89,11 @@ export class SettingsPanel {
         return this.settingsPanelViewStateChanged.event;
     }
 
-    public GetLastValuesFromConfigUI(): config.Configuration {
+    public getLastValuesFromConfigUI(): config.Configuration {
         return this.configValues;
     }
 
-    public UpdateConfigUI(configuration: config.Configuration): void {
+    public updateConfigUI(configuration: config.Configuration): void {
         if (this.panel) {
             this.updateWebview(configuration);
         }
@@ -97,7 +102,7 @@ export class SettingsPanel {
     //TODO: validate input paths
     // public validatePaths(invalid: boolean) {
     //     if (this.panel) {
-    //         this.panel.webview.postMessage({ command: 'validatecompilerPath', invalid: invalid });
+    //         this.panel.webview.postMessage({ command: 'validateCompilerPath', invalid: invalid });
     //      }
     // }
 
@@ -144,6 +149,13 @@ export class SettingsPanel {
         }
     }
 
+    private onWindowStateChanged(e: vscode.WindowState) {
+        let viewState: ViewStateEvent = { isActive: e.focused };
+        if (this.configDirty || e.focused) {
+            this.settingsPanelViewStateChanged.fire(viewState);
+        }
+    }
+
     private onMessageReceived(message: any): void {
         if (message === null) {
             return;
@@ -159,27 +171,27 @@ export class SettingsPanel {
         this.configDirty = true;
 
         switch (message.key) {
-            case ElementId.ActiveConfig:
+            case elementId.activeConfig:
                 this.configValues.name = message.value;
                 break;
-            case ElementId.CompilerPath:
+            case elementId.compilerPath:
                 this.configValues.compilerPath = message.value;
                 break;
-            case ElementId.IncludePath:
+            case elementId.includePath:
                 entries = message.value.split("\n");
-                this.configValues.includePath = entries;
+                this.configValues.includePath = entries.filter(e => e !== "");
                 break;
-            case ElementId.Defines:
+            case elementId.defines:
                 entries = message.value.split("\n");
-                this.configValues.defines = entries;
+                this.configValues.defines = entries.filter(e => e !== "");
                 break;
-            case ElementId.IntelliSenseMode:
+            case elementId.intelliSenseMode:
                 this.configValues.intelliSenseMode = message.value;
                 break;
-            case ElementId.cStandard:
+            case elementId.cStandard:
                 this.configValues.cStandard = message.value;
                 break;
-            case ElementId.cppStandard:
+            case elementId.cppStandard:
                 this.configValues.cppStandard = message.value;
                 break;
         }
@@ -197,17 +209,17 @@ export class SettingsPanel {
 
         content = content.replace(
             /{{nonce}}/g, 
-            this.getNouce());
+            this.getNonce());
 
         return content;
     }
 
-    private getNouce(): string {
-        let nouce: string;
+    private getNonce(): string {
+        let nonce: string;
         const possible: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for (let i: number = 0; i < 32; i++) {
-            nouce += possible.charAt(Math.floor(Math.random() * possible.length));
+            nonce += possible.charAt(Math.floor(Math.random() * possible.length));
         }
-        return nouce;
+        return nonce;
     }
 }

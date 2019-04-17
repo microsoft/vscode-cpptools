@@ -549,7 +549,7 @@ export class CppProperties {
         }
     }
 
-    private async SetPropertiesFile(): Promise<void> {
+    private async ensurePropertiesFile(): Promise<void> {
         if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
             return;
         } else {
@@ -609,7 +609,7 @@ export class CppProperties {
     }
 
     public handleConfigurationEditJSONCommand(onSuccess: (document: vscode.TextDocument) => void): void {
-        this.SetPropertiesFile().then(() => {
+        this.ensurePropertiesFile().then(() => {
             console.assert(this.propertiesFile);
             // Directly open the json file
             vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
@@ -619,7 +619,7 @@ export class CppProperties {
     }
 
     public handleConfigurationEditUICommand(onSuccess: (document: vscode.TextDocument) => void): void {
-        this.SetPropertiesFile().then(() => {
+        this.ensurePropertiesFile().then(() => {
             if (this.propertiesFile) {
                 if (this.parsePropertiesFile()) {
                     // Parse successful, show UI
@@ -628,9 +628,9 @@ export class CppProperties {
                         this.settingsPanel.SettingsPanelViewStateChanged((e) => this.onSettingsPanelViewStateChanged(e));
                         this.disposables.push(this.settingsPanel);
                     }
-                    this.settingsPanel.CreateOrShow(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+                    this.settingsPanel.createOrShow(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
                 } else {
-                    // Prase failed, open json file
+                    // Parse failed, open json file
                     vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
                         onSuccess(document);
                     });
@@ -643,7 +643,7 @@ export class CppProperties {
         if (e.isActive && this.configurationJson) {
             // The settings UI became visible or active.
             // Ensure settingsPanel is referencing current configuration
-            this.settingsPanel.UpdateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+            this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
         } else {
             console.assert(this.configurationJson);
             // The settings UI closed or is out of focus, save any changes to current configuration
