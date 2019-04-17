@@ -3,6 +3,7 @@
 ## Table of Contents
 * Setup: [Debugging Setup](#debugging-setup)
 * Setup: [What is the .vscode/ipch folder?](#what-is-the-vscodeipch-folder)
+* Setup: [How do I disable the IntelliSense cache (ipch)?](#how-do-i-disable-the-intellisense-cache-ipch)
 * Debugger: [Why is debugging not working?](#why-is-debugging-not-working)
 * Build: [How to enable debug symbols](#how-to-enable-debug-symbols)
 * Logging: [How to enable logging](#how-to-enable-logging)
@@ -29,6 +30,10 @@ This setting allows you to set workspace or global overrides for the cache path.
 
 #### `"C_Cpp.intelliSenseCacheSize": <number>`
 This setting allows you to set a limit on the amount of caching the extension does. This is an approximation, but the extension will make a best effort to keep the cache size as close to the limit you set as possible. If you are sharing the cache location across workspaces as explained above, you can still increase/decrease the limit, but you should make sure that you add a "User" setting for "IntelliSense Cache Size".
+
+## How do I disable the IntelliSense cache (ipch)?
+
+If you do not want to use the IntelliSense caching feature to improve the performance of IntelliSense, you can disable the feature by setting the "IntelliSense Cache Size" setting to 0. (or `"C_Cpp.intelliSenseCacheSize": 0"` in the JSON settings editor)
 
 ## Why is debugging not working?
 
