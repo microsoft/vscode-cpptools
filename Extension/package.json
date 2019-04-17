@@ -1444,6 +1444,7 @@
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
+    "escape-string-regexp": "1.0.5",
     "http-proxy-agent": "~2.1.0",
     "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
@@ -1455,8 +1456,7 @@
     "vscode-debugprotocol": "~1.33.0",
     "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "5.1.1",
-    "yauzl": "~2.10.0",
-    "escape-string-regexp": "1.0.5"
+    "yauzl": "~2.10.0"
   },
   "runtimeDependencies": [
     {
