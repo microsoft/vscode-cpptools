@@ -1010,8 +1010,8 @@ class DefaultClient implements Client {
                     let configUI: string = "Configure (UI)";
                     let dontShowAgain: string = "Don't Show Again";
                     let fallbackMsg: string = this.configuration.VcpkgInstalled ?
-                        "Update your IntelliSense settings in JSON or UI. Or use Vcpkg to install libraries to help find missing headers." :
-                        "Configure your IntelliSense settings in JSON or UI to help find missing headers.";
+                        "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
+                        "Configure your IntelliSense settings to help find missing headers.";
                     return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then((value) => {
                         switch (value) {
                             case configJSON:

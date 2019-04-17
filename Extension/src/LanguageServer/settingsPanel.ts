@@ -178,11 +178,11 @@ export class SettingsPanel {
                 break;
             case elementId.includePath:
                 entries = message.value.split("\n");
-                this.configValues.includePath = entries.filter(e => e !== "");
+                this.configValues.includePath = entries.filter(e => e);
                 break;
             case elementId.defines:
                 entries = message.value.split("\n");
-                this.configValues.defines = entries.filter(e => e !== "");
+                this.configValues.defines = entries.filter(e => e);
                 break;
             case elementId.intelliSenseMode:
                 this.configValues.intelliSenseMode = message.value;
