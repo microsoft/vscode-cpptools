@@ -667,7 +667,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', onEditConfigurationJSON));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', onEditConfigurationUI));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', onEnableSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', onDisableSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
@@ -820,11 +821,18 @@ function onAddToIncludePath(path: string): void {
     }
 }
 
-function onToggleSquiggles(): void {
+function onEnableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
+    settings.update<string>("errorSquiggles", "Enabled");
+}
+
+function onDisableSquiggles(): void {
+    onActivationEvent();
+    // This only applies to the active client.
+    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    settings.update<string>("errorSquiggles", "Disabled");
 }
 
 function onToggleIncludeFallback(): void {
