@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-const ElementId = {
+const ElementId: {[key:string]: string} = {
     ActiveConfig: "activeConfig",
     CompilerPath: "compilerPath",
     IntelliSenseMode: "intelliSenseMode", 
