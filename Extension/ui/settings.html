@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource:; script-src 'nonce-{{nonce}}';">
+  </head>
+
+  <!-- todo: create .css for styles -->
+  <style>
+    th, td {
+      padding: 10px;
+      font-family: verdana, sans-serif;
+      font-size: 15px;
+    }
+  </style>
+
+  <body>
+
+  <!-- todo: change table into div elements -->
+  <table>
+
+  <!-- row 0 -->
+  <!-- Header -->
+  <tr>
+      <td>
+        <table>
+          <td>
+            <img src="{{root}}/LanguageCCPP_color_128x.png" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension">
+          </td>
+          <td>
+               Microsoft <br>
+               C/C++ Extension
+          </td>
+        </table>
+      </td>
+  </tr>
+
+  <!-- row 1 -->
+  <!-- Save -->
+  <tr>
+      <td>
+          <p>Saves to active configuration <span id=activeConfig></span> in <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a></p>
+      </td>
+  </tr>
+
+  <!-- row 2 -->
+  <!-- compiler path -->
+    <tr>
+      <td>
+        Compiler path
+       <p>
+          <!--<span id="compilerPathInvalid">compiler path is invalid.</span><br>-->
+          <input type="text" id="compilerPath" size="54">
+       </p>
+       <p>
+      </td>
+    </tr>
+
+  <!-- row 4 -->
+  <!-- IntelliSense mode -->
+  <tr>
+      <td>
+          IntelliSense mode
+        <p>
+          <select id="intelliSenseMode">
+            <option value="msvc-x64">msvc-x64</option>
+            <option value="gcc-x64">gcc-x64</option>
+            <option value="clang-x64">clang-x64</option>
+          </select>
+        </p>
+      </td>
+    </tr>
+
+  <!-- row 5 -->
+  <!-- includes -->
+  <tr>
+    <td>Include path
+        <p>
+            <!--<span id="includePathInvalid">one or more include paths is invalid.</span><br>-->
+          <textarea id="includePath" rows="4" cols="54" placeholder="specify one include path per line"></textarea> <br>
+        </p>
+    </td>
+  </tr>
+
+  <!-- row 6 -->
+  <!-- defines -->
+  <tr>
+    <td>Defines
+      <p>
+        <textarea id="defines" rows="4" cols="30" placeholder="specify one define per line"></textarea>
+      </p>
+    </td>
+  </tr>
+
+  <!-- row 7 -->
+  <!-- C Standard -->
+  <tr>
+    <td>C Standard
+      <p>
+        <select id="cStandard">
+          <option value="c11">C11</option>
+          <option value="c99">C99</option>
+          <option value="c89">C89</option>
+        </select>
+      </p>
+    </td>
+  </tr>
+
+  <!-- row 8 -->
+  <!-- C++ Standard -->
+  <tr>
+    <td>
+      C++ Standard
+      <p>
+        <select id="cppStandard">
+          <option value="c++17">C++17</option>
+          <option value="c++14">C++14</option>
+          <option value="c++11">C++11</option>
+          <option value="c++03">C++03</option>
+          <option value="c++98">C++98</option>
+        </select>
+      </p>
+    </td>
+  </tr>
+  </table>
+
+  <script nonce="{{nonce}}" src="{{root}}/out/ui/settings.js"></script>
+
+  </body>
+</html>
