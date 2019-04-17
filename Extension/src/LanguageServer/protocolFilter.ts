@@ -49,7 +49,12 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
 
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: invoke3,
+        provideHover: (document, position, token, next: (document, position, token) => any) => {
+            if (clients.checkOwnership(me, document)) {
+                return me.requestWhenReady(() => next(document, position, token));
+            }
+            return null;
+        },
         provideSignatureHelp: invoke3,
         provideDefinition: invoke3,
         provideReferences: invoke4,
