@@ -10,9 +10,10 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
-import { CppSettings } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
+import { SettingsPanel, ViewStateEvent } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 const configVersion: number = 4;
@@ -113,6 +114,7 @@ export class CppProperties {
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
     private rootfs: string = null;
+    private settingsPanel: SettingsPanel = undefined;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -125,9 +127,7 @@ export class CppProperties {
         this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
-
         this.buildVcpkgIncludePath();
-
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
@@ -367,7 +367,7 @@ export class CppProperties {
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             telemetry.logLanguageServerEvent("addToIncludePath");
-            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             if (config.includePath === undefined) {
                 config.includePath = ["${default}"];
@@ -382,7 +382,7 @@ export class CppProperties {
         return new Promise<void>((resolve) => {
             if (this.propertiesFile) {
                 this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-                    this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+                    this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
                     let config: Configuration = this.CurrentConfiguration;
                     if (providerId) {
                         config.configurationProvider = providerId;
@@ -408,7 +408,7 @@ export class CppProperties {
 
     public setCompileCommands(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             config.compileCommands = path;
             fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
@@ -557,49 +557,106 @@ export class CppProperties {
         }
     }
 
-    public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+    private async ensurePropertiesFile(): Promise<void> {
         if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
+            return;
+        } else {
+            try {
+                if  (!fs.existsSync(this.configFolder)) {
+                    fs.mkdirSync(this.configFolder);
+                }
+
+                let fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
+                let filePath: vscode.Uri = vscode.Uri.file(fullPathToFile).with({ scheme: "untitled" });
+
+                let document: vscode.TextDocument = await vscode.workspace.openTextDocument(filePath);
+
+                let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                if (this.configurationJson) {
+                    this.resetToDefaultSettings(true);
+                }
+                this.applyDefaultIncludePathsAndFrameworks();
+                let settings: CppSettings = new CppSettings(this.rootUri);
+                if (settings.defaultConfigurationProvider) {
+                    this.configurationJson.configurations.forEach(config => {
+                        config.configurationProvider = settings.defaultConfigurationProvider;
+                    });
+                    settings.update("default.configurationProvider", undefined); // delete the setting
+                }
+                let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
+                delete this.configurationJson.configurations[0].knownCompilers;
+
+                edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
+
+                this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
+                await vscode.workspace.applyEdit(edit);
+
+                // Fix for issue 163
+                // https://github.com/Microsoft/vscppsamples/issues/163
+                // Save the file to disk so that when the user tries to re-open the file it exists.
+                // Before this fix the file existed but was unsaved, so we went through the same
+                // code path and reapplied the edit.
+                await document.save();
+
+                this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
+
+            } catch (err) {
+                vscode.window.showErrorMessage(`Failed to create "${this.configFolder}": ${err.message}`);
+            }
+        }
+        return;
+    }
+
+    public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
+        if (otherSettings.settingsEditor === "ui") {
+            this.handleConfigurationEditUICommand(onSuccess);
+        } else {
+            this.handleConfigurationEditJSONCommand(onSuccess);
+        }
+    }
+
+    public handleConfigurationEditJSONCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+        this.ensurePropertiesFile().then(() => {
+            console.assert(this.propertiesFile);
+            // Directly open the json file
             vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
                 onSuccess(document);
             });
-        } else {
-            fs.mkdir(this.configFolder, (e: NodeJS.ErrnoException) => {
-                if (!e || e.code === 'EEXIST') {
-                    let fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
-                    let filePath: vscode.Uri = vscode.Uri.file(fullPathToFile).with({ scheme: "untitled" });
-                    vscode.workspace.openTextDocument(filePath).then((document: vscode.TextDocument) => {
-                        let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                        if (this.configurationJson) {
-                            this.resetToDefaultSettings(true);
-                        }
-                        this.applyDefaultIncludePathsAndFrameworks();
-                        let settings: CppSettings = new CppSettings(this.rootUri);
-                        if (settings.defaultConfigurationProvider) {
-                            this.configurationJson.configurations.forEach(config => {
-                                config.configurationProvider = settings.defaultConfigurationProvider;
-                            });
-                            settings.update("default.configurationProvider", undefined); // delete the setting
-                        }
-                        let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
-                        delete this.configurationJson.configurations[0].knownCompilers;
-                        edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
-                        this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
-                        vscode.workspace.applyEdit(edit).then((status) => {
-                            // Fix for issue 163
-                            // https://github.com/Microsoft/vscppsamples/issues/163
-                            // Save the file to disk so that when the user tries to re-open the file it exists.
-                            // Before this fix the file existed but was unsaved, so we went through the same
-                            // code path and reapplied the edit.
-                            document.save().then(() => {
-                                this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
-                                vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                                    onSuccess(document);
-                                });
-                            });
-                        });
+        });
+    }
+
+    public handleConfigurationEditUICommand(onSuccess: (document: vscode.TextDocument) => void): void {
+        this.ensurePropertiesFile().then(() => {
+            if (this.propertiesFile) {
+                if (this.parsePropertiesFile()) {
+                    // Parse successful, show UI
+                    if (this.settingsPanel === undefined) {
+                        this.settingsPanel = new SettingsPanel();
+                        this.settingsPanel.SettingsPanelViewStateChanged((e) => this.onSettingsPanelViewStateChanged(e));
+                        this.disposables.push(this.settingsPanel);
+                    }
+                    this.settingsPanel.createOrShow(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+                } else {
+                    // Parse failed, open json file
+                    vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                        onSuccess(document);
                     });
                 }
-            });
+            }
+        });
+    }
+
+    private onSettingsPanelViewStateChanged(e: ViewStateEvent): void {
+        if (e.isActive && this.configurationJson) {
+            // The settings UI became visible or active.
+            // Ensure settingsPanel is referencing current configuration
+            this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+        } else {
+            console.assert(this.configurationJson);
+            // The settings UI closed or is out of focus, save any changes to current configuration
+            // No need to get the changed values from settingsPanel because settingsPanel has a reference of this.configurationJson
+            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
         }
     }
 
@@ -609,7 +666,7 @@ export class CppProperties {
         }
         this.configFileWatcherFallbackTime = new Date();
         if (this.propertiesFile) {
-            this.parsePropertiesFile();
+            this.parsePropertiesFileAndHandleSquiggles();
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
             if (this.configurationJson) {
@@ -629,7 +686,14 @@ export class CppProperties {
         this.updateServerOnFolderSettingsChange();
     }
 
-    private parsePropertiesFile(): void {
+    private parsePropertiesFileAndHandleSquiggles(): void {
+        if (this.parsePropertiesFile()) {
+            this.handleSquiggles();
+        }
+    }
+
+    private parsePropertiesFile(): boolean {
+        let success: boolean = true;
         try {
             let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
             if (readResults === "") {
@@ -705,31 +769,33 @@ export class CppProperties {
                 } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
                     vscode.window.showWarningMessage(`Attempt to update "${this.propertiesFile.fsPath}" failed (do you have write access?)`);
+                    success = false;
                 }
             }
 
-            if (this.configurationJson.enableConfigurationSquiggles === false) {
-                this.diagnosticCollection.clear();
-            } else if (this.configurationJson.enableConfigurationSquiggles === true) {
-                this.handleSquiggles();
-            } else {
-                const settings: CppSettings = new CppSettings(this.rootUri);
-                if (settings.defaultEnableConfigurationSquiggles === false) {
-                    this.diagnosticCollection.clear();
-                } else {
-                    this.handleSquiggles();
-                }
-            }
         } catch (err) {
             vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
-            throw err;
+            success = false;
         }
+        return success;
     }
 
     private handleSquiggles(): void {
         if (!this.propertiesFile) {
             return;
         }
+
+        if (this.configurationJson.enableConfigurationSquiggles === false) {
+            this.diagnosticCollection.clear();
+            return;
+        }
+
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        if (settings.defaultEnableConfigurationSquiggles === false) {
+            this.diagnosticCollection.clear();
+            return;
+        }
+
         vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
             let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 
