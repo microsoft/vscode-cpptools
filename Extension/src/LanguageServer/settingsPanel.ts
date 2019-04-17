@@ -148,7 +148,7 @@ export class SettingsPanel {
         }
     }
 
-    private onWindowStateChanged(e: vscode.WindowState) {
+    private onWindowStateChanged(e: vscode.WindowState): void {
         let viewState: ViewStateEvent = { isActive: e.focused };
         if (this.configDirty || e.focused) {
             this.settingsPanelViewStateChanged.fire(viewState);
