@@ -51,7 +51,7 @@ class SettingsApp {
     private onChanged(id: string) {
         if (this.updating) return;
 
-        var x = document.getElementById(id);
+        var x = <HTMLInputElement>document.getElementById(id);
         this.vsCodeApi.postMessage({
             command: "change",
             key: id,
