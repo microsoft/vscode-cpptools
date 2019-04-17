@@ -124,7 +124,6 @@ export class SettingsPanel {
         if (this.configDirty) {
             let viewState: ViewStateEvent = { isActive: false };
             this.settingsPanelViewStateChanged.fire(viewState);
-            this.configDirty = false;
         }
 
         if (this.disposablesPanel) { 
@@ -135,9 +134,10 @@ export class SettingsPanel {
 
     private updateWebview(configuration: config.Configuration): void {
         this.configValues = configuration;
-        // Send a message to the webview webview to update the settings from json.
+        // Send a message to the webview to update the values from json.
         if (this.panel) {
            this.panel.webview.postMessage({ command: 'update', config: configuration });
+           this.configDirty = false;
         }
     }
 
@@ -145,7 +145,6 @@ export class SettingsPanel {
         let viewState: ViewStateEvent = { isActive: e.webviewPanel.active };
         if (this.configDirty || e.webviewPanel.active) {
             this.settingsPanelViewStateChanged.fire(viewState);
-            this.configDirty = false;
         }
     }
 
