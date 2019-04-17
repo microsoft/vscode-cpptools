@@ -117,7 +117,7 @@
             "Enabled",
             "Disabled"
           ],
-          "default": "Enabled",
+          "default": "Disabled",
           "description": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing #include errors.",
           "scope": "resource"
         },
@@ -135,10 +135,11 @@
           "type": "string",
           "enum": [
             "Enabled",
-            "Disabled"
+            "Disabled",
+            "EnabledIfIncludesResolve"
           ],
-          "default": "Enabled",
-          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. Warnings about #includes that could not be located will always be reported to the editor. This setting is ignored by the Tag Parser engine.",
+          "default": "EnabledIfIncludesResolve",
+          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
         },
         "C_Cpp.dimInactiveRegions": {
@@ -534,8 +535,13 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ToggleErrorSquiggles",
-        "title": "%c_cpp.command.toggleErrorSquiggles.title%",
+        "command": "C_Cpp.EnableErrorSquiggles",
+        "title": "%c_cpp.command.enableErrorSquiggles.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.DisableErrorSquiggles",
+        "title": "%c_cpp.command.disableErrorSquiggles.title%",
         "category": "C/C++"
       },
       {
@@ -1444,6 +1450,7 @@
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
+    "escape-string-regexp": "1.0.5",
     "http-proxy-agent": "~2.1.0",
     "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
