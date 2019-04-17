@@ -80,14 +80,14 @@ class SettingsApp {
         try {
             document.getElementById(ElementId.ActiveConfig).innerHTML = config.name;
 
-            document.getElementById(ElementId.CompilerPath).value = config.compilerPath;
-            document.getElementById(ElementId.IntelliSenseMode).value = config.intelliSenseMode;
+            (<HTMLInputElement>document.getElementById(ElementId.CompilerPath)).value = config.compilerPath;
+            (<HTMLInputElement>document.getElementById(ElementId.IntelliSenseMode)).value = config.intelliSenseMode;
 
             document.getElementById(ElementId.IncludePath).innerHTML = (config.includePath.length > 0) ? config.includePath.join("\n") : "";
             document.getElementById(ElementId.Defines).innerHTML = (config.defines.length > 0 ) ? config.defines.join("\n") : "";
 
-            document.getElementById(ElementId.cStandard).value = config.cStandard;
-            document.getElementById(ElementId.cppStandard).value = config.cppStandard;
+            (<HTMLInputElement>document.getElementById(ElementId.cStandard)).value = config.cStandard;
+            (<HTMLInputElement>document.getElementById(ElementId.cppStandard)).value = config.cppStandard;
         }
         finally {
             this.updating = false;
