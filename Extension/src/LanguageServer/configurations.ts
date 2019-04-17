@@ -751,6 +751,27 @@ export class CppProperties {
 
             // TODO: Add other squiggles.
 
+            // Check if intelliSenseMode and compilerPath are compatible
+            if (os.platform() === 'win32') {
+                // cl.exe is only available on Windows
+                const intelliSenseModeStart: number = curText.search(/\s*\"intelliSenseMode\"\s*:\s*\"/);
+                if (intelliSenseModeStart !== -1) {
+                    const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
+                    const intelliSenseModeEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
+
+                    // cl.exe and msvc mode should be used together
+                    let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
+                    if (compilerPathAndArgs.compilerPath.endsWith("cl.exe") !== (this.CurrentConfiguration.intelliSenseMode === "msvc-x64")) {
+                        let message: string = `IntelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
+                                document.positionAt(curTextStartOffset + intelliSenseModeEnd)),
+                            message, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                    }
+                }
+            }
+
             // Check for path-related squiggles.
             let paths: Set<string> = new Set<string>();
             for (let pathArray of [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
