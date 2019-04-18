@@ -770,7 +770,7 @@ export class CppProperties {
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
                     if (!this.isCompilerIntelliSenseModeCompatible()) {
-                        let message: string = `IntelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
+                        let message: string = `intelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
