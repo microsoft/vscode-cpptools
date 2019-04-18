@@ -1,7 +1,8 @@
 {
     "c_cpp.command.configurationSelect.title": "Scegli una configurazione...",
     "c_cpp.command.configurationProviderSelect.title": "Cambia provider configurazioni...",
-    "c_cpp.command.configurationEdit.title": "Modifica configurazioni...",
+    "c_cpp.command.configurationEditJSON.title": "Modifica configurazioni... (JSON)",
+    "c_cpp.command.configurationEditUI.title": "Modifica configurazioni... (UI)",
     "c_cpp.command.goToDeclaration.title": "Vai a dichiarazione",
     "c_cpp.command.peekDeclaration.title": "Visualizza dichiarazione",
     "c_cpp.command.switchHeaderSource.title": "Visualizza Header/Sorgente",

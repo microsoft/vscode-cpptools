@@ -664,7 +664,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', onSelectConfigurationProvider));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', onEditConfigurationJSON));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', onEditConfigurationUI));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', onEnableSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', onDisableSquiggles));
@@ -790,12 +791,23 @@ function onSelectConfigurationProvider(): void {
     }
 }
 
-function onEditConfiguration(): void {
+function onEditConfigurationJSON(): void {
     onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, null);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
+    }
+}
+
+function onEditConfigurationUI(): void {
+    onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, null);
+    if (!isFolderOpen()) {
+        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+    } else {
+        selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
     }
 }
 
