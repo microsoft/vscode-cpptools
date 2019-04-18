@@ -15,14 +15,16 @@ class TemporaryCommandRegistrar {
     private isActivationReady: boolean = false;
 
     private commandsToRegister: string[] = [
-        "C_Cpp.ConfigurationEdit",
+        "C_Cpp.ConfigurationEditJSON",
+        "C_Cpp.ConfigurationEditUI",
         "C_Cpp.ConfigurationSelect",
         "C_Cpp.ConfigurationProviderSelect",
         "C_Cpp.SwitchHeaderSource",
         "C_Cpp.Navigate",
         "C_Cpp.GoToDeclaration",
         "C_Cpp.PeekDeclaration",
-        "C_Cpp.ToggleErrorSquiggles",
+        "C_Cpp.EnableErrorSquiggles",
+        "C_Cpp.DisableErrorSquiggles",
         "C_Cpp.ToggleIncludeFallback",
         "C_Cpp.ToggleDimInactiveRegions",
         "C_Cpp.ShowReleaseNotes",

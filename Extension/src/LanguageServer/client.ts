@@ -252,6 +252,8 @@ export interface Client {
     handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
+    handleConfigurationEditJSONCommand(): void;
+    handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
     onInterval(): void;
     dispose(): Thenable<void>;
@@ -1004,22 +1006,31 @@ class DefaultClient implements Client {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
                 ui.showConfigureIncludePathMessage(() => {
-                    let learnMorePanel: string = "Configuration Help";
+                    let configJSON: string = "Configure (JSON)";
+                    let configUI: string = "Configure (UI)";
                     let dontShowAgain: string = "Don't Show Again";
                     let fallbackMsg: string = this.configuration.VcpkgInstalled ?
                         "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
                         "Configure your IntelliSense settings to help find missing headers.";
-                    return vscode.window.showInformationMessage(fallbackMsg, learnMorePanel, dontShowAgain).then((value) => {
+                    return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then((value) => {
                         switch (value) {
-                            case learnMorePanel:
-                                let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
-                                vscode.commands.executeCommand('vscode.open', uri);
+                            case configJSON:
+                                vscode.commands.getCommands(true).then((commands: string[]) => {
+                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                         vscode.commands.executeCommand("workbench.action.problems.focus");
+                                   }
+                                });
+                                this.handleConfigurationEditJSONCommand();
+                                telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, null);
+                                break;
+                            case configUI:
                                 vscode.commands.getCommands(true).then((commands: string[]) => {
                                     if (commands.indexOf("workbench.action.problems.focus") >= 0) {
                                         vscode.commands.executeCommand("workbench.action.problems.focus");
-                                    }
+                                }
                                 });
-                                this.handleConfigurationEditCommand();
+                                this.handleConfigurationEditUICommand();
+                                telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, null);
                                 break;
                             case dontShowAgain:
                                 showIntelliSenseFallbackMessage.Value = false;
@@ -1365,6 +1376,14 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
     }
 
+    public handleConfigurationEditJSONCommand(): void {
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditJSONCommand(vscode.window.showTextDocument));
+    }
+
+    public handleConfigurationEditUICommand(): void {
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditUICommand(vscode.window.showTextDocument));
+    }
+
     public handleAddToIncludePathCommand(path: string): void {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
@@ -1448,6 +1467,8 @@ class NullClient implements Client {
     handleConfigurationProviderSelectCommand(): void {}
     handleShowParsingCommands(): void {}
     handleConfigurationEditCommand(): void {}
+    handleConfigurationEditJSONCommand(): void {}
+    handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void {}
     onInterval(): void {}
     dispose(): Thenable<void> {
