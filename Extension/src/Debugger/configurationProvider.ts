@@ -179,10 +179,23 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         if (config) {
-            // Fail if cppvsdbg type is running on non-Windows
-            if (config.type === 'cppvsdbg' && os.platform() !== 'win32') {
-                vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
-                return undefined;
+            if (config.type === 'cppvsdbg') {
+                // Fail if cppvsdbg type is running on non-Windows
+                if (os.platform() !== 'win32') {
+                    vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
+                    return undefined;
+                }
+
+                // Disable debug heap by default, enable if 'enableDebugHeap' is set.
+                if (!config.enableDebugHeap) {
+                    const disableDebugHeapEnvSetting : any = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
+
+                    if (config.environment && util.isArray(config.environment)) {
+                        config.environment.push(disableDebugHeapEnvSetting);
+                    } else {
+                        config.environment = [disableDebugHeapEnvSetting];
+                    }
+                }
             }
 
             // Modify WSL config for OpenDebugAD7
