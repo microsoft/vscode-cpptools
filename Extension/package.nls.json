@@ -18,5 +18,5 @@
     "c_cpp.command.showParsingCommands.title": "Show parsing commands",
     "c_cpp.command.takeSurvey.title": "Take survey",
     "c_cpp.command.buildAndDebugActiveFile.title": "Build and Debug Active File",
-    "c_cpp.command.logDiagnostics.title": "Log Language Service Diagnostics"
+    "c_cpp.command.logDiagnostics.title": "Log Diagnostics"
 }
