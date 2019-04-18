@@ -24,51 +24,55 @@
       }
 
       .sidebar {
-        width: 340px;
-        position: fixed;
-        z-index: 1;
-        left: 45px;
-        overflow-x: hidden;
+          width: 340px;
+          position: fixed;
+          z-index: 1;
+          left: 45px;
+          overflow-x: hidden;
       }
 
       .main {
-        max-width: 800px;
-        margin-left: 360px;
-        padding: 0px 30px;
+          max-width: 800px;
+          margin-left: 360px;
+          padding: 0px 30px;
       }
 
       .main-title {
-        font-weight: 600;
-        font-size: 20px;
-        padding-bottom: 6px
+          font-weight: 500;
+          font-size: 22px;
+          padding-bottom: 6px
       }
 
       .section {
-        padding-bottom: 30px;
-      }
-
-      .codeblock {
-        vertical-align: middle;
-        padding: 4px 8px;
-        margin-top: 10px;
-        display: inline-block;
-        font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
-        border-radius: 5px;
+          padding-bottom: 30px;
       }
 
       .section-title {
-        font-weight: 500;
-        font-size: 13px;
-        padding-bottom: 5px
+          font-weight: 500;
+          font-size: 13px;
+          padding-bottom: 4px
       }
 
       .section-text {
-        padding-bottom: 8px
+          padding-bottom: 8px
       }
 
       .section-note {
-        font-style: italic;
-        padding-bottom: 2px
+          font-style: italic;
+          padding-bottom: 2px
+      }
+
+      .codeblock {
+          vertical-align: middle;
+          padding: 2px 8px;
+          margin-top: 8px;
+          display: inline-block;
+          font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          border-radius: 5px;
+      }
+
+      body {
+          line-height: 19px
       }
 
       a {
@@ -104,25 +108,25 @@
       }
 
       input {
-        height: 17px;
-        padding: 4px;
-        border: solid 1px;
-        font-size: 13px;
-        font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          height: 17px;
+          padding: 4px;
+          border: solid 1px;
+          font-size: 13px;
+          font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
       }
 
       textarea {
-        padding: 4px;
-        font-size: 13px;
-        font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          padding: 4px;
+          font-size: 13px;
+          font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
       }
 
       select {
-        width: 300px;
-        height: 27px;
-        font-size: 13px;
-        font-family:sans-serif;
-        color: #1e1e1e;
+          width: 300px;
+          height: 27px;
+          font-size: 13px;
+          font-family:sans-serif;
+          color: #1e1e1e;
       }
 
       blockquote {
@@ -283,7 +287,7 @@
               <img src="{{root}}/LanguageCCPP_color_128x.png" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px">
             </td>
             <td>
-                <div style="font-size: 20px; font-weight: 400;">Microsoft<br>C/C++ Extension</div>
+                <div style="font-size: 20px; font-weight: 400; line-height: 24px">Microsoft<br>C/C++ Extension</div>
             </td>
           </table>
     </div>
@@ -292,10 +296,12 @@
     <div style="height: 30px; display: block"></div>
 
     <div style="padding-right: 10px;">
-        Open this editor by using the command palette<br>
+        Command palette to open this editor<br>
         <div class="codeblock">C/C++: Edit configurations (UI)</div>
+
         <div style="height: 46px; display: block"></div>
-        Open the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file by using the command palette<br> 
+
+        Command palette to open <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a><br> 
         <div class="codeblock">C/C++: Edit configurations (JSON)</div>
     </div>
 
