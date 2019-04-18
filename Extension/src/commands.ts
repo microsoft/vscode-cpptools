@@ -32,7 +32,8 @@ class TemporaryCommandRegistrar {
         "C_Cpp.PauseParsing",
         "C_Cpp.ResumeParsing",
         "C_Cpp.ShowParsingCommands",
-        "C_Cpp.TakeSurvey"
+        "C_Cpp.TakeSurvey",
+        "C_Cpp.ShowDiagnostics"
     ];
 
     constructor() {

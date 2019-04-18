@@ -17,5 +17,6 @@
     "c_cpp.command.resumeParsing.title": "Riprendi l'analisi del codice",
     "c_cpp.command.showParsingCommands.title": "Mostra comandi per l'analisi del codice",
     "c_cpp.command.takeSurvey.title": "Partecipa al Sondaggio",
-    "c_cpp.command.buildAndDebugActiveFile.title": "Compila ed Esegui il debug del file attivo"
+    "c_cpp.command.buildAndDebugActiveFile.title": "Compila ed Esegui il debug del file attivo",
+    "c_cpp.command.showDiagnostics.title": "Mostra diagnostica"
 }

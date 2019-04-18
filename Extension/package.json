@@ -593,6 +593,11 @@
         "command": "C_Cpp.BuildAndDebugActiveFile",
         "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.ShowDiagnostics",
+        "title": "%c_cpp.command.showDiagnostics.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [

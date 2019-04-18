@@ -676,6 +676,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowDiagnostics', onShowDiagnostics));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -878,6 +879,11 @@ function onTakeSurvey(): void {
 
 function onGetActiveConfigName(): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigName();
+}
+
+function onShowDiagnostics(): void {
+    onActivationEvent();
+    clients.ActiveClient.showDiagnostics();
 }
 
 function reportMacCrashes(): void {
