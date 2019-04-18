@@ -1230,7 +1230,7 @@
               },
               "enableDebugHeap": {
                 "type": "boolean",
-                "description": "If false, the process will be launched with debug heaps disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+                "description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
                 "default": false
               },
               "logging": {
