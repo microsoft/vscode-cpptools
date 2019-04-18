@@ -1432,7 +1432,7 @@
     "test": "gulp allTests",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "node ./src/Support/prepublish.js && webpack --mode production",
+    "vscode:prepublish": "node ./tools/prepublish.js && webpack --mode production",
     "watch": "webpack --watch --mode development"
   },
   "devDependencies": {

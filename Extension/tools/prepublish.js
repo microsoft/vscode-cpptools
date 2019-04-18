@@ -10,8 +10,16 @@
  */
 
 const fs = require("fs");
+const os = require("os");
 const cp = require("child_process");
 const path = require("path");
+
+let compile = function(tsPath) {
+    const folderName = path.dirname(tsPath);
+
+    console.log(">> tsc " + tsPath + " --outDir out/" + folderName);
+    cp.execSync("tsc " + tsPath + " --outDir out/" + folderName, {stdio:[0, 1, 2]});
+};
 
 if (!process.env.CPPTOOLS_DEV && fs.existsSync('./node_modules')) {
     console.warn("WARNING: Skipping npm install since it appears to have been executed already.");
@@ -20,17 +28,14 @@ if (!process.env.CPPTOOLS_DEV && fs.existsSync('./node_modules')) {
     cp.execSync("npm install", { stdio: [0, 1, 2] });
 }
 
-// Compile the support file TypeScript code. Webpack will do the development/production extension compilation.
+const tscCompileListStr = fs.readFileSync("./tscCompileList.txt").toString();
 
-// tools/GenerateOptionsSchema 
-// needed for gulpfile.js
-console.log(">> tsc tools/GenerateOptionsSchema.ts --outDir out/tools/");
-cp.execSync("tsc tools/GenerateOptionsSchema.ts --outDir out/tools/", {stdio:[0, 1, 2]});
-
-// src/Support/copyDebuggerDependencies 
-// needed for debugging debugger support files
-console.log(">> tsc src/Support/copyDebuggerDependencies.ts  --outDir out/src/Support/");
-cp.execSync("tsc src/Support/copyDebuggerDependencies.ts  --outDir out/src/Support/", {stdio:[0, 1, 2]});
+tscCompileListStr.split(os.EOL).forEach(filePath => {
+    if (!filePath.startsWith("#") && /\S/.test(filePath))
+    {
+        compile(filePath);
+    }
+});
 
 // If the required debugger file doesn't exist, make sure it is copied.
 if (process.env.CPPTOOLS_DEV || !fs.existsSync('./debugAdapters/bin/cppdbg.ad7Engine.json')) {

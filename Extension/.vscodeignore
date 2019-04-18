@@ -1,14 +1,35 @@
-obj/**
+
+# ignore vscode settings for extension development
 .vscode/**
-typings/**
-test/**
-src/**
-**/*.map
-.gitignore
-tsconfig.json
-CMakeLists.txt
-debugAdapters/install.lock*
+
+# ignore binaries
+obj/**
+
+# ignore source files
 tools/**
 notices/**
-out/
-jobs/
+test/**
+src/**
+
+# ignore .js files that are webpacked or only used for development
+out/src/**
+out/tools/**
+
+# ignore ts files in ui
+ui/*.ts
+
+# ignore Azure-Pipelines files
+jobs/**
+
+# ignore development files
+tsconfig.json
+tslint.json
+webpack.config.js
+README.md
+gulpfile.js
+.gitattributes
+.gitignore
+CMakeLists.txt
+debugAdapters/install.lock*
+typings/**
+**/*.map
