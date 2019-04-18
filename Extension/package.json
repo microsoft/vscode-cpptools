@@ -595,8 +595,8 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ShowDiagnostics",
-        "title": "%c_cpp.command.showDiagnostics.title%",
+        "command": "C_Cpp.LogDiagnostics",
+        "title": "%c_cpp.command.logDiagnostics.title%",
         "category": "C/C++"
       }
     ],

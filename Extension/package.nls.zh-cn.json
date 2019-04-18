@@ -18,5 +18,5 @@
     "c_cpp.command.showParsingCommands.title": "查看解析命令",
     "c_cpp.command.takeSurvey.title": "调查问卷",
     "c_cpp.command.buildAndDebugActiveFile.title": "生成和调试当前文件",
-    "c_cpp.command.showDiagnostics.title": "显示诊断"
+    "c_cpp.command.logDiagnostics.title": "记录语言服务诊断"
 }
