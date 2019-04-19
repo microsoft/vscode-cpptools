@@ -8,7 +8,7 @@
 * Add a new option 'EnabledIfIncludesResolve' to the `errorSquiggles` setting where error squiggles will be shown if include headers are successfully resolved. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
 
 ### Minor Changes
-* Change the default value of 'intelliSenseEngineFallback' setting to `Disabled`. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
+* Change the default value of `intelliSenseEngineFallback` setting to `Disabled`. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
 * Configuration squiggles for `c_cpp_properties.json` now validates if the setting values of `compilerPath` and `intelliSenseMode` match on Windows. [PR #3483](https://github.com/Microsoft/vscode-cpptools/pull/3483)
 
 ### Bug Fixes
