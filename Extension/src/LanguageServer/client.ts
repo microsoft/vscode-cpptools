@@ -654,6 +654,7 @@ class DefaultClient implements Client {
         let header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
         let version: string = `Version: ${util.packageJson.version}\n`;
         this.diagnosticsChannel.appendLine(`${header}${version}${response.diagnostics}`);
+        this.diagnosticsChannel.show(false);
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
