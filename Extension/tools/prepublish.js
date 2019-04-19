@@ -39,7 +39,7 @@ tscCompileListStr.split(os.EOL).forEach(filePath => {
 
 // If the required debugger file doesn't exist, make sure it is copied.
 if (process.env.CPPTOOLS_DEV || !fs.existsSync('./debugAdapters/bin/cppdbg.ad7Engine.json')) {
-    const copyDebuggerDependenciesJSFile = './out/src/Support/copyDebuggerDependencies.js';
+    const copyDebuggerDependenciesJSFile = './out/tools/copyDebuggerDependencies.js';
 
     // Required for nightly builds. Nightly builds do not enable CPPTOOLS_DEV.
     console.log(">> node " + copyDebuggerDependenciesJSFile);
