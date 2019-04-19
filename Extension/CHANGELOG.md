@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.23.0-insiders: April 19, 2019
+
+### New Features
+* Add a configuration UI editor to edit select IntelliSense settings defined in the underlying `c_cpp_properties.json` file. Add a new command `C/C++: Edit configurations (UI)` to open the UI editor. Add a new command `C/C++: Edit configurations (JSON)` to open `c_cpp_properties.json`. Remove the old command `C/C++: Edit configurations...` that used to open `c_cpp_properties.json`. The default whether to open the UI editor or json file is based on the `workbench.settings.editor` setting. [PR #3479](https://github.com/Microsoft/vscode-cpptools/pull/3479), [PR #3487](https://github.com/Microsoft/vscode-cpptools/pull/3487)
+* Add command `C/C++: Log Diagnostics` to log language service diagnostics. [PR #3489](https://github.com/Microsoft/vscode-cpptools/pull/3489)
+* Add a new option 'EnabledIfIncludesResolve' to the `errorSquiggles` setting where error squiggles will be shown if include headers are successfully resolved. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
+
+### Minor Changes
+* Change the default value of 'intelliSenseEngineFallback' setting to `Disabled`. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
+* Configuration squiggles for `c_cpp_properties.json` now validates if the setting values of `compilerPath` and `intelliSenseMode` match on Windows. [PR #3483](https://github.com/Microsoft/vscode-cpptools/pull/3483)
+
+### Bug Fixes
+
+
 ## Version 0.22.2-insiders: April 9, 2019
 * Fix various IntelliSense parsing bugs. [#2824](https://github.com/Microsoft/vscode-cpptools/issues/2824), [#3110](https://github.com/Microsoft/vscode-cpptools/issues/3110), [#3168](https://github.com/Microsoft/vscode-cpptools/issues/3168)
 * Enable `-fms-extensions` to be used as an argument to `compilerPath` on Linux/Mac. [#3063](https://github.com/Microsoft/vscode-cpptools/issues/3063)
