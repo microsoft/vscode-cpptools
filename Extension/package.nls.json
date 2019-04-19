@@ -1,8 +1,8 @@
 {
     "c_cpp.command.configurationSelect.title": "Select a configuration...",
     "c_cpp.command.configurationProviderSelect.title": "Change configuration provider...",
-    "c_cpp.command.configurationEditJSON.title": "Edit configurations... (JSON)",
-    "c_cpp.command.configurationEditUI.title": "Edit configurations... (UI)",
+    "c_cpp.command.configurationEditJSON.title": "Edit configurations (JSON)",
+    "c_cpp.command.configurationEditUI.title": "Edit configurations (UI)",
     "c_cpp.command.goToDeclaration.title": "Go to Declaration",
     "c_cpp.command.peekDeclaration.title": "Peek Declaration",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",

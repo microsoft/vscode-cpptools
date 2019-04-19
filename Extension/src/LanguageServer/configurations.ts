@@ -203,6 +203,9 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
+        if (this.settingsPanel) {
+            this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+        }
         this.handleSquiggles();
     }
 
@@ -702,8 +705,9 @@ export class CppProperties {
 
             // Replace all \<escape character> with \\<character>.
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
-            readResults = readResults.replace(/\\/g, '\\\\');
-            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \".
+            readResults = readResults.replace(/\\/g, '\\\\'); 
+            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \". 
+            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to do it again for \\". 
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
