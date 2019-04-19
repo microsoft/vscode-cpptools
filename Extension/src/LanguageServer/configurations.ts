@@ -203,6 +203,9 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
+        if (this.settingsPanel) {
+            this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+        }
         this.handleSquiggles();
     }
 
