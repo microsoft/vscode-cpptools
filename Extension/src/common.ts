@@ -17,6 +17,7 @@ import * as assert from 'assert';
 import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { getBuildTasks } from './LanguageServer/extension';
+import { OtherSettings } from './LanguageServer/settings';
 
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -88,7 +89,8 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     }
     
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
-    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
+    let settings: OtherSettings = new OtherSettings();
+    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, settings.editorTabSize));
 }
 
 export function fileIsCOrCppSource(file: string): boolean {

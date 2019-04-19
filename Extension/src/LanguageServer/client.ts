@@ -140,12 +140,17 @@ interface QueryTranslationUnitSourceResult {
     configDisposition: QueryTranslationUnitSourceConfigDisposition;
 }
 
+interface GetDiagnosticsResult {
+    diagnostics: string;
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
+const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void> = new RequestType<void, GetDiagnosticsResult, void, void>('cpptools/getDiagnostics');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -231,6 +236,7 @@ export interface Client {
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
+    logDiagnostics(): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
     getCompilerPath(): Thenable<string>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
@@ -276,6 +282,7 @@ class DefaultClient implements Client {
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
+    private diagnosticsChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
@@ -636,6 +643,17 @@ class DefaultClient implements Client {
                 },
                 () => {});
         });
+    }
+
+    public async logDiagnostics(): Promise<void> {
+        let response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
+        if (!this.diagnosticsChannel) {
+            this.diagnosticsChannel = vscode.window.createOutputChannel("C/C++ Diagnostics");
+            this.disposables.push(this.diagnosticsChannel);
+        }
+        let header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
+        let version: string = `Version: ${util.packageJson.version}\n`;
+        this.diagnosticsChannel.appendLine(`${header}${version}${response.diagnostics}`);
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
@@ -1446,6 +1464,7 @@ class NullClient implements Client {
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    logDiagnostics(): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
