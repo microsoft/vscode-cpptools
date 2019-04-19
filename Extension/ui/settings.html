@@ -24,7 +24,7 @@
       }
 
       .sidebar {
-          width: 340px;
+          width: 290px;
           position: fixed;
           z-index: 1;
           left: 45px;
@@ -33,7 +33,7 @@
 
       .main {
           max-width: 800px;
-          margin-left: 360px;
+          margin-left: 320px;
           padding: 0px 30px;
       }
 
@@ -343,9 +343,9 @@
         Open this editor by using the command:<br>
         <code>C/C++: Edit configurations (UI)</code>
 
-        <div style="height: 46px; display: block"></div>
+        <div style="height: 30px; display: block"></div>
 
-        Open <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> by using the command:<br> 
+        Switch to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file by clicking on the file link or using the command:<br> 
         <code>C/C++: Edit configurations (JSON)</code>
     </div>
 
@@ -355,11 +355,11 @@
   <div id="main" class="main">
 
     <!-- title -->
-    <div style=" height: 90px; display: block">
+    <div style=" height: 90px; display: inline-block;">
       <div class="main-title">IntelliSense Configurations</div>
       <div>
-        Use this editor to edit basic IntelliSense settings for the active configuration.
-        To edit multiple IntelliSense configurations and additional settings go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
+        Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
+        Only the setting values of the active configuration can be modified at a time. Switch active configurations to modify a different configurations on this editor. To edit multiple configurations or set additional settings go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
     </div>
 
@@ -373,7 +373,7 @@
         The identifier of the active configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.
       </div>
       <div class="section-input"><input class="input-disabled" type="text" id=activeConfig style="width: 290px" disabled>
-      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Select a different configuration">Select a different configuration</a>
+      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Select active configuration">Select active configuration</a>
     </div> 
     </div>
 

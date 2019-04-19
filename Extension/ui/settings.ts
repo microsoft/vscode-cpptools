@@ -82,7 +82,7 @@ class SettingsApp {
         try {
             (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = config.name;
 
-            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath;
+            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode;
 
             document.getElementById(elementId.includePath).innerHTML = (config.includePath.length > 0) ? config.includePath.join("\n") : "";
