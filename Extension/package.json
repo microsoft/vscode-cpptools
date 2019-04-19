@@ -593,6 +593,11 @@
         "command": "C_Cpp.BuildAndDebugActiveFile",
         "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.LogDiagnostics",
+        "title": "%c_cpp.command.logDiagnostics.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
@@ -1227,6 +1232,11 @@
                 "default": {
                   "<source-path>": "<target-path>"
                 }
+              },
+              "enableDebugHeap": {
+                "type": "boolean",
+                "description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+                "default": false
               },
               "logging": {
                 "type": "object",
