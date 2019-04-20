@@ -363,6 +363,10 @@ export class CppProperties {
     private isCompilerIntelliSenseModeCompatible(): boolean {
         // Check if intelliSenseMode and compilerPath are compatible
         // cl.exe and msvc mode should be used together
+        // Ignore if compiler path is not set
+        if (this.CurrentConfiguration.compilerPath === undefined) {
+            return true;
+        }
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
         return compilerPathAndArgs.compilerPath.endsWith("cl.exe") === (this.CurrentConfiguration.intelliSenseMode === "msvc-x64");
     }
