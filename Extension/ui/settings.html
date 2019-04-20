@@ -40,7 +40,8 @@
       .main-title {
           font-weight: 500;
           font-size: 22px;
-          padding-bottom: 6px
+          padding-bottom: 6px;
+          color: var(--vscode-foreground);
       }
 
       .section {
@@ -50,18 +51,21 @@
       .section-title {
           font-weight: 500;
           font-size: 14px;
-          padding-bottom: 4px
+          padding-bottom: 4px;
+          color: var(--vscode-foreground);
       }
 
       .section-text {
           font-size: 14px;
-          padding-bottom: 8px
+          padding-bottom: 8px;
+          color: var(--vscode-foreground);
       }
 
       .section-note {
           font-size: 14px;
           font-style: italic;
-          padding-bottom: 2px
+          padding-bottom: 2px;
+          color: var(--vscode-foreground);
       }
 
       .codeblock {
@@ -115,12 +119,18 @@
           border: solid 1px;
           font-size: 13px;
           font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          color: var(--vscode-settings-textInputForeground);
+          background: var(--vscode-settings-textInputBackground);
+          border: 1px solid var(--vscode-settings-textInputBorder);
       }
 
       textarea {
           padding: 4px;
           font-size: 13px;
           font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          color: var(--vscode-settings-textInputForeground);
+          background: var(--vscode-settings-textInputBackground);
+          border: 1px solid var(--vscode-settings-textInputBorder);
       }
 
       select {
@@ -128,13 +138,15 @@
           height: 27px;
           font-size: 13px;
           font-family:sans-serif;
-          color: #414141;
+          color: var(--vscode-settings-dropdownForeground);
+          background: var(--vscode-settings-dropdownBackground);
+          border: 1px solid var(--vscode-settings-dropdownBorder);
       }
 
       blockquote {
           margin: 0 7px 0 5px;
           padding: 0 16px 0 10px;
-          border-left: 5px solid
+          border-left: 5px solid;
       }
 
       code {
@@ -186,39 +198,15 @@
           background-color: rgba(10, 10, 10, .4)
       }
 
-      .vscode-dark select,
-      .vscode-dark textarea,
-      .vscode-dark input {
-          background-color: rgba(255, 255, 255, 0.1);
-          color: #ddd;
-          border: solid 0px;
-      }
-
-      .vscode-light select,
-      .vscode-light textarea,
-      .vscode-light input {
-          background-color: rgba(255, 255, 255, 0.4);
-          border: solid 1px rgb(184, 184, 184);
-          color: #1e1e1e;
-      }
-
-      .vscode-high-contrast select,
-      .vscode-high-contrast textarea,
-      .vscode-high-contrast input {
-          color: #fff;
-          border: solid 1px rgba(126, 200, 230);
-          background: transparent;
-      }
-
       .vscode-light .input-disabled {
           background-color:rgba(255, 255, 255, 0.4);
-          color: rgb(160, 160, 160);
+          color: rgb(138, 138, 138);
           border: solid 1px rgb(201, 198, 198);
       }
 
       .vscode-dark .input-disabled {
           background-color:  rgba(255, 255, 255, 0.1);
-          color: rgb(150, 150, 150);
+          color: rgb(167, 167, 167);
 
       }
 
@@ -228,29 +216,17 @@
           border: solid 1px rgb(255, 255, 255);
       }
 
-      .vscode-light .section-title {
+      /* .vscode-light .section-title {
           color: #5a5a5a;
-      }
-
-      .vscode-light .section-text,
-      .vscode-light .section-note {
-          color: #818181;
       }
 
       .vscode-dark .section-title {
           color: #ddd;
       }
 
-      .vscode-dark .section-text,
-      .vscode-dark .section-note {
-          color: rgb(180, 180, 180);
-      }
-
-      .vscode-high-contrast .section-title,
-      .vscode-high-contrast .section-text,
-      .vscode-high-contrast .section-note {
+      .vscode-high-contrast .section-title {
           color: #fff;
-      }
+      } */
 
       .vscode-high-contrast code > div {
           background-color: #000
@@ -339,7 +315,7 @@
     <hr>
     <div style="height: 30px; display: block"></div>
 
-    <div style="padding-right: 10px;">
+    <div style="padding-right: 10px; color: var(--vscode-foreground);">
         Open this editor by using the command:<br>
         <code>C/C++: Edit configurations (UI)</code>
 
@@ -357,7 +333,7 @@
     <!-- title -->
     <div style=" height: 90px; display: inline-block;">
       <div class="main-title">IntelliSense Configurations</div>
-      <div>
+      <div style="color: var(--vscode-foreground);">
         Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
         Only the setting values of the active configuration can be modified at a time. Switch active configurations to modify a different configurations on this editor. To edit multiple configurations or set additional settings go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
