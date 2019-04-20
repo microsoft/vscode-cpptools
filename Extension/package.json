@@ -1201,6 +1201,11 @@
                 },
                 "default": []
               },
+              "envFile": {
+                "type": "string",
+                "description": "Environment variables passed to the program by a file.",
+                "default": "${workspaceFolder}/.env"
+              },
               "symbolSearchPath": {
                 "type": "string",
                 "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
