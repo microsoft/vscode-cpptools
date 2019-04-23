@@ -204,7 +204,18 @@ export class CppProperties {
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
         if (this.settingsPanel) {
-            this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+            this.ensurePropertiesFile().then(() => {
+                if (this.propertiesFile) {
+                    // Clear out any modifications we may have made internally by parsing the json file
+                    if (this.parsePropertiesFile()) {
+                        // Update the UI with new selected configuration
+                        this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+                    } else {
+                        // Parse failed, open json file
+                        vscode.workspace.openTextDocument(this.propertiesFile);
+                    }
+                }
+            });
         }
         this.handleSquiggles();
     }
@@ -380,7 +391,7 @@ export class CppProperties {
                 config.includePath = ["${default}"];
             }
             config.includePath.splice(config.includePath.length, 0, path);
-            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            this.writeToJson();
             this.handleConfigurationChange();
         });
     }
@@ -396,7 +407,7 @@ export class CppProperties {
                     } else {
                         delete config.configurationProvider;
                     }
-                    fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+                    this.writeToJson();
                     this.handleConfigurationChange();
                     resolve();
                 });
@@ -418,7 +429,7 @@ export class CppProperties {
             this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             config.compileCommands = path;
-            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            this.writeToJson();
             this.handleConfigurationChange();
         });
     }
@@ -428,6 +439,18 @@ export class CppProperties {
             this.handleConfigurationEditCommand(vscode.window.showTextDocument);
             return;
         }
+
+        // Before changing the current configuration index, save any edits from the UI.
+        if (this.settingsPanel) {
+            if (this.settingsPanel.isDirty()) {
+                this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+                // Get the changes from the UI and save to json file
+                let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
+                this.configurationJson.configurations[this.currentConfigurationIndex.Value] = config;
+                this.writeToJson();
+            }
+        }
+
         this.currentConfigurationIndex.Value = index;
         this.onSelectionChanged();
     }
@@ -564,6 +587,95 @@ export class CppProperties {
         }
     }
 
+    public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
+        if (otherSettings.settingsEditor === "ui") {
+            this.handleConfigurationEditUICommand(onSuccess);
+        } else {
+            this.handleConfigurationEditJSONCommand(onSuccess);
+        }
+    }
+
+    public handleConfigurationEditJSONCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+        this.ensurePropertiesFile().then(() => {
+            console.assert(this.propertiesFile);
+            // Directly open the json file
+            vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                onSuccess(document);
+            });
+        });
+    }
+
+    public handleConfigurationEditUICommand(onSuccess: (document: vscode.TextDocument) => void): void {
+        this.ensurePropertiesFile().then(() => {
+            if (this.propertiesFile) {
+                if (this.parsePropertiesFile()) {
+                    // Parse successful, show UI
+                    if (this.settingsPanel === undefined) {
+                        this.settingsPanel = new SettingsPanel();
+                        this.settingsPanel.SettingsPanelViewStateChanged((e) => this.onSettingsPanelViewStateChanged(e));
+                        this.disposables.push(this.settingsPanel);
+                    }
+                    this.settingsPanel.createOrShow(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+                } else {
+                    // Parse failed, open json file
+                    vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                        onSuccess(document);
+                    });
+                }
+            }
+        });
+    }
+
+    private onSettingsPanelViewStateChanged(e: ViewStateEvent): void {
+        if (!e.isDirty && e.isActive && this.configurationJson) {
+            this.ensurePropertiesFile().then(() => {
+                if (this.propertiesFile) {
+                    if (this.parsePropertiesFile()) {
+                        // The settings UI became visible or active.
+                        // Ensure settingsPanel has copy of latest current configuration
+                        this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+                    } else {
+                        // Parse failed, open json file
+                        vscode.workspace.openTextDocument(this.propertiesFile);
+                    }
+                }
+            });
+        } else if (e.isDirty) {
+            console.assert(this.configurationJson);
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
+            this.configurationJson.configurations[this.currentConfigurationIndex.Value] = config;
+            this.writeToJson();
+        }
+    }
+
+    private handleConfigurationChange(): void {
+        if (this.propertiesFile === undefined) {
+            return; // Occurs when propertiesFile hasn't been checked yet.
+        }
+        this.configFileWatcherFallbackTime = new Date();
+        if (this.propertiesFile) {
+            this.parsePropertiesFileAndHandleSquiggles();
+            // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
+            // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
+            if (this.configurationJson) {
+                if (this.CurrentConfigurationIndex < 0 ||
+                    this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
+                    // If the index is out of bounds (during initialization or due to removal of configs), fix it.
+                    this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
+                }
+            }
+        }
+
+        if (!this.configurationJson) {
+            this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
+        }
+
+        this.applyDefaultIncludePathsAndFrameworks();
+        this.updateServerOnFolderSettingsChange();
+    }
+
     private async ensurePropertiesFile(): Promise<void> {
         if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
             return;
@@ -612,85 +724,6 @@ export class CppProperties {
             }
         }
         return;
-    }
-
-    public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
-        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
-        if (otherSettings.settingsEditor === "ui") {
-            this.handleConfigurationEditUICommand(onSuccess);
-        } else {
-            this.handleConfigurationEditJSONCommand(onSuccess);
-        }
-    }
-
-    public handleConfigurationEditJSONCommand(onSuccess: (document: vscode.TextDocument) => void): void {
-        this.ensurePropertiesFile().then(() => {
-            console.assert(this.propertiesFile);
-            // Directly open the json file
-            vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                onSuccess(document);
-            });
-        });
-    }
-
-    public handleConfigurationEditUICommand(onSuccess: (document: vscode.TextDocument) => void): void {
-        this.ensurePropertiesFile().then(() => {
-            if (this.propertiesFile) {
-                if (this.parsePropertiesFile()) {
-                    // Parse successful, show UI
-                    if (this.settingsPanel === undefined) {
-                        this.settingsPanel = new SettingsPanel();
-                        this.settingsPanel.SettingsPanelViewStateChanged((e) => this.onSettingsPanelViewStateChanged(e));
-                        this.disposables.push(this.settingsPanel);
-                    }
-                    this.settingsPanel.createOrShow(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
-                } else {
-                    // Parse failed, open json file
-                    vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                        onSuccess(document);
-                    });
-                }
-            }
-        });
-    }
-
-    private onSettingsPanelViewStateChanged(e: ViewStateEvent): void {
-        if (e.isActive && this.configurationJson) {
-            // The settings UI became visible or active.
-            // Ensure settingsPanel is referencing current configuration
-            this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
-        } else {
-            console.assert(this.configurationJson);
-            // The settings UI closed or is out of focus, save any changes to current configuration
-            // No need to get the changed values from settingsPanel because settingsPanel has a reference of this.configurationJson
-            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
-        }
-    }
-
-    private handleConfigurationChange(): void {
-        if (this.propertiesFile === undefined) {
-            return; // Occurs when propertiesFile hasn't been checked yet.
-        }
-        this.configFileWatcherFallbackTime = new Date();
-        if (this.propertiesFile) {
-            this.parsePropertiesFileAndHandleSquiggles();
-            // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
-            // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
-            if (this.configurationJson) {
-                if (this.CurrentConfigurationIndex < 0 ||
-                    this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
-                    // If the index is out of bounds (during initialization or due to removal of configs), fix it.
-                    this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
-                }
-            }
-        }
-
-        if (!this.configurationJson) {
-            this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
-        }
-
-        this.applyDefaultIncludePathsAndFrameworks();
-        this.updateServerOnFolderSettingsChange();
     }
 
     private parsePropertiesFileAndHandleSquiggles(): void {
@@ -773,7 +806,7 @@ export class CppProperties {
 
             if (dirty) {
                 try {
-                    fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+                    this.writeToJson();
                 } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
                     vscode.window.showWarningMessage(`Attempt to update "${this.propertiesFile.fsPath}" failed (do you have write access?)`);
@@ -1071,6 +1104,11 @@ export class CppProperties {
                 config.cppStandard = this.defaultCppStandard;
             }
         }
+    }
+
+    private writeToJson(): void {
+        console.assert(this.propertiesFile);
+        fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
     }
 
     public checkCppProperties(): void {
