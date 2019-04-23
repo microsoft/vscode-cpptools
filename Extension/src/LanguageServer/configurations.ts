@@ -974,8 +974,7 @@ export class CppProperties {
                 // and extend that pattern to the next quote before and next quote after it.
                 let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`);
                 let matches: string[] = curText.match(pattern);
-                if (matches)
-                {
+                if (matches) {
                     let curOffset: number = 0;
                     let endOffset: number = 0;
                     let message: string;
