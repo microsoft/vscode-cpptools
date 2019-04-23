@@ -964,47 +964,57 @@ export class CppProperties {
                 }
 
                 // Iterate through the text and apply squiggles.
-                let escapedPath: string = curPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                // Escape the path string for literal use in a regular expression
+                // Need to escape any quotes to match the original text
+                let escapedPath: string = curPath.replace(/\"/g, '\\\"');
+                escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+                // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
+                // and extend that pattern to the next quote before and next quote after it.
                 let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`);
                 let matches: string[] = curText.match(pattern);
-                let curOffset: number = 0;
-                let endOffset: number = 0;
-                let message: string;
-                for (let curMatch of matches) {
-                    curOffset = curText.substr(endOffset).search(pattern) + endOffset;
-                    endOffset = curOffset + curMatch.length;
+                if (matches)
+                {
+                    let curOffset: number = 0;
+                    let endOffset: number = 0;
                     let message: string;
-                    if (!pathExists) {
-                        message = `Cannot find "${resolvedPath}".`;
-                        newSquiggleMetrics.PathNonExistent++;
-                    } else {
-                        // Check for file versus path mismatches.
-                        if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
-                            (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
-                            if (compilerPathNeedsQuotes) {
-                                message = `Compiler path with spaces and arguments is missing \\" around the path.`;
-                                newSquiggleMetrics.CompilerPathMissingQuotes++;
+                    for (let curMatch of matches) {
+                        curOffset = curText.substr(endOffset).search(pattern) + endOffset;
+                        endOffset = curOffset + curMatch.length;
+                        let message: string;
+                        if (!pathExists) {
+                            message = `Cannot find "${resolvedPath}".`;
+                            newSquiggleMetrics.PathNonExistent++;
+                        } else {
+                            // Check for file versus path mismatches.
+                            if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
+                                (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
+                                (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
+                                if (compilerPathNeedsQuotes) {
+                                    message = `Compiler path with spaces and arguments is missing \\" around the path.`;
+                                    newSquiggleMetrics.CompilerPathMissingQuotes++;
+                                } else {
+                                    if (util.checkFileExistsSync(resolvedPath)) {
+                                        continue;
+                                    }
+                                    message = `Path is not a file: "${resolvedPath}".`;
+                                    newSquiggleMetrics.PathNotAFile++;
+                                }
                             } else {
-                                if (util.checkFileExistsSync(resolvedPath)) {
+                                if (util.checkDirectoryExistsSync(resolvedPath)) {
                                     continue;
                                 }
-                                message = `Path is not a file: "${resolvedPath}".`;
-                                newSquiggleMetrics.PathNotAFile++;
+                                message = `Path is not a directory: "${resolvedPath}".`;
+                                newSquiggleMetrics.PathNotADirectory++;
                             }
-                        } else {
-                            if (util.checkDirectoryExistsSync(resolvedPath)) {
-                                continue;
-                            }
-                            message = `Path is not a directory: "${resolvedPath}".`;
-                            newSquiggleMetrics.PathNotADirectory++;
                         }
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
+                                document.positionAt(curTextStartOffset + endOffset)),
+                            message, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
                     }
-                    let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                            document.positionAt(curTextStartOffset + endOffset)),
-                        message, vscode.DiagnosticSeverity.Warning);
-                    diagnostics.push(diagnostic);
                 }
             }
             if (diagnostics.length !== 0) {
