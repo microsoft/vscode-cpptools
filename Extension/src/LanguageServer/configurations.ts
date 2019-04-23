@@ -864,12 +864,12 @@ export class CppProperties {
                     this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
-                        paths.add(`"${curPath}"`);
+                        paths.add(`${curPath}`);
                     }
                 }
             }
             if (this.CurrentConfiguration.compileCommands) {
-                paths.add(`"${this.CurrentConfiguration.compileCommands}"`);
+                paths.add(`${this.CurrentConfiguration.compileCommands}`);
             }
 
             if (this.CurrentConfiguration.compilerPath) {
@@ -887,13 +887,12 @@ export class CppProperties {
 
             for (let curPath of paths) {
                 const isCompilerPath: boolean = curPath === this.CurrentConfiguration.compilerPath;
-                let resolvedPath: string = isCompilerPath ? curPath : curPath.substr(1, curPath.length - 2); // Remove the surrounding quotes.
                 // Resolve special path cases.
-                if (resolvedPath === "${default}") {
+                if (curPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
                     continue;
                 }
-                resolvedPath = util.resolveVariables(resolvedPath, this.ExtendedEnvironment);
+                let resolvedPath: string = util.resolveVariables(curPath, this.ExtendedEnvironment);
                 if (resolvedPath.includes("${workspaceFolder}")) {
                     resolvedPath = resolvedPath.replace("${workspaceFolder}", this.rootUri.fsPath);
                 }
@@ -965,7 +964,15 @@ export class CppProperties {
                 }
 
                 // Iterate through the text and apply squiggles.
-                for (let curOffset: number = curText.indexOf(curPath); curOffset !== -1; curOffset = curText.indexOf(curPath, curOffset + curPath.length)) {
+                let escapedPath: string = curPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`);
+                let matches: string[] = curText.match(pattern);
+                let curOffset: number = 0;
+                let endOffset: number = 0;
+                let message: string;
+                for (let curMatch of matches) {
+                    curOffset = curText.substr(endOffset).search(pattern) + endOffset;
+                    endOffset = curOffset + curMatch.length;
                     let message: string;
                     if (!pathExists) {
                         message = `Cannot find "${resolvedPath}".`;
@@ -995,7 +1002,7 @@ export class CppProperties {
                     }
                     let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                         new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                            document.positionAt(curTextStartOffset + curOffset + curPath.length + (!isCompilerPath ? -1 : 0))),
+                            document.positionAt(curTextStartOffset + endOffset)),
                         message, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diagnostic);
                 }
