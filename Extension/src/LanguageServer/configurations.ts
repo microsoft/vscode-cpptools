@@ -977,7 +977,6 @@ export class CppProperties {
                 if (matches) {
                     let curOffset: number = 0;
                     let endOffset: number = 0;
-                    let message: string;
                     for (let curMatch of matches) {
                         curOffset = curText.substr(endOffset).search(pattern) + endOffset;
                         endOffset = curOffset + curMatch.length;
