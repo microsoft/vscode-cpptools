@@ -323,7 +323,8 @@
       <div class="main-title">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
         Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
-        Only the setting values of the active configuration can be modified at a time. Change the active configuration to modify a different configuration on this editor. To edit multiple configurations or set additional settings go to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
+        Changes made in this editor only apply to the active configuration. To modify other configurations <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">change the active configuration</a>. 
+        To edit multiple configurations at once, or additional settings not shown here, go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
     </div>
 
@@ -338,7 +339,7 @@
         To edit the name of the current active configuration, go to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file and edit the <code>name</code> property.
       </div>
       <div class="section-input"><input class="input-disabled" type="text" id=activeConfig style="width: 290px" disabled>
-      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Change active configuration">Change active configuration</a>
+      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">Change the active configuration</a>
     </div> 
     </div>
 
@@ -356,7 +357,7 @@
     <div class="section">
         <div class="section-title">IntelliSense mode</div>
         <div class="section-text">
-            The IntelliSense mode used by the IntelliSense engine. The selected mode should match the compiler specified under the compiler path setting. The <code>${default}</code> mode will choose the default for that platform. 
+            The IntelliSense mode used by the IntelliSense engine. The <code>${default}</code> mode will choose the default for that platform. 
             Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and Mac defaults to <code>clang-x64</code>. 
             Select a specific IntelliSense mode to override the <code>${default}</code> mode.
         </div>
