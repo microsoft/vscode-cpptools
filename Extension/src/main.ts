@@ -18,7 +18,7 @@ import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistr
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import { getInstallationInformation, InstallationInformation, setInstallationStage } from './installationInformation';
+import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
@@ -87,6 +87,7 @@ async function processRuntimeDependencies(): Promise<void> {
 
 async function offlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
+    setInstallationType(InstallationType.Offline);
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     setInstallationStage('makeBinariesExecutable');
@@ -107,6 +108,7 @@ async function offlineInstallation(): Promise<void> {
 
 async function onlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
+    setInstallationType(InstallationType.Online);
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     await downloadAndInstallPackages(info);
@@ -234,6 +236,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
+    installBlob.telemetryProperties['type'] = installBlob.type === InstallationType.Online ? "online" : "offline";
 
     if (info.distribution) {
         installBlob.telemetryProperties['linuxDistroName'] = info.distribution.name;
