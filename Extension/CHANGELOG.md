@@ -15,6 +15,7 @@
 * Add a new (default) value of `EnabledIfIncludesResolve` to `C_Cpp.errorSquiggles`, which only shows error squiggles if include headers are successfully resolved. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
 * Enable flag `/permissive-` as an argument to `compilerPath` with `cl.exe`. [#3446](https://github.com/Microsoft/vscode-cpptools/issues/3446)
 * Disable debug heap by default with cppvsdbg. [#3484](https://github.com/Microsoft/vscode-cpptools/issues/3484)
+  * Reported by Djoulihen (@Djoulihen)
 
 ### Bug Fixes
 * Fix browsing for functions with BOOST_FOREACH. [#953](https://github.com/Microsoft/vscode-cpptools/issues/953)
