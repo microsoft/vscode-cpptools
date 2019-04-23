@@ -28,6 +28,7 @@ export interface ViewStateEvent {
 
 export class SettingsPanel {
     private configValues: config.Configuration;
+    private isIntelliSenseModeDefined: boolean = false;
     private configDirty: boolean = false;
     private settingsPanelViewStateChanged = new vscode.EventEmitter<ViewStateEvent>(); 
     private panel: vscode.WebviewPanel;
@@ -139,6 +140,7 @@ export class SettingsPanel {
 
     private updateWebview(configuration: config.Configuration): void {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
+        this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !==undefined);
         if (this.panel) {
             // Send a message to the webview to update the values
            this.panel.webview.postMessage({ command: 'update', config: this.configValues });
@@ -192,7 +194,11 @@ export class SettingsPanel {
                 this.configValues.defines = entries.filter(e => e);
                 break;
             case elementId.intelliSenseMode:
-                this.configValues.intelliSenseMode = message.value;
+                if (message.value !== "${default}" || this.isIntelliSenseModeDefined) {
+                    this.configValues.intelliSenseMode = message.value;
+                } else {
+                    this.configValues.intelliSenseMode = undefined;
+                }
                 break;
             case elementId.cStandard:
                 this.configValues.cStandard = message.value;

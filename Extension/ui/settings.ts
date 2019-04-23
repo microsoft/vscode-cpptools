@@ -85,7 +85,7 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = config.name;
 
             (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
-            (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode;
+            (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
 
             (<HTMLInputElement>document.getElementById(elementId.includePath)).value = 
                 (config.includePath && config.includePath.length > 0) ? config.includePath.join("\n") : "";
