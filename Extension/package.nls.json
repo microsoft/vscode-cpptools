@@ -1,8 +1,8 @@
 {
     "c_cpp.command.configurationSelect.title": "Select a configuration...",
     "c_cpp.command.configurationProviderSelect.title": "Change configuration provider...",
-    "c_cpp.command.configurationEditJSON.title": "Edit configurations... (JSON)",
-    "c_cpp.command.configurationEditUI.title": "Edit configurations... (UI)",
+    "c_cpp.command.configurationEditJSON.title": "Edit configurations (JSON)",
+    "c_cpp.command.configurationEditUI.title": "Edit configurations (UI)",
     "c_cpp.command.goToDeclaration.title": "Go to Declaration",
     "c_cpp.command.peekDeclaration.title": "Peek Declaration",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
@@ -17,5 +17,6 @@
     "c_cpp.command.resumeParsing.title": "Resume parsing",
     "c_cpp.command.showParsingCommands.title": "Show parsing commands",
     "c_cpp.command.takeSurvey.title": "Take survey",
-    "c_cpp.command.buildAndDebugActiveFile.title": "Build and Debug Active File"
+    "c_cpp.command.buildAndDebugActiveFile.title": "Build and Debug Active File",
+    "c_cpp.command.logDiagnostics.title": "Log Diagnostics"
 }

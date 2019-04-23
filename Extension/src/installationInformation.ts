@@ -3,8 +3,14 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+export enum InstallationType {
+    Online,
+    Offline
+}
+
 export class InstallationInformation {
     stage: string;
+    type: InstallationType;
     hasError: boolean;
     telemetryProperties: { [key: string]: string };
 
@@ -25,4 +31,8 @@ export function getInstallationInformation(): InstallationInformation {
 
 export function setInstallationStage(stage: string): void {
     getInstallationInformation().stage = stage;
+}
+
+export function setInstallationType(type: InstallationType): void {
+    getInstallationInformation().type = type;
 }

@@ -203,6 +203,9 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
+        if (this.settingsPanel) {
+            this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
+        }
         this.handleSquiggles();
     }
 
@@ -355,6 +358,17 @@ export class CppProperties {
         } else {
             return "gcc-x64";
         }
+    }
+
+    private isCompilerIntelliSenseModeCompatible(): boolean {
+        // Check if intelliSenseMode and compilerPath are compatible
+        // cl.exe and msvc mode should be used together
+        // Ignore if compiler path is not set
+        if (this.CurrentConfiguration.compilerPath === undefined) {
+            return true;
+        }
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
+        return compilerPathAndArgs.compilerPath.endsWith("cl.exe") === (this.CurrentConfiguration.intelliSenseMode === "msvc-x64");
     }
 
     public addToIncludePathCommand(path: string): void {
@@ -695,8 +709,9 @@ export class CppProperties {
 
             // Replace all \<escape character> with \\<character>.
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
-            readResults = readResults.replace(/\\/g, '\\\\');
-            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \".
+            readResults = readResults.replace(/\\/g, '\\\\'); 
+            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \". 
+            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to do it again for \\". 
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
@@ -815,8 +830,33 @@ export class CppProperties {
                 }
                 curText = curText.substr(0, nextNameStart2);
             }
+            if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
+                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+            }
+            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+            const isWindows: boolean = os.platform() === 'win32';
 
             // TODO: Add other squiggles.
+
+            // Check if intelliSenseMode and compilerPath are compatible
+            if (isWindows) {
+                // cl.exe is only available on Windows
+                const intelliSenseModeStart: number = curText.search(/\s*\"intelliSenseMode\"\s*:\s*\"/);
+                if (intelliSenseModeStart !== -1) {
+                    const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
+                    const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
+
+                    if (!this.isCompilerIntelliSenseModeCompatible()) {
+                        let message: string = `intelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
+                                document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
+                            message, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                        newSquiggleMetrics.CompilerModeMismatch++;
+                    }
+                }
+            }
 
             // Check for path-related squiggles.
             let paths: Set<string> = new Set<string>();
@@ -844,12 +884,6 @@ export class CppProperties {
             const compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
-
-            if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
-                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0 };
-            }
-            let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0 };
-            const isWindows: boolean = os.platform() === 'win32';
 
             for (let curPath of paths) {
                 const isCompilerPath: boolean = curPath === this.CurrentConfiguration.compilerPath;

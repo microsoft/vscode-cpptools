@@ -80,9 +80,9 @@ class SettingsApp {
     private update(config: any) {
         this.updating = true;
         try {
-            document.getElementById(elementId.activeConfig).innerHTML = config.name;
+            (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = config.name;
 
-            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath;
+            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode;
 
             document.getElementById(elementId.includePath).innerHTML = (config.includePath.length > 0) ? config.includePath.join("\n") : "";
