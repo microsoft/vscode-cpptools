@@ -125,6 +125,7 @@
       }
 
       textarea {
+          white-space: nowrap;
           padding: 4px;
           font-size: 13px;
           font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
@@ -322,7 +323,7 @@
       <div class="main-title">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
         Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
-        Only the setting values of the active configuration can be modified at a time. Switch active configurations to modify a different configurations on this editor. To edit multiple configurations or set additional settings go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
+        Only the setting values of the active configuration can be modified at a time. Change the active configuration to modify a different configuration on this editor. To edit multiple configurations or set additional settings go to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
       </div>
     </div>
 
@@ -331,19 +332,20 @@
 
     <!-- sections -->
     <div class="section">
-      <div class="section-title">Configuration identifier</div>
+      <div class="section-title">Configuration name</div>
       <div class="section-text">
-        The identifier of the active configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.
+        A friendly name to identify a configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything.
+        To edit the name of the current active configuration, go to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file and edit the <code>name</code> property.
       </div>
       <div class="section-input"><input class="input-disabled" type="text" id=activeConfig style="width: 290px" disabled>
-      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Select active configuration">Select active configuration</a>
+      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Change active configuration">Change active configuration</a>
     </div> 
     </div>
 
     <div class="section">
         <div class="section-title">Compiler path</div>
         <div class="section-text">
-            Full path of the compiler being used to build, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.
+            The full path of the compiler being used to build, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.
             Args can be added to modify the includes/defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc., but paths with spaces must be surrounded by double quotes <code>"</code> if args are used.
         </div>
         <div class="section-input">
@@ -354,7 +356,7 @@
     <div class="section">
         <div class="section-title">IntelliSense mode</div>
         <div class="section-text">
-            If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64, Linux defaults to gcc-x64, and Mac defaults to clang-x64.
+            If an IntelliSense mode is specified, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64, Linux defaults to gcc-x64, and Mac defaults to clang-x64.
         </div>
         <div class="section-input">
           <select id="intelliSenseMode">
