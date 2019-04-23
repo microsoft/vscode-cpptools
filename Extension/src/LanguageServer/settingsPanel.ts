@@ -140,7 +140,7 @@ export class SettingsPanel {
 
     private updateWebview(configuration: config.Configuration): void {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
-        this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !==undefined);
+        this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
             // Send a message to the webview to update the values
            this.panel.webview.postMessage({ command: 'update', config: this.configValues });
