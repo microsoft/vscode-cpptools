@@ -12,6 +12,7 @@ const elementId: { [key: string]: string } = {
     defines: "defines",
     cStandard: "cStandard",
     cppStandard: "cppStandard"
+    //TODO: validate input paths
     // compilerPathInvalid: "compilerPathInvalid",
     // includePathInvalid: "includePathInvalid"
 };
@@ -44,11 +45,12 @@ class SettingsApp {
         document.getElementById(elementId.cStandard).addEventListener("change", this.onChanged.bind(this, elementId.cStandard));
         document.getElementById(elementId.cppStandard).addEventListener("change", this.onChanged.bind(this, elementId.cppStandard));
 
+        //TODO: validate input paths
         // document.getElementById(ElementId.compilerPathInvalid).style.visibility = "hidden";
         // document.getElementById(ElementId.includePathInvalid).style.visibility = "hidden";
     }
 
-    private onChanged(id: string) {
+    private onChanged(id: string): void {
         if (this.updating) {
             return; 
         }
@@ -61,7 +63,7 @@ class SettingsApp {
         });
     }
 
-    private onMessageReceived(e: MessageEvent) {
+    private onMessageReceived(e: MessageEvent): void {
         const message = e.data; // The json data that the extension sent
         switch (message.command) {
             case 'update':
@@ -77,16 +79,19 @@ class SettingsApp {
         }
     }
 
-    private update(config: any) {
+    private update(config: any): void {
         this.updating = true;
         try {
             (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = config.name;
 
             (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
-            (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode;
+            (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
 
-            document.getElementById(elementId.includePath).innerHTML = (config.includePath.length > 0) ? config.includePath.join("\n") : "";
-            document.getElementById(elementId.defines).innerHTML = (config.defines.length > 0 ) ? config.defines.join("\n") : "";
+            (<HTMLInputElement>document.getElementById(elementId.includePath)).value = 
+                (config.includePath && config.includePath.length > 0) ? config.includePath.join("\n") : "";
+
+            (<HTMLInputElement>document.getElementById(elementId.defines)).value = 
+                (config.defines && config.defines.length > 0 ) ? config.defines.join("\n") : "";
 
             (<HTMLInputElement>document.getElementById(elementId.cStandard)).value = config.cStandard;
             (<HTMLInputElement>document.getElementById(elementId.cppStandard)).value = config.cppStandard;
@@ -96,9 +101,10 @@ class SettingsApp {
         }
     }
 
-    // private validateInput(elementID: string, invalid: boolean) {
+    //TODO: validate input paths
+    // private validateInput(elementID: string, invalid: boolean): void {
     //     document.getElementById(elementID).style.visibility = invalid ? "visible" : "hidden";
     // }
 }
 
-new SettingsApp();
+let app: SettingsApp = new SettingsApp();
