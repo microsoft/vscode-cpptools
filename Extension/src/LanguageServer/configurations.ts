@@ -436,7 +436,11 @@ export class CppProperties {
 
     public select(index: number): Configuration {
         if (index === this.configurationJson.configurations.length) {
-            this.handleConfigurationEditCommand(vscode.window.showTextDocument);
+            this.handleConfigurationEditUICommand(vscode.window.showTextDocument);
+            return;
+        }
+        if (index === this.configurationJson.configurations.length + 1) {
+            this.handleConfigurationEditJSONCommand(vscode.window.showTextDocument);
             return;
         }
 
