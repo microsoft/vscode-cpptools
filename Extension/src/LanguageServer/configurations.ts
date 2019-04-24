@@ -13,7 +13,7 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { getCustomConfigProviders } from './customProviders';
-import { SettingsPanel, ViewStateEvent } from './settingsPanel';
+import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 const configVersion: number = 4;
@@ -207,7 +207,7 @@ export class CppProperties {
             this.ensurePropertiesFile().then(() => {
                 if (this.propertiesFile) {
                     // Clear out any modifications we may have made internally by parsing the json file
-                    if (this.parsePropertiesFile()) {
+                    if (this.parsePropertiesFile(false)) {
                         // Update the UI with new selected configuration
                         this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
                     } else {
@@ -385,7 +385,7 @@ export class CppProperties {
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
             telemetry.logLanguageServerEvent("addToIncludePath");
-            this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
+            this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             if (config.includePath === undefined) {
                 config.includePath = ["${default}"];
@@ -400,7 +400,7 @@ export class CppProperties {
         return new Promise<void>((resolve) => {
             if (this.propertiesFile) {
                 this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-                    this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
+                    this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
                     let config: Configuration = this.CurrentConfiguration;
                     if (providerId) {
                         config.configurationProvider = providerId;
@@ -426,7 +426,7 @@ export class CppProperties {
 
     public setCompileCommands(path: string): void {
         this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
-            this.parsePropertiesFileAndHandleSquiggles(); // Clear out any modifications we may have made internally.
+            this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             config.compileCommands = path;
             this.writeToJson();
@@ -442,17 +442,6 @@ export class CppProperties {
         if (index === this.configurationJson.configurations.length + 1) {
             this.handleConfigurationEditJSONCommand(vscode.window.showTextDocument);
             return;
-        }
-
-        // Before changing the current configuration index, save any edits from the UI.
-        if (this.settingsPanel) {
-            if (this.settingsPanel.isDirty()) {
-                this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-                // Get the changes from the UI and save to json file
-                let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
-                this.configurationJson.configurations[this.currentConfigurationIndex.Value] = config;
-                this.writeToJson();
-            }
         }
 
         this.currentConfigurationIndex.Value = index;
@@ -613,11 +602,12 @@ export class CppProperties {
     public handleConfigurationEditUICommand(onSuccess: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             if (this.propertiesFile) {
-                if (this.parsePropertiesFile()) {
+                if (this.parsePropertiesFile(false)) {
                     // Parse successful, show UI
                     if (this.settingsPanel === undefined) {
                         this.settingsPanel = new SettingsPanel();
-                        this.settingsPanel.SettingsPanelViewStateChanged((e) => this.onSettingsPanelViewStateChanged(e));
+                        this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
+                        this.settingsPanel.SettingsPanelStateChanged(() => this.saveConfigurationUI());
                         this.disposables.push(this.settingsPanel);
                     }
                     this.settingsPanel.createOrShow(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
@@ -631,11 +621,11 @@ export class CppProperties {
         });
     }
 
-    private onSettingsPanelViewStateChanged(e: ViewStateEvent): void {
-        if (!e.isDirty && e.isActive && this.configurationJson) {
+    private onSettingsPanelActivated(): void {
+        if (this.configurationJson) {
             this.ensurePropertiesFile().then(() => {
                 if (this.propertiesFile) {
-                    if (this.parsePropertiesFile()) {
+                    if (this.parsePropertiesFile(false)) {
                         // The settings UI became visible or active.
                         // Ensure settingsPanel has copy of latest current configuration
                         this.settingsPanel.updateConfigUI(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);
@@ -645,13 +635,14 @@ export class CppProperties {
                     }
                 }
             });
-        } else if (e.isDirty) {
-            console.assert(this.configurationJson);
-            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-            let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
-            this.configurationJson.configurations[this.currentConfigurationIndex.Value] = config;
-            this.writeToJson();
         }
+    }
+
+    private saveConfigurationUI(): void {
+        this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
+        let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
+        this.configurationJson.configurations[this.currentConfigurationIndex.Value] = config;
+        this.writeToJson();
     }
 
     private handleConfigurationChange(): void {
@@ -660,7 +651,7 @@ export class CppProperties {
         }
         this.configFileWatcherFallbackTime = new Date();
         if (this.propertiesFile) {
-            this.parsePropertiesFileAndHandleSquiggles();
+            this.parsePropertiesFile(true);
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
             if (this.configurationJson) {
@@ -730,13 +721,7 @@ export class CppProperties {
         return;
     }
 
-    private parsePropertiesFileAndHandleSquiggles(): void {
-        if (this.parsePropertiesFile()) {
-            this.handleSquiggles();
-        }
-    }
-
-    private parsePropertiesFile(): boolean {
+    private parsePropertiesFile(handleSquiggles: boolean): boolean {
         let success: boolean = true;
         try {
             let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
@@ -744,11 +729,13 @@ export class CppProperties {
                 return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
             }
 
-            // Replace all \<escape character> with \\<character>.
-            // Otherwise, the JSON.parse result will have the \<escape character> missing.
-            readResults = readResults.replace(/\\/g, '\\\\'); 
-            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \". 
-            readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to do it again for \\". 
+            if (handleSquiggles) {
+                // Replace all \<escape character> with \\<character>.
+                // Otherwise, the JSON.parse result will have the \<escape character> missing.
+                readResults = readResults.replace(/\\/g, '\\\\'); 
+                readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \". 
+                readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to do it again for \\". 
+            }
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
@@ -822,6 +809,11 @@ export class CppProperties {
             vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
             success = false;
         }
+
+        if (handleSquiggles && success) {
+            this.handleSquiggles();
+        }
+
         return success;
     }
 
