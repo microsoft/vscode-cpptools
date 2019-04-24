@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.23.0-insiders: April 22, 2019
+## Version 0.23.0-insiders: April 23, 2019
 ### New Features
 * Add a configuration UI editor to edit IntelliSense settings defined in the underlying `c_cpp_properties.json` file. [PR #3479](https://github.com/Microsoft/vscode-cpptools/pull/3479), [PR #3487](https://github.com/Microsoft/vscode-cpptools/pull/3487)
   * Add a new command `C/C++: Edit configurations (UI)` to open the UI editor.
@@ -14,18 +14,22 @@
 * Change the `Disabled` value for `C_Cpp.errorSquiggles` to stop showing missing header squiggles. [#3361](https://github.com/Microsoft/vscode-cpptools/issues/3361)
 * Add a new (default) value of `EnabledIfIncludesResolve` to `C_Cpp.errorSquiggles`, which only shows error squiggles if include headers are successfully resolved. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
 * Enable flag `/permissive-` as an argument to `compilerPath` with `cl.exe`. [#3446](https://github.com/Microsoft/vscode-cpptools/issues/3446)
+* Disable debug heap by default with cppvsdbg. [#3484](https://github.com/Microsoft/vscode-cpptools/issues/3484)
+  * Reported by Djoulihen (@Djoulihen)
 
 ### Bug Fixes
+* Fix browsing for functions with BOOST_FOREACH. [#953](https://github.com/Microsoft/vscode-cpptools/issues/953)
 * Preserve newlines in documentation comments. [#2937](https://github.com/Microsoft/vscode-cpptools/issues/2937)
 * Fix documentation comments above multi-line templates (and some other issues). [#3162](https://github.com/Microsoft/vscode-cpptools/issues/3162)
+* Fix auto-removal of compiler-provided paths in `includePath` when they end with a directory separator on Windows. [#3245](https://github.com/Microsoft/vscode-cpptools/issues/3245)
 * Fix `.cmd` and `.bat` files not working for `compilerPath` on Windows. [#3428](https://github.com/Microsoft/vscode-cpptools/issues/3428)
 * Fix `compilerPath` with arguments that are surrounded by quotes. [#3428](https://github.com/Microsoft/vscode-cpptools/issues/3428)
 * Fix documentation comments interpreting special characters as markdown. [#3441](https://github.com/Microsoft/vscode-cpptools/issues/3441)
 * Fix a JSON parsing error when a path in `c_cpp_properties.json` ended with `\\"`. [#3449](https://github.com/Microsoft/vscode-cpptools/issues/3449)
 * Fix hover using the configuration of the active document instead of the hovered document. [#3452](https://github.com/Microsoft/vscode-cpptools/issues/3452)
 * Fix `c_cpp_properties.json` squiggles when the configuration name has regex characters. [PR #3478](https://github.com/Microsoft/vscode-cpptools/pull/3478)
-* Disable debug heap by default with cppvsdbg. [#3484](https://github.com/Microsoft/vscode-cpptools/issues/3484)
 * Use the `editor.tabSize` setting instead of `2` when creating build tasks. [PR #3486](https://github.com/Microsoft/vscode-cpptools/pull/3486)
+* Fix some potential crashes on hover. [#3509](https://github.com/Microsoft/vscode-cpptools/issues/3509)
 * Fix icon of parameters in completion results.
 * Fix code action sometimes not appearing over a squiggled identifier.
 
