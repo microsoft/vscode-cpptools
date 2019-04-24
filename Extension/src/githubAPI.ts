@@ -125,11 +125,6 @@ export interface BuildInfo {
 }
 
 /**
- * Set this hook to true to force an update, to test the update flow.
- */
-let testUpdateFlow: boolean = false;
-
-/**
  * Use the GitHub API to retrieve the download URL of the extension version the user should update to, if any.
  * @param updateChannel The user's updateChannel setting.
  * @return Download URL for the extension VSIX package that the user should install. If the user
@@ -146,11 +141,8 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
             // Allows testing pre-releases without accidentally downgrading to the latest version
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
             const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-            if (!testUpdateFlow)
-            {
-                if (!testingInsidersVsixInstall && (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders'))) {
-                    return undefined;
-                }
+            if (!testingInsidersVsixInstall && (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders'))) {
+                return undefined;
             }
 
             return getTargetBuild(builds, userVersion, updateChannel);
@@ -199,7 +191,7 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
 
     // Check current version against target's version to determine if the installation should happen
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
-    if (testUpdateFlow || needsUpdate(userVersion, targetVersion)) {
+    if (needsUpdate(userVersion, targetVersion)) {
         return targetBuild;
     }
     return undefined;
