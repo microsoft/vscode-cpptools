@@ -23,10 +23,12 @@ const elementId: { [key: string]: string } = {
 
 export interface ViewStateEvent {
     isActive: boolean;
+    isDirty: boolean;
 }
 
 export class SettingsPanel {
     private configValues: config.Configuration;
+    private isIntelliSenseModeDefined: boolean = false;
     private configDirty: boolean = false;
     private settingsPanelViewStateChanged = new vscode.EventEmitter<ViewStateEvent>(); 
     private panel: vscode.WebviewPanel;
@@ -89,6 +91,10 @@ export class SettingsPanel {
         return this.settingsPanelViewStateChanged.event;
     }
 
+    public isDirty(): boolean {
+        return this.configDirty;
+    }
+
     public getLastValuesFromConfigUI(): config.Configuration {
         return this.configValues;
     }
@@ -122,7 +128,7 @@ export class SettingsPanel {
     private onPanelDisposed(): void {
         // Notify listener config panel is not active
         if (this.configDirty) {
-            let viewState: ViewStateEvent = { isActive: false };
+            let viewState: ViewStateEvent = { isActive: false, isDirty: this.configDirty };
             this.settingsPanelViewStateChanged.fire(viewState);
         }
 
@@ -133,25 +139,28 @@ export class SettingsPanel {
     }
 
     private updateWebview(configuration: config.Configuration): void {
-        this.configValues = configuration;
-        // Send a message to the webview to update the values from json.
+        this.configValues = Object.assign({}, configuration); // Copy configuration values
+        this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-           this.panel.webview.postMessage({ command: 'update', config: configuration });
+            // Send a message to the webview to update the values
+           this.panel.webview.postMessage({ command: 'update', config: this.configValues });
            this.configDirty = false;
         }
     }
 
     private onViewStateChanged(e: vscode.WebviewPanelOnDidChangeViewStateEvent): void {
-        let viewState: ViewStateEvent = { isActive: e.webviewPanel.active };
+        let viewState: ViewStateEvent = { isActive: e.webviewPanel.active, isDirty: this.configDirty };
         if (this.configDirty || e.webviewPanel.active) {
             this.settingsPanelViewStateChanged.fire(viewState);
+            this.configDirty = false;
         }
     }
 
     private onWindowStateChanged(e: vscode.WindowState): void {
-        let viewState: ViewStateEvent = { isActive: e.focused };
-        if (this.configDirty || e.focused) {
+        let viewState: ViewStateEvent = { isActive: this.panel.active, isDirty: this.configDirty };
+        if (this.configDirty || this.panel.active) {
             this.settingsPanelViewStateChanged.fire(viewState);
+            this.configDirty = false;
         }
     }
 
@@ -185,7 +194,11 @@ export class SettingsPanel {
                 this.configValues.defines = entries.filter(e => e);
                 break;
             case elementId.intelliSenseMode:
-                this.configValues.intelliSenseMode = message.value;
+                if (message.value !== "${default}" || this.isIntelliSenseModeDefined) {
+                    this.configValues.intelliSenseMode = message.value;
+                } else {
+                    this.configValues.intelliSenseMode = undefined;
+                }
                 break;
             case elementId.cStandard:
                 this.configValues.cStandard = message.value;
