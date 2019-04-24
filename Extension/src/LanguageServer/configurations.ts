@@ -931,7 +931,6 @@ export class CppProperties {
                     // Squiggle when the compiler's path has spaces without quotes but args are used.
                     compilerPathNeedsQuotes = compilerPathAndArgs.additionalArgs && !resolvedPath.startsWith('"') && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
-                    curPath = curPath.replace(/\"/g, `\\"`);
                 }
 
                 let pathExists: boolean = true;
