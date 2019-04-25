@@ -975,7 +975,7 @@ class DefaultClient implements Client {
         for (let i: number = 0; i < filesAndPaths.length; ++i) {
             let fileAndPath: string[] = filesAndPaths[i].split("@");
             // Skip empty or malformed
-            if (fileAndPath.length == 2) { 
+            if (fileAndPath.length === 2) {
                 let file: string = fileAndPath[0];
                 let filePath: string = fileAndPath[1];
                 if ((file in assocs) || (("**/" + file) in assocs)) {
