@@ -23,6 +23,14 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
+
+                // Work around vscode treating ".C" as c, by adding this file name to file associations as cpp
+                if (document.uri.path.endsWith(".C")) {
+                    let fileName: string = document.uri.fsPath.split('\\').pop().split('/').pop();
+                    let mappingString: string = fileName + "@" + document.uri.fsPath;
+                    me.addFileAssociations(mappingString, false);
+                }
+
                 me.provideCustomConfiguration(document).then(() => {
                     sendMessage(document);
                 }, () => {
