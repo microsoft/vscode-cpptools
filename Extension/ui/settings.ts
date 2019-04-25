@@ -79,23 +79,19 @@ class SettingsApp {
         }
     }
 
-    private unescapeConfigString(s: string): string {
-        return s.replace(/\\\\/g, "\\");
-    }
-
     private update(config: any): void {
         this.updating = true;
         try {
-            (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = this.unescapeConfigString(config.name);
+            (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = config.name;
 
-            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? this.unescapeConfigString(config.compilerPath) : "";
+            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
 
             (<HTMLInputElement>document.getElementById(elementId.includePath)).value = 
-                (config.includePath && config.includePath.length > 0) ? this.unescapeConfigString(config.includePath.join("\n")) : "";
+                (config.includePath && config.includePath.length > 0) ? config.includePath.join("\n") : "";
 
             (<HTMLInputElement>document.getElementById(elementId.defines)).value = 
-                (config.defines && config.defines.length > 0 ) ? this.unescapeConfigString(config.defines.join("\n")) : "";
+                (config.defines && config.defines.length > 0 ) ? config.defines.join("\n") : "";
 
             (<HTMLInputElement>document.getElementById(elementId.cStandard)).value = config.cStandard;
             (<HTMLInputElement>document.getElementById(elementId.cppStandard)).value = config.cppStandard;
