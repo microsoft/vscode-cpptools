@@ -431,7 +431,7 @@
         },
         "envFile": { 
           "type": "string", 
-          "description": "Environment variables passed to the program by a file.", 
+          "description": "Absolute path to a file containing environment variable definitions. These file has key value pairs sepearted by an equals sign per line. E.g. KEY=VALUE", 
           "default": "${workspaceFolder}/.env"
         },
         "symbolSearchPath": {
