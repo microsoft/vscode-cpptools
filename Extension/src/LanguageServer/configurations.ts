@@ -607,7 +607,7 @@ export class CppProperties {
                     if (this.settingsPanel === undefined) {
                         this.settingsPanel = new SettingsPanel();
                         this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
-                        this.settingsPanel.SettingsPanelStateChanged(() => this.saveConfigurationUI());
+                        this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());
                         this.disposables.push(this.settingsPanel);
                     }
                     this.settingsPanel.createOrShow(this.configurationJson.configurations[this.currentConfigurationIndex.Value]);

@@ -25,7 +25,7 @@ export class SettingsPanel {
     private configValues: config.Configuration;
     private isIntelliSenseModeDefined: boolean = false;
     private settingsPanelActivated = new vscode.EventEmitter<void>();
-    private settingsPanelStateChanged = new vscode.EventEmitter<void>();
+    private configValuesChanged = new vscode.EventEmitter<void>();
     private panel: vscode.WebviewPanel;
     private disposable: vscode.Disposable = undefined;
     private disposablesPanel: vscode.Disposable = undefined;
@@ -35,7 +35,8 @@ export class SettingsPanel {
     constructor() {
         this.configValues = { name: undefined };
         this.disposable = vscode.Disposable.from(
-            this.settingsPanelStateChanged,
+            this.settingsPanelActivated,
+            this.configValuesChanged,
             vscode.window.onDidChangeWindowState(this.onWindowStateChanged, this)
         );
     }
@@ -86,8 +87,8 @@ export class SettingsPanel {
         return this.settingsPanelActivated.event;
     }
 
-    public get SettingsPanelStateChanged(): vscode.Event<void> { 
-        return this.settingsPanelStateChanged.event;
+    public get ConfigValuesChanged(): vscode.Event<void> { 
+        return this.configValuesChanged.event;
     }
 
     public getLastValuesFromConfigUI(): config.Configuration {
@@ -191,7 +192,7 @@ export class SettingsPanel {
                 break;
         }
 
-        this.settingsPanelStateChanged.fire();
+        this.configValuesChanged.fire();
     }
 
     private getHtml(): string {
