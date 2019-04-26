@@ -464,8 +464,8 @@ function installVsix(vsixLocation: string): Thenable<void> {
         }
 
         // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
-        let breakingVersion: PackageVersion = new PackageVersion('1.27.2');
-        if (userVersion.isGreaterThan(breakingVersion)) {
+        let oldVersion: PackageVersion = new PackageVersion('1.27.2');
+        if (userVersion.isGreaterThan(oldVersion)) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
                 try {
