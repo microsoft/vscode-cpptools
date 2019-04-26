@@ -17,11 +17,13 @@ import { CppSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
+import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
+import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
 
 let prevCrashFile: string;
@@ -419,12 +421,12 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+function installVsix(vsixLocation: string): Thenable<void> {
     let userVersion: PackageVersion = new PackageVersion(vscode.version);
 
      // 1.33.0 introduces workbench.extensions.installExtension
     let versionWithInstallVsixCommand: PackageVersion = new PackageVersion('1.33.0');
-    if (userVersion.isGreaterThan(versionWithInstallVsixCommand, 'insider')) {
+    if (userVersion.isGreaterThan(versionWithInstallVsixCommand)) {
         return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
     }
 
@@ -463,7 +465,7 @@ function installVsix(vsixLocation: string, updateChannel: string): Promise<void>
 
         // 1.28.0 changes the CLI for making installations
         let breakingVersion: PackageVersion = new PackageVersion('1.28.0');
-        if (userVersion.isGreaterThan(breakingVersion, 'insider')) {
+        if (userVersion.isGreaterThan(breakingVersion)) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
                 try {
@@ -568,7 +570,7 @@ async function suggestInsidersChannel(): Promise<void> {
     }
 }
 
-function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
+function applyUpdate(buildInfo: BuildInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
@@ -606,7 +608,7 @@ function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void>
                 break;
             }
             try {
-                await installVsix(vsixPath, updateChannel);
+                await installVsix(vsixPath);
             } catch (error) {
                 reject(error);
                 return;
@@ -648,7 +650,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     if (!buildInfo) {
         return; // No need to update.
     }
-    await applyUpdate(buildInfo, updateChannel);
+    await applyUpdate(buildInfo);
 }
 
 /*********************************************
