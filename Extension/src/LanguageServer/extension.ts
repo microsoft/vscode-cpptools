@@ -421,7 +421,15 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+function installVsix(vsixLocation: string): Thenable<void> {
+    let userVersion: PackageVersion = new PackageVersion(vscode.version);
+
+    // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
+    let lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
+    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand)) {
+        return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
+    }
+
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
@@ -455,21 +463,20 @@ function installVsix(vsixLocation: string, updateChannel: string): Promise<void>
             return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
-        // 1.28.0 changes the CLI for making installations
-        let userVersion: PackageVersion = new PackageVersion(vscode.version);
-        let breakingVersion: PackageVersion = new PackageVersion('1.28.0');
-        if (userVersion.isGreaterThan(breakingVersion, 'insider')) {
+        // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
+        let oldVersion: PackageVersion = new PackageVersion('1.27.2');
+        if (userVersion.isGreaterThan(oldVersion)) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
                 try {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
-                    
+
                     // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
                     const timer: NodeJS.Timer = setTimeout(() => {
                         process.kill();
                         reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
                     }, 30000);
-                    
+
                     process.on('exit', (code: number) => {
                         clearInterval(timer);
                         if (code !== 0) {
@@ -563,7 +570,7 @@ async function suggestInsidersChannel(): Promise<void> {
     }
 }
 
-function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
+function applyUpdate(buildInfo: BuildInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
@@ -601,7 +608,7 @@ function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void>
                 break;
             }
             try {
-                await installVsix(vsixPath, updateChannel);
+                await installVsix(vsixPath);
             } catch (error) {
                 reject(error);
                 return;
@@ -643,7 +650,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     if (!buildInfo) {
         return; // No need to update.
     }
-    await applyUpdate(buildInfo, updateChannel);
+    await applyUpdate(buildInfo);
 }
 
 /*********************************************
