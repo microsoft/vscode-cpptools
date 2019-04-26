@@ -1468,7 +1468,9 @@
     "ts-loader": "^5.3.3",
     "typescript": "^2.9.2",
     "vrsource-tslint-rules": "^5.8.3",
-    "vscode": "^1.1.33"
+    "vscode": "^1.1.33",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1"
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
@@ -1484,8 +1486,6 @@
     "vscode-debugprotocol": "~1.33.0",
     "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "5.1.1",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
     "yauzl": "~2.10.0"
   },
   "runtimeDependencies": [
