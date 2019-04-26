@@ -53,6 +53,18 @@
             "dependsOn": [
                 "TypeScript Compile"
             ]
+        },
+        {
+            "label": "Compile Dev",
+            "group": "build",
+            "isBackground": false,
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "compileDev"
+            ],
+            "problemMatcher": "$tsc-watch"
         }
     ]
 }
