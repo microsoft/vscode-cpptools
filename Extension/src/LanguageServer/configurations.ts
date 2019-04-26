@@ -173,7 +173,8 @@ export class CppProperties {
             this.propertiesFile = null;
         }
         
-        this.configFileWatcher = vscode.workspace.createFileSystemWatcher(path.join(this.configFolder, this.configurationGlobPattern));
+        let settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
+        this.configFileWatcher = vscode.workspace.createFileSystemWatcher(settingsPath);
         this.disposables.push(this.configFileWatcher);
         this.configFileWatcher.onDidCreate((uri) => {
             this.propertiesFile = uri;
@@ -187,7 +188,24 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidChange(() => {
-            this.handleConfigurationChange();
+            // If the file is one of the textDocument's vscode is tracking, we need to wait for an
+            // onDidChangeTextDocument event, or we may get old/cached contents when we open it.
+            let alreadyTracking: boolean = false;
+            for (let i: number = 0; i < vscode.workspace.textDocuments.length; i++) {
+                if (vscode.workspace.textDocuments[i].uri.fsPath === settingsPath) {
+                    alreadyTracking = true;
+                    break;
+                }
+            }
+            if (!alreadyTracking) {
+                this.handleConfigurationChange();
+            }
+        });
+
+        vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
+            if (e.document.uri.fsPath === settingsPath) {
+                this.handleConfigurationChange();
+            }
         });
 
         this.handleConfigurationChange();
