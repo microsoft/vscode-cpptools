@@ -461,6 +461,11 @@
             "<source-path>": "<target-path>"
           }
         },
+        "enableDebugHeap": {
+          "type": "boolean",
+          "description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+          "default": false
+        },
         "logging": {
           "type": "object",
           "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",

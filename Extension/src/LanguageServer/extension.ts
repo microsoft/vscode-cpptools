@@ -664,9 +664,11 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', onSelectConfigurationProvider));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', onEditConfigurationJSON));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', onEditConfigurationUI));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', onEnableSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', onDisableSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
@@ -674,6 +676,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -789,12 +792,23 @@ function onSelectConfigurationProvider(): void {
     }
 }
 
-function onEditConfiguration(): void {
+function onEditConfigurationJSON(): void {
     onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, null);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
+    }
+}
+
+function onEditConfigurationUI(): void {
+    onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, null);
+    if (!isFolderOpen()) {
+        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+    } else {
+        selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
     }
 }
 
@@ -808,11 +822,18 @@ function onAddToIncludePath(path: string): void {
     }
 }
 
-function onToggleSquiggles(): void {
+function onEnableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
+    settings.update<string>("errorSquiggles", "Enabled");
+}
+
+function onDisableSquiggles(): void {
+    onActivationEvent();
+    // This only applies to the active client.
+    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    settings.update<string>("errorSquiggles", "Disabled");
 }
 
 function onToggleIncludeFallback(): void {
@@ -858,6 +879,11 @@ function onTakeSurvey(): void {
 
 function onGetActiveConfigName(): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigName();
+}
+
+function onLogDiagnostics(): void {
+    onActivationEvent();
+    clients.ActiveClient.logDiagnostics();
 }
 
 function reportMacCrashes(): void {

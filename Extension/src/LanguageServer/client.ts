@@ -140,12 +140,17 @@ interface QueryTranslationUnitSourceResult {
     configDisposition: QueryTranslationUnitSourceConfigDisposition;
 }
 
+interface GetDiagnosticsResult {
+    diagnostics: string;
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
+const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void> = new RequestType<void, GetDiagnosticsResult, void, void>('cpptools/getDiagnostics');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -231,6 +236,7 @@ export interface Client {
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
+    logDiagnostics(): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
     getCompilerPath(): Thenable<string>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
@@ -252,6 +258,8 @@ export interface Client {
     handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
     handleConfigurationEditCommand(): void;
+    handleConfigurationEditJSONCommand(): void;
+    handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
     onInterval(): void;
     dispose(): Thenable<void>;
@@ -274,6 +282,7 @@ class DefaultClient implements Client {
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
+    private diagnosticsChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
@@ -648,17 +657,19 @@ class DefaultClient implements Client {
         });
     }
 
-    public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
-            let params: QueryTranslationUnitSourceParams = {
-                uri: document.uri.toString()
-            };
-            
-            let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-            if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
-                return Promise.resolve();
-            }
+    public async logDiagnostics(): Promise<void> {
+        let response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
+        if (!this.diagnosticsChannel) {
+            this.diagnosticsChannel = vscode.window.createOutputChannel("C/C++ Diagnostics");
+            this.disposables.push(this.diagnosticsChannel);
+        }
+        let header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
+        let version: string = `Version: ${util.packageJson.version}\n`;
+        this.diagnosticsChannel.appendLine(`${header}${version}${response.diagnostics}`);
+        this.diagnosticsChannel.show(false);
+    }
 
-            let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
+    public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
             let tokenSource: CancellationTokenSource = new CancellationTokenSource();
             let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
             if (providers.size === 0) {
@@ -671,6 +682,15 @@ class DefaultClient implements Client {
             }
 
             let providerName: string = providerId;
+        let params: QueryTranslationUnitSourceParams = {
+            uri: document.uri.toString()
+        };
+        let response: QueryTranslationUnitSourceResult = await this.requestWhenReady(() => this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params));
+        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
+            return Promise.resolve();
+        }
+
+        let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
             let configName: string = await this.getCurrentConfigName();
             const notReadyMessage: string = `${providerName} is not ready`;
             let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
@@ -1017,22 +1037,31 @@ class DefaultClient implements Client {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
                 ui.showConfigureIncludePathMessage(() => {
-                    let learnMorePanel: string = "Configuration Help";
+                    let configJSON: string = "Configure (JSON)";
+                    let configUI: string = "Configure (UI)";
                     let dontShowAgain: string = "Don't Show Again";
                     let fallbackMsg: string = this.configuration.VcpkgInstalled ?
                         "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
                         "Configure your IntelliSense settings to help find missing headers.";
-                    return vscode.window.showInformationMessage(fallbackMsg, learnMorePanel, dontShowAgain).then((value) => {
+                    return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then((value) => {
                         switch (value) {
-                            case learnMorePanel:
-                                let uri: vscode.Uri = vscode.Uri.parse(`https://go.microsoft.com/fwlink/?linkid=864631`);
-                                vscode.commands.executeCommand('vscode.open', uri);
+                            case configJSON:
+                                vscode.commands.getCommands(true).then((commands: string[]) => {
+                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                         vscode.commands.executeCommand("workbench.action.problems.focus");
+                                   }
+                                });
+                                this.handleConfigurationEditJSONCommand();
+                                telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, null);
+                                break;
+                            case configUI:
                                 vscode.commands.getCommands(true).then((commands: string[]) => {
                                     if (commands.indexOf("workbench.action.problems.focus") >= 0) {
                                         vscode.commands.executeCommand("workbench.action.problems.focus");
-                                    }
+                                }
                                 });
-                                this.handleConfigurationEditCommand();
+                                this.handleConfigurationEditUICommand();
+                                telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, null);
                                 break;
                             case dontShowAgain:
                                 showIntelliSenseFallbackMessage.Value = false;
@@ -1387,6 +1416,14 @@ class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
     }
 
+    public handleConfigurationEditJSONCommand(): void {
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditJSONCommand(vscode.window.showTextDocument));
+    }
+
+    public handleConfigurationEditUICommand(): void {
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditUICommand(vscode.window.showTextDocument));
+    }
+
     public handleAddToIncludePathCommand(path: string): void {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
@@ -1449,6 +1486,7 @@ class NullClient implements Client {
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    logDiagnostics(): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
@@ -1470,6 +1508,8 @@ class NullClient implements Client {
     handleConfigurationProviderSelectCommand(): void {}
     handleShowParsingCommands(): void {}
     handleConfigurationEditCommand(): void {}
+    handleConfigurationEditJSONCommand(): void {}
+    handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void {}
     onInterval(): void {}
     dispose(): Thenable<void> {

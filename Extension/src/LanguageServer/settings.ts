@@ -93,10 +93,11 @@ export class OtherSettings {
         this.resource = resource;
     }
 
-    public get editorTabSize(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("editor", this.resource).get("tabSize"); }
+    public get editorTabSize(): number { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files", null).get("associations"); }
     public get filesExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get searchExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
+    public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
     public set filesAssociations(value: any) {
          vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
