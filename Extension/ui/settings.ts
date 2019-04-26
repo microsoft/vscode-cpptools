@@ -55,7 +55,7 @@ class SettingsApp {
             return; 
         }
 
-        var x = <HTMLInputElement>document.getElementById(id);
+        const x: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
         this.vsCodeApi.postMessage({
             command: "change",
             key: id,
@@ -64,7 +64,7 @@ class SettingsApp {
     }
 
     private onMessageReceived(e: MessageEvent): void {
-        const message = e.data; // The json data that the extension sent
+        const message: any = e.data; // The json data that the extension sent
         switch (message.command) {
             case 'update':
                 this.update(message.config);
@@ -95,8 +95,7 @@ class SettingsApp {
 
             (<HTMLInputElement>document.getElementById(elementId.cStandard)).value = config.cStandard;
             (<HTMLInputElement>document.getElementById(elementId.cppStandard)).value = config.cppStandard;
-        }
-        finally {
+        } finally {
             this.updating = false;
         }
     }
