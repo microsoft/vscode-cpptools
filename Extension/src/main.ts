@@ -247,7 +247,9 @@ function sendTelemetry(info: PlatformInformation): boolean {
         util.setProgress(util.getProgressInstallSuccess());
         let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
         if (versionShown.Value < releaseNotesVersion) {
-            util.showReleaseNotes();
+            if (versionShown.Value !== versionShown.DefaultValue) {
+                util.showReleaseNotes();
+            }
             versionShown.Value = releaseNotesVersion;
         }
     }
