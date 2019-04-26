@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
@@ -26,7 +27,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
 
                 // Work around vscode treating ".C" as c, by adding this file name to file associations as cpp
                 if (document.uri.path.endsWith(".C")) {
-                    let fileName: string = document.uri.fsPath.split('\\').pop().split('/').pop();
+                    let fileName: string = path.basename(document.uri.fsPath);
                     let mappingString: string = fileName + "@" + document.uri.fsPath;
                     me.addFileAssociations(mappingString, false);
                 }
