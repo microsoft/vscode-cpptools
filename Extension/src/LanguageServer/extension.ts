@@ -424,9 +424,9 @@ function onInterval(): void {
 function installVsix(vsixLocation: string): Thenable<void> {
     let userVersion: PackageVersion = new PackageVersion(vscode.version);
 
-     // 1.33.0 introduces workbench.extensions.installExtension
-    let versionWithInstallVsixCommand: PackageVersion = new PackageVersion('1.33.0');
-    if (userVersion.isGreaterThan(versionWithInstallVsixCommand)) {
+    // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
+    let lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
+    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand)) {
         return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
     }
 
@@ -463,8 +463,8 @@ function installVsix(vsixLocation: string): Thenable<void> {
             return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
-        // 1.28.0 changes the CLI for making installations
-        let breakingVersion: PackageVersion = new PackageVersion('1.28.0');
+        // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
+        let breakingVersion: PackageVersion = new PackageVersion('1.27.2');
         if (userVersion.isGreaterThan(breakingVersion)) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
