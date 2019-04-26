@@ -263,6 +263,7 @@ export interface Client {
     handleAddToIncludePathCommand(path: string): void;
     onInterval(): void;
     dispose(): Thenable<void>;
+    addFileAssociations(fileAssociations: string, is_c: boolean): void;
 }
 
 export function createClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -959,7 +960,11 @@ class DefaultClient implements Client {
 
         // TODO: Move this code to a different place?
         if (cppSettings.autoAddFileAssociations && payload.navigation.startsWith("<def")) {
-            this.addFileAssociations(payload.navigation.substr(4));
+            let fileAssociations: string = payload.navigation.substr(4);
+            let is_c: boolean = fileAssociations.startsWith("c");
+            // Skip over rest of header: c>; or >;
+            fileAssociations = fileAssociations.substr(is_c ? 3 : 2);
+            this.addFileAssociations(fileAssociations, is_c);
             return;
         }
 
@@ -973,41 +978,41 @@ class DefaultClient implements Client {
         this.model.navigationLocation.Value = currentNavigation;
     }
 
-    private addFileAssociations(fileAssociations: string): void {
+    public addFileAssociations(fileAssociations: string, is_c: boolean): void {
         let settings: OtherSettings = new OtherSettings(this.RootUri);
         let assocs: any = settings.filesAssociations;
-        let is_c: boolean = fileAssociations.startsWith("c");
 
-        // Skip over rest of header: c>; or >;
-        fileAssociations = fileAssociations.substr(is_c ? 3 : 2);
         let filesAndPaths: string[] = fileAssociations.split(";");
         let foundNewAssociation: boolean = false;
-        for (let i: number = 0; i < filesAndPaths.length - 1; ++i) {
+        for (let i: number = 0; i < filesAndPaths.length; ++i) {
             let fileAndPath: string[] = filesAndPaths[i].split("@");
-            let file: string = fileAndPath[0];
-            let filePath: string = fileAndPath[1];
-            if ((file in assocs) || (("**/" + file) in assocs)) {
-                continue; // File already has an association.
-            }
-            let j: number = file.lastIndexOf('.');
-            if (j !== -1) {
-                let ext: string = file.substr(j);
-                if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs)) {
-                    continue; // Extension already has an association.
+            // Skip empty or malformed
+            if (fileAndPath.length === 2) {
+                let file: string = fileAndPath[0];
+                let filePath: string = fileAndPath[1];
+                if ((file in assocs) || (("**/" + file) in assocs)) {
+                    continue; // File already has an association.
                 }
-            }
-            let foundGlobMatch: boolean = false;
-            for (let assoc in assocs) {
-                if (minimatch(filePath, assoc)) {
-                    foundGlobMatch = true;
-                    break; // Assoc matched a glob pattern.
+                let j: number = file.lastIndexOf('.');
+                if (j !== -1) {
+                    let ext: string = file.substr(j);
+                    if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs)) {
+                        continue; // Extension already has an association.
+                    }
                 }
+                let foundGlobMatch: boolean = false;
+                for (let assoc in assocs) {
+                    if (minimatch(filePath, assoc)) {
+                        foundGlobMatch = true;
+                        break; // Assoc matched a glob pattern.
+                    }
+                }
+                if (foundGlobMatch) {
+                    continue;
+                }
+                assocs[file] = is_c ? "c" : "cpp";
+                foundNewAssociation = true;
             }
-            if (foundGlobMatch) {
-                continue;
-            }
-            assocs[file] = is_c ? "c" : "cpp";
-            foundNewAssociation = true;
         }
         if (foundNewAssociation) {
             settings.filesAssociations = assocs;
@@ -1517,4 +1522,5 @@ class NullClient implements Client {
         this.stringEvent.dispose();
         return Promise.resolve();
     }
+    addFileAssociations(fileAssociations: string, is_c: boolean): void {}
 }
