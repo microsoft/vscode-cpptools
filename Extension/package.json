@@ -41,7 +41,7 @@
   "activationEvents": [
     "*"
   ],
-  "main": "./out/src/main",
+  "main": "./dist/main",
   "contributes": {
     "problemMatchers": [
       {
@@ -1433,6 +1433,7 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
+    "compileDev": "webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
@@ -1441,8 +1442,8 @@
     "test": "gulp allTests",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "node ./src/Support/prepublish.js",
-    "watch": "tsc -watch -p ./"
+    "vscode:prepublish": "node ./tools/prepublish.js && webpack --mode production",
+    "watch": "webpack --watch --mode development"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",
@@ -1459,6 +1460,7 @@
     "tslint": "5.8.0",
     "tslint-microsoft-contrib": "5.0.1",
     "tslint-no-unused-expression-chai": "0.0.3",
+    "ts-loader": "^5.3.3",
     "typescript": "^2.9.2",
     "vrsource-tslint-rules": "^5.8.3",
     "vscode": "^1.1.33"
@@ -1472,11 +1474,13 @@
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
-    "vscode-cpptools": "2.1.1",
+    "vscode-cpptools": "^2.1.2",
     "vscode-debugadapter": "~1.33.0",
     "vscode-debugprotocol": "~1.33.0",
     "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "5.1.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
     "yauzl": "~2.10.0"
   },
   "runtimeDependencies": [
