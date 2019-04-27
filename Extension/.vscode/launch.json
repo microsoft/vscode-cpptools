@@ -13,9 +13,9 @@
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "TypeScript Compile",
+			"preLaunchTask": "Compile Dev",
 		},
 		{
 			"name": "Launch Tests",
