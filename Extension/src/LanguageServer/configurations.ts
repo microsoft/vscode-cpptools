@@ -941,8 +941,8 @@ export class CppProperties {
         // Validate includePath
         let includePathErrors: string[] = [];
         for (let includePath of this.CurrentConfiguration.includePath) {
-            let pathExists = true;
-            let resolvedIncludePath = this.resolvePath(includePath, isWindows);
+            let pathExists: boolean = true;
+            let resolvedIncludePath: string = this.resolvePath(includePath, isWindows);
             if (!resolvedIncludePath) {
                 continue;
             }
@@ -1088,7 +1088,7 @@ export class CppProperties {
                     continue;
                 }
 
-                let resolvedPath = this.resolvePath(curPath, isWindows);
+                let resolvedPath: string = this.resolvePath(curPath, isWindows);
                 if (!resolvedPath) {
                     continue;
                 }
