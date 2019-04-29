@@ -30,7 +30,7 @@ if (!process.env.CPPTOOLS_DEV && fs.existsSync('./node_modules')) {
 
 const tscCompileListStr = fs.readFileSync("./tscCompileList.txt").toString();
 
-tscCompileListStr.split(os.EOL).forEach(filePath => {
+tscCompileListStr.split(/\r?\n/).forEach(filePath => {
     if (!filePath.startsWith("#") && /\S/.test(filePath)) {
         compile(filePath);
     }
