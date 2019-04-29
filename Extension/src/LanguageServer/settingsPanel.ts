@@ -36,8 +36,7 @@ export class SettingsPanel {
         this.configValues = { name: undefined };
         this.disposable = vscode.Disposable.from(
             this.settingsPanelActivated,
-            this.configValuesChanged,
-            vscode.window.onDidChangeWindowState(this.onWindowStateChanged, this)
+            this.configValuesChanged
         );
     }
 
@@ -75,7 +74,8 @@ export class SettingsPanel {
             this.panel,
             this.panel.onDidDispose(this.onPanelDisposed, this),
             this.panel.onDidChangeViewState(this.onViewStateChanged, this),
-            this.panel.webview.onDidReceiveMessage(this.onMessageReceived, this)
+            this.panel.webview.onDidReceiveMessage(this.onMessageReceived, this),
+            vscode.window.onDidChangeWindowState(this.onWindowStateChanged, this)
         );
 
         this.panel.webview.html = this.getHtml();

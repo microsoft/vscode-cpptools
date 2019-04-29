@@ -699,11 +699,6 @@ export class CppProperties {
                 }
 
                 let fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
-                let filePath: vscode.Uri = vscode.Uri.file(fullPathToFile).with({ scheme: "untitled" });
-
-                let document: vscode.TextDocument = await vscode.workspace.openTextDocument(filePath);
-
-                let edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 if (this.configurationJson) {
                     this.resetToDefaultSettings(true);
                 }
@@ -718,17 +713,8 @@ export class CppProperties {
                 let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
                 delete this.configurationJson.configurations[0].knownCompilers;
 
-                edit.insert(document.uri, new vscode.Position(0, 0), JSON.stringify(this.configurationJson, null, 4));
-
+                await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, 4));
                 this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
-                await vscode.workspace.applyEdit(edit);
-
-                // Fix for issue 163
-                // https://github.com/Microsoft/vscppsamples/issues/163
-                // Save the file to disk so that when the user tries to re-open the file it exists.
-                // Before this fix the file existed but was unsaved, so we went through the same
-                // code path and reapplied the edit.
-                await document.save();
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
