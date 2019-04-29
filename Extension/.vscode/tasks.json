@@ -64,6 +64,9 @@
                 "run",
                 "compileDev"
             ],
+            "dependsOn": [
+                "TypeScript Compile"
+            ],
             "problemMatcher": "$tsc-watch"
         }
     ]
