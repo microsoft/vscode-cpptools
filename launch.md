@@ -194,3 +194,23 @@ _Note: core dump debugging is not supported with MinGw._
 
 * #### `sourceFileMap`
   This allows mapping of the compile time paths for source to local source locations. It is an object of key/value pairs and will resolve the first string-matched path. (example: `"sourceFileMap": { "/mnt/c": "c:\\" }` will map any path returned by the debugger that begins with `/mnt/c` and convert it to `c:\\`. You can have multiple mappings in the object but they will be handled in the order provided.)
+
+## Environment variable definitions file
+
+An environment variable definitions file is a simple text file containing key-value pairs in the form of `environment_variable=value`, with `#` used for comments. Multiline values are not supported.
+
+The `cppvsdbg` debugger configuration also contains an `envFile` property that allows you to easily set variables for debugging purposes.
+
+For example:
+
+**project.env file**
+
+```bash
+# project.env
+
+# Example environment with key as 'MYENVRIONMENTPATH' and value as C:\\Users\\USERNAME\\Project
+MYENVRIONMENTPATH=C:\\Users\\USERNAME\\Project
+
+# Variables with spaces
+SPACED_OUT_PATH="C:\\This Has Spaces\\Project"
+```
