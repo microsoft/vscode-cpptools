@@ -401,8 +401,9 @@ export class CppProperties {
         // Check if intelliSenseMode and compilerPath are compatible
         // cl.exe and msvc mode should be used together
         // Ignore if compiler path is not set or intelliSenseMode is not set
-        if (this.CurrentConfiguration.compilerPath === undefined || 
+        if (this.CurrentConfiguration.compilerPath === undefined ||
             this.CurrentConfiguration.compilerPath === "" ||
+            this.CurrentConfiguration.compilerPath === "${default}" ||
             this.CurrentConfiguration.intelliSenseMode === undefined || 
             this.CurrentConfiguration.intelliSenseMode === "" || 
             this.CurrentConfiguration.intelliSenseMode === "${default}")  {
