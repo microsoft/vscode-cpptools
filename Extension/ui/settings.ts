@@ -11,10 +11,10 @@ const elementId: { [key: string]: string } = {
     includePath: "includePath",
     defines: "defines",
     cStandard: "cStandard",
-    cppStandard: "cppStandard"
-    //TODO: validate input paths
-    // compilerPathInvalid: "compilerPathInvalid",
-    // includePathInvalid: "includePathInvalid"
+    cppStandard: "cppStandard",
+    compilerPathInvalid: "compilerPathInvalid",
+    intelliSenseModeInvalid: "intelliSenseModeInvalid",
+    includePathInvalid: "includePathInvalid"
 };
 
 interface VsCodeApi {
@@ -44,10 +44,6 @@ class SettingsApp {
 
         document.getElementById(elementId.cStandard).addEventListener("change", this.onChanged.bind(this, elementId.cStandard));
         document.getElementById(elementId.cppStandard).addEventListener("change", this.onChanged.bind(this, elementId.cppStandard));
-
-        //TODO: validate input paths
-        // document.getElementById(ElementId.compilerPathInvalid).style.visibility = "hidden";
-        // document.getElementById(ElementId.includePathInvalid).style.visibility = "hidden";
     }
 
     private onChanged(id: string): void {
@@ -66,20 +62,16 @@ class SettingsApp {
     private onMessageReceived(e: MessageEvent): void {
         const message: any = e.data; // The json data that the extension sent
         switch (message.command) {
-            case 'update':
-                this.update(message.config);
+            case 'updateConfig':
+                this.updateConfig(message.config);
                 break;
-            //TODO: validate input paths
-            // case 'validateCompilerPath':
-            //     this.validateInput(ElementId.compilerPathInvalid, message.invalid);
-            //     break;
-            // case 'validateIncludePath':
-            //     this.validateInput(ElementId.includePathInvalid, message.invalid);
-            //     break;
+            case 'updateErrors':
+                 this.updateErrors(message.errors);
+                 break;
         }
     }
 
-    private update(config: any): void {
+    private updateConfig(config: any): void {
         this.updating = true;
         try {
             (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = config.name;
@@ -100,10 +92,30 @@ class SettingsApp {
         }
     }
 
-    //TODO: validate input paths
-    // private validateInput(elementID: string, invalid: boolean): void {
-    //     document.getElementById(elementID).style.visibility = invalid ? "visible" : "hidden";
-    // }
+    private updateErrors(errors: any): void {
+        this.updating = true;
+        try {
+            this.showErrorWithInfo(elementId.intelliSenseModeInvalid, 
+                    errors.intelliSenseMode ? true : false, 
+                    errors.intelliSenseMode);
+
+            this.showErrorWithInfo(elementId.compilerPathInvalid, 
+                    errors.compilerPath ? true : false, 
+                    errors.compilerPath);
+
+            this.showErrorWithInfo(elementId.includePathInvalid, 
+                    errors.includePath ? true : false, 
+                    errors.includePath);
+        }
+        finally {
+            this.updating = false;
+        }
+    }
+
+    private showErrorWithInfo(elementID: string, show: boolean, errorInfo: string): void {
+         document.getElementById(elementID).style.visibility = show ? "visible" : "hidden";
+         document.getElementById(elementID).innerHTML = errorInfo ? errorInfo : "";
+    }
 }
 
 let app: SettingsApp = new SettingsApp();
