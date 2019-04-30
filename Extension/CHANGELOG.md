@@ -13,7 +13,6 @@
 * Add input validation to the configuration UI. [PR #3563](https://github.com/Microsoft/vscode-cpptools/pull/3563)
 * Add process ID and memory usage to `C/C++: Log Diagnostics` results.
 * Remove IntelliSense fallback code actions.
-* Fix crash on hover (due to `trim_string`).
 
 ### Bug Fixes
 * Work around issue with VS Code not treating `.C` files as C++ files [Microsoft/vscode#59369](https://github.com/Microsoft/vscode/issues/59369) -- `.C` files become associated by name in `files.associations`. [#2558](https://github.com/Microsoft/vscode-cpptools/issues/2558)
@@ -21,6 +20,8 @@
 * Fix backslashes getting added each time settings are saved. [#3526](https://github.com/Microsoft/vscode-cpptools/issues/3526)
 * Fix regression with some C++17 features with `msvc-x64` mode. [#3541](https://github.com/Microsoft/vscode-cpptools/issues/3541)
 * Fix `Go to Definition` giving no results when IntelliSense doesn't find the symbol. [#3549](https://github.com/Microsoft/vscode-cpptools/issues/3549)
+* Fix crash on hover (due to `trim_string`).
+* Fix randomly occurring crash (related to opening files while IntelliSense squiggles are pending).
 
 ## Version 0.23.0-insiders: April 23, 2019
 ### New Features
