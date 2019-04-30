@@ -1,5 +1,27 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.23.0-insiders2: April 30, 2019
+### New Features
+* Add support for .env files for cppvsdbg. [#3490](https://github.com/Microsoft/vscode-cpptools/issues/3490)
+
+### Minor Changes
+* Switch to using the `installExtension` command for offline/insider vsix installing (to reduce install failures). [#3408](https://github.com/Microsoft/vscode-cpptools/issues/3408)
+* Update configuration squiggle parsing to squiggle bad paths delimited by semicolons. [PR #3517](https://github.com/Microsoft/vscode-cpptools/pull/3517)
+* Update `Select Configurations` command to offer the `Edit Configurations (JSON)` option. [PR #3519](https://github.com/Microsoft/vscode-cpptools/pull/3519)
+* Update configuration UI to save changes after the UI changes focus. [#3524](https://github.com/Microsoft/vscode-cpptools/issues/3524)
+* Don't show release notes if the extension has never been installed before. [#3533](https://github.com/Microsoft/vscode-cpptools/issues/3533)
+* Add input validation to the configuration UI. [PR #3563](https://github.com/Microsoft/vscode-cpptools/pull/3563)
+* Add process ID and memory usage to Log Diagnostics.
+* Remove IntelliSense fallback code actions.
+* Fix crash on hover (due to trim_string).
+
+### Bug Fixes
+* Work around issue with VS Code not treating .C files as C++ files [Microsoft/vscode#59369](https://github.com/Microsoft/vscode/issues/59369) -- .C files become associated by name in files.associations setting. [#2558](https://github.com/Microsoft/vscode-cpptools/issues/2558)
+* Fix "Extension causes high cpu load" due to module loading. [#3213](https://github.com/Microsoft/vscode-cpptools/issues/3213)
+* Fixed issues with backslashes getting added (re-escaped) each time settings are saved. [#3526](https://github.com/Microsoft/vscode-cpptools/issues/3526)
+* Fix regression with C++17 with cl.exe. [#3541](https://github.com/Microsoft/vscode-cpptools/issues/3541)
+* Fix `Go to Definition` giving no results when IntelliSense doesn't find the symbol. [#3549](https://github.com/Microsoft/vscode-cpptools/issues/3549)
+
 ## Version 0.23.0-insiders: April 23, 2019
 ### New Features
 * Add a configuration UI editor to edit IntelliSense settings defined in the underlying `c_cpp_properties.json` file. [PR #3479](https://github.com/Microsoft/vscode-cpptools/pull/3479), [PR #3487](https://github.com/Microsoft/vscode-cpptools/pull/3487)
