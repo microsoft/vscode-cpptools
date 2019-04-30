@@ -967,7 +967,7 @@ export class CppProperties {
 
             // Check if path is a directory
             if (!util.checkDirectoryExistsSync(resolvedIncludePath)) {
-                let message: string = `Path is not a directory: "${resolvedIncludePath}"`;
+                let message: string = `Path is not a directory: ${resolvedIncludePath}`;
                 includePathErrors.push(message);
             }
         }
