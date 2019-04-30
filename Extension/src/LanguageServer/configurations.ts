@@ -731,8 +731,7 @@ export class CppProperties {
                 let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
                 delete this.configurationJson.configurations[0].knownCompilers;
 
-                let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
-                await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, otherSettings.editorTabSize));
+                await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, 4));
                 this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
@@ -1265,8 +1264,7 @@ export class CppProperties {
 
     private writeToJson(): void {
         console.assert(this.propertiesFile);
-        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
-        fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, otherSettings.editorTabSize));
+        fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
     }
 
     public checkCppProperties(): void {
