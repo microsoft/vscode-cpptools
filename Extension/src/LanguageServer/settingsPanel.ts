@@ -40,7 +40,7 @@ export class SettingsPanel {
         );
     }
 
-    public createOrShow(activeConfiguration: config.Configuration): void {
+    public createOrShow(activeConfiguration: config.Configuration, errors: config.ConfigurationErrors): void {
         const column: vscode.ViewColumn = vscode.window.activeTextEditor
                 ? vscode.window.activeTextEditor.viewColumn
                 : undefined;
@@ -80,7 +80,7 @@ export class SettingsPanel {
 
         this.panel.webview.html = this.getHtml();
 
-        this.updateWebview(activeConfiguration);
+        this.updateWebview(activeConfiguration, errors);
     }
 
     public get SettingsPanelActivated(): vscode.Event<void> { 
@@ -95,18 +95,17 @@ export class SettingsPanel {
         return this.configValues;
     }
 
-    public updateConfigUI(configuration: config.Configuration): void {
+    public updateConfigUI(configuration: config.Configuration, errors: config.ConfigurationErrors): void {
         if (this.panel) {
-            this.updateWebview(configuration);
+            this.updateWebview(configuration, errors);
         }
     }
 
-    //TODO: validate input paths
-    // public validatePaths(invalid: boolean) {
-    //     if (this.panel) {
-    //         this.panel.webview.postMessage({ command: 'validateCompilerPath', invalid: invalid });
-    //      }
-    // }
+    public updateErrors(errors: config.ConfigurationErrors): void {
+        if (this.panel) {
+            this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+        }
+    }
 
     public dispose(): void {
         // Clean up resources
@@ -128,12 +127,13 @@ export class SettingsPanel {
         }
     }
 
-    private updateWebview(configuration: config.Configuration): void {
+    private updateWebview(configuration: config.Configuration, errors: config.ConfigurationErrors): void {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-            // Send a message to the webview to update the values
-           this.panel.webview.postMessage({ command: 'update', config: this.configValues });
+            // Send a message to the webview to update the values and errors
+           this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
+           this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
         }
     }
 
