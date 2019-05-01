@@ -414,7 +414,7 @@ export class CppProperties {
     }
 
     public addToIncludePathCommand(path: string): void {
-        this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+        this.handleConfigurationEditCommand(() => {
             telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
@@ -424,13 +424,13 @@ export class CppProperties {
             config.includePath.splice(config.includePath.length, 0, path);
             this.writeToJson();
             this.handleConfigurationChange();
-        });
+        }, null);
     }
 
     public updateCustomConfigurationProvider(providerId: string): Thenable<void> {
         return new Promise<void>((resolve) => {
             if (this.propertiesFile) {
-                this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+                this.handleConfigurationEditJSONCommand(() => {
                     this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
                     let config: Configuration = this.CurrentConfiguration;
                     if (providerId) {
@@ -441,7 +441,7 @@ export class CppProperties {
                     this.writeToJson();
                     this.handleConfigurationChange();
                     resolve();
-                });
+                }, null);
             } else {
                 let settings: CppSettings = new CppSettings(this.rootUri);
                 if (providerId) {
@@ -456,22 +456,22 @@ export class CppProperties {
     }
 
     public setCompileCommands(path: string): void {
-        this.handleConfigurationEditCommand((document: vscode.TextDocument) => {
+        this.handleConfigurationEditJSONCommand(() => {
             this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             config.compileCommands = path;
             this.writeToJson();
             this.handleConfigurationChange();
-        });
+        }, null);
     }
 
     public select(index: number): Configuration {
         if (index === this.configurationJson.configurations.length) {
-            this.handleConfigurationEditUICommand(vscode.window.showTextDocument);
+            this.handleConfigurationEditUICommand(null, vscode.window.showTextDocument);
             return;
         }
         if (index === this.configurationJson.configurations.length + 1) {
-            this.handleConfigurationEditJSONCommand(vscode.window.showTextDocument);
+            this.handleConfigurationEditJSONCommand(null, vscode.window.showTextDocument);
             return;
         }
 
@@ -611,28 +611,36 @@ export class CppProperties {
         }
     }
 
-    public handleConfigurationEditCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+    public handleConfigurationEditCommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
         let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
         if (otherSettings.settingsEditor === "ui") {
-            this.handleConfigurationEditUICommand(onSuccess);
+            this.handleConfigurationEditUICommand(onCreation, showDocument);
         } else {
-            this.handleConfigurationEditJSONCommand(onSuccess);
+            this.handleConfigurationEditJSONCommand(onCreation, showDocument);
         }
     }
 
-    public handleConfigurationEditJSONCommand(onSuccess: (document: vscode.TextDocument) => void): void {
+    public handleConfigurationEditJSONCommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             console.assert(this.propertiesFile);
+            if (onCreation) {
+                onCreation();
+            }
             // Directly open the json file
             vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                onSuccess(document);
+                if (showDocument) {
+                    showDocument(document);
+                }
             });
         });
     }
 
-    public handleConfigurationEditUICommand(onSuccess: (document: vscode.TextDocument) => void): void {
+    public handleConfigurationEditUICommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             if (this.propertiesFile) {
+                if (onCreation) {
+                    onCreation();
+                }
                 if (this.parsePropertiesFile(false)) {
                     // Parse successful, show UI
                     if (this.settingsPanel === undefined) {
@@ -647,7 +655,9 @@ export class CppProperties {
                 } else {
                     // Parse failed, open json file
                     vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                        onSuccess(document);
+                        if (showDocument) {
+                            showDocument(document);
+                        }
                     });
                 }
             }

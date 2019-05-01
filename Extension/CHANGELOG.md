@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.23.0-insiders2: April 30, 2019
+## Version 0.23.0-insiders2: May 1, 2019
 ### New Features
 * Add support for `.env` files for `cppvsdbg`. [#3490](https://github.com/Microsoft/vscode-cpptools/issues/3490)
 
@@ -20,6 +20,8 @@
 * Fix backslashes getting added each time settings are saved. [#3526](https://github.com/Microsoft/vscode-cpptools/issues/3526)
 * Fix regression with some C++17 features with `msvc-x64` mode. [#3541](https://github.com/Microsoft/vscode-cpptools/issues/3541)
 * Fix `Go to Definition` giving no results when IntelliSense doesn't find the symbol. [#3549](https://github.com/Microsoft/vscode-cpptools/issues/3549)
+* Fix configuration squiggles with trailing backslashes. [PR #3573](https://github.com/Microsoft/vscode-cpptools/pull/3573)
+* Fix `includePath` code actions, configuration prompts, and the `C/C++: Change configuration provider...` command. [PR #3575](https://github.com/Microsoft/vscode-cpptools/pull/3575)
 * Fix crash on hover (that could occur when document comments have blank lines).
 * Fix randomly occurring crash (that could occur when opening files while IntelliSense squiggles are pending).
 
