@@ -21,7 +21,7 @@
 * Fix regression with some C++17 features with `msvc-x64` mode. [#3541](https://github.com/Microsoft/vscode-cpptools/issues/3541)
 * Fix `Go to Definition` giving no results when IntelliSense doesn't find the symbol. [#3549](https://github.com/Microsoft/vscode-cpptools/issues/3549)
 * Fix configuration squiggles with trailing backslashes. [PR #3573](https://github.com/Microsoft/vscode-cpptools/pull/3573)
-* Fix `includePath` code actions, configuration prompts, and the `C/C++: Change configuration provider...` command. [PR #3575](https://github.com/Microsoft/vscode-cpptools/pull/3575)
+* Fix `includePath` code actions, configuration prompts, and the `C/C++: Change configuration provider...` command. [PR #3576](https://github.com/Microsoft/vscode-cpptools/pull/3576)
 * Fix crash on hover (that could occur when document comments have blank lines).
 * Fix randomly occurring crash (that could occur when opening files while IntelliSense squiggles are pending).
 
