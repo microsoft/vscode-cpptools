@@ -1007,6 +1007,9 @@ export class CppProperties {
             // Get the text of the current configuration.
             let curText: string = document.getText();
             let curTextStartOffset: number = 0;
+            if (!this.CurrentConfiguration.name) {
+                return;
+            }
             const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(this.CurrentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
