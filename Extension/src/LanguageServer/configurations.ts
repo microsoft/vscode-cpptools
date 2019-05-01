@@ -768,8 +768,7 @@ export class CppProperties {
                         }
                         newResults += "\\";
                         lastWasBackslash = true;
-                    }
-                    else {
+                    } else {
                         if (lastWasBackslash && (lastBackslashWasEscaped || (readResults[i] !== '"'))) {
                             newResults += "\\";
                         }
