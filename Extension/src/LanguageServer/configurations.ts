@@ -762,13 +762,10 @@ export class CppProperties {
             }
 
             if (handleSquiggles) {
-                // Replace all \<escape character> with \\<character>.
+                // Replace all \<escape character> with \\<character>, except for \"
                 // Otherwise, the JSON.parse result will have the \<escape character> missing.
-                readResults = readResults.replace(/\\/g, '\\\\'); 
-                readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \". 
-                readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to do it again for \\". 
+                readResults = util.escapeForSquiggles(readResults);
             }
-
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
