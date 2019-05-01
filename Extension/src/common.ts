@@ -802,8 +802,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
     return { compilerPath, additionalArgs };
 }
 
-export function escapeForSquiggles(s: string): string
-{
+export function escapeForSquiggles(s: string): string {
     // Replace all \<escape character> with \\<character>, except for \"
     // Otherwise, the JSON.parse result will have the \<escape character> missing.
     let newResults: string = "";
