@@ -961,39 +961,41 @@ export class CppProperties {
 
         // Validate includePath
         let includePathErrors: string[] = [];
-        for (let includePath of this.CurrentConfiguration.includePath) {
-            let pathExists: boolean = true;
-            let resolvedIncludePath: string = this.resolvePath(includePath, isWindows);
-            if (!resolvedIncludePath) {
-                continue;
-            }
+        if (this.CurrentConfiguration.includePath) {
+            for (let includePath of this.CurrentConfiguration.includePath) {
+                let pathExists: boolean = true;
+                let resolvedIncludePath: string = this.resolvePath(includePath, isWindows);
+                if (!resolvedIncludePath) {
+                    continue;
+                }
 
-            // Check if resolved path exists
-            if (!fs.existsSync(resolvedIncludePath)) {
-                // Check for relative path if resolved path does not exists
-                const relativePath: string = this.rootUri.fsPath + path.sep + resolvedIncludePath;
-                if (!fs.existsSync(relativePath)) {
-                    pathExists = false;
-                } else {
-                    resolvedIncludePath = relativePath;
+                // Check if resolved path exists
+                if (!fs.existsSync(resolvedIncludePath)) {
+                    // Check for relative path if resolved path does not exists
+                    const relativePath: string = this.rootUri.fsPath + path.sep + resolvedIncludePath;
+                    if (!fs.existsSync(relativePath)) {
+                        pathExists = false;
+                    } else {
+                        resolvedIncludePath = relativePath;
+                    }
+                }
+
+                if (!pathExists) {
+                    let message: string = `Cannot find: ${resolvedIncludePath}`;
+                    includePathErrors.push(message);
+                    continue;
+                }
+
+                // Check if path is a directory
+                if (!util.checkDirectoryExistsSync(resolvedIncludePath)) {
+                    let message: string = `Path is not a directory: ${resolvedIncludePath}`;
+                    includePathErrors.push(message);
                 }
             }
 
-            if (!pathExists) {
-                let message: string = `Cannot find: ${resolvedIncludePath}`;
-                includePathErrors.push(message);
-                continue;
+            if (includePathErrors.length > 0) {
+                errors.includePath = includePathErrors.join('\n');
             }
-
-            // Check if path is a directory
-            if (!util.checkDirectoryExistsSync(resolvedIncludePath)) {
-                let message: string = `Path is not a directory: ${resolvedIncludePath}`;
-                includePathErrors.push(message);
-            }
-        }
-
-        if (includePathErrors.length > 0) {
-            errors.includePath = includePathErrors.join('\n');
         }
 
         // Validate intelliSenseMode
@@ -1026,6 +1028,9 @@ export class CppProperties {
             // Get the text of the current configuration.
             let curText: string = document.getText();
             let curTextStartOffset: number = 0;
+            if (!this.CurrentConfiguration.name) {
+                return;
+            }
             const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(this.CurrentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
