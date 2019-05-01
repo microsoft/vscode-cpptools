@@ -752,13 +752,34 @@ export class CppProperties {
             }
 
             if (handleSquiggles) {
-                // Replace all \<escape character> with \\<character>.
+                // Replace all \<escape character> with \\<character>, except for \"
                 // Otherwise, the JSON.parse result will have the \<escape character> missing.
-                readResults = readResults.replace(/\\/g, '\\\\'); 
-                readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to revert the change to \". 
-                readResults = readResults.replace(/\\\\"/g, '\\"'); // Need to do it again for \\". 
+                let newResults: string = "";
+                let lastWasBackslash: Boolean = false;
+                let lastBackslashWasEscaped: Boolean = false;
+                for (let i: number = 0; i < readResults.length; i++) {
+                    if (readResults[i] === '\\') {
+                        if (lastWasBackslash) {
+                            newResults += "\\";
+                            lastBackslashWasEscaped = !lastBackslashWasEscaped;
+                        }
+                        else {
+                            lastBackslashWasEscaped = false;
+                        }
+                        newResults += "\\";
+                        lastWasBackslash = true;
+                    }
+                    else {
+                        if (lastWasBackslash && (lastBackslashWasEscaped || (readResults[i] !== '"'))) {
+                            newResults += "\\";
+                        }
+                        lastWasBackslash = false;
+                        lastBackslashWasEscaped  = false;
+                        newResults += readResults[i];
+                    }
+                }
+                readResults = newResults;
             }
-
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
