@@ -15,3 +15,21 @@ jobs:
       vmImage: 'ubuntu-16.04'
 
 - template: Extension/jobs/build.windows.yml
+
+- job: WebackCompile
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: NodeTool@0
+    displayName: 'Use Node 8.x'
+    inputs:
+      versionSpec: 8.x
+
+  - script: npm install
+    displayName: "Install Dependencies"
+    workingDirectory: '$(Build.SourcesDirectory)/Extension'
+
+  - script: npm run compile
+    displayName: "Compile with Webpack"
+    workingDirectory: '$(Build.SourcesDirectory)/Extension'
+      

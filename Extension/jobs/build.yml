@@ -16,7 +16,7 @@ jobs:
     displayName: "Install Dependencies"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
       
-  - script: npm run compile
+  - script: npm run pretest
     displayName: "Compile Sources"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
