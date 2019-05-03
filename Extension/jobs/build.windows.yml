@@ -16,8 +16,8 @@ jobs:
   - script: npm install
     displayName: "Install Dependencies"
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
-      
-  - script: npm run pretest
+
+  - script: npm run compile
     displayName: "Compile Sources"
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
@@ -33,6 +33,10 @@ jobs:
     displayName: 'Run unit tests'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
     continueOnError: true
+
+  - script: npm run pretest
+    displayName: "Compile Test Sources"
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
   - script: 'node node_modules/vscode/bin/test'
     displayName: 'Run languageServer integration tests'

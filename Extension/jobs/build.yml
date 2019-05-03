@@ -15,8 +15,8 @@ jobs:
   - script: npm install
     displayName: "Install Dependencies"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
-      
-  - script: npm run pretest
+
+  - script: npm run compile
     displayName: "Compile Sources"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
@@ -38,6 +38,10 @@ jobs:
       /usr/bin/Xvfb :10 -ac >> /tmp/Xvfb.out 2>&1 &
       disown -ar
     displayName: 'Start xvfb'
+
+  - script: npm run pretest
+    displayName: "Compile Test Sources"
+    workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
   - script: 'node node_modules/vscode/bin/test'
     displayName: 'Run languageServer integration tests'

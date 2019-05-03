@@ -16,7 +16,7 @@ jobs:
 
 - template: Extension/jobs/build.windows.yml
 
-- job: WebackCompile
+- job: WebpackCompile
   pool:
     vmImage: 'vs2017-win2016'
   steps:

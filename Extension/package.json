@@ -1441,7 +1441,7 @@
     "compileDev": "webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "pretest": "tsc -p ./ && node ./tools/prepublish.js",
+    "pretest": "tsc -p ./",
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
