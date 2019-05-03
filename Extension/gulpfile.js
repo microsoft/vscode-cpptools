@@ -29,24 +29,6 @@ gulp.task('unitTests', (done) => {
         });
 });
 
-gulp.task('integrationTests', (done) => {
-    env.set({
-            CODE_TESTS_PATH: "./out/test/integrationTests",
-            CODE_TESTS_WORKSPACE: "./test/integrationTests/testAssets/SimpleCppProject"
-        });
-
-    return gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
-        .pipe(mocha({ ui: "tdd" }))
-        .once('error', err => {
-            done();
-            process.exit(1);
-        })
-        .once('end', () => {
-            done();
-            process.exit();
-        });
-});
-
 /// Misc Tasks
 const allTypeScript = [
     'src/**/*.ts',
