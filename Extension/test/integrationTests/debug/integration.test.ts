@@ -18,7 +18,7 @@ suite(`Debug Integration Test: `, function(): void {
         }
     });
  
-    test("Starting (gdb) Launch from the workspace root should create an Active Debug Session", async function() { 
+    test("Starting (gdb) Launch from the workspace root should create an Active Debug Session", async () => { 
         // If it is failing on startDebugging. Investigate the SimpleCppProject's tasks.json or launch.json.
         await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "(gdb) Launch");
 
