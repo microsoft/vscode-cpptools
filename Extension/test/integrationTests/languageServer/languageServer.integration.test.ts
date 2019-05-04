@@ -13,6 +13,8 @@ import * as config from '../../../src/LanguageServer/configurations';
 import { getActiveClient } from '../../../src/LanguageServer/extension';
 import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
 
+const defaultTimeout: number = 10000;
+
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> { 
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
@@ -189,7 +191,7 @@ suite("extensibility tests v2", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, 2500);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -264,7 +266,7 @@ suite("extensibility tests v1", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, 2500);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -336,7 +338,7 @@ suite("extensibility tests v0", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, 3500);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
