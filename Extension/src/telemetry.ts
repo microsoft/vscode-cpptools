@@ -30,23 +30,25 @@ export function deactivate(): void {
 }
 
 export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): void {
-    const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
     if (telemetryReporter) {
+        const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
         telemetryReporter.sendTelemetryEvent(eventNamePrefix + eventName, properties);
     }
 }
 
 export function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
-    const eventNamePrefix: string = "C_Cpp/LanguageServer/";
     if (telemetryReporter) {
+        const eventNamePrefix: string = "C_Cpp/LanguageServer/";
         telemetryReporter.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
     }
 }
 
 function createReporter(): TelemetryReporter {
-    let packageInfo: IPackageInfo = getPackageInfo();
-    if (packageInfo && packageInfo.aiKey) {
-        return new TelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey);
+    if (util.extensionContext) {
+        let packageInfo: IPackageInfo = getPackageInfo();
+        if (packageInfo && packageInfo.aiKey) {
+            return new TelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey);
+        }
     }
     return null;
 }

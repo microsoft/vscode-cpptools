@@ -62,9 +62,9 @@ export class SettingsPanel {
 
                 // Restrict the webview to only loading content from these directories
                 localResourceRoots: [
-                    vscode.Uri.file(util.extensionContext.extensionPath), 
-                    vscode.Uri.file(path.join(util.extensionContext.extensionPath, 'ui')), 
-                    vscode.Uri.file(path.join(util.extensionContext.extensionPath, 'out', 'ui'))]
+                    vscode.Uri.file(util.extensionPath), 
+                    vscode.Uri.file(path.join(util.extensionPath, 'ui')), 
+                    vscode.Uri.file(path.join(util.extensionPath, 'out', 'ui'))]
             }
         );
 
@@ -201,7 +201,7 @@ export class SettingsPanel {
 
         content = content.replace(
             /{{root}}/g, 
-            vscode.Uri.file(util.extensionContext.extensionPath)
+            vscode.Uri.file(util.extensionPath)
             .with({ scheme: 'vscode-resource' })
             .toString());
 
