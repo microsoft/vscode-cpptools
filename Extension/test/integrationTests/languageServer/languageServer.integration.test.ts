@@ -13,7 +13,7 @@ import * as config from '../../../src/LanguageServer/configurations';
 import { getActiveClient } from '../../../src/LanguageServer/extension';
 import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
 
-const defaultTimeout: number = 60000;
+const defaultTimeout: number = 10000;
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> { 
