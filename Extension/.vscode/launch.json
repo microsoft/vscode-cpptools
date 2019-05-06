@@ -53,8 +53,8 @@
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
-            ],
-            "preLaunchTask": "Pretest"
+			],
+			"preLaunchTask": "Pretest"
 		},
 	]
 }
