@@ -121,4 +121,8 @@ export class CppTools implements CppToolsTestApi {
     public getTestHook(): CppToolsTestHook {
         return test.getTestHook();
     }
+
+    public getClients() {
+        return LanguageServer.getClients();
+    }
 }
