@@ -205,22 +205,20 @@
                         <tr>
                             <td>
                                 <div>
-                                    <h2 class="caption">March 2019 Update</h2>
-                                    <div>Thank you for installing the C/C++ extension! We're excited to announce the following features in the March update:<br/>
-                                        <h3 style="font-weight: 600">IntelliSense caching</h3>
-                                        The extension will now cache header information to improve IntelliSense speed for your code files.<br/>
+                                    <h2 class="caption">May 2019 Update</h2>
+                                    <div>Thank you for installing the C/C++ extension! We're excited to announce the following features in the May update:<br/>
+                                        <h3 style="font-weight: 600">IntelliSense configuration settings editor UI</h3>
+                                        The extension now has a UI editor to edit basic IntelliSense configuration settings defined in the underlying <code>c_cpp_properties.json</code> file.<br/>
                                         <br/>
-                                        <em style="font-weight: 600">Please Note:</em> The extension writes the cache to disk in order to achieve this performance improvement. By default the cache files will be stored in your workspace
-                                        folder's ".vscode" folder, but you can change this location by using the <code>"C_Cpp.intelliSenseCachePath"</code> setting. You can also control how much disk space can be
-                                        used for the cache with the <code>"C_Cpp.intelliSenseCacheSize"</code> setting. The default is 5120 MB as the caches for individual translation units can be large,
-                                        depending on the size and number of included headers.<br/>
-                                        <h3 style="font-weight: 600">Build and debug the active source file</h3>
-                                        We added a command to help you generate build and debug tasks for single code files. Since this feature writes out tasks.json and launch.json files, it currently requires
-                                        that a workspace folder be opened in VS Code first. After that, you can press F5 or select the command from the context menu to configure the tasks or kick off a build and debug
-                                        session.<br/>
-                                        <h3 style="font-weight: 600">Configuration squiggles</h3>
-                                        We added additional validation to the <code>c_cpp_properties.json</code> file to assist in diagnosing potential configuration mistakes. They will show up as problems in the
-                                        problems window.<br/>
+                                        You can get to the IntelliSense configuration settings editor UI through the command palette (Ctrl+Shift+P) and running the <code>C/C++: Edit configurations (UI)</code> command.
+                                        The <code>c_cpp_properties.json</code> file can be opened by running the <code>C/C++: Edit configurations (JSON)</code> command.
+                                        <br/>
+                                        <br/>
+                                        <em style="font-weight: 600">Please Note:</em> When configuring IntelliSense for the first time, VS Code will open the UI editor or JSON file based on your <code>workbench.settings.editor</code> setting.
+                                        If <code>workbench.settings.editor</code> is set to “ui”, then the UI editor will open by default, and if it is set to “json”, then the JSON file will open by default. You can view that setting under VS Code preferences → settings → “Workbench Settings Editor”.<br/>
+
+                                        <h3 style="font-weight: 600">Log diagnostics command</h3>
+                                        We added the command <code>C/C++: Log Diagnostics</code> to help diagnose IntelliSense issues. Running the command shows IntelliSense information of the current translation unit that is associated with the active file.<br/>
                                         <br/>
                                         <br/>
                                         Additional features and bug fixes are detailed in the <a href="https://github.com/Microsoft/vscode-cpptools/releases">full release notes</a>.</div>
@@ -246,9 +244,9 @@
                             <td>
                                 <div>
                                     <h3 class="caption">Blog Posts</h3>
+                                    <div><a href="https://devblogs.microsoft.com/cppblog/vscode-cpp-may-2019-update/">May 2019 Update</a></div>
+                                    <div><a href="https://devblogs.microsoft.com/cppblog/visual-studio-code-c-c-extension-march-2019-update/">March 2019 Update</a></div>
                                     <div><a href="https://devblogs.microsoft.com/cppblog/vs-code-cpp-extension-january-2019-update/">January 2019 Update</a></div>
-                                    <div><a href="https://devblogs.microsoft.com/cppblog/visual-studio-code-cpp-extension-october-2018-update-and-a-simplified-insiders-program/">October 2018 Update</a></div>
-                                    <div><a href="https://devblogs.microsoft.com/cppblog/visual-studio-code-c-c-extension-august-2018-update/">August 2018 Update</a></div>
                                 </div>
                             </td>
                         </tr>
