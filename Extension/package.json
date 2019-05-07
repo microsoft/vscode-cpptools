@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.22.1",
+  "version": "0.23.0",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -41,7 +41,7 @@
   "activationEvents": [
     "*"
   ],
-  "main": "./out/src/main",
+  "main": "./dist/main",
   "contributes": {
     "problemMatchers": [
       {
@@ -77,13 +77,13 @@
         "C_Cpp.clang_format_style": {
           "type": "string",
           "default": "file",
-          "description": "Coding style, currently supports: Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit. Use \"file\" to load the style from a .clang-format file in the current or parent directory. Use \"{key: value, ...}\" to set specific parameters, e.g.: \"{ BasedOnStyle: LLVM, IndentWidth: 8 }\"",
+          "description": "Coding style, currently supports: Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit. Use \"file\" to load the style from a .clang-format file in the current or parent directory. Use {key: value, ...} to set specific parameters. For example, the \"Visual Studio\" style is similar to: { BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4 }",
           "scope": "resource"
         },
         "C_Cpp.clang_format_fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
-          "description": "Name of the predefined style used as a fallback in case clang-format is invoked with style \"file\" but the .clang-format file is not found. Possible values are Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit, none, or use \"{key: value, ...}\" to set specific parameters, e.g.: \"{ BasedOnStyle: LLVM, IndentWidth: 8 }\"",
+          "description": "Name of the predefined style used as a fallback in case clang-format is invoked with style \"file\" but the .clang-format file is not found. Possible values are Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit, none, or use {key: value, ...} to set specific parameters. For example, the \"Visual Studio\" style is similar to: { BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4 }",
           "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
@@ -117,7 +117,7 @@
             "Enabled",
             "Disabled"
           ],
-          "default": "Enabled",
+          "default": "Disabled",
           "description": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing #include errors.",
           "scope": "resource"
         },
@@ -135,10 +135,11 @@
           "type": "string",
           "enum": [
             "Enabled",
-            "Disabled"
+            "Disabled",
+            "EnabledIfIncludesResolve"
           ],
-          "default": "Enabled",
-          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. Warnings about #includes that could not be located will always be reported to the editor. This setting is ignored by the Tag Parser engine.",
+          "default": "EnabledIfIncludesResolve",
+          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. This setting is ignored by the Tag Parser engine.",
           "scope": "resource"
         },
         "C_Cpp.dimInactiveRegions": {
@@ -470,6 +471,15 @@
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
           "scope": "resource"
         },
+        "C_Cpp.default.enableConfigurationSquiggles": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null,
+          "description": "Controls whether the extension will report errors detected in c_cpp_properties.json.",
+          "scope": "resource"
+        },
         "C_Cpp.updateChannel": {
           "type": "string",
           "enum": [
@@ -500,8 +510,13 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ConfigurationEdit",
-        "title": "%c_cpp.command.configurationEdit.title%",
+        "command": "C_Cpp.ConfigurationEditJSON",
+        "title": "%c_cpp.command.configurationEditJSON.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.ConfigurationEditUI",
+        "title": "%c_cpp.command.configurationEditUI.title%",
         "category": "C/C++"
       },
       {
@@ -525,8 +540,13 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ToggleErrorSquiggles",
-        "title": "%c_cpp.command.toggleErrorSquiggles.title%",
+        "command": "C_Cpp.EnableErrorSquiggles",
+        "title": "%c_cpp.command.enableErrorSquiggles.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.DisableErrorSquiggles",
+        "title": "%c_cpp.command.disableErrorSquiggles.title%",
         "category": "C/C++"
       },
       {
@@ -572,6 +592,11 @@
       {
         "command": "C_Cpp.BuildAndDebugActiveFile",
         "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.LogDiagnostics",
+        "title": "%c_cpp.command.logDiagnostics.title%",
         "category": "C/C++"
       }
     ],
@@ -1176,6 +1201,11 @@
                 },
                 "default": []
               },
+              "envFile": {
+                "type": "string",
+                "description": "Absolute path to a file containing environment variable definitions. These file has key value pairs sepearted by an equals sign per line. E.g. KEY=VALUE",
+                "default": "${workspaceFolder}/.env"
+              },
               "symbolSearchPath": {
                 "type": "string",
                 "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
@@ -1207,6 +1237,11 @@
                 "default": {
                   "<source-path>": "<target-path>"
                 }
+              },
+              "enableDebugHeap": {
+                "type": "boolean",
+                "description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+                "default": false
               },
               "logging": {
                 "type": "object",
@@ -1403,20 +1438,19 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
+    "compileDev": "webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
-    "integrationTests": "gulp integrationTests",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "pretest": "tsc -p ./",
+    "pretest": "tsc -p test.tsconfig.json",
     "pr-check": "gulp pr-check",
-    "test": "gulp allTests",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "node ./src/Support/prepublish.js",
-    "watch": "tsc -watch -p ./"
+    "vscode:prepublish": "node ./tools/prepublish.js && webpack --mode production",
+    "watch": "webpack --watch --mode development"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",
-    "@types/node": "^8.10.43",
+    "@types/node": "^8.10.45",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "child-process": "^1.0.2",
@@ -1429,19 +1463,23 @@
     "tslint": "5.8.0",
     "tslint-microsoft-contrib": "5.0.1",
     "tslint-no-unused-expression-chai": "0.0.3",
+    "ts-loader": "^5.3.3",
     "typescript": "^2.9.2",
     "vrsource-tslint-rules": "^5.8.3",
-    "vscode": "^1.1.30"
+    "vscode": "^1.1.33",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1"
   },
   "dependencies": {
     "@types/minimatch": "^3.0.3",
+    "escape-string-regexp": "1.0.5",
     "http-proxy-agent": "~2.1.0",
     "https-proxy-agent": "~2.2.0",
     "jsonc-parser": "^1.0.0",
     "minimatch": "~3.0.4",
     "mkdirp": "~0.5.1",
     "tmp": "~0.0.33",
-    "vscode-cpptools": "2.1.1",
+    "vscode-cpptools": "^2.1.2",
     "vscode-debugadapter": "~1.33.0",
     "vscode-debugprotocol": "~1.33.0",
     "vscode-extension-telemetry": "^0.1.1",
@@ -1451,7 +1489,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2084924",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2085632",
       "platforms": [
         "linux"
       ],
@@ -1465,7 +1503,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2085028",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2085734",
       "platforms": [
         "linux"
       ],
@@ -1481,7 +1519,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2084925",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2085735",
       "platforms": [
         "darwin"
       ],
@@ -1492,7 +1530,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2085027",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2085633",
       "platforms": [
         "win32"
       ],

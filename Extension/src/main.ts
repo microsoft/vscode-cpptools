@@ -18,11 +18,11 @@ import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistr
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import { getInstallationInformation, InstallationInformation, setInstallationStage } from './installationInformation';
+import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
-const releaseNotesVersion: number = 4;
+const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
@@ -87,6 +87,7 @@ async function processRuntimeDependencies(): Promise<void> {
 
 async function offlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
+    setInstallationType(InstallationType.Offline);
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     setInstallationStage('makeBinariesExecutable');
@@ -107,6 +108,7 @@ async function offlineInstallation(): Promise<void> {
 
 async function onlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
+    setInstallationType(InstallationType.Online);
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     await downloadAndInstallPackages(info);
@@ -234,6 +236,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
+    installBlob.telemetryProperties['type'] = installBlob.type === InstallationType.Online ? "online" : "offline";
 
     if (info.distribution) {
         installBlob.telemetryProperties['linuxDistroName'] = info.distribution.name;
@@ -244,7 +247,9 @@ function sendTelemetry(info: PlatformInformation): boolean {
         util.setProgress(util.getProgressInstallSuccess());
         let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
         if (versionShown.Value < releaseNotesVersion) {
-            util.showReleaseNotes();
+            if (versionShown.Value !== versionShown.DefaultValue) {
+                util.showReleaseNotes();
+            }
             versionShown.Value = releaseNotesVersion;
         }
     }
@@ -330,14 +335,16 @@ function rewriteManifest(): Promise<void> {
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.BuildAndDebugActiveFile",
-        "onCommand:C_Cpp.ConfigurationEdit",
+        "onCommand:C_Cpp.ConfigurationEditJSON",
+        "onCommand:C_Cpp.ConfigurationEditUI",
         "onCommand:C_Cpp.ConfigurationSelect",
         "onCommand:C_Cpp.ConfigurationProviderSelect",
         "onCommand:C_Cpp.SwitchHeaderSource",
         "onCommand:C_Cpp.Navigate",
         "onCommand:C_Cpp.GoToDeclaration",
         "onCommand:C_Cpp.PeekDeclaration",
-        "onCommand:C_Cpp.ToggleErrorSquiggles",
+        "onCommand:C_Cpp.EnableErrorSquiggles",
+        "onCommand:C_Cpp.DisableErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
         "onCommand:C_Cpp.ShowReleaseNotes",
@@ -346,6 +353,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ResumeParsing",
         "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
+        "onCommand:C_Cpp.LogDiagnostics",
         "onDebug",
         "workspaceContains:/.vscode/c_cpp_properties.json"
     ];

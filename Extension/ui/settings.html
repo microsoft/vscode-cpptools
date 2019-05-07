@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; img-src vscode-resource:; script-src 'nonce-{{nonce}}';">
+
+    <style type="text/css">
+      @media (max-width: 1140px) {
+          #sidebar {
+              display: none;
+          }
+          #main {
+            max-width: 800px;
+            padding: 0px 20px;
+            margin: auto;
+          }
+      }
+
+      .page-margins {
+          vertical-align: top;
+          padding-top: 40px;
+          padding-bottom: 10px
+      }
+
+      .sidebar {
+          width: 290px;
+          position: fixed;
+          z-index: 1;
+          left: 45px;
+          overflow-x: hidden;
+      }
+
+      .error {
+        color: var(--vscode-inputValidation-errorForeground);
+        background: var(--vscode-inputValidation-errorBackground);
+        border: solid 1px var(--vscode-inputValidation-errorBorder);
+        white-space: pre-wrap;
+        visibility: hidden;
+        display: block;
+        padding: 1px 4px 4px 4px;
+      }
+
+      .main {
+          max-width: 800px;
+          margin-left: 320px;
+          padding: 0px 30px;
+      }
+
+      .main-title {
+          font-weight: 500;
+          font-size: 22px;
+          padding-bottom: 6px;
+          color: var(--vscode-foreground);
+      }
+
+      .section {
+          padding-bottom: 35px;
+      }
+
+      .section-title {
+          font-weight: 500;
+          font-size: 14px;
+          padding-bottom: 4px;
+          color: var(--vscode-foreground);
+      }
+
+      .section-text {
+          font-size: 14px;
+          padding-bottom: 8px;
+          color: var(--vscode-foreground);
+      }
+
+      .section-note {
+          font-size: 14px;
+          font-style: italic;
+          padding-bottom: 2px;
+          color: var(--vscode-foreground);
+      }
+
+      .codeblock {
+          vertical-align: middle;
+          padding: 2px 8px;
+          margin-top: 8px;
+          display: inline-block;
+          font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          border-radius: 5px;
+      }
+
+      body {
+          line-height: 19px
+      }
+
+      a {
+          text-decoration: none
+      }
+
+      a:focus,
+      input:focus,
+      select:focus,
+      textarea:focus {
+          outline: 1px solid -webkit-focus-ring-color;
+          outline-offset: -1px
+      }
+
+      hr {
+          border: 0;
+          height: 1px;
+          border-bottom: 1px solid;
+      }
+
+      h1 {
+          padding-bottom: .3em;
+      }
+
+      h1,
+      h2,
+      h3 {
+          font-weight: 400
+      }
+
+      a:hover {
+          text-decoration: underline
+      }
+
+      input {
+          height: 17px;
+          padding: 6px;
+          border: solid 1px;
+          font-size: 13px;
+          font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          color: var(--vscode-settings-textInputForeground);
+          background: var(--vscode-settings-textInputBackground);
+          border: 1px solid var(--vscode-settings-textInputBorder);
+      }
+
+      textarea {
+          white-space: nowrap;
+          padding: 4px, 4px;
+          font-size: 13px;
+          font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          color: var(--vscode-settings-textInputForeground);
+          background: var(--vscode-settings-textInputBackground);
+          border: 1px solid var(--vscode-settings-textInputBorder);
+      }
+
+      select {
+          width: 300px;
+          height: 27px;
+          font-size: 13px;
+          font-family:sans-serif;
+          color: var(--vscode-settings-dropdownForeground);
+          background: var(--vscode-settings-dropdownBackground);
+          border: 1px solid var(--vscode-settings-dropdownBorder);
+      }
+
+      blockquote {
+          margin: 0 7px 0 5px;
+          padding: 0 16px 0 10px;
+          border-left: 5px solid;
+      }
+
+      code {
+          font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+          line-height: 19px
+      }
+
+      .mac code {
+          line-height: 18px
+      }
+
+      code > div {
+          padding: 16px;
+          border-radius: 3px;
+          overflow: auto
+      }
+
+      .monaco-tokenized-source {
+          white-space: pre
+      }
+
+      /** Theming */
+
+      .vscode-light {
+          color: #1e1e1e
+      }
+
+      .vscode-dark {
+          color: #ddd
+      }
+
+      .vscode-high-contrast {
+          color: #fff
+      }
+
+      .vscode-light code {
+          color: #a31515
+      }
+
+      .vscode-dark code {
+          color: #d7ba7d
+      }
+
+      .vscode-light code > div {
+          background-color: rgba(220, 220, 220, .4)
+      }
+
+      .vscode-dark code > div {
+          background-color: rgba(10, 10, 10, .4)
+      }
+
+      .vscode-light .input-disabled {
+          background-color:rgba(255, 255, 255, 0.4);
+          color: rgb(138, 138, 138);
+          border: solid 1px rgb(201, 198, 198);
+      }
+
+      .vscode-dark .input-disabled {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: rgb(167, 167, 167);
+      }
+
+      .vscode-high-contrast .input-disabled {
+          background-color: transparent;
+          color: #fff;
+          border: solid 1px rgb(255, 255, 255);
+      }
+
+      .vscode-high-contrast code > div {
+          background-color: #000
+      }
+
+      .vscode-high-contrast h1 {
+          border-color: #000
+      }
+
+      .vscode-light table > thead > tr > th {
+          border-color: rgba(0, 0, 0, .69)
+      }
+
+      .vscode-dark table > thead > tr > th {
+          border-color: rgba(255, 255, 255, .69)
+      }
+
+      .vscode-light h1,
+      .vscode-light hr,
+      .vscode-light table > tbody > tr + tr > td {
+          border-color: rgba(0, 0, 0, .18)
+      }
+
+      .vscode-dark h1,
+      .vscode-dark hr,
+      .vscode-dark table > tbody > tr + tr > td {
+          border-color: rgba(255, 255, 255, 0.18)
+      }
+
+      .vscode-light blockquote,
+      .vscode-dark blockquote {
+          background: rgba(127, 127, 127, .1);
+          border-color: rgba(0, 122, 204, .5)
+      }
+
+      .vscode-high-contrast blockquote {
+          background: transparent;
+          border-color: #fff
+      }
+
+      .vscode-light div.codeblock {
+          background-color: rgba(0, 0, 0, 0.048)
+      }
+
+      .vscode-dark div.codeblock {
+          background-color: rgba(255, 255, 255, 0.1)
+      }
+
+      .vscode-high-contrast div.codeblock {
+          background-color: rgba(255, 255, 255, 0.15)
+      }
+
+      .footer {
+          padding: 25px;
+          text-align: center
+      }
+
+      .vscode-light a {
+          color: #4080D0
+      }
+
+      .vscode-dark a {
+          color: #a2c1e8
+      }
+
+  </style>
+
+  </head>
+
+  <body class="page-margins">
+
+  <!-- sidebar -->
+  <div id="sidebar" class="sidebar">
+
+    <div style="height: 90px; display: block">
+        <table>
+            <td>
+              <img src="{{root}}/LanguageCCPP_color_128x.png" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px">
+            </td>
+            <td>
+                <div style="font-size: 20px; font-weight: 400; line-height: 24px">Microsoft<br>C/C++ Extension</div>
+            </td>
+          </table>
+    </div>
+
+    <hr>
+    <div style="height: 30px; display: block"></div>
+
+    <div style="padding-right: 10px; color: var(--vscode-foreground);">
+        Open this editor by using the command:<br>
+        <code>C/C++: Edit configurations (UI)</code>
+
+        <div style="height: 30px; display: block"></div>
+
+        Switch to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file by clicking on the file link or using the command:<br> 
+        <code>C/C++: Edit configurations (JSON)</code>
+    </div>
+
+  </div> <!-- sidebar end -->
+
+  <!-- main -->
+  <div id="main" class="main">
+
+    <!-- title -->
+    <div style=" height: 90px; display: inline-block;">
+      <div class="main-title">IntelliSense Configurations</div>
+      <div style="color: var(--vscode-foreground);">
+        Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
+        Changes made in this editor only apply to the active configuration. To modify other configurations <a href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">change the active configuration</a>. 
+        To edit multiple configurations at once, or additional settings not shown here, go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
+      </div>
+    </div>
+
+    <hr>
+    <div style="height: 30px; display: block"></div>
+
+    <!-- sections -->
+    <div class="section">
+      <div class="section-title">Configuration name</div>
+      <div class="section-text">
+        A friendly name that identifies a configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything.
+        To edit the name of the current active configuration, go to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file and edit the <code>name</code> property.
+      </div>
+      <div><input class="input-disabled" type="text" id=activeConfig style="width: 290px" disabled>
+      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">Change the active configuration</a>
+    </div> 
+    </div>
+
+    <div class="section">
+        <div class="section-title">Compiler path</div>
+        <div class="section-text">
+            The full path of the compiler being used to build, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.
+            Args can be added to modify the includes/defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc., but paths with spaces must be surrounded by double quotes <code>"</code> if args are used.
+        </div>
+        <div>
+            <input id="compilerPath" style="width: 798px"></input>
+            <div id="compilerPathInvalid" class="error" style="width: 800px"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">IntelliSense mode</div>
+        <div class="section-text">
+            The IntelliSense mode used by the IntelliSense engine. The <code>${default}</code> mode will choose the default for that platform. 
+            Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and Mac defaults to <code>clang-x64</code>. 
+            Select a specific IntelliSense mode to override the <code>${default}</code> mode.
+        </div>
+        <div>
+          <select id="intelliSenseMode">
+            <option value="${default}">${default}</option>
+            <option value="msvc-x64">msvc-x64</option>
+            <option value="gcc-x64">gcc-x64</option>
+            <option value="clang-x64">clang-x64</option>
+          </select>
+        </div>
+        <div id="intelliSenseModeInvalid" class="error" style="width: 290px"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Include path</div>
+        <div class="section-text">
+            A list of paths for the IntelliSense engine to use while searching for included headers. If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for headers starting from that directory.
+        </div>
+        <div>
+          <div class="section-note">One include path per line.</div>
+          <textarea id="includePath" rows="4" cols="93" style="width: 800px"></textarea>
+          <div id="includePathInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Defines</div>
+        <div class="section-text">
+            A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use <code>=</code> to set a value, e.g. <code>VERSION=1</code>.
+        </div>
+        <div>
+            <div class="section-note">One definition per line.</div>
+            <textarea id="defines" rows="4" cols="39"></textarea>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">C Standard</div>
+        <div class="section-text">The version of the C language standard to use for IntelliSense.</div>
+        <div>
+            <select id="cStandard">
+                <option value="c11">c11</option>
+                <option value="c99">c99</option>
+                <option value="c89">c89</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">C++ Standard</div>
+        <div class="section-text">The version of the C++ language standard to use for IntelliSense.</div>
+        <div>
+            <select id="cppStandard">
+                <option value="c++17">c++17</option>
+                <option value="c++14">c++14</option>
+                <option value="c++11">c++11</option>
+                <option value="c++03">c++03</option>
+                <option value="c++98">c++98</option>
+            </select>
+        </div> <!-- sections end -->
+
+    </div>
+
+  </div> <!-- main end -->
+
+  <script nonce="{{nonce}}" src="{{root}}/out/ui/settings.js"></script>
+
+</body>
+</html>

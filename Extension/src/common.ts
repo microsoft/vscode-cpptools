@@ -17,10 +17,16 @@ import * as assert from 'assert';
 import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { getBuildTasks } from './LanguageServer/extension';
+import { OtherSettings } from './LanguageServer/settings';
 
+export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
+    extensionPath = extensionContext.extensionPath;
+}
+export function setExtensionPath(path: string): void {
+    extensionPath = path;
 }
 
 export const failedToParseTasksJson: string = "Failed to parse tasks.json, possibly due to comments or trailing commas.";
@@ -88,7 +94,8 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     }
     
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
-    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, 2));
+    let settings: OtherSettings = new OtherSettings();
+    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, settings.editorTabSize));
 }
 
 export function fileIsCOrCppSource(file: string): boolean {
@@ -104,7 +111,7 @@ export function stringifyPackageJson(packageJson: string): string {
 }
 
 export function getExtensionFilePath(extensionfile: string): string {
-    return path.resolve(extensionContext.extensionPath, extensionfile);
+    return path.resolve(extensionPath, extensionfile);
 }
 
 export function getPackageJsonPath(): string {
@@ -149,8 +156,8 @@ export function getVcpkgRoot(): string {
  * For the purposes of this function, a header file has no extension, or an extension that begins with the letter 'h'.
  * @param document The document to check.
  */
-export function isHeader(document: vscode.TextDocument): boolean {
-    let ext: string = path.extname(document.uri.fsPath);
+export function isHeader(uri: vscode.Uri): boolean {
+    let ext: string = path.extname(uri.fsPath);
     return !ext || ext.startsWith(".h") || ext.startsWith(".H");
 }
 
@@ -193,15 +200,15 @@ let installProgressStr: string = "CPP." + packageJson.version + ".Progress";
 let intelliSenseProgressStr: string = "CPP." + packageJson.version + ".IntelliSenseProgress";
 
 export function getProgress(): number {
-    return extensionContext.globalState.get<number>(installProgressStr, -1);
+    return extensionContext ? extensionContext.globalState.get<number>(installProgressStr, -1) : -1;
 }
 
 export function getIntelliSenseProgress(): number {
-    return extensionContext.globalState.get<number>(intelliSenseProgressStr, -1);
+    return extensionContext ? extensionContext.globalState.get<number>(intelliSenseProgressStr, -1) : -1;
 }
 
 export function setProgress(progress: number): void {
-    if (getProgress() < progress) {
+    if (extensionContext && getProgress() < progress) {
         extensionContext.globalState.update(installProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
@@ -218,7 +225,7 @@ export function setProgress(progress: number): void {
 }
 
 export function setIntelliSenseProgress(progress: number): void {
-    if (getIntelliSenseProgress() < progress) {
+    if (extensionContext && getIntelliSenseProgress() < progress) {
         extensionContext.globalState.update(intelliSenseProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
@@ -419,7 +426,7 @@ export function touchInstallLockFile(): Promise<void> {
 
 export function touchExtensionFolder(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        fs.utimes(path.resolve(extensionContext.extensionPath, ".."), new Date(Date.now()), new Date(Date.now()), (err) => {
+        fs.utimes(path.resolve(extensionPath, ".."), new Date(Date.now()), new Date(Date.now()), (err) => {
             if (err) {
                 reject(err);
             }
@@ -767,7 +774,6 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
     let additionalArgs: string[];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
-        compilerPath = compilerPath.trim();
         if (compilerPath.startsWith("\"")) {
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
@@ -799,4 +805,35 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
         }
     }
     return { compilerPath, additionalArgs };
+}
+
+export function escapeForSquiggles(s: string): string {
+    // Replace all \<escape character> with \\<character>, except for \"
+    // Otherwise, the JSON.parse result will have the \<escape character> missing.
+    let newResults: string = "";
+    let lastWasBackslash: Boolean = false;
+    let lastBackslashWasEscaped: Boolean = false;
+    for (let i: number = 0; i < s.length; i++) {
+        if (s[i] === '\\') {
+            if (lastWasBackslash) {
+                newResults += "\\";
+                lastBackslashWasEscaped = !lastBackslashWasEscaped;
+            } else {
+                lastBackslashWasEscaped = false;
+            }
+            newResults += "\\";
+            lastWasBackslash = true;
+        } else {
+            if (lastWasBackslash && (lastBackslashWasEscaped || (s[i] !== '"'))) {
+                newResults += "\\";
+            }
+            lastWasBackslash = false;
+            lastBackslashWasEscaped  = false;
+            newResults += s[i];
+        }
+    }
+    if (lastWasBackslash) {
+        newResults += "\\";
+    }
+    return newResults;
 }

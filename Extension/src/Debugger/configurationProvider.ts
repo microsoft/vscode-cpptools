@@ -16,6 +16,7 @@ import { buildAndDebugActiveFileStr } from './extension';
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
 import { PlatformInformation } from '../platform';
+import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 
 function isDebugLaunchStr(str: string): boolean {
     return str === "(gdb) Launch" || str === "(lldb) Launch" || str === "(Windows) Launch";
@@ -179,10 +180,41 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         if (config) {
-            // Fail if cppvsdbg type is running on non-Windows
-            if (config.type === 'cppvsdbg' && os.platform() !== 'win32') {
-                vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
-                return undefined;
+            if (config.type === 'cppvsdbg') {
+                // Fail if cppvsdbg type is running on non-Windows
+                if (os.platform() !== 'win32') {
+                    vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
+                    return undefined;
+                }
+
+                // Disable debug heap by default, enable if 'enableDebugHeap' is set.
+                if (!config.enableDebugHeap) {
+                    const disableDebugHeapEnvSetting : Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
+
+                    if (config.environment && util.isArray(config.environment)) {
+                        config.environment.push(disableDebugHeapEnvSetting);
+                    } else {
+                        config.environment = [disableDebugHeapEnvSetting];
+                    }
+                }
+
+                // Add environment variables from .env file
+                if (config.envFile) {
+                    try {
+                        const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(config.envFile.replace(/\${workspaceFolder}/g, folder.uri.path), config["environment"]);
+                        
+                        // show error message if single lines cannot get parsed
+                        if (parsedFile.Warning) {
+                            CppConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
+                        }
+
+                        config.environment = parsedFile.Env;
+
+                        delete config.envFile;
+                    } catch (e) {
+                        throw new Error("Can't parse envFile " + config.envFile);
+                    }
+                }
             }
 
             // Modify WSL config for OpenDebugAD7
@@ -210,6 +242,17 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         }
         // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213 
         return config && config.type ? config : null;
+    }
+
+    private static async showFileWarningAsync(message: string, fileName: string) : Promise<void> {
+        const openItem: vscode.MessageItem = { title: 'Open envFile' };
+        let result: vscode.MessageItem = await vscode.window.showWarningMessage(message, openItem);
+        if (result && result.title === openItem.title) {
+            let doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
+            if (doc) {
+                vscode.window.showTextDocument(doc);
+            }
+        }
     }
 }
 

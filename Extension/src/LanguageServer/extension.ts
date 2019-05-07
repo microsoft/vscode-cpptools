@@ -171,8 +171,13 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
 
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
-            const basename: string = path.basename(compilerPath);
-            //map.has(basename) ? map.basename] = compilerPath : 
+            let basename: string = compilerPath;
+            if (compilerPath === userCompilerPath) {
+                // Make sure the compiler args are not part of the basename.
+                const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
+                basename = compilerPathAndArgs.compilerPath;
+            }
+            basename = path.basename(basename);
             map.set(basename, compilerPath);
         };
         compilerPaths.forEach(insertOrAssignEntry);
@@ -416,7 +421,15 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-function installVsix(vsixLocation: string, updateChannel: string): Promise<void> {
+function installVsix(vsixLocation: string): Thenable<void> {
+    let userVersion: PackageVersion = new PackageVersion(vscode.version);
+
+    // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
+    let lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
+    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand)) {
+        return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
+    }
+
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
@@ -450,21 +463,20 @@ function installVsix(vsixLocation: string, updateChannel: string): Promise<void>
             return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
-        // 1.28.0 changes the CLI for making installations
-        let userVersion: PackageVersion = new PackageVersion(vscode.version);
-        let breakingVersion: PackageVersion = new PackageVersion('1.28.0');
-        if (userVersion.isGreaterThan(breakingVersion, 'insider')) {
+        // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
+        let oldVersion: PackageVersion = new PackageVersion('1.27.2');
+        if (userVersion.isGreaterThan(oldVersion)) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
                 try {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
-                    
+
                     // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
                     const timer: NodeJS.Timer = setTimeout(() => {
                         process.kill();
                         reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
                     }, 30000);
-                    
+
                     process.on('exit', (code: number) => {
                         clearInterval(timer);
                         if (code !== 0) {
@@ -558,7 +570,7 @@ async function suggestInsidersChannel(): Promise<void> {
     }
 }
 
-function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void> {
+function applyUpdate(buildInfo: BuildInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
@@ -596,7 +608,7 @@ function applyUpdate(buildInfo: BuildInfo, updateChannel: string): Promise<void>
                 break;
             }
             try {
-                await installVsix(vsixPath, updateChannel);
+                await installVsix(vsixPath);
             } catch (error) {
                 reject(error);
                 return;
@@ -638,7 +650,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     if (!buildInfo) {
         return; // No need to update.
     }
-    await applyUpdate(buildInfo, updateChannel);
+    await applyUpdate(buildInfo);
 }
 
 /*********************************************
@@ -659,9 +671,12 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', onSelectConfigurationProvider));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', onEditConfigurationJSON));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', onEditConfigurationUI));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleErrorSquiggles', onToggleSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', onEnableSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', onDisableSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
@@ -669,6 +684,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -784,6 +800,26 @@ function onSelectConfigurationProvider(): void {
     }
 }
 
+function onEditConfigurationJSON(): void {
+    onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, null);
+    if (!isFolderOpen()) {
+        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+    } else {
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
+    }
+}
+
+function onEditConfigurationUI(): void {
+    onActivationEvent();
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, null);
+    if (!isFolderOpen()) {
+        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+    } else {
+        selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
+    }
+}
+
 function onEditConfiguration(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
@@ -803,11 +839,18 @@ function onAddToIncludePath(path: string): void {
     }
 }
 
-function onToggleSquiggles(): void {
+function onEnableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("errorSquiggles", "Enabled", "Disabled");
+    settings.update<string>("errorSquiggles", "Enabled");
+}
+
+function onDisableSquiggles(): void {
+    onActivationEvent();
+    // This only applies to the active client.
+    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    settings.update<string>("errorSquiggles", "Disabled");
 }
 
 function onToggleIncludeFallback(): void {
@@ -853,6 +896,11 @@ function onTakeSurvey(): void {
 
 function onGetActiveConfigName(): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigName();
+}
+
+function onLogDiagnostics(): void {
+    onActivationEvent();
+    clients.ActiveClient.logDiagnostics();
 }
 
 function reportMacCrashes(): void {

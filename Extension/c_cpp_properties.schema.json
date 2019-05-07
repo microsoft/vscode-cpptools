@@ -142,6 +142,11 @@
         "version": {
             "type": "integer",
             "description": "Version of the configuration file. This property is managed by the extension. Please do not change it."
+        },
+        "enableConfigurationSquiggles": {
+            "type": "boolean",
+            "default": true,
+            "description": "Controls whether the extension will report errors detected in c_cpp_properties.json."
         }
     },
     "properties": {
@@ -153,6 +158,9 @@
         },
         "version": {
             "$ref": "#/definitions/version"
+        },
+        "enableConfigurationSquiggles": {
+            "$ref": "#/definitions/enableConfigurationSquiggles"
         }
     },
     "required": [

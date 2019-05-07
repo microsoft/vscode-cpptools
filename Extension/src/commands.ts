@@ -6,6 +6,7 @@
 
 import * as vscode from 'vscode';
 import * as LanguageServer from './LanguageServer/extension';
+import * as util from './common';
 
 class TemporaryCommandRegistrar {
     // Used to save/re-execute commands used before the extension has activated (e.g. delayed by dependency downloading).
@@ -15,14 +16,16 @@ class TemporaryCommandRegistrar {
     private isActivationReady: boolean = false;
 
     private commandsToRegister: string[] = [
-        "C_Cpp.ConfigurationEdit",
+        "C_Cpp.ConfigurationEditJSON",
+        "C_Cpp.ConfigurationEditUI",
         "C_Cpp.ConfigurationSelect",
         "C_Cpp.ConfigurationProviderSelect",
         "C_Cpp.SwitchHeaderSource",
         "C_Cpp.Navigate",
         "C_Cpp.GoToDeclaration",
         "C_Cpp.PeekDeclaration",
-        "C_Cpp.ToggleErrorSquiggles",
+        "C_Cpp.EnableErrorSquiggles",
+        "C_Cpp.DisableErrorSquiggles",
         "C_Cpp.ToggleIncludeFallback",
         "C_Cpp.ToggleDimInactiveRegions",
         "C_Cpp.ShowReleaseNotes",
@@ -30,7 +33,8 @@ class TemporaryCommandRegistrar {
         "C_Cpp.PauseParsing",
         "C_Cpp.ResumeParsing",
         "C_Cpp.ShowParsingCommands",
-        "C_Cpp.TakeSurvey"
+        "C_Cpp.TakeSurvey",
+        "C_Cpp.LogDiagnostics"
     ];
 
     constructor() {
@@ -38,9 +42,11 @@ class TemporaryCommandRegistrar {
         this.delayedCommandsToExecute = new Set<string>();
 
         // Add temp commands that invoke the real commands after download/install is complete (preventing an error message)
-        this.commandsToRegister.forEach(command => {
-            this.registerTempCommand(command);
-        });
+        if (util.extensionContext) {
+            this.commandsToRegister.forEach(command => {
+                this.registerTempCommand(command);
+            });
+        }
     }
 
     public registerTempCommand(command: string): void {
