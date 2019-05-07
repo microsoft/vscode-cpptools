@@ -39,7 +39,7 @@ export class PlatformInformation {
     public static GetUnknownArchitecture(): string { return "Unknown"; }
 
     private static GetWindowsArchitecture(): Promise<string> {
-        return util.execChildProcess('wmic os get osarchitecture', util.extensionContext.extensionPath)
+        return util.execChildProcess('wmic os get osarchitecture', util.extensionPath)
             .then((architecture) => {
                 if (architecture) {
                     let archArray: string[] = architecture.split(os.EOL);

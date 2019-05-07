@@ -47,13 +47,14 @@
 			"args": [
 				"${workspaceFolder}/test/integrationTests/testAssets/SimpleCppProject",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests"
+				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/languageServer"
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
-			]
+			],
+			"preLaunchTask": "Pretest"
 		},
 	]
 }
