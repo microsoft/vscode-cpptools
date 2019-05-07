@@ -6,6 +6,7 @@
 
 import * as vscode from 'vscode';
 import * as LanguageServer from './LanguageServer/extension';
+import * as util from './common';
 
 class TemporaryCommandRegistrar {
     // Used to save/re-execute commands used before the extension has activated (e.g. delayed by dependency downloading).
@@ -41,9 +42,11 @@ class TemporaryCommandRegistrar {
         this.delayedCommandsToExecute = new Set<string>();
 
         // Add temp commands that invoke the real commands after download/install is complete (preventing an error message)
-        this.commandsToRegister.forEach(command => {
-            this.registerTempCommand(command);
-        });
+        if (util.extensionContext) {
+            this.commandsToRegister.forEach(command => {
+                this.registerTempCommand(command);
+            });
+        }
     }
 
     public registerTempCommand(command: string): void {

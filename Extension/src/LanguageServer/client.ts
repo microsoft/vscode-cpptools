@@ -413,7 +413,8 @@ class DefaultClient implements Client {
         let settings: CppSettings = new CppSettings(workspaceFolder ? workspaceFolder.uri : null);
         let other: OtherSettings = new OtherSettings(workspaceFolder ? workspaceFolder.uri : null);
 
-        let storagePath: string = util.extensionContext.storagePath;
+        let storagePath: string = util.extensionContext ? util.extensionContext.storagePath :
+            path.join((workspaceFolder ? workspaceFolder.uri.fsPath : ""), "/.vscode");
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             storagePath = path.join(storagePath, serverName);
         }
@@ -445,7 +446,7 @@ class DefaultClient implements Client {
                 clang_format_fallbackStyle: settings.clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings.clangFormatSortIncludes,
                 formatting: settings.formatting,
-                extension_path: util.extensionContext.extensionPath,
+                extension_path: util.extensionPath,
                 exclude_files: other.filesExclude,
                 exclude_search: other.searchExclude,
                 storage_path: storagePath,
@@ -1397,15 +1398,15 @@ class DefaultClient implements Client {
     }
 
     public handleConfigurationEditCommand(): void {
-        this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(vscode.window.showTextDocument));
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(null, vscode.window.showTextDocument));
     }
 
     public handleConfigurationEditJSONCommand(): void {
-        this.notifyWhenReady(() => this.configuration.handleConfigurationEditJSONCommand(vscode.window.showTextDocument));
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditJSONCommand(null, vscode.window.showTextDocument));
     }
 
     public handleConfigurationEditUICommand(): void {
-        this.notifyWhenReady(() => this.configuration.handleConfigurationEditUICommand(vscode.window.showTextDocument));
+        this.notifyWhenReady(() => this.configuration.handleConfigurationEditUICommand(null, vscode.window.showTextDocument));
     }
 
     public handleAddToIncludePathCommand(path: string): void {
