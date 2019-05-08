@@ -402,6 +402,7 @@ class DefaultClient implements Client {
         let serverModule: string = getLanguageServerFileName();
         let exeExists: boolean = fs.existsSync(serverModule);
         if (!exeExists) {
+            telemetry.logLanguageServerEvent("missingBinary");
             throw String('Missing binary at ' + serverModule);
         }
         let serverName: string = this.getName(workspaceFolder);
