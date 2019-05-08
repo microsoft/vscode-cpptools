@@ -154,7 +154,7 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
     try {
         activeClient = getActiveClient();
     } catch (e) {
-        return []; // Language Serivice features may be disabled.
+        return []; // Language service features may be disabled.
     }
     let userCompilerPath: string = await activeClient.getCompilerPath();
     if (userCompilerPath) {
