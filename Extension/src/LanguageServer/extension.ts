@@ -150,7 +150,12 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
     // for the active file, remove duplicate compiler names, then finally add the user's compilerPath setting.
     let compilerPaths: string[];
     const isWindows: boolean = os.platform() === 'win32';
-    const activeClient: Client = getActiveClient();
+    let activeClient: Client;
+    try {
+        activeClient = getActiveClient();
+    } catch (e) {
+        return []; // Language Serivice features may be disabled.
+    }
     let userCompilerPath: string = await activeClient.getCompilerPath();
     if (userCompilerPath) {
         userCompilerPath = userCompilerPath.trim();
