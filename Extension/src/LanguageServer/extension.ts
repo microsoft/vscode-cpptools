@@ -42,6 +42,7 @@ let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
+const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
 /**
  * activate: set up the extension for language services
@@ -154,6 +155,9 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
     try {
         activeClient = getActiveClient();
     } catch (e) {
+        if (!e || e.message !== intelliSenseDisabledError) {
+            console.error("Unknown error calling getActiveClient().");
+        }
         return []; // Language service features may be disabled.
     }
     let userCompilerPath: string = await activeClient.getCompilerPath();
@@ -285,7 +289,7 @@ function onActivationEvent(): void {
 
 function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
-        throw new Error("Do not activate the extension when IntelliSense is disabled.");
+        throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
         let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
