@@ -29,8 +29,8 @@ let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
-    initializeTemporaryCommandRegistrar();
     util.setExtensionContext(context);
+    initializeTemporaryCommandRegistrar();
     Telemetry.activate();
     util.setProgress(0);
 
