@@ -106,8 +106,7 @@ class SettingsApp {
             this.showErrorWithInfo(elementId.includePathInvalid, 
                     errors.includePath ? true : false, 
                     errors.includePath);
-        }
-        finally {
+        } finally {
             this.updating = false;
         }
     }
