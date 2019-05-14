@@ -340,11 +340,11 @@ class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         try {
+            this.rootFolder = workspaceFolder;
             let languageClient: LanguageClient = this.createLanguageClient(allClients, workspaceFolder);
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
             util.setProgress(util.getProgressExecutableStarted());
-            this.rootFolder = workspaceFolder;
             ui = getUI();
             ui.bind(this);
 
