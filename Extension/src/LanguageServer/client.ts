@@ -340,7 +340,6 @@ class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         try {
-            this.rootFolder = workspaceFolder;
             let languageClient: LanguageClient = this.createLanguageClient(allClients, workspaceFolder);
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
@@ -405,6 +404,7 @@ class DefaultClient implements Client {
             telemetry.logLanguageServerEvent("missingLanguageServerBinary");
             throw String('Missing binary at ' + serverModule);
         }
+        this.rootFolder = workspaceFolder;
         let serverName: string = this.getName(workspaceFolder);
 
         let serverOptions: ServerOptions = {
