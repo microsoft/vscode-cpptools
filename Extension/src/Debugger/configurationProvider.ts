@@ -327,6 +327,11 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
         "description": "Enable pretty-printing for gdb",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
+    },
+    {
+        "description": "Enable unlimited string size for gdb",
+        "text": "-interpreter-exec console \"set print elements 0\"",
+        "ignoreFailures": true
     }
 ]`;
 
@@ -360,6 +365,11 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     {
         "description": "Enable pretty-printing for gdb",
         "text": "-enable-pretty-printing",
+        "ignoreFailures": true
+    },
+    {
+        "description": "Enable unlimited string size for gdb",
+        "text": "-interpreter-exec console \"set print elements 0\"",
         "ignoreFailures": true
     }
 ]`;
