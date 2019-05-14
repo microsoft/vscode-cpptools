@@ -103,6 +103,11 @@ export function fileIsCOrCppSource(file: string): boolean {
     return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
 }
 
+export function isEditorFileCpp(file: string): boolean {
+    let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
+    return editor && editor.document.languageId === "cpp";
+}
+
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.

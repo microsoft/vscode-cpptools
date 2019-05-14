@@ -42,6 +42,8 @@ export class CppSettings extends Settings {
     public get intelliSenseCachePath(): string { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
+    public get textMateColorization(): boolean { return super.Section.get<boolean>("textMateColorization"); }
+    public get enhancedColorization(): boolean { return super.Section.get<boolean>("enhancedColorization"); }
     public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string { return super.Section.get<string>("inactiveRegionForegroundColor"); }
@@ -83,6 +85,23 @@ export class CppSettings extends Settings {
     }
 }
 
+export interface TextMateRuleSettings {
+    foreground: string | undefined;
+    background: string | undefined;
+    fontStyle: string | undefined;
+}
+
+export interface TextMateRule {
+    scope: any;
+    settings: TextMateRuleSettings;
+}
+
+export interface TextMateContributesGrammar {
+    language: string;
+    scopeName: string;
+    path: string;
+}
+
 export class OtherSettings {
     private resource: vscode.Uri;
 
@@ -98,6 +117,13 @@ export class OtherSettings {
     public get filesExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get searchExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+
+    public get colorTheme(): string { return vscode.workspace.getConfiguration("workbench", this.resource).get<string>("colorTheme"); }
+    public getCustomColorToken(colorTokenName: string): string { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations", this.resource).get<string>(colorTokenName); }
+    public getCustomThemeSpecificColorToken(themeName: string, colorTokenName: string): string { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<string>(colorTokenName); }
+
+    public get customTextMateRules(): TextMateRule[] { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations", this.resource).get<TextMateRule[]>("textMateRules"); }
+    public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
 
     public set filesAssociations(value: any) {
          vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
