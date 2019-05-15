@@ -280,6 +280,7 @@ class DefaultClient implements Client {
     private configuration: configs.CppProperties;
     private rootPathFileWatcher: vscode.FileSystemWatcher;
     private rootFolder: vscode.WorkspaceFolder | undefined;
+    private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
@@ -322,7 +323,7 @@ class DefaultClient implements Client {
     }
 
     private get AdditionalEnvironment(): { [key: string]: string | string[] } {
-        return { workspaceFolderBasename: this.Name };
+        return { workspaceFolderBasename: this.Name, workspaceStorage: this.storagePath };
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -419,6 +420,7 @@ class DefaultClient implements Client {
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             storagePath = path.join(storagePath, serverName);
         }
+        this.storagePath = storagePath;
 
         let abTestSettings: ABTestSettings = getABTestSettings();
         
