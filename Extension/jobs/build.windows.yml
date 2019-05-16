@@ -29,13 +29,12 @@ jobs:
     displayName: 'Run Linter'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: 'npm run unitTests'
-    displayName: 'Run unit tests'
-    workingDirectory: '$(Build.SourcesDirectory)\Extension'
-    continueOnError: true
-
   - script: npm run pretest
     displayName: "Compile Test Sources"
+    workingDirectory: '$(Build.SourcesDirectory)\Extension'
+
+  - script: 'npm run unitTests'
+    displayName: 'Run unit tests'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
   - script: 'node node_modules/vscode/bin/test'
