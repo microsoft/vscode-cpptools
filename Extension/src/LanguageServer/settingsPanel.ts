@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as util from '../common';
 import * as config from './configurations';
+import * as telemetry from '../telemetry';
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
@@ -165,17 +166,21 @@ export class SettingsPanel {
         switch (message.key) {
             case elementId.activeConfig:
                 this.configValues.name = message.value;
+                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "configName" }, null);
                 break;
             case elementId.compilerPath:
                 this.configValues.compilerPath = message.value;
+                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "compilerPath" }, null);
                 break;
             case elementId.includePath:
                 entries = message.value.split("\n");
                 this.configValues.includePath = entries.filter(e => e);
+                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "includePath" }, null);
                 break;
             case elementId.defines:
                 entries = message.value.split("\n");
                 this.configValues.defines = entries.filter(e => e);
+                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "defines" }, null);
                 break;
             case elementId.intelliSenseMode:
                 if (message.value !== "${default}" || this.isIntelliSenseModeDefined) {
@@ -183,12 +188,15 @@ export class SettingsPanel {
                 } else {
                     this.configValues.intelliSenseMode = undefined;
                 }
+                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "intelliSenseMode" }, null);
                 break;
             case elementId.cStandard:
                 this.configValues.cStandard = message.value;
+                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "cStandard" }, null);
                 break;
             case elementId.cppStandard:
                 this.configValues.cppStandard = message.value;
+                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "cppStandard" }, null);
                 break;
         }
 
