@@ -354,6 +354,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
         "onCommand:C_Cpp.LogDiagnostics",
+        "onCommand:C_Cpp.RescanFolder",
         "onDebug",
         "workspaceContains:/.vscode/c_cpp_properties.json"
     ];
