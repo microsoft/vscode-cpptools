@@ -28,11 +28,6 @@ jobs:
     displayName: 'Run Linter'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
-  - script: 'npm run unitTests'
-    displayName: 'Run unit tests'
-    workingDirectory: '$(Build.SourcesDirectory)/Extension'
-    continueOnError: true
-
   - script: |
       set -e
       /usr/bin/Xvfb :10 -ac >> /tmp/Xvfb.out 2>&1 &
@@ -41,6 +36,10 @@ jobs:
 
   - script: npm run pretest
     displayName: "Compile Test Sources"
+    workingDirectory: '$(Build.SourcesDirectory)/Extension'
+
+  - script: 'npm run unitTests'
+    displayName: 'Run unit tests'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
   - script: 'node node_modules/vscode/bin/test'
