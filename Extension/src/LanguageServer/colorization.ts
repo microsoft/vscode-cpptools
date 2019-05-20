@@ -548,9 +548,6 @@ export class ColorizationState {
         // Disposing and recreating is simpler than setting decorators to empty ranges in each editor showing this file
         this.disposeColorizationDecorations();
 
-        // Create decorations
-        let inactiveRegionDecoration: vscode.TextEditorDecorationType;
-
         if (inactiveRanges) {
             this.inactiveRanges = inactiveRanges;
         }
