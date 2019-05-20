@@ -13,7 +13,7 @@ import * as telemetry from '../telemetry';
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
-    activeConfig: "activeConfig",
+    configName: "configName",
     compilerPath: "compilerPath",
     intelliSenseMode: "intelliSenseMode", 
     includePath: "includePath",
@@ -32,6 +32,7 @@ export class SettingsPanel {
     private disposablesPanel: vscode.Disposable = undefined;
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
+    private telemetry: { [key: string]: number } = {};
 
     constructor() {
         this.configValues = { name: undefined };
@@ -109,6 +110,11 @@ export class SettingsPanel {
     }
 
     public dispose(): void {
+        // Log any telementry
+        if (Object.keys(this.telemetry).length > 0) {
+            telemetry.logLanguageServerEvent("ConfigUI", null, this.telemetry);
+        }
+
         // Clean up resources
         this.panel.dispose();
 
@@ -164,23 +170,23 @@ export class SettingsPanel {
         let entries: string[];
 
         switch (message.key) {
-            case elementId.activeConfig:
+            case elementId.configName:
                 this.configValues.name = message.value;
-                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "configName" }, null);
+                this.logTelementryForElement(elementId.configName);
                 break;
             case elementId.compilerPath:
                 this.configValues.compilerPath = message.value;
-                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "compilerPath" }, null);
+                this.logTelementryForElement(elementId.compilerPath);
                 break;
             case elementId.includePath:
                 entries = message.value.split("\n");
                 this.configValues.includePath = entries.filter(e => e);
-                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "includePath" }, null);
+                this.logTelementryForElement(elementId.includePath);
                 break;
             case elementId.defines:
                 entries = message.value.split("\n");
                 this.configValues.defines = entries.filter(e => e);
-                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "defines" }, null);
+                this.logTelementryForElement(elementId.defines);
                 break;
             case elementId.intelliSenseMode:
                 if (message.value !== "${default}" || this.isIntelliSenseModeDefined) {
@@ -188,19 +194,25 @@ export class SettingsPanel {
                 } else {
                     this.configValues.intelliSenseMode = undefined;
                 }
-                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "intelliSenseMode" }, null);
+                this.logTelementryForElement(elementId.intelliSenseMode);
                 break;
             case elementId.cStandard:
                 this.configValues.cStandard = message.value;
-                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "cStandard" }, null);
+                this.logTelementryForElement(elementId.cStandard);
                 break;
             case elementId.cppStandard:
                 this.configValues.cppStandard = message.value;
-                telemetry.logLanguageServerEvent("ConfigUI", { "ValueChanged": "cppStandard" }, null);
+                this.logTelementryForElement(elementId.cppStandard);
                 break;
         }
 
         this.configValuesChanged.fire();
+    }
+
+    private logTelementryForElement(elementId: string): void {
+        if(this.telemetry[elementId] === undefined)
+            this.telemetry[elementId] = 0;
+        this.telemetry[elementId]++;
     }
 
     private getHtml(): string {
