@@ -83,13 +83,13 @@ interface OutputNotificationBody {
 
 interface SyntacticColorizationRegionsParams {
     uri: string;
-    syntacticColorizableRegions: InputColorizationRegion[];
+    regions: InputColorizationRegion[];
     editVersion: number;
 }
 
 interface SemanticColorizationRegionsParams {
     uri: string;
-    semanticColorizableRegions: InputColorizationRegion[];
+    regions: InputColorizationRegion[];
     inactiveRegions: InputRegion[];
     editVersion: number;
 }
@@ -1178,7 +1178,7 @@ class DefaultClient implements Client {
             syntacticRanges[i] = [];
         }
 
-        params.syntacticColorizableRegions.forEach(element => {
+        params.regions.forEach(element => {
             let newRange : vscode.Range = new vscode.Range(element.startLine, element.startColumn, element.endLine, element.endColumn);
             syntacticRanges[element.kind].push(newRange);
         });
@@ -1194,7 +1194,7 @@ class DefaultClient implements Client {
             semanticRanges[i] = [];
         }
 
-        params.semanticColorizableRegions.forEach(element => {
+        params.regions.forEach(element => {
             let newRange : vscode.Range = new vscode.Range(element.startLine, element.startColumn, element.endLine, element.endColumn);
             semanticRanges[element.kind].push(newRange);
         });
