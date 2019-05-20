@@ -210,8 +210,9 @@ export class SettingsPanel {
     }
 
     private logTelementryForElement(elementId: string): void {
-        if(this.telemetry[elementId] === undefined)
+        if (this.telemetry[elementId] === undefined) {
             this.telemetry[elementId] = 0;
+        }
         this.telemetry[elementId]++;
     }
 
