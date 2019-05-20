@@ -119,6 +119,7 @@ export class OtherSettings {
     public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
     public get colorTheme(): string { return vscode.workspace.getConfiguration("workbench", this.resource).get<string>("colorTheme"); }
+
     public getCustomColorToken(colorTokenName: string): string { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations", this.resource).get<string>(colorTokenName); }
     public getCustomThemeSpecificColorToken(themeName: string, colorTokenName: string): string { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<string>(colorTokenName); }
 

@@ -39,7 +39,12 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 });
             }
         },
-        didChange: defaultHandler,
+        didChange: (textDocumentChangeEvent, sendMessage) => {
+            if (clients.ActiveClient === me) {
+                me.onDidChangeTextDocument(textDocumentChangeEvent);
+                me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
+            }
+        },
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
             if (clients.ActiveClient === me) {

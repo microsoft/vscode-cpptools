@@ -496,12 +496,6 @@
           "description": "If true, snippets are provided by the language server.",
           "scope": "resource"
         },
-        "C_Cpp.textMateColorization": {
-          "type": "boolean",
-          "default": "true",
-          "description": "If false, the VSCode's TextMate.colorization is disabled for C and C++ files.  A reload is required for changes to this setting to take effect.  Default is: true",
-          "scope": "resource"
-        },
         "C_Cpp.enhancedColorization": {
           "type": "boolean",
           "default": "true",
