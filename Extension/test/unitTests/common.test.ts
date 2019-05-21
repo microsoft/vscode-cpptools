@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as assert from "assert";
-import {  resolveVariables } from "../../src/common";
+import { resolveVariables, escapeForSquiggles } from "../../src/common";
 
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
@@ -198,6 +198,25 @@ suite("Common Utility validation", () => {
                 .shouldLookupSymbol("Root");
         });
 
+        test("escapeForSquiggles:", () => {
+            let testEscapeForSquigglesScenario: any = (input: string, expectedOutput: string) => {
+                let result: string = escapeForSquiggles(input);
+                if (result !== expectedOutput) {
+                    throw new Error(`escapeForSquiggles failure: for \"${input}\", \"${result}\" !== \"${expectedOutput}\"`);
+                }
+            };
+
+            testEscapeForSquigglesScenario("\\", "\\\\"); // single backslash
+            testEscapeForSquigglesScenario("\\\"", "\\\""); // escaped quote
+            testEscapeForSquigglesScenario("\\\t", "\\\\\t"); // escaped non-quote
+            testEscapeForSquigglesScenario("\\\\\"", "\\\\\\\\\""); // escaped backslash, unescaped quote
+            testEscapeForSquigglesScenario("\\\\\t", "\\\\\\\\\t"); // escaped backslash, unescaped non-quote
+            testEscapeForSquigglesScenario("\\t", "\\\\t"); // escaped non-quote
+            testEscapeForSquigglesScenario("\\\\\\t", "\\\\\\\\\\\\t"); // escaped backslash, unescaped non-quote
+            testEscapeForSquigglesScenario("\"\"", "\"\""); // empty quoted string
+            testEscapeForSquigglesScenario("\"\\\\\"", "\"\\\\\\\\\""); // quoted string containing escaped backslash
+        });
+
         interface ResolveTestFlowEnvironment {
             withEnvironment(additionalEnvironment: {[key: string]: string | string[]}): ResolveTestFlowAssert;
             shouldLookupSymbol: (key: string) => void;
@@ -229,6 +248,5 @@ suite("Common Utility validation", () => {
                 }
             };
         }
-
     });
 });

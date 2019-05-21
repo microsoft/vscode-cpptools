@@ -42,6 +42,7 @@ let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
+const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
 /**
  * activate: set up the extension for language services
@@ -150,7 +151,15 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
     // for the active file, remove duplicate compiler names, then finally add the user's compilerPath setting.
     let compilerPaths: string[];
     const isWindows: boolean = os.platform() === 'win32';
-    const activeClient: Client = getActiveClient();
+    let activeClient: Client;
+    try {
+        activeClient = getActiveClient();
+    } catch (e) {
+        if (!e || e.message !== intelliSenseDisabledError) {
+            console.error("Unknown error calling getActiveClient().");
+        }
+        return []; // Language service features may be disabled.
+    }
     let userCompilerPath: string = await activeClient.getCompilerPath();
     if (userCompilerPath) {
         userCompilerPath = userCompilerPath.trim();
@@ -280,7 +289,7 @@ function onActivationEvent(): void {
 
 function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
-        throw new Error("Do not activate the extension when IntelliSense is disabled.");
+        throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
         let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
@@ -673,6 +682,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', onSelectConfigurationProvider));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', onEditConfigurationJSON));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', onEditConfigurationUI));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
     disposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', onEnableSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', onDisableSquiggles));
@@ -816,6 +826,15 @@ function onEditConfigurationUI(): void {
         vscode.window.showInformationMessage('Open a folder first to edit configurations');
     } else {
         selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
+    }
+}
+
+function onEditConfiguration(): void {
+    onActivationEvent();
+    if (!isFolderOpen()) {
+        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+    } else {
+        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
     }
 }
 

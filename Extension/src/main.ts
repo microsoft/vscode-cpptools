@@ -22,15 +22,15 @@ import { getInstallationInformation, InstallationInformation, setInstallationSta
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
-const releaseNotesVersion: number = 4;
+const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
-    initializeTemporaryCommandRegistrar();
     util.setExtensionContext(context);
+    initializeTemporaryCommandRegistrar();
     Telemetry.activate();
     util.setProgress(0);
 

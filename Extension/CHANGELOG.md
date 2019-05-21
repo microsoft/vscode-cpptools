@@ -1,51 +1,68 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.23.0-insiders: April 23, 2019
+## Version 0.23.1: May 13, 2019
+### Bug Fixes
+* Fix `launch.json` creation when `intelliSenseEngine` is `"Disabled"`. [#3583](https://github.com/microsoft/vscode-cpptools/issues/3583)
+* Fix C/C++ commands not working if the language service isn't activated. [#3615](https://github.com/microsoft/vscode-cpptools/issues/3615)
+* Fix missing extension `"Details"` page. [#3621](https://github.com/microsoft/vscode-cpptools/issues/3621)
+* Fix some random crashes related to IntelliSense inactive region processing.
+
+## Version 0.23.0: May 6, 2019
 ### New Features
-* Add a configuration UI editor to edit IntelliSense settings defined in the underlying `c_cpp_properties.json` file. [PR #3479](https://github.com/Microsoft/vscode-cpptools/pull/3479), [PR #3487](https://github.com/Microsoft/vscode-cpptools/pull/3487)
+* Add a configuration UI editor to edit IntelliSense settings defined in the underlying `c_cpp_properties.json` file. [PR #3479](https://github.com/Microsoft/vscode-cpptools/pull/3479), [PR #3487](https://github.com/Microsoft/vscode-cpptools/pull/3487), [PR #3519](https://github.com/Microsoft/vscode-cpptools/pull/3519), [#3524](https://github.com/Microsoft/vscode-cpptools/issues/3524), [PR #3563](https://github.com/Microsoft/vscode-cpptools/pull/3563), [#3526](https://github.com/Microsoft/vscode-cpptools/issues/3526)
   * Add a new command `C/C++: Edit configurations (UI)` to open the UI editor.
   * Replace the `C/C++: Edit configurations...` command with `C/C++: Edit configurations (JSON)` to open `c_cpp_properties.json`.
   * The default whether to open the UI editor or JSON file is based on the `workbench.settings.editor` setting.
 * Add command `C/C++: Log Diagnostics` to log language service diagnostics. [PR #3489](https://github.com/Microsoft/vscode-cpptools/pull/3489)
+* Add support for `.env` files for `cppvsdbg`. [#3490](https://github.com/Microsoft/vscode-cpptools/issues/3490)
 
-### Minor Changes
+### Other Changes
+* Enable flag `/permissive-` as an argument to `compilerPath` with `cl.exe`. [#1589](https://github.com/Microsoft/vscode-cpptools/issues/1589), [#3446](https://github.com/Microsoft/vscode-cpptools/issues/3446)
 * Configuration squiggles for `c_cpp_properties.json` now validates if the setting values of `compilerPath` and `intelliSenseMode` match on Windows. [#2983](https://github.com/Microsoft/vscode-cpptools/issues/2983)
+* Enable `-fms-extensions` to be used as an argument to `compilerPath` on Linux/Mac. [#3063](https://github.com/Microsoft/vscode-cpptools/issues/3063)
 * Change the default value of `C_Cpp.intelliSenseEngineFallback` setting to `Disabled`. [#3165](https://github.com/Microsoft/vscode-cpptools/issues/3165)
+* Add squiggle when `compilerPath` uses spaces and arguments without `"`. [#3357](https://github.com/Microsoft/vscode-cpptools/issues/3357)
 * Change the `Disabled` value for `C_Cpp.errorSquiggles` to stop showing missing header squiggles. [#3361](https://github.com/Microsoft/vscode-cpptools/issues/3361)
+* Add `enableConfigurationSquiggles` setting to allow squiggles to be disabled for `c_cpp_properties.json`. [#3403](https://github.com/Microsoft/vscode-cpptools/issues/3403)
+* Switch to using the `installExtension` command for offline/insider vsix installing (to reduce install failures). [#3408](https://github.com/Microsoft/vscode-cpptools/issues/3408)
+* Add a better example to the description of `C_Cpp.clang_format_style` and `C_Cpp.clang_format_fallback_style`. [#3419](https://github.com/Microsoft/vscode-cpptools/issues/3419)
 * Add a new (default) value of `EnabledIfIncludesResolve` to `C_Cpp.errorSquiggles`, which only shows error squiggles if include headers are successfully resolved. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
-* Enable flag `/permissive-` as an argument to `compilerPath` with `cl.exe`. [#3446](https://github.com/Microsoft/vscode-cpptools/issues/3446)
 * Disable debug heap by default with cppvsdbg. [#3484](https://github.com/Microsoft/vscode-cpptools/issues/3484)
   * Reported by Djoulihen (@Djoulihen)
+* Enable configuration squiggles for paths delimited by semicolons. [PR #3517](https://github.com/Microsoft/vscode-cpptools/pull/3517)
+* Don't show release notes if the extension has never been installed before. [#3533](https://github.com/Microsoft/vscode-cpptools/issues/3533)
+* Remove IntelliSense fallback code actions.
 
 ### Bug Fixes
 * Fix browsing for functions with BOOST_FOREACH. [#953](https://github.com/Microsoft/vscode-cpptools/issues/953)
+* Fix code action sometimes not appearing over a squiggled identifier. [#1436](https://github.com/microsoft/vscode-cpptools/issues/1436)
+* Work around issue with VS Code not treating `.C` files as C++ files [Microsoft/vscode#59369](https://github.com/Microsoft/vscode/issues/59369) -- `.C` files become associated by name in `files.associations`. [#2558](https://github.com/Microsoft/vscode-cpptools/issues/2558)
+* Fix various IntelliSense parsing bugs. [#2824](https://github.com/Microsoft/vscode-cpptools/issues/2824), [#3110](https://github.com/Microsoft/vscode-cpptools/issues/3110), [#3168](https://github.com/Microsoft/vscode-cpptools/issues/3168)
 * Preserve newlines in documentation comments. [#2937](https://github.com/Microsoft/vscode-cpptools/issues/2937)
 * Fix documentation comments above multi-line templates (and some other issues). [#3162](https://github.com/Microsoft/vscode-cpptools/issues/3162)
+* Fix "Extension causes high cpu load" due to module loading. [#3213](https://github.com/Microsoft/vscode-cpptools/issues/3213)
 * Fix auto-removal of compiler-provided paths in `includePath` when they end with a directory separator on Windows. [#3245](https://github.com/Microsoft/vscode-cpptools/issues/3245)
-* Fix `.cmd` and `.bat` files not working for `compilerPath` on Windows. [#3428](https://github.com/Microsoft/vscode-cpptools/issues/3428)
-* Fix `compilerPath` with arguments that are surrounded by quotes. [#3428](https://github.com/Microsoft/vscode-cpptools/issues/3428)
-* Fix documentation comments interpreting special characters as markdown. [#3441](https://github.com/Microsoft/vscode-cpptools/issues/3441)
-* Fix a JSON parsing error when a path in `c_cpp_properties.json` ended with `\\"`. [#3449](https://github.com/Microsoft/vscode-cpptools/issues/3449)
-* Fix hover using the configuration of the active document instead of the hovered document. [#3452](https://github.com/Microsoft/vscode-cpptools/issues/3452)
-* Fix `c_cpp_properties.json` squiggles when the configuration name has regex characters. [PR #3478](https://github.com/Microsoft/vscode-cpptools/pull/3478)
-* Use the `editor.tabSize` setting instead of `2` when creating build tasks. [PR #3486](https://github.com/Microsoft/vscode-cpptools/pull/3486)
-* Fix some potential crashes on hover. [#3509](https://github.com/Microsoft/vscode-cpptools/issues/3509)
-* Fix icon of parameters in completion results.
-* Fix code action sometimes not appearing over a squiggled identifier.
-
-## Version 0.22.2-insiders: April 9, 2019
-* Fix various IntelliSense parsing bugs. [#2824](https://github.com/Microsoft/vscode-cpptools/issues/2824), [#3110](https://github.com/Microsoft/vscode-cpptools/issues/3110), [#3168](https://github.com/Microsoft/vscode-cpptools/issues/3168)
-* Enable `-fms-extensions` to be used as an argument to `compilerPath` on Linux/Mac. [#3063](https://github.com/Microsoft/vscode-cpptools/issues/3063)
 * Fix duplicate compiler build tasks appearing when `compilerPath` has arguments. [PR #3360](https://github.com/Microsoft/vscode-cpptools/pull/3360)
-* Add squiggle when `compilerPath` uses spaces and arguments without `"`. [#3357](https://github.com/Microsoft/vscode-cpptools/issues/3357)
 * Fix environment variables not resolving with `C_Cpp.intelliSenseCachePath`. [#3367](https://github.com/Microsoft/vscode-cpptools/issues/3367)
 * Fix the formatting of snippets text. [#3376](https://github.com/Microsoft/vscode-cpptools/issues/3376)
 * Fix the default `AccessModifierOffset` used when formatting. [#3376](https://github.com/Microsoft/vscode-cpptools/issues/3376)
 * Fix null reference during initialization when using custom configuration providers. [PR #3377](https://github.com/Microsoft/vscode-cpptools/pull/3377)
 * Fix symbol parsing when `__MINGW_ATTRIB_*` is used. [#3390](https://github.com/Microsoft/vscode-cpptools/issues/3390)
 * Fix `compile_commands.json` configuration prompt being disabled per user instead of per folder. [PR #3399](https://github.com/Microsoft/vscode-cpptools/pull/3399)
-* Add `enableConfigurationSquiggles` setting to allow squiggles to be disabled for `c_cpp_properties.json`. [#3403](https://github.com/Microsoft/vscode-cpptools/issues/3403)
-* Add a better example to the description of `C_Cpp.clang_format_style` and `C_Cpp.clang_format_fallback_style`. [#3419](https://github.com/Microsoft/vscode-cpptools/issues/3419)
+* Fix `.cmd` and `.bat` files not working for `compilerPath` on Windows. [#3428](https://github.com/Microsoft/vscode-cpptools/issues/3428)
+* Fix `compilerPath` with arguments that are surrounded by quotes. [#3428](https://github.com/Microsoft/vscode-cpptools/issues/3428)
+* Fix documentation comments interpreting special characters as markdown. [#3441](https://github.com/Microsoft/vscode-cpptools/issues/3441)
+* Fix hover using the configuration of the active document instead of the hovered document. [#3452](https://github.com/Microsoft/vscode-cpptools/issues/3452)
+* Fix `c_cpp_properties.json` squiggles when the configuration name has regex characters. [PR #3478](https://github.com/Microsoft/vscode-cpptools/pull/3478)
+* Use the `editor.tabSize` setting instead of `2` when creating build tasks. [PR #3486](https://github.com/Microsoft/vscode-cpptools/pull/3486)
+* Fix some potential crashes on hover. [#3509](https://github.com/Microsoft/vscode-cpptools/issues/3509)
+* Fix for `NullReferenceException` occurring when `"args"` is not specified in `launch.json`. [#3532](https://github.com/Microsoft/vscode-cpptools/issues/3532)
+* Fix `Go to Definition` giving no results when IntelliSense doesn't find the symbol. [#3549](https://github.com/Microsoft/vscode-cpptools/issues/3549)
+* Fix configuration squiggles with trailing backslashes. [PR #3573](https://github.com/Microsoft/vscode-cpptools/pull/3573)
+* Fix `includePath` code actions, configuration prompts, and the `C/C++: Change configuration provider...` command. [PR #3576](https://github.com/Microsoft/vscode-cpptools/pull/3576)
+* Fix randomly occurring crash (that could occur when opening files while IntelliSense squiggles are pending).
+* Fix crash on hover (that could occur when document comments have blank lines).
+* Fix icon of parameters in completion results.
 
 ## Version 0.22.1: March 21, 2019
 * Fix `tasks.json` with single-line comments being overwritten when `Build and Debug Active File` is used. [#3327](https://github.com/Microsoft/vscode-cpptools/issues/3327)
