@@ -280,6 +280,7 @@ class DefaultClient implements Client {
     private configuration: configs.CppProperties;
     private rootPathFileWatcher: vscode.FileSystemWatcher;
     private rootFolder: vscode.WorkspaceFolder | undefined;
+    private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
@@ -322,7 +323,7 @@ class DefaultClient implements Client {
     }
 
     private get AdditionalEnvironment(): { [key: string]: string | string[] } {
-        return { workspaceFolderBasename: this.Name };
+        return { workspaceFolderBasename: this.Name, workspaceStorage: this.storagePath };
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
@@ -339,12 +340,17 @@ class DefaultClient implements Client {
     private pendingTask: BlockingTask<void>;
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
+        this.rootFolder = workspaceFolder;
+        this.storagePath = util.extensionContext ? util.extensionContext.storagePath :
+            path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
+            this.storagePath = path.join(this.storagePath, this.getName(this.rootFolder));
+        }
         try {
-            let languageClient: LanguageClient = this.createLanguageClient(allClients, workspaceFolder);
+            let languageClient: LanguageClient = this.createLanguageClient(allClients);
             languageClient.registerProposedFeatures();
             languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
             util.setProgress(util.getProgressExecutableStarted());
-            this.rootFolder = workspaceFolder;
             ui = getUI();
             ui.bind(this);
 
@@ -398,28 +404,20 @@ class DefaultClient implements Client {
         }
     }
 
-    private createLanguageClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): LanguageClient {
+    private createLanguageClient(allClients: ClientCollection): LanguageClient {
         let serverModule: string = getLanguageServerFileName();
         let exeExists: boolean = fs.existsSync(serverModule);
         if (!exeExists) {
             telemetry.logLanguageServerEvent("missingLanguageServerBinary");
             throw String('Missing binary at ' + serverModule);
         }
-        let serverName: string = this.getName(workspaceFolder);
-
+        let serverName: string = this.getName(this.rootFolder);
         let serverOptions: ServerOptions = {
             run: { command: serverModule },
             debug: { command: serverModule, args: [ serverName ] }
         };
-        let settings: CppSettings = new CppSettings(workspaceFolder ? workspaceFolder.uri : null);
-        let other: OtherSettings = new OtherSettings(workspaceFolder ? workspaceFolder.uri : null);
-
-        let storagePath: string = util.extensionContext ? util.extensionContext.storagePath :
-            path.join((workspaceFolder ? workspaceFolder.uri.fsPath : ""), "/.vscode");
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            storagePath = path.join(storagePath, serverName);
-        }
-
+        let settings: CppSettings = new CppSettings(this.rootFolder ? this.rootFolder.uri : null);
+        let other: OtherSettings = new OtherSettings(this.rootFolder ? this.rootFolder.uri : null);
         let abTestSettings: ABTestSettings = getABTestSettings();
         
         let intelliSenseCacheDisabled: boolean = false;
@@ -440,7 +438,7 @@ class DefaultClient implements Client {
                 // Synchronize the setting section to the server
                 configurationSection: ['C_Cpp', 'files', 'search']
             },
-            workspaceFolder: workspaceFolder,
+            workspaceFolder: this.rootFolder,
             initializationOptions: {
                 clang_format_path: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
                 clang_format_style: settings.clangFormatStyle,
@@ -450,7 +448,7 @@ class DefaultClient implements Client {
                 extension_path: util.extensionPath,
                 exclude_files: other.filesExclude,
                 exclude_search: other.searchExclude,
-                storage_path: storagePath,
+                storage_path: this.storagePath,
                 tab_size: other.editorTabSize,
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
