@@ -1025,7 +1025,7 @@ class DefaultClient implements Client {
             let settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.loggingLevel === "Debug") {
                 let duration: number = Date.now() - timeStamp;
-                console.log("IntelliSense refresh time (sec):", duration / 1000);
+                console.log("Update IntelliSense time (sec):", duration / 1000);
             }
             this.model.isUpdatingIntelliSense.Value = false;
             testHook.updateStatus(Status.IntelliSenseReady);
