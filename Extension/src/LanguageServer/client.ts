@@ -1022,8 +1022,8 @@ class DefaultClient implements Client {
             this.model.isUpdatingIntelliSense.Value = true;
             testHook.updateStatus(Status.IntelliSenseCompiling);
         } else if (message.endsWith("IntelliSense Ready")) {
-            let duration = Date.now() - timeStamp;
-            console.log("Flame time (sec):", duration/1000);
+            let duration: number = Date.now() - timeStamp;
+            console.log("Flame time (sec):", duration / 1000);
             this.model.isUpdatingIntelliSense.Value = false;
             testHook.updateStatus(Status.IntelliSenseReady);
         } else if (message.endsWith("Ready")) { // Tag Parser Ready
