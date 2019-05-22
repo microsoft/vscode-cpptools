@@ -33,6 +33,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 let ui: UI;
+let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
 
 interface NavigationPayload {
@@ -1015,9 +1016,16 @@ class DefaultClient implements Client {
             this.model.isTagParsing.Value = true;
             testHook.updateStatus(Status.TagParsingBegun);
         } else if (message.endsWith("Updating IntelliSense...")) {
+            timeStamp = Date.now();
             this.model.isUpdatingIntelliSense.Value = true;
             testHook.updateStatus(Status.IntelliSenseCompiling);
         } else if (message.endsWith("IntelliSense Ready")) {
+            let settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.loggingLevel === "Debug") {
+                let out: logger.Logger = logger.getOutputChannelLogger();
+                let duration: number = Date.now() - timeStamp;
+                out.appendLine(`Update IntelliSense time (sec): ${duration / 1000}`);
+            }
             this.model.isUpdatingIntelliSense.Value = false;
             testHook.updateStatus(Status.IntelliSenseReady);
         } else if (message.endsWith("Ready")) { // Tag Parser Ready
