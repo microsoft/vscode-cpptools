@@ -503,7 +503,7 @@
             "Disabled"
           ],
           "default": "Enabled",
-          "description": "If enabled, code is colorized based on syntactic and semantic analysis.  This setting has no effect if IntelliSense is disabled.",
+          "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled.",
           "scope": "resource"
         }
       }
