@@ -65,7 +65,7 @@ class ThemeStyle {
 
 export class ColorizationSettings {
     private uri: vscode.Uri;
-    private pendingTask: util.BlockingTask<void>;
+    private pendingTask: util.BlockingTask;
 
     public themeStyleCMap: ThemeStyle[] = [];
     public themeStyleCppMap: ThemeStyle[] = [];
@@ -182,7 +182,7 @@ export class ColorizationSettings {
     }
 
     public syncWithLoadingSettings(f: () => any): void {
-        this.pendingTask = new util.BlockingTask<void>(f, this.pendingTask);
+        this.pendingTask = new util.BlockingTask(f, this.pendingTask);
     }
 
     public reload(): void {

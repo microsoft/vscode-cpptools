@@ -325,7 +325,7 @@ class DefaultClient implements Client {
      * @see notifyWhenReady(notify)
      */
 
-    private pendingTask: util.BlockingTask<void>;
+    private pendingTask: util.BlockingTask;
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
@@ -500,8 +500,8 @@ class DefaultClient implements Client {
         if (event.affectsConfiguration("C_Cpp.textMateColorization", this.RootUri)) {
             this.colorizationSettings.updateGrammars();
         }
-        let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri)
-            || event.affectsConfiguration("editor.tokenColorCustomizations", this.RootUri);
+        let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
+            || event.affectsConfiguration("editor.tokenColorCustomizations");
 
         let colorizationNeedsRefresh: boolean = colorizationNeedsReload
             || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
@@ -844,7 +844,7 @@ class DefaultClient implements Client {
      */
     private queueBlockingTask(task: () => Thenable<void>): Thenable<void> {
         if (this.isSupported) {
-            this.pendingTask = new util.BlockingTask<void>(task, this.pendingTask);
+            this.pendingTask = new util.BlockingTask(task, this.pendingTask);
         } else {
             return Promise.reject("Unsupported client");
         }

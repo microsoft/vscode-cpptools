@@ -843,29 +843,26 @@ export function escapeForSquiggles(s: string): string {
     return newResults;
 }
 
-export class BlockingTask<T> {
-    private dependency: BlockingTask<any>;
+export class BlockingTask {
+    private dependency: BlockingTask;
     private done: boolean = false;
-    private promise: Promise<T>;
+    private promise: Thenable<void>;
 
-    constructor(task: () => T, dependency?: BlockingTask<any>) {
-        let f: () => Promise<T> = () => {
-            return new Promise<T>(async (resolve, reject) => {
-                this.dependency = null; // Make sure we dont perpetually leaking previous tasks
-                try {
-                    let result: T = await task();
-                    resolve(result);
-                } catch (err) {
-                    reject(err);
-                }
-                this.done = true;
-            });
-        };
-        if (dependency) {
+    constructor(task: () => Thenable<void>, dependency?: BlockingTask) {
+        if (!dependency) {
+            this.promise = task();
+        } else {
             this.dependency = dependency;
-            this.promise = this.dependency.promise.then(f, f);
-        } else  {
-            this.promise = f();
+            this.promise = new Promise<void>((resolve, reject) => {
+                let f1: () => void = () => {
+                    task().then(resolve, reject);
+                };
+                let f2: (err: any) => void = (err) => {
+                    console.log(err);
+                    task().then(resolve, reject);
+                };
+                this.dependency.promise.then(f1, f2);
+            });
         }
     }
 
@@ -873,7 +870,7 @@ export class BlockingTask<T> {
         return this.done;
     }
 
-    public then(onSucceeded: (value: T) => any, onRejected?: (err) => any): Promise<any> {
+    public then(onSucceeded: () => any, onRejected?: (err) => any): Thenable<void> {
         if (onRejected) {
             return this.promise.then(onSucceeded, onRejected);
         }
