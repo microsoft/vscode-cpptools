@@ -6,7 +6,6 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as util from '../common';
 import { CppSettings, OtherSettings, TextMateRule, TextMateRuleSettings, TextMateContributesGrammar } from './settings';
 
@@ -184,7 +183,7 @@ export class ColorizationSettings {
 
     public syncWithLoadingSettings(f: () => any): void {
         this.pendingTask = new util.BlockingTask<void>(f, this.pendingTask);
-    };
+    }
 
     public reload(): void {
         let f: () => void = async () => {
@@ -440,7 +439,7 @@ export class ColorizationState {
             for (let e of editors) {
                 this.refreshColorizationRanges(e);
             }
-        }
+        };
         this.colorizationSettings.syncWithLoadingSettings(f);
     }
 
