@@ -14,7 +14,7 @@ import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileCo
 import { Status } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
-import { CppSettings, OtherSettings, TextMateContributesGrammar } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState } from './persistentState';
 import { UI, getUI } from './ui';
@@ -195,34 +195,6 @@ const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, 
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
 
-class BlockingTask<T> {
-    private dependency: BlockingTask<any>;
-    private done: boolean = false;
-    private promise: Promise<T>;
-
-    constructor(task: () => T, dependency?: BlockingTask<any>) {
-        this.promise = new Promise<T>(async (resolve, reject) => {
-            try {
-                let result: T = await task();
-                resolve(result);
-                this.done = true;
-            } catch (err) {
-                reject(err);
-                this.done = true;
-            }
-        });
-        this.dependency = dependency;
-    }
-
-    public get Done(): boolean {
-        return this.done && (!this.dependency || this.dependency.Done);
-    }
-
-    public then(onSucceeded: (value: T) => any, onRejected: (err) => any): Promise<any> {
-        return this.promise.then(onSucceeded, onRejected);
-    }
-}
-
 let failureMessageShown: boolean = false;
 
 interface ClientModel {
@@ -243,7 +215,7 @@ export interface Client {
     RootUri: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    onDidChangeSettings(): { [key: string] : string };
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string };
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
@@ -351,7 +323,7 @@ class DefaultClient implements Client {
      * @see notifyWhenReady(notify)
      */
 
-    private pendingTask: BlockingTask<void>;
+    private pendingTask: util.BlockingTask<void>;
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         try {
@@ -399,7 +371,6 @@ class DefaultClient implements Client {
                     }
                 }));
 
-                this.updateGrammarsInPackageJson();
                 this.colorizationSettings = new ColorizationSettings(this.RootUri);
         } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
@@ -526,45 +497,38 @@ class DefaultClient implements Client {
         return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
     }
 
-    private updateGrammarsInPackageJson(): void {
-        let packageJson: any = util.getRawPackageJson();
-        let settings: CppSettings = new CppSettings(this.RootUri);
-        let changesMade: boolean = false;
-        if (settings.textMateColorization === false) {
-            if (!packageJson.contributes.grammars || !packageJson.contributes.grammars.length) {
+    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
+        if (event.affectsConfiguration("C_Cpp.textMateColorization", this.RootUri)) {
+            this.colorizationSettings.updateGrammars();
+        }
+        let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri)
+            || event.affectsConfiguration("editor.tokenColorCustomizations", this.RootUri);
 
-                let cppGrammarContributesNode: TextMateContributesGrammar = {
-                    language: "cpp",
-                    scopeName: "source.cpp",
-                    path: "./nogrammar.cpp.json"
-                };
-                let cGrammarContributesNode: TextMateContributesGrammar = {
-                    language: "c",
-                    scopeName: "source.c",
-                    path: "./nogrammar.c.json"
-                };
+        let colorizationNeedsRefresh: boolean = colorizationNeedsReload
+            || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
+            || event.affectsConfiguration("C_Cpp.dimInactiveRegions", this.RootUri)
+            || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
+            || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
+            || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
 
-                packageJson.contributes.grammars = [];
-                packageJson.contributes.grammars.push(cppGrammarContributesNode);
-                packageJson.contributes.grammars.push(cGrammarContributesNode);
-                changesMade = true;
-            }
-        } else {
-            if (packageJson.contributes.grammars && packageJson.contributes.grammars.length > 0) {
-                packageJson.contributes.grammars = [];
-                changesMade = true;
+        if (colorizationNeedsReload) {
+            this.colorizationSettings.reload();
+        }
+        if (colorizationNeedsRefresh) {
+            let processedUris: vscode.Uri[] = [];
+            for (let e of vscode.window.visibleTextEditors) {
+                let uri: vscode.Uri = e.document.uri;
+                // Make sure we don't process the same file multiple times
+                if (!processedUris.find(e => e === uri)) {
+                    processedUris.push(uri);
+                    let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
+                    if (colorizationState) {
+                        colorizationState.onSettingsChanged(uri);
+                    }
+                }
             }
         }
-
-        if (changesMade) {
-            util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-            util.promptForReloadWindowDueToSettingsChange();
-        }
-    }
-
-    public onDidChangeSettings(): { [key: string] : string } {
         let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
-
         if (Object.keys(changedSettings).length > 0) {
             if (changedSettings["commentContinuationPatterns"]) {
                 updateLanguageConfigurations();
@@ -577,43 +541,21 @@ class DefaultClient implements Client {
                 let settings: CppSettings = new CppSettings(this.RootUri);
                 this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveVariables(settings.intelliSenseCachePath, this.AdditionalEnvironment));
             }
-            if (changedSettings["textMateColorization"]) {
-                this.updateGrammarsInPackageJson();
-            }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
         }
-
-        let settings: CppSettings = new CppSettings(this.RootUri);
-        if (settings.enhancedColorization) {
-            this.colorizationSettings.reload();
-        }
-
-        // Update colorization
-        let processedUris: vscode.Uri[] = [];
-        for (let e of vscode.window.visibleTextEditors) {
-            let uri: vscode.Uri = e.document.uri;
-            // Make sure we don't process the same file multiple times
-            if (!processedUris.find(e => e === uri)) {
-                processedUris.push(uri);
-                let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
-                if (colorizationState) {
-                    colorizationState.onSettingsChanged(uri);
-                }
-            }
-        }
-
         return changedSettings;
     }
 
     private editVersion: number = 0;
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
-
         this.editVersion++;
         try {
             let colorizationState: ColorizationState = this.getColorizationState(textDocumentChangeEvent.document.uri.toString());
-            colorizationState.fixColorizationState(textDocumentChangeEvent.contentChanges, this.editVersion);
+
+            // Adjust colorization ranges after this edit.  (i.e. if a line was added, push decorations after it down one line)
+            colorizationState.updateAfterEdits(textDocumentChangeEvent.contentChanges, this.editVersion);
         } catch (e) {
             // Ensure an exception does not prevent pass-through to native handler, or editVersion could become inconsistent
             console.log(e.toString());
@@ -903,7 +845,7 @@ class DefaultClient implements Client {
      */
     private queueBlockingTask(task: () => Thenable<void>): Thenable<void> {
         if (this.isSupported) {
-            this.pendingTask = new BlockingTask<void>(task, this.pendingTask);
+            this.pendingTask = new util.BlockingTask<void>(task, this.pendingTask);
         } else {
             return Promise.reject("Unsupported client");
         }
@@ -1166,7 +1108,7 @@ class DefaultClient implements Client {
     private getColorizationState(uri: string): ColorizationState {
         let colorizationState: ColorizationState = this.colorizationState.get(uri);
         if (!colorizationState) {
-            colorizationState = new ColorizationState(this, this.colorizationSettings);
+            colorizationState = new ColorizationState(this.RootUri, this.colorizationSettings);
             this.colorizationState.set(uri, colorizationState);
         }
         return colorizationState;
@@ -1177,12 +1119,10 @@ class DefaultClient implements Client {
         for (let i: number = 0; i < TokenKind.Count; i++) {
             syntacticRanges[i] = [];
         }
-
         params.regions.forEach(element => {
             let newRange : vscode.Range = new vscode.Range(element.startLine, element.startColumn, element.endLine, element.endColumn);
             syntacticRanges[element.kind].push(newRange);
         });
-
         let colorizationState: ColorizationState = this.getColorizationState(params.uri);
         colorizationState.updateSyntactic(params.uri, syntacticRanges, params.editVersion);
     }
@@ -1193,18 +1133,15 @@ class DefaultClient implements Client {
         for (let i: number = 0; i < TokenKind.Count; i++) {
             semanticRanges[i] = [];
         }
-
         params.regions.forEach(element => {
             let newRange : vscode.Range = new vscode.Range(element.startLine, element.startColumn, element.endLine, element.endColumn);
             semanticRanges[element.kind].push(newRange);
         });
-
         let inactiveRanges: vscode.Range[] = [];
         params.inactiveRegions.forEach(element => {
             let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
             inactiveRanges.push(newRange);
         });
-
         let colorizationState: ColorizationState = this.getColorizationState(params.uri);
         colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
     }
@@ -1563,7 +1500,7 @@ class NullClient implements Client {
     RootUri: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    onDidChangeSettings(): { [key: string] : string } { return {}; }
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } { return {}; }
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {}
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }

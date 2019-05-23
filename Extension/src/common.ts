@@ -842,3 +842,41 @@ export function escapeForSquiggles(s: string): string {
     }
     return newResults;
 }
+
+export class BlockingTask<T> {
+    private dependency: BlockingTask<any>;
+    private done: boolean = false;
+    private promise: Promise<T>;
+
+    constructor(task: () => T, dependency?: BlockingTask<any>) {
+        let f: () => Promise<T> = () => {
+            return new Promise<T>(async (resolve, reject) => {
+                this.dependency = null; // Make sure we dont perpetually leaking previous tasks
+                try {
+                    let result: T = await task();
+                    resolve(result);
+                } catch (err) {
+                    reject(err);
+                }
+                this.done = true;
+            });
+        };
+        if (dependency) {
+            this.dependency = dependency;
+            this.promise = this.dependency.promise.then(f, f);
+        } else  {
+            this.promise = f();
+        }
+    }
+
+    public get Done(): boolean {
+        return this.done;
+    }
+
+    public then(onSucceeded: (value: T) => any, onRejected?: (err) => any): Promise<any> {
+        if (onRejected) {
+            return this.promise.then(onSucceeded, onRejected);
+        }
+        return this.promise.then(onSucceeded);
+    }
+}

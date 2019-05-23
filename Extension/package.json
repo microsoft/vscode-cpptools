@@ -497,9 +497,13 @@
           "scope": "resource"
         },
         "C_Cpp.enhancedColorization": {
-          "type": "boolean",
-          "default": "true",
-          "description": "If true, code is colorized based on syntactic and semantic analysis.  This is disabled if IntelliSense is disabled.",
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "If enabled, code is colorized based on syntactic and semantic analysis.  This setting has no effect if IntelliSense is disabled.",
           "scope": "resource"
         }
       }
