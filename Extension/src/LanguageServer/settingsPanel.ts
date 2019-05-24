@@ -33,6 +33,7 @@ export class SettingsPanel {
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
     private telemetry: { [key: string]: number } = {};
+    private compilerPaths: string[] = [];
 
     constructor() {
         this.configValues = { name: undefined };
@@ -103,6 +104,19 @@ export class SettingsPanel {
         }
     }
 
+    public setKnownCompilers(knownCompilers: config.KnownCompiler[]): void {
+        if (this.panel) {
+            // if (knownCompilers === undefined) {
+            //     this.compilerPaths.push("(no compilers detected)");
+            // }
+            this.compilerPaths.push("cl.exe");
+            this.compilerPaths.push("C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe");
+            this.compilerPaths.push("abc.exe");
+
+            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
+        }
+    }
+
     public updateErrors(errors: config.ConfigurationErrors): void {
         if (this.panel) {
             this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
@@ -138,9 +152,10 @@ export class SettingsPanel {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-            // Send a message to the webview to update the values and errors
+            // Send a message to the webview to update the values and errors and reset the known compilers
            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
            this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+           this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
         }
     }
 

@@ -652,6 +652,7 @@ export class CppProperties {
                     this.settingsPanel.createOrShow(
                         this.configurationJson.configurations[this.currentConfigurationIndex.Value],
                         this.getErrorsForConfigUI());
+                    this.settingsPanel.setKnownCompilers(this.knownCompilers);
                 } else {
                     // Parse failed, open json file
                     vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
