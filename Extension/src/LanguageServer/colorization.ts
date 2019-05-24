@@ -8,7 +8,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../common';
 import { CppSettings, OtherSettings, TextMateRule, TextMateRuleSettings, TextMateContributesGrammar } from './settings';
-import * as jsonc from "jsonc-parser";
+import * as jsonc from 'jsonc-parser';
+import * as plist from 'plist';
 
 export enum TokenKind {
     // These need to match the token_kind enum in the server
@@ -19,6 +20,9 @@ export enum TokenKind {
     Keyword,
     PreprocessorKeyword,
     OperatorToken,
+    Variable,
+    NumberLiteral,
+    StringLiteral,
     XmlDocComment,
     XmlDocTag,
 
@@ -104,7 +108,6 @@ export class ColorizationSettings {
                     if (baseCppStyle) {
                         this.getThemeStyleFromTextMateRuleSettings(baseCppStyle, textMateRules[i].settings);
                     }
-                    break;
                 }
             }
         }
@@ -163,6 +166,10 @@ export class ColorizationSettings {
     }
 
     private calculateThemeStyleForVsToken(tokenKind: TokenKind, scope: string, themeName: string, themeTextMateRules: TextMateRule[]): void {
+        // Apply default (scopeless) style
+        this.findThemeStyleForScope(this.themeStyleCMap[tokenKind], this.themeStyleCppMap[tokenKind], undefined, themeTextMateRules);
+
+        // Try scopes, from most general to most specific, apply style in cascading manner
         let parts: string[] = scope.split(".");
         let accumulatedScope: string = "";
         for (let i: number = 0; i < parts.length; i++) {
@@ -184,6 +191,9 @@ export class ColorizationSettings {
         this.calculateThemeStyleForVsToken(TokenKind.Keyword, "keyword.control", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.PreprocessorKeyword, "keyword.control.directive", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.OperatorToken, "entity.name.operator", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Variable, "variable", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.NumberLiteral, "constant.numeric", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.StringLiteral, "string.quoted", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.XmlDocComment, "comment.xml.doc", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.XmlDocTag, "comment.xml.doc.tag", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.Macro, "entity.name.function.preprocessor", themeName, textMateRules);
@@ -206,9 +216,9 @@ export class ColorizationSettings {
         this.calculateThemeStyleForVsToken(TokenKind.FunctionTemplate, "entity.name.function.template", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.Namespace, "entity.name.namespace", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.Label, "entity.name.label", themeName, textMateRules);
-        this.calculateThemeStyleForVsToken(TokenKind.UdlRaw, "constant.other.user-defined-literal", themeName, textMateRules);
-        this.calculateThemeStyleForVsToken(TokenKind.UdlNumber, "constant.numeric", themeName, textMateRules);
-        this.calculateThemeStyleForVsToken(TokenKind.UdlString, "string.quoted", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.UdlRaw, "entity.name.user-defined-literal", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.UdlNumber, "entity.name.user-defined-literal.number", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.UdlString, "entity.name.user-defined-literal.string", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.OperatorFunction, "keyword.operator", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.MemberOperator, "keyword.operator.member", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.NewDelete, "keyword.operator.new", themeName, textMateRules);
@@ -217,14 +227,29 @@ export class ColorizationSettings {
     public async loadTheme(themePath: string): Promise<void> {
         if (await util.checkFileExists(themePath)) {
             let themeContentText: string = await util.readFileText(themePath);
-            let themeContent: any = jsonc.parse(themeContentText);
+            let themeContent: any;
             let textMateRules: TextMateRule[];
-            if (themeContent) {
-                textMateRules = themeContent.tokenColors;
-                if (themeContent.include) {
-                    // parse included theme file
-                    let includedThemePath: string = path.join(path.dirname(themePath), themeContent.include);
-                    await this.loadTheme(includedThemePath);
+            if (themePath.endsWith("tmTheme")) {
+                themeContent = plist.parse(themeContentText);
+                if (themeContent) {
+                    textMateRules = themeContent.settings;
+
+                    // Convert comma delimited scopes into an array, to match the json format
+                    textMateRules.forEach(e => {
+                        if (e.scope && e.scope.includes(',')) {
+                            e.scope = e.scope.split(',').map((s: string) => s.trim());
+                        }
+                    });
+                }
+            } else {
+                themeContent = jsonc.parse(themeContentText);
+                if (themeContent) {
+                    textMateRules = themeContent.tokenColors;
+                    if (themeContent.include) {
+                        // parse included theme file
+                        let includedThemePath: string = path.join(path.dirname(themePath), themeContent.include);
+                        await this.loadTheme(includedThemePath);
+                    }
                 }
             }
             this.loadColors(themePath, textMateRules);

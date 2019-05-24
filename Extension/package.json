@@ -1491,7 +1491,8 @@
     "vscode-debugprotocol": "^1.34.0",
     "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "^5.2.1",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "plist": "^2.0.1"
   },
   "runtimeDependencies": [
     {
