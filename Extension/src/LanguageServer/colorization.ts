@@ -19,7 +19,7 @@ export enum TokenKind {
     Comment,
     Keyword,
     PreprocessorKeyword,
-    OperatorToken,
+    Operator,
     Variable,
     NumberLiteral,
     StringLiteral,
@@ -190,14 +190,14 @@ export class ColorizationSettings {
         this.calculateThemeStyleForVsToken(TokenKind.Comment, "comment", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.Keyword, "keyword.control", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.PreprocessorKeyword, "keyword.control.directive", themeName, textMateRules);
-        this.calculateThemeStyleForVsToken(TokenKind.OperatorToken, "entity.name.operator", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Operator, "keyword.operator", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.Variable, "variable", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.NumberLiteral, "constant.numeric", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.StringLiteral, "string.quoted", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.XmlDocComment, "comment.xml.doc", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.XmlDocTag, "comment.xml.doc.tag", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.Macro, "entity.name.function.preprocessor", themeName, textMateRules);
-        this.calculateThemeStyleForVsToken(TokenKind.Enumerator, "entity.name.enum", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Enumerator, "variable.other.enummember", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.GlobalVariable, "variable.other.global", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.LocalVariable, "variable.other.local", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.Parameter, "variable.parameter", themeName, textMateRules);
@@ -219,7 +219,7 @@ export class ColorizationSettings {
         this.calculateThemeStyleForVsToken(TokenKind.UdlRaw, "entity.name.user-defined-literal", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.UdlNumber, "entity.name.user-defined-literal.number", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.UdlString, "entity.name.user-defined-literal.string", themeName, textMateRules);
-        this.calculateThemeStyleForVsToken(TokenKind.OperatorFunction, "keyword.operator", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.OperatorFunction, "entity.name.function.operator", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.MemberOperator, "keyword.operator.member", themeName, textMateRules);
         this.calculateThemeStyleForVsToken(TokenKind.NewDelete, "keyword.operator.new", themeName, textMateRules);
     }
