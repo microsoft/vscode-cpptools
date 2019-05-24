@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../common';
 import { CppSettings, OtherSettings, TextMateRule, TextMateRuleSettings, TextMateContributesGrammar } from './settings';
+import * as jsonc from "jsonc-parser";
 
 export enum TokenKind {
     // These need to match the token_kind enum in the server
@@ -74,14 +75,6 @@ export class ColorizationSettings {
         this.uri = uri;
         this.updateGrammars();
         this.reload();
-    }
-
-    private cloneThemeStyle(styleToCopy: ThemeStyle): ThemeStyle {
-        let newStyle: ThemeStyle = new ThemeStyle();
-        newStyle.foreground = styleToCopy.foreground;
-        newStyle.background = styleToCopy.background;
-        newStyle.fontStyle = styleToCopy.fontStyle;
-        return newStyle;
     }
 
     private getThemeStyleFromTextMateRuleSettings(baseStyle: ThemeStyle, textMateRuleSettings: TextMateRuleSettings): void {
@@ -185,8 +178,70 @@ export class ColorizationSettings {
         this.pendingTask = new util.BlockingTask(f, this.pendingTask);
     }
 
+    public loadColors(themeName: string, textMateRules: TextMateRule[]): void {
+        this.calculateThemeStyleForVsToken(TokenKind.Identifier, "entity.name", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Comment, "comment", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Keyword, "keyword.control", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.PreprocessorKeyword, "keyword.control.directive", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.OperatorToken, "entity.name.operator", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.XmlDocComment, "comment.xml.doc", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.XmlDocTag, "comment.xml.doc.tag", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Macro, "entity.name.function.preprocessor", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Enumerator, "entity.name.enum", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.GlobalVariable, "variable.other.global", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.LocalVariable, "variable.other.local", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Parameter, "variable.parameter", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Type, "entity.name.type", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.RefType, "entity.name.type.class.reference", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.ValueType, "entity.name.type.class.value", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Function, "entity.name.function", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.MemberFunction, "entity.name.function.member", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.MemberField, "variable.other.member", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.StaticMemberFunction, "entity.name.function.member.static", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.StaticMemberField, "variable.other.member.static", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Property, "variable.other.property", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Event, "variable.other.event", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.ClassTemplate, "entity.name.type.class.template", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.GenericType, "entity.name.type.class.generic", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.FunctionTemplate, "entity.name.function.template", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Namespace, "entity.name.namespace", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.Label, "entity.name.label", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.UdlRaw, "constant.other.user-defined-literal", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.UdlNumber, "constant.numeric", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.UdlString, "string.quoted", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.OperatorFunction, "keyword.operator", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.MemberOperator, "keyword.operator.member", themeName, textMateRules);
+        this.calculateThemeStyleForVsToken(TokenKind.NewDelete, "keyword.operator.new", themeName, textMateRules);
+    }
+
+    public async loadTheme(themePath: string): Promise<void> {
+        if (await util.checkFileExists(themePath)) {
+            let themeContentText: string = await util.readFileText(themePath);
+            let themeContent: any = jsonc.parse(themeContentText);
+            let textMateRules: TextMateRule[];
+            if (themeContent) {
+                textMateRules = themeContent.tokenColors;
+                if (themeContent.include) {
+                    // parse included theme file
+                    let includedThemePath: string = path.join(path.dirname(themePath), themeContent.include);
+                    await this.loadTheme(includedThemePath);
+                }
+            }
+            this.loadColors(themePath, textMateRules);
+        }
+    }
+
     public reload(): void {
         let f: () => void = async () => {
+            this.themeStyleCMap = new Array<ThemeStyle>(TokenKind.Count);
+            this.themeStyleCppMap = new Array<ThemeStyle>(TokenKind.Count);
+
+            // Populate with unique objects, as they will be individual modified in place
+            for (let i: number = 0; i < TokenKind.Count; i++) {
+                this.themeStyleCMap[i] = new ThemeStyle();
+                this.themeStyleCppMap[i] = new ThemeStyle();
+            }
+            
             let otherSettings: OtherSettings = new OtherSettings(this.uri);
             let themeName: string = otherSettings.colorTheme;
 
@@ -199,66 +254,14 @@ export class ColorizationSettings {
                     continue;
                 }
                 let packageJsonText: string = await util.readFileText(extensionPackageJsonPath);
-                let packageJson: any = JSON.parse(packageJsonText);
+                let packageJson: any = jsonc.parse(packageJsonText);
                 if (packageJson.contributes && packageJson.contributes.themes) {
                     let foundTheme: any = packageJson.contributes.themes.find(e => e.id === themeName || e.label === themeName);
                     if (foundTheme) {
-                        let defaultStyle: ThemeStyle = new ThemeStyle();                        
                         let themeRelativePath: string = foundTheme.path;
                         let themeFullPath: string = path.join(extensionPath, themeRelativePath);
-                        if (await util.checkFileExists(themeFullPath)) {
-                            let themeContentText: string = await util.readFileText(themeFullPath);
-                            let themeContent: any = JSON.parse(themeContentText);
-                            let textMateRules: TextMateRule[];
-                            if (themeContent) {
-                                textMateRules = themeContent.tokenColors;
-                            }
-
-                            // override default if there are setting for an undefined scope in the current theme.
-                            this.findThemeStyleForScope(defaultStyle, null, undefined, textMateRules);
-                            this.themeStyleCMap = new Array<ThemeStyle>(TokenKind.Count);
-                            this.themeStyleCppMap = new Array<ThemeStyle>(TokenKind.Count);
-                            
-                            // Populate with unique objects, as they will be individual modified in place
-                            for (let i: number = 0; i < TokenKind.Count; i++) {
-                                this.themeStyleCMap[i] = this.cloneThemeStyle(defaultStyle);
-                                this.themeStyleCppMap[i] = this.cloneThemeStyle(defaultStyle);
-                            }
-                            this.calculateThemeStyleForVsToken(TokenKind.Identifier, "entity.name", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Comment, "comment", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Keyword, "keyword.control", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.PreprocessorKeyword, "keyword.control.directive", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.OperatorToken, "entity.name.operator", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.XmlDocComment, "comment.xml.doc", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.XmlDocTag, "comment.xml.doc.tag", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Macro, "entity.name.function.preprocessor", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Enumerator, "entity.name.enum", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.GlobalVariable, "variable.other.global", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.LocalVariable, "variable.other.local", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Parameter, "variable.parameter", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Type, "entity.name.type", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.RefType, "entity.name.type.class.reference", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.ValueType, "entity.name.type.class.value", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Function, "entity.name.function", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.MemberFunction, "entity.name.function.member", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.MemberField, "variable.other.member", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.StaticMemberFunction, "entity.name.function.member.static", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.StaticMemberField, "variable.other.member.static", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Property, "variable.other.property", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Event, "variable.other.event", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.ClassTemplate, "entity.name.type.class.template", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.GenericType, "entity.name.type.class.generic", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.FunctionTemplate, "entity.name.function.template", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Namespace, "entity.name.namespace", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.Label, "entity.name.label", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.UdlRaw, "constant.other.user-defined-literal", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.UdlNumber, "constant.numeric", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.UdlString, "string.quoted", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.OperatorFunction, "keyword.operator", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.MemberOperator, "keyword.operator.member", themeName, textMateRules);
-                            this.calculateThemeStyleForVsToken(TokenKind.NewDelete, "keyword.operator.new", themeName, textMateRules);
-                            return;
-                        }
+                        await this.loadTheme(themeFullPath);
+                        return;
                     }
                 }
             }
