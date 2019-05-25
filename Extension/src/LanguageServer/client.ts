@@ -325,7 +325,7 @@ class DefaultClient implements Client {
      * @see notifyWhenReady(notify)
      */
 
-    private pendingTask: util.BlockingTask;
+    private pendingTask: util.BlockingTask<any>;
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
@@ -517,7 +517,10 @@ class DefaultClient implements Client {
             let processedUris: vscode.Uri[] = [];
             for (let e of vscode.window.visibleTextEditors) {
                 let uri: vscode.Uri = e.document.uri;
-                // Make sure we don't process the same file multiple times
+
+                // Make sure we don't process the same file multiple times.
+                // colorizationState.onSettingsChanged ensures all visible text editors for that file get
+                // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
                 if (!processedUris.find(e => e === uri)) {
                     processedUris.push(uri);
                     let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
@@ -565,7 +568,7 @@ class DefaultClient implements Client {
         for (let e of editors) {
             let colorizationState: ColorizationState = this.colorizationState.get(e.document.uri.toString());
             if (colorizationState) {
-                colorizationState.refreshColorizationRanges(e);
+                colorizationState.refresh(e);
             }
         }
     }
@@ -844,7 +847,7 @@ class DefaultClient implements Client {
      */
     private queueBlockingTask(task: () => Thenable<void>): Thenable<void> {
         if (this.isSupported) {
-            this.pendingTask = new util.BlockingTask(task, this.pendingTask);
+            this.pendingTask = new util.BlockingTask<void>(task, this.pendingTask);
         } else {
             return Promise.reject("Unsupported client");
         }
@@ -1121,6 +1124,7 @@ class DefaultClient implements Client {
     }
 
     private updateSyntacticColorizationRegions(params: SyntacticColorizationRegionsParams): void {
+        // Convert the params to vscode.Range's before passing to colorizationState.updateSyntactic()
         let syntacticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
         for (let i: number = 0; i < TokenKind.Count; i++) {
             syntacticRanges[i] = [];
@@ -1134,7 +1138,7 @@ class DefaultClient implements Client {
     }
 
     private updateSemanticColorizationRegions(params: SemanticColorizationRegionsParams): void {
-        // We must convert to vscode.Ranges in order to make use of the API's
+        // Convert the params to vscode.Range's before passing to colorizationState.updateSemantic()
         let semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
         for (let i: number = 0; i < TokenKind.Count; i++) {
             semanticRanges[i] = [];

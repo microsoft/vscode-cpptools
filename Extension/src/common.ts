@@ -843,17 +843,17 @@ export function escapeForSquiggles(s: string): string {
     return newResults;
 }
 
-export class BlockingTask {
-    private dependency: BlockingTask;
+export class BlockingTask<T> {
+    private dependency: BlockingTask<any>;
     private done: boolean = false;
-    private promise: Thenable<void>;
+    private promise: Thenable<T>;
 
-    constructor(task: () => Thenable<void>, dependency?: BlockingTask) {
+    constructor(task: () => Thenable<T>, dependency?: BlockingTask<any>) {
         if (!dependency) {
             this.promise = task();
         } else {
             this.dependency = dependency;
-            this.promise = new Promise<void>((resolve, reject) => {
+            this.promise = new Promise<T>((resolve, reject) => {
                 let f1: () => void = () => {
                     task().then(resolve, reject);
                 };
@@ -870,7 +870,7 @@ export class BlockingTask {
         return this.done;
     }
 
-    public then(onSucceeded: () => any, onRejected?: (err) => any): Thenable<void> {
+    public then<T2>(onSucceeded: (value: T) => T2, onRejected?: (err) => any): Thenable<T2> {
         if (onRejected) {
             return this.promise.then(onSucceeded, onRejected);
         }
