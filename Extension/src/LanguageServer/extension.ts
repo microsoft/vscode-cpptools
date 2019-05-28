@@ -18,13 +18,14 @@ import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
-import { Range } from 'vscode-languageclient';
+import { Range, Disposable } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import * as tmp from 'tmp';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
+import * as rd from 'readline';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -42,7 +43,39 @@ let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
+let codeActionProvider: vscode.Disposable;
 const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
+
+type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
+async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
+    let database: vcpkgDatabase = {};
+    return new Promise((resolve, reject) => {
+        try {
+            let reader: rd.ReadLine = rd.createInterface(fs.createReadStream('/home/griff/vcpkg-db/VCPkgHeadersDatabase.txt'));
+            reader.on('line', (lineText: string) => {
+                let portFilePair: string[] = lineText.split(':');
+                if (portFilePair.length !== 2) {
+                    return;
+                }
+    
+                const portName: string = portFilePair[0];
+                const relativeHeader: string = portFilePair[1];
+    
+                if (!database[relativeHeader]) {
+                    database[relativeHeader] = [];
+                }
+
+                database[relativeHeader].push(portName);
+            });
+
+            reader.on('close', () => {
+                return resolve(database);
+            });
+        } catch (e) {
+            return reject();
+        }
+    });
+}
 
 /**
  * activate: set up the extension for language services
@@ -84,6 +117,63 @@ export function activate(activationEventOccurred: boolean): void {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
     });
+
+    let vcpkgDbPromise: Promise<vcpkgDatabase> = initVcpkgDatabase();
+
+    let sel: vscode.DocumentSelector = { scheme: 'file', language: 'cpp' };
+    codeActionProvider = vscode.languages.registerCodeActionsProvider(sel, {
+        provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
+            const cannotOpenSourceFile: string = 'cannot open source file';
+            let missingSourceDiagnostics: vscode.Diagnostic[] = context.diagnostics;
+            missingSourceDiagnostics = missingSourceDiagnostics.filter(diagnostic => {
+                return diagnostic.message.startsWith(cannotOpenSourceFile);
+            });
+            if (!missingSourceDiagnostics.length) {
+                return;
+            }
+    
+            let missingHeaders: string[] = missingSourceDiagnostics.map<string>(diagnostic => {
+                return diagnostic.message.slice(`${cannotOpenSourceFile} \"`.length, diagnostic.message.length - ('\"').length)
+                    .replace('/', '\\');
+            });
+    
+            let actions: vscode.CodeAction[] = [];
+
+            missingHeaders.forEach(async header => {
+                const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
+                let portsWithHeader: string[] = vcpkgDb[header];
+                if (!portsWithHeader) {
+                    return;
+                }
+
+                actions.push(...portsWithHeader.map<vscode.CodeAction>(port => {
+                    const command: vscode.Command = {
+                        title: 'test1', // `Copy vcpkg command to install '${port}' to the clipboard`,
+                        command: 'C_Cpp.VCPkgClipboardInstallSuggestedCommand',
+                        arguments: [port]
+                    };
+                    return {
+                        command,
+                        title: `Copy vcpkg command to install '${port}' to the clipboard`,
+                        kind: vscode.CodeActionKind.QuickFix
+                    };
+                }));
+            });
+
+            return Promise.resolve(actions);
+        }});
+
+        // Get diagnostics from context
+        // Parse for 'cannot find source file'
+
+        // create code action array
+        // for each match in vcpkg matches
+            // register a command to copy install line to clipboard
+            // create a title for the code action
+            // generate the action
+            // add action to array
+        
+        // return code action array
 
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
@@ -694,6 +784,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.VCPkgClipboardInstallSuggestedCommand', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -901,6 +992,24 @@ function onTakeSurvey(): void {
     telemetry.logLanguageServerEvent("onTakeSurvey");
     let uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
     vscode.commands.executeCommand('vscode.open', uri);
+}
+
+async function onVcpkgClipboardInstallSuggested(port: string): Promise<void> {
+    let triplets: string;
+
+    let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    switch(platformInfo.platform) {
+        case 'win32':
+            triplets = 'x86-windows,x64-windows';
+            break;
+        case 'darwin':
+            triplets = 'x64-osx';
+            break;
+        default:
+            triplets = 'x64-linux';
+    }
+
+    return vscode.env.clipboard.writeText(`vcpkg install ${port}:${triplets}`);
 }
 
 function onGetActiveConfigName(): Thenable<string> {
