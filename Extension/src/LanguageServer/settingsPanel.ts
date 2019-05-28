@@ -24,6 +24,7 @@ const elementId: { [key: string]: string } = {
 
 export class SettingsPanel {
     private configValues: config.Configuration;
+    private compilerPaths: string[] = [];
     private isIntelliSenseModeDefined: boolean = false;
     private settingsPanelActivated = new vscode.EventEmitter<void>();
     private configValuesChanged = new vscode.EventEmitter<void>();
@@ -33,7 +34,6 @@ export class SettingsPanel {
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
     private telemetry: { [key: string]: number } = {};
-    private compilerPaths: string[] = [];
 
     constructor() {
         this.configValues = { name: undefined };
@@ -105,15 +105,13 @@ export class SettingsPanel {
     }
 
     public setKnownCompilers(knownCompilers: config.KnownCompiler[]): void {
-        if (this.panel) {
-            // if (knownCompilers === undefined) {
-            //     this.compilerPaths.push("(no compilers detected)");
-            // }
-            this.compilerPaths.push("cl.exe");
-            this.compilerPaths.push("C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe");
-            this.compilerPaths.push("abc.exe");
-
-            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
+        if (knownCompilers.length > 0) {
+            for (let compiler of knownCompilers) {
+                // Do not add duplicate paths in case the default compilers for cpp and c are the same
+                if (this.compilerPaths.indexOf(compiler.path) === -1) {
+                    this.compilerPaths.push(compiler.path);
+                }
+            }
         }
     }
 
@@ -152,10 +150,9 @@ export class SettingsPanel {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-            // Send a message to the webview to update the values and errors and reset the known compilers
-           this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
-           this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
-           this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
+            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
+            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
+            this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
         }
     }
 

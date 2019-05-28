@@ -50,12 +50,9 @@ class SettingsApp {
     }
 
     private onKnownCompilerSelect(): void {
-        // todo: add telemetry
         const x: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
-        if (x.value !== "(no compilers detected)") {
-            (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = x.value;
-            this.onChanged(elementId.compilerPath);
-        }
+        (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = x.value;
+        this.onChanged(elementId.compilerPath);
     }
 
     private onChanged(id: string): void {
@@ -124,19 +121,35 @@ class SettingsApp {
     }
 
     private setKnownCompilers(compilers: string[]): void {
-        let x: HTMLElement = document.getElementById(elementId.knownCompilers);
+        let list: HTMLElement = document.getElementById(elementId.knownCompilers);
 
-        if (x.firstChild) {
+        // No need to add items unless webview is reloaded, in which case it will not have any elements.
+        // Otherwise, add items again.
+        if (list.firstChild) {
            return;
         }
 
-        // Dynamic elements are not saved when webview gets reloaded, so add them again
+        if (compilers.length === 0) {
+            const noCompilers: string = "(No other compiler paths detected)";
+            let option: HTMLOptionElement = document.createElement("option");
+            option.text = noCompilers;
+            option.value = noCompilers;
+            list.append(option);
+            
+            // Set the selection to this one item so that no selection change event will be fired
+            (<HTMLInputElement>list).value = noCompilers;
+            return;
+        }
+
         for (let path of compilers) {
             let option: HTMLOptionElement = document.createElement("option");
             option.text = path;
             option.value = path;
-            x.append(option);
+            list.append(option);
         }
+
+        // Initialize list with no selected item
+        (<HTMLInputElement>list).value = "";
     }
 }
 

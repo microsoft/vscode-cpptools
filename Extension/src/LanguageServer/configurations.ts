@@ -645,6 +645,7 @@ export class CppProperties {
                     // Parse successful, show UI
                     if (this.settingsPanel === undefined) {
                         this.settingsPanel = new SettingsPanel();
+                        this.settingsPanel.setKnownCompilers(this.knownCompilers);
                         this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
                         this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());
                         this.disposables.push(this.settingsPanel);
@@ -652,7 +653,6 @@ export class CppProperties {
                     this.settingsPanel.createOrShow(
                         this.configurationJson.configurations[this.currentConfigurationIndex.Value],
                         this.getErrorsForConfigUI());
-                    this.settingsPanel.setKnownCompilers(this.knownCompilers);
                 } else {
                     // Parse failed, open json file
                     vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
