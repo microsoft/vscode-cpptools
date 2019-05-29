@@ -74,7 +74,7 @@ class SettingsApp {
     private updateConfig(config: any): void {
         this.updating = true;
         try {
-            (<HTMLInputElement>document.getElementById(elementId.activeConfig)).value = config.name;
+            (<HTMLInputElement>document.getElementById(elementId.configName)).value = config.name;
 
             (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";

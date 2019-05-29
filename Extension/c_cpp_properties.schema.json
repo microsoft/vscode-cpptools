@@ -71,7 +71,7 @@
                         }
                     },
                     "intelliSenseMode": {
-                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64, Linux defaults to gcc-x64, and Mac default to clang-x64.",
+                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64, Linux defaults to gcc-x64, and Mac defaults to clang-x64.",
                         "type": "string",
                         "enum": [
                             "msvc-x64",
