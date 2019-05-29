@@ -130,7 +130,7 @@ class SettingsApp {
         }
 
         if (compilers.length === 0) {
-            const noCompilers: string = "(No other compiler paths detected)";
+            const noCompilers: string = "(No compiler paths detected)";
             let option: HTMLOptionElement = document.createElement("option");
             option.text = noCompilers;
             option.value = noCompilers;

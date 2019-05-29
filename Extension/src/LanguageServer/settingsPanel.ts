@@ -104,12 +104,19 @@ export class SettingsPanel {
         }
     }
 
-    public setKnownCompilers(knownCompilers: config.KnownCompiler[]): void {
+    public setKnownCompilers(knownCompilers: config.KnownCompiler[], pathSeparator: string): void {
         if (knownCompilers.length > 0) {
             for (let compiler of knownCompilers) {
-                // Do not add duplicate paths in case the default compilers for cpp and c are the same
-                if (this.compilerPaths.indexOf(compiler.path) === -1) {
-                    this.compilerPaths.push(compiler.path);
+                // Normalize path separators.
+                let path: string = compiler.path;
+                if (pathSeparator === "Forward Slash") {
+                    path = path.replace(/\\/g, '/');
+                } else {
+                    path = path.replace(/\//g, '\\');
+                }
+                // Do not add duplicate paths in case the default compilers for cpp and c are the same.
+                if (this.compilerPaths.indexOf(path) === -1) {
+                    this.compilerPaths.push(path);
                 }
             }
         }
