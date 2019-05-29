@@ -373,10 +373,10 @@ export class ColorizationSettings {
 
     public updateGrammars(): void {
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.textMateColorization === "Enabled") {
-            this.useStandardGrammars();
-        } else {
+        if (settings.textMateColorization === "Disabled") {
             this.useEmptyGrammars();
+        } else {
+            this.useStandardGrammars();
         }
     }
 }
