@@ -212,8 +212,8 @@ export class ColorizationSettings {
         this.calculateStyleForToken(TokenKind.LocalVariable, "variable.other.local", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Parameter, "variable.parameter", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Type, "entity.name.type", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.RefType, "entity.name.type.class.reference", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.ValueType, "entity.name.type.class.value", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.RefType, "entity.name.class.reference", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.ValueType, "entity.name.class.value", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Function, "entity.name.function", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.MemberFunction, "entity.name.function.member", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.MemberField, "variable.other.member", themeName, textMateRules);
@@ -221,8 +221,8 @@ export class ColorizationSettings {
         this.calculateStyleForToken(TokenKind.StaticMemberField, "variable.other.member.static", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Property, "variable.other.property", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Event, "variable.other.event", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.ClassTemplate, "entity.name.type.class.template", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.GenericType, "entity.name.type.class.generic", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.ClassTemplate, "entity.name.class.template", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.GenericType, "entity.name.class.generic", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.FunctionTemplate, "entity.name.function.template", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Namespace, "entity.name.namespace", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Label, "entity.name.label", themeName, textMateRules);
