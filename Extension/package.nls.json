@@ -17,6 +17,7 @@
     "c_cpp.command.resumeParsing.title": "Resume parsing",
     "c_cpp.command.showParsingCommands.title": "Show parsing commands",
     "c_cpp.command.takeSurvey.title": "Take survey",
-    "c_cpp.command.BuildAndDebugActiveFile.title": "Build and Debug active file",
+    "c_cpp.command.buildAndDebugActiveFile.title": "Build and Debug Active File",
+    "c_cpp.command.logDiagnostics.title": "Log Diagnostics",
     "c_cpp.command.VCPkgClipboardInstallSuggestedCommand.title": "Copy vcpkg install command to clipboard"
 }
