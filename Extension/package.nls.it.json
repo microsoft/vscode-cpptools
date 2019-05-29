@@ -19,5 +19,5 @@
     "c_cpp.command.takeSurvey.title": "Partecipa al sondaggio",
     "c_cpp.command.buildAndDebugActiveFile.title": "Compila ed esegui il debug del file attivo",
     "c_cpp.command.logDiagnostics.title": "Registra diagnostica",
-    "c_cpp.command.rescanFolder.title": "Ripetere l'analisi della cartella"
+    "c_cpp.command.rescanWorkspace.title": "Ripetere l'analisi dell'area di lavoro"
 }

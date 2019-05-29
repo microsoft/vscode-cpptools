@@ -35,7 +35,7 @@ class TemporaryCommandRegistrar {
         "C_Cpp.ShowParsingCommands",
         "C_Cpp.TakeSurvey",
         "C_Cpp.LogDiagnostics",
-        "C_Cpp.RescanFolder",
+        "C_Cpp.RescanWorkspace",
     ];
 
     constructor() {

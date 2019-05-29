@@ -19,5 +19,5 @@
     "c_cpp.command.takeSurvey.title": "Take survey",
     "c_cpp.command.buildAndDebugActiveFile.title": "Build and debug active file",
     "c_cpp.command.logDiagnostics.title": "Log diagnostics",
-    "c_cpp.command.rescanFolder.title": "Rescan folder"
+    "c_cpp.command.rescanWorkspace.title": "Rescan workspace"
 }

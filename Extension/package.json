@@ -600,8 +600,8 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.RescanFolder",
-        "title": "%c_cpp.command.rescanFolder.title%",
+        "command": "C_Cpp.RescanWorkspace",
+        "title": "%c_cpp.command.rescanWorkspace.title%",
         "category": "C/C++"
       }
     ],
