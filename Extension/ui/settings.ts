@@ -5,7 +5,7 @@
 'use strict';
 
 const elementId: { [key: string]: string } = {
-    activeConfig: "activeConfig",
+    configName: "configName",
     compilerPath: "compilerPath",
     intelliSenseMode: "intelliSenseMode", 
     includePath: "includePath",
@@ -34,7 +34,7 @@ class SettingsApp {
 
         window.addEventListener('message', this.onMessageReceived.bind(this));
 
-        document.getElementById(elementId.activeConfig).addEventListener("change", this.onChanged.bind(this, elementId.activeConfig));
+        document.getElementById(elementId.configName).addEventListener("change", this.onChanged.bind(this, elementId.configName));
         
         document.getElementById(elementId.compilerPath).addEventListener("change", this.onChanged.bind(this, elementId.compilerPath));
         document.getElementById(elementId.intelliSenseMode).addEventListener("change", this.onChanged.bind(this, elementId.intelliSenseMode));
