@@ -995,21 +995,25 @@ function onTakeSurvey(): void {
 }
 
 async function onVcpkgClipboardInstallSuggested(port: string): Promise<void> {
-    let triplets: string;
-
-    let platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    let triplets: string[];
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     switch (platformInfo.platform) {
         case 'win32':
-            triplets = 'x86-windows,x64-windows';
+            triplets = ['x86-windows', 'x64-windows'];
             break;
         case 'darwin':
-            triplets = 'x64-osx';
+            triplets = ['x64-osx'];
             break;
         default:
-            triplets = 'x64-linux';
+            triplets = ['x64-linux'];
     }
 
-    return vscode.env.clipboard.writeText(`vcpkg install ${port}:${triplets}`);
+    let installCommand: string = 'vcpkg install';
+    triplets.forEach(triplet => {
+        installCommand += ` ${port}:${triplet}`;
+    });
+
+    return vscode.env.clipboard.writeText(installCommand);
 }
 
 function onGetActiveConfigName(): Thenable<string> {
