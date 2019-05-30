@@ -46,13 +46,14 @@
     "problemMatchers": [
       {
         "name": "gcc",
+        "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
           "relative",
           "${workspaceFolder}"
         ],
         "pattern": {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error|fatal\\s+error):\\s+(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
