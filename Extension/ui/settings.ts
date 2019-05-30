@@ -14,7 +14,8 @@ const elementId: { [key: string]: string } = {
     cppStandard: "cppStandard",
     compilerPathInvalid: "compilerPathInvalid",
     intelliSenseModeInvalid: "intelliSenseModeInvalid",
-    includePathInvalid: "includePathInvalid"
+    includePathInvalid: "includePathInvalid",
+    knownCompilers: "knownCompilers"
 };
 
 interface VsCodeApi {
@@ -44,6 +45,14 @@ class SettingsApp {
 
         document.getElementById(elementId.cStandard).addEventListener("change", this.onChanged.bind(this, elementId.cStandard));
         document.getElementById(elementId.cppStandard).addEventListener("change", this.onChanged.bind(this, elementId.cppStandard));
+
+        document.getElementById(elementId.knownCompilers).addEventListener("change", this.onKnownCompilerSelect.bind(this));
+    }
+
+    private onKnownCompilerSelect(): void {
+        const x: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
+        (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = x.value;
+        this.onChanged(elementId.compilerPath);
     }
 
     private onChanged(id: string): void {
@@ -66,8 +75,11 @@ class SettingsApp {
                 this.updateConfig(message.config);
                 break;
             case 'updateErrors':
-                 this.updateErrors(message.errors);
-                 break;
+                this.updateErrors(message.errors);
+                break;
+            case 'setKnownCompilers':
+                this.setKnownCompilers(message.compilers);
+                break;
         }
     }
 
@@ -95,25 +107,49 @@ class SettingsApp {
     private updateErrors(errors: any): void {
         this.updating = true;
         try {
-            this.showErrorWithInfo(elementId.intelliSenseModeInvalid, 
-                    errors.intelliSenseMode ? true : false, 
-                    errors.intelliSenseMode);
-
-            this.showErrorWithInfo(elementId.compilerPathInvalid, 
-                    errors.compilerPath ? true : false, 
-                    errors.compilerPath);
-
-            this.showErrorWithInfo(elementId.includePathInvalid, 
-                    errors.includePath ? true : false, 
-                    errors.includePath);
+            this.showErrorWithInfo(elementId.intelliSenseModeInvalid, errors.intelliSenseMode);
+            this.showErrorWithInfo(elementId.compilerPathInvalid, errors.compilerPath);
+            this.showErrorWithInfo(elementId.includePathInvalid, errors.includePath);
         } finally {
             this.updating = false;
         }
     }
 
-    private showErrorWithInfo(elementID: string, show: boolean, errorInfo: string): void {
-         document.getElementById(elementID).style.visibility = show ? "visible" : "hidden";
+    private showErrorWithInfo(elementID: string, errorInfo: string): void {
+         document.getElementById(elementID).style.visibility = errorInfo ? "visible" : "hidden";
          document.getElementById(elementID).innerHTML = errorInfo ? errorInfo : "";
+    }
+
+    private setKnownCompilers(compilers: string[]): void {
+        let list: HTMLElement = document.getElementById(elementId.knownCompilers);
+
+        // No need to add items unless webview is reloaded, in which case it will not have any elements.
+        // Otherwise, add items again.
+        if (list.firstChild) {
+           return;
+        }
+
+        if (compilers.length === 0) {
+            const noCompilers: string = "(No compiler paths detected)";
+            let option: HTMLOptionElement = document.createElement("option");
+            option.text = noCompilers;
+            option.value = noCompilers;
+            list.append(option);
+            
+            // Set the selection to this one item so that no selection change event will be fired
+            (<HTMLInputElement>list).value = noCompilers;
+            return;
+        }
+
+        for (let path of compilers) {
+            let option: HTMLOptionElement = document.createElement("option");
+            option.text = path;
+            option.value = path;
+            list.append(option);
+        }
+
+        // Initialize list with no selected item
+        (<HTMLInputElement>list).value = "";
     }
 }
 
