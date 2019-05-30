@@ -24,6 +24,7 @@ const elementId: { [key: string]: string } = {
 
 export class SettingsPanel {
     private configValues: config.Configuration;
+    private compilerPaths: string[] = [];
     private isIntelliSenseModeDefined: boolean = false;
     private settingsPanelActivated = new vscode.EventEmitter<void>();
     private configValuesChanged = new vscode.EventEmitter<void>();
@@ -103,6 +104,24 @@ export class SettingsPanel {
         }
     }
 
+    public setKnownCompilers(knownCompilers: config.KnownCompiler[], pathSeparator: string): void {
+        if (knownCompilers.length > 0) {
+            for (let compiler of knownCompilers) {
+                // Normalize path separators.
+                let path: string = compiler.path;
+                if (pathSeparator === "Forward Slash") {
+                    path = path.replace(/\\/g, '/');
+                } else {
+                    path = path.replace(/\//g, '\\');
+                }
+                // Do not add duplicate paths in case the default compilers for cpp and c are the same.
+                if (this.compilerPaths.indexOf(path) === -1) {
+                    this.compilerPaths.push(path);
+                }
+            }
+        }
+    }
+
     public updateErrors(errors: config.ConfigurationErrors): void {
         if (this.panel) {
             this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
@@ -138,9 +157,9 @@ export class SettingsPanel {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-            // Send a message to the webview to update the values and errors
-           this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
-           this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
+            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
+            this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
         }
     }
 

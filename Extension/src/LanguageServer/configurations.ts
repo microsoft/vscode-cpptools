@@ -644,7 +644,9 @@ export class CppProperties {
                 if (this.parsePropertiesFile(false)) {
                     // Parse successful, show UI
                     if (this.settingsPanel === undefined) {
+                        let settings: CppSettings = new CppSettings(this.rootUri);
                         this.settingsPanel = new SettingsPanel();
+                        this.settingsPanel.setKnownCompilers(this.knownCompilers, settings.preferredPathSeparator);
                         this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
                         this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());
                         this.disposables.push(this.settingsPanel);
