@@ -103,6 +103,11 @@ export function fileIsCOrCppSource(file: string): boolean {
     return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
 }
 
+export function isEditorFileCpp(file: string): boolean {
+    let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
+    return editor && editor.document.languageId === "cpp";
+}
+
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.
@@ -836,4 +841,39 @@ export function escapeForSquiggles(s: string): string {
         newResults += "\\";
     }
     return newResults;
+}
+
+export class BlockingTask<T> {
+    private dependency: BlockingTask<any>;
+    private done: boolean = false;
+    private promise: Thenable<T>;
+
+    constructor(task: () => Thenable<T>, dependency?: BlockingTask<any>) {
+        if (!dependency) {
+            this.promise = task();
+        } else {
+            this.dependency = dependency;
+            this.promise = new Promise<T>((resolve, reject) => {
+                let f1: () => void = () => {
+                    task().then(resolve, reject);
+                };
+                let f2: (err: any) => void = (err) => {
+                    console.log(err);
+                    task().then(resolve, reject);
+                };
+                this.dependency.promise.then(f1, f2);
+            });
+        }
+    }
+
+    public get Done(): boolean {
+        return this.done;
+    }
+
+    public then<T2>(onSucceeded: (value: T) => T2, onRejected?: (err) => any): Thenable<T2> {
+        if (onRejected) {
+            return this.promise.then(onSucceeded, onRejected);
+        }
+        return this.promise.then(onSucceeded);
+    }
 }
