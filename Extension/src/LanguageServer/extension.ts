@@ -355,9 +355,14 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  *********************************************/
 
-function onDidChangeSettings(): void {
-    const changedActiveClientSettings: { [key: string] : string } = clients.ActiveClient.onDidChangeSettings();
-    clients.forEach(client => client.onDidChangeSettings());
+function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
+    let activeClient: Client = clients.ActiveClient;
+    const changedActiveClientSettings: { [key: string] : string } = activeClient.onDidChangeSettings(event);
+    clients.forEach(client => {
+        if (client !== activeClient) {
+            client.onDidChangeSettings(event);
+        }
+    });
 
     const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
     if (newUpdateChannel) {
