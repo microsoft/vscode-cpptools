@@ -332,7 +332,7 @@ class DefaultClient implements Client {
         this.storagePath = util.extensionContext ? util.extensionContext.storagePath :
             path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.storagePath = path.join(this.storagePath, this.getName(this.rootFolder));
+            this.storagePath = path.join(this.storagePath, String(workspaceFolder.index));
         }
         try {
             let languageClient: LanguageClient = this.createLanguageClient(allClients);
