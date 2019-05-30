@@ -1485,14 +1485,14 @@
     "jsonc-parser": "^2.1.0",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
+    "plist": "^2.0.1",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^2.1.2",
     "vscode-debugadapter": "^1.34.0",
     "vscode-debugprotocol": "^1.34.0",
     "vscode-extension-telemetry": "^0.1.1",
     "vscode-languageclient": "^5.2.1",
-    "yauzl": "^2.10.0",
-    "plist": "^2.0.1"
+    "yauzl": "^2.10.0"
   },
   "runtimeDependencies": [
     {
