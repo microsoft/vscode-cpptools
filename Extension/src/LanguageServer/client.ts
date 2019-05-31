@@ -327,12 +327,25 @@ class DefaultClient implements Client {
 
     private pendingTask: util.BlockingTask<any>;
 
+    private getUniqueWorkspaceStorageName(workspaceFolder?: vscode.WorkspaceFolder) : string {
+        let workspaceFolderName: string = this.getName(workspaceFolder);
+        if (!workspaceFolder || workspaceFolder.index < 1) {
+            return workspaceFolderName; // No duplicate names to search for.
+        }
+        for (let i: number = 0; i < workspaceFolder.index; ++i) {
+            if (vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
+                return path.join(workspaceFolderName, String(workspaceFolder.index)); // Use the index as a subfolder.
+            }
+        }
+        return workspaceFolderName; // No duplicate names found.
+    }
+
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
         this.storagePath = util.extensionContext ? util.extensionContext.storagePath :
             path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.storagePath = path.join(this.storagePath, this.getName(this.rootFolder));
+            this.storagePath = path.join(this.storagePath, this.getUniqueWorkspaceStorageName(this.rootFolder));
         }
         try {
             let languageClient: LanguageClient = this.createLanguageClient(allClients);
