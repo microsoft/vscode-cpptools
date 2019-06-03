@@ -198,7 +198,7 @@
         },
         "envFile": { 
           "type": "string", 
-          "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs sepearted by an equals sign per line. E.g. KEY=VALUE", 
+          "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE", 
           "default": "${workspaceFolder}/.env"
         },
         "additionalSOLibSearchPath": {
@@ -436,7 +436,7 @@
         },
         "envFile": { 
           "type": "string", 
-          "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs sepearted by an equals sign per line. E.g. KEY=VALUE", 
+          "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE", 
           "default": "${workspaceFolder}/.env"
         },
         "symbolSearchPath": {
