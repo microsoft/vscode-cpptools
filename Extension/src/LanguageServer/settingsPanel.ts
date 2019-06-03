@@ -23,27 +23,39 @@ const elementId: { [key: string]: string } = {
 };
 
 export class SettingsPanel {
-    private configValues: config.Configuration;
-    private compilerPaths: string[] = [];
-    private isIntelliSenseModeDefined: boolean = false;
+    private telemetry: { [key: string]: number } = {};
+    private disposable: vscode.Disposable = undefined;
+
+    // Events
     private settingsPanelActivated = new vscode.EventEmitter<void>();
     private configValuesChanged = new vscode.EventEmitter<void>();
+    private configSelectionChanged = new vscode.EventEmitter<void>();
+    private addConfigRequested = new vscode.EventEmitter<string>();
+
+    // Configuration data
+    private configValues: config.Configuration;
+    private isIntelliSenseModeDefined: boolean = false;
+    private configIndexSelected: number = 0;
+    private configSelection: string[] = [];
+    private compilerPaths: string[] = [];
+
+    // WebviewPanel objects
     private panel: vscode.WebviewPanel;
-    private disposable: vscode.Disposable = undefined;
     private disposablesPanel: vscode.Disposable = undefined;
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
-    private telemetry: { [key: string]: number } = {};
 
     constructor() {
         this.configValues = { name: undefined };
         this.disposable = vscode.Disposable.from(
             this.settingsPanelActivated,
-            this.configValuesChanged
+            this.configValuesChanged,
+            this.configSelectionChanged,
+            this.addConfigRequested
         );
     }
 
-    public createOrShow(activeConfiguration: config.Configuration, errors: config.ConfigurationErrors): void {
+    public createOrShow(configSelection: string[], activeConfiguration: config.Configuration, errors: config.ConfigurationErrors): void {
         const column: vscode.ViewColumn = vscode.window.activeTextEditor
                 ? vscode.window.activeTextEditor.viewColumn
                 : undefined;
@@ -83,7 +95,7 @@ export class SettingsPanel {
 
         this.panel.webview.html = this.getHtml();
 
-        this.updateWebview(activeConfiguration, errors);
+        this.updateWebview(configSelection, activeConfiguration, errors);
     }
 
     public get SettingsPanelActivated(): vscode.Event<void> { 
@@ -94,13 +106,29 @@ export class SettingsPanel {
         return this.configValuesChanged.event;
     }
 
+    public get ConfigSelectionChanged(): vscode.Event<void> {
+        return this.configSelectionChanged.event;
+    }
+
+    public get AddConfigRequested(): vscode.Event<string> {
+        return this.addConfigRequested.event;
+    }
+
+    public get selectedConfigIndex(): number {
+        return this.configIndexSelected;
+    }
+
+    public set selectedConfigIndex(index: number) {
+        this.configIndexSelected = index;
+    }
+
     public getLastValuesFromConfigUI(): config.Configuration {
         return this.configValues;
     }
 
-    public updateConfigUI(configuration: config.Configuration, errors: config.ConfigurationErrors): void {
+    public updateConfigUI(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
         if (this.panel) {
-            this.updateWebview(configuration, errors);
+            this.updateWebview(configSelection, configuration, errors);
         }
     }
 
@@ -153,13 +181,16 @@ export class SettingsPanel {
         }
     }
 
-    private updateWebview(configuration: config.Configuration, errors: config.ConfigurationErrors): void {
+    private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
             this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
+            this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected});
             this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
-            this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+            if (errors !== null) {
+                this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+            }
         }
     }
 
@@ -182,7 +213,23 @@ export class SettingsPanel {
         switch (message.command) {
             case 'change':
                 this.updateConfig(message);
+                break;
+            case 'configSelect':
+                this.configSelect(message.index);
+                break;
+            case 'addConfig':
+                this.addConfig(message.name);
+                break;
         }
+    }
+
+    private addConfig(name: string): void {
+        this.addConfigRequested.fire(name);
+    }
+
+    private configSelect(index: number): void {
+        this.configIndexSelected = index;
+        this.configSelectionChanged.fire();
     }
 
     private updateConfig(message: any): void {

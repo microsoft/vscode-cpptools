@@ -227,22 +227,6 @@ export class CppProperties {
 
     private onSelectionChanged(): void {
         this.selectionChanged.fire(this.CurrentConfigurationIndex);
-        if (this.settingsPanel) {
-            this.ensurePropertiesFile().then(() => {
-                if (this.propertiesFile) {
-                    // Clear out any modifications we may have made internally by parsing the json file
-                    if (this.parsePropertiesFile(false)) {
-                        // Update the UI with new selected configuration
-                        this.settingsPanel.updateConfigUI(
-                            this.configurationJson.configurations[this.currentConfigurationIndex.Value],
-                            this.getErrorsForConfigUI());
-                    } else {
-                        // Parse failed, open json file
-                        vscode.workspace.openTextDocument(this.propertiesFile);
-                    }
-                }
-            });
-        }
         this.handleSquiggles();
     }
 
@@ -397,20 +381,20 @@ export class CppProperties {
         }
     }
 
-    private isCompilerIntelliSenseModeCompatible(): boolean {
+    private isCompilerIntelliSenseModeCompatible(configuration: Configuration): boolean {
         // Check if intelliSenseMode and compilerPath are compatible
         // cl.exe and msvc mode should be used together
         // Ignore if compiler path is not set or intelliSenseMode is not set
-        if (this.CurrentConfiguration.compilerPath === undefined ||
-            this.CurrentConfiguration.compilerPath === "" ||
-            this.CurrentConfiguration.compilerPath === "${default}" ||
-            this.CurrentConfiguration.intelliSenseMode === undefined || 
-            this.CurrentConfiguration.intelliSenseMode === "" || 
-            this.CurrentConfiguration.intelliSenseMode === "${default}")  {
+        if (configuration.compilerPath === undefined ||
+            configuration.compilerPath === "" ||
+            configuration.compilerPath === "${default}" ||
+            configuration.intelliSenseMode === undefined || 
+            configuration.intelliSenseMode === "" || 
+            configuration.intelliSenseMode === "${default}") {
             return true;
         }
-        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(this.CurrentConfiguration.compilerPath);
-        return compilerPathAndArgs.compilerPath.endsWith("cl.exe") === (this.CurrentConfiguration.intelliSenseMode === "msvc-x64");
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(configuration.compilerPath);
+        return compilerPathAndArgs.compilerPath.endsWith("cl.exe") === (configuration.intelliSenseMode === "msvc-x64");
     }
 
     public addToIncludePathCommand(path: string): void {
@@ -635,6 +619,25 @@ export class CppProperties {
         });
     }
 
+    private ensureSettingsPanelInitlialized(): void {
+        if (this.settingsPanel === undefined) {
+            let settings: CppSettings = new CppSettings(this.rootUri);
+            this.settingsPanel = new SettingsPanel(); // set initial this.currentConfigurationIndex.Value
+            this.settingsPanel.setKnownCompilers(this.knownCompilers, settings.preferredPathSeparator);
+            this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
+            this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());
+            this.settingsPanel.ConfigSelectionChanged(() => this.onConfigSelectionChanged());
+            this.settingsPanel.AddConfigRequested((e) => this.onAddConfigRequested(e));
+            this.disposables.push(this.settingsPanel);
+        }
+    }
+
+    private onConfigSelectionChanged(): void {
+        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+    }
+
     public handleConfigurationEditUICommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             if (this.propertiesFile) {
@@ -642,18 +645,13 @@ export class CppProperties {
                     onCreation();
                 }
                 if (this.parsePropertiesFile(false)) {
-                    // Parse successful, show UI
-                    if (this.settingsPanel === undefined) {
-                        let settings: CppSettings = new CppSettings(this.rootUri);
-                        this.settingsPanel = new SettingsPanel();
-                        this.settingsPanel.setKnownCompilers(this.knownCompilers, settings.preferredPathSeparator);
-                        this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
-                        this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());
-                        this.disposables.push(this.settingsPanel);
-                    }
-                    this.settingsPanel.createOrShow(
-                        this.configurationJson.configurations[this.currentConfigurationIndex.Value],
-                        this.getErrorsForConfigUI());
+                    this.ensureSettingsPanelInitlialized();
+
+                    // Use the active configuration as the default selected configuration to load on UI editor
+                    this.settingsPanel.selectedConfigIndex = this.currentConfigurationIndex.Value;
+                    this.settingsPanel.createOrShow(this.ConfigurationNames,
+                        this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                        this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                 } else {
                     // Parse failed, open json file
                     vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
@@ -673,9 +671,12 @@ export class CppProperties {
                     if (this.parsePropertiesFile(false)) {
                         // The settings UI became visible or active.
                         // Ensure settingsPanel has copy of latest current configuration
-                        this.settingsPanel.updateConfigUI(
-                            this.configurationJson.configurations[this.currentConfigurationIndex.Value],
-                            this.getErrorsForConfigUI());
+                        if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
+                            this.settingsPanel.selectedConfigIndex = this.currentConfigurationIndex.Value;
+                        }
+                        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                     } else {
                         // Parse failed, open json file
                         vscode.workspace.openTextDocument(this.propertiesFile);
@@ -685,11 +686,80 @@ export class CppProperties {
         }
     }
 
+    private onAddConfigRequested(configName: string): void {
+        this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
+
+        // Create default config
+        let newConfig: Configuration = { name: configName };
+        this.applyDefaultConfigurationValues(newConfig);
+        this.configurationJson.configurations.push(newConfig);
+
+        this.settingsPanel.selectedConfigIndex = this.configurationJson.configurations.length - 1;
+        delete this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].knownCompilers;
+
+        // Update UI
+        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+            null);
+
+        // Save new config to file
+        this.writeToJson();
+    }
+
+    private applyDefaultConfigurationValues(configuration: Configuration): void {
+        let settings: CppSettings = new CppSettings(this.rootUri);
+        let isUnset: (input: any) => boolean = (input: any) => {
+                // default values for "default" config settings is null.
+                return input === null;
+        };
+
+        // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
+        // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
+            // to the setting will be lost if this configuration is saved into a c_cpp_properties.json file.
+
+            // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
+
+            if (isUnset(settings.defaultIncludePath)) {
+                // We don't add system includes to the includePath anymore. The language server has this information.
+                let abTestSettings: ABTestSettings = getABTestSettings();
+                let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+                configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
+            }
+            // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
+            if (isUnset(settings.defaultDefines)) {
+                configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
+            }
+            if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
+                configuration.macFrameworkPath = this.defaultFrameworks;
+            }
+            if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
+                configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+            }
+            if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
+                isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
+                // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
+                // don't set a default when compileCommands is in use.
+                configuration.compilerPath = this.defaultCompilerPath;
+            }
+            if (this.knownCompilers) {
+                configuration.knownCompilers = this.knownCompilers;
+            }
+            if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
+                configuration.cStandard = this.defaultCStandard;
+            }
+            if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
+                configuration.cppStandard = this.defaultCppStandard;
+            }
+            if (isUnset(settings.defaultIntelliSenseMode)) {
+                configuration.intelliSenseMode = this.defaultIntelliSenseMode;
+            }
+    }
+
     private saveConfigurationUI(): void {
         this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
         let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
-        this.configurationJson.configurations[this.currentConfigurationIndex.Value] = config;
-        this.settingsPanel.updateErrors(this.getErrorsForConfigUI());
+        this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
+        this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
         this.writeToJson();
     }
 
@@ -885,12 +955,14 @@ export class CppProperties {
         return result;
     }
 
-    private getErrorsForConfigUI(): ConfigurationErrors {
+    private getErrorsForConfigUI(configIndex: number): ConfigurationErrors {
         let errors: ConfigurationErrors = {};
         const isWindows: boolean = os.platform() === 'win32';
 
+        let config: Configuration = this.configurationJson.configurations[configIndex];
+
         // Validate compilerPath
-        let resolvedCompilerPath: string = this.resolvePath(this.CurrentConfiguration.compilerPath, isWindows);
+        let resolvedCompilerPath: string = this.resolvePath(config.compilerPath, isWindows);
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         if (resolvedCompilerPath &&
             // Don't error cl.exe paths because it could be for an older preview build.
@@ -949,8 +1021,8 @@ export class CppProperties {
 
         // Validate includePath
         let includePathErrors: string[] = [];
-        if (this.CurrentConfiguration.includePath) {
-            for (let includePath of this.CurrentConfiguration.includePath) {
+        if (config.includePath) {
+            for (let includePath of config.includePath) {
                 let pathExists: boolean = true;
                 let resolvedIncludePath: string = this.resolvePath(includePath, isWindows);
                 if (!resolvedIncludePath) {
@@ -987,8 +1059,8 @@ export class CppProperties {
         }
 
         // Validate intelliSenseMode
-        if (isWindows && !this.isCompilerIntelliSenseModeCompatible()) {
-            errors.intelliSenseMode = `IntelliSense mode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compiler path.`;
+        if (isWindows && !this.isCompilerIntelliSenseModeCompatible(config)) {
+            errors.intelliSenseMode = `IntelliSense mode ${config.intelliSenseMode} is incompatible with compiler path.`;
         }
 
         return errors;
@@ -1055,7 +1127,7 @@ export class CppProperties {
                     const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
-                    if (!this.isCompilerIntelliSenseModeCompatible()) {
+                    if (!this.isCompilerIntelliSenseModeCompatible(this.CurrentConfiguration)) {
                         let message: string = `intelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),

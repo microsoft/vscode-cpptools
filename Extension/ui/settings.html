@@ -102,6 +102,11 @@
             outline-offset: -1px
         }
 
+        button:focus {
+            outline: 1px solid -webkit-focus-ring-color;
+            outline-offset: 2px
+        }
+
         hr {
             border: 0;
             height: 1px;
@@ -120,6 +125,10 @@
 
         a:hover {
             text-decoration: underline
+        }
+
+        ::placeholder {
+            color: var(--vscode-input-placeholderForeground);
         }
 
         input {
@@ -143,6 +152,18 @@
             border: 1px solid var(--vscode-settings-textInputBorder);
         }
 
+        button {
+            color: var(--vscode-button-foreground);
+            background: var(--vscode-button-background);
+            border: 0px;
+            padding: 6px 14px;
+        }
+
+        button:hover {
+            background: var(--vscode-button-hoverBackground);
+            border: 0px;
+        }
+
         .select-default {
             width: 300px;
             height: 27px;
@@ -157,7 +178,7 @@
             position: relative;
             background-color: var(--vscode-settings-textInputBackground);
             width: 800px;
-            height: 30px;
+            height: 31px;
         }
 
         .select-editable select {
@@ -165,7 +186,7 @@
             font-size: 13px;
             font-family: sans-serif;
             border: 1px solid var(--vscode-settings-textInputBorder);
-            height: 30px;
+            height: 31px;
             margin: auto;
             color: var(--vscode-settings-textInputForeground);
             background: var(--vscode-settings-textInputBackground);
@@ -177,7 +198,7 @@
             left: 1px;
             right: 1px;
             bottom: 1px;
-            height: 16px;
+            height: 17px;
             font-size: 13px;
             border: none;
             color: var(--vscode-settings-textInputForeground);
@@ -258,6 +279,12 @@
             background-color: transparent;
             color: #fff;
             border: solid 1px rgb(255, 255, 255);
+        }
+
+        .vscode-high-contrast button {
+            color:  var(--vscode-button-foreground);
+            background-color: var(--vscode-button-background);
+            border: solid 1px var(--vscode-contrastBorder);
         }
 
         .vscode-high-contrast code > div {
@@ -367,7 +394,7 @@
       <div class="main-title">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
         Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
-        Changes made in this editor only apply to the active configuration. To modify other configurations <a href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">change the active configuration</a>. 
+        Changes made in this editor only apply to the selected configuration name. 
         To edit multiple configurations at once, or additional settings not shown here, go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
     </div>
@@ -380,11 +407,31 @@
       <div class="section-title">Configuration name</div>
       <div class="section-text">
         A friendly name that identifies a configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything.
-        To edit the name of the current active configuration, go to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file and edit the <code>name</code> property.
       </div>
-      <div><input class="input-disabled" type="text" id=configName style="width: 290px" disabled>
-      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">Change the active configuration</a>
-    </div> 
+      <div>
+
+        <div class="section-note">Select a configuration set to edit.</div>
+        <table>
+        <tr style="vertical-align: top;">
+        <td> <!-- select configuration name -->
+            <div class="select-editable" style="width: 300px; margin-right: 10px">
+                <select id="configSelection" style="width: 300px"></select>
+                <input id=configName style="width: 267px" type="text"/>
+            </div>
+        </td>
+        <td> <!-- input configuration name -->
+            <div id=addConfigDiv style="visibility: visible; position: absolute;">
+                <button id=addConfigBtn>Add Configuration</button>
+            </div>
+            <div id=addConfigInputDiv style="visibility: hidden; position: absolute; width: 400px;">
+                <input id=addConfigName type=text style="width: 200px; margin-right: 6px" placeholder="Configuration name..."/> 
+                <button id=addConfigOk style="margin-right: 6px">OK</button>
+                <button id=addConfigCancel>CANCEL</button>
+            </div>
+        </td>
+        </tr>
+        </table>
+      </div> 
     </div>
 
     <div class="section">
@@ -395,10 +442,10 @@
         </div>
         <!-- input compilerPath -->
         <div class="section-note">Specify a compiler path or select a detected compiler path from the drop-down list.</div>
-        <div class="select-editable">
-          <select id="knownCompilers" style="width: 810px"></select>
-          <input id="compilerPath" style="width: 777px" type="text"/>
-        </div>
+            <div class="select-editable">
+                <select id="knownCompilers" style="width: 810px"></select>
+                <input id="compilerPath" style="width: 777px" type="text"/>
+            </div>
         <div id="compilerPathInvalid" class="error" style="width: 800px"></div>
         <!-- input compilerPath end -->
     </div>
