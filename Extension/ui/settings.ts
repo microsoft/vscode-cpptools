@@ -6,23 +6,25 @@
 
 const elementId: { [key: string]: string } = {
     configName: "configName",
-    compilerPath: "compilerPath",
-    intelliSenseMode: "intelliSenseMode", 
-    includePath: "includePath",
-    defines: "defines",
-    cStandard: "cStandard",
-    cppStandard: "cppStandard",
-    compilerPathInvalid: "compilerPathInvalid",
-    intelliSenseModeInvalid: "intelliSenseModeInvalid",
-    includePathInvalid: "includePathInvalid",
-    knownCompilers: "knownCompilers",
     configSelection: "configSelection",
     addConfigDiv: "addConfigDiv",
     addConfigBtn: "addConfigBtn",
     addConfigInputDiv: "addConfigInputDiv",
     addConfigOk: "addConfigOk",
     addConfigCancel: "addConfigCancel",
-    addConfigName: "addConfigName"
+    addConfigName: "addConfigName",
+
+    compilerPath: "compilerPath",
+    compilerPathInvalid: "compilerPathInvalid",
+    knownCompilers: "knownCompilers",
+
+    intelliSenseMode: "intelliSenseMode",
+    intelliSenseModeInvalid: "intelliSenseModeInvalid",
+    includePath: "includePath",
+    includePathInvalid: "includePathInvalid",
+    defines: "defines",
+    cStandard: "cStandard",
+    cppStandard: "cppStandard",
 };
 
 interface VsCodeApi {
@@ -45,7 +47,13 @@ class SettingsApp {
         document.getElementById(elementId.configName).addEventListener("change", this.onConfigNameChanged.bind(this));
         document.getElementById(elementId.configSelection).addEventListener("change", this.onConfigSelect.bind(this));
 
+        document.getElementById(elementId.addConfigBtn).addEventListener("click", this.onAddConfigBtn.bind(this));
+        document.getElementById(elementId.addConfigOk).addEventListener("click", this.OnAddConfigConfirm.bind(this, true));
+        document.getElementById(elementId.addConfigCancel).addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
+
         document.getElementById(elementId.compilerPath).addEventListener("change", this.onChanged.bind(this, elementId.compilerPath));
+        document.getElementById(elementId.knownCompilers).addEventListener("change", this.onKnownCompilerSelect.bind(this));
+
         document.getElementById(elementId.intelliSenseMode).addEventListener("change", this.onChanged.bind(this, elementId.intelliSenseMode));
 
         document.getElementById(elementId.includePath).addEventListener("change", this.onChanged.bind(this, elementId.includePath));
@@ -53,36 +61,16 @@ class SettingsApp {
 
         document.getElementById(elementId.cStandard).addEventListener("change", this.onChanged.bind(this, elementId.cStandard));
         document.getElementById(elementId.cppStandard).addEventListener("change", this.onChanged.bind(this, elementId.cppStandard));
-
-        document.getElementById(elementId.knownCompilers).addEventListener("change", this.onKnownCompilerSelect.bind(this));
-
-        document.getElementById(elementId.addConfigBtn).addEventListener("click", this.onAddConfigBtn.bind(this));
-        document.getElementById(elementId.addConfigOk).addEventListener("click", this.OnAddConfigConfirm.bind(this, true));
-        document.getElementById(elementId.addConfigCancel).addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
-    }
-
-    private onKnownCompilerSelect(): void {
-        if (this.updating) {
-            return; 
-        }
-
-        const x: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
-        (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = x.value;
-        this.onChanged(elementId.compilerPath);
     }
 
     private onAddConfigBtn(): void {
-        // Hide "Add Configuration" button
-        document.getElementById(elementId.addConfigDiv).style.visibility =  "hidden";
-        // Show input field and buttons
-        document.getElementById(elementId.addConfigInputDiv).style.visibility =  "visible";
+        this.showElement(elementId.addConfigDiv, false);
+        this.showElement(elementId.addConfigInputDiv, true);
     }
 
     private OnAddConfigConfirm(request: boolean): void {
-        // Hide input field and buttons
-        document.getElementById(elementId.addConfigInputDiv).style.visibility =  "hidden";
-        // Show "Add Configuration" button
-        document.getElementById(elementId.addConfigDiv).style.visibility =  "visible";
+        this.showElement(elementId.addConfigInputDiv, false);
+        this.showElement(elementId.addConfigDiv, true);
 
         // If request is yes, send message to create new config 
         if (request) {
@@ -128,6 +116,15 @@ class SettingsApp {
             command: "configSelect",
             index: x.selectedIndex
         });
+    }
+
+    private onKnownCompilerSelect(): void {
+        if (this.updating) {
+            return; 
+        }
+        const x: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
+        (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = x.value;
+        this.onChanged(elementId.compilerPath);
     }
 
     private onChanged(id: string): void {
@@ -194,18 +191,19 @@ class SettingsApp {
     }
 
     private showErrorWithInfo(elementID: string, errorInfo: string): void {
-         document.getElementById(elementID).style.visibility = errorInfo ? "visible" : "hidden";
-         document.getElementById(elementID).innerHTML = errorInfo ? errorInfo : "";
+        this.showElement(elementID, errorInfo ? true : false);
+        document.getElementById(elementID).innerHTML = errorInfo ? errorInfo : "";
     }
 
     private updateConfigSelection(message: any): void {
         this.updating = true;
         try {
-            let list: HTMLElement = document.getElementById(elementId.configSelection);
+            let list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
 
             // Clear list before updating
-            (<HTMLSelectElement>list).options.length = 0;
-    
+            list.options.length = 0;
+
+            // Update list
             for (let name of message.selections) {
                 let option: HTMLOptionElement = document.createElement("option");
                 option.text = name;
@@ -213,7 +211,7 @@ class SettingsApp {
                 list.append(option);
             }
 
-            (<HTMLSelectElement>list).selectedIndex = message.selectedIndex;
+            list.selectedIndex = message.selectedIndex;
         } finally {
             this.updating = false;
         }
@@ -222,7 +220,7 @@ class SettingsApp {
     private setKnownCompilers(compilers: string[]): void {
         this.updating = true;
         try {
-            let list: HTMLElement = document.getElementById(elementId.knownCompilers);
+            let list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
 
             // No need to add items unless webview is reloaded, in which case it will not have any elements.
             // Otherwise, add items again.
@@ -238,7 +236,7 @@ class SettingsApp {
                 list.append(option);
                 
                 // Set the selection to this one item so that no selection change event will be fired
-                (<HTMLInputElement>list).value = noCompilers;
+                list.value = noCompilers;
                 return;
             }
     
@@ -248,12 +246,16 @@ class SettingsApp {
                 option.value = path;
                 list.append(option);
             }
-    
+
             // Initialize list with no selected item
-            (<HTMLInputElement>list).value = "";
+            list.value = "";
         } finally {
             this.updating = false;
         }
+    }
+
+    private showElement(elementID: string, show: boolean): void {
+        document.getElementById(elementID).style.display = show ? "block" : "none";
     }
 }
 
