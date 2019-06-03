@@ -107,6 +107,10 @@
             outline-offset: 2px
         }
 
+        button:active {
+            outline: none;
+        }
+
         hr {
             border: 0;
             height: 1px;
@@ -409,26 +413,27 @@
         A friendly name that identifies a configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything.
       </div>
       <div>
-
         <div class="section-note">Select a configuration set to edit.</div>
         <table>
-        <tr style="vertical-align: top;">
-        <td> <!-- select configuration name -->
-            <div class="select-editable" style="width: 300px; margin-right: 10px">
-                <select id="configSelection" style="width: 300px"></select>
-                <input id=configName style="width: 267px" type="text"/>
-            </div>
-        </td>
-        <td> <!-- input configuration name -->
-            <div id=addConfigDiv style="visibility: visible; position: absolute;">
-                <button id=addConfigBtn>Add Configuration</button>
-            </div>
-            <div id=addConfigInputDiv style="visibility: hidden; position: absolute; width: 400px;">
-                <input id=addConfigName type=text style="width: 200px; margin-right: 6px" placeholder="Configuration name..."/> 
-                <button id=addConfigOk style="margin-right: 6px">OK</button>
-                <button id=addConfigCancel>CANCEL</button>
-            </div>
-        </td>
+            <tr>
+            <!-- select configuration name -->
+            <td>
+                <div class="select-editable" style="width: 300px; margin-right: 10px">
+                    <select id="configSelection" style="width: 300px"></select>
+                    <input id=configName style="width: 267px" type="text"/>
+                </div>
+            </td>
+            <!-- input configuration name -->
+            <td style="vertical-align: middle;">
+                <div id=addConfigDiv style="display: block">
+                    <button id=addConfigBtn >Add Configuration</button>
+                </div>
+                <div id=addConfigInputDiv style="display: none; width: 400px;">
+                    <input id=addConfigName type=text style="width: 200px; margin-right: 6px" placeholder="Configuration name..."/> 
+                    <button id=addConfigOk style="margin-right: 6px">OK</button>
+                    <button id=addConfigCancel>CANCEL</button>
+                </div>
+            </td>
         </tr>
         </table>
       </div> 
