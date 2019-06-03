@@ -257,53 +257,57 @@ export class CppProperties {
      private applyDefaultIncludePathsAndFrameworks(): void {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             let configuration: Configuration = this.CurrentConfiguration;
-            let settings: CppSettings = new CppSettings(this.rootUri);
-            let isUnset: (input: any) => boolean = (input: any) => {
+            this.applyDefaultConfigurationValues(configuration);
+            this.configurationIncomplete = false;
+        }
+    }
+
+    private applyDefaultConfigurationValues(configuration: Configuration): void {
+        let settings: CppSettings = new CppSettings(this.rootUri);
+        let isUnset: (input: any) => boolean = (input: any) => {
                 // default values for "default" config settings is null.
                 return input === null;
-            };
+        };
 
-            // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
-            // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
-            // to the setting will be lost if this configuration is saved into a c_cpp_properties.json file.
+        // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
+        // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
+        // to the setting will be lost if this configuration is saved into a c_cpp_properties.json file.
 
-            // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
+        // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
 
-            if (isUnset(settings.defaultIncludePath)) {
-                // We don't add system includes to the includePath anymore. The language server has this information.
-                let abTestSettings: ABTestSettings = getABTestSettings();
-                let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
-                configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
-            }
-            // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
-            if (isUnset(settings.defaultDefines)) {
-                configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
-            }
-            if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
-                configuration.macFrameworkPath = this.defaultFrameworks;
-            }
-            if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
-                configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
-            }
-            if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
-                isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
-                // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
-                // don't set a default when compileCommands is in use.
-                configuration.compilerPath = this.defaultCompilerPath;
-            }
-            if (this.knownCompilers) {
-                configuration.knownCompilers = this.knownCompilers;
-            }
-            if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
-                configuration.cStandard = this.defaultCStandard;
-            }
-            if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
-                configuration.cppStandard = this.defaultCppStandard;
-            }
-            if (isUnset(settings.defaultIntelliSenseMode)) {
-                configuration.intelliSenseMode = this.defaultIntelliSenseMode;
-            }
-            this.configurationIncomplete = false;
+        if (isUnset(settings.defaultIncludePath)) {
+            // We don't add system includes to the includePath anymore. The language server has this information.
+            let abTestSettings: ABTestSettings = getABTestSettings();
+            let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+            configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
+        }
+        // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
+        if (isUnset(settings.defaultDefines)) {
+            configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
+        }
+        if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
+            configuration.macFrameworkPath = this.defaultFrameworks;
+        }
+        if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
+            configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+        }
+        if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
+            isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
+            // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
+            // don't set a default when compileCommands is in use.
+            configuration.compilerPath = this.defaultCompilerPath;
+        }
+        if (this.knownCompilers) {
+            configuration.knownCompilers = this.knownCompilers;
+        }
+        if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
+            configuration.cStandard = this.defaultCStandard;
+        }
+        if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
+            configuration.cppStandard = this.defaultCppStandard;
+        }
+        if (isUnset(settings.defaultIntelliSenseMode)) {
+            configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
     }
 
@@ -632,12 +636,6 @@ export class CppProperties {
         }
     }
 
-    private onConfigSelectionChanged(): void {
-        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
-            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-    }
-
     public handleConfigurationEditUICommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             if (this.propertiesFile) {
@@ -686,80 +684,36 @@ export class CppProperties {
         }
     }
 
-    private onAddConfigRequested(configName: string): void {
-        this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
-
-        // Create default config
-        let newConfig: Configuration = { name: configName };
-        this.applyDefaultConfigurationValues(newConfig);
-        this.configurationJson.configurations.push(newConfig);
-
-        this.settingsPanel.selectedConfigIndex = this.configurationJson.configurations.length - 1;
-        delete this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].knownCompilers;
-
-        // Update UI
-        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
-            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-            null);
-
-        // Save new config to file
-        this.writeToJson();
-    }
-
-    private applyDefaultConfigurationValues(configuration: Configuration): void {
-        let settings: CppSettings = new CppSettings(this.rootUri);
-        let isUnset: (input: any) => boolean = (input: any) => {
-                // default values for "default" config settings is null.
-                return input === null;
-        };
-
-        // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
-        // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
-            // to the setting will be lost if this configuration is saved into a c_cpp_properties.json file.
-
-            // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
-
-            if (isUnset(settings.defaultIncludePath)) {
-                // We don't add system includes to the includePath anymore. The language server has this information.
-                let abTestSettings: ABTestSettings = getABTestSettings();
-                let rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
-                configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
-            }
-            // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
-            if (isUnset(settings.defaultDefines)) {
-                configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
-            }
-            if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
-                configuration.macFrameworkPath = this.defaultFrameworks;
-            }
-            if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
-                configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
-            }
-            if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
-                isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
-                // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
-                // don't set a default when compileCommands is in use.
-                configuration.compilerPath = this.defaultCompilerPath;
-            }
-            if (this.knownCompilers) {
-                configuration.knownCompilers = this.knownCompilers;
-            }
-            if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
-                configuration.cStandard = this.defaultCStandard;
-            }
-            if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
-                configuration.cppStandard = this.defaultCppStandard;
-            }
-            if (isUnset(settings.defaultIntelliSenseMode)) {
-                configuration.intelliSenseMode = this.defaultIntelliSenseMode;
-            }
-    }
-
     private saveConfigurationUI(): void {
         this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
         let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
         this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
         this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+        this.writeToJson();
+    }
+
+    private onConfigSelectionChanged(): void {
+        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+    }
+
+    private onAddConfigRequested(configName: string): void {
+        this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
+
+        // Create default config and add to list of configurations
+        let newConfig: Configuration = { name: configName };
+        this.applyDefaultConfigurationValues(newConfig);
+        delete newConfig.knownCompilers;
+        this.configurationJson.configurations.push(newConfig);
+
+        // Update UI
+        this.settingsPanel.selectedConfigIndex = this.configurationJson.configurations.length - 1;
+        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+            null);
+
+        // Save new config to file
         this.writeToJson();
     }
 
