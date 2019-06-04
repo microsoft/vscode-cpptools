@@ -179,6 +179,10 @@ interface TypedReferencesResult {
     firstResult: boolean;
 }
 
+interface TypedReferencesResultMessage {
+    typedReferencesResult: TypedReferencesResult;
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -217,7 +221,7 @@ const SemanticColorizationRegionsNotification:  NotificationType<SemanticColoriz
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
-const TypedReferencesNotification: NotificationType<TypedReferencesResult, void> = new NotificationType<TypedReferencesResult, void>('cpptools/typedReferences');
+const TypedReferencesNotification: NotificationType<TypedReferencesResultMessage, void> = new NotificationType<TypedReferencesResultMessage, void>('cpptools/typedReferences');
 
 let failureMessageShown: boolean = false;
 
@@ -947,7 +951,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(SyntacticColorizationRegionsNotification, (e) => this.updateSyntacticColorizationRegions(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(TypedReferencesNotification, (e) => this.processTypedReferences(e));
+        this.languageClient.onNotification(TypedReferencesNotification, (e) => this.processTypedReferences(e.typedReferencesResult));
         this.setupOutputHandlers();
     }
 
