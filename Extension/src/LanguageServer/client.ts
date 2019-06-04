@@ -157,6 +157,28 @@ interface GetDiagnosticsResult {
     diagnostics: string;
 }
 
+enum ReferenceType {
+    // Confirmed, // Confirmed types are returned to via textDocument/references.
+    ConfirmationInProgress,
+    Comment,
+    String,
+    Inactive,
+    CannotConfirm,
+    NotAReference
+}
+
+interface TypedReference {
+    uri: string;
+    position: vscode.Position;
+    text: string;
+    type: ReferenceType;
+}
+
+interface TypedReferencesResult {
+    typedReferences: TypedReference[];
+    firstResult: boolean;
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -195,6 +217,7 @@ const SemanticColorizationRegionsNotification:  NotificationType<SemanticColoriz
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
+const TypedReferencesNotification: NotificationType<TypedReferencesResult, void> = new NotificationType<TypedReferencesResult, void>('cpptools/typedReferences');
 
 let failureMessageShown: boolean = false;
 
@@ -272,6 +295,7 @@ class DefaultClient implements Client {
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
     private diagnosticsChannel: vscode.OutputChannel;
+    private typedReferencesChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
@@ -923,6 +947,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(SyntacticColorizationRegionsNotification, (e) => this.updateSyntacticColorizationRegions(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
+        this.languageClient.onNotification(TypedReferencesNotification, (e) => this.processTypedReferences(e));
         this.setupOutputHandlers();
     }
 
@@ -1492,6 +1517,30 @@ class DefaultClient implements Client {
                 }
             }
         });
+    }
+
+    private convertReferenceTypeToString(referenceType: ReferenceType): string {
+        switch (referenceType) {
+            case ReferenceType.ConfirmationInProgress: return "Possible reference (confirmation in progress)";
+            case ReferenceType.Comment: return "Comment reference";
+            case ReferenceType.String: return "String reference";
+            case ReferenceType.Inactive: return "Inactive reference";
+            case ReferenceType.CannotConfirm: return "Cannot confirm reference";
+            case ReferenceType.NotAReference: return "Not a reference";
+        }
+        return "";
+    }
+
+    private processTypedReferences(typedReferencesResult: TypedReferencesResult): void {
+        if (!this.typedReferencesChannel) {
+            this.typedReferencesChannel = vscode.window.createOutputChannel("C/C++ References");
+            this.disposables.push(this.typedReferencesChannel);
+        }
+        for (let typedReference of typedReferencesResult.typedReferences) {
+            this.typedReferencesChannel.appendLine(this.convertReferenceTypeToString(typedReference.type) + ": " + typedReference.text);
+            this.typedReferencesChannel.appendLine(typedReference.uri + ":" + (typedReference.position.line + 1) + ":" + (typedReference.position.character + 1));
+        }
+        this.typedReferencesChannel.show(true);
     }
 }
 
