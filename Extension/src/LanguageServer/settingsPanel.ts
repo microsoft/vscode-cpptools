@@ -266,6 +266,10 @@ export class SettingsPanel {
 
     private knownCompilerSelect(): void {
         this.logTelementryForElement(elementId.knownCompilers);
+        // Remove one count from compilerPath because selecting a different compiler causes a change on the compiler path
+        if (this.telemetry[elementId.compilerPath]) {
+            this.telemetry[elementId.compilerPath]--;
+        }
     }
 
     private updateConfig(message: any): void {

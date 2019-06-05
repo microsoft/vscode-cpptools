@@ -81,6 +81,7 @@ class SettingsApp {
         document.getElementById(elementId.macFrameworkPath).addEventListener("change", this.onChanged.bind(this, elementId.macFrameworkPath));
         document.getElementById(elementId.compileCommands).addEventListener("change", this.onChanged.bind(this, elementId.compileCommands));
         document.getElementById(elementId.configurationProvider).addEventListener("change", this.onChanged.bind(this, elementId.configurationProvider));
+        document.getElementById(elementId.forcedInclude).addEventListener("change", this.onChanged.bind(this, elementId.forcedInclude));
 
         // Browse properties
         document.getElementById(elementId.browsePath).addEventListener("change", this.onChanged.bind(this, elementId.browsePath));
@@ -163,6 +164,11 @@ class SettingsApp {
         const x: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
         (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = x.value;
         this.onChanged(elementId.compilerPath);
+
+        // Post message that this control was used for telemetry
+        this.vsCodeApi.postMessage({
+            command: "knownCompilerSelect"
+        });
     }
 
     private onChanged(id: string): void {
