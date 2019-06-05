@@ -40,6 +40,41 @@
             padding: 1px 4px 4px 4px;
         }
 
+        .headerBtn,
+        .headerBtn:hover,
+        .headerBtn:active,
+        .headerBtn:focus {
+            cursor: pointer;
+            color: var(--vscode-foreground);
+            background: var(--vscode-background);
+            border: 0px;
+            padding: 0px;
+            outline: none;
+        }
+
+        .headerBtn:focus:not(:hover):not(:active) {
+            outline: 1px solid -webkit-focus-ring-color;
+            outline-offset: 3px;
+        }
+
+        .expand:after {
+            font-weight: bold;
+            float: right;
+            margin-right: 6px;
+            margin-top: -4px;
+            content: '\276E';
+            transform: rotate(90deg);
+        }
+
+        .collapse:after {
+            font-weight: bold;
+            float: right;
+            margin-right: 6px;
+            margin-top: -4px;
+            content: '\276E';
+            transform: rotate(270deg);
+        }
+
         .main {
             max-width: 800px;
             margin-left: 320px;
@@ -94,21 +129,18 @@
             text-decoration: none
         }
 
+        checkbox {
+            color: var(--vscode-settings-checkboxForeground);
+            background: var(--vscode-settings-checkboxForeground);
+            border: var(--vscode-settings-checkboxBorder);
+        }
+
         a:focus,
         input:focus,
         select:focus,
         textarea:focus {
             outline: 1px solid -webkit-focus-ring-color;
             outline-offset: -1px
-        }
-
-        button:focus {
-            outline: 1px solid -webkit-focus-ring-color;
-            outline-offset: 2px
-        }
-
-        button:active {
-            outline: none;
         }
 
         hr {
@@ -166,6 +198,15 @@
         button:hover {
             background: var(--vscode-button-hoverBackground);
             border: 0px;
+        }
+
+        button:focus {
+            outline: 1px solid -webkit-focus-ring-color;
+            outline-offset: 2px
+        }
+
+        button:active {
+            outline: none;
         }
 
         .select-default {
@@ -399,7 +440,7 @@
       <div style="color: var(--vscode-foreground);">
         Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
         Changes made in this editor only apply to the selected configuration name. 
-        To edit multiple configurations at once, or additional settings not shown here, go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
+        To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
     </div>
 
@@ -519,9 +560,107 @@
                 <option value="c++03">c++03</option>
                 <option value="c++98">c++98</option>
             </select>
-        </div> <!-- sections end -->
-
+        </div> 
     </div>
+
+    <hr>
+    <button id=showAdvanced tabindex="0" class="headerBtn expand" style="margin-top: 5px; font-size: 18px; font-weight: 500; width: 100%; text-align: left">
+        Advanced Settings
+    </button>
+    <div style="height: 30px; display: block"></div>
+
+    <div id=advancedSection>
+
+        <div class="section">
+            <div class="section-title">Configuration provider</div>
+            <div class="section-text">
+                The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
+            </div>
+            <div>
+                <input id="configurationProvider" style="width: 300px"></input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Windows SDK version</div>
+            <div class="section-text">
+                Version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.
+            </div>
+            <div>
+                <input id="windowsSdkVersion" style="width: 300px"></input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Mac framework path</div>
+            <div class="section-text">
+                A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.
+            </div>
+            <div>
+                <div class="section-note">One path per line.</div>
+                <textarea id="macFrameworkPath" rows="4" cols="93" style="width: 800px"></textarea>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Forced include</div>
+            <div class="section-text">
+                A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.
+            </div>
+            <div>
+                <div class="section-note">One file per line.</div>
+                <textarea id="forcedInclude" rows="4" cols="93" style="width: 800px"></textarea>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Compile commands</div>
+            <div class="section-text">
+                Full path to <code>compile_commands.json</code> file for the workspace.
+            </div>
+            <div>
+                <input id="compileCommands" style="width: 798px"></input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Browse: path</div>
+            <div class="section-text">
+                A list of paths for the tag parser to use while searching for included headers. 
+                Searching on these paths is recursive by default. Specify <code>*</code> to indicate non-recursive search. 
+                For example: <code>/usr/include</code> will search through all subdirectories while <code>/usr/include/*</code> will not.
+            </div>
+            <div>
+                <div class="section-note">One browse path per line.</div>
+                <textarea id="browsePath" rows="4" cols="93" style="width: 800px"></textarea>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Browse: limit symbols to included headers</div>
+            <div>
+            <input type="checkbox" id="limitSymbolsToIncludedHeaders" style="vertical-align: middle; transform: scale(1.5)">
+                Process only those files directly or indirectly included as headers. If not set, process all files under the specified include paths.
+            </input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Browse: database filename</div>
+            <div class="section-text">
+                Path to the generated symbol database. If a relative path is specified, 
+                it will be made relative to the workspace's default storage location.
+            </div>
+            <div>
+                <input id="databaseFilename" style="width: 798px"></input>
+            </div>
+        </div>
+
+    </div> <!-- advanced settings end -->
+
+
+
+    <!-- sections end -->
 
   </div> <!-- main end -->
 

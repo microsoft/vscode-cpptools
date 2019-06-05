@@ -13,13 +13,40 @@ import * as telemetry from '../telemetry';
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
+    // Basic settings
     configName: "configName",
+    configSelection: "configSelection",
+    addConfigBtn: "addConfigBtn",
+    addConfigOk: "addConfigOk",
+    addConfigCancel: "addConfigCancel",
+    addConfigName: "addConfigName",
+
     compilerPath: "compilerPath",
-    intelliSenseMode: "intelliSenseMode", 
+    compilerPathInvalid: "compilerPathInvalid",
+    knownCompilers: "knownCompilers",
+
+    intelliSenseMode: "intelliSenseMode",
+    intelliSenseModeInvalid: "intelliSenseModeInvalid",
     includePath: "includePath",
+    includePathInvalid: "includePathInvalid",
     defines: "defines",
     cStandard: "cStandard",
-    cppStandard: "cppStandard"
+    cppStandard: "cppStandard",
+
+    // Advance settings
+    windowsSdkVersion: "windowsSdkVersion",
+    macFrameworkPath: "macFrameworkPath",
+    compileCommands: "compileCommands",
+    configurationProvider: "configurationProvider",
+    forcedInclude: "forcedInclude",
+
+    // Browse properties
+    browsePath: "browsePath",
+    limitSymbolsToIncludedHeaders: "limitSymbolsToIncludedHeaders",
+    databaseFilename: "databaseFilename",
+
+    // Other
+    showAdvancedBtn: "showAdvancedBtn"
 };
 
 export class SettingsPanel {
@@ -220,39 +247,44 @@ export class SettingsPanel {
             case 'addConfig':
                 this.addConfig(message.name);
                 break;
+            case 'knownCompilerSelect':
+                this.knownCompilerSelect();
+                break;
         }
     }
 
     private addConfig(name: string): void {
         this.addConfigRequested.fire(name);
+        this.logTelementryForElement(elementId.addConfigName);
     }
 
     private configSelect(index: number): void {
         this.configIndexSelected = index;
         this.configSelectionChanged.fire();
+        this.logTelementryForElement(elementId.configSelection);
+    }
+
+    private knownCompilerSelect(): void {
+        this.logTelementryForElement(elementId.knownCompilers);
     }
 
     private updateConfig(message: any): void {
-        let entries: string[];
+        let splitEntries: (input: any) => string[] = (input: any) => {
+            return input.split("\n").filter((e: string) => e);
+        };
 
         switch (message.key) {
             case elementId.configName:
                 this.configValues.name = message.value;
-                this.logTelementryForElement(elementId.configName);
                 break;
             case elementId.compilerPath:
                 this.configValues.compilerPath = message.value;
-                this.logTelementryForElement(elementId.compilerPath);
                 break;
             case elementId.includePath:
-                entries = message.value.split("\n");
-                this.configValues.includePath = entries.filter(e => e);
-                this.logTelementryForElement(elementId.includePath);
+                this.configValues.includePath = splitEntries(message.value);
                 break;
             case elementId.defines:
-                entries = message.value.split("\n");
-                this.configValues.defines = entries.filter(e => e);
-                this.logTelementryForElement(elementId.defines);
+                this.configValues.defines = splitEntries(message.value);
                 break;
             case elementId.intelliSenseMode:
                 if (message.value !== "${default}" || this.isIntelliSenseModeDefined) {
@@ -260,19 +292,44 @@ export class SettingsPanel {
                 } else {
                     this.configValues.intelliSenseMode = undefined;
                 }
-                this.logTelementryForElement(elementId.intelliSenseMode);
                 break;
             case elementId.cStandard:
                 this.configValues.cStandard = message.value;
-                this.logTelementryForElement(elementId.cStandard);
                 break;
             case elementId.cppStandard:
                 this.configValues.cppStandard = message.value;
-                this.logTelementryForElement(elementId.cppStandard);
+                break;
+            case elementId.windowsSdkVersion:
+                this.configValues.windowsSdkVersion = message.value;
+                break;
+            case elementId.macFrameworkPath:
+                this.configValues.macFrameworkPath = splitEntries(message.value);
+                break;
+            case elementId.compileCommands:
+                this.configValues.compileCommands = message.value;
+                break;
+            case elementId.configurationProvider:
+                this.configValues.configurationProvider = message.value;
+                break;
+            case elementId.forcedInclude:
+                this.configValues.forcedInclude = splitEntries(message.value);
+                break;
+            case elementId.browsePath:
+                this.initializeBrowseProperties();
+                this.configValues.browse.path = splitEntries(message.value);
+                break;
+            case elementId.limitSymbolsToIncludedHeaders:
+                this.initializeBrowseProperties();
+                this.configValues.browse.limitSymbolsToIncludedHeaders = (message.value === "on" ? true : false);
+                break;
+            case elementId.databaseFilename:
+                this.initializeBrowseProperties();
+                this.configValues.browse.databaseFilename = message.value;
                 break;
         }
 
         this.configValuesChanged.fire();
+        this.logTelementryForElement(message.key);
     }
 
     private logTelementryForElement(elementId: string): void {
@@ -280,6 +337,12 @@ export class SettingsPanel {
             this.telemetry[elementId] = 0;
         }
         this.telemetry[elementId]++;
+    }
+
+    private initializeBrowseProperties(): void {
+        if (this.configValues.browse === undefined) {
+            this.configValues.browse = {};
+        }
     }
 
     private getHtml(): string {
