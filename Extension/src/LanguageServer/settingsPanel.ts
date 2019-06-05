@@ -63,7 +63,6 @@ export class SettingsPanel {
     private configValues: config.Configuration;
     private isIntelliSenseModeDefined: boolean = false;
     private configIndexSelected: number = 0;
-    private configSelection: string[] = [];
     private compilerPaths: string[] = [];
 
     // WebviewPanel objects
