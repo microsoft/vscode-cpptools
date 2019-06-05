@@ -609,6 +609,11 @@
         "command": "C_Cpp.LogDiagnostics",
         "title": "%c_cpp.command.logDiagnostics.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.RescanWorkspace",
+        "title": "%c_cpp.command.rescanWorkspace.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
