@@ -59,6 +59,7 @@ class SettingsApp {
     constructor() {
         this.vsCodeApi = acquireVsCodeApi();
 
+        window.addEventListener('keydown', this.handleTab.bind(this));
         window.addEventListener('message', this.onMessageReceived.bind(this));
 
         // Basic settings
@@ -91,6 +92,20 @@ class SettingsApp {
         // Other
         document.getElementById(elementId.showAdvanced).addEventListener("click", this.onShowAdvanced.bind(this));
         document.getElementById(elementId.advancedSection).style.display = "none";
+    }
+
+    private handleTab(e: any): void {
+        if (e.keyCode === 9) {
+            document.body.classList.add('tabbing');
+            window.removeEventListener('keydown', this.handleTab);
+            window.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        }
+    }
+
+    private handleMouseDown(): void {
+        document.body.classList.remove('tabbing');
+        window.removeEventListener('mousedown', this.handleMouseDown);
+        window.addEventListener('keydown', this.handleTab.bind(this));
     }
 
     private onShowAdvanced(): void {
