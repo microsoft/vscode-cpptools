@@ -33,7 +33,7 @@ const elementId: { [key: string]: string } = {
     cStandard: "cStandard",
     cppStandard: "cppStandard",
 
-    // Advance settings
+    // Advanced settings
     windowsSdkVersion: "windowsSdkVersion",
     macFrameworkPath: "macFrameworkPath",
     compileCommands: "compileCommands",
@@ -183,7 +183,7 @@ export class SettingsPanel {
     }
 
     public dispose(): void {
-        // Log any telementry
+        // Log any telemetry
         if (Object.keys(this.telemetry).length > 0) {
             telemetry.logLanguageServerEvent("ConfigUI", null, this.telemetry);
         }
@@ -254,17 +254,17 @@ export class SettingsPanel {
 
     private addConfig(name: string): void {
         this.addConfigRequested.fire(name);
-        this.logTelementryForElement(elementId.addConfigName);
+        this.logTelemetryForElement(elementId.addConfigName);
     }
 
     private configSelect(index: number): void {
         this.configIndexSelected = index;
         this.configSelectionChanged.fire();
-        this.logTelementryForElement(elementId.configSelection);
+        this.logTelemetryForElement(elementId.configSelection);
     }
 
     private knownCompilerSelect(): void {
-        this.logTelementryForElement(elementId.knownCompilers);
+        this.logTelemetryForElement(elementId.knownCompilers);
         // Remove one count from compilerPath because selecting a different compiler causes a change on the compiler path
         if (this.telemetry[elementId.compilerPath]) {
             this.telemetry[elementId.compilerPath]--;
@@ -332,10 +332,10 @@ export class SettingsPanel {
         }
 
         this.configValuesChanged.fire();
-        this.logTelementryForElement(message.key);
+        this.logTelemetryForElement(message.key);
     }
 
-    private logTelementryForElement(elementId: string): void {
+    private logTelemetryForElement(elementId: string): void {
         if (this.telemetry[elementId] === undefined) {
             this.telemetry[elementId] = 0;
         }
