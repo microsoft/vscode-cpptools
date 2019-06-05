@@ -653,7 +653,7 @@ export class ColorizationState {
         this.versionedEdits.forEach((edit) => {
             if (edit.editVersion > editVersion) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
-                    this.fixRanges(syntacticRanges[i], edit.changes);
+                    syntacticRanges[i] = this.fixRanges(syntacticRanges[i], edit.changes);
                 }
             }
         });
@@ -666,9 +666,9 @@ export class ColorizationState {
         this.versionedEdits.forEach((edit) => {
             if (edit.editVersion > editVersion) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
-                    this.fixRanges(semanticRanges[i], edit.changes);
+                    semanticRanges[i] = this.fixRanges(semanticRanges[i], edit.changes);
                 }
-                this.fixRanges(inactiveRanges, edit.changes);
+                inactiveRanges = this.fixRanges(inactiveRanges, edit.changes);
             }
         });
         this.updateColorizationRanges(uri, null, semanticRanges, inactiveRanges);

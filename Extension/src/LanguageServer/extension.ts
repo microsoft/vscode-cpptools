@@ -326,6 +326,7 @@ function realActivation(): void {
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(onDidChangeTextEditorVisibleRanges));
 
     updateLanguageConfigurations();
 
@@ -423,7 +424,30 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
-    clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
+    clients.forEach(client => {
+        let editorsForThisClient: vscode.TextEditor[] = [];
+        editors.forEach(editor => {
+            if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+                if (clients.checkOwnership(client, editor.document)) {
+                    editorsForThisClient.push(editor);
+                }
+            }
+        });
+        if (editorsForThisClient.length > 0) {
+            client.onDidChangeVisibleTextEditors(editorsForThisClient);
+        }
+    });
+}
+
+function onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
+    let languageId: String = textEditorVisibleRangesChangeEvent.textEditor.document.languageId;
+    if (languageId === "c" || languageId === "cpp") {
+        clients.forEach(client => {
+            if (clients.checkOwnership(client, textEditorVisibleRangesChangeEvent.textEditor.document)) {
+                client.onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent);
+            }
+        });
+    }
 }
 
 function onInterval(): void {
