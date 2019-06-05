@@ -158,7 +158,7 @@ interface GetDiagnosticsResult {
 }
 
 enum ReferenceType {
-    // Confirmed, // Confirmed types are returned to via textDocument/references.
+    Confirmed,
     ConfirmationInProgress,
     Comment,
     String,
@@ -168,7 +168,7 @@ enum ReferenceType {
 }
 
 interface TypedReference {
-    uri: string;
+    file: string;
     position: vscode.Position;
     text: string;
     type: ReferenceType;
@@ -176,7 +176,8 @@ interface TypedReference {
 
 interface TypedReferencesResult {
     typedReferences: TypedReference[];
-    firstResult: boolean;
+    isInitialResult: boolean;
+    isFinalResult: boolean;
 }
 
 interface TypedReferencesResultMessage {
@@ -193,6 +194,7 @@ const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void>
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
+const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cppTools/didOpenForReferenceConfirmation');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
 const FileDeletedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileDeleted');
 const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
@@ -1535,16 +1537,54 @@ class DefaultClient implements Client {
         return "";
     }
 
+    private typedReferencesSavedResults: TypedReference[] = null;
+    private documentsForReferences: Map<string, vscode.TextDocument> = new Map<string, vscode.TextDocument>();
+    private referencesProgress: vscode.Progress<{message?: string; increment?: number }>;
+
     private processTypedReferences(typedReferencesResult: TypedReferencesResult): void {
         if (!this.typedReferencesChannel) {
             this.typedReferencesChannel = vscode.window.createOutputChannel("C/C++ References");
             this.disposables.push(this.typedReferencesChannel);
+        } else {
+            this.typedReferencesChannel.clear();
+        }
+        if (typedReferencesResult.isInitialResult) {
+            this.typedReferencesSavedResults = [];
         }
         for (let typedReference of typedReferencesResult.typedReferences) {
+            if (typedReference.type === ReferenceType.Confirmed) {
+                continue; // Already displayed in VS Code's References.
+            }
+            if (typedReference.type === ReferenceType.ConfirmationInProgress) {
+                if (!this.documentsForReferences.has(typedReference.file)) {
+                    this.documentsForReferences.set(typedReference.file, null);
+                    this.languageClient.sendNotification(DidOpenForReferenceConfirmationNotification, typedReference.file);
+                    vscode.workspace.openTextDocument(typedReference.file).then((document: vscode.TextDocument) => {
+                        this.documentsForReferences.set(typedReference.file, document);
+                        //vscode.commands.executeCommand("references-view.find");
+                    });
+                }
+            } else {
+                this.typedReferencesSavedResults.push(typedReference);
+            }
             this.typedReferencesChannel.appendLine(this.convertReferenceTypeToString(typedReference.type) + ": " + typedReference.text);
-            this.typedReferencesChannel.appendLine(typedReference.uri + ":" + (typedReference.position.line + 1) + ":" + (typedReference.position.character + 1));
+            this.typedReferencesChannel.appendLine(typedReference.file + ":" + (typedReference.position.line + 1) + ":" + (typedReference.position.character + 1));
         }
         this.typedReferencesChannel.show(true);
+
+        if (typedReferencesResult.isFinalResult) {
+            this.documentsForReferences.clear();
+        } else {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "Find All References",
+                cancellable: false // TODO: Handle cancelation
+            }, async (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) => {
+                this.referencesProgress = progress;
+                // TODO: Update progress.
+            });
+            vscode.commands.executeCommand("references-view.find");
+        }
     }
 }
 
