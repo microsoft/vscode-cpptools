@@ -27,7 +27,7 @@ const elementId: { [key: string]: string } = {
     cStandard: "cStandard",
     cppStandard: "cppStandard",
 
-    // Advance settings
+    // Advanced settings
     windowsSdkVersion: "windowsSdkVersion",
     macFrameworkPath: "macFrameworkPath",
     compileCommands: "compileCommands",

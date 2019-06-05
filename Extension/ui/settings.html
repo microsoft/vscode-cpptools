@@ -42,8 +42,7 @@
 
         .headerBtn,
         .headerBtn:hover,
-        .headerBtn:active,
-        .headerBtn:focus {
+        .headerBtn:active {
             cursor: pointer;
             color: var(--vscode-foreground);
             background: var(--vscode-background);
@@ -52,7 +51,7 @@
             outline: none;
         }
 
-        .headerBtn:focus:not(:hover):not(:active) {
+        .headerBtn:focus {
             outline: 1px solid -webkit-focus-ring-color;
             outline-offset: 3px;
         }
@@ -190,14 +189,13 @@
 
         button {
             color: var(--vscode-button-foreground);
-            background: var(--vscode-button-background);
-            border: 0px;
+            background-color: var(--vscode-button-background);
+            border: solid 1px var(--vscode-contrastBorder);
             padding: 6px 14px;
         }
 
         button:hover {
-            background: var(--vscode-button-hoverBackground);
-            border: 0px;
+            background-color: var(--vscode-button-hoverBackground);
         }
 
         button:focus {
@@ -326,12 +324,6 @@
             border: solid 1px rgb(255, 255, 255);
         }
 
-        .vscode-high-contrast button {
-            color:  var(--vscode-button-foreground);
-            background-color: var(--vscode-button-background);
-            border: solid 1px var(--vscode-contrastBorder);
-        }
-
         .vscode-high-contrast code > div {
             background-color: #000
         }
@@ -439,7 +431,7 @@
       <div class="main-title">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
         Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
-        Changes made in this editor only apply to the selected configuration name. 
+        Changes made in this editor only apply to the selected configuration. 
         To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
     </div>
@@ -538,7 +530,7 @@
     </div>
 
     <div class="section">
-        <div class="section-title">C Standard</div>
+        <div class="section-title">C standard</div>
         <div class="section-text">The version of the C language standard to use for IntelliSense.</div>
         <div>
             <select id="cStandard" class="select-default">
@@ -550,7 +542,7 @@
     </div>
 
     <div class="section">
-        <div class="section-title">C++ Standard</div>
+        <div class="section-title">C++ standard</div>
         <div class="section-text">The version of the C++ language standard to use for IntelliSense.</div>
         <div>
             <select id="cppStandard" class="select-default">
@@ -564,7 +556,7 @@
     </div>
 
     <hr>
-    <button id=showAdvanced tabindex="0" class="headerBtn expand" style="margin-top: 5px; font-size: 18px; font-weight: 500; width: 100%; text-align: left">
+    <button id=showAdvanced class="headerBtn expand" style="margin-top: 5px; font-size: 20px; font-weight: 500; width: 100%; text-align: left">
         Advanced Settings
     </button>
     <div style="height: 30px; display: block"></div>
