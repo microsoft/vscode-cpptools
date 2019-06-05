@@ -1223,6 +1223,9 @@ export class CppProperties {
             if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].CompilerPathMissingQuotes) {
                 changedSquiggleMetrics.CompilerPathMissingQuotes = newSquiggleMetrics.CompilerPathMissingQuotes;
             }
+            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].CompilerModeMismatch) {
+                changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
+            }
             if (Object.keys(changedSquiggleMetrics).length > 0) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", null, changedSquiggleMetrics);
             }
