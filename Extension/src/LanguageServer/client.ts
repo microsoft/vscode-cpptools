@@ -1550,6 +1550,7 @@ class DefaultClient implements Client {
         }
         if (typedReferencesResult.isInitialResult) {
             this.typedReferencesSavedResults = [];
+            this.documentsForReferences.clear();
         }
         for (let typedReference of typedReferencesResult.typedReferences) {
             if (typedReference.type === ReferenceType.Confirmed) {
@@ -1561,7 +1562,6 @@ class DefaultClient implements Client {
                     this.languageClient.sendNotification(DidOpenForReferenceConfirmationNotification, typedReference.file);
                     vscode.workspace.openTextDocument(typedReference.file).then((document: vscode.TextDocument) => {
                         this.documentsForReferences.set(typedReference.file, document);
-                        //vscode.commands.executeCommand("references-view.find");
                     });
                 }
             } else {
@@ -1575,6 +1575,7 @@ class DefaultClient implements Client {
         if (typedReferencesResult.isFinalResult) {
             this.documentsForReferences.clear();
         } else {
+            /*
             vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: "Find All References",
@@ -1583,6 +1584,7 @@ class DefaultClient implements Client {
                 this.referencesProgress = progress;
                 // TODO: Update progress.
             });
+            */
             vscode.commands.executeCommand("references-view.find");
         }
     }
