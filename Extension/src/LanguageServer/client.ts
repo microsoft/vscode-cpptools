@@ -161,11 +161,11 @@ interface DidChangeVisibleRangesParams {
 
 interface SyntacticColorizationRegionsReceiptParams {
     uri: string;
-};
+}
 
 interface SemanticColorizationRegionsReceiptParams {
     uri: string;
-};
+}
 
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
