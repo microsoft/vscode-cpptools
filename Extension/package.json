@@ -46,13 +46,14 @@
     "problemMatchers": [
       {
         "name": "gcc",
+        "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
           "relative",
           "${workspaceFolder}"
         ],
         "pattern": {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
@@ -607,6 +608,11 @@
       {
         "command": "C_Cpp.LogDiagnostics",
         "title": "%c_cpp.command.logDiagnostics.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.RescanWorkspace",
+        "title": "%c_cpp.command.rescanWorkspace.title%",
         "category": "C/C++"
       }
     ],

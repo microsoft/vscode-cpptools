@@ -191,6 +191,7 @@ const IntervalTimerNotification: NotificationType<void, void> = new Notification
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
+const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SyntacticColorizationRegionsReceiptNotification: NotificationType<SyntacticColorizationRegionsReceiptParams, void> = new NotificationType<SyntacticColorizationRegionsReceiptParams, void>('cpptools/syntacticColorizationRegionsReceipt');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
@@ -238,6 +239,7 @@ export interface Client {
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
     logDiagnostics(): Promise<void>;
+    rescanFolder(): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
     getCompilerPath(): Thenable<string>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
@@ -341,12 +343,25 @@ class DefaultClient implements Client {
 
     private pendingTask: util.BlockingTask<any>;
 
+    private getUniqueWorkspaceStorageName(workspaceFolder?: vscode.WorkspaceFolder) : string {
+        let workspaceFolderName: string = this.getName(workspaceFolder);
+        if (!workspaceFolder || workspaceFolder.index < 1) {
+            return workspaceFolderName; // No duplicate names to search for.
+        }
+        for (let i: number = 0; i < workspaceFolder.index; ++i) {
+            if (vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
+                return path.join(workspaceFolderName, String(workspaceFolder.index)); // Use the index as a subfolder.
+            }
+        }
+        return workspaceFolderName; // No duplicate names found.
+    }
+
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
         this.storagePath = util.extensionContext ? util.extensionContext.storagePath :
             path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.storagePath = path.join(this.storagePath, this.getName(this.rootFolder));
+            this.storagePath = path.join(this.storagePath, this.getUniqueWorkspaceStorageName(this.rootFolder));
         }
         try {
             let languageClient: LanguageClient = this.createLanguageClient(allClients);
@@ -729,6 +744,10 @@ class DefaultClient implements Client {
         let version: string = `Version: ${util.packageJson.version}\n`;
         this.diagnosticsChannel.appendLine(`${header}${version}${response.diagnostics}`);
         this.diagnosticsChannel.show(false);
+    }
+
+    public async rescanFolder(): Promise<void> {
+        await this.notifyWhenReady(() => this.languageClient.sendNotification(RescanFolderNotification));
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
@@ -1560,6 +1579,7 @@ class NullClient implements Client {
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
+    rescanFolder(): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }

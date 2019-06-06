@@ -723,6 +723,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -939,6 +940,11 @@ function onGetActiveConfigName(): Thenable<string> {
 function onLogDiagnostics(): void {
     onActivationEvent();
     clients.ActiveClient.logDiagnostics();
+}
+
+function onRescanWorkspace(): void {
+    onActivationEvent();
+    clients.forEach(client => client.rescanFolder());
 }
 
 function reportMacCrashes(): void {
