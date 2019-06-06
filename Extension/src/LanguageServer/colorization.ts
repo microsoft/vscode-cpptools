@@ -498,6 +498,7 @@ export class ColorizationState {
         return new vscode.Range(newStartLine, newStartCharacter, newEndLine, newEndCharacter);
     }
 
+    // Utility function to shift a range back after removing content before it
     private shiftRangeAfterRemove(range: vscode.Range, removeStartPosition: vscode.Position, removeEndPosition: vscode.Position): vscode.Range {
         let lineDelta: number = removeStartPosition.line - removeEndPosition.line;
         let startCharacterDelta: number = 0;
@@ -513,6 +514,7 @@ export class ColorizationState {
         return new vscode.Range(newStart, newEnd);
     }
 
+    // Utility function to shift a range forward after inserting content before it
     private shiftRangeAfterInsert(range: vscode.Range, insertStartPosition: vscode.Position, insertEndPosition: vscode.Position): vscode.Range {
         let addedLines: number = insertEndPosition.line - insertStartPosition.line;
         let newStartLine: number = range.start.line + addedLines;
@@ -534,6 +536,7 @@ export class ColorizationState {
         return new vscode.Range(newStartLine, newStartCharacter, newEndLine, newEndCharacter);
     }
 
+    // Utility function to adjust a range to account for an insert and/or replace
     private fixRange(range: vscode.Range, removeInsertStartPosition: vscode.Position, removeEndPosition: vscode.Position, insertEndPosition: vscode.Position): vscode.Range {
         // If the replace/insert starts after this range ends, no adjustment is needed.
         if (removeInsertStartPosition.isAfterOrEqual(range.end)) {
