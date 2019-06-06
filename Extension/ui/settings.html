@@ -486,7 +486,7 @@
         <div class="section-note">Specify a compiler path or select a detected compiler path from the drop-down list.</div>
             <div class="select-editable">
                 <select id="knownCompilers" style="width: 810px"></select>
-                <input id="compilerPath" style="width: 777px" type="text"/>
+                <input name="inputValue" id="compilerPath" style="width: 777px" type="text"/>
             </div>
         <div id="compilerPathInvalid" class="error" style="width: 800px"></div>
         <!-- input compilerPath end -->
@@ -500,7 +500,7 @@
             Select a specific IntelliSense mode to override the <code>${default}</code> mode.
         </div>
         <div>
-          <select id="intelliSenseMode" class="select-default">
+          <select name="inputValue" id="intelliSenseMode" class="select-default">
             <option value="${default}">${default}</option>
             <option value="msvc-x64">msvc-x64</option>
             <option value="gcc-x64">gcc-x64</option>
@@ -517,7 +517,7 @@
         </div>
         <div>
           <div class="section-note">One include path per line.</div>
-          <textarea id="includePath" rows="4" cols="93" style="width: 800px"></textarea>
+          <textarea name="inputValue" id="includePath" rows="4" cols="93" style="width: 800px"></textarea>
           <div id="includePathInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
         </div>
     </div>
@@ -529,7 +529,7 @@
         </div>
         <div>
             <div class="section-note">One definition per line.</div>
-            <textarea id="defines" rows="4" cols="39"></textarea>
+            <textarea name="inputValue" id="defines" rows="4" cols="39"></textarea>
         </div>
     </div>
 
@@ -537,7 +537,7 @@
         <div class="section-title">C standard</div>
         <div class="section-text">The version of the C language standard to use for IntelliSense.</div>
         <div>
-            <select id="cStandard" class="select-default">
+            <select name="inputValue" id="cStandard" class="select-default">
                 <option value="c11">c11</option>
                 <option value="c99">c99</option>
                 <option value="c89">c89</option>
@@ -549,7 +549,7 @@
         <div class="section-title">C++ standard</div>
         <div class="section-text">The version of the C++ language standard to use for IntelliSense.</div>
         <div>
-            <select id="cppStandard" class="select-default">
+            <select name="inputValue" id="cppStandard" class="select-default">
                 <option value="c++17">c++17</option>
                 <option value="c++14">c++14</option>
                 <option value="c++11">c++11</option>
@@ -560,7 +560,7 @@
     </div>
 
     <hr>
-    <button id=showAdvanced class="headerBtn expand" style="margin-top: 5px; font-size: 20px; font-weight: 500; width: 100%; text-align: left">
+    <button id=showAdvanced class="headerBtn" style="margin-top: 5px; font-size: 20px; font-weight: 500; width: 100%; text-align: left">
         Advanced Settings
     </button>
     <div style="height: 30px; display: block"></div>
@@ -573,7 +573,7 @@
                 The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
             </div>
             <div>
-                <input id="configurationProvider" style="width: 300px"></input>
+                <input name="inputValue" id="configurationProvider" style="width: 300px"></input>
             </div>
         </div>
 
@@ -583,7 +583,7 @@
                 Version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.
             </div>
             <div>
-                <input id="windowsSdkVersion" style="width: 300px"></input>
+                <input name="inputValue" id="windowsSdkVersion" style="width: 300px"></input>
             </div>
         </div>
 
@@ -594,7 +594,7 @@
             </div>
             <div>
                 <div class="section-note">One path per line.</div>
-                <textarea id="macFrameworkPath" rows="4" cols="93" style="width: 800px"></textarea>
+                <textarea name="inputValue" id="macFrameworkPath" rows="4" cols="93" style="width: 800px"></textarea>
             </div>
         </div>
 
@@ -605,7 +605,7 @@
             </div>
             <div>
                 <div class="section-note">One file per line.</div>
-                <textarea id="forcedInclude" rows="4" cols="93" style="width: 800px"></textarea>
+                <textarea name="inputValue" id="forcedInclude" rows="4" cols="93" style="width: 800px"></textarea>
             </div>
         </div>
 
@@ -615,7 +615,7 @@
                 Full path to <code>compile_commands.json</code> file for the workspace.
             </div>
             <div>
-                <input id="compileCommands" style="width: 798px"></input>
+                <input name="inputValue" id="compileCommands" style="width: 798px"></input>
             </div>
         </div>
 
@@ -628,7 +628,7 @@
             </div>
             <div>
                 <div class="section-note">One browse path per line.</div>
-                <textarea id="browsePath" rows="4" cols="93" style="width: 800px"></textarea>
+                <textarea name="inputValue" id="browsePath" rows="4" cols="93" style="width: 800px"></textarea>
             </div>
         </div>
 
@@ -648,13 +648,11 @@
                 it will be made relative to the workspace's default storage location.
             </div>
             <div>
-                <input id="databaseFilename" style="width: 798px"></input>
+                <input name="inputValue" id="databaseFilename" style="width: 798px"></input>
             </div>
         </div>
 
     </div> <!-- advanced settings end -->
-
-
 
     <!-- sections end -->
 

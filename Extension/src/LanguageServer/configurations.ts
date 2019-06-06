@@ -626,7 +626,7 @@ export class CppProperties {
     private ensureSettingsPanelInitlialized(): void {
         if (this.settingsPanel === undefined) {
             let settings: CppSettings = new CppSettings(this.rootUri);
-            this.settingsPanel = new SettingsPanel(); // set initial this.currentConfigurationIndex.Value
+            this.settingsPanel = new SettingsPanel();
             this.settingsPanel.setKnownCompilers(this.knownCompilers, settings.preferredPathSeparator);
             this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
             this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());

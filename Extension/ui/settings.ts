@@ -59,62 +59,65 @@ class SettingsApp {
     constructor() {
         this.vsCodeApi = acquireVsCodeApi();
 
-        window.addEventListener('keydown', this.handleTab.bind(this));
-        window.addEventListener('message', this.onMessageReceived.bind(this));
+        window.addEventListener("keydown", this.handleTab.bind(this));
+        window.addEventListener("message", this.onMessageReceived.bind(this));
 
-        // Basic settings
+        // Add event listeners to UI elements
+        this.addEventsToConfigNameChanges();
+        this.addEventsToInputValues();
+        document.getElementById(elementId.knownCompilers).addEventListener("change", this.onKnownCompilerSelect.bind(this));
+
+        // Set view state of advanced settings and add event
+        const oldState: any = this.vsCodeApi.getState();
+        const advancedShown: boolean = (oldState && oldState.advancedShown);
+        document.getElementById(elementId.advancedSection).style.display = advancedShown ? "block" : "none";
+        document.getElementById(elementId.showAdvanced).classList.toggle(advancedShown ? "collapse" : "expand", true);
+        document.getElementById(elementId.showAdvanced).addEventListener("click", this.onShowAdvanced.bind(this));
+    }
+
+    private addEventsToInputValues(): void {
+        const elements: NodeListOf<HTMLElement> = document.getElementsByName("inputValue");
+        elements.forEach(el => {
+            el.addEventListener("change", this.onChanged.bind(this, el.id));
+        });
+
+        // Special case for checkbox element
+        document.getElementById(elementId.limitSymbolsToIncludedHeaders).addEventListener("change", this.onChangedCheckbox.bind(this, elementId.limitSymbolsToIncludedHeaders));
+    }
+
+    private addEventsToConfigNameChanges(): void {
         document.getElementById(elementId.configName).addEventListener("change", this.onConfigNameChanged.bind(this));
         document.getElementById(elementId.configSelection).addEventListener("change", this.onConfigSelect.bind(this));
         document.getElementById(elementId.addConfigBtn).addEventListener("click", this.onAddConfigBtn.bind(this));
         document.getElementById(elementId.addConfigOk).addEventListener("click", this.OnAddConfigConfirm.bind(this, true));
         document.getElementById(elementId.addConfigCancel).addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
-
-        document.getElementById(elementId.compilerPath).addEventListener("change", this.onChanged.bind(this, elementId.compilerPath));
-        document.getElementById(elementId.knownCompilers).addEventListener("change", this.onKnownCompilerSelect.bind(this));
-        document.getElementById(elementId.intelliSenseMode).addEventListener("change", this.onChanged.bind(this, elementId.intelliSenseMode));
-        document.getElementById(elementId.includePath).addEventListener("change", this.onChanged.bind(this, elementId.includePath));
-        document.getElementById(elementId.defines).addEventListener("change", this.onChanged.bind(this, elementId.defines));
-        document.getElementById(elementId.cStandard).addEventListener("change", this.onChanged.bind(this, elementId.cStandard));
-        document.getElementById(elementId.cppStandard).addEventListener("change", this.onChanged.bind(this, elementId.cppStandard));
-
-        // Advanced settings
-        document.getElementById(elementId.windowsSdkVersion).addEventListener("change", this.onChanged.bind(this, elementId.windowsSdkVersion));
-        document.getElementById(elementId.macFrameworkPath).addEventListener("change", this.onChanged.bind(this, elementId.macFrameworkPath));
-        document.getElementById(elementId.compileCommands).addEventListener("change", this.onChanged.bind(this, elementId.compileCommands));
-        document.getElementById(elementId.configurationProvider).addEventListener("change", this.onChanged.bind(this, elementId.configurationProvider));
-        document.getElementById(elementId.forcedInclude).addEventListener("change", this.onChanged.bind(this, elementId.forcedInclude));
-
-        // Browse properties
-        document.getElementById(elementId.browsePath).addEventListener("change", this.onChanged.bind(this, elementId.browsePath));
-        document.getElementById(elementId.limitSymbolsToIncludedHeaders).addEventListener("change", this.onChanged.bind(this, elementId.limitSymbolsToIncludedHeaders));
-        document.getElementById(elementId.databaseFilename).addEventListener("change", this.onChanged.bind(this, elementId.databaseFilename));
-
-        // Other
-        document.getElementById(elementId.showAdvanced).addEventListener("click", this.onShowAdvanced.bind(this));
-        document.getElementById(elementId.advancedSection).style.display = "none";
     }
 
     private handleTab(e: any): void {
         if (e.keyCode === 9) {
-            document.body.classList.add('tabbing');
-            window.removeEventListener('keydown', this.handleTab);
-            window.addEventListener('mousedown', this.handleMouseDown.bind(this));
+            document.body.classList.add("tabbing");
+            window.removeEventListener("keydown", this.handleTab);
+            window.addEventListener("mousedown", this.handleMouseDown.bind(this));
         }
     }
 
     private handleMouseDown(): void {
-        document.body.classList.remove('tabbing');
-        window.removeEventListener('mousedown', this.handleMouseDown);
-        window.addEventListener('keydown', this.handleTab.bind(this));
+        document.body.classList.remove("tabbing");
+        window.removeEventListener("mousedown", this.handleMouseDown);
+        window.addEventListener("keydown", this.handleTab.bind(this));
     }
 
     private onShowAdvanced(): void {
-        let isShown: boolean = (document.getElementById(elementId.advancedSection).style.display === "block");
+        const isShown: boolean = (document.getElementById(elementId.advancedSection).style.display === "block");
         document.getElementById(elementId.advancedSection).style.display = isShown ? "none" : "block";
 
-        let element: HTMLElement = document.getElementById(elementId.showAdvanced);
-        element.classList.toggle('collapse');
-        element.classList.toggle('expand');
+        // Save view state
+        this.vsCodeApi.setState({ advancedShown: !isShown });
+
+        // Update chevron on button
+        const element: HTMLElement = document.getElementById(elementId.showAdvanced);
+        element.classList.toggle("collapse");
+        element.classList.toggle("expand");
     }
 
     private onAddConfigBtn(): void {
@@ -185,17 +188,29 @@ class SettingsApp {
             command: "knownCompilerSelect"
         });
     }
+    private onChangedCheckbox(id: string): void {
+        if (this.updating) {
+            return; 
+        }
+
+        const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
+        this.vsCodeApi.postMessage({
+            command: "change",
+            key: id,
+            value: el.checked
+        });
+    }
 
     private onChanged(id: string): void {
         if (this.updating) {
             return; 
         }
 
-        const x: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
+        const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
         this.vsCodeApi.postMessage({
             command: "change",
             key: id,
-            value: x.value
+            value: el.value
         });
     }
 
@@ -234,7 +249,7 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.cStandard)).value = config.cStandard;
             (<HTMLInputElement>document.getElementById(elementId.cppStandard)).value = config.cppStandard;
 
-            // Advance settings
+            // Advanced settings
             (<HTMLInputElement>document.getElementById(elementId.windowsSdkVersion)).value = config.windowsSdkVersion ? config.windowsSdkVersion : "";
 
             (<HTMLInputElement>document.getElementById(elementId.macFrameworkPath)).value =
@@ -249,7 +264,8 @@ class SettingsApp {
             if (config.browse) {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value =
                     (config.browse.path && config.browse.path.length > 0) ? config.browse.path.join("\n") : "";
-                (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked = config.browse.limitSymbolsToIncludedHeaders ? true : false;
+                (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked = 
+                    (config.browse.limitSymbolsToIncludedHeaders && config.browse.limitSymbolsToIncludedHeaders);
                 (<HTMLInputElement>document.getElementById(elementId.databaseFilename)).value = config.browse.databaseFilename ? config.browse.databaseFilename : "";
             } else {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = "";

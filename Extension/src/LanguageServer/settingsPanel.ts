@@ -323,7 +323,7 @@ export class SettingsPanel {
                 break;
             case elementId.limitSymbolsToIncludedHeaders:
                 this.initializeBrowseProperties();
-                this.configValues.browse.limitSymbolsToIncludedHeaders = (message.value === "on" ? true : false);
+                this.configValues.browse.limitSymbolsToIncludedHeaders = message.value;
                 break;
             case elementId.databaseFilename:
                 this.initializeBrowseProperties();
