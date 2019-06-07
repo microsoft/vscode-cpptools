@@ -5,9 +5,9 @@ The VS Code C/C++ extension now supports lexical/syntactic and semantic coloriza
 
 # Theming
 
-Colors can be associated using the existing support for theming and color customization in VS Code.  Documentation on Theming in VS Code can be found <a HREF="https://code.visualstudio.com/docs/getstarted/themes">here</a>.
+Colors can be associated using the existing support for theming and color customization in VS Code.  Documentation on Theming in VS Code can be found [here](https://code.visualstudio.com/docs/getstarted/themes)
 
-Colors are associated with <a HREF="https://macromates.com/manual/en/language_grammars#naming_conventions">TextMate scopes</a>.
+Colors are associated with [TextMate scopes](https://macromates.com/manual/en/language_grammars#naming_conventions).
 
 
 # IntelliSense Tokens and Scopes
