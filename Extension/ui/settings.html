@@ -36,8 +36,42 @@
             background: var(--vscode-inputValidation-errorBackground);
             border: solid 1px var(--vscode-inputValidation-errorBorder);
             white-space: pre-wrap;
-            visibility: hidden;
+            display: none;
             padding: 1px 4px 4px 4px;
+        }
+
+        .headerBtn,
+        .headerBtn:hover,
+        .headerBtn:active {
+            cursor: pointer;
+            color: var(--vscode-foreground);
+            background: var(--vscode-background);
+            border: 0px;
+            padding: 0px;
+            outline: none;
+        }
+
+        .headerBtn:focus {
+            outline: 1px solid -webkit-focus-ring-color;
+            outline-offset: 3px;
+        }
+
+        .expand:after {
+            font-weight: bold;
+            float: right;
+            margin-right: 6px;
+            margin-top: -4px;
+            content: '\276E';
+            transform: rotate(90deg);
+        }
+
+        .collapse:after {
+            font-weight: bold;
+            float: right;
+            margin-right: 6px;
+            margin-top: -4px;
+            content: '\276E';
+            transform: rotate(270deg);
         }
 
         .main {
@@ -90,8 +124,18 @@
             line-height: 19px
         }
 
+        body:not(.tabbing) button:focus {
+            outline: none;
+        }
+
         a {
             text-decoration: none
+        }
+
+        checkbox {
+            color: var(--vscode-settings-checkboxForeground);
+            background: var(--vscode-settings-checkboxForeground);
+            border: var(--vscode-settings-checkboxBorder);
         }
 
         a:focus,
@@ -122,6 +166,10 @@
             text-decoration: underline
         }
 
+        ::placeholder {
+            color: var(--vscode-input-placeholderForeground);
+        }
+
         input {
             height: 17px;
             padding: 6px;
@@ -143,6 +191,26 @@
             border: 1px solid var(--vscode-settings-textInputBorder);
         }
 
+        button {
+            color: var(--vscode-button-foreground);
+            background-color: var(--vscode-button-background);
+            border: solid 1px var(--vscode-contrastBorder);
+            padding: 6px 14px;
+        }
+
+        button:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+
+        button:focus {
+            outline: 1px solid -webkit-focus-ring-color;
+            outline-offset: 2px
+        }
+
+        button:active {
+            outline: none;
+        }
+
         .select-default {
             width: 300px;
             height: 27px;
@@ -157,7 +225,7 @@
             position: relative;
             background-color: var(--vscode-settings-textInputBackground);
             width: 800px;
-            height: 30px;
+            height: 31px;
         }
 
         .select-editable select {
@@ -165,7 +233,7 @@
             font-size: 13px;
             font-family: sans-serif;
             border: 1px solid var(--vscode-settings-textInputBorder);
-            height: 30px;
+            height: 31px;
             margin: auto;
             color: var(--vscode-settings-textInputForeground);
             background: var(--vscode-settings-textInputBackground);
@@ -177,7 +245,7 @@
             left: 1px;
             right: 1px;
             bottom: 1px;
-            height: 16px;
+            height: 17px;
             font-size: 13px;
             border: none;
             color: var(--vscode-settings-textInputForeground);
@@ -367,8 +435,8 @@
       <div class="main-title">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
         Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
-        Changes made in this editor only apply to the active configuration. To modify other configurations <a href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">change the active configuration</a>. 
-        To edit multiple configurations at once, or additional settings not shown here, go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
+        Changes made in this editor only apply to the selected configuration. 
+        To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
     </div>
 
@@ -380,11 +448,32 @@
       <div class="section-title">Configuration name</div>
       <div class="section-text">
         A friendly name that identifies a configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything.
-        To edit the name of the current active configuration, go to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file and edit the <code>name</code> property.
       </div>
-      <div><input class="input-disabled" type="text" id=configName style="width: 290px" disabled>
-      <a style="padding-left: 6px;" href="command:C_Cpp.ConfigurationSelect" title="Change the active configuration">Change the active configuration</a>
-    </div> 
+      <div>
+        <div class="section-note">Select a configuration set to edit.</div>
+        <table>
+            <tr>
+            <!-- select configuration name -->
+            <td>
+                <div class="select-editable" style="width: 300px; margin-right: 10px">
+                    <select id="configSelection" style="width: 300px"></select>
+                    <input id=configName style="width: 267px" type="text"/>
+                </div>
+            </td>
+            <!-- input configuration name -->
+            <td style="vertical-align: middle;">
+                <div id=addConfigDiv style="display: block">
+                    <button id=addConfigBtn >Add Configuration</button>
+                </div>
+                <div id=addConfigInputDiv style="display: none; width: 400px;">
+                    <input id=addConfigName type=text style="width: 200px; margin-right: 6px" placeholder="Configuration name..."/> 
+                    <button id=addConfigOk style="margin-right: 6px">OK</button>
+                    <button id=addConfigCancel>CANCEL</button>
+                </div>
+            </td>
+        </tr>
+        </table>
+      </div> 
     </div>
 
     <div class="section">
@@ -395,10 +484,10 @@
         </div>
         <!-- input compilerPath -->
         <div class="section-note">Specify a compiler path or select a detected compiler path from the drop-down list.</div>
-        <div class="select-editable">
-          <select id="knownCompilers" style="width: 810px"></select>
-          <input id="compilerPath" style="width: 777px" type="text"/>
-        </div>
+            <div class="select-editable">
+                <select id="knownCompilers" style="width: 810px"></select>
+                <input name="inputValue" id="compilerPath" style="width: 777px" type="text"/>
+            </div>
         <div id="compilerPathInvalid" class="error" style="width: 800px"></div>
         <!-- input compilerPath end -->
     </div>
@@ -411,7 +500,7 @@
             Select a specific IntelliSense mode to override the <code>${default}</code> mode.
         </div>
         <div>
-          <select id="intelliSenseMode" class="select-default">
+          <select name="inputValue" id="intelliSenseMode" class="select-default">
             <option value="${default}">${default}</option>
             <option value="msvc-x64">msvc-x64</option>
             <option value="gcc-x64">gcc-x64</option>
@@ -428,7 +517,7 @@
         </div>
         <div>
           <div class="section-note">One include path per line.</div>
-          <textarea id="includePath" rows="4" cols="93" style="width: 800px"></textarea>
+          <textarea name="inputValue" id="includePath" rows="4" cols="93" style="width: 800px"></textarea>
           <div id="includePathInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
         </div>
     </div>
@@ -440,15 +529,15 @@
         </div>
         <div>
             <div class="section-note">One definition per line.</div>
-            <textarea id="defines" rows="4" cols="39"></textarea>
+            <textarea name="inputValue" id="defines" rows="4" cols="39"></textarea>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">C Standard</div>
+        <div class="section-title">C standard</div>
         <div class="section-text">The version of the C language standard to use for IntelliSense.</div>
         <div>
-            <select id="cStandard" class="select-default">
+            <select name="inputValue" id="cStandard" class="select-default">
                 <option value="c11">c11</option>
                 <option value="c99">c99</option>
                 <option value="c89">c89</option>
@@ -457,19 +546,115 @@
     </div>
 
     <div class="section">
-        <div class="section-title">C++ Standard</div>
+        <div class="section-title">C++ standard</div>
         <div class="section-text">The version of the C++ language standard to use for IntelliSense.</div>
         <div>
-            <select id="cppStandard" class="select-default">
+            <select name="inputValue" id="cppStandard" class="select-default">
                 <option value="c++17">c++17</option>
                 <option value="c++14">c++14</option>
                 <option value="c++11">c++11</option>
                 <option value="c++03">c++03</option>
                 <option value="c++98">c++98</option>
             </select>
-        </div> <!-- sections end -->
-
+        </div> 
     </div>
+
+    <hr>
+    <button id=showAdvanced class="headerBtn" style="margin-top: 5px; font-size: 20px; font-weight: 500; width: 100%; text-align: left">
+        Advanced Settings
+    </button>
+    <div style="height: 30px; display: block"></div>
+
+    <div id=advancedSection>
+
+        <div class="section">
+            <div class="section-title">Configuration provider</div>
+            <div class="section-text">
+                The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
+            </div>
+            <div>
+                <input name="inputValue" id="configurationProvider" style="width: 300px"></input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Windows SDK version</div>
+            <div class="section-text">
+                Version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.
+            </div>
+            <div>
+                <input name="inputValue" id="windowsSdkVersion" style="width: 300px"></input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Mac framework path</div>
+            <div class="section-text">
+                A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.
+            </div>
+            <div>
+                <div class="section-note">One path per line.</div>
+                <textarea name="inputValue" id="macFrameworkPath" rows="4" cols="93" style="width: 800px"></textarea>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Forced include</div>
+            <div class="section-text">
+                A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.
+            </div>
+            <div>
+                <div class="section-note">One file per line.</div>
+                <textarea name="inputValue" id="forcedInclude" rows="4" cols="93" style="width: 800px"></textarea>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Compile commands</div>
+            <div class="section-text">
+                Full path to <code>compile_commands.json</code> file for the workspace.
+            </div>
+            <div>
+                <input name="inputValue" id="compileCommands" style="width: 798px"></input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Browse: path</div>
+            <div class="section-text">
+                A list of paths for the tag parser to use while searching for included headers. 
+                Searching on these paths is recursive by default. Specify <code>*</code> to indicate non-recursive search. 
+                For example: <code>/usr/include</code> will search through all subdirectories while <code>/usr/include/*</code> will not.
+            </div>
+            <div>
+                <div class="section-note">One browse path per line.</div>
+                <textarea name="inputValue" id="browsePath" rows="4" cols="93" style="width: 800px"></textarea>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Browse: limit symbols to included headers</div>
+            <div>
+            <input type="checkbox" id="limitSymbolsToIncludedHeaders" style="vertical-align: middle; transform: scale(1.5)">
+                Process only those files directly or indirectly included as headers. If not set, process all files under the specified include paths.
+            </input>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Browse: database filename</div>
+            <div class="section-text">
+                Path to the generated symbol database. If a relative path is specified, 
+                it will be made relative to the workspace's default storage location.
+            </div>
+            <div>
+                <input name="inputValue" id="databaseFilename" style="width: 798px"></input>
+            </div>
+        </div>
+
+    </div> <!-- advanced settings end -->
+
+    <!-- sections end -->
 
   </div> <!-- main end -->
 
