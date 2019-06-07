@@ -400,7 +400,7 @@ export class ColorizationState {
 
     private createColorizationDecorations(isCpp: boolean): void {
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled") {
+        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
             // Create new decorators
             // The first decorator created takes precedence, so these need to be created in reverse order
             for (let i: number = TokenKind.Count; i > 0;) {
@@ -448,7 +448,7 @@ export class ColorizationState {
             e.setDecorations(this.inactiveDecoration, []);
         }
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled") {
+        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
             for (let i: number = 0; i < TokenKind.Count; i++) {
                 if (this.decorations[i]) {
                     let ranges: vscode.Range[] = this.syntacticRanges[i];
