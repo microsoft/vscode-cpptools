@@ -513,7 +513,9 @@
     <div class="section">
         <div class="section-title">Include path</div>
         <div class="section-text">
-            A list of paths for the IntelliSense engine to use while searching for included headers. If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for headers starting from that directory.
+            An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. 
+            Specify a list paths for the IntelliSense engine to use while searching for included header files. 
+            If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for header files starting from that directory.
         </div>
         <div>
           <div class="section-note">One include path per line.</div>
@@ -573,7 +575,7 @@
                 The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
             </div>
             <div>
-                <input name="inputValue" id="configurationProvider" style="width: 300px"></input>
+                <input name="inputValue" id="configurationProvider" style="width: 290px"></input>
             </div>
         </div>
 
@@ -583,7 +585,7 @@
                 Version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.
             </div>
             <div>
-                <input name="inputValue" id="windowsSdkVersion" style="width: 300px"></input>
+                <input name="inputValue" id="windowsSdkVersion" style="width: 290px"></input>
             </div>
         </div>
 
