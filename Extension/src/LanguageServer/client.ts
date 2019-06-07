@@ -619,7 +619,7 @@ class DefaultClient implements Client {
         let params: DidChangeVisibleRangesParams = {
             uri: uri.toString(),
             ranges: ranges
-        }
+        };
         this.notifyWhenReady(() => this.languageClient.sendNotification(DidChangeVisibleRangesNotification, params));
 }
 

@@ -1,16 +1,16 @@
 
-# VSCode C/C++ Extension - Enhanced Colorization
+# VS Code C/C++ Extension - Enhanced Colorization
 
-The VSCode C/C++ extension now supports lexical/syntactic and semantic colorization, using IntelliSense.
+The VS Code C/C++ extension now supports lexical/syntactic and semantic colorization, using IntelliSense.
 
 # Theming
 
-Colors can be associated using the existing support for theming and color customization in VSCode.  Documentation on Theming in VS Code can be found <a HREF="https://code.visualstudio.com/docs/getstarted/themes">here</a>.
+Colors can be associated using the existing support for theming and color customization in VS Code.  Documentation on Theming in VS Code can be found <a HREF="https://code.visualstudio.com/docs/getstarted/themes">here</a>.
 
 Colors are associated with <a HREF="https://macromates.com/manual/en/language_grammars#naming_conventions">TextMate scopes</a>.
 
 
-# All IntelliSense Tokens and Scopes
+# IntelliSense Tokens and Scopes
 
 
 | Token         | Scope         |
@@ -52,7 +52,7 @@ Colors are associated with <a HREF="https://macromates.com/manual/en/language_gr
 | Xml Doc Comment | comment.xml.doc |
 | Xml Doc Tag | comment.xml.doc.tag |
 
-Many of the tokens recognized by IntelliSense do not directly map to existing scopes in the VSCode's default C/C++ TextMate grammar, so are likely not colored by existing VSCode themes.
+Many of the tokens recognized by IntelliSense do not directly map to existing scopes in the VS Code's default C/C++ TextMate grammar, so are likely not colored by existing VS Code themes.
 
 # Customizing Colors in Settings
 
