@@ -231,6 +231,7 @@ export interface Client {
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string };
+    onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void;
@@ -292,6 +293,7 @@ class DefaultClient implements Client {
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
     private colorizationState = new Map<string, ColorizationState>();
+    private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
     private configurationProvider: string;
 
@@ -595,6 +597,10 @@ class DefaultClient implements Client {
         }
     }
 
+    public onDidOpenTextDocument(document: vscode.TextDocument): void {
+        this.sendVisibleRanges(document.uri);
+    }
+
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
         let processedUris: vscode.Uri[] = [];
         editors.forEach(editor => {
@@ -616,12 +622,31 @@ class DefaultClient implements Client {
         for (let e of editors) {
             e.visibleRanges.forEach(range => ranges.push(Range.create(range.start.line, range.start.character, range.end.line, range.end.character)));
         }
-        let params: DidChangeVisibleRangesParams = {
-            uri: uri.toString(),
-            ranges: ranges
-        };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(DidChangeVisibleRangesNotification, params));
-}
+
+        // Only send ranges if they have actually changed.
+        let isSame: boolean = false;
+        let savedRanges: Range[] = this.visibleRanges.get(uri.toString());
+        if (savedRanges) {
+            if (ranges.length === savedRanges.length) {
+                for (let i: number = 0; i < ranges.length; i++) {
+                    if (ranges[i] !== savedRanges[i]) {
+                        break;
+                    }
+                }
+                isSame = true;
+            }
+        } else {
+            isSame = ranges.length === 0;
+        }
+        if (!isSame) {
+            this.visibleRanges.set(uri.toString(), ranges);
+            let params: DidChangeVisibleRangesParams = {
+                uri: uri.toString(),
+                ranges: ranges
+            };
+            this.notifyWhenReady(() => this.languageClient.sendNotification(DidChangeVisibleRangesNotification, params));
+        }
+    }
 
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
         this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
@@ -1571,6 +1596,7 @@ class NullClient implements Client {
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } { return {}; }
+    onDidOpenTextDocument(document: vscode.TextDocument): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {}
     onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {}
