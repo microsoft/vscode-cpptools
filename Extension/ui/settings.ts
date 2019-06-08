@@ -59,7 +59,7 @@ class SettingsApp {
     constructor() {
         this.vsCodeApi = acquireVsCodeApi();
 
-        window.addEventListener("keydown", this.handleTab.bind(this));
+        window.addEventListener("keydown", this.onTabKeyDown.bind(this));
         window.addEventListener("message", this.onMessageReceived.bind(this));
 
         // Add event listeners to UI elements
@@ -93,18 +93,18 @@ class SettingsApp {
         document.getElementById(elementId.addConfigCancel).addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
     }
 
-    private handleTab(e: any): void {
+    private onTabKeyDown(e: any): void {
         if (e.keyCode === 9) {
             document.body.classList.add("tabbing");
-            window.removeEventListener("keydown", this.handleTab);
-            window.addEventListener("mousedown", this.handleMouseDown.bind(this));
+            window.removeEventListener("keydown", this.onTabKeyDown);
+            window.addEventListener("mousedown", this.onMouseDown.bind(this));
         }
     }
 
-    private handleMouseDown(): void {
+    private onMouseDown(): void {
         document.body.classList.remove("tabbing");
-        window.removeEventListener("mousedown", this.handleMouseDown);
-        window.addEventListener("keydown", this.handleTab.bind(this));
+        window.removeEventListener("mousedown", this.onMouseDown);
+        window.addEventListener("keydown", this.onTabKeyDown.bind(this));
     }
 
     private onShowAdvanced(): void {
@@ -129,14 +129,16 @@ class SettingsApp {
         this.showElement(elementId.addConfigInputDiv, false);
         this.showElement(elementId.addConfigDiv, true);
 
-        // If request is yes, send message to create new config 
+        // If request is yes, send message to create new config
         if (request) {
-            const x: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.addConfigName);
-            if (x.value !== undefined && x.value !== "") {
+            const el: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.addConfigName);
+            if (el.value !== undefined && el.value !== "") {
                 this.vsCodeApi.postMessage({
                     command: "addConfig",
-                    name: x.value
+                    name: el.value
                 });
+
+                el.value = "";
             }
         }
     }
@@ -166,12 +168,12 @@ class SettingsApp {
             return; 
         }
 
-        const x: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
-        (<HTMLInputElement>document.getElementById(elementId.configName)).value = x.value;
+        const el: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
+        (<HTMLInputElement>document.getElementById(elementId.configName)).value = el.value;
 
         this.vsCodeApi.postMessage({
             command: "configSelect",
-            index: x.selectedIndex
+            index: el.selectedIndex
         });
     }
 
@@ -179,8 +181,8 @@ class SettingsApp {
         if (this.updating) {
             return; 
         }
-        const x: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
-        (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = x.value;
+        const el: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
+        (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = el.value;
         this.onChanged(elementId.compilerPath);
 
         // Post message that this control was used for telemetry
