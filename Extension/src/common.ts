@@ -294,7 +294,7 @@ export function isOptionalArrayOfString(input: any): input is string[]|undefined
 
 export function resolveCachePath(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     let resolvedPath: string = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
-    if (!input || input === "") {
+    if (!input) {
         // Return default path if no path is specified.
         return resolvedPath + "/.cpptools/";
     }
