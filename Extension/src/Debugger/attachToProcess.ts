@@ -103,15 +103,33 @@ export class RemoteAttachPicker {
         });
     }
 
-    private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
-        // Commands to get OS and processes
-        const command: string = `sh -c "uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
-            `then ${PsProcessParser.psDarwinCommand}; fi"`;
+    // Command to get OS and processes
+    private getRemoteProcessCommand(): string {
+        let innerQuote: string;
+        let outerQuote: string;
 
-        // Must use single quotes around ${command}. Linux systems evaluate $() within double-quotes.
-        return execChildProcess(`${pipeCmd} '${command}'`, null, this._channel).then(output => {
+        // Determine which quoting system to use depending on host machine.
+        if (os.platform() !== "win32") {
+            // Must use single quotes around the command sh -c runs. Linux systems evaluate $() within double-quotes.
+            innerQuote = `"`;
+            outerQuote = `'`;
+        }
+        else {
+            innerQuote = `'`;
+            outerQuote = `"`;
+        }
+
+        return `${outerQuote}sh -c ${innerQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
+        `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
+    }
+
+    private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
+        // Do not put any quoting in execCommand.
+        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
+
+        return execChildProcess(execCommand, null, this._channel).then(output => {
             // OS will be on first line
-            // Processess will follow if listed
+            // Processes will follow if listed
             let lines: string[] = output.split(/\r?\n/);
 
             if (lines.length === 0) {
