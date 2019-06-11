@@ -408,8 +408,6 @@ class DefaultClient implements Client {
                         vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
                     }
                 }));
-
-                this.colorizationSettings = new ColorizationSettings(this.RootUri);
         } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
             if (!failureMessageShown) {
@@ -423,6 +421,8 @@ class DefaultClient implements Client {
                 vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + additionalInfo);
             }
         }
+
+        this.colorizationSettings = new ColorizationSettings(this.RootUri);
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {

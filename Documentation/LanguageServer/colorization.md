@@ -1,7 +1,11 @@
 
 # VS Code C/C++ Extension - Enhanced Colorization
 
-The VS Code C/C++ extension now supports lexical/syntactic and semantic colorization, using IntelliSense.
+The VS Code C/C++ extension now supports lexical/syntactic and semantic colorization, when IntelliSense is enabled.  Enhanced colorization can be enabled using the enhancedColorization setting:
+
+```
+    "C_Cpp.enhancedColorization": "Enabled"
+```
 
 # Theming
 

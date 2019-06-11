@@ -642,14 +642,17 @@ export class ColorizationState {
                 this.semanticRanges[i] = semanticRanges[i];
             }
         }
-        let isCpp: boolean = util.isEditorFileCpp(uri);
-        this.createColorizationDecorations(isCpp);
+        let f: () => void = async () => {
+            let isCpp: boolean = util.isEditorFileCpp(uri);
+            this.createColorizationDecorations(isCpp);
 
-        // Apply the decorations to all *visible* text editors
-        let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
-        for (let e of editors) {
-            this.refresh(e);
-        }
+            // Apply the decorations to all *visible* text editors
+            let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
+            for (let e of editors) {
+                this.refresh(e);
+            }
+        };
+        this.colorizationSettings.syncWithLoadingSettings(f);
     }
 
     public updateSyntactic(uri: string, syntacticRanges: vscode.Range[][], editVersion: number): void {
