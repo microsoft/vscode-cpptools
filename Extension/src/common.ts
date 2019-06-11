@@ -771,11 +771,13 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
 
 export interface CompilerPathAndArgs {
     compilerPath: string;
+    compilerName: string;
     additionalArgs: string[];
 }
 
 export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
     let compilerPath: string = inputCompilerPath;
+    let compilerName: string = "";
     let additionalArgs: string[];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
@@ -785,6 +787,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
                 additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
                 compilerPath = compilerPath.substr(1, endQuote - 1);
+                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
             }
         } else {
             // Go from right to left checking if a valid path is to the left of a space.
@@ -805,11 +808,12 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                     additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
                     additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
                     compilerPath = potentialCompilerPath;
+                    compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
                 }
             }
         }
     }
-    return { compilerPath, additionalArgs };
+    return { compilerPath, compilerName, additionalArgs };
 }
 
 export function escapeForSquiggles(s: string): string {
