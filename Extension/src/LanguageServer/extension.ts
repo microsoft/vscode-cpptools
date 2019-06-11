@@ -57,10 +57,10 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                 if (portFilePair.length !== 2) {
                     return;
                 }
-    
+
                 const portName: string = portFilePair[0];
                 const relativeHeader: string = portFilePair[1];
-    
+
                 if (!database[relativeHeader]) {
                     database[relativeHeader] = [];
                 }
@@ -120,60 +120,45 @@ export function activate(activationEventOccurred: boolean): void {
 
     let vcpkgDbPromise: Promise<vcpkgDatabase> = initVcpkgDatabase();
 
-    let sel: vscode.DocumentSelector = { scheme: 'file', language: 'cpp' };
+    const sel: vscode.DocumentSelector = { scheme: 'file', language: 'cpp' };
     codeActionProvider = vscode.languages.registerCodeActionsProvider(sel, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-            const cannotOpenSourceFile: string = 'cannot open source file';
-            let missingSourceDiagnostics: vscode.Diagnostic[] = context.diagnostics;
-            missingSourceDiagnostics = missingSourceDiagnostics.filter(diagnostic => {
-                return diagnostic.message.startsWith(cannotOpenSourceFile);
-            });
-            if (!missingSourceDiagnostics.length) {
+            // Generate vcpkg install/help commands if the incoming doc/range is a #include error
+            const regex: RegExp = RegExp("#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]");
+            const matches : RegExpMatchArray = document.getText(range).match(regex);
+            if (!matches.length) {
                 return;
             }
-    
-            let missingHeaders: string[] = missingSourceDiagnostics.map<string>(diagnostic => {
-                return diagnostic.message.slice(`${cannotOpenSourceFile} \"`.length, diagnostic.message.length - ('\"').length)
-                    .replace('/', '\\');
-            });
-    
-            let actions: vscode.CodeAction[] = [];
+            const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
 
-            missingHeaders.forEach(async header => {
+            let portsWithHeader: string[];
+            try {
                 const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
-                let portsWithHeader: string[] = vcpkgDb[header];
-                if (!portsWithHeader) {
-                    return;
-                }
+                portsWithHeader = vcpkgDb[missingHeader];
+            } catch (e) {
+                return;
+            }
+            if (!portsWithHeader) {
+                return;
+            }
 
-                actions.push(...portsWithHeader.map<vscode.CodeAction>(port => {
-                    const command: vscode.Command = {
-                        title: 'test1', // `Copy vcpkg command to install '${port}' to the clipboard`,
-                        command: 'C_Cpp.VCPkgClipboardInstallSuggestedCommand',
-                        arguments: [port]
-                    };
-                    return {
-                        command,
-                        title: `Copy vcpkg command to install '${port}' to the clipboard`,
-                        kind: vscode.CodeActionKind.QuickFix
-                    };
-                }));
-            });
-
+            let actions: vscode.CodeAction[] = [];
+            actions.push(...portsWithHeader.map<vscode.CodeAction>(port => {
+                return {
+                    command: { title: 'VCPkgClipboardInstallSuggested', command: 'C_Cpp.VCPkgClipboardInstallSuggestedCommand', arguments: [port] },
+                    title: `Copy vcpkg command to install '${port}' to the clipboard`,
+                    kind: vscode.CodeActionKind.QuickFix
+                };
+            }));
+            actions.push(...portsWithHeader.map<vscode.CodeAction>(port => {
+                return {
+                    command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VCPkgOnlineHelpSuggestedCommand'},
+                    title: `Library '${port}' can be installed using vcpkg package manager`,
+                    kind: vscode.CodeActionKind.QuickFix
+                };
+            }));
             return Promise.resolve(actions);
         }});
-
-        // Get diagnostics from context
-        // Parse for 'cannot find source file'
-
-        // create code action array
-        // for each match in vcpkg matches
-            // register a command to copy install line to clipboard
-            // create a title for the code action
-            // generate the action
-            // add action to array
-        
-        // return code action array
 
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
