@@ -32,6 +32,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                     me.addFileAssociations(mappingString, false);
                 }
 
+                me.onDidOpenTextDocument(document);
                 me.provideCustomConfiguration(document).then(() => {
                     sendMessage(document);
                 }, () => {
