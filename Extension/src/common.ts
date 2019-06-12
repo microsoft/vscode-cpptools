@@ -292,6 +292,21 @@ export function isOptionalArrayOfString(input: any): input is string[]|undefined
     return input === undefined || isArrayOfString(input);
 }
 
+export function resolveCachePath(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+    let resolvedPath: string = "";
+    if (!input) {
+        // Return default path if no path is specified.
+        // Windows: %LocalAppData%/Microsoft/vscode-cpptools/
+        // Linux and Mac: ~/.vscode-cpptools/
+        resolvedPath = (process.platform === 'win32') ?
+            (process.env.LOCALAPPDATA + "/Microsoft/vscode-cpptools/") : (process.env.HOME + "/.vscode-cpptools/");
+        return resolvedPath;
+    }
+
+    resolvedPath = resolveVariables(input, additionalEnvironment);
+    return resolvedPath;
+}
+
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
