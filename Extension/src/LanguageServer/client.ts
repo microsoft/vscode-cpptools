@@ -480,7 +480,7 @@ class DefaultClient implements Client {
                 errorSquiggles: settings.errorSquiggles,
                 dimInactiveRegions: settings.dimInactiveRegions,
                 textMateColorization: settings.textMateColorization,
-                enhancedColorization: abTestSettings.UseEnhancedColorization,
+                enhancedColorization: settings.enhancedColorization,
                 suggestSnippets: settings.suggestSnippets,
                 loggingLevel: settings.loggingLevel,
                 workspaceParsingPriority: settings.workspaceParsingPriority,
