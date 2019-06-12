@@ -26,6 +26,7 @@ import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
+import * as yauzl from 'yauzl';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -51,25 +52,37 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     let database: vcpkgDatabase = {};
     return new Promise((resolve, reject) => {
         try {
-            let reader: rd.ReadLine = rd.createInterface(fs.createReadStream('/home/griff/vcpkg-db/VCPkgHeadersDatabase.txt'));
-            reader.on('line', (lineText: string) => {
-                let portFilePair: string[] = lineText.split(':');
-                if (portFilePair.length !== 2) {
-                    return;
+            yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, async (err? : Error, zipfile?: yauzl.ZipFile) => {
+                if (err) {
+                    throw err;
                 }
+                zipfile.readEntry();
+                zipfile.on('entry', entry => {
+                    if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
+                        throw err;
+                    }
+                    zipfile.openReadStream(entry, (err?: Error, stream?: any) => {
+                        let reader: rd.ReadLine = rd.createInterface(stream);
+                        reader.on('line', (lineText: string) => {
+                            let portFilePair: string[] = lineText.split(':');
+                            if (portFilePair.length !== 2) {
+                                return;
+                            }
 
-                const portName: string = portFilePair[0];
-                const relativeHeader: string = portFilePair[1];
+                            const portName: string = portFilePair[0];
+                            const relativeHeader: string = portFilePair[1];
 
-                if (!database[relativeHeader]) {
-                    database[relativeHeader] = [];
-                }
+                            if (!database[relativeHeader]) {
+                                database[relativeHeader] = [];
+                            }
 
-                database[relativeHeader].push(portName);
-            });
-
-            reader.on('close', () => {
-                return resolve(database);
+                            database[relativeHeader].push(portName);
+                        });
+                        reader.on('close', () => {
+                            return resolve(database);
+                        });
+                    });
+                });
             });
         } catch (e) {
             return reject();
@@ -123,9 +136,14 @@ export function activate(activationEventOccurred: boolean): void {
     const sel: vscode.DocumentSelector = { scheme: 'file', language: 'cpp' };
     codeActionProvider = vscode.languages.registerCodeActionsProvider(sel, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-            // Generate vcpkg install/help commands if the incoming doc/range is a #include error
-            const regex: RegExp = RegExp("#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]");
-            const matches : RegExpMatchArray = document.getText(range).match(regex);
+            telemetry.logLanguageServerEvent('provideCodeActionsRequested');
+
+            // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
+            const missingIncludeCode: number = 1696;
+            if (!context.diagnostics.find(diagnostic => { return diagnostic.code === missingIncludeCode && diagnostic.source === 'cpptools'; })) {
+                return Promise.resolve([]);
+            }
+            const matches : RegExpMatchArray = document.getText(range).match(/#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]/);
             if (!matches.length) {
                 return;
             }
@@ -141,6 +159,7 @@ export function activate(activationEventOccurred: boolean): void {
             if (!portsWithHeader) {
                 return;
             }
+            telemetry.logLanguageServerEvent('vcpkgCodeActionsProvided');
 
             let actions: vscode.CodeAction[] = [];
             actions.push(...portsWithHeader.map<vscode.CodeAction>(port => {
@@ -150,13 +169,11 @@ export function activate(activationEventOccurred: boolean): void {
                     kind: vscode.CodeActionKind.QuickFix
                 };
             }));
-            actions.push(...portsWithHeader.map<vscode.CodeAction>(port => {
-                return {
-                    command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VCPkgOnlineHelpSuggestedCommand'},
-                    title: `Library '${port}' can be installed using vcpkg package manager`,
-                    kind: vscode.CodeActionKind.QuickFix
-                };
-            }));
+            actions.push({
+                command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VCPkgOnlineHelpSuggestedCommand'},
+                title: `What is the vcpkg package manager?`,
+                kind: vscode.CodeActionKind.QuickFix
+            });
             return Promise.resolve(actions);
         }});
 
@@ -770,6 +787,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VCPkgClipboardInstallSuggestedCommand', onVcpkgClipboardInstallSuggested));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.VCPkgOnlineHelpSuggestedCommand', onVCPkgOnlineHelpSuggestedCommand));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -976,6 +994,13 @@ function onTakeSurvey(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("onTakeSurvey");
     let uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
+    vscode.commands.executeCommand('vscode.open', uri);
+}
+
+async function onVCPkgOnlineHelpSuggestedCommand(): Promise<void> {
+    onActivationEvent();
+    telemetry.logLanguageServerEvent("onVcpkgHelp");
+    let uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
