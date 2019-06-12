@@ -294,7 +294,7 @@
         "C_Cpp.intelliSenseCachePath": {
           "type": "string",
           "default": null,
-          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is \"%USERPROFILE%\/.cpptools\" on Windows and \"~/.cpptools\" on Linux and Mac. The default path will be used if no path is specified or if a specified path is invalid.",
+          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is \"%LocalAppData%\/Microsoft/vscode-cpptools\" on Windows and \"~/.vscode-cpptools\" on Linux and Mac. The default path will be used if no path is specified or if a specified path is invalid.",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseCacheSize": {
