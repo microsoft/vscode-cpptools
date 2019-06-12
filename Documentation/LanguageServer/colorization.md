@@ -36,7 +36,7 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 | Member Function | entity.name.function.member |
 | Member Operator | keyword.operator.member |
 | Namespace | entity.name.namespace |
-| NewDelete | keyword.operator.new |
+| New / Delete | keyword.operator.new |
 | Number Literal | constant.numeric |
 | Operator | keyword.operator |
 | Operator Function | entity.name.function.operator |
@@ -89,3 +89,445 @@ Or, overridden on a per-theme basis:
             ]    
         }
 ```
+
+Use the following to augment the Visual Studio Dark theme to match what Visual Studio would display for C++ files.
+
+```
+    "editor.tokenColorCustomizations": {
+        "[Visual Studio Dark]": {
+            "textMateRules": [
+                {
+                    "scope": "entity.name",
+                    "settings": {
+                        "foreground": "#FFFFFF"
+                    }
+                },
+                {
+                    "scope": "comment",
+                    "settings": {
+                        "foreground": "#57A64A"
+                    }
+                },
+                {
+                    "scope": "keyword.control",
+                    "settings": {
+                        "foreground": "#569CD6"
+                    }
+                },
+                {
+                    "scope": "keyword.control.directive",
+                    "settings": {
+                        "foreground": "#9B9B9B"
+                    }
+                },
+                {
+                    "scope": "keyword.operator",
+                    "settings": {
+                        "foreground": "#B4B4B4"
+                    }
+                },
+                {
+                    "scope": "variable",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "constant.numeric",
+                    "settings": {
+                        "foreground": "#B5CEA8"
+                    }
+                },
+                {
+                    "scope": "string.quoted",
+                    "settings": {
+                        "foreground": "#D69D85"
+                    }
+                },
+                {
+                    "scope": "comment.xml.doc",
+                    "settings": {
+                        "foreground": "#57A64A"
+                    }
+                },
+                {
+                    "scope": "comment.xml.doc.tag",
+                    "settings": {
+                        "foreground": "#57A64A"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.preprocessor",
+                    "settings": {
+                        "foreground": "#BD63C5"
+                    }
+                },
+                {
+                    "scope": "variable.other.enummember",
+                    "settings": {
+                        "foreground": "#B8D7A3"
+                    }
+                },
+                {
+                    "scope": "variable.other.global",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "variable.other.local",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "variable.parameter",
+                    "settings": {
+                        "foreground": "#7F7F7F"
+                    }
+                },
+                {
+                    "scope": "entity.name.type",
+                    "settings": {
+                        "foreground": "#4EC9B0"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.reference",
+                    "settings": {
+                        "foreground": "#4EC9B0"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.value",
+                    "settings": {
+                        "foreground": "#4EC9B0"
+                    }
+                },
+                {
+                    "scope": "entity.name.function",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.member",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "variable.other.member",
+                    "settings": {
+                        "foreground": "#DADADA"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.member.static",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "variable.other.member.static",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "variable.other.event",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.template",
+                    "settings": {
+                        "foreground": "#4EC9B0"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.generic",
+                    "settings": {
+                        "foreground": "#4EC9B0"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.template",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "entity.name.namespace",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "entity.name.label",
+                    "settings": {
+                        "foreground": "#C8C8C8"
+                    }
+                },
+                {
+                    "scope": "entity.name.user-defined-literal",
+                    "settings": {
+                        "foreground": "#DADADA"
+                    }
+                },
+                {
+                    "scope": "entity.name.user-defined-literal.string",
+                    "settings": {
+                        "foreground": "#D69D85"
+                    }
+                },
+                {
+                    "scope": "entity.name.user-defined-literal.number",
+                    "settings": {
+                        "foreground": "#B5CEA8"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.operator",
+                    "settings": {
+                        "foreground": "#B4B4B4"
+                    }
+                },
+                {
+                    "scope": "keyword.operator.member",
+                    "settings": {
+                        "foreground": "#B4B4B4"
+                    }
+                },
+                {
+                    "scope": "keyword.operator.new",
+                    "settings": {
+                        "foreground": "#569CD6"
+                    }
+                },
+            ]
+        }
+    }
+```
+
+Use the following to augment the Visual Studio Light theme to match what Visual Studio would display for C++ files.
+
+````
+    "editor.tokenColorCustomizations": {
+        "[Visual Studio Light]": {
+            "textMateRules": [
+                {
+                    "scope": "entity.name",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "comment",
+                    "settings": {
+                        "foreground": "#008000"
+                    }
+                },
+                {
+                    "scope": "keyword.control",
+                    "settings": {
+                        "foreground": "#0000FF"
+                    }
+                },
+                {
+                    "scope": "keyword.control.directive",
+                    "settings": {
+                        "foreground": "#808080"
+                    }
+                },
+                {
+                    "scope": "keyword.operator",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "variable",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "constant.numeric",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "string.quoted",
+                    "settings": {
+                        "foreground": "#A31515"
+                    }
+                },
+                {
+                    "scope": "comment.xml.doc",
+                    "settings": {
+                        "foreground": "#006400"
+                    }
+                },
+                {
+                    "scope": "comment.xml.doc.tag",
+                    "settings": {
+                        "foreground": "#A9A9A9"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.preprocessor",
+                    "settings": {
+                        "foreground": "#6F0026"
+                    }
+                },
+                {
+                    "scope": "variable.other.enummember",
+                    "settings": {
+                        "foreground": "#2F4F4F"
+                    }
+                },
+                {
+                    "scope": "variable.other.global",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "variable.other.local",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "variable.parameter",
+                    "settings": {
+                        "foreground": "#808080"
+                    }
+                },
+                {
+                    "scope": "entity.name.type",
+                    "settings": {
+                        "foreground": "#2B91AF"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.reference",
+                    "settings": {
+                        "foreground": "#2B91AF"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.value",
+                    "settings": {
+                        "foreground": "#2B91AF"
+                    }
+                },
+                {
+                    "scope": "entity.name.function",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.member",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "variable.other.member",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.member.static",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "variable.other.member.static",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "variable.other.event",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.template",
+                    "settings": {
+                        "foreground": "#2B91AF"
+                    }
+                },
+                {
+                    "scope": "entity.name.class.generic",
+                    "settings": {
+                        "foreground": "#2B91AF"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.template",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.namespace",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.label",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.user-defined-literal",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.user-defined-literal.string",
+                    "settings": {
+                        "foreground": "#A31515"
+                    }
+                },
+                {
+                    "scope": "entity.name.user-defined-literal.number",
+                    "settings": {
+                        "foreground": "#000000"
+                    }
+                },
+                {
+                    "scope": "entity.name.function.operator",
+                    "settings": {
+                        "foreground": "#008080"
+                    }
+                },
+                {
+                    "scope": "keyword.operator.member",
+                    "settings": {
+                        "foreground": "#008080"
+                    }
+                },
+                {
+                    "scope": "keyword.operator.new",
+                    "settings": {
+                        "foreground": "#0000FF"
+                    }
+                },
+            ]
+        }
+    }
+````

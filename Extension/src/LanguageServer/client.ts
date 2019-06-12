@@ -628,12 +628,13 @@ class DefaultClient implements Client {
         let savedRanges: Range[] = this.visibleRanges.get(uri.toString());
         if (savedRanges) {
             if (ranges.length === savedRanges.length) {
+                isSame = true;
                 for (let i: number = 0; i < ranges.length; i++) {
                     if (ranges[i] !== savedRanges[i]) {
+                        isSame = false;
                         break;
                     }
                 }
-                isSame = true;
             }
         } else {
             isSame = ranges.length === 0;
