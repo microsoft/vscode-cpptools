@@ -197,23 +197,23 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                         config.environment = [disableDebugHeapEnvSetting];
                     }
                 }
+            }
 
-                // Add environment variables from .env file
-                if (config.envFile) {
-                    try {
-                        const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(config.envFile.replace(/\${workspaceFolder}/g, folder.uri.path), config["environment"]);
-                        
-                        // show error message if single lines cannot get parsed
-                        if (parsedFile.Warning) {
-                            CppConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
-                        }
-
-                        config.environment = parsedFile.Env;
-
-                        delete config.envFile;
-                    } catch (e) {
-                        throw new Error("Can't parse envFile " + config.envFile);
+            // Add environment variables from .env file
+            if (config.envFile) {
+                try {
+                    const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(config.envFile.replace(/\${workspaceFolder}/g, folder.uri.path), config["environment"]);
+                    
+                    // show error message if single lines cannot get parsed
+                    if (parsedFile.Warning) {
+                        CppConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
                     }
+
+                    config.environment = parsedFile.Env;
+
+                    delete config.envFile;
+                } catch (e) {
+                    throw new Error("Can't parse envFile " + config.envFile);
                 }
             }
 

@@ -797,6 +797,11 @@
                 },
                 "default": []
               },
+              "envFile": {
+                "type": "string",
+                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
+                "default": "${workspaceFolder}/.env"
+              },
               "additionalSOLibSearchPath": {
                 "type": "string",
                 "description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
@@ -1219,7 +1224,7 @@
               },
               "envFile": {
                 "type": "string",
-                "description": "Absolute path to a file containing environment variable definitions. These file has key value pairs sepearted by an equals sign per line. E.g. KEY=VALUE",
+                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
                 "default": "${workspaceFolder}/.env"
               },
               "symbolSearchPath": {

@@ -103,15 +103,29 @@ export class RemoteAttachPicker {
         });
     }
 
-    private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
-        // Commands to get OS and processes
-        const command: string = `sh -c "uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
-            `then ${PsProcessParser.psDarwinCommand}; fi"`;
+    // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
+    private getRemoteProcessCommand(): string {
+        let innerQuote: string = `'`;
+        let outerQuote: string = `"`;
 
-        // Must use single quotes around ${command}. Linux systems evaluate $() within double-quotes.
-        return execChildProcess(`${pipeCmd} '${command}'`, null, this._channel).then(output => {
+        // Must use single quotes around the whole command and double quotes for the argument to `sh -c` because Linux evaluates $() inside of double quotes.
+        // Having double quotes for the outerQuote will have $(uname) replaced before it is sent to the remote machine.
+        if (os.platform() !== "win32") {
+            innerQuote = `"`;
+            outerQuote = `'`;
+        }
+
+        return `${outerQuote}sh -c ${innerQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
+        `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
+    }
+
+    private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
+        // Do not add any quoting in execCommand.
+        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
+
+        return execChildProcess(execCommand, null, this._channel).then(output => {
             // OS will be on first line
-            // Processess will follow if listed
+            // Processes will follow if listed
             let lines: string[] = output.split(/\r?\n/);
 
             if (lines.length === 0) {
