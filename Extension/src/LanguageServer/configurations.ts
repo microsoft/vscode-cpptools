@@ -392,13 +392,13 @@ export class CppProperties {
         if (configuration.compilerPath === undefined ||
             configuration.compilerPath === "" ||
             configuration.compilerPath === "${default}" ||
-            configuration.intelliSenseMode === undefined || 
-            configuration.intelliSenseMode === "" || 
+            configuration.intelliSenseMode === undefined ||
+            configuration.intelliSenseMode === "" ||
             configuration.intelliSenseMode === "${default}") {
             return true;
         }
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(configuration.compilerPath);
-        return compilerPathAndArgs.compilerPath.endsWith("cl.exe") === (configuration.intelliSenseMode === "msvc-x64");
+        return (compilerPathAndArgs.compilerName === "cl.exe") === (configuration.intelliSenseMode === "msvc-x64");
     }
 
     public addToIncludePathCommand(path: string): void {
@@ -920,7 +920,7 @@ export class CppProperties {
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         if (resolvedCompilerPath &&
             // Don't error cl.exe paths because it could be for an older preview build.
-            !(isWindows && compilerPathAndArgs.compilerPath.endsWith("cl.exe"))) {
+            !(isWindows && compilerPathAndArgs.compilerName === "cl.exe")) {
             resolvedCompilerPath = resolvedCompilerPath.trim();
 
             // Error when the compiler's path has spaces without quotes but args are used.
@@ -1139,7 +1139,7 @@ export class CppProperties {
                 if (isCompilerPath) {
                     resolvedPath = resolvedPath.trim();
                     let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedPath);
-                    if (isWindows && compilerPathAndArgs.compilerPath.endsWith("cl.exe")) {
+                    if (isWindows && compilerPathAndArgs.compilerName === "cl.exe") {
                         continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
                     }
                     // Squiggle when the compiler's path has spaces without quotes but args are used.
