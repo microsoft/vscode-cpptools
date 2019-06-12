@@ -400,7 +400,7 @@ export class ColorizationState {
 
     private createColorizationDecorations(isCpp: boolean): void {
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled") {
+        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
             // Create new decorators
             // The first decorator created takes precedence, so these need to be created in reverse order
             for (let i: number = TokenKind.Count; i > 0;) {
@@ -448,7 +448,7 @@ export class ColorizationState {
             e.setDecorations(this.inactiveDecoration, []);
         }
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled") {
+        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
             for (let i: number = 0; i < TokenKind.Count; i++) {
                 if (this.decorations[i]) {
                     let ranges: vscode.Range[] = this.syntacticRanges[i];
@@ -498,6 +498,7 @@ export class ColorizationState {
         return new vscode.Range(newStartLine, newStartCharacter, newEndLine, newEndCharacter);
     }
 
+    // Utility function to shift a range back after removing content before it
     private shiftRangeAfterRemove(range: vscode.Range, removeStartPosition: vscode.Position, removeEndPosition: vscode.Position): vscode.Range {
         let lineDelta: number = removeStartPosition.line - removeEndPosition.line;
         let startCharacterDelta: number = 0;
@@ -513,6 +514,7 @@ export class ColorizationState {
         return new vscode.Range(newStart, newEnd);
     }
 
+    // Utility function to shift a range forward after inserting content before it
     private shiftRangeAfterInsert(range: vscode.Range, insertStartPosition: vscode.Position, insertEndPosition: vscode.Position): vscode.Range {
         let addedLines: number = insertEndPosition.line - insertStartPosition.line;
         let newStartLine: number = range.start.line + addedLines;
@@ -534,6 +536,7 @@ export class ColorizationState {
         return new vscode.Range(newStartLine, newStartCharacter, newEndLine, newEndCharacter);
     }
 
+    // Utility function to adjust a range to account for an insert and/or replace
     private fixRange(range: vscode.Range, removeInsertStartPosition: vscode.Position, removeEndPosition: vscode.Position, insertEndPosition: vscode.Position): vscode.Range {
         // If the replace/insert starts after this range ends, no adjustment is needed.
         if (removeInsertStartPosition.isAfterOrEqual(range.end)) {
@@ -625,9 +628,6 @@ export class ColorizationState {
     }
     
     private updateColorizationRanges(uri: string, syntacticRanges: vscode.Range[][], semanticRanges: vscode.Range[][], inactiveRanges: vscode.Range[]): void {
-        // Dispose of original decorators.
-        // Disposing and recreating is simpler than setting decorators to empty ranges in each editor showing this file
-        this.disposeColorizationDecorations();
         if (inactiveRanges) {
             this.inactiveRanges = inactiveRanges;
         }
@@ -639,21 +639,28 @@ export class ColorizationState {
                 this.semanticRanges[i] = semanticRanges[i];
             }
         }
-        let isCpp: boolean = util.isEditorFileCpp(uri);
-        this.createColorizationDecorations(isCpp);
+        let f: () => void = async () => {
+            // Dispose of original decorators.
+            // Disposing and recreating is simpler than setting decorators to empty ranges in each editor showing this file
+            this.disposeColorizationDecorations();
 
-        // Apply the decorations to all *visible* text editors
-        let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
-        for (let e of editors) {
-            this.refresh(e);
-        }
+            let isCpp: boolean = util.isEditorFileCpp(uri);
+            this.createColorizationDecorations(isCpp);
+
+            // Apply the decorations to all *visible* text editors
+            let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
+            for (let e of editors) {
+                this.refresh(e);
+            }
+        };
+        this.colorizationSettings.syncWithLoadingSettings(f);
     }
 
     public updateSyntactic(uri: string, syntacticRanges: vscode.Range[][], editVersion: number): void {
         this.versionedEdits.forEach((edit) => {
             if (edit.editVersion > editVersion) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
-                    this.fixRanges(syntacticRanges[i], edit.changes);
+                    syntacticRanges[i] = this.fixRanges(syntacticRanges[i], edit.changes);
                 }
             }
         });
@@ -666,9 +673,9 @@ export class ColorizationState {
         this.versionedEdits.forEach((edit) => {
             if (edit.editVersion > editVersion) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
-                    this.fixRanges(semanticRanges[i], edit.changes);
+                    semanticRanges[i] = this.fixRanges(semanticRanges[i], edit.changes);
                 }
-                this.fixRanges(inactiveRanges, edit.changes);
+                inactiveRanges = this.fixRanges(inactiveRanges, edit.changes);
             }
         });
         this.updateColorizationRanges(uri, null, semanticRanges, inactiveRanges);

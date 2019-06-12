@@ -303,10 +303,10 @@ async function finalizeExtensionActivation(): Promise<void> {
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
     // (this may result in rewriting the package.json file)
     
+    let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
+    let packageJson: any = util.getRawPackageJson();
     let packageJsonPath: string = util.getExtensionFilePath("package.json");
     if (!packageJsonPath.includes(".vscode-insiders") && !packageJsonPath.includes(".vscode-exploration")) {
-        let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
-        let packageJson: any = util.getRawPackageJson();
         let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (abTestSettings.UseDefaultIntelliSenseEngine) {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
@@ -317,11 +317,16 @@ async function finalizeExtensionActivation(): Promise<void> {
             return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
         }
     } else {
-        let packageJson: any = util.getRawPackageJson();
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
             return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
         }
+    }
+
+    if (abTestSettings.UseEnhancedColorization) {
+        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Enabled";
+    } else {
+        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Disabled";
     }
 }
 
