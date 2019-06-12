@@ -105,22 +105,22 @@ export class RemoteAttachPicker {
 
     // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
     private getRemoteProcessCommand(): string {
-        let shellCommandQuote: string = `'`;
-        let hostCommandQuote: string = `"`;
+        let innerQuote: string = `'`;
+        let outerQuote: string = `"`;
 
         // Must use single quotes around the whole command and double quotes for the argument to `sh -c` because Linux evaluates $() inside of double quotes.
-        // Having double quotes for the hostCommandQuote will have $(uname) replaced before it is sent to the remote machine.
+        // Having double quotes for the outerQuote will have $(uname) replaced before it is sent to the remote machine.
         if (os.platform() !== "win32") {
-            shellCommandQuote = `"`;
-            hostCommandQuote = `'`;
+            innerQuote = `"`;
+            outerQuote = `'`;
         }
 
-        return `${hostCommandQuote}sh -c ${shellCommandQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
-        `then ${PsProcessParser.psDarwinCommand}; fi${shellCommandQuote}${hostCommandQuote}`;
+        return `${outerQuote}sh -c ${innerQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
+        `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
     private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
-        // Do not put any quoting in execCommand.
+        // Do not add any quoting in execCommand.
         const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
 
         return execChildProcess(execCommand, null, this._channel).then(output => {
