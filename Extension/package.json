@@ -603,6 +603,11 @@
         "command": "C_Cpp.VCPkgClipboardInstallSuggestedCommand",
         "title": "%c_cpp.command.VCPkgClipboardInstallSuggestedCommand.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.VCPkgOnlineHelpSuggestedCommand",
+        "title": "%c_cpp.command.VCPkgOnlineHelpSuggestedCommand.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
@@ -1456,6 +1461,7 @@
   "devDependencies": {
     "@types/mocha": "^5.2.6",
     "@types/node": "^12.0.0",
+    "@types/yauzl": "^2.9.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "gulp": "^4.0.2",
