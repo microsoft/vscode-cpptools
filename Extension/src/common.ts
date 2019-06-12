@@ -808,8 +808,11 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                     additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
                     additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
                     compilerPath = potentialCompilerPath;
-                    compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
                 }
+            }
+            // Get compiler name if there are no args but path is valid or a valid path was found with args.
+            if (checkFileExistsSync(compilerPath)) {
+                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
             }
         }
     }
