@@ -103,24 +103,20 @@ export class RemoteAttachPicker {
         });
     }
 
-    // Command to get OS and processes
+    // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
     private getRemoteProcessCommand(): string {
-        let innerQuote: string;
-        let outerQuote: string;
+        let shellCommandQuote: string = `'`;
+        let hostCommandQuote: string = `"`;
 
-        // Determine which quoting system to use depending on host machine.
+        // Must use single quotes around the whole command and double quotes for the argument to `sh -c` because Linux evaluates $() inside of double quotes.
+        // Having double quotes for the hostCommandQuote will have $(uname) replaced before it is sent to the remote machine.
         if (os.platform() !== "win32") {
-            // Must use single quotes around the command sh -c runs. Linux systems evaluate $() within double-quotes.
-            innerQuote = `"`;
-            outerQuote = `'`;
-        }
-        else {
-            innerQuote = `'`;
-            outerQuote = `"`;
+            shellCommandQuote = `"`;
+            hostCommandQuote = `'`;
         }
 
-        return `${outerQuote}sh -c ${innerQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
-        `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
+        return `${hostCommandQuote}sh -c ${shellCommandQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
+        `then ${PsProcessParser.psDarwinCommand}; fi${shellCommandQuote}${hostCommandQuote}`;
     }
 
     private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
