@@ -628,9 +628,6 @@ export class ColorizationState {
     }
     
     private updateColorizationRanges(uri: string, syntacticRanges: vscode.Range[][], semanticRanges: vscode.Range[][], inactiveRanges: vscode.Range[]): void {
-        // Dispose of original decorators.
-        // Disposing and recreating is simpler than setting decorators to empty ranges in each editor showing this file
-        this.disposeColorizationDecorations();
         if (inactiveRanges) {
             this.inactiveRanges = inactiveRanges;
         }
@@ -643,6 +640,10 @@ export class ColorizationState {
             }
         }
         let f: () => void = async () => {
+            // Dispose of original decorators.
+            // Disposing and recreating is simpler than setting decorators to empty ranges in each editor showing this file
+            this.disposeColorizationDecorations();
+
             let isCpp: boolean = util.isEditorFileCpp(uri);
             this.createColorizationDecorations(isCpp);
 
