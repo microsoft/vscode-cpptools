@@ -1186,7 +1186,7 @@ export class CppProperties {
 
                 // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
                 // and extend that pattern to the next quote before and next quote after it.
-                let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`);
+                let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
                 let matches: string[] = curText.match(pattern);
                 if (matches) {
                     let curOffset: number = 0;
