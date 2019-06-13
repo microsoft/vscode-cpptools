@@ -796,7 +796,12 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
     let additionalArgs: string[];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
-        if (compilerPath.startsWith("\"")) {
+        if (compilerPath === "cl.exe") {
+            // Input is only compiler name, this is only for cl.exe
+            compilerName = compilerPath;
+    
+        } else if (compilerPath.startsWith("\"")) {
+            // Input has quotes around compiler path
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
@@ -805,6 +810,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                 compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
             }
         } else {
+            // Input has no quotes but can have a compiler path with spaces and args.
             // Go from right to left checking if a valid path is to the left of a space.
             let spaceStart: number = compilerPath.lastIndexOf(" ");
             if (spaceStart !== -1 && (!isWindows || !compilerPath.endsWith("cl.exe")) && !checkFileExistsSync(compilerPath)) {
@@ -826,7 +832,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                 }
             }
             // Get compiler name if there are no args but path is valid or a valid path was found with args.
-            if (checkFileExistsSync(compilerPath)) {
+            if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {
                 compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
             }
         }
