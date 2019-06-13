@@ -17,6 +17,7 @@ interface Settings {
     defaultIntelliSenseEngine?: number;
     recursiveIncludes?: number;
     gotoDefIntelliSense?: number;
+    enhancedColorization?: number;
 }
 
 export class ABTestSettings {
@@ -24,16 +25,19 @@ export class ABTestSettings {
     private intelliSenseEngineDefault: PersistentState<number>;
     private recursiveIncludesDefault: PersistentState<number>;
     private gotoDefIntelliSenseDefault: PersistentState<number>;
+    private enhancedColorizationDefault: PersistentState<number>;
     private bucket: PersistentState<number>;
 
     constructor() {
         this.intelliSenseEngineDefault = new PersistentState<number>("ABTest.1", 100);
         this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
         this.gotoDefIntelliSenseDefault = new PersistentState<number>("ABTest.3", 100);
+        this.enhancedColorizationDefault = new PersistentState<number>("ABTest.4", 100);
         this.settings = {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
             recursiveIncludes: this.recursiveIncludesDefault.Value,
-            gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value
+            gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
+            enhancedColorization: this.enhancedColorizationDefault.Value
         };
         this.bucket = new PersistentState<number>(userBucketString, -1);
         if (this.bucket.Value === -1) {
@@ -61,6 +65,10 @@ export class ABTestSettings {
         return util.isNumber(this.settings.gotoDefIntelliSense) ? this.settings.gotoDefIntelliSense >= this.bucket.Value : true;
     }
 
+    public get UseEnhancedColorization(): boolean {
+        return util.isNumber(this.settings.enhancedColorization) ? this.settings.enhancedColorization >= this.bucket.Value : true;
+    }
+
     private updateSettings(): void {
         const cpptoolsJsonFile: string = util.getExtensionFilePath(localConfigFile);
 
@@ -72,10 +80,12 @@ export class ABTestSettings {
                 this.intelliSenseEngineDefault.Value = util.isNumber(newSettings.defaultIntelliSenseEngine) ? newSettings.defaultIntelliSenseEngine : this.intelliSenseEngineDefault.DefaultValue;
                 this.recursiveIncludesDefault.Value = util.isNumber(newSettings.recursiveIncludes) ? newSettings.recursiveIncludes : this.recursiveIncludesDefault.DefaultValue;
                 this.gotoDefIntelliSenseDefault.Value = util.isNumber(newSettings.gotoDefIntelliSense) ? newSettings.gotoDefIntelliSense : this.gotoDefIntelliSenseDefault.DefaultValue;
+                this.enhancedColorizationDefault.Value = util.isNumber(newSettings.enhancedColorization) ? newSettings.enhancedColorization : this.enhancedColorizationDefault.DefaultValue;
                 this.settings = {
                     defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
                     recursiveIncludes: this.recursiveIncludesDefault.Value,
-                    gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value
+                    gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
+                    enhancedColorization: this.enhancedColorizationDefault.Value
                 };
             }
         } catch (error) {

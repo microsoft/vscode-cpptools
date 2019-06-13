@@ -292,6 +292,19 @@ export function isOptionalArrayOfString(input: any): input is string[]|undefined
     return input === undefined || isArrayOfString(input);
 }
 
+export function resolveCachePath(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+    let resolvedPath: string = "";
+    if (!input) {
+        // If no path is set, return empty string to language service process, where it will set the default path as
+        // Windows: %LocalAppData%/Microsoft/vscode-cpptools/
+        // Linux and Mac: ~/.vscode-cpptools/
+        return resolvedPath;
+    }
+
+    resolvedPath = resolveVariables(input, additionalEnvironment);
+    return resolvedPath;
+}
+
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
@@ -771,11 +784,13 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
 
 export interface CompilerPathAndArgs {
     compilerPath: string;
+    compilerName: string;
     additionalArgs: string[];
 }
 
 export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
     let compilerPath: string = inputCompilerPath;
+    let compilerName: string = "";
     let additionalArgs: string[];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
@@ -785,6 +800,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
                 additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
                 compilerPath = compilerPath.substr(1, endQuote - 1);
+                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
             }
         } else {
             // Go from right to left checking if a valid path is to the left of a space.
@@ -807,9 +823,13 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                     compilerPath = potentialCompilerPath;
                 }
             }
+            // Get compiler name if there are no args but path is valid or a valid path was found with args.
+            if (checkFileExistsSync(compilerPath)) {
+                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
+            }
         }
     }
-    return { compilerPath, additionalArgs };
+    return { compilerPath, compilerName, additionalArgs };
 }
 
 export function escapeForSquiggles(s: string): string {
