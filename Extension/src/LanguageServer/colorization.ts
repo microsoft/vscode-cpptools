@@ -442,7 +442,7 @@ export class ColorizationState {
         this.disposeColorizationDecorations();
     }
 
-    private refresh_inner(e: vscode.TextEditor): void {
+    private refreshInner(e: vscode.TextEditor): void {
         // Clear inactive regions
         if (this.inactiveDecoration) {
             e.setDecorations(this.inactiveDecoration, []);
@@ -473,7 +473,7 @@ export class ColorizationState {
 
     public refresh(e: vscode.TextEditor): void {
         let f: () => void = async () => {
-            this.refresh_inner(e);
+            this.refreshInner(e);
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
     }
@@ -485,7 +485,7 @@ export class ColorizationState {
             this.createColorizationDecorations(isCpp);
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri === uri);
             for (let e of editors) {
-                this.refresh_inner(e);
+                this.refreshInner(e);
             }
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
@@ -657,7 +657,7 @@ export class ColorizationState {
             // Apply the decorations to all *visible* text editors
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
             for (let e of editors) {
-                this.refresh_inner(e);
+                this.refreshInner(e);
             }
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
