@@ -3,7 +3,7 @@
 ## Version 0.24.0-insiders: June 13, 2019
 ### New Features
 * Syntactic/lexical and semantic colorization [PR #3651](https://github.com/microsoft/vscode-cpptools/pull/3651) [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md)
-* Add "Rescan Workspace" command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
+* Add `Rescan Workspace` command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
 
 ### Minor Changes
 * Configuration UI editor improvements:  
@@ -18,7 +18,7 @@
 * Fix user defined literals crashing IntelliSense in clang/gcc mode. [#3481](https://github.com/microsoft/vscode-cpptools/issues/3481)
 * Fix IntelliSense-based hover document comments being shown for invalid declarations not used by the current translation unit. [#3596](https://github.com/microsoft/vscode-cpptools/issues/3596)
 * Fix `Go to Definition` when is `void` missing in the parameter list of a function definition a .c file. [#3609](https://github.com/microsoft/vscode-cpptools/issues/3609)
-* Fix configuration validation of compiler path and IntelliSense mode compatibility for clang-cl.exe compiler. [#3637](https://github.com/microsoft/vscode-cpptools/issues/3637)
+* Fix configuration validation of compiler path and IntelliSense mode compatibility for `clang-cl.exe` compiler. [#3637](https://github.com/microsoft/vscode-cpptools/issues/3637)
 * Fix resolving `${workspaceFolderBasename}` and add `${workspaceStorage}`. [#3642](https://github.com/microsoft/vscode-cpptools/issues/3642)
 * Fix IntelliSense-based `Go to Definition` performance issue due to extra database iteration. [#3655](https://github.com/microsoft/vscode-cpptools/issues/3655)
 * Fix typo in `intelliSenseMode` description.
