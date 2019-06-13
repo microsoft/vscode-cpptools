@@ -29,6 +29,7 @@
 * Fix problem matcher to show fatal errors from GCC [#3712](https://github.com/microsoft/vscode-cpptools/issues/3712)
 * Fix multi-root folders with the same name sharing the same browse database. [PR #3715](https://github.com/microsoft/vscode-cpptools/pull/3715)
 * Fix `remoteProcessPicker` on Windows. [#3758](https://github.com/microsoft/vscode-cpptools/issues/3758)
+* Fix configuration squiggles not appearing for multiple occurrences of the same error. [#3765](https://github.com/microsoft/vscode-cpptools/issues/3765)
 * Improvements to CPU and memory usage when editing.
 * Fix pause not working when using `DebugServer`/`MIDebuggerServerAddress` on Linux and macOS. [MIEngine#844](https://github.com/microsoft/MIEngine/issues/844)
 * Fix multiple anonymous unions not showing correctly in Locals while debugging. [MIEngine#820](https://github.com/microsoft/MIEngine/issues/820)
