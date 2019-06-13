@@ -959,9 +959,12 @@ export class CppProperties {
                     }
                 }
             }
-            
+
             if (!pathExists) {
                 let message: string = `Cannot find: ${resolvedCompilerPath}`;
+                compilerPathErrors.push(message);
+            } else if (compilerPathAndArgs.compilerPath === "") {
+                let message: string = `Invalid input, cannot resolve compiler path`;
                 compilerPathErrors.push(message);
             } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
                 let message: string = `Path is not a file: ${resolvedCompilerPath}`;

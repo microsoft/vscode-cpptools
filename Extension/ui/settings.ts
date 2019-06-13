@@ -189,6 +189,9 @@ class SettingsApp {
         this.vsCodeApi.postMessage({
             command: "knownCompilerSelect"
         });
+
+        // Reset selection to none
+        el.value = "";
     }
     private onChangedCheckbox(id: string): void {
         if (this.updating) {
