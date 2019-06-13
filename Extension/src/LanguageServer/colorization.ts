@@ -442,7 +442,7 @@ export class ColorizationState {
         this.disposeColorizationDecorations();
     }
 
-    public refresh(e: vscode.TextEditor): void {
+    private refresh_inner(e: vscode.TextEditor): void {
         // Clear inactive regions
         if (this.inactiveDecoration) {
             e.setDecorations(this.inactiveDecoration, []);
@@ -466,9 +466,16 @@ export class ColorizationState {
             }
         }
         // Apply dimming last
-        if (settings.dimInactiveRegions && this.inactiveRanges) {
+        if (settings.dimInactiveRegions && this.inactiveDecoration && this.inactiveRanges) {
             e.setDecorations(this.inactiveDecoration, this.inactiveRanges);
         }
+    }
+
+    public refresh(e: vscode.TextEditor): void {
+        let f: () => void = async () => {
+            this.refresh_inner(e);
+        };
+        this.colorizationSettings.syncWithLoadingSettings(f);
     }
 
     public onSettingsChanged(uri: vscode.Uri): void {
@@ -478,7 +485,7 @@ export class ColorizationState {
             this.createColorizationDecorations(isCpp);
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri === uri);
             for (let e of editors) {
-                this.refresh(e);
+                this.refresh_inner(e);
             }
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
@@ -650,7 +657,7 @@ export class ColorizationState {
             // Apply the decorations to all *visible* text editors
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
             for (let e of editors) {
-                this.refresh(e);
+                this.refresh_inner(e);
             }
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
