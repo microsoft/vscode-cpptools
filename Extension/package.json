@@ -503,7 +503,7 @@
             "Enabled",
             "Disabled"
           ],
-          "default": "Disabled",
+          "default": "Enabled",
           "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled.",
           "scope": "resource"
         }
