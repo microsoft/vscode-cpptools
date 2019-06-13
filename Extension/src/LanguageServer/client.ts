@@ -225,6 +225,7 @@ const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, 
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
 const TypedReferencesNotification: NotificationType<TypedReferencesResultMessage, void> = new NotificationType<TypedReferencesResultMessage, void>('cpptools/typedReferences');
+const ReportReferencesStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportReferencesStatus');
 
 let failureMessageShown: boolean = false;
 
@@ -960,6 +961,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(TypedReferencesNotification, (e) => this.processTypedReferences(e.typedReferencesResult));
+        this.languageClient.onNotification(ReportReferencesStatusNotification, (e) => this.updateReferencesStatus(e));
         this.setupOutputHandlers();
     }
 
@@ -1162,6 +1164,17 @@ class DefaultClient implements Client {
 
     private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
         this.model.tagParserStatus.Value = notificationBody.status;
+    }
+
+    private updateReferencesStatus(notificationBody: ReportStatusNotificationBody): void {
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Find All References",
+            cancellable: true
+        }, async (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) => {
+            this.referencesProgress = progress;
+            // TODO: Update progress.
+        });
     }
 
     private getColorizationState(uri: string): ColorizationState {
