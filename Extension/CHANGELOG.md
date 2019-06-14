@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.24.0-insiders: June 13, 2019
+## Version 0.24.0-insiders: June 14, 2019
 ### New Features
 * Syntactic/lexical and semantic colorization [PR #3651](https://github.com/microsoft/vscode-cpptools/pull/3651) [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md)
 * Add `Rescan Workspace` command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
