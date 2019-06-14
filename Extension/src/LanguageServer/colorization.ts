@@ -443,10 +443,15 @@ export class ColorizationState {
     }
 
     private refreshInner(e: vscode.TextEditor): void {
+
+        let oldInactiveDecoration: vscode.TextEditorDecorationType = this.inactiveDecoration;
+        let oldDecorations: vscode.TextEditorDecorationType[] = this.decorations;
+        this.inactiveDecoration = null;
+        this.decorations =  new Array<vscode.TextEditorDecorationType>(TokenKind.Count);
+
+        this.createColorizationDecorations(e.document.languageId === "cpp");
+
         // Clear inactive regions
-        if (this.inactiveDecoration) {
-            e.setDecorations(this.inactiveDecoration, []);
-        }
         let settings: CppSettings = new CppSettings(this.uri);
         if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
             for (let i: number = 0; i < TokenKind.Count; i++) {
@@ -465,9 +470,22 @@ export class ColorizationState {
                 }
             }
         }
+
+        if (oldInactiveDecoration) {
+            oldInactiveDecoration.dispose();
+        }
+
         // Apply dimming last
         if (settings.dimInactiveRegions && this.inactiveDecoration && this.inactiveRanges) {
             e.setDecorations(this.inactiveDecoration, this.inactiveRanges);
+        }
+
+        if (oldDecorations) {
+            for (let i: number = 0; i < TokenKind.Count; i++) {
+                if (oldDecorations[i]) {
+                    oldDecorations[i].dispose();
+                }
+            }
         }
     }
 
@@ -649,10 +667,10 @@ export class ColorizationState {
         let f: () => void = async () => {
             // Dispose of original decorators.
             // Disposing and recreating is simpler than setting decorators to empty ranges in each editor showing this file
-            this.disposeColorizationDecorations();
+            //this.disposeColorizationDecorations();
 
-            let isCpp: boolean = util.isEditorFileCpp(uri);
-            this.createColorizationDecorations(isCpp);
+            // let isCpp: boolean = util.isEditorFileCpp(uri);
+            // this.createColorizationDecorations(isCpp);
 
             // Apply the decorations to all *visible* text editors
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
