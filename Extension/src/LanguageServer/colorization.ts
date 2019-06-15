@@ -442,11 +442,7 @@ export class ColorizationState {
         this.disposeColorizationDecorations();
     }
 
-    public refresh(e: vscode.TextEditor): void {
-        // Clear inactive regions
-        if (this.inactiveDecoration) {
-            e.setDecorations(this.inactiveDecoration, []);
-        }
+    private refreshInner(e: vscode.TextEditor): void {
         let settings: CppSettings = new CppSettings(this.uri);
         if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
             for (let i: number = 0; i < TokenKind.Count; i++) {
@@ -465,10 +461,21 @@ export class ColorizationState {
                 }
             }
         }
-        // Apply dimming last
-        if (settings.dimInactiveRegions && this.inactiveRanges) {
+
+        // Normally, decorators are honored in the order in which they were created, not the 
+        // order in which they were applied.  Decorators with opacity appear to be handled
+        // differently, in that the opacity is applied to overlapping decorators even if
+        // created afterwards.
+        if (settings.dimInactiveRegions && this.inactiveDecoration && this.inactiveRanges) {
             e.setDecorations(this.inactiveDecoration, this.inactiveRanges);
         }
+    }
+
+    public refresh(e: vscode.TextEditor): void {
+        let f: () => void = async () => {
+            this.refreshInner(e);
+        };
+        this.colorizationSettings.syncWithLoadingSettings(f);
     }
 
     public onSettingsChanged(uri: vscode.Uri): void {
@@ -478,7 +485,7 @@ export class ColorizationState {
             this.createColorizationDecorations(isCpp);
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri === uri);
             for (let e of editors) {
-                this.refresh(e);
+                this.refreshInner(e);
             }
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
@@ -640,9 +647,15 @@ export class ColorizationState {
             }
         }
         let f: () => void = async () => {
-            // Dispose of original decorators.
-            // Disposing and recreating is simpler than setting decorators to empty ranges in each editor showing this file
-            this.disposeColorizationDecorations();
+            // The only way to un-apply decorators is to dispose them.
+            // If we dispose old decorators before applying new decorators, we see a flicker on Mac,
+            // likely due to a race with UI updates.  Here we set aside the existing decorators to be
+            // disposed of after the new decorators have been applied, so there is not a gap
+            // in which decorators are not applied.
+            let oldInactiveDecoration: vscode.TextEditorDecorationType = this.inactiveDecoration;
+            let oldDecorations: vscode.TextEditorDecorationType[] = this.decorations;
+            this.inactiveDecoration = null;
+            this.decorations =  new Array<vscode.TextEditorDecorationType>(TokenKind.Count);
 
             let isCpp: boolean = util.isEditorFileCpp(uri);
             this.createColorizationDecorations(isCpp);
@@ -650,7 +663,19 @@ export class ColorizationState {
             // Apply the decorations to all *visible* text editors
             let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
             for (let e of editors) {
-                this.refresh(e);
+                this.refreshInner(e);
+            }
+
+            // Dispose of the old decorators only after the new ones have been applied.
+            if (oldInactiveDecoration) {
+                oldInactiveDecoration.dispose();
+            }
+            if (oldDecorations) {
+                for (let i: number = 0; i < TokenKind.Count; i++) {
+                    if (oldDecorations[i]) {
+                        oldDecorations[i].dispose();
+                    }
+                }
             }
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
