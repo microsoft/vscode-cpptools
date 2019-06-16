@@ -48,6 +48,7 @@ let codeActionProvider: vscode.Disposable;
 const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
 type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
+let vcpkgDbPromise: Promise<vcpkgDatabase>;
 async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     let database: vcpkgDatabase = {};
     return new Promise((resolve, reject) => {
@@ -88,6 +89,42 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
             return reject();
         }
     });
+}
+
+function getVcpkgHelpAction(): vscode.CodeAction {
+    return {
+        command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VCPkgOnlineHelpSuggestedCommand'},
+        title: `What is the vcpkg package manager?`,
+        kind: vscode.CodeActionKind.QuickFix
+    };
+}
+
+function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
+    return {
+        command: { title: 'VCPkgClipboardInstallSuggested', command: 'C_Cpp.VCPkgClipboardInstallSuggestedCommand', arguments: [[port]] },
+        title: `Copy vcpkg command to install '${port}' to the clipboard`,
+        kind: vscode.CodeActionKind.QuickFix
+    };
+}
+
+async function lookupIncludeInVcpkg(document: vscode.TextDocument, range: vscode.Range): Promise<string[]> {
+    const matches : RegExpMatchArray = document.getText(range).match("#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]");
+    if (!matches.length) {
+        return Promise.resolve([]);
+    }
+    const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
+
+    let portsWithHeader: string[];
+    try {
+        const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
+        portsWithHeader = vcpkgDb[missingHeader];
+    } catch (e) {
+        return Promise.resolve([]);
+    }
+    if (!portsWithHeader) {
+        return Promise.resolve([]);
+    }
+    return Promise.resolve(portsWithHeader);
 }
 
 /**
@@ -131,10 +168,12 @@ export function activate(activationEventOccurred: boolean): void {
         }
     });
 
-    let vcpkgDbPromise: Promise<vcpkgDatabase> = initVcpkgDatabase();
-
-    const sel: vscode.DocumentSelector = { scheme: 'file', language: 'cpp' };
-    codeActionProvider = vscode.languages.registerCodeActionsProvider(sel, {
+    vcpkgDbPromise = initVcpkgDatabase();
+    const selector: vscode.DocumentSelector = [
+        { scheme: 'file', language: 'cpp' },
+        { scheme: 'file', language: 'c' }
+    ];
+    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
             telemetry.logLanguageServerEvent('provideCodeActionsRequested');
 
@@ -143,39 +182,14 @@ export function activate(activationEventOccurred: boolean): void {
             if (!context.diagnostics.find(diagnostic => { return diagnostic.code === missingIncludeCode && diagnostic.source === 'cpptools'; })) {
                 return Promise.resolve([]);
             }
-            const matches : RegExpMatchArray = document.getText(range).match(/#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]/);
-            if (!matches.length) {
-                return;
-            }
-            const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
 
-            let portsWithHeader: string[];
-            try {
-                const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
-                portsWithHeader = vcpkgDb[missingHeader];
-            } catch (e) {
-                return;
+            let actions: vscode.CodeAction[] = (await lookupIncludeInVcpkg(document, range)).map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
+            if (actions.length) {
+                actions.push(getVcpkgHelpAction());
             }
-            if (!portsWithHeader) {
-                return;
-            }
-            telemetry.logLanguageServerEvent('vcpkgCodeActionsProvided');
-
-            let actions: vscode.CodeAction[] = [];
-            actions.push(...portsWithHeader.map<vscode.CodeAction>(port => {
-                return {
-                    command: { title: 'VCPkgClipboardInstallSuggested', command: 'C_Cpp.VCPkgClipboardInstallSuggestedCommand', arguments: [port] },
-                    title: `Copy vcpkg command to install '${port}' to the clipboard`,
-                    kind: vscode.CodeActionKind.QuickFix
-                };
-            }));
-            actions.push({
-                command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VCPkgOnlineHelpSuggestedCommand'},
-                title: `What is the vcpkg package manager?`,
-                kind: vscode.CodeActionKind.QuickFix
-            });
             return Promise.resolve(actions);
-        }});
+        }
+    });
 
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
@@ -1004,7 +1018,47 @@ async function onVCPkgOnlineHelpSuggestedCommand(): Promise<void> {
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
-async function onVcpkgClipboardInstallSuggested(port: string): Promise<void> {
+async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void> {
+    if (!ports) {
+        // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
+        const missingIncludeLocations: [vscode.TextDocument, vscode.Range[]][] = [];
+        vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
+            // Extract textDocument
+            const textDocument: vscode.TextDocument = vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === uriAndDiagnostics[0].fsPath);
+            if (!textDocument) {
+                return;
+            }
+
+            const missingIncludeCode: number = 1696;
+            uriAndDiagnostics[1] = uriAndDiagnostics[1].filter(d => { return d.code && d.code === missingIncludeCode && d.source && d.source === 'cpptools'; });
+            if (!uriAndDiagnostics[1].length) {
+                return;
+            }
+
+            // Extract ranges while filtering duplicates
+            let ranges: vscode.Range[] = uriAndDiagnostics[1].map<vscode.Range>(diagnostic => { return diagnostic.range; });
+            ranges = ranges.filter((range: vscode.Range, index: number) => {
+                const foundIndex: number = ranges.findIndex(range2 => {
+                    return range.start.line === range2.start.line && range.start.character === range2.start.character &&
+                        range.end.line === range2.end.line && range.end.character === range2.end.character;
+                });
+                return foundIndex === index;
+            });
+
+            missingIncludeLocations.push([textDocument, ranges]);
+        });
+
+        // Queue look ups in the vcpkg database for missing ports, filtering out duplicate results
+        let portsPromises: Promise<string[]>[] = [];
+        missingIncludeLocations.forEach(docAndRanges => {
+            docAndRanges[1].forEach(async range => {
+                portsPromises.push(lookupIncludeInVcpkg(docAndRanges[0], range));
+            });
+        });
+        ports = [].concat(...(await Promise.all(portsPromises)));
+        ports = ports.filter((port: string, index: number) => { return ports.indexOf(port) === index; });
+    }
+
     let triplets: string[];
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     switch (platformInfo.platform) {
@@ -1019,8 +1073,10 @@ async function onVcpkgClipboardInstallSuggested(port: string): Promise<void> {
     }
 
     let installCommand: string = 'vcpkg install';
-    triplets.forEach(triplet => {
-        installCommand += ` ${port}:${triplet}`;
+    ports.forEach(port => {
+        triplets.forEach(triplet => {
+            installCommand += ` ${port}:${triplet}`;
+        });
     });
 
     return vscode.env.clipboard.writeText(installCommand);
