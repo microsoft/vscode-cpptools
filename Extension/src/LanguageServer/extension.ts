@@ -52,42 +52,38 @@ let vcpkgDbPromise: Promise<vcpkgDatabase>;
 async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     let database: vcpkgDatabase = {};
     return new Promise((resolve, reject) => {
-        try {
-            yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, async (err? : Error, zipfile?: yauzl.ZipFile) => {
-                if (err) {
-                    throw err;
+        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, async (err? : Error, zipfile?: yauzl.ZipFile) => {
+            if (err) {
+                return resolve(database);
+            }
+            zipfile.readEntry();
+            zipfile.on('entry', entry => {
+                if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
+                    return resolve(database);
                 }
-                zipfile.readEntry();
-                zipfile.on('entry', entry => {
-                    if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
-                        throw err;
-                    }
-                    zipfile.openReadStream(entry, (err?: Error, stream?: any) => {
-                        let reader: rd.ReadLine = rd.createInterface(stream);
-                        reader.on('line', (lineText: string) => {
-                            let portFilePair: string[] = lineText.split(':');
-                            if (portFilePair.length !== 2) {
-                                return;
-                            }
+                zipfile.openReadStream(entry, (err?: Error, stream?: any) => {
+                    let reader: rd.ReadLine = rd.createInterface(stream);
+                    reader.on('line', (lineText: string) => {
+                        let portFilePair: string[] = lineText.split(':');
+                        if (portFilePair.length !== 2) {
+                            return;
+                        }
 
-                            const portName: string = portFilePair[0];
-                            const relativeHeader: string = portFilePair[1];
+                        const portName: string = portFilePair[0];
+                        const relativeHeader: string = portFilePair[1];
 
-                            if (!database[relativeHeader]) {
-                                database[relativeHeader] = [];
-                            }
+                        if (!database[relativeHeader]) {
+                            database[relativeHeader] = [];
+                        }
 
-                            database[relativeHeader].push(portName);
-                        });
-                        reader.on('close', () => {
-                            return resolve(database);
-                        });
+                        database[relativeHeader].push(portName);
+                    });
+                    reader.on('close', () => {
+                        return resolve(database);
                     });
                 });
             });
-        } catch (e) {
-            return reject();
-        }
+        });
     });
 }
 
@@ -107,24 +103,24 @@ function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
     };
 }
 
-async function lookupIncludeInVcpkg(document: vscode.TextDocument, range: vscode.Range): Promise<string[]> {
-    const matches : RegExpMatchArray = document.getText(range).match("#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]");
+async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number): Promise<string[]> {
+    const matches : RegExpMatchArray = document.lineAt(line).text.match("#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]");
     if (!matches.length) {
         return Promise.resolve([]);
     }
     const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
 
     let portsWithHeader: string[];
-    try {
-        const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
+    const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
+    if (vcpkgDb) {
         portsWithHeader = vcpkgDb[missingHeader];
-    } catch (e) {
-        return Promise.resolve([]);
     }
-    if (!portsWithHeader) {
-        return Promise.resolve([]);
-    }
-    return Promise.resolve(portsWithHeader);
+    return Promise.resolve(portsWithHeader ? portsWithHeader : []);
+}
+
+function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
+    const missingIncludeCode: number = 1696;
+    return diagnostic.code && diagnostic.code === missingIncludeCode && diagnostic.source && diagnostic.source === 'cpptools';
 }
 
 /**
@@ -178,12 +174,11 @@ export function activate(activationEventOccurred: boolean): void {
             telemetry.logLanguageServerEvent('provideCodeActionsRequested');
 
             // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
-            const missingIncludeCode: number = 1696;
-            if (!context.diagnostics.find(diagnostic => { return diagnostic.code === missingIncludeCode && diagnostic.source === 'cpptools'; })) {
+            if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
                 return Promise.resolve([]);
             }
 
-            let actions: vscode.CodeAction[] = (await lookupIncludeInVcpkg(document, range)).map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
+            let actions: vscode.CodeAction[] = (await lookupIncludeInVcpkg(document, range.start.line)).map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
             if (actions.length) {
                 actions.push(getVcpkgHelpAction());
             }
@@ -1029,14 +1024,13 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
                 return;
             }
 
-            const missingIncludeCode: number = 1696;
-            uriAndDiagnostics[1] = uriAndDiagnostics[1].filter(d => { return d.code && d.code === missingIncludeCode && d.source && d.source === 'cpptools'; });
-            if (!uriAndDiagnostics[1].length) {
+            // Extract ranges, taking only those which are for missing includes
+            let ranges: vscode.Range[] = uriAndDiagnostics[1].filter(isMissingIncludeDiagnostic).map<vscode.Range>(d => { return d.range; });
+            if (!ranges.length) {
                 return;
             }
 
-            // Extract ranges while filtering duplicates
-            let ranges: vscode.Range[] = uriAndDiagnostics[1].map<vscode.Range>(diagnostic => { return diagnostic.range; });
+            // Filter duplicate ranges
             ranges = ranges.filter((range: vscode.Range, index: number) => {
                 const foundIndex: number = ranges.findIndex(range2 => {
                     return range.start.line === range2.start.line && range.start.character === range2.start.character &&
@@ -1048,14 +1042,17 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
             missingIncludeLocations.push([textDocument, ranges]);
         });
 
-        // Queue look ups in the vcpkg database for missing ports, filtering out duplicate results
+        // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         let portsPromises: Promise<string[]>[] = [];
         missingIncludeLocations.forEach(docAndRanges => {
             docAndRanges[1].forEach(async range => {
-                portsPromises.push(lookupIncludeInVcpkg(docAndRanges[0], range));
+                portsPromises.push(lookupIncludeInVcpkg(docAndRanges[0], range.start.line));
             });
         });
         ports = [].concat(...(await Promise.all(portsPromises)));
+        if (!ports.length) {
+            return Promise.resolve();
+        }
         ports = ports.filter((port: string, index: number) => { return ports.indexOf(port) === index; });
     }
 
