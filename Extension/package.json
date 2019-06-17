@@ -616,13 +616,13 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.VCPkgClipboardInstallSuggestedCommand",
-        "title": "%c_cpp.command.VCPkgClipboardInstallSuggestedCommand.title%",
+        "command": "C_Cpp.VcpkgClipboardInstallSuggested",
+        "title": "%c_cpp.command.VcpkgClipboardInstallSuggested.title%",
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.VCPkgOnlineHelpSuggestedCommand",
-        "title": "%c_cpp.command.VCPkgOnlineHelpSuggestedCommand.title%",
+        "command": "C_Cpp.VcpkgOnlineHelpSuggested",
+        "title": "%c_cpp.command.VcpkgOnlineHelpSuggested.title%",
         "category": "C/C++"
       }
     ],

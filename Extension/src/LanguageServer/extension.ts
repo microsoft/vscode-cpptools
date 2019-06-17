@@ -50,18 +50,18 @@ const intelliSenseDisabledError: string = "Do not activate the extension when In
 type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<vcpkgDatabase>;
 async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
-    let database: vcpkgDatabase = {};
     return new Promise((resolve, reject) => {
         yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, async (err? : Error, zipfile?: yauzl.ZipFile) => {
             if (err) {
-                return resolve(database);
+                return resolve({});
             }
             zipfile.readEntry();
             zipfile.on('entry', entry => {
                 if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
-                    return resolve(database);
+                    return resolve({});
                 }
                 zipfile.openReadStream(entry, (err?: Error, stream?: any) => {
+                    let database: vcpkgDatabase = {};
                     let reader: rd.ReadLine = rd.createInterface(stream);
                     reader.on('line', (lineText: string) => {
                         let portFilePair: string[] = lineText.split(':');
@@ -89,7 +89,7 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
 
 function getVcpkgHelpAction(): vscode.CodeAction {
     return {
-        command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VCPkgOnlineHelpSuggestedCommand'},
+        command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VcpkgOnlineHelpSuggested'},
         title: `What is the vcpkg package manager?`,
         kind: vscode.CodeActionKind.QuickFix
     };
@@ -97,7 +97,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
 
 function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
     return {
-        command: { title: 'VCPkgClipboardInstallSuggested', command: 'C_Cpp.VCPkgClipboardInstallSuggestedCommand', arguments: [[port]] },
+        command: { title: 'VcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
         title: `Copy vcpkg command to install '${port}' to the clipboard`,
         kind: vscode.CodeActionKind.QuickFix
     };
@@ -825,8 +825,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.VCPkgClipboardInstallSuggestedCommand', onVcpkgClipboardInstallSuggested));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.VCPkgOnlineHelpSuggestedCommand', onVCPkgOnlineHelpSuggestedCommand));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -1036,7 +1036,7 @@ function onTakeSurvey(): void {
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
-async function onVCPkgOnlineHelpSuggestedCommand(): Promise<void> {
+async function onVcpkgOnlineHelpSuggested(): Promise<void> {
     onActivationEvent();
     telemetry.logLanguageServerEvent("onVcpkgHelp");
     let uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
