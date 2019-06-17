@@ -1242,6 +1242,9 @@ export function deactivate(): Thenable<void> {
     if (taskProvider) {
         taskProvider.dispose();
     }
+    if (codeActionProvider) {
+        codeActionProvider.dispose();
+    }
     return clients.dispose();
 }
 
