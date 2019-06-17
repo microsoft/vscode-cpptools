@@ -103,6 +103,11 @@ export function fileIsCOrCppSource(file: string): boolean {
     return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
 }
 
+export function isEditorFileCpp(file: string): boolean {
+    let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
+    return editor && editor.document.languageId === "cpp";
+}
+
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.
@@ -285,6 +290,19 @@ export function isArrayOfString(input: any): input is string[] {
 
 export function isOptionalArrayOfString(input: any): input is string[]|undefined {
     return input === undefined || isArrayOfString(input);
+}
+
+export function resolveCachePath(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+    let resolvedPath: string = "";
+    if (!input) {
+        // If no path is set, return empty string to language service process, where it will set the default path as
+        // Windows: %LocalAppData%/Microsoft/vscode-cpptools/
+        // Linux and Mac: ~/.vscode-cpptools/
+        return resolvedPath;
+    }
+
+    resolvedPath = resolveVariables(input, additionalEnvironment);
+    return resolvedPath;
 }
 
 export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
@@ -766,22 +784,31 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
 
 export interface CompilerPathAndArgs {
     compilerPath: string;
+    compilerName: string;
     additionalArgs: string[];
 }
 
 export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
     let compilerPath: string = inputCompilerPath;
+    let compilerName: string = "";
     let additionalArgs: string[];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
-        if (compilerPath.startsWith("\"")) {
+        if (compilerPath === "cl.exe") {
+            // Input is only compiler name, this is only for cl.exe
+            compilerName = compilerPath;
+    
+        } else if (compilerPath.startsWith("\"")) {
+            // Input has quotes around compiler path
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
                 additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
                 compilerPath = compilerPath.substr(1, endQuote - 1);
+                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
             }
         } else {
+            // Input has no quotes but can have a compiler path with spaces and args.
             // Go from right to left checking if a valid path is to the left of a space.
             let spaceStart: number = compilerPath.lastIndexOf(" ");
             if (spaceStart !== -1 && (!isWindows || !compilerPath.endsWith("cl.exe")) && !checkFileExistsSync(compilerPath)) {
@@ -802,9 +829,13 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                     compilerPath = potentialCompilerPath;
                 }
             }
+            // Get compiler name if there are no args but path is valid or a valid path was found with args.
+            if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {
+                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
+            }
         }
     }
-    return { compilerPath, additionalArgs };
+    return { compilerPath, compilerName, additionalArgs };
 }
 
 export function escapeForSquiggles(s: string): string {
@@ -836,4 +867,39 @@ export function escapeForSquiggles(s: string): string {
         newResults += "\\";
     }
     return newResults;
+}
+
+export class BlockingTask<T> {
+    private dependency: BlockingTask<any>;
+    private done: boolean = false;
+    private promise: Thenable<T>;
+
+    constructor(task: () => Thenable<T>, dependency?: BlockingTask<any>) {
+        if (!dependency) {
+            this.promise = task();
+        } else {
+            this.dependency = dependency;
+            this.promise = new Promise<T>((resolve, reject) => {
+                let f1: () => void = () => {
+                    task().then(resolve, reject);
+                };
+                let f2: (err: any) => void = (err) => {
+                    console.log(err);
+                    task().then(resolve, reject);
+                };
+                this.dependency.promise.then(f1, f2);
+            });
+        }
+    }
+
+    public get Done(): boolean {
+        return this.done;
+    }
+
+    public then<T2>(onSucceeded: (value: T) => T2, onRejected?: (err) => any): Thenable<T2> {
+        if (onRejected) {
+            return this.promise.then(onSucceeded, onRejected);
+        }
+        return this.promise.then(onSucceeded);
+    }
 }

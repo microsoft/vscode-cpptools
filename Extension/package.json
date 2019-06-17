@@ -46,13 +46,14 @@
     "problemMatchers": [
       {
         "name": "gcc",
+        "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
           "relative",
           "${workspaceFolder}"
         ],
         "pattern": {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
@@ -292,8 +293,8 @@
         },
         "C_Cpp.intelliSenseCachePath": {
           "type": "string",
-          "default": "${workspaceFolder}/.vscode",
-          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default path \"${workspaceFolder}/.vscode\" will be used if a specified path is invalid.",
+          "default": null,
+          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is \"%LocalAppData%\/Microsoft/vscode-cpptools\" on Windows and \"~/.vscode-cpptools\" on Linux and Mac. The default path will be used if no path is specified or if a specified path is invalid.",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseCacheSize": {
@@ -495,6 +496,16 @@
           "default": true,
           "description": "If true, snippets are provided by the language server.",
           "scope": "resource"
+        },
+        "C_Cpp.enhancedColorization": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled.",
+          "scope": "resource"
         }
       }
     },
@@ -600,8 +611,15 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.RescanWorkspace",
+        "title": "%c_cpp.command.rescanWorkspace.title%",
+        "category": "C/C++"
+      },
+      {
+      {
         "command": "C_Cpp.VCPkgClipboardInstallSuggestedCommand",
         "title": "%c_cpp.command.VCPkgClipboardInstallSuggestedCommand.title%",
+        "title": "%c_cpp.command.rescanWorkspace.title%",
         "category": "C/C++"
       },
       {
@@ -790,6 +808,11 @@
                   }
                 },
                 "default": []
+              },
+              "envFile": {
+                "type": "string",
+                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
+                "default": "${workspaceFolder}/.env"
               },
               "additionalSOLibSearchPath": {
                 "type": "string",
@@ -1213,7 +1236,7 @@
               },
               "envFile": {
                 "type": "string",
-                "description": "Absolute path to a file containing environment variable definitions. These file has key value pairs sepearted by an equals sign per line. E.g. KEY=VALUE",
+                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
                 "default": "${workspaceFolder}/.env"
               },
               "symbolSearchPath": {
@@ -1486,6 +1509,7 @@
     "jsonc-parser": "^2.1.0",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
+    "plist": "^2.0.1",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^2.1.2",
     "vscode-debugadapter": "^1.34.0",
