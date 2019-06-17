@@ -1044,7 +1044,7 @@ async function onVcpkgOnlineHelpSuggested(): Promise<void> {
 }
 
 async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void> {
-    if (!ports) {
+    if (!ports || !ports.length) {
         // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
         const missingIncludeLocations: [vscode.TextDocument, vscode.Range[]][] = [];
         vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
