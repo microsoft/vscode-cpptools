@@ -177,21 +177,41 @@ enum ReferenceType {
     NotAReference
 }
 
-interface TypedReference {
+interface ReferenceInfo {
     file: string;
     position: vscode.Position;
     text: string;
     type: ReferenceType;
 }
 
-interface TypedReferencesResult {
-    typedReferences: TypedReference[];
+interface ReferencesResult {
+    references: ReferenceInfo[];
     isInitialResult: boolean;
     isFinalResult: boolean;
 }
 
-interface TypedReferencesResultMessage {
-    typedReferencesResult: TypedReferencesResult;
+interface ReferencesResultMessage {
+    referencesResult: ReferencesResult;
+}
+
+enum ReferencesProgress {
+    Started,
+    ProcessingSourceLocation,
+    ProcessingTargetLocations,
+    Finished
+}
+
+enum TargetLocationReferencesProgress {
+    WaitingForFreeThread,
+    Lexing,
+    InitializingIntelliSense,
+    ConfirmingReferences,
+    Finished
+}
+
+interface ReportReferencesStatusNotificationBody {
+    referencesProgress: ReferencesProgress;
+    targetLocationReferencesProgress: TargetLocationReferencesProgress[];
 }
 
 // Requests
@@ -237,8 +257,8 @@ const SemanticColorizationRegionsNotification:  NotificationType<SemanticColoriz
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
-const TypedReferencesNotification: NotificationType<TypedReferencesResultMessage, void> = new NotificationType<TypedReferencesResultMessage, void>('cpptools/typedReferences');
-const ReportReferencesStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportReferencesStatus');
+const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
+const ReportReferencesStatusNotification: NotificationType<ReportReferencesStatusNotificationBody, void> = new NotificationType<ReportReferencesStatusNotificationBody, void>('cpptools/reportReferencesStatus');
 
 let failureMessageShown: boolean = false;
 
@@ -319,7 +339,7 @@ class DefaultClient implements Client {
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
     private diagnosticsChannel: vscode.OutputChannel;
-    private typedReferencesChannel: vscode.OutputChannel;
+    private referencesChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
@@ -1033,7 +1053,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(SyntacticColorizationRegionsNotification, (e) => this.updateSyntacticColorizationRegions(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(TypedReferencesNotification, (e) => this.processTypedReferences(e.typedReferencesResult));
+        this.languageClient.onNotification(ReferencesNotification, (e) => this.processTypedReferences(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesStatusNotification, (e) => this.updateReferencesStatus(e));
         this.setupOutputHandlers();
     }
@@ -1239,15 +1259,29 @@ class DefaultClient implements Client {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
-    private updateReferencesStatus(notificationBody: ReportStatusNotificationBody): void {
-        vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Find All References",
-            cancellable: true
-        }, async (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) => {
-            this.referencesProgress = progress;
-            // TODO: Update progress.
-        });
+    private currentReferencesProgress: ReportReferencesStatusNotificationBody;
+    private updateReferencesStatus(notificationBody: ReportReferencesStatusNotificationBody): void {
+        if (notificationBody.referencesProgress === ReferencesProgress.Started) {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "Find All References",
+                cancellable: true
+            }, (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) => {
+                return new Promise((resolve, reject) => {
+                    //currentReferencesProgress.
+                    progress.report({message: 'Start working...' });
+                    let count: number = 0;
+                    let handle: NodeJS.Timeout = setInterval(() => {
+                        count++;
+                        progress.report({message: 'Worked ' + count + ' steps' });
+                        if (count >= 10) {
+                            clearInterval(handle);
+                            resolve();
+                        }
+                    }, 1000);
+                });
+            });
+        }
     }
 
     private getColorizationState(uri: string): ColorizationState {
@@ -1631,54 +1665,44 @@ class DefaultClient implements Client {
         return "";
     }
 
-    private typedReferencesSavedResults: TypedReference[] = null;
+    private referencesSavedResults: ReferenceInfo[] = null;
     private documentsForReferences: Map<string, vscode.TextDocument> = new Map<string, vscode.TextDocument>();
     private referencesProgress: vscode.Progress<{message?: string; increment?: number }>;
 
-    private processTypedReferences(typedReferencesResult: TypedReferencesResult): void {
-        if (!this.typedReferencesChannel) {
-            this.typedReferencesChannel = vscode.window.createOutputChannel("C/C++ References");
-            this.disposables.push(this.typedReferencesChannel);
+    private processTypedReferences(referencesResult: ReferencesResult): void {
+        if (!this.referencesChannel) {
+            this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
+            this.disposables.push(this.referencesChannel);
         } else {
-            this.typedReferencesChannel.clear();
+            this.referencesChannel.clear();
         }
-        if (typedReferencesResult.isInitialResult) {
-            this.typedReferencesSavedResults = [];
+        if (referencesResult.isInitialResult) {
+            this.referencesSavedResults = [];
             this.documentsForReferences.clear();
         }
-        for (let typedReference of typedReferencesResult.typedReferences) {
-            if (typedReference.type === ReferenceType.Confirmed) {
+        for (let reference of referencesResult.references) {
+            if (reference.type === ReferenceType.Confirmed) {
                 continue; // Already displayed in VS Code's References.
             }
-            if (typedReference.type === ReferenceType.ConfirmationInProgress) {
-                if (!this.documentsForReferences.has(typedReference.file)) {
-                    this.documentsForReferences.set(typedReference.file, null);
-                    this.languageClient.sendNotification(DidOpenForReferenceConfirmationNotification, typedReference.file);
-                    vscode.workspace.openTextDocument(typedReference.file).then((document: vscode.TextDocument) => {
-                        this.documentsForReferences.set(typedReference.file, document);
+            if (reference.type === ReferenceType.ConfirmationInProgress) {
+                if (!this.documentsForReferences.has(reference.file)) {
+                    this.documentsForReferences.set(reference.file, null);
+                    this.languageClient.sendNotification(DidOpenForReferenceConfirmationNotification, reference.file);
+                    vscode.workspace.openTextDocument(reference.file).then((document: vscode.TextDocument) => {
+                        this.documentsForReferences.set(reference.file, document);
                     });
                 }
             } else {
-                this.typedReferencesSavedResults.push(typedReference);
+                this.referencesSavedResults.push(reference);
             }
-            this.typedReferencesChannel.appendLine(this.convertReferenceTypeToString(typedReference.type) + ": " + typedReference.text);
-            this.typedReferencesChannel.appendLine(typedReference.file + ":" + (typedReference.position.line + 1) + ":" + (typedReference.position.character + 1));
+            this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type) + ": " + reference.text);
+            this.referencesChannel.appendLine(reference.file + ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1));
         }
-        this.typedReferencesChannel.show(true);
+        this.referencesChannel.show(true);
 
-        if (typedReferencesResult.isFinalResult) {
+        if (referencesResult.isFinalResult) {
             this.documentsForReferences.clear();
         } else {
-            /*
-            vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: "Find All References",
-                cancellable: false // TODO: Handle cancelation
-            }, async (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) => {
-                this.referencesProgress = progress;
-                // TODO: Update progress.
-            });
-            */
             vscode.commands.executeCommand("references-view.find");
         }
     }
