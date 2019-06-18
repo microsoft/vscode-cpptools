@@ -272,8 +272,8 @@ export class ColorizationSettings {
             if (textMateRules) {
                 let scopelessSetting: any = textMateRules.find(e => e.settings && !e.scope);
                 if (scopelessSetting) {
-                    if (scopelessSetting.background) {
-                        this.editorBackground = scopelessSetting.background;
+                    if (scopelessSetting.settings.background) {
+                        this.editorBackground = scopelessSetting.settings.background;
                     }
                     this.updateStyleFromTextMateRuleSettings(defaultStyle, scopelessSetting.settings);
                 }
