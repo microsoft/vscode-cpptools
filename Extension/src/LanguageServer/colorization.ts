@@ -252,7 +252,7 @@ export class ColorizationSettings {
                             e.scope = e.scope.split(',').map((s: string) => s.trim());
                         }
                     });
-                } 
+                }
             } else {
                 themeContent = jsonc.parse(themeContentText);
                 if (themeContent) {
