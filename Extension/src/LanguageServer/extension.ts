@@ -88,8 +88,9 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
 }
 
 function getVcpkgHelpAction(): vscode.CodeAction {
+    const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
-        command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VcpkgOnlineHelpSuggested'},
+        command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
         title: `What is the vcpkg package manager?`,
         kind: vscode.CodeActionKind.QuickFix
     };
@@ -171,16 +172,18 @@ export function activate(activationEventOccurred: boolean): void {
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-            telemetry.logLanguageServerEvent('provideCodeActionsRequested');
+            telemetry.logLanguageServerEvent('onCodeActionsRequested');
 
             // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
             if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
                 return Promise.resolve([]);
             }
 
+            telemetry.logLanguageServerEvent('onVcpkgCodeActionsRequested');
             let actions: vscode.CodeAction[] = (await lookupIncludeInVcpkg(document, range.start.line)).map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
             if (actions.length) {
                 actions.push(getVcpkgHelpAction());
+                telemetry.logLanguageServerEvent('onVcpkgCodeActionsProvided');
             }
             return Promise.resolve(actions);
         }
@@ -1036,15 +1039,19 @@ function onTakeSurvey(): void {
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
-async function onVcpkgOnlineHelpSuggested(): Promise<void> {
-    onActivationEvent();
-    telemetry.logLanguageServerEvent("onVcpkgHelp");
-    let uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
+async function onVcpkgOnlineHelpSuggested(dummy?: any): Promise<void> {
+    telemetry.logLanguageServerEvent(dummy ? 'onVcpkgHelpCodeAction' : 'onVcpkgHelpCommandPalette');
+    const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
 async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void> {
-    if (!ports || !ports.length) {
+    onActivationEvent();
+    if (ports && ports.length) {
+        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCodeAction');
+    } else {
+        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandPalette');
+
         // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
         const missingIncludeLocations: [vscode.TextDocument, vscode.Range[]][] = [];
         vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
