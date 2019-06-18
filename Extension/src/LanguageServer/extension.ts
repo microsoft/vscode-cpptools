@@ -1053,7 +1053,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandPalette');
 
         // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
-        const missingIncludeLocations: [vscode.TextDocument, vscode.Range[]][] = [];
+        const missingIncludeLocations: [vscode.TextDocument, number[]][] = [];
         vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
             // Extract textDocument
             const textDocument: vscode.TextDocument = vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === uriAndDiagnostics[0].fsPath);
@@ -1061,29 +1061,26 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
                 return;
             }
 
-            // Extract ranges, taking only those which are for missing includes
-            let ranges: vscode.Range[] = uriAndDiagnostics[1].filter(isMissingIncludeDiagnostic).map<vscode.Range>(d => { return d.range; });
-            if (!ranges.length) {
+            // Extract lines numbers for missing include diagnostics
+            let lines: number[] = uriAndDiagnostics[1].filter(isMissingIncludeDiagnostic).map<number>(d => { return d.range.start.line; });
+            if (!lines.length) {
                 return;
             }
 
-            // Filter duplicate ranges
-            ranges = ranges.filter((range: vscode.Range, index: number) => {
-                const foundIndex: number = ranges.findIndex(range2 => {
-                    return range.start.line === range2.start.line && range.start.character === range2.start.character &&
-                        range.end.line === range2.end.line && range.end.character === range2.end.character;
-                });
+            // Filter duplicate lines
+            lines = lines.filter((line: number, index: number) => {
+                const foundIndex: number = lines.indexOf(line);
                 return foundIndex === index;
             });
 
-            missingIncludeLocations.push([textDocument, ranges]);
+            missingIncludeLocations.push([textDocument, lines]);
         });
 
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         let portsPromises: Promise<string[]>[] = [];
-        missingIncludeLocations.forEach(docAndRanges => {
-            docAndRanges[1].forEach(async range => {
-                portsPromises.push(lookupIncludeInVcpkg(docAndRanges[0], range.start.line));
+        missingIncludeLocations.forEach(docAndLineNumbers => {
+            docAndLineNumbers[1].forEach(async line => {
+                portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
             });
         });
         ports = [].concat(...(await Promise.all(portsPromises)));
