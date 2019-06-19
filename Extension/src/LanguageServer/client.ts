@@ -583,14 +583,15 @@ class DefaultClient implements Client {
     private editVersion: number = 0;
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
+        // Increment editVersion for every call to onDidChangeTextDocument, regardless of whether the file is handled
+        this.editVersion++;
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
             if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
-                this.editVersion++;
                 try {
                     let colorizationState: ColorizationState = this.getColorizationState(textDocumentChangeEvent.document.uri.toString());
 
                     // Adjust colorization ranges after this edit.  (i.e. if a line was added, push decorations after it down one line)
-                    colorizationState.updateAfterEdits(textDocumentChangeEvent.contentChanges, this.editVersion);
+                    colorizationState.addEdits(textDocumentChangeEvent.contentChanges, this.editVersion);
                 } catch (e) {
                     // Ensure an exception does not prevent pass-through to native handler, or editVersion could become inconsistent
                     console.log(e.toString());

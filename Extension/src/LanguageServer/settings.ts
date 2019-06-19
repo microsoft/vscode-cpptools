@@ -117,6 +117,7 @@ export class OtherSettings {
     public get filesExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get searchExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+    public get editorBackground(): string { return vscode.workspace.getConfiguration("editor", this.resource).get<string>("background"); }
 
     public get colorTheme(): string { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
 
