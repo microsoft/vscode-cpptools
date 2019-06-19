@@ -1091,8 +1091,8 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     }
 
     let triplets: string[];
-    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    switch (platformInfo.platform) {
+    const platform: NodeJS.Platform = await os.platform();
+    switch (platform) {
         case 'win32':
             triplets = ['x86-windows', 'x64-windows'];
             break;
