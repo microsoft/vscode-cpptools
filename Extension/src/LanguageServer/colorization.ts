@@ -306,10 +306,6 @@ export class ColorizationSettings {
                         let themeFullPath: string = path.join(extensionPath, themeRelativePath);
                         let defaultStyle: ThemeStyle = new ThemeStyle();
                         let rulesSet: TextMateRule[][] = await this.loadTheme(themeFullPath, defaultStyle);
-                        let editorBackgroundSetting: string = otherSettings.editorBackground;
-                        if (editorBackgroundSetting) {
-                            this.editorBackground = editorBackgroundSetting;
-                        }
                         this.updateStyles(themeName, defaultStyle, rulesSet);
                         return;
                     }
