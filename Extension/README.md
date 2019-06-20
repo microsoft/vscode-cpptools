@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code
+
 ### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://github.com/microsoft/vscode-cpptools/tree/master/Documentation)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/master/Code%20Samples)&nbsp;&nbsp;|&nbsp;&nbsp;[Offline Installers](https://github.com/microsoft/vscode-cpptools/releases)
+
+[![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
+
 This preview release of the extension adds language support for C/C++ to Visual Studio Code including:
 * Language service
   * Code Formatting (clang-format)
