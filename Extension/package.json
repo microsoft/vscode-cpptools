@@ -295,7 +295,7 @@
           "type": "string",
           "default": null,
           "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is \"%LocalAppData%/Microsoft/vscode-cpptools\" on Windows and \"~/.vscode-cpptools\" on Linux and Mac. The default path will be used if no path is specified or if a specified path is invalid.",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.intelliSenseCacheSize": {
           "type": "number",
@@ -314,7 +314,7 @@
           },
           "default": null,
           "description": "The value to use in a configuration if \"includePath\" is not specified, or the values to insert if \"${default}\" is present in \"includePath\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.defines": {
           "type": [
@@ -338,7 +338,7 @@
           },
           "default": null,
           "description": "The value to use in a configuration if \"macFrameworkPath\" is not specified, or the values to insert if \"${default}\" is present in \"macFrameworkPath\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.windowsSdkVersion": {
           "type": [
@@ -357,7 +357,7 @@
           ],
           "default": null,
           "description": "The value to use in a configuration if \"compileCommands\" is either not specified, or set to \"${default}\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.forcedInclude": {
           "type": [
@@ -369,7 +369,7 @@
           },
           "default": null,
           "description": "The value to use in a configuration if \"forcedInclude\" is not specified, or the values to insert if \"${default}\" is present in \"forcedInclude\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.intelliSenseMode": {
           "type": [
@@ -392,7 +392,7 @@
           ],
           "default": null,
           "description": "The value to use in a configuration if \"compilerPath\" is either not specified or set to \"${default}\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.cStandard": {
           "type": [
@@ -431,7 +431,7 @@
           ],
           "default": null,
           "description": "The value to use in a configuration if \"configurationProvider\" is either not specified or set to \"${default}\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.browse.path": {
           "type": [
@@ -443,7 +443,7 @@
           },
           "default": null,
           "description": "The value to use in a configuration if \"browse.path\" is not specified, or the values to insert if \"${default}\" is present in \"browse.path\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.browse.databaseFilename": {
           "type": [
@@ -452,7 +452,7 @@
           ],
           "default": null,
           "description": "The value to use in a configuration if \"browse.databaseFilename\" is either not specified or set to \"${default}\".",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": {
           "type": "boolean",
@@ -470,7 +470,7 @@
           },
           "default": null,
           "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.default.enableConfigurationSquiggles": {
           "type": [
