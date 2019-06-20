@@ -572,7 +572,7 @@ class DefaultClient implements Client {
             }
             if (changedSettings["intelliSenseCachePath"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveVariables(settings.intelliSenseCachePath, this.AdditionalEnvironment));
+                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
             }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
