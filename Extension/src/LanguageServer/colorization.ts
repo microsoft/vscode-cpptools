@@ -245,13 +245,6 @@ export class ColorizationSettings {
                 themeContent = plist.parse(themeContentText);
                 if (themeContent) {
                     textMateRules = themeContent.settings;
-
-                    // Convert comma delimited scopes into an array, to match the json format
-                    textMateRules.forEach(e => {
-                        if (e.scope && e.scope.includes(',')) {
-                            e.scope = e.scope.split(',').map((s: string) => s.trim());
-                        }
-                    });
                 }
             } else {
                 themeContent = jsonc.parse(themeContentText);
@@ -270,6 +263,13 @@ export class ColorizationSettings {
             }
 
             if (textMateRules) {
+                // Convert comma delimited scopes into an array
+                textMateRules.forEach(e => {
+                    if (e.scope && e.scope.includes(',')) {
+                        e.scope = e.scope.split(',').map((s: string) => s.trim());
+                    }
+                });
+
                 let scopelessSetting: any = textMateRules.find(e => e.settings && !e.scope);
                 if (scopelessSetting) {
                     if (scopelessSetting.settings.background) {
