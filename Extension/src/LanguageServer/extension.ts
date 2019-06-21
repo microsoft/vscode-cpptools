@@ -105,7 +105,7 @@ function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
 }
 
 async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number): Promise<string[]> {
-    const matches : RegExpMatchArray = document.lineAt(line).text.match("#include\\s*[<\"](?<includeFile>[^>\"]*)[>\"]");
+    const matches : RegExpMatchArray = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
     if (!matches.length) {
         return Promise.resolve([]);
     }
