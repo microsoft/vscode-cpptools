@@ -73,7 +73,7 @@
           ],
           "default": null,
           "description": "The full path of the clang-format executable.",
-          "scope": "resource"
+          "scope": "machine"
         },
         "C_Cpp.clang_format_style": {
           "type": "string",
