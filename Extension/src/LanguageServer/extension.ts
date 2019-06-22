@@ -1050,7 +1050,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     if (ports && ports.length) {
         telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCodeAction');
     } else {
-        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandPalette');
+        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandRequested');
 
         // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
         const missingIncludeLocations: [vscode.TextDocument, number[]][] = [];
@@ -1075,6 +1075,11 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
 
             missingIncludeLocations.push([textDocument, lines]);
         });
+        if (!missingIncludeLocations.length) {
+            return Promise.resolve();
+        }
+
+        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandValid');
 
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         let portsPromises: Promise<string[]>[] = [];
@@ -1088,6 +1093,8 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
             return Promise.resolve();
         }
         ports = ports.filter((port: string, index: number) => { return ports.indexOf(port) === index; });
+
+        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandProvided');
     }
 
     let triplets: string[];
