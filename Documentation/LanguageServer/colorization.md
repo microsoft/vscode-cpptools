@@ -1,7 +1,7 @@
 
 # VS Code C/C++ Extension - Enhanced Colorization
 
-The VS Code C/C++ extension now supports lexical/syntactic and semantic colorization, when IntelliSense is enabled.  Enhanced colorization can be enabled using the enhancedColorization setting:
+The VS Code C/C++ extension now supports semantic colorization, when IntelliSense is enabled.  Enhanced colorization can be enabled using the enhancedColorization setting:
 
 ```
     "C_Cpp.enhancedColorization": "Enabled"
@@ -20,7 +20,6 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 | Token         | Scope         |
 | ------------- |:-------------:|
 | Class Template | entity.name.class.template |
-| Comment | comment |
 | Enumerator | variable.other.enummember |
 | Event  (C++/CLI) | variable.other.event |
 | Function | entity.name.function |
@@ -28,33 +27,25 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 | Generic Type (C++/CLI) | entity.name.class.generic |
 | Global Variable | variable.other.global |
 | Identifier | <span>entity.name</span> |
-| Keyword | keyword.control |
 | Label | entity.name.label |
 | Local Variable | variable.other.local |
 | Macro | entity.name.function.preprocessor |
 | Member Field  | variable.other.member |
 | Member Function | entity.name.function.member |
 | Member Operator | keyword.operator.member |
-| Namespace | entity.name.namespace |
+| Namespace | entity.name.type.namespace |
 | New / Delete | keyword.operator.new |
-| Number Literal | constant.numeric |
-| Operator | keyword.operator |
 | Operator Function | entity.name.function.operator |
 | Parameter | variable.parameter |
-| Preprocessor Keyword | keyword.control.directive |
 | Property (C++/CLI) | variable.other.property |
 | Reference Type (C++/CLI) | entity.name.class.reference |
 | Static Member Field | variable.other.member.static |
 | Static Member Function | entity.name.function.member.static |
-| String Literal | string.quoted |
 | Type | entity.name.type |
-| User-Defined Literal – Number | entity.name.user-defined-literal.number |
+| User-Defined Literal - Number | entity.name.user-defined-literal.number |
 | User-Defined Literal - Raw | entity.name.user-defined-literal |
 | User-Defined Literal - String | entity.name.user-defined-literal.string |
 | Value Type (C++/CLI) | entity.name.class.value |
-| Variable | variable |
-| Xml Doc Comment | comment.xml.doc |
-| Xml Doc Tag | comment.xml.doc.tag |
 
 Many of the tokens recognized by IntelliSense do not directly map to existing scopes in the VS Code's default C/C++ TextMate grammar, so are likely not colored by existing VS Code themes.
 
@@ -259,7 +250,7 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.namespace",
+                    "scope": "entity.name.type.namespace",
                     "settings": {
                         "foreground": "#C8C8C8"
                     }
@@ -480,7 +471,7 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.namespace",
+                    "scope": "entity.name.type.namespace",
                     "settings": {
                         "foreground": "#000000"
                     }

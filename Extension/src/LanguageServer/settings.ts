@@ -42,7 +42,6 @@ export class CppSettings extends Settings {
     public get intelliSenseCachePath(): string { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
-    public get textMateColorization(): string { return super.Section.get<string>("textMateColorization"); }
     public get enhancedColorization(): string { return super.Section.get<string>("enhancedColorization"); }
     public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }

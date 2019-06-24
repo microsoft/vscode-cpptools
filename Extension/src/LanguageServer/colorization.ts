@@ -14,18 +14,6 @@ import * as plist from 'plist';
 export enum TokenKind {
     // These need to match the token_kind enum in the server
 
-    // Syntactic/Lexical tokens
-    Identifier,
-    Comment,
-    Keyword,
-    PreprocessorKeyword,
-    Operator,
-    Variable,
-    NumberLiteral,
-    StringLiteral,
-    XmlDocComment,
-    XmlDocTag,
-
     // Semantic tokens
     Macro,
     Enumerator,
@@ -90,7 +78,6 @@ export class ColorizationSettings {
 
     constructor(uri: vscode.Uri) {
         this.uri = uri;
-        this.updateGrammars();
         this.reload();
     }
 
@@ -197,16 +184,6 @@ export class ColorizationSettings {
             this.themeStyleCppMap[i] = Object.assign({}, defaultStyle);
         }
 
-        this.calculateStyleForToken(TokenKind.Identifier, "entity.name", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Comment, "comment", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Keyword, "keyword.control", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.PreprocessorKeyword, "keyword.control.directive", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Operator, "keyword.operator", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Variable, "variable", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.NumberLiteral, "constant.numeric", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.StringLiteral, "string.quoted", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.XmlDocComment, "comment.xml.doc", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.XmlDocTag, "comment.xml.doc.tag", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Macro, "entity.name.function.preprocessor", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Enumerator, "variable.other.enummember", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.GlobalVariable, "variable.other.global", themeName, textMateRules);
@@ -225,7 +202,7 @@ export class ColorizationSettings {
         this.calculateStyleForToken(TokenKind.ClassTemplate, "entity.name.class.template", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.GenericType, "entity.name.class.generic", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.FunctionTemplate, "entity.name.function.template", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Namespace, "entity.name.namespace", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.Namespace, "entity.name.type.namespace", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Label, "entity.name.label", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.UdlRaw, "entity.name.user-defined-literal", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.UdlNumber, "entity.name.user-defined-literal.number", themeName, textMateRules);
@@ -348,58 +325,16 @@ export class ColorizationSettings {
 
         return null;
     }
-
-    public useEmptyGrammars(): void {
-        let packageJson: any = util.getRawPackageJson();
-        if (!packageJson.contributes.grammars || !packageJson.contributes.grammars.length) {
-            let cppGrammarContributesNode: TextMateContributesGrammar = {
-                language: "cpp",
-                scopeName: "source.cpp",
-                path: "./nogrammar.cpp.json"
-            };
-            let cGrammarContributesNode: TextMateContributesGrammar = {
-                language: "c",
-                scopeName: "source.c",
-                path: "./nogrammar.c.json"
-            };
-            packageJson.contributes.grammars = [];
-            packageJson.contributes.grammars.push(cppGrammarContributesNode);
-            packageJson.contributes.grammars.push(cGrammarContributesNode);
-            util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-            util.promptForReloadWindowDueToSettingsChange();
-        }
-    }
-
-    public useStandardGrammars(): void {
-        let packageJson: any = util.getRawPackageJson();
-        if (packageJson.contributes.grammars && packageJson.contributes.grammars.length > 0) {
-            packageJson.contributes.grammars = [];
-            util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-            util.promptForReloadWindowDueToSettingsChange();
-        }
-    }
-
-    public updateGrammars(): void {
-        let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.textMateColorization === "Disabled") {
-            this.useEmptyGrammars();
-        } else {
-            this.useStandardGrammars();
-        }
-    }
 }
 
 export class ColorizationState {
     private uri: vscode.Uri;
     private colorizationSettings: ColorizationSettings;
     private decorations: vscode.TextEditorDecorationType[] = new Array<vscode.TextEditorDecorationType>(TokenKind.Count);
-    private syntacticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
     private semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
     private inactiveDecoration: vscode.TextEditorDecorationType = null;
     private inactiveRanges: vscode.Range[] = [];
     private versionedEdits: VersionedEdits[] = [];
-    private currentSyntacticVersion: number = 0;
-    private lastReceivedSyntacticVersion: number = 0;
     private currentSemanticVersion: number = 0;
     private lastReceivedSemanticVersion: number = 0;
 
@@ -457,14 +392,7 @@ export class ColorizationState {
         if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
             for (let i: number = 0; i < TokenKind.Count; i++) {
                 if (this.decorations[i]) {
-                    let ranges: vscode.Range[] = this.syntacticRanges[i];
-                    if (this.semanticRanges[i]) {
-                        if (!ranges || !ranges.length) {
-                            ranges = this.semanticRanges[i];
-                        } else {
-                            ranges = ranges.concat(this.semanticRanges[i]);
-                        }
-                    }
+                    let ranges: vscode.Range[] = this.semanticRanges[i];
                     if (ranges && ranges.length > 0) {
                         e.setDecorations(this.decorations[i], ranges);
                     }
@@ -633,12 +561,6 @@ export class ColorizationState {
     // Apply any pending edits to the currently cached tokens
     private applyEdits() : void {
         this.versionedEdits.forEach((edit) => {
-            if (edit.editVersion > this.currentSyntacticVersion) {
-                for (let i: number = 0; i < TokenKind.Count; i++) {
-                    this.syntacticRanges[i] = this.fixRanges(this.syntacticRanges[i], edit.changes);
-                }
-                this.currentSyntacticVersion = edit.editVersion;
-            }
             if (edit.editVersion > this.currentSemanticVersion) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
                     this.semanticRanges[i] = this.fixRanges(this.semanticRanges[i], edit.changes);
@@ -651,7 +573,7 @@ export class ColorizationState {
 
     // Remove any edits from the list if we will never receive tokens that old.
     private purgeOldVersionedEdits(): void {
-        let minVersion: number = Math.min(this.lastReceivedSemanticVersion, this.lastReceivedSyntacticVersion);
+        let minVersion: number = this.lastReceivedSemanticVersion;
         let index: number = this.versionedEdits.findIndex((edit) => edit.editVersion > minVersion);
         if (index === -1) {
             this.versionedEdits = [];
@@ -697,15 +619,6 @@ export class ColorizationState {
             }
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
-    }
-
-    public updateSyntactic(uri: string, syntacticRanges: vscode.Range[][], editVersion: number): void {
-        for (let i: number = 0; i < TokenKind.Count; i++) {
-            this.syntacticRanges[i] = syntacticRanges[i];
-        }
-        this.currentSyntacticVersion = editVersion;
-        this.lastReceivedSyntacticVersion = editVersion;
-        this.updateColorizationRanges(uri);
     }
 
     public updateSemantic(uri: string, semanticRanges: vscode.Range[][], inactiveRanges: vscode.Range[], editVersion: number): void {
