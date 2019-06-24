@@ -86,7 +86,7 @@ export class ColorizationSettings {
         if (textMateRuleSettings.foreground) {
             baseStyle.foreground = textMateRuleSettings.foreground;
         }
-        if (textMateRuleSettings.background && textMateRuleSettings.background !== this.editorBackground) {
+        if (textMateRuleSettings.background && textMateRuleSettings.background.toUpperCase() !== this.editorBackground.toUpperCase()) {
             baseStyle.background = textMateRuleSettings.background;
         }
         // Any (even empty) string for fontStyle removes inherited value
@@ -345,7 +345,7 @@ export class ColorizationState {
 
     private createColorizationDecorations(isCpp: boolean): void {
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
+        if (settings.enhancedColorization) {
             // Create new decorators
             // The first decorator created takes precedence, so these need to be created in reverse order
             for (let i: number = TokenKind.Count; i > 0;) {
@@ -389,7 +389,7 @@ export class ColorizationState {
 
     private refreshInner(e: vscode.TextEditor): void {
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
+        if (settings.enhancedColorization) {
             for (let i: number = 0; i < TokenKind.Count; i++) {
                 if (this.decorations[i]) {
                     let ranges: vscode.Range[] = this.semanticRanges[i];

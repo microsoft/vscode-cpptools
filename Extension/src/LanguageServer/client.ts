@@ -157,6 +157,10 @@ interface SemanticColorizationRegionsReceiptParams {
     uri: string;
 }
 
+interface ColorThemeChangedParams {
+    name: string;
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -184,6 +188,7 @@ const ClearCustomConfigurationsNotification: NotificationType<void, void> = new 
 const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
+const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -524,6 +529,12 @@ class DefaultClient implements Client {
             || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
             || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
             || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
+
+        let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
+        if (colorThemeChanged) {
+            let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
+            this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme } );
+        }
 
         if (colorizationNeedsReload) {
             this.colorizationSettings.reload();
