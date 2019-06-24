@@ -3,7 +3,7 @@
 ## Version 0.24.0-insiders2: June 25, 2019
 ### Minor Changes
 * Change `C_Cpp.clang_format_path` to `machine` scope. [#3774](https://github.com/microsoft/vscode-cpptools/issues/3774)
-* Removed syntactic/lexical colorization from enhancedColorization.  [PR #3821](https://github.com/microsoft/vscode-cpptools/pull/3821)
+* Removed syntactic/lexical colorization from `enhancedColorization`.  [PR #3821](https://github.com/microsoft/vscode-cpptools/pull/3821)
 
 ### Bug Fixes
 * Fix crash when tag parsing Objective-C code. [#3776](https://github.com/microsoft/vscode-cpptools/issues/3776)
