@@ -1,8 +1,21 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.24.0-insiders2: June 25, 2019
+### Minor Changes
+* Change `C_Cpp.clang_format_path` to `machine` scope. [#3774](https://github.com/microsoft/vscode-cpptools/issues/3774)
+* Removed syntactic/lexical colorization from enhancedColorization.  [PR #3821](https://github.com/microsoft/vscode-cpptools/pull/3821)
+
+### Bug Fixes
+* Fix crash when tag parsing Objective-C code. [#3776](https://github.com/microsoft/vscode-cpptools/issues/3776)
+* Fix duplicate slashes getting added to `c_cpp_properties.json`. [PR #3778](https://github.com/microsoft/vscode-cpptools/pull/3778)
+* Fix incorrect "file already opened in editor" message on Linux/Mac. [#3786](https://github.com/microsoft/vscode-cpptools/issues/3786)
+* Fix colorization for themes with background colors equal to the editor background color. [#3780](https://github.com/microsoft/vscode-cpptools/issues/3780)
+* Improve performance of colorization. [#3781](https://github.com/microsoft/vscode-cpptools/issues/3781)
+* Fix regression crash on hover. [#3792](https://github.com/microsoft/vscode-cpptools/issues/3792)
+
 ## Version 0.24.0-insiders: June 14, 2019
 ### New Features
-* Syntactic/lexical and semantic colorization [PR #3651](https://github.com/microsoft/vscode-cpptools/pull/3651) [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md)
+* Semantic colorization [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md)  [#230](https://github.com/microsoft/vscode-cpptools/issues/230)
 * Add `Rescan Workspace` command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
 
 ### Minor Changes
