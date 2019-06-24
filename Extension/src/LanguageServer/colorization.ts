@@ -7,7 +7,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../common';
-import { CppSettings, OtherSettings, TextMateRule, TextMateRuleSettings, TextMateContributesGrammar } from './settings';
+import { CppSettings, OtherSettings, TextMateRule, TextMateRuleSettings } from './settings';
 import * as jsonc from 'jsonc-parser';
 import * as plist from 'plist';
 

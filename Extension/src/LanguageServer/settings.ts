@@ -95,12 +95,6 @@ export interface TextMateRule {
     settings: TextMateRuleSettings;
 }
 
-export interface TextMateContributesGrammar {
-    language: string;
-    scopeName: string;
-    path: string;
-}
-
 export class OtherSettings {
     private resource: vscode.Uri;
 
