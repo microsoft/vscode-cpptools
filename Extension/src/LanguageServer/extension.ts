@@ -91,7 +91,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
         command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
-        title: `What is the vcpkg package manager?`,
+        title: `Learn more about the vcpkg library manager`,
         kind: vscode.CodeActionKind.QuickFix
     };
 }
