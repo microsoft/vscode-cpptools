@@ -97,7 +97,7 @@ export class ABTestSettings {
         let hasError: boolean = false;
         let telemetryProperties: { [key: string]: string } = {};
         const localConfigPath: string = util.getExtensionFilePath(localConfigFile);
-        return util.downloadFileToDestination("https://go.microsoft.com/fwlink/?linkid=2026205", localConfigPath)
+        return util.downloadFileToDestination("https://go.microsoft.com/fwlink/?linkid=2097702", localConfigPath)
             .catch((error) => {
                 // More specific error info is not likely to be helpful, and we get detailed download data from the initial install.
                 hasError = true;
