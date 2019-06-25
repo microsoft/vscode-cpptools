@@ -172,6 +172,10 @@ export function activate(activationEventOccurred: boolean): void {
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
+            if (!await clients.ActiveClient.getVcpkgInstalled()) {
+                return Promise.resolve([]);
+            }
+            
             // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
             if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
                 return Promise.resolve([]);
