@@ -202,7 +202,7 @@ enum ReferencesProgress {
 }
 
 enum TargetLocationReferencesProgress {
-    WaitingForFreeThread,
+    Waiting,
     Lexing,
     InitializingIntelliSense,
     ConfirmingReferences,
@@ -1284,15 +1284,15 @@ class DefaultClient implements Client {
                             case ReferencesProgress.ProcessingTargetLocations:
                                 let numFilesToProcess: number = this.currentReferencesProgress.targetLocationReferencesProgress.length + 1;
                                 let maxProgress: number = numFilesToProcess * 4;
-                                let numWaitingForFreeThread: number = 0;
+                                let numWaiting: number = 0;
                                 let numLexing: number = 0;
                                 let numInitializingIntelliSense: number = 0;
                                 let numConfirmingReferences: number = 0;
                                 let numFinished: number = 0;
                                 for (let targetLocationProgress of this.currentReferencesProgress.targetLocationReferencesProgress) {
                                     switch (targetLocationProgress) {
-                                        case TargetLocationReferencesProgress.WaitingForFreeThread:
-                                            ++numWaitingForFreeThread;
+                                        case TargetLocationReferencesProgress.Waiting:
+                                            ++numWaiting;
                                             break;
                                         case TargetLocationReferencesProgress.Lexing:
                                             ++numLexing;
@@ -1310,8 +1310,8 @@ class DefaultClient implements Client {
                                 }
                                 let currentProgress: number = 4 + numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
                                 let currentMessage: string =  `Find All References: Finished processing ${numFinished} / ${numFilesToProcess} files.\nCurrent processing...`;
-                                if (numWaitingForFreeThread > 0) {
-                                    currentMessage += `\n\t* Waiting for free thread: ${numWaitingForFreeThread}`;
+                                if (numWaiting > 0) {
+                                    currentMessage += `\n\t* Waiting for free thread: ${numWaiting}`;
                                 }
                                 if (numLexing > 0) {
                                     currentMessage += `\n\t* Lexing: ${numLexing}`;
