@@ -209,7 +209,7 @@ enum TargetLocationReferencesProgress {
     Finished
 }
 
-interface ReportReferencesStatusNotificationBody {
+interface ReportReferencesProgressNotification {
     referencesProgress: ReferencesProgress;
     targetLocationReferencesProgress: TargetLocationReferencesProgress[];
 }
@@ -258,7 +258,7 @@ const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, 
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
 const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
-const ReportReferencesStatusNotification: NotificationType<ReportReferencesStatusNotificationBody, void> = new NotificationType<ReportReferencesStatusNotificationBody, void>('cpptools/reportReferencesStatus');
+const ReportReferencesProgressNotification: NotificationType<ReportReferencesProgressNotification, void> = new NotificationType<ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 
 let failureMessageShown: boolean = false;
 
@@ -1054,7 +1054,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processTypedReferences(e.referencesResult));
-        this.languageClient.onNotification(ReportReferencesStatusNotification, (e) => this.updateReferencesStatus(e));
+        this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.setupOutputHandlers();
     }
 
@@ -1259,81 +1259,88 @@ class DefaultClient implements Client {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
-    private currentReferencesProgress: ReportReferencesStatusNotificationBody;
-    private updateReferencesStatus(notificationBody: ReportReferencesStatusNotificationBody): void {
-        if (notificationBody.referencesProgress === ReferencesProgress.Started) {
-            this.currentReferencesProgress = notificationBody;
-            vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: "Find All References",
-                cancellable: true,
-            }, (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) => {
-                return new Promise((resolve, reject) => {
-                    progress.report({message: 'Find All References: Started...', increment: 0 });
-                    let handle: NodeJS.Timeout = setInterval(() => {
-                        if (token.isCancellationRequested) {
-                            clearInterval(handle);
-                            resolve();
-                        }
-                        switch (this.currentReferencesProgress.referencesProgress) {
-                            case ReferencesProgress.Started:
-                                break;
-                            case ReferencesProgress.ProcessingSourceLocation:
-                                progress.report({message: 'Find All References: Processing source location...', increment: 1 });
-                                break;
-                            case ReferencesProgress.ProcessingTargetLocations:
-                                let numFilesToProcess: number = this.currentReferencesProgress.targetLocationReferencesProgress.length + 1;
-                                let maxProgress: number = numFilesToProcess * 4;
+    private currentReferencesProgress: ReportReferencesProgressNotification;
+    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>): void {
+        switch (this.currentReferencesProgress.referencesProgress) {
+            case ReferencesProgress.Started:
+                progress.report({ message: 'Find All References: Started...', increment: 0 });
+                break;
+            case ReferencesProgress.ProcessingSourceLocation:
+                progress.report({ message: 'Find All References: Processing source location...', increment: 1 });
+                break;
+            case ReferencesProgress.ProcessingTargetLocations:
+                let numFilesToProcess: number = this.currentReferencesProgress.targetLocationReferencesProgress.length + 1;
+                let maxProgress: number = numFilesToProcess * 4;
                                 let numWaiting: number = 0;
-                                let numLexing: number = 0;
-                                let numInitializingIntelliSense: number = 0;
-                                let numConfirmingReferences: number = 0;
-                                let numFinished: number = 0;
-                                for (let targetLocationProgress of this.currentReferencesProgress.targetLocationReferencesProgress) {
-                                    switch (targetLocationProgress) {
+                let numLexing: number = 0;
+                let numInitializingIntelliSense: number = 0;
+                let numConfirmingReferences: number = 0;
+                let numFinished: number = 0;
+                for (let targetLocationProgress of this.currentReferencesProgress.targetLocationReferencesProgress) {
+                    switch (targetLocationProgress) {
                                         case TargetLocationReferencesProgress.Waiting:
                                             ++numWaiting;
-                                            break;
-                                        case TargetLocationReferencesProgress.Lexing:
-                                            ++numLexing;
-                                            break;
-                                        case TargetLocationReferencesProgress.InitializingIntelliSense:
-                                            ++numInitializingIntelliSense;
-                                            break;
-                                        case TargetLocationReferencesProgress.ConfirmingReferences:
-                                            ++numConfirmingReferences;
-                                            break;
-                                        case TargetLocationReferencesProgress.Finished:
-                                            ++numFinished;
-                                            break;
-                                    }
-                                }
-                                let currentProgress: number = 4 + numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
-                                let currentMessage: string =  `Find All References: Finished processing ${numFinished} / ${numFilesToProcess} files.\nCurrent processing...`;
+                            break;
+                        case TargetLocationReferencesProgress.Lexing:
+                            ++numLexing;
+                            break;
+                        case TargetLocationReferencesProgress.InitializingIntelliSense:
+                            ++numInitializingIntelliSense;
+                            break;
+                        case TargetLocationReferencesProgress.ConfirmingReferences:
+                            ++numConfirmingReferences;
+                            break;
+                        case TargetLocationReferencesProgress.Finished:
+                            ++numFinished;
+                            break;
+                    }
+                }
+                let currentProgress: number = 4 + numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
+                let currentMessage: string = `Find All References: Finished processing ${numFinished} / ${numFilesToProcess} files.\nCurrent processing...`;
                                 if (numWaiting > 0) {
                                     currentMessage += `\n\t* Waiting for free thread: ${numWaiting}`;
+                }
+                if (numLexing > 0) {
+                    currentMessage += `\n\t* Lexing: ${numLexing}`;
+                }
+                if (numInitializingIntelliSense > 0) {
+                    currentMessage += `\n\t* Initializing IntelliSense: ${numInitializingIntelliSense}`;
+                }
+                if (numConfirmingReferences > 0) {
+                    currentMessage += `\n\t* Confirming references: ${numConfirmingReferences}`;
+                }
+                progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
+                break;
+        }
+    }
+
+    private delayReferencesProgress: NodeJS.Timeout;
+    private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
+        switch (notificationBody.referencesProgress) {
+            case ReferencesProgress.Started:
+                this.delayReferencesProgress = setInterval(() => {
+                    vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true },
+                        (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
+// tslint:disable-next-line: promise-must-complete
+                        new Promise((resolve) => {
+                            this.reportReferencesProgress(progress);
+                            let updateProgress: NodeJS.Timeout = setInterval(() => {
+                                if (token.isCancellationRequested || this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
+                                    clearInterval(updateProgress);
+                                    resolve();
+                                } else {
+                                    this.reportReferencesProgress(progress);
                                 }
-                                if (numLexing > 0) {
-                                    currentMessage += `\n\t* Lexing: ${numLexing}`;
-                                }
-                                if (numInitializingIntelliSense > 0) {
-                                    currentMessage += `\n\t* Initializing IntelliSense: ${numInitializingIntelliSense}`;
-                                }
-                                if (numConfirmingReferences > 0) {
-                                    currentMessage += `\n\t* Confirming references: ${numConfirmingReferences}`;
-                                }
-                                progress.report({message: currentMessage, increment: currentProgress / maxProgress });
-                                break;
-                            case ReferencesProgress.Finished:
-                                clearInterval(handle);
-                                resolve();
-                                break;
-                        }
-                    }, 1000);
-                });
-            });
-        } else {
-            this.currentReferencesProgress = notificationBody;
+                            }, 1000);
+                        })
+                    );
+                }, 2000);
+            case ReferencesProgress.Finished:
+                clearInterval(this.delayReferencesProgress);
+                break;
+            default:
+                this.currentReferencesProgress = notificationBody;
+                break;
         }
     }
 
