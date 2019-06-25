@@ -346,6 +346,9 @@ export class CppProperties {
             }
         } catch (error) {} finally {
             this.vcpkgPathReady = true;
+            if (this.vcpkgIncludes.length) {
+                telemetry.logLanguageServerEvent('vcpkgUserPlatform', { 'platform': await os.platform() });
+            }
             this.handleConfigurationChange();
         }
     }
