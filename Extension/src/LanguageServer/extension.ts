@@ -172,14 +172,11 @@ export function activate(activationEventOccurred: boolean): void {
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-            telemetry.logLanguageServerEvent('onCodeActionsRequested');
-
             // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
             if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
                 return Promise.resolve([]);
             }
 
-            telemetry.logLanguageServerEvent('onVcpkgCodeActionsRequested');
             let actions: vscode.CodeAction[] = (await lookupIncludeInVcpkg(document, range.start.line)).map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
             if (actions.length) {
                 actions.push(getVcpkgHelpAction());
