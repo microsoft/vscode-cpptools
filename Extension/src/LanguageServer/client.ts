@@ -82,12 +82,6 @@ interface OutputNotificationBody {
     output: string;
 }
 
-interface SyntacticColorizationRegionsParams {
-    uri: string;
-    regions: InputColorizationRegion[];
-    editVersion: number;
-}
-
 interface SemanticColorizationRegionsParams {
     uri: string;
     regions: InputColorizationRegion[];
@@ -159,12 +153,12 @@ interface DidChangeVisibleRangesParams {
     ranges: Range[];
 }
 
-interface SyntacticColorizationRegionsReceiptParams {
+interface SemanticColorizationRegionsReceiptParams {
     uri: string;
 }
 
-interface SemanticColorizationRegionsReceiptParams {
-    uri: string;
+interface ColorThemeChangedParams {
+    name: string;
 }
 
 // Requests
@@ -193,8 +187,8 @@ const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfig
 const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
 const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
-const SyntacticColorizationRegionsReceiptNotification: NotificationType<SyntacticColorizationRegionsReceiptParams, void> = new NotificationType<SyntacticColorizationRegionsReceiptParams, void>('cpptools/syntacticColorizationRegionsReceipt');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
+const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -204,7 +198,6 @@ const ReportTagParseStatusNotification: NotificationType<ReportStatusNotificatio
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
 const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
-const SyntacticColorizationRegionsNotification:  NotificationType<SyntacticColorizationRegionsParams, void> = new NotificationType<SyntacticColorizationRegionsParams, void>('cpptools/syntacticColorizationRegions');
 const SemanticColorizationRegionsNotification:  NotificationType<SemanticColorizationRegionsParams, void> = new NotificationType<SemanticColorizationRegionsParams, void>('cpptools/semanticColorizationRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
@@ -479,7 +472,6 @@ class DefaultClient implements Client {
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
                 dimInactiveRegions: settings.dimInactiveRegions,
-                textMateColorization: settings.textMateColorization,
                 enhancedColorization: settings.enhancedColorization,
                 suggestSnippets: settings.suggestSnippets,
                 loggingLevel: settings.loggingLevel,
@@ -528,9 +520,6 @@ class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
-        if (event.affectsConfiguration("C_Cpp.textMateColorization", this.RootUri)) {
-            this.colorizationSettings.updateGrammars();
-        }
         let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
             || event.affectsConfiguration("editor.tokenColorCustomizations");
 
@@ -540,6 +529,12 @@ class DefaultClient implements Client {
             || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
             || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
             || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
+
+        let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
+        if (colorThemeChanged) {
+            let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
+            this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme } );
+        }
 
         if (colorizationNeedsReload) {
             this.colorizationSettings.reload();
@@ -1000,7 +995,6 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportNavigationNotification, (e) => this.navigate(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
-        this.languageClient.onNotification(SyntacticColorizationRegionsNotification, (e) => this.updateSyntacticColorizationRegions(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.setupOutputHandlers();
@@ -1214,21 +1208,6 @@ class DefaultClient implements Client {
             this.colorizationState.set(uri, colorizationState);
         }
         return colorizationState;
-    }
-
-    private updateSyntacticColorizationRegions(params: SyntacticColorizationRegionsParams): void {
-        // Convert the params to vscode.Range's before passing to colorizationState.updateSyntactic()
-        let syntacticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
-        for (let i: number = 0; i < TokenKind.Count; i++) {
-            syntacticRanges[i] = [];
-        }
-        params.regions.forEach(element => {
-            let newRange : vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
-            syntacticRanges[element.kind].push(newRange);
-        });
-        let colorizationState: ColorizationState = this.getColorizationState(params.uri);
-        colorizationState.updateSyntactic(params.uri, syntacticRanges, params.editVersion);
-        this.languageClient.sendNotification(SyntacticColorizationRegionsReceiptNotification, { uri: params.uri });
     }
 
     private updateSemanticColorizationRegions(params: SemanticColorizationRegionsParams): void {

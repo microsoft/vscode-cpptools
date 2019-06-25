@@ -146,7 +146,7 @@
         "C_Cpp.dimInactiveRegions": {
           "type": "boolean",
           "default": true,
-          "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting is ignored by the Tag Parser engine.",
+          "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
           "scope": "resource"
         },
         "C_Cpp.inactiveRegionOpacity": {
@@ -504,7 +504,7 @@
             "Disabled"
           ],
           "default": "Disabled",
-          "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled.",
+          "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
           "scope": "resource"
         }
       }

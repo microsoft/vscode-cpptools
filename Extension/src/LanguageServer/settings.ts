@@ -42,9 +42,6 @@ export class CppSettings extends Settings {
     public get intelliSenseCachePath(): string { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
-    public get textMateColorization(): string { return super.Section.get<string>("textMateColorization"); }
-    public get enhancedColorization(): string { return super.Section.get<string>("enhancedColorization"); }
-    public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
@@ -76,6 +73,18 @@ export class CppSettings extends Settings {
     public get defaultSystemIncludePath(): string[] { return super.Section.get<string[]>("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
 
+    public get enhancedColorization(): boolean {
+        return super.Section.get<string>("enhancedColorization") === "Enabled"
+            && super.Section.get<string>("intelliSenseEngine") === "Default"
+            && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+    }
+
+    public get dimInactiveRegions(): boolean {
+        return super.Section.get<boolean>("dimInactiveRegions")
+            && super.Section.get<string>("intelliSenseEngine") === "Default"
+            && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+    }
+
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
@@ -94,12 +103,6 @@ export interface TextMateRuleSettings {
 export interface TextMateRule {
     scope: any;
     settings: TextMateRuleSettings;
-}
-
-export interface TextMateContributesGrammar {
-    language: string;
-    scopeName: string;
-    path: string;
 }
 
 export class OtherSettings {
