@@ -506,6 +506,11 @@
           "default": "Disabled",
           "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled.",
           "scope": "resource"
+        },
+        "C_Cpp.vcpkg.enabled": {
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "Enable integration services for the [vcpkg library manager](https://aka.ms/vcpkg/)."
         }
       }
     },
