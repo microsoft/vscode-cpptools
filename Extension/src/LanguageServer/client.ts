@@ -244,6 +244,7 @@ export interface Client {
     getCurrentConfigName(): Thenable<string>;
     getCompilerPath(): Thenable<string>;
     getVcpkgInstalled(): Thenable<boolean>;
+    getDependencyManager(): Thenable<string>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
@@ -885,6 +886,11 @@ class DefaultClient implements Client {
 
     public getVcpkgInstalled(): Thenable<boolean> {
         return this.queueTask(() => Promise.resolve(this.configuration.VcpkgInstalled));
+    }
+
+    public getDependencyManager(): Thenable<string> {
+        const cppSettings: CppSettings = new CppSettings(this.RootUri);
+        return this.queueTask(() => Promise.resolve(cppSettings.dependencyManager));
     }
 
     public getKnownCompilers(): Thenable<configs.KnownCompiler[]> {
@@ -1624,6 +1630,7 @@ class NullClient implements Client {
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
+    getDependencyManager(): Thenable<string> { return Promise.resolve('vcpkg'); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
