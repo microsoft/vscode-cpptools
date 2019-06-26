@@ -91,7 +91,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
         command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
-        title: `Learn more about the vcpkg library manager`,
+        title: `This header can be installed using the vcpkg dependency manager. Learn more.`,
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -172,7 +172,7 @@ export function activate(activationEventOccurred: boolean): void {
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-            if (!await clients.ActiveClient.getVcpkgInstalled()) {
+            if (await clients.ActiveClient.getDependencyManager() !== 'vcpkg') {
                 return Promise.resolve([]);
             }
             
@@ -180,13 +180,14 @@ export function activate(activationEventOccurred: boolean): void {
             if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
                 return Promise.resolve([]);
             }
+            
+            telemetry.logLanguageServerEvent('onVcpkgCodeActionsProvided');
 
-            let actions: vscode.CodeAction[] = (await lookupIncludeInVcpkg(document, range.start.line)).map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
-            if (actions.length) {
-                actions.push(getVcpkgHelpAction());
-                telemetry.logLanguageServerEvent('onVcpkgCodeActionsProvided');
+            if (!await clients.ActiveClient.getVcpkgInstalled()) {
+                return Promise.resolve([getVcpkgHelpAction()]);
             }
-            return Promise.resolve(actions);
+
+            return lookupIncludeInVcpkg(document, range.start.line).then(ports => ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction));
         }
     });
 
