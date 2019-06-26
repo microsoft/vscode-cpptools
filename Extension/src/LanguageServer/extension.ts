@@ -175,12 +175,12 @@ export function activate(activationEventOccurred: boolean): void {
             if (await clients.ActiveClient.getDependencyManager() !== 'vcpkg') {
                 return Promise.resolve([]);
             }
-            
+
             // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
             if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
                 return Promise.resolve([]);
             }
-            
+
             telemetry.logLanguageServerEvent('onVcpkgCodeActionsProvided');
 
             if (!await clients.ActiveClient.getVcpkgInstalled()) {
@@ -1052,8 +1052,6 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     if (ports && ports.length) {
         telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCodeAction');
     } else {
-        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandRequested');
-
         // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
         const missingIncludeLocations: [vscode.TextDocument, number[]][] = [];
         vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
@@ -1080,9 +1078,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         if (!missingIncludeLocations.length) {
             return Promise.resolve();
         }
-
-        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandValid');
-
+        
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         let portsPromises: Promise<string[]>[] = [];
         missingIncludeLocations.forEach(docAndLineNumbers => {
@@ -1096,7 +1092,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         }
         ports = ports.filter((port: string, index: number) => { return ports.indexOf(port) === index; });
 
-        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommandProvided');
+        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommand');
     }
 
     let triplets: string[];
@@ -1113,11 +1109,16 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     }
 
     let installCommand: string = 'vcpkg install';
+    let requestedPortTriplets: { [key: string]: string } = {};
     ports.forEach(port => {
         triplets.forEach(triplet => {
             installCommand += ` ${port}:${triplet}`;
         });
+
+        requestedPortTriplets[port] = triplets.toString();
     });
+
+    telemetry.logLanguageServerEvent('vcpkgClipboardInstallSuggestedPortTriplets', requestedPortTriplets);
 
     return vscode.env.clipboard.writeText(installCommand);
 }
