@@ -404,7 +404,7 @@ export class CppProperties {
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand(() => {
             telemetry.logLanguageServerEvent("addToIncludePath");
-            this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             if (config.includePath === undefined) {
                 config.includePath = ["${default}"];
@@ -419,7 +419,7 @@ export class CppProperties {
         return new Promise<void>((resolve) => {
             if (this.propertiesFile) {
                 this.handleConfigurationEditJSONCommand(() => {
-                    this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
+                    this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
                     let config: Configuration = this.CurrentConfiguration;
                     if (providerId) {
                         config.configurationProvider = providerId;
@@ -445,7 +445,7 @@ export class CppProperties {
 
     public setCompileCommands(path: string): void {
         this.handleConfigurationEditJSONCommand(() => {
-            this.parsePropertiesFile(true); // Clear out any modifications we may have made internally.
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             let config: Configuration = this.CurrentConfiguration;
             config.compileCommands = path;
             this.writeToJson();
@@ -642,7 +642,7 @@ export class CppProperties {
                 if (onCreation) {
                     onCreation();
                 }
-                if (this.parsePropertiesFile(false)) {
+                if (this.parsePropertiesFile()) {
                     this.ensureSettingsPanelInitlialized();
 
                     // Use the active configuration as the default selected configuration to load on UI editor
@@ -666,7 +666,7 @@ export class CppProperties {
         if (this.configurationJson) {
             this.ensurePropertiesFile().then(() => {
                 if (this.propertiesFile) {
-                    if (this.parsePropertiesFile(false)) {
+                    if (this.parsePropertiesFile()) {
                         // The settings UI became visible or active.
                         // Ensure settingsPanel has copy of latest current configuration
                         if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
@@ -685,7 +685,7 @@ export class CppProperties {
     }
 
     private saveConfigurationUI(): void {
-        this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
+        this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
         let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
         this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
         this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
@@ -699,7 +699,7 @@ export class CppProperties {
     }
 
     private onAddConfigRequested(configName: string): void {
-        this.parsePropertiesFile(false); // Clear out any modifications we may have made internally.
+        this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
 
         // Create default config and add to list of configurations
         let newConfig: Configuration = { name: configName };
@@ -723,7 +723,7 @@ export class CppProperties {
         }
         this.configFileWatcherFallbackTime = new Date();
         if (this.propertiesFile) {
-            this.parsePropertiesFile(true);
+            this.parsePropertiesFile();
             // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
             // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
             if (this.configurationJson) {
@@ -779,7 +779,7 @@ export class CppProperties {
         return;
     }
 
-    private parsePropertiesFile(handleSquiggles: boolean): boolean {
+    private parsePropertiesFile(): boolean {
         let success: boolean = true;
         try {
             let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
@@ -787,11 +787,6 @@ export class CppProperties {
                 return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
             }
 
-            if (handleSquiggles) {
-                // Replace all \<escape character> with \\<character>, except for \"
-                // Otherwise, the JSON.parse result will have the \<escape character> missing.
-                readResults = util.escapeForSquiggles(readResults);
-            }
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
@@ -865,7 +860,7 @@ export class CppProperties {
             success = false;
         }
 
-        if (handleSquiggles && success) {
+        if (success) {
             this.handleSquiggles();
         }
 
@@ -1044,11 +1039,18 @@ export class CppProperties {
 
             // Get the text of the current configuration.
             let curText: string = document.getText();
+
+            // Replace all \<escape character> with \\<character>, except for \"
+            // Otherwise, the JSON.parse result will have the \<escape character> missing.
+            let configurationsText: string = util.escapeForSquiggles(curText);
+            let configurations: ConfigurationJson = JSON.parse(configurationsText);
+            let currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
+
             let curTextStartOffset: number = 0;
-            if (!this.CurrentConfiguration.name) {
+            if (!currentConfiguration.name) {
                 return;
             }
-            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(this.CurrentConfiguration.name)}"`));
+            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
                 return;
@@ -1068,8 +1070,8 @@ export class CppProperties {
                 }
                 curText = curText.substr(0, nextNameStart2);
             }
-            if (this.prevSquiggleMetrics[this.CurrentConfiguration.name] === undefined) {
-                this.prevSquiggleMetrics[this.CurrentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+            if (this.prevSquiggleMetrics[currentConfiguration.name] === undefined) {
+                this.prevSquiggleMetrics[currentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
             }
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
             const isWindows: boolean = os.platform() === 'win32';
@@ -1084,8 +1086,8 @@ export class CppProperties {
                     const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
-                    if (!this.isCompilerIntelliSenseModeCompatible(this.CurrentConfiguration)) {
-                        let message: string = `intelliSenseMode ${this.CurrentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
+                    if (!this.isCompilerIntelliSenseModeCompatible(currentConfiguration)) {
+                        let message: string = `intelliSenseMode ${currentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
@@ -1098,21 +1100,21 @@ export class CppProperties {
 
             // Check for path-related squiggles.
             let paths: Set<string> = new Set<string>();
-            for (let pathArray of [ (this.CurrentConfiguration.browse ? this.CurrentConfiguration.browse.path : undefined),
-                    this.CurrentConfiguration.includePath, this.CurrentConfiguration.macFrameworkPath, this.CurrentConfiguration.forcedInclude ] ) {
+            for (let pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
+                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ] ) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
                         paths.add(`${curPath}`);
                     }
                 }
             }
-            if (this.CurrentConfiguration.compileCommands) {
-                paths.add(`${this.CurrentConfiguration.compileCommands}`);
+            if (currentConfiguration.compileCommands) {
+                paths.add(`${currentConfiguration.compileCommands}`);
             }
 
-            if (this.CurrentConfiguration.compilerPath) {
+            if (currentConfiguration.compilerPath) {
                 // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
-                paths.add(`${this.CurrentConfiguration.compilerPath}`);
+                paths.add(`${currentConfiguration.compilerPath}`);
             }
 
             // Get the start/end for properties that are file-only.
@@ -1124,7 +1126,7 @@ export class CppProperties {
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
             for (let curPath of paths) {
-                const isCompilerPath: boolean = curPath === this.CurrentConfiguration.compilerPath;
+                const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
                 // Resolve special path cases.
                 if (curPath === "${default}") {
                     // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
@@ -1240,25 +1242,25 @@ export class CppProperties {
 
             // Send telemetry on squiggle changes.
             let changedSquiggleMetrics: { [key: string]: number } = {};
-            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNonExistent) {
+            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics[currentConfiguration.name].PathNonExistent) {
                 changedSquiggleMetrics.PathNonExistent = newSquiggleMetrics.PathNonExistent;
             }
-            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNotAFile) {
+            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics[currentConfiguration.name].PathNotAFile) {
                 changedSquiggleMetrics.PathNotAFile = newSquiggleMetrics.PathNotAFile;
             }
-            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].PathNotADirectory) {
+            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics[currentConfiguration.name].PathNotADirectory) {
                 changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
             }
-            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].CompilerPathMissingQuotes) {
+            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics[currentConfiguration.name].CompilerPathMissingQuotes) {
                 changedSquiggleMetrics.CompilerPathMissingQuotes = newSquiggleMetrics.CompilerPathMissingQuotes;
             }
-            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics[this.CurrentConfiguration.name].CompilerModeMismatch) {
+            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics[currentConfiguration.name].CompilerModeMismatch) {
                 changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
             }
             if (Object.keys(changedSquiggleMetrics).length > 0) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", null, changedSquiggleMetrics);
             }
-            this.prevSquiggleMetrics[this.CurrentConfiguration.name] = newSquiggleMetrics;
+            this.prevSquiggleMetrics[currentConfiguration.name] = newSquiggleMetrics;
         });
     }
 

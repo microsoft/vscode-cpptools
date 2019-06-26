@@ -7,24 +7,12 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as util from '../common';
-import { CppSettings, OtherSettings, TextMateRule, TextMateRuleSettings, TextMateContributesGrammar } from './settings';
+import { CppSettings, OtherSettings, TextMateRule, TextMateRuleSettings } from './settings';
 import * as jsonc from 'jsonc-parser';
 import * as plist from 'plist';
 
 export enum TokenKind {
     // These need to match the token_kind enum in the server
-
-    // Syntactic/Lexical tokens
-    Identifier,
-    Comment,
-    Keyword,
-    PreprocessorKeyword,
-    Operator,
-    Variable,
-    NumberLiteral,
-    StringLiteral,
-    XmlDocComment,
-    XmlDocTag,
 
     // Semantic tokens
     Macro,
@@ -71,6 +59,7 @@ class ThemeStyle {
 export class ColorizationSettings {
     private uri: vscode.Uri;
     private pendingTask: util.BlockingTask<any>;
+    private editorBackground: string;
 
     public themeStyleCMap: ThemeStyle[] = [];
     public themeStyleCppMap: ThemeStyle[] = [];
@@ -89,7 +78,6 @@ export class ColorizationSettings {
 
     constructor(uri: vscode.Uri) {
         this.uri = uri;
-        this.updateGrammars();
         this.reload();
     }
 
@@ -98,7 +86,7 @@ export class ColorizationSettings {
         if (textMateRuleSettings.foreground) {
             baseStyle.foreground = textMateRuleSettings.foreground;
         }
-        if (textMateRuleSettings.background) {
+        if (textMateRuleSettings.background && textMateRuleSettings.background.toUpperCase() !== this.editorBackground.toUpperCase()) {
             baseStyle.background = textMateRuleSettings.background;
         }
         // Any (even empty) string for fontStyle removes inherited value
@@ -196,16 +184,6 @@ export class ColorizationSettings {
             this.themeStyleCppMap[i] = Object.assign({}, defaultStyle);
         }
 
-        this.calculateStyleForToken(TokenKind.Identifier, "entity.name", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Comment, "comment", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Keyword, "keyword.control", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.PreprocessorKeyword, "keyword.control.directive", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Operator, "keyword.operator", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Variable, "variable", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.NumberLiteral, "constant.numeric", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.StringLiteral, "string.quoted", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.XmlDocComment, "comment.xml.doc", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.XmlDocTag, "comment.xml.doc.tag", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Macro, "entity.name.function.preprocessor", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Enumerator, "variable.other.enummember", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.GlobalVariable, "variable.other.global", themeName, textMateRules);
@@ -224,7 +202,7 @@ export class ColorizationSettings {
         this.calculateStyleForToken(TokenKind.ClassTemplate, "entity.name.class.template", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.GenericType, "entity.name.class.generic", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.FunctionTemplate, "entity.name.function.template", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Namespace, "entity.name.namespace", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.Namespace, "entity.name.type.namespace", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Label, "entity.name.label", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.UdlRaw, "entity.name.user-defined-literal", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.UdlNumber, "entity.name.user-defined-literal.number", themeName, textMateRules);
@@ -244,13 +222,6 @@ export class ColorizationSettings {
                 themeContent = plist.parse(themeContentText);
                 if (themeContent) {
                     textMateRules = themeContent.settings;
-
-                    // Convert comma delimited scopes into an array, to match the json format
-                    textMateRules.forEach(e => {
-                        if (e.scope && e.scope.includes(',')) {
-                            e.scope = e.scope.split(',').map((s: string) => s.trim());
-                        }
-                    });
                 }
             } else {
                 themeContent = jsonc.parse(themeContentText);
@@ -261,12 +232,26 @@ export class ColorizationSettings {
                         let includedThemePath: string = path.join(path.dirname(themePath), themeContent.include);
                         rules = await this.loadTheme(includedThemePath, defaultStyle);
                     }
+
+                    if (themeContent.colors && themeContent.colors["editor.background"]) {
+                        this.editorBackground = themeContent.colors["editor.background"];
+                    }
                 }
             }
 
             if (textMateRules) {
+                // Convert comma delimited scopes into an array
+                textMateRules.forEach(e => {
+                    if (e.scope && e.scope.includes(',')) {
+                        e.scope = e.scope.split(',').map((s: string) => s.trim());
+                    }
+                });
+
                 let scopelessSetting: any = textMateRules.find(e => e.settings && !e.scope);
                 if (scopelessSetting) {
+                    if (scopelessSetting.settings.background) {
+                        this.editorBackground = scopelessSetting.settings.background;
+                    }
                     this.updateStyleFromTextMateRuleSettings(defaultStyle, scopelessSetting.settings);
                 }
                 rules.push(textMateRules);
@@ -340,58 +325,18 @@ export class ColorizationSettings {
 
         return null;
     }
-
-    public useEmptyGrammars(): void {
-        let packageJson: any = util.getRawPackageJson();
-        if (!packageJson.contributes.grammars || !packageJson.contributes.grammars.length) {
-            let cppGrammarContributesNode: TextMateContributesGrammar = {
-                language: "cpp",
-                scopeName: "source.cpp",
-                path: "./nogrammar.cpp.json"
-            };
-            let cGrammarContributesNode: TextMateContributesGrammar = {
-                language: "c",
-                scopeName: "source.c",
-                path: "./nogrammar.c.json"
-            };
-            packageJson.contributes.grammars = [];
-            packageJson.contributes.grammars.push(cppGrammarContributesNode);
-            packageJson.contributes.grammars.push(cGrammarContributesNode);
-            util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-            util.promptForReloadWindowDueToSettingsChange();
-        }
-    }
-
-    public useStandardGrammars(): void {
-        let packageJson: any = util.getRawPackageJson();
-        if (packageJson.contributes.grammars && packageJson.contributes.grammars.length > 0) {
-            packageJson.contributes.grammars = [];
-            util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-            util.promptForReloadWindowDueToSettingsChange();
-        }
-    }
-
-    public updateGrammars(): void {
-        let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.textMateColorization === "Disabled") {
-            this.useEmptyGrammars();
-        } else {
-            this.useStandardGrammars();
-        }
-    }
 }
 
 export class ColorizationState {
     private uri: vscode.Uri;
     private colorizationSettings: ColorizationSettings;
     private decorations: vscode.TextEditorDecorationType[] = new Array<vscode.TextEditorDecorationType>(TokenKind.Count);
-    private syntacticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
     private semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
     private inactiveDecoration: vscode.TextEditorDecorationType = null;
     private inactiveRanges: vscode.Range[] = [];
     private versionedEdits: VersionedEdits[] = [];
-    private lastSyntacticVersion: number = 0;
-    private lastSemanticVersion: number = 0;
+    private currentSemanticVersion: number = 0;
+    private lastReceivedSemanticVersion: number = 0;
 
     public constructor(uri: vscode.Uri, colorizationSettings: ColorizationSettings) {
         this.uri = uri;
@@ -400,7 +345,7 @@ export class ColorizationState {
 
     private createColorizationDecorations(isCpp: boolean): void {
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
+        if (settings.enhancedColorization) {
             // Create new decorators
             // The first decorator created takes precedence, so these need to be created in reverse order
             for (let i: number = TokenKind.Count; i > 0;) {
@@ -444,17 +389,10 @@ export class ColorizationState {
 
     private refreshInner(e: vscode.TextEditor): void {
         let settings: CppSettings = new CppSettings(this.uri);
-        if (settings.enhancedColorization === "Enabled" && settings.intelliSenseEngine === "Default") {
+        if (settings.enhancedColorization) {
             for (let i: number = 0; i < TokenKind.Count; i++) {
                 if (this.decorations[i]) {
-                    let ranges: vscode.Range[] = this.syntacticRanges[i];
-                    if (this.semanticRanges[i]) {
-                        if (!ranges || !ranges.length) {
-                            ranges = this.semanticRanges[i];
-                        } else {
-                            ranges = ranges.concat(this.semanticRanges[i]);
-                        }
-                    }
+                    let ranges: vscode.Range[] = this.semanticRanges[i];
                     if (ranges && ranges.length > 0) {
                         e.setDecorations(this.decorations[i], ranges);
                     }
@@ -472,6 +410,7 @@ export class ColorizationState {
     }
 
     public refresh(e: vscode.TextEditor): void {
+        this.applyEdits();
         let f: () => void = async () => {
             this.refreshInner(e);
         };
@@ -480,6 +419,7 @@ export class ColorizationState {
 
     public onSettingsChanged(uri: vscode.Uri): void {
         let f: () => void = async () => {
+            this.applyEdits();
             this.disposeColorizationDecorations();
             let isCpp: boolean = util.isEditorFileCpp(uri.toString());
             this.createColorizationDecorations(isCpp);
@@ -609,14 +549,8 @@ export class ColorizationState {
         return ranges;
     }
 
-    public updateAfterEdits(changes: vscode.TextDocumentContentChangeEvent[], editVersion: number): void {
-        for (let i: number = 0; i < this.syntacticRanges.length; i++) {
-            this.syntacticRanges[i] = this.fixRanges(this.syntacticRanges[i], changes);
-        }
-        for (let i: number = 0; i < this.semanticRanges.length; i++) {
-            this.semanticRanges[i] = this.fixRanges(this.semanticRanges[i], changes);
-        }
-        this.inactiveRanges = this.fixRanges(this.inactiveRanges, changes);
+    // Add edits to be applied when/if cached tokens need to be reapplied.
+    public addEdits(changes: vscode.TextDocumentContentChangeEvent[], editVersion: number): void {
         let edits: VersionedEdits = {
             editVersion: editVersion,
             changes: changes
@@ -624,8 +558,22 @@ export class ColorizationState {
         this.versionedEdits.push(edits);
     }
 
+    // Apply any pending edits to the currently cached tokens
+    private applyEdits() : void {
+        this.versionedEdits.forEach((edit) => {
+            if (edit.editVersion > this.currentSemanticVersion) {
+                for (let i: number = 0; i < TokenKind.Count; i++) {
+                    this.semanticRanges[i] = this.fixRanges(this.semanticRanges[i], edit.changes);
+                }
+                this.inactiveRanges = this.fixRanges(this.inactiveRanges, edit.changes);
+                this.currentSemanticVersion = edit.editVersion;
+            }
+        });
+    }
+
+    // Remove any edits from the list if we will never receive tokens that old.
     private purgeOldVersionedEdits(): void {
-        let minVersion: number = Math.min(this.lastSemanticVersion, this.lastSyntacticVersion);
+        let minVersion: number = this.lastReceivedSemanticVersion;
         let index: number = this.versionedEdits.findIndex((edit) => edit.editVersion > minVersion);
         if (index === -1) {
             this.versionedEdits = [];
@@ -633,20 +581,12 @@ export class ColorizationState {
             this.versionedEdits = this.versionedEdits.slice(index);
         }
     }
-    
-    private updateColorizationRanges(uri: string, syntacticRanges: vscode.Range[][], semanticRanges: vscode.Range[][], inactiveRanges: vscode.Range[]): void {
-        if (inactiveRanges) {
-            this.inactiveRanges = inactiveRanges;
-        }
-        for (let i: number = 0; i < TokenKind.Count; i++) {
-            if (syntacticRanges) {
-                this.syntacticRanges[i] = syntacticRanges[i];
-            }
-            if (semanticRanges) {
-                this.semanticRanges[i] = semanticRanges[i];
-            }
-        }
+
+    private updateColorizationRanges(uri: string): void {
         let f: () => void = async () => {
+            this.applyEdits();
+            this.purgeOldVersionedEdits();
+
             // The only way to un-apply decorators is to dispose them.
             // If we dispose old decorators before applying new decorators, we see a flicker on Mac,
             // likely due to a race with UI updates.  Here we set aside the existing decorators to be
@@ -681,30 +621,13 @@ export class ColorizationState {
         this.colorizationSettings.syncWithLoadingSettings(f);
     }
 
-    public updateSyntactic(uri: string, syntacticRanges: vscode.Range[][], editVersion: number): void {
-        this.versionedEdits.forEach((edit) => {
-            if (edit.editVersion > editVersion) {
-                for (let i: number = 0; i < TokenKind.Count; i++) {
-                    syntacticRanges[i] = this.fixRanges(syntacticRanges[i], edit.changes);
-                }
-            }
-        });
-        this.updateColorizationRanges(uri, syntacticRanges, null, null);
-        this.lastSyntacticVersion = editVersion;
-        this.purgeOldVersionedEdits();
-    }
-
     public updateSemantic(uri: string, semanticRanges: vscode.Range[][], inactiveRanges: vscode.Range[], editVersion: number): void {
-        this.versionedEdits.forEach((edit) => {
-            if (edit.editVersion > editVersion) {
-                for (let i: number = 0; i < TokenKind.Count; i++) {
-                    semanticRanges[i] = this.fixRanges(semanticRanges[i], edit.changes);
-                }
-                inactiveRanges = this.fixRanges(inactiveRanges, edit.changes);
-            }
-        });
-        this.updateColorizationRanges(uri, null, semanticRanges, inactiveRanges);
-        this.lastSemanticVersion = editVersion;
-        this.purgeOldVersionedEdits();
+       this.inactiveRanges = inactiveRanges;
+        for (let i: number = 0; i < TokenKind.Count; i++) {
+            this.semanticRanges[i] = semanticRanges[i];
+        }
+        this.currentSemanticVersion = editVersion;
+        this.lastReceivedSemanticVersion = editVersion;
+        this.updateColorizationRanges(uri);
     }
 }
