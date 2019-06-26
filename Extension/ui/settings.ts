@@ -30,14 +30,19 @@ const elementId: { [key: string]: string } = {
     // Advanced settings
     windowsSdkVersion: "windowsSdkVersion",
     macFrameworkPath: "macFrameworkPath",
+    macFrameworkPathInvalid: "macFrameworkPathInvalid",
     compileCommands: "compileCommands",
+    compileCommandsInvalid: "compileCommandsInvalid",
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
+    forcedIncludeInvalid: "forcedIncludeInvalid",
 
     // Browse properties
     browsePath: "browsePath",
+    browsePathInvalid: "browsePathInvalid",
     limitSymbolsToIncludedHeaders: "limitSymbolsToIncludedHeaders",
     databaseFilename: "databaseFilename",
+    databaseFilenameInvalid: "databaseFilenameInvalid",
 
     // Other
     showAdvanced: "showAdvanced",
@@ -288,6 +293,11 @@ class SettingsApp {
             this.showErrorWithInfo(elementId.intelliSenseModeInvalid, errors.intelliSenseMode);
             this.showErrorWithInfo(elementId.compilerPathInvalid, errors.compilerPath);
             this.showErrorWithInfo(elementId.includePathInvalid, errors.includePath);
+            this.showErrorWithInfo(elementId.macFrameworkPathInvalid, errors.macFrameworkPath);
+            this.showErrorWithInfo(elementId.forcedIncludeInvalid, errors.forcedInclude);
+            this.showErrorWithInfo(elementId.compileCommandsInvalid, errors.compileCommands);
+            this.showErrorWithInfo(elementId.browsePathInvalid, errors.browsePath);
+            this.showErrorWithInfo(elementId.databaseFilenameInvalid, errors.databaseFilename);
         } finally {
             this.updating = false;
         }
