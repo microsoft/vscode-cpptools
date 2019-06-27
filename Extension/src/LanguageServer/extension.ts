@@ -91,7 +91,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
         command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
-        title: `This header can be installed by the vcpkg dependency manager. Learn more.`,
+        title: "Learn how to install a library for this header with vcpkg",
         kind: vscode.CodeActionKind.QuickFix
     };
 }
