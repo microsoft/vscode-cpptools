@@ -36,13 +36,28 @@
     "Debuggers",
     "Formatters",
     "Linters",
-    "Snippets"
+    "Snippets",
+    "Themes"
   ],
   "activationEvents": [
     "*"
   ],
   "main": "./dist/main",
   "contributes": {
+    "themes": [
+      {
+        "id": "Visual Studio Dark (cpptools)",
+        "label": "Visual Studio Dark (cpptools)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/cpptools_dark_vs.json"
+      },
+      {
+        "id": "Visual Studio Light (cpptools)",
+        "label": "Visual Studio Light (cpptools)",
+        "uiTheme": "vs",
+        "path": "./themes/cpptools_light_vs.json"
+      }
+    ],
     "problemMatchers": [
       {
         "name": "gcc",
