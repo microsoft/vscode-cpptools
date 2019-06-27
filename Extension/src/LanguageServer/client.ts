@@ -179,7 +179,7 @@ interface ReferenceInfo {
 }
 
 interface ReferencesResult {
-    references: ReferenceInfo[];
+    referenceInfos: ReferenceInfo[];
     isInitialResult: boolean;
     isFinalResult: boolean;
 }
@@ -1330,6 +1330,7 @@ class DefaultClient implements Client {
                         })
                     );
                 }, 2000);
+                break;
             case ReferencesProgress.Finished:
                 clearInterval(this.delayReferencesProgress);
                 break;
@@ -1720,7 +1721,7 @@ class DefaultClient implements Client {
             this.referencesSavedResults = [];
             this.documentsForReferences.clear();
         }
-        for (let reference of referencesResult.references) {
+        for (let reference of referencesResult.referenceInfos) {
             if (reference.type === ReferenceType.Confirmed) {
                 continue; // Already displayed in VS Code's References.
             }
