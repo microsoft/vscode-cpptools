@@ -1459,7 +1459,7 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
-    "compileDev": "webpack --mode development",
+    "compileDev": "node ./tools/prepublish.js && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "pretest": "tsc -p test.tsconfig.json",
