@@ -1183,7 +1183,7 @@ class DefaultClient implements Client {
             util.setProgress(util.getProgressParseRootSuccess());
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
-        } else if (message.endsWith("IntelliSense Fallback")) {
+        } else if (message.endsWith("Unresolved Headers")) {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
                 ui.showConfigureIncludePathMessage(() => {
@@ -1198,8 +1198,8 @@ class DefaultClient implements Client {
                             case configJSON:
                                 vscode.commands.getCommands(true).then((commands: string[]) => {
                                     if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                         vscode.commands.executeCommand("workbench.action.problems.focus");
-                                   }
+                                        vscode.commands.executeCommand("workbench.action.problems.focus");
+                                    }
                                 });
                                 this.handleConfigurationEditJSONCommand();
                                 telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, null);
@@ -1208,7 +1208,7 @@ class DefaultClient implements Client {
                                 vscode.commands.getCommands(true).then((commands: string[]) => {
                                     if (commands.indexOf("workbench.action.problems.focus") >= 0) {
                                         vscode.commands.executeCommand("workbench.action.problems.focus");
-                                }
+                                    }
                                 });
                                 this.handleConfigurationEditUICommand();
                                 telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, null);
