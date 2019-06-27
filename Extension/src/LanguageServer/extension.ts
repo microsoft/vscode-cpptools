@@ -1095,26 +1095,9 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommand');
     }
 
-    let triplets: string[];
-    const platform: NodeJS.Platform = await os.platform();
-    switch (platform) {
-        case 'win32':
-            triplets = ['x86-windows', 'x64-windows'];
-            break;
-        case 'darwin':
-            triplets = ['x64-osx'];
-            break;
-        default:
-            triplets = ['x64-linux'];
-    }
-
     let installCommand: string = 'vcpkg install';
-    let requestedPortTriplets: { [key: string]: string } = {};
-    ports.forEach(port => {
-        installCommand += ` ${port}`;
-        requestedPortTriplets[port] = triplets.toString();
-    });
-    telemetry.logLanguageServerEvent('vcpkgClipboardInstallSuggestedPortTriplets', requestedPortTriplets);
+    ports.forEach(port => installCommand += ` ${port}`);
+    telemetry.logLanguageServerEvent('vcpkgClipboardInstallSuggestedPorts', { 'ports': ports.toString() });
 
     return vscode.env.clipboard.writeText(installCommand);
 }
