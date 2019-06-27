@@ -1111,13 +1111,9 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     let installCommand: string = 'vcpkg install';
     let requestedPortTriplets: { [key: string]: string } = {};
     ports.forEach(port => {
-        triplets.forEach(triplet => {
-            installCommand += ` ${port}:${triplet}`;
-        });
-
+        installCommand += ` ${port}`;
         requestedPortTriplets[port] = triplets.toString();
     });
-
     telemetry.logLanguageServerEvent('vcpkgClipboardInstallSuggestedPortTriplets', requestedPortTriplets);
 
     return vscode.env.clipboard.writeText(installCommand);
