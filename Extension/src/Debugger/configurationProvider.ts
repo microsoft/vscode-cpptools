@@ -202,13 +202,12 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             // Add environment variables from .env file
             if (config.envFile) {
                 // replace ${env:???} variables
-                let envFilePath = util.resolveVariables(config.envFile, null);
+                let envFilePath: string = util.resolveVariables(config.envFile, null);
 
                 try {
-                    if (folder && folder.uri && folder.uri.fsPath)
-                    {
+                    if (folder && folder.uri && folder.uri.fsPath) {
                         // Try to replace ${workspaceFolder} or ${workspaceRoot}
-                        envFilePath = envFilePath.replace(/(\${workspaceFolder}|\${workspaceRoot})/g, folder.uri.fsPath)
+                        envFilePath = envFilePath.replace(/(\${workspaceFolder}|\${workspaceRoot})/g, folder.uri.fsPath);
                     }
 
                     const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(envFilePath, config["environment"]);
