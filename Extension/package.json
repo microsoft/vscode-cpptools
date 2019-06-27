@@ -1459,14 +1459,15 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
-    "compileDev": "node ./tools/prepublish.js && webpack --mode development",
+    "compileDev": "npm run prepublishjs && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "postinstall": "node ./node_modules/vscode/bin/install",
+    "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "node ./tools/prepublish.js && webpack --mode production",
+    "vscode:prepublish": "npm run prepublishjs && webpack --mode production",
     "watch": "webpack --watch --mode development"
   },
   "devDependencies": {
