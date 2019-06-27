@@ -867,10 +867,6 @@ class DefaultClient implements Client {
         return util.isHeader(uri) && !uri.toString().startsWith(this.RootUri.toString());
     }
 
-    private getCustomConfigurationProviderId(): Thenable<string|undefined> {
-        return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfigurationProvider));
-    }
-
     public getCurrentConfigName(): Thenable<string> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
     }
