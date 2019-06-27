@@ -366,7 +366,7 @@
 		{
 			"scope": "entity.name",
 			"settings": {
-				"foreground": "#000000"
+				"foreground": "#FFFFFF"
 			}
 		},
 		{
