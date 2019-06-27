@@ -201,9 +201,18 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
             // Add environment variables from .env file
             if (config.envFile) {
+                // replace ${env:???} variables
+                let envFilePath = util.resolveVariables(config.envFile, null);
+
                 try {
-                    const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(config.envFile.replace(/\${workspaceFolder}/g, folder.uri.path), config["environment"]);
-                    
+                    if (folder && folder.uri && folder.uri.fsPath)
+                    {
+                        // Try to replace ${workspaceFolder} or ${workspaceRoot}
+                        envFilePath = envFilePath.replace(/(\${workspaceFolder}|\${workspaceRoot})/g, folder.uri.fsPath)
+                    }
+
+                    const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(envFilePath, config["environment"]);
+
                     // show error message if single lines cannot get parsed
                     if (parsedFile.Warning) {
                         CppConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
@@ -213,7 +222,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
                     delete config.envFile;
                 } catch (e) {
-                    throw new Error("Can't parse envFile " + config.envFile);
+                    throw new Error(`Can't parse envFile (${envFilePath}): ${e.message}`);
                 }
             }
 
