@@ -108,7 +108,7 @@ export class MIConfigurations extends Configuration {
         let body: string = formatString(`{
 \t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
-}`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "", 
+}`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
 this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
@@ -123,7 +123,7 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
     public GetAttachConfiguration(): IConfigurationSnippet {
         let name: string = `(${this.MIMode}) Attach`;
 
-        let body: string = formatString(`{ 
+        let body: string = formatString(`{
 \t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",

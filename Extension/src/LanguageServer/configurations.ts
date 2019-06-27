@@ -183,7 +183,7 @@ export class CppProperties {
         } else {
             this.propertiesFile = null;
         }
-        
+
         let settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(settingsPath);
         this.disposables.push(this.configFileWatcher);
@@ -559,9 +559,9 @@ export class CppProperties {
                 } else if (configuration.includePath) {
                     // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
                     configuration.browse.path = configuration.includePath.slice(0);
-                    if (-1 === configuration.includePath.findIndex((value: string, index: number) => {
-                        return !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\\*{0,2}|\/\*{0,2})?$/g);
-                    })) {
+                    if (configuration.includePath.findIndex((value: string, index: number) =>
+                        !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\\*{0,2}|\/\*{0,2})?$/g)) === -1
+                    ) {
                         configuration.browse.path.push("${workspaceFolder}");
                     }
                 }
@@ -928,7 +928,7 @@ export class CppProperties {
                 compilerPathAndArgs.additionalArgs &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath.includes(" ");
-            
+
             let compilerPathErrors: string[] = [];
             if (compilerPathNeedsQuotes) {
                 compilerPathErrors.push(`Compiler path with spaces and arguments is missing double quotes " around the path.`);
@@ -999,7 +999,7 @@ export class CppProperties {
         }
 
         const isWindows: boolean = os.platform() === 'win32';
-        let errorMsg: string = undefined;
+        let errorMsg: string;
         let errors: string[] = [];
         let paths: string[] = [];
 
@@ -1055,13 +1055,13 @@ export class CppProperties {
             return;
         }
 
-        if (this.configurationJson.enableConfigurationSquiggles === false) {
+        if (!this.configurationJson.enableConfigurationSquiggles) {
             this.diagnosticCollection.clear();
             return;
         }
 
         const settings: CppSettings = new CppSettings(this.rootUri);
-        if (settings.defaultEnableConfigurationSquiggles === false) {
+        if (!settings.defaultEnableConfigurationSquiggles) {
             this.diagnosticCollection.clear();
             return;
         }
@@ -1133,7 +1133,7 @@ export class CppProperties {
             // Check for path-related squiggles.
             let paths: Set<string> = new Set<string>();
             for (let pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
-                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ] ) {
+                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
                         paths.add(`${curPath}`);

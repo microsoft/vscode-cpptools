@@ -61,7 +61,7 @@ export function activate(activationEventOccurred: boolean): void {
     }
 
     if (tempCommands.length === 0) { // Only needs to be added once.
-        tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
+        tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
     }
 
     // Check if an activation event has already occurred.
@@ -176,7 +176,7 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
             return ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
                 (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
         });
-        compilerPaths = knownCompilers.map<string>(info => { return info.path; });
+        compilerPaths = knownCompilers.map<string>(info => info.path);
 
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
@@ -331,9 +331,9 @@ function realActivation(): void {
     updateLanguageConfigurations();
 
     reportMacCrashes();
-    
+
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    
+
     if (settings.updateChannel === 'Default') {
         suggestInsidersChannel();
     } else if (settings.updateChannel === 'Insiders') {
@@ -372,7 +372,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
         } else if (newUpdateChannel === 'Insiders') {
             insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
-        
+
         checkAndApplyUpdate(newUpdateChannel);
     }
 }
@@ -615,7 +615,7 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
                 reject(new Error('Failed to create vsix file'));
                 return;
             }
-    
+
             // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
             // then the .catch call will return a resolved promise
             // Thusly, the .catch call must also throw, as a return would simply return an unused promise
@@ -677,7 +677,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     let buildInfo: BuildInfo | null = buildInfoCache;
     // clear buildInfo cache.
     buildInfoCache = null;
-    
+
     if (!buildInfo) {
         try {
             buildInfo = await getTargetBuildInfo(updateChannel);
@@ -1018,7 +1018,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
         return logCrashTelemetry("No crash end");
     }
     data = data.substr(startCrash, endCrash - startCrash);
-    
+
     // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
     data = data.replace(/0x................ /g, "");
     data = data.replace(/0x1........ \+ 0/g, "");

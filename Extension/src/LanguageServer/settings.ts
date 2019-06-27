@@ -29,7 +29,7 @@ export class CppSettings extends Settings {
     constructor(resource?: vscode.Uri) {
         super("C_Cpp", resource);
     }
-  
+
     public get clangFormatPath(): string { return super.Section.get<string>("clang_format_path"); }
     public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string { return super.Section.get<string>("clang_format_fallbackStyle"); }
@@ -117,6 +117,9 @@ export class OtherSettings {
 
     public get editorTabSize(): number { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files", null).get("associations"); }
+    public set filesAssociations(value: any) {
+        vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
+    }
     public get filesExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get searchExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
@@ -128,8 +131,4 @@ export class OtherSettings {
 
     public get customTextMateRules(): TextMateRule[] { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<TextMateRule[]>("textMateRules"); }
     public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
-
-    public set filesAssociations(value: any) {
-         vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
-    }
 }

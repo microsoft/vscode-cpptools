@@ -24,7 +24,6 @@ import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
 import { updateLanguageConfigurations, registerCommands } from './extension';
-import { CancellationTokenSource } from 'vscode';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
@@ -388,7 +387,7 @@ class DefaultClient implements Client {
                     // The event handlers must be set before this happens.
                     return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
                         this.configuration.CompilerDefaults = compilerDefaults;
-                            
+
                         // Only register the real commands after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         registerCommands();
@@ -433,7 +432,7 @@ class DefaultClient implements Client {
         let settings: CppSettings = new CppSettings(this.rootFolder ? this.rootFolder.uri : null);
         let other: OtherSettings = new OtherSettings(this.rootFolder ? this.rootFolder.uri : null);
         let abTestSettings: ABTestSettings = getABTestSettings();
-        
+
         let intelliSenseCacheDisabled: boolean = false;
         if (os.platform() === "darwin") {
             const releaseParts: string[] = os.release().split(".");
@@ -533,7 +532,7 @@ class DefaultClient implements Client {
         let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
         if (colorThemeChanged) {
             let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
-            this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme } );
+            this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
         }
 
         if (colorizationNeedsReload) {
@@ -723,7 +722,7 @@ class DefaultClient implements Client {
                 return;
             }
 
-            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+            let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let documentUris: vscode.Uri[] = [];
             this.trackedDocuments.forEach(document => documentUris.push(document.uri));
 
@@ -745,7 +744,7 @@ class DefaultClient implements Client {
                 return;
             }
 
-            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+            let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let task: () => Thenable<WorkspaceBrowseConfiguration> = async () => {
                 if (await currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
                     return currentProvider.provideBrowseConfiguration(tokenSource.token);
@@ -781,7 +780,7 @@ class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
-        let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+        let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.size === 0) {
             return Promise.resolve();
@@ -915,7 +914,7 @@ class DefaultClient implements Client {
                     throw err;
                 }
             };
-            
+
             if (this.pendingTask && !this.pendingTask.Done) {
                 // We don't want the queue to stall because of a rejected promise.
                 return this.pendingTask.then(nextTask, nextTask);
@@ -941,7 +940,7 @@ class DefaultClient implements Client {
         }
     }
 
-    private queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: CancellationTokenSource): Thenable<any> {
+    private queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
         let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
@@ -1227,7 +1226,7 @@ class DefaultClient implements Client {
         });
         let colorizationState: ColorizationState = this.getColorizationState(params.uri);
         colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
-        this.languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri } );
+        this.languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri });
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
