@@ -201,7 +201,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             }
 
             // Add environment variables from .env file
-            this.convertEnvFileToEnvironmentMap(config, folder);
+            this.resolveEnvFile(config, folder);
 
             this.resolveSourceFileMapVariables(config);
 
@@ -232,7 +232,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         return config && config.type ? config : null;
     }
 
-    private convertEnvFileToEnvironmentMap(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder): void {
+    private resolveEnvFile(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder): void {
         if (config.envFile) {
             // replace ${env:???} variables
             let envFilePath: string = util.resolveVariables(config.envFile, null);
@@ -262,21 +262,31 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private resolveSourceFileMapVariables(config: vscode.DebugConfiguration): void {
         let messages: string[] = [];
         if (config.sourceFileMap) {
-            for (const sourceFileMapKey of Object.keys(config.sourceFileMap)) {
-                const sourceFileMapValue: string = config.sourceFileMap[sourceFileMapKey];
+            for (const sourceFileMapSource of Object.keys(config.sourceFileMap)) {
+                let message: string = null;
+                const sourceFileMapTarget: string = config.sourceFileMap[sourceFileMapSource];
 
-                // TODO: pass config.environment as initial environment to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
-                const newSourceFileMapKey: string = util.resolveVariables(sourceFileMapKey, null);
-                const newSourceFileMapValue: string = util.resolveVariables(sourceFileMapValue, null);
+                // TODO: pass config.environment as 'additionalEnvironment' to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
+                const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, null);
+                const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, null);
 
-                if (sourceFileMapKey === newSourceFileMapKey) {
-                    messages.push(`\t- Replacing '${sourceFileMapKey}' original value '${sourceFileMapValue}' with '${newSourceFileMapValue}'.`);
-                    config.sourceFileMap[sourceFileMapKey] = newSourceFileMapValue;
-                } else {
-                    messages.push(`\t- Replacing key '${sourceFileMapKey}' with '${newSourceFileMapKey}' and its original value '${sourceFileMapValue}' with '${newSourceFileMapValue}'.`);
-                    delete config.sourceFileMap[sourceFileMapKey];
+                let source: string = sourceFileMapSource;
+                let target: string = sourceFileMapTarget;
 
-                    config.sourceFileMap[newSourceFileMapKey] = newSourceFileMapValue;
+                if (sourceFileMapSource !== newSourceFileMapSource) {
+                    message = `\tReplacing sourcePath '${sourceFileMapSource}' with '${newSourceFileMapSource}'.`;
+                    delete config.sourceFileMap[sourceFileMapSource];
+                    source = newSourceFileMapSource;
+                }
+
+                if (sourceFileMapTarget !== newSourceFileMapTarget) {
+                    message = (message ? `${message} ` : "\t") + `Replacing targetPath '${sourceFileMapTarget}' with '${newSourceFileMapTarget}'.`;
+                    target = newSourceFileMapTarget;
+                }
+
+                if (message) {
+                    config.sourceFileMap[source] = target;
+                    messages.push(message);
                 }
             }
 
