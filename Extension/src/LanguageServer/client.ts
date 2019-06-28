@@ -1258,23 +1258,23 @@ class DefaultClient implements Client {
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>): void {
         switch (this.currentReferencesProgress.referencesProgress) {
             case ReferencesProgress.Started:
-                progress.report({ message: 'Find All References: Started...', increment: 0 });
+                progress.report({ message: 'Started.', increment: 0 });
                 break;
             case ReferencesProgress.ProcessingSourceLocation:
-                progress.report({ message: 'Find All References: Processing source location...', increment: 1 });
+                progress.report({ message: 'Processing source location.', increment: 1 });
                 break;
             case ReferencesProgress.ProcessingTargetLocations:
                 let numFilesToProcess: number = this.currentReferencesProgress.targetLocationReferencesProgress.length + 1;
                 let maxProgress: number = numFilesToProcess * 4;
-                                let numWaiting: number = 0;
+                let numWaiting: number = 0;
                 let numLexing: number = 0;
                 let numInitializingIntelliSense: number = 0;
                 let numConfirmingReferences: number = 0;
                 let numFinished: number = 0;
                 for (let targetLocationProgress of this.currentReferencesProgress.targetLocationReferencesProgress) {
                     switch (targetLocationProgress) {
-                                        case TargetLocationReferencesProgress.Waiting:
-                                            ++numWaiting;
+                        case TargetLocationReferencesProgress.Waiting:
+                            ++numWaiting;
                             break;
                         case TargetLocationReferencesProgress.Lexing:
                             ++numLexing;
@@ -1291,18 +1291,20 @@ class DefaultClient implements Client {
                     }
                 }
                 let currentProgress: number = 4 + numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
-                let currentMessage: string = `Find All References: Finished processing ${numFinished} / ${numFilesToProcess} files.\nCurrent processing...`;
-                                if (numWaiting > 0) {
-                                    currentMessage += `\n\t* Waiting for free thread: ${numWaiting}`;
-                }
+                let currentMessage: string = ` Finished(${numFinished}/${numFilesToProcess})`;
+                /*
+                // Don't need to show Waiting.
+                if (numWaiting > 0) {
+                    currentMessage += ` Waiting(${numWaiting})`;
+                }*/
                 if (numLexing > 0) {
-                    currentMessage += `\n\t* Lexing: ${numLexing}`;
+                    currentMessage += ` Lexing(${numLexing})`;
                 }
                 if (numInitializingIntelliSense > 0) {
-                    currentMessage += `\n\t* Initializing IntelliSense: ${numInitializingIntelliSense}`;
+                    currentMessage += ` Parsing(${numInitializingIntelliSense})`;
                 }
                 if (numConfirmingReferences > 0) {
-                    currentMessage += `\n\t* Confirming references: ${numConfirmingReferences}`;
+                    currentMessage += ` Confirming(${numConfirmingReferences})`;
                 }
                 progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
                 break;
@@ -1329,6 +1331,7 @@ class DefaultClient implements Client {
                             }, 1000);
                         })
                     );
+                    clearInterval(this.delayReferencesProgress);
                 }, 2000);
                 break;
             case ReferencesProgress.Finished:
