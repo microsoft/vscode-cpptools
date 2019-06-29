@@ -263,7 +263,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         let messages: string[] = [];
         if (config.sourceFileMap) {
             for (const sourceFileMapSource of Object.keys(config.sourceFileMap)) {
-                let message: string = null;
+                let message: string = "";
                 const sourceFileMapTarget: string = config.sourceFileMap[sourceFileMapSource];
 
                 // TODO: pass config.environment as 'additionalEnvironment' to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
@@ -280,7 +280,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 }
 
                 if (sourceFileMapTarget !== newSourceFileMapTarget) {
-                    message = (message ? `${message} ` : "\t") + `Replacing targetPath '${sourceFileMapTarget}' with '${newSourceFileMapTarget}'.`;
+                    // Add a space if source was changed, else just tab the target message.
+                    message +=  (message ? ' ' : '\t');
+                    message += `Replacing targetPath '${sourceFileMapTarget}' with '${newSourceFileMapTarget}'.`;
                     target = newSourceFileMapTarget;
                 }
 
