@@ -775,7 +775,7 @@ class DefaultClient implements Client {
         let version: string = `Version: ${util.packageJson.version}\n`;
         let configJson: string = "";
         if (this.configuration.CurrentConfiguration) {
-            configJson = "Current Configuration:\n" + JSON.stringify(this.configuration.CurrentConfiguration, null, 4) + "\n";
+            configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
         this.diagnosticsChannel.appendLine(`${header}${version}${configJson}${response.diagnostics}`);
         this.diagnosticsChannel.show(false);
