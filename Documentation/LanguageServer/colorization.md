@@ -26,7 +26,6 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 | Function Template | entity.name.function.template |
 | Generic Type (C++/CLI) | entity.name.class.generic |
 | Global Variable | variable.other.global |
-| Identifier | <span>entity.name</span> |
 | Label | entity.name.label |
 | Local Variable | variable.other.local |
 | Macro | entity.name.function.preprocessor |
@@ -87,12 +86,6 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
     "editor.tokenColorCustomizations": {
         "[Visual Studio Dark]": {
             "textMateRules": [
-                {
-                    "scope": "entity.name",
-                    "settings": {
-                        "foreground": "#FFFFFF"
-                    }
-                },
                 {
                     "scope": "comment",
                     "settings": {
@@ -308,12 +301,6 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
     "editor.tokenColorCustomizations": {
         "[Visual Studio Light]": {
             "textMateRules": [
-                {
-                    "scope": "entity.name",
-                    "settings": {
-                        "foreground": "#000000"
-                    }
-                },
                 {
                     "scope": "comment",
                     "settings": {
