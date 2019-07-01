@@ -81,7 +81,7 @@ export class ColorizationSettings {
         this.reload();
     }
 
-    // Given a TextMate rule 'settings' mode, update a ThemeStyle to include any color or style information
+    // Given a TextMate rule 'settings' node, update a ThemeStyle to include any color or style information
     private updateStyleFromTextMateRuleSettings(baseStyle: ThemeStyle, textMateRuleSettings: TextMateRuleSettings): void {
         if (textMateRuleSettings.foreground) {
             baseStyle.foreground = textMateRuleSettings.foreground;
@@ -106,6 +106,30 @@ export class ColorizationSettings {
                     this.updateStyleFromTextMateRuleSettings(baseCStyle, match.settings);
                 }
                 if (baseCppStyle) {
+                    this.updateStyleFromTextMateRuleSettings(baseCppStyle, match.settings);
+                }
+            }
+
+            match = textMateRules.find(e => e.settings && (e.scope === "source " + scope || ((e.scope instanceof Array) && e.scope.indexOf("source " + scope) > -1)));
+            if (match) {
+                if (baseCStyle) {
+                    this.updateStyleFromTextMateRuleSettings(baseCStyle, match.settings);
+                }
+                if (baseCppStyle) {
+                    this.updateStyleFromTextMateRuleSettings(baseCppStyle, match.settings);
+                }
+            }
+
+            if (baseCStyle) {
+                match = textMateRules.find(e => e.settings && (e.scope === "source.c " + scope || ((e.scope instanceof Array) && e.scope.indexOf("source.c " + scope) > -1)));
+                if (match) {
+                    this.updateStyleFromTextMateRuleSettings(baseCStyle, match.settings);
+                }
+            }
+
+            if (baseCppStyle) {
+                match = textMateRules.find(e => e.settings && (e.scope === "source.cpp " + scope || ((e.scope instanceof Array) && e.scope.indexOf("source.cpp " + scope) > -1)));
+                if (match) {
                     this.updateStyleFromTextMateRuleSettings(baseCppStyle, match.settings);
                 }
             }
