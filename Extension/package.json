@@ -46,14 +46,14 @@
   "contributes": {
     "themes": [
       {
-        "id": "Visual Studio Dark (cpptools)",
-        "label": "Visual Studio Dark (cpptools)",
+        "id": "Dark (Visual Studio - C/C++)",
+        "label": "Dark (Visual Studio - C/C++)",
         "uiTheme": "vs-dark",
         "path": "./themes/cpptools_dark_vs.json"
       },
       {
-        "id": "Visual Studio Light (cpptools)",
-        "label": "Visual Studio Light (cpptools)",
+        "id": "Light (Visual Studio - C/C++)",
+        "label": "Light (Visual Studio - C/C++)",
         "uiTheme": "vs",
         "path": "./themes/cpptools_light_vs.json"
       }
