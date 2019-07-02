@@ -1266,16 +1266,12 @@ class DefaultClient implements Client {
             case ReferencesProgress.ProcessingTargetLocations:
                 let numFilesToProcess: number = this.currentReferencesProgress.targetLocationReferencesProgress.length + 1;
                 let maxProgress: number = numFilesToProcess * 4;
-                let numWaiting: number = 0;
                 let numLexing: number = 0;
                 let numInitializingIntelliSense: number = 0;
                 let numConfirmingReferences: number = 0;
                 let numFinished: number = 0;
                 for (let targetLocationProgress of this.currentReferencesProgress.targetLocationReferencesProgress) {
                     switch (targetLocationProgress) {
-                        case TargetLocationReferencesProgress.Waiting:
-                            ++numWaiting;
-                            break;
                         case TargetLocationReferencesProgress.Lexing:
                             ++numLexing;
                             break;
@@ -1288,15 +1284,12 @@ class DefaultClient implements Client {
                         case TargetLocationReferencesProgress.Finished:
                             ++numFinished;
                             break;
+                        default:
+                            break;
                     }
                 }
                 let currentProgress: number = 4 + numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
                 let currentMessage: string = ` Finished(${numFinished}/${numFilesToProcess})`;
-                /*
-                // Don't need to show Waiting.
-                if (numWaiting > 0) {
-                    currentMessage += ` Waiting(${numWaiting})`;
-                }*/
                 if (numLexing > 0) {
                     currentMessage += ` Lexing(${numLexing})`;
                 }
