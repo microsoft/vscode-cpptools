@@ -1003,6 +1003,16 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
         return logCrashTelemetry("readFile: " + err.code);
     }
 
+    // Extract the crashing process version, because the version might not match
+    // if multiple VS Codes are running with different extension versions.
+    let binaryVersion: string = "";
+    let startVersion: number = data.indexOf("Version:");
+    if (startVersion >= 0) {
+        data = data.substr(startVersion);
+        const binaryVersionMatches: string[] = data.match(/^Version:\s*(\d|\d*\.\d*\.\d*\.\d*)/);
+        binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
+    }
+
     // Extract the crashing thread's call stack.
     const crashStart: string = " Crashed:";
     let startCrash: number = data.indexOf(crashStart);
@@ -1028,10 +1038,10 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     const process2: string = "Microsoft.VSCode.CPP.Extension.darwin\t";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
-        data = process1 + "\n" + data;
+        data = `${process1}${binaryVersion}\n${data}`;
     } else if (data.includes(process2)) {
         data = data.replace(new RegExp(process2, "g"), "");
-        data = process2 + "\n" + data;
+        data = `${process2}${binaryVersion}\n${data}`;
     } else {
         return logCrashTelemetry("No process"); // Not expected, but just in case.
     }
