@@ -770,9 +770,14 @@ class DefaultClient implements Client {
             this.diagnosticsChannel = vscode.window.createOutputChannel("C/C++ Diagnostics");
             this.disposables.push(this.diagnosticsChannel);
         }
+
         let header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
         let version: string = `Version: ${util.packageJson.version}\n`;
-        this.diagnosticsChannel.appendLine(`${header}${version}${response.diagnostics}`);
+        let configJson: string = "";
+        if (this.configuration.CurrentConfiguration) {
+            configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
+        }
+        this.diagnosticsChannel.appendLine(`${header}${version}${configJson}${response.diagnostics}`);
         this.diagnosticsChannel.show(false);
     }
 
