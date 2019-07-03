@@ -1,5 +1,48 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.24.0: July 3, 2019
+### New Features
+* Semantic colorization [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md) [#230](https://github.com/microsoft/vscode-cpptools/issues/230)
+* Add `Rescan Workspace` command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
+
+### Enhancements
+* Configuration UI editor improvements:  
+  * Add list of detected compiler paths. [PR #3708](https://github.com/microsoft/vscode-cpptools/pull/3708)
+  * Enable selecting/editing of other configurations and add "Advanced Settings" section. [PR #3732](https://github.com/microsoft/vscode-cpptools/pull/3732)
+* Enable `envFile` for `cppdbg`. [PR #3723](https://github.com/microsoft/vscode-cpptools/pull/3723)
+* Change the default path value of `C_Cpp.intelliSenseCachePath`. [#3347](https://github.com/microsoft/vscode-cpptools/issues/3347) [#3664](https://github.com/microsoft/vscode-cpptools/issues/3664)
+* Change `C_Cpp.clang_format_path` to `machine` scope. [#3774](https://github.com/microsoft/vscode-cpptools/issues/3774)
+* Add validation to the advanced configuration UI settings. [PR #3838](https://github.com/microsoft/vscode-cpptools/pull/3838)
+* Add `Current Configuration` to `C/C++: Log Diagnostics`. [PR #3866](https://github.com/microsoft/vscode-cpptools/pull/3866)
+
+### Bug Fixes
+* Fix for gdb `follow-fork-mode` `child` not working. [#2738](https://github.com/microsoft/vscode-cpptools/issues/2738)
+* Fix IntelliSense process crash on hover with certain arrays. [#3081](https://github.com/Microsoft/vscode-cpptools/issues/3081)
+* Fix IntelliSense-based `Go to Definition` for goto labels. [#3111](https://github.com/microsoft/vscode-cpptools/issues/3111)
+* Fix IntelliSense behaving incorrectly when files are opened with different casing on Windows. [#3229](https://github.com/microsoft/vscode-cpptools/issues/3229)
+* Fix user defined literals crashing IntelliSense in clang/gcc mode. [#3481](https://github.com/microsoft/vscode-cpptools/issues/3481)
+* Improve `sourceFileMap` to be more dynamic. [#3504](https://github.com/microsoft/vscode-cpptools/issues/3504)
+* Fix IntelliSense-based hover document comments being shown for invalid declarations not used by the current translation unit. [#3596](https://github.com/microsoft/vscode-cpptools/issues/3596)
+* Fix `Go to Definition` when is `void` missing in the parameter list of a function definition a .c file. [#3609](https://github.com/microsoft/vscode-cpptools/issues/3609)
+* Fix configuration validation of compiler path and IntelliSense mode compatibility for `clang-cl.exe` compiler. [#3637](https://github.com/microsoft/vscode-cpptools/issues/3637)
+* Fix resolving `${workspaceFolderBasename}` and add `${workspaceStorage}`. [#3642](https://github.com/microsoft/vscode-cpptools/issues/3642)
+* Fix IntelliSense-based `Go to Definition` performance issue due to extra database iteration. [#3655](https://github.com/microsoft/vscode-cpptools/issues/3655)
+* Fix `SourceRequest` causing debugging to stop with `NotImplementedException`. [#3662](https://github.com/microsoft/vscode-cpptools/issues/3662)
+* Fix typo in `intelliSenseMode` description.
+  * Karsten Thoms (@kthoms) [PR #3682](https://github.com/microsoft/vscode-cpptools/pull/3682)
+* Fix invalid warning with typedef enums in .c files. [#3685](https://github.com/microsoft/vscode-cpptools/issues/3685)
+* Fix incorrect `keyword` completion occurring for pragma `#keyword`. [#3690](https://github.com/microsoft/vscode-cpptools/issues/3690)
+* Fix problem matcher to show fatal errors from GCC [#3712](https://github.com/microsoft/vscode-cpptools/issues/3712)
+* Fix multi-root folders with the same name sharing the same browse database. [PR #3715](https://github.com/microsoft/vscode-cpptools/pull/3715)
+* Fix `remoteProcessPicker` on Windows. [#3758](https://github.com/microsoft/vscode-cpptools/issues/3758)
+* Fix crash when tag parsing Objective-C code. [#3776](https://github.com/microsoft/vscode-cpptools/issues/3776)
+* Fix duplicate slashes getting added to `c_cpp_properties.json`. [PR #3778](https://github.com/microsoft/vscode-cpptools/pull/3778)
+* Fix `envFile` variable substitution. [#3836](https://github.com/microsoft/vscode-cpptools/issues/3836)
+* Fix missing headers popup. [PR #3840](https://github.com/microsoft/vscode-cpptools/pull/3840)
+* Fix multiple anonymous unions not showing correctly in Locals while debugging. [MIEngine#820](https://github.com/microsoft/MIEngine/issues/820)
+* Fix pause not working when using `DebugServer`/`MIDebuggerServerAddress` on Linux and macOS. [MIEngine#844](https://github.com/microsoft/MIEngine/issues/844)
+* Improvements to CPU and memory usage when editing.
+
 ## Version 0.23.1: May 13, 2019
 ### Bug Fixes
 * Fix `launch.json` creation when `intelliSenseEngine` is `"Disabled"`. [#3583](https://github.com/microsoft/vscode-cpptools/issues/3583)

@@ -42,7 +42,6 @@ export class CppSettings extends Settings {
     public get intelliSenseCachePath(): string { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
-    public get dimInactiveRegions(): boolean { return super.Section.get<boolean>("dimInactiveRegions"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
@@ -74,6 +73,18 @@ export class CppSettings extends Settings {
     public get defaultSystemIncludePath(): string[] { return super.Section.get<string[]>("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
 
+    public get enhancedColorization(): boolean {
+        return super.Section.get<string>("enhancedColorization") === "Enabled"
+            && super.Section.get<string>("intelliSenseEngine") === "Default"
+            && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+    }
+
+    public get dimInactiveRegions(): boolean {
+        return super.Section.get<boolean>("dimInactiveRegions")
+            && super.Section.get<string>("intelliSenseEngine") === "Default"
+            && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+    }
+
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
@@ -81,6 +92,17 @@ export class CppSettings extends Settings {
     public update<T>(name: string, value: T): void {
         super.Section.update(name, value);
     }
+}
+
+export interface TextMateRuleSettings {
+    foreground: string | undefined;
+    background: string | undefined;
+    fontStyle: string | undefined;
+}
+
+export interface TextMateRule {
+    scope: any;
+    settings: TextMateRuleSettings;
 }
 
 export class OtherSettings {
@@ -98,6 +120,14 @@ export class OtherSettings {
     public get filesExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get searchExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+
+    public get colorTheme(): string { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
+
+    public getCustomColorToken(colorTokenName: string): string { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<string>(colorTokenName); }
+    public getCustomThemeSpecificColorToken(themeName: string, colorTokenName: string): string { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<string>(colorTokenName); }
+
+    public get customTextMateRules(): TextMateRule[] { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<TextMateRule[]>("textMateRules"); }
+    public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
 
     public set filesAssociations(value: any) {
          vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);

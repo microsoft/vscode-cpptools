@@ -303,10 +303,11 @@ async function finalizeExtensionActivation(): Promise<void> {
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
     // (this may result in rewriting the package.json file)
     
+    let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
+    let packageJson: any = util.getRawPackageJson();
+    let writePackageJson: boolean = false;
     let packageJsonPath: string = util.getExtensionFilePath("package.json");
     if (!packageJsonPath.includes(".vscode-insiders") && !packageJsonPath.includes(".vscode-exploration")) {
-        let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
-        let packageJson: any = util.getRawPackageJson();
         let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (abTestSettings.UseDefaultIntelliSenseEngine) {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
@@ -314,14 +315,27 @@ async function finalizeExtensionActivation(): Promise<void> {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
         }
         if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
-            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+            writePackageJson = true;
         }
     } else {
-        let packageJson: any = util.getRawPackageJson();
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
-            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+            writePackageJson = true;
         }
+    }
+
+    let prevEnhancedColorizationDefault: any = packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default;
+    if (abTestSettings.UseEnhancedColorization) {
+        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Enabled";
+    } else {
+        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Disabled";
+    }
+    if (prevEnhancedColorizationDefault !== packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default) {
+        writePackageJson = true;
+    }
+
+    if (writePackageJson) {
+        return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
     }
 }
 
@@ -354,6 +368,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
         "onCommand:C_Cpp.LogDiagnostics",
+        "onCommand:C_Cpp.RescanWorkspace",
         "onDebug",
         "workspaceContains:/.vscode/c_cpp_properties.json"
     ];

@@ -9,25 +9,64 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as util from '../common';
 import * as config from './configurations';
+import * as telemetry from '../telemetry';
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
-    activeConfig: "activeConfig",
+    // Basic settings
+    configName: "configName",
+    configSelection: "configSelection",
+    addConfigBtn: "addConfigBtn",
+    addConfigOk: "addConfigOk",
+    addConfigCancel: "addConfigCancel",
+    addConfigName: "addConfigName",
+
     compilerPath: "compilerPath",
-    intelliSenseMode: "intelliSenseMode", 
+    compilerPathInvalid: "compilerPathInvalid",
+    knownCompilers: "knownCompilers",
+
+    intelliSenseMode: "intelliSenseMode",
+    intelliSenseModeInvalid: "intelliSenseModeInvalid",
     includePath: "includePath",
+    includePathInvalid: "includePathInvalid",
     defines: "defines",
     cStandard: "cStandard",
-    cppStandard: "cppStandard"
+    cppStandard: "cppStandard",
+
+    // Advanced settings
+    windowsSdkVersion: "windowsSdkVersion",
+    macFrameworkPath: "macFrameworkPath",
+    compileCommands: "compileCommands",
+    configurationProvider: "configurationProvider",
+    forcedInclude: "forcedInclude",
+
+    // Browse properties
+    browsePath: "browsePath",
+    limitSymbolsToIncludedHeaders: "limitSymbolsToIncludedHeaders",
+    databaseFilename: "databaseFilename",
+
+    // Other
+    showAdvancedBtn: "showAdvancedBtn"
 };
 
 export class SettingsPanel {
-    private configValues: config.Configuration;
-    private isIntelliSenseModeDefined: boolean = false;
+    private telemetry: { [key: string]: number } = {};
+    private disposable: vscode.Disposable = undefined;
+
+    // Events
     private settingsPanelActivated = new vscode.EventEmitter<void>();
     private configValuesChanged = new vscode.EventEmitter<void>();
+    private configSelectionChanged = new vscode.EventEmitter<void>();
+    private addConfigRequested = new vscode.EventEmitter<string>();
+
+    // Configuration data
+    private configValues: config.Configuration;
+    private isIntelliSenseModeDefined: boolean = false;
+    private configIndexSelected: number = 0;
+    private compilerPaths: string[] = [];
+
+    // WebviewPanel objects
     private panel: vscode.WebviewPanel;
-    private disposable: vscode.Disposable = undefined;
     private disposablesPanel: vscode.Disposable = undefined;
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
@@ -36,11 +75,13 @@ export class SettingsPanel {
         this.configValues = { name: undefined };
         this.disposable = vscode.Disposable.from(
             this.settingsPanelActivated,
-            this.configValuesChanged
+            this.configValuesChanged,
+            this.configSelectionChanged,
+            this.addConfigRequested
         );
     }
 
-    public createOrShow(activeConfiguration: config.Configuration, errors: config.ConfigurationErrors): void {
+    public createOrShow(configSelection: string[], activeConfiguration: config.Configuration, errors: config.ConfigurationErrors): void {
         const column: vscode.ViewColumn = vscode.window.activeTextEditor
                 ? vscode.window.activeTextEditor.viewColumn
                 : undefined;
@@ -80,7 +121,7 @@ export class SettingsPanel {
 
         this.panel.webview.html = this.getHtml();
 
-        this.updateWebview(activeConfiguration, errors);
+        this.updateWebview(configSelection, activeConfiguration, errors);
     }
 
     public get SettingsPanelActivated(): vscode.Event<void> { 
@@ -91,13 +132,47 @@ export class SettingsPanel {
         return this.configValuesChanged.event;
     }
 
+    public get ConfigSelectionChanged(): vscode.Event<void> {
+        return this.configSelectionChanged.event;
+    }
+
+    public get AddConfigRequested(): vscode.Event<string> {
+        return this.addConfigRequested.event;
+    }
+
+    public get selectedConfigIndex(): number {
+        return this.configIndexSelected;
+    }
+
+    public set selectedConfigIndex(index: number) {
+        this.configIndexSelected = index;
+    }
+
     public getLastValuesFromConfigUI(): config.Configuration {
         return this.configValues;
     }
 
-    public updateConfigUI(configuration: config.Configuration, errors: config.ConfigurationErrors): void {
+    public updateConfigUI(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
         if (this.panel) {
-            this.updateWebview(configuration, errors);
+            this.updateWebview(configSelection, configuration, errors);
+        }
+    }
+
+    public setKnownCompilers(knownCompilers: config.KnownCompiler[], pathSeparator: string): void {
+        if (knownCompilers.length > 0) {
+            for (let compiler of knownCompilers) {
+                // Normalize path separators.
+                let path: string = compiler.path;
+                if (pathSeparator === "Forward Slash") {
+                    path = path.replace(/\\/g, '/');
+                } else {
+                    path = path.replace(/\//g, '\\');
+                }
+                // Do not add duplicate paths in case the default compilers for cpp and c are the same.
+                if (this.compilerPaths.indexOf(path) === -1) {
+                    this.compilerPaths.push(path);
+                }
+            }
         }
     }
 
@@ -108,6 +183,11 @@ export class SettingsPanel {
     }
 
     public dispose(): void {
+        // Log any telemetry
+        if (Object.keys(this.telemetry).length > 0) {
+            telemetry.logLanguageServerEvent("ConfigUI", null, this.telemetry);
+        }
+
         // Clean up resources
         this.panel.dispose();
 
@@ -127,13 +207,16 @@ export class SettingsPanel {
         }
     }
 
-    private updateWebview(configuration: config.Configuration, errors: config.ConfigurationErrors): void {
+    private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
         this.configValues = Object.assign({}, configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-            // Send a message to the webview to update the values and errors
-           this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
-           this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
+            this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected});
+            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
+            if (errors !== null) {
+                this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+            }
         }
     }
 
@@ -156,26 +239,55 @@ export class SettingsPanel {
         switch (message.command) {
             case 'change':
                 this.updateConfig(message);
+                break;
+            case 'configSelect':
+                this.configSelect(message.index);
+                break;
+            case 'addConfig':
+                this.addConfig(message.name);
+                break;
+            case 'knownCompilerSelect':
+                this.knownCompilerSelect();
+                break;
+        }
+    }
+
+    private addConfig(name: string): void {
+        this.addConfigRequested.fire(name);
+        this.logTelemetryForElement(elementId.addConfigName);
+    }
+
+    private configSelect(index: number): void {
+        this.configIndexSelected = index;
+        this.configSelectionChanged.fire();
+        this.logTelemetryForElement(elementId.configSelection);
+    }
+
+    private knownCompilerSelect(): void {
+        this.logTelemetryForElement(elementId.knownCompilers);
+        // Remove one count from compilerPath because selecting a different compiler causes a change on the compiler path
+        if (this.telemetry[elementId.compilerPath]) {
+            this.telemetry[elementId.compilerPath]--;
         }
     }
 
     private updateConfig(message: any): void {
-        let entries: string[];
+        let splitEntries: (input: any) => string[] = (input: any) => {
+            return input.split("\n").filter((e: string) => e);
+        };
 
         switch (message.key) {
-            case elementId.activeConfig:
+            case elementId.configName:
                 this.configValues.name = message.value;
                 break;
             case elementId.compilerPath:
                 this.configValues.compilerPath = message.value;
                 break;
             case elementId.includePath:
-                entries = message.value.split("\n");
-                this.configValues.includePath = entries.filter(e => e);
+                this.configValues.includePath = splitEntries(message.value);
                 break;
             case elementId.defines:
-                entries = message.value.split("\n");
-                this.configValues.defines = entries.filter(e => e);
+                this.configValues.defines = splitEntries(message.value);
                 break;
             case elementId.intelliSenseMode:
                 if (message.value !== "${default}" || this.isIntelliSenseModeDefined) {
@@ -190,9 +302,50 @@ export class SettingsPanel {
             case elementId.cppStandard:
                 this.configValues.cppStandard = message.value;
                 break;
+            case elementId.windowsSdkVersion:
+                this.configValues.windowsSdkVersion = message.value;
+                break;
+            case elementId.macFrameworkPath:
+                this.configValues.macFrameworkPath = splitEntries(message.value);
+                break;
+            case elementId.compileCommands:
+                this.configValues.compileCommands = message.value;
+                break;
+            case elementId.configurationProvider:
+                this.configValues.configurationProvider = message.value;
+                break;
+            case elementId.forcedInclude:
+                this.configValues.forcedInclude = splitEntries(message.value);
+                break;
+            case elementId.browsePath:
+                this.initializeBrowseProperties();
+                this.configValues.browse.path = splitEntries(message.value);
+                break;
+            case elementId.limitSymbolsToIncludedHeaders:
+                this.initializeBrowseProperties();
+                this.configValues.browse.limitSymbolsToIncludedHeaders = message.value;
+                break;
+            case elementId.databaseFilename:
+                this.initializeBrowseProperties();
+                this.configValues.browse.databaseFilename = message.value;
+                break;
         }
 
         this.configValuesChanged.fire();
+        this.logTelemetryForElement(message.key);
+    }
+
+    private logTelemetryForElement(elementId: string): void {
+        if (this.telemetry[elementId] === undefined) {
+            this.telemetry[elementId] = 0;
+        }
+        this.telemetry[elementId]++;
+    }
+
+    private initializeBrowseProperties(): void {
+        if (this.configValues.browse === undefined) {
+            this.configValues.browse = {};
+        }
     }
 
     private getHtml(): string {

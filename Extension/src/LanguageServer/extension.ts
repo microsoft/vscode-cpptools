@@ -326,6 +326,7 @@ function realActivation(): void {
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(onDidChangeTextEditorVisibleRanges));
 
     updateLanguageConfigurations();
 
@@ -355,9 +356,14 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  *********************************************/
 
-function onDidChangeSettings(): void {
-    const changedActiveClientSettings: { [key: string] : string } = clients.ActiveClient.onDidChangeSettings();
-    clients.forEach(client => client.onDidChangeSettings());
+function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
+    let activeClient: Client = clients.ActiveClient;
+    const changedActiveClientSettings: { [key: string] : string } = activeClient.onDidChangeSettings(event);
+    clients.forEach(client => {
+        if (client !== activeClient) {
+            client.onDidChangeSettings(event);
+        }
+    });
 
     const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
     if (newUpdateChannel) {
@@ -418,7 +424,30 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
-    clients.forEach(client => client.onDidChangeVisibleTextEditors(editors));
+    clients.forEach(client => {
+        let editorsForThisClient: vscode.TextEditor[] = [];
+        editors.forEach(editor => {
+            if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+                if (clients.checkOwnership(client, editor.document)) {
+                    editorsForThisClient.push(editor);
+                }
+            }
+        });
+        if (editorsForThisClient.length > 0) {
+            client.onDidChangeVisibleTextEditors(editorsForThisClient);
+        }
+    });
+}
+
+function onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
+    let languageId: String = textEditorVisibleRangesChangeEvent.textEditor.document.languageId;
+    if (languageId === "c" || languageId === "cpp") {
+        clients.forEach(client => {
+            if (clients.checkOwnership(client, textEditorVisibleRangesChangeEvent.textEditor.document)) {
+                client.onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent);
+            }
+        });
+    }
 }
 
 function onInterval(): void {
@@ -694,6 +723,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -912,6 +942,11 @@ function onLogDiagnostics(): void {
     clients.ActiveClient.logDiagnostics();
 }
 
+function onRescanWorkspace(): void {
+    onActivationEvent();
+    clients.forEach(client => client.rescanFolder());
+}
+
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
         prevCrashFile = "";
@@ -968,6 +1003,16 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
         return logCrashTelemetry("readFile: " + err.code);
     }
 
+    // Extract the crashing process version, because the version might not match
+    // if multiple VS Codes are running with different extension versions.
+    let binaryVersion: string = "";
+    let startVersion: number = data.indexOf("Version:");
+    if (startVersion >= 0) {
+        data = data.substr(startVersion);
+        const binaryVersionMatches: string[] = data.match(/^Version:\s*(\d|\d*\.\d*\.\d*\.\d*)/);
+        binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
+    }
+
     // Extract the crashing thread's call stack.
     const crashStart: string = " Crashed:";
     let startCrash: number = data.indexOf(crashStart);
@@ -993,10 +1038,10 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     const process2: string = "Microsoft.VSCode.CPP.Extension.darwin\t";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
-        data = process1 + "\n" + data;
+        data = `${process1}${binaryVersion}\n${data}`;
     } else if (data.includes(process2)) {
         data = data.replace(new RegExp(process2, "g"), "");
-        data = process2 + "\n" + data;
+        data = `${process2}${binaryVersion}\n${data}`;
     } else {
         return logCrashTelemetry("No process"); // Not expected, but just in case.
     }
