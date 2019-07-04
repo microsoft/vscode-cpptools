@@ -700,6 +700,7 @@ export function registerCommands(): void {
     if (commandsRegistered) {
         return;
     }
+
     commandsRegistered = true;
     getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
@@ -1009,7 +1010,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     let startVersion: number = data.indexOf("Version:");
     if (startVersion >= 0) {
         data = data.substr(startVersion);
-        const binaryVersionMatches: string[] = data.match(/^Version:\s*(\d|\d*\.\d*\.\d*\.\d*)/);
+        const binaryVersionMatches: string[] = data.match(/^Version:\s*(\d*\.\d*\.\d*\.\d*|\d)/);
         binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
     }
 
