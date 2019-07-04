@@ -890,16 +890,14 @@ export class BlockingTask<T> {
                 this.dependency.promise.then(f1, f2);
             });
         }
+        this.promise.then(() => this.done = true, () => this.done = true);
     }
 
     public get Done(): boolean {
         return this.done;
     }
 
-    public then<T2>(onSucceeded: (value: T) => T2, onRejected?: (err) => any): Thenable<T2> {
-        if (onRejected) {
-            return this.promise.then(onSucceeded, onRejected);
-        }
-        return this.promise.then(onSucceeded);
+    public getPromise(): Thenable<T> {
+        return this.promise;
     }
 }
