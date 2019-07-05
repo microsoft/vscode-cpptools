@@ -358,7 +358,7 @@ export class PackageManager {
                                             return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
                                         }
 
-                                        // Create as a .tmp file to avoid partially unzipped files 
+                                        // Create as a .tmp file to avoid partially unzipped files
                                         // counting as completed files.
                                         let absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
                                         if (fs.existsSync(absoluteEntryTempFile)) {

@@ -69,7 +69,7 @@ function isBuild(input: any): input is Build {
  * @return Whether input is of type Asset[].
  */
 function isArrayOfAssets(input: any): input is Asset[] {
-    return input instanceof Array && input.every(item => isAsset(item));
+    return input instanceof Array && input.every(isAsset);
 }
 
 /**
@@ -174,17 +174,17 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdate = (installed: PackageVersion, target: PackageVersion) => { return testingInsidersVsixInstall || target.isGreaterThan(installed); };
-        useBuild = (build: Build): boolean => { return true; };
+        needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || target.isGreaterThan(installed);
+        useBuild = (build: Build): boolean => true;
     } else if (updateChannel === 'Default') {
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
-        useBuild = (build: Build): boolean => { return build.name.indexOf('-') === -1; };
+        useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
     } else {
         throw new Error('Incorrect updateChannel setting provided');
     }
 
     // Get the build to install
-    const targetBuild: Build = builds.find((build) => useBuild(build));
+    const targetBuild: Build = builds.find(useBuild);
     if (!targetBuild) {
         throw new Error('Failed to determine installation candidate');
     }
