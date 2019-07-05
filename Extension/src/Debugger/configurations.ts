@@ -40,7 +40,7 @@ function createLaunchString(name: string, type: string, executable: string): str
 "stopAtEntry": false,
 "cwd": "$\{workspaceFolder\}",
 "environment": [],
-"externalConsole": true
+"externalConsole": false
 `;
     }
 
