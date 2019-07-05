@@ -1472,8 +1472,12 @@
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
+    "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.0.12",
+    "@types/plist": "^3.0.2",
+    "@types/tmp": "^0.1.0",
+    "@types/yauzl": "^2.9.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "gulp": "^4.0.2",
