@@ -251,11 +251,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 }
 
                 config.environment = parsedFile.Env;
-                
+
                 delete config.envFile;
             } catch (e) {
                 throw new Error(`Failed to use envFile. Reason: ${e.message}`);
-            }            
+            }
         }
     }
 

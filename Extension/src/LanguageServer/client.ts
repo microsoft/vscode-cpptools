@@ -971,7 +971,7 @@ class DefaultClient implements Client {
         });
     }
 
-    private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: CancellationTokenSource): Thenable<any> {
+    private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
         let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {

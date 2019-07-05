@@ -91,7 +91,6 @@
         "promise-must-complete": true,
         "semicolon": true,
         "space-within-parens": true,
-        "strict-type-predicates": true,
         "trailing-comma": true,
         "triple-equals": true,
         "type-literal-delimiter": true,

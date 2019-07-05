@@ -1,6 +1,6 @@
-/*--------------------------------------------------------------------------------------------- 
- *  Copyright (c) Microsoft Corporation. All rights reserved. 
- *  Licensed under the MIT License. See License.txt in the project root for license information. 
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
@@ -16,12 +16,12 @@ import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
 const defaultTimeout: number = 60000;
 
 suite("multiline comment setting tests", function(): void {
-    suiteSetup(async function(): Promise<void> { 
+    suiteSetup(async function(): Promise<void> {
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
         util.setExtensionPath(extension.extensionPath);
         initializeTemporaryCommandRegistrar();
-        if (!extension.isActive) { 
-            await extension.activate(); 
+        if (!extension.isActive) {
+            await extension.activate();
         }
     });
 
@@ -349,10 +349,10 @@ suite("extensibility tests v0", function(): void {
 
 /*
 suite("configuration tests", function() {
-    suiteSetup(async function() { 
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
-        if (!extension.isActive) { 
-            await extension.activate(); 
+    suiteSetup(async function() {
+        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        if (!extension.isActive) {
+            await extension.activate();
         }
         // Open a c++ file to start the language server.
         await vscode.workspace.openTextDocument({ language: "cpp", content: "int main() { return 0; }"});
