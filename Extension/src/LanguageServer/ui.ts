@@ -232,7 +232,7 @@ export class UI {
         } else {
             items.push({ label: "Pause Parsing", description: "", index: 0 });
         }
-        
+
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.index : -1);
     }

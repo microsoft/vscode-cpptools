@@ -219,10 +219,10 @@ suite("Common Utility validation", () => {
 
         interface ResolveTestFlowEnvironment {
             withEnvironment(additionalEnvironment: {[key: string]: string | string[]}): ResolveTestFlowAssert;
-            shouldLookupSymbol: (key: string) => void;
+            shouldLookupSymbol(key: string): void;
         }
         interface ResolveTestFlowAssert {
-            shouldResolveTo: (x: string) => void;
+            shouldResolveTo(x: string): void;
         }
 
         function resolveVariablesWithInput(input: string): ResolveTestFlowEnvironment {

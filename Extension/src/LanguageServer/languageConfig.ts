@@ -162,7 +162,7 @@ function getMLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | un
     return undefined;
 }
 
-// When Enter is pressed while the cursor is after '*/' (and '*/' plus leading whitespace is all that is on the line) 
+// When Enter is pressed while the cursor is after '*/' (and '*/' plus leading whitespace is all that is on the line)
 function getMLEndRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
     if (comment) {
         let endPattern: string = getMLEndPattern(comment.continue);
