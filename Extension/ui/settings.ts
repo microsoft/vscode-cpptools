@@ -150,7 +150,7 @@ class SettingsApp {
 
     private onConfigNameChanged(): void {
         if (this.updating) {
-            return; 
+            return;
         }
 
         const configName: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.configName);
@@ -170,7 +170,7 @@ class SettingsApp {
 
     private onConfigSelect(): void {
         if (this.updating) {
-            return; 
+            return;
         }
 
         const el: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
@@ -184,7 +184,7 @@ class SettingsApp {
 
     private onKnownCompilerSelect(): void {
         if (this.updating) {
-            return; 
+            return;
         }
         const el: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.knownCompilers);
         (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = el.value;
@@ -200,7 +200,7 @@ class SettingsApp {
     }
     private onChangedCheckbox(id: string): void {
         if (this.updating) {
-            return; 
+            return;
         }
 
         const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
@@ -213,7 +213,7 @@ class SettingsApp {
 
     private onChanged(id: string): void {
         if (this.updating) {
-            return; 
+            return;
         }
 
         const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
@@ -250,11 +250,11 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
 
-            (<HTMLInputElement>document.getElementById(elementId.includePath)).value = 
+            (<HTMLInputElement>document.getElementById(elementId.includePath)).value =
                 (config.includePath && config.includePath.length > 0) ? config.includePath.join("\n") : "";
 
-            (<HTMLInputElement>document.getElementById(elementId.defines)).value = 
-                (config.defines && config.defines.length > 0 ) ? config.defines.join("\n") : "";
+            (<HTMLInputElement>document.getElementById(elementId.defines)).value =
+                (config.defines && config.defines.length > 0) ? config.defines.join("\n") : "";
 
             (<HTMLInputElement>document.getElementById(elementId.cStandard)).value = config.cStandard;
             (<HTMLInputElement>document.getElementById(elementId.cppStandard)).value = config.cppStandard;
@@ -274,7 +274,7 @@ class SettingsApp {
             if (config.browse) {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value =
                     (config.browse.path && config.browse.path.length > 0) ? config.browse.path.join("\n") : "";
-                (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked = 
+                (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked =
                     (config.browse.limitSymbolsToIncludedHeaders && config.browse.limitSymbolsToIncludedHeaders);
                 (<HTMLInputElement>document.getElementById(elementId.databaseFilename)).value = config.browse.databaseFilename ? config.browse.databaseFilename : "";
             } else {
@@ -340,7 +340,7 @@ class SettingsApp {
             if (list.firstChild) {
                return;
             }
-    
+
             if (compilers.length === 0) {
                 const noCompilers: string = "(No compiler paths detected)";
                 let option: HTMLOptionElement = document.createElement("option");
@@ -352,7 +352,7 @@ class SettingsApp {
                 list.value = noCompilers;
                 return;
             }
-    
+
             for (let path of compilers) {
                 let option: HTMLOptionElement = document.createElement("option");
                 option.text = path;

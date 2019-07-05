@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 
-export interface Environment { 
+export interface Environment {
     name: string;
     value: string;
 }

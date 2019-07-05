@@ -6,11 +6,11 @@
 import * as assert from 'assert';
 import * as os from 'os';
 import { LinuxDistribution } from '../../src/linuxDistribution';
-import { WmicProcessParser, PsProcessParser } from '../../src/Debugger/nativeAttach';
+import { Process, WmicProcessParser, PsProcessParser } from '../../src/Debugger/nativeAttach';
 
 suite("LinuxDistro Tests", () => {
     test("Parse valid os-release file", () => {
-        const dataUbuntu1404 = 'NAME="Ubuntu"' + os.EOL +
+        const dataUbuntu1404: string = 'NAME="Ubuntu"' + os.EOL +
                                'VERSION="14.04.4 LTS, Trusty Tahr"' + os.EOL +
                                'ID=ubuntu' + os.EOL +
                                'ID_LIKE=debian' + os.EOL +
@@ -20,7 +20,7 @@ suite("LinuxDistro Tests", () => {
                                'SUPPORT_URL="http://help.ubuntu.com/"' + os.EOL +
                                'BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"';
 
-        const dataUbuntu1510 = 'NAME="Ubuntu"' + os.EOL +
+        const dataUbuntu1510: string = 'NAME="Ubuntu"' + os.EOL +
                                'VERSION="15.10 (Wily Werewolf)"' + os.EOL +
                                'ID=ubuntu' + os.EOL +
                                'ID_LIKE=debian' + os.EOL +
@@ -30,7 +30,7 @@ suite("LinuxDistro Tests", () => {
                                'SUPPORT_URL="http://help.ubuntu.com/"' + os.EOL +
                                'BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"';
 
-        const dataCentos73 = 'NAME="CentOS Linux"' + os.EOL +
+        const dataCentos73: string = 'NAME="CentOS Linux"' + os.EOL +
                              'VERSION="7 (Core)"' + os.EOL +
                              'ID="centos"' + os.EOL +
                              'ID_LIKE="rhel fedora"' + os.EOL +
@@ -46,9 +46,9 @@ suite("LinuxDistro Tests", () => {
                              'REDHAT_SUPPORT_PRODUCT="centos"' + os.EOL +
                              'REDHAT_SUPPORT_PRODUCT_VERSION="7"';
 
-        let ubuntu1404 = LinuxDistribution.getDistroInformation(dataUbuntu1404);
-        let ubuntu1510 = LinuxDistribution.getDistroInformation(dataUbuntu1510);
-        let centos73 = LinuxDistribution.getDistroInformation(dataCentos73);
+        let ubuntu1404: LinuxDistribution = LinuxDistribution.getDistroInformation(dataUbuntu1404);
+        let ubuntu1510: LinuxDistribution = LinuxDistribution.getDistroInformation(dataUbuntu1510);
+        let centos73: LinuxDistribution = LinuxDistribution.getDistroInformation(dataCentos73);
 
         assert.equal(ubuntu1404.name, 'ubuntu');
         assert.equal(ubuntu1404.version, '"14.04"');
@@ -61,9 +61,9 @@ suite("LinuxDistro Tests", () => {
     });
 
     test("Parse invalid os-release file", () => {
-        const data = 'garbage"';
+        const data: string = 'garbage"';
 
-        let unknown = LinuxDistribution.getDistroInformation(data);
+        let unknown: LinuxDistribution = LinuxDistribution.getDistroInformation(data);
         assert.equal(unknown.name, 'unknown');
         assert.equal(unknown.version, 'unknown');
     });
@@ -72,7 +72,7 @@ suite("LinuxDistro Tests", () => {
 suite("Pick Process Tests", () => {
     test("Parse valid wmic output", () => {
         // output from the command used in WmicAttachItemsProvider
-        const wmicOutput = 'CommandLine=' + os.EOL +
+        const wmicOutput: string = 'CommandLine=' + os.EOL +
                            'Name=System Idle Process' + os.EOL +
                            'ProcessId=0' + os.EOL +
                            '' + os.EOL +
@@ -86,11 +86,11 @@ suite("Pick Process Tests", () => {
                            'Name=conhost.exe' + os.EOL +
                            'ProcessId=59148' + os.EOL;
 
-        let parsedOutput = WmicProcessParser.ParseProcessFromWmic(wmicOutput);
+        let parsedOutput: Process[] = WmicProcessParser.ParseProcessFromWmic(wmicOutput);
 
-        let process1 = parsedOutput[0];
-        let process2 = parsedOutput[1];
-        let process3 = parsedOutput[2];
+        let process1: Process = parsedOutput[0];
+        let process2: Process = parsedOutput[1];
+        let process3: Process = parsedOutput[2];
 
         assert.equal(process1.commandLine, '');
         assert.equal(process1.name, 'System Idle Process');
@@ -107,15 +107,15 @@ suite("Pick Process Tests", () => {
 
     test("Parse valid ps output", () => {
         // output from the command used in PsAttachItemsProvider
-        const psOutput = '      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + os.EOL +
+        const psOutput: string = '      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + os.EOL +
                          '15470 ScopedBookmarkAgent                                ScopedBookmarkAgent' + os.EOL +
                          '15220 mdworker                                           mdworker -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared' + os.EOL;
 
-        let parsedOutput = PsProcessParser.ParseProcessFromPs(psOutput);
+        let parsedOutput: Process[] = PsProcessParser.ParseProcessFromPs(psOutput);
 
-        let process1 = parsedOutput[0];
-        let process2 = parsedOutput[1];
-        let process3 = parsedOutput[2];
+        let process1: Process = parsedOutput[0];
+        let process2: Process = parsedOutput[1];
+        let process3: Process = parsedOutput[2];
 
         assert.equal(process1.commandLine, 'ScopedBookmarkAgent');
         assert.equal(process1.name, 'ScopedBookmarkAgent');

@@ -204,8 +204,8 @@ export class ColorizationSettings {
 
         // Populate with unique objects, as they will be individual modified in place
         for (let i: number = 0; i < TokenKind.Count; i++) {
-            this.themeStyleCMap[i] = Object.assign({}, defaultStyle);
-            this.themeStyleCppMap[i] = Object.assign({}, defaultStyle);
+            this.themeStyleCMap[i] = {...defaultStyle};
+            this.themeStyleCppMap[i] = {...defaultStyle};
         }
 
         this.calculateStyleForToken(TokenKind.Macro, "entity.name.function.preprocessor", themeName, textMateRules);
@@ -424,7 +424,7 @@ export class ColorizationState {
             }
         }
 
-        // Normally, decorators are honored in the order in which they were created, not the 
+        // Normally, decorators are honored in the order in which they were created, not the
         // order in which they were applied.  Decorators with opacity appear to be handled
         // differently, in that the opacity is applied to overlapping decorators even if
         // created afterwards.
