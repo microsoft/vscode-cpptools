@@ -1477,6 +1477,7 @@
     "@types/node": "^12.0.12",
     "@types/plist": "^3.0.2",
     "@types/tmp": "^0.1.0",
+    "@types/webpack": "^4.4.34",
     "@types/yauzl": "^2.9.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
