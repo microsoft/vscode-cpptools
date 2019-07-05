@@ -1473,7 +1473,7 @@
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.0.10",
+    "@types/node": "^12.0.12",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "gulp": "^4.0.2",
@@ -1500,16 +1500,16 @@
     "plist": "^2.0.1",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^2.1.2",
-    "vscode-debugadapter": "^1.34.0",
-    "vscode-debugprotocol": "^1.34.0",
-    "vscode-extension-telemetry": "^0.1.1",
+    "vscode-debugadapter": "^1.35.0",
+    "vscode-debugprotocol": "^1.35.0",
+    "vscode-extension-telemetry": "^0.1.2",
     "vscode-languageclient": "^5.2.1",
     "yauzl": "^2.10.0"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2092533",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2098277",
       "platforms": [
         "linux"
       ],
@@ -1523,7 +1523,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2092603",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2098276",
       "platforms": [
         "linux"
       ],
@@ -1539,7 +1539,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2092602",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2098195",
       "platforms": [
         "darwin"
       ],
@@ -1550,7 +1550,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2092532",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2098194",
       "platforms": [
         "win32"
       ],
