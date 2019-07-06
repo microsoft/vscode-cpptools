@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { execChildProcess } from '../common';
 import { PsProcessParser } from './nativeAttach';
 import { AttachItem, showQuickPick } from './attachQuickPick';
 
@@ -123,7 +122,7 @@ export class RemoteAttachPicker {
         // Do not add any quoting in execCommand.
         const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
 
-        return execChildProcess(execCommand, null, this._channel).then(output => {
+        return util.execChildProcess(execCommand, null, this._channel).then(output => {
             // OS will be on first line
             // Processes will follow if listed
             let lines: string[] = output.split(/\r?\n/);

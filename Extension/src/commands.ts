@@ -72,7 +72,7 @@ class TemporaryCommandRegistrar {
         LanguageServer.activate(this.delayedCommandsToExecute.size > 0);
         this.isActivationReady = true;
     }
-    
+
     public clearTempCommands(): void {
         this.tempCommands.forEach((command) => {
             command.dispose();

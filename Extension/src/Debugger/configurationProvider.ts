@@ -12,6 +12,7 @@ import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
 import { buildAndDebugActiveFileStr } from './extension';
+import * as logger from '../logger';
 
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
@@ -36,7 +37,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         const configs: vscode.DebugConfiguration[] = await this.underlyingProvider.provideDebugConfigurations(folder, token);
-        const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return isDebugLaunchStr(config.name); });
+        const defaultConfig: vscode.DebugConfiguration = configs.find(config => isDebugLaunchStr(config.name));
         console.assert(defaultConfig);
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
@@ -95,7 +96,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await getBuildTasks(true); 
+        let buildTasks: vscode.Task[] = await getBuildTasks(true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
@@ -127,7 +128,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
             const compilerName: string = path.basename(definition.compilerPath);
 
-            let newConfig: vscode.DebugConfiguration = Object.assign({}, defaultConfig); // Copy enumerables and properties
+            let newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
@@ -152,11 +153,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     } else {
                         debuggerName = "gdb";
                     }
-        
+
                     if (platform === "win32") {
                         debuggerName += ".exe";
                     }
-        
+
                     const compilerDirname: string = path.dirname(definition.compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
                     fs.stat(debuggerPath, (err, stats: fs.Stats) => {
@@ -183,7 +184,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             if (config.type === 'cppvsdbg') {
                 // Fail if cppvsdbg type is running on non-Windows
                 if (os.platform() !== 'win32') {
-                    vscode.window.showErrorMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
+                    logger.getOutputChannelLogger().showWarningMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
                     return undefined;
                 }
 
@@ -200,30 +201,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             }
 
             // Add environment variables from .env file
-            if (config.envFile) {
-                // replace ${env:???} variables
-                let envFilePath: string = util.resolveVariables(config.envFile, null);
+            this.resolveEnvFile(config, folder);
 
-                try {
-                    if (folder && folder.uri && folder.uri.fsPath) {
-                        // Try to replace ${workspaceFolder} or ${workspaceRoot}
-                        envFilePath = envFilePath.replace(/(\${workspaceFolder}|\${workspaceRoot})/g, folder.uri.fsPath);
-                    }
-
-                    const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(envFilePath, config["environment"]);
-
-                    // show error message if single lines cannot get parsed
-                    if (parsedFile.Warning) {
-                        CppConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
-                    }
-
-                    config.environment = parsedFile.Env;
-
-                    delete config.envFile;
-                } catch (e) {
-                    throw new Error(`Can't parse envFile (${envFilePath}): ${e.message}`);
-                }
-            }
+            this.resolveSourceFileMapVariables(config);
 
             // Modify WSL config for OpenDebugAD7
             if (os.platform() === 'win32' &&
@@ -248,8 +228,78 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 }
             }
         }
-        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213 
+        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213
         return config && config.type ? config : null;
+    }
+
+    private resolveEnvFile(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder): void {
+        if (config.envFile) {
+            // replace ${env:???} variables
+            let envFilePath: string = util.resolveVariables(config.envFile, null);
+
+            try {
+                if (folder && folder.uri && folder.uri.fsPath) {
+                    // Try to replace ${workspaceFolder} or ${workspaceRoot}
+                    envFilePath = envFilePath.replace(/(\${workspaceFolder}|\${workspaceRoot})/g, folder.uri.fsPath);
+                }
+
+                const parsedFile: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromFile(envFilePath, config["environment"]);
+
+                // show error message if single lines cannot get parsed
+                if (parsedFile.Warning) {
+                    CppConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
+                }
+
+                config.environment = parsedFile.Env;
+
+                delete config.envFile;
+            } catch (e) {
+                throw new Error(`Failed to use envFile. Reason: ${e.message}`);
+            }
+        }
+    }
+
+    private resolveSourceFileMapVariables(config: vscode.DebugConfiguration): void {
+        let messages: string[] = [];
+        if (config.sourceFileMap) {
+            for (const sourceFileMapSource of Object.keys(config.sourceFileMap)) {
+                let message: string = "";
+                const sourceFileMapTarget: string = config.sourceFileMap[sourceFileMapSource];
+
+                // TODO: pass config.environment as 'additionalEnvironment' to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
+                const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, null);
+                const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, null);
+
+                let source: string = sourceFileMapSource;
+                let target: string = sourceFileMapTarget;
+
+                if (sourceFileMapSource !== newSourceFileMapSource) {
+                    message = `\tReplacing sourcePath '${sourceFileMapSource}' with '${newSourceFileMapSource}'.`;
+                    delete config.sourceFileMap[sourceFileMapSource];
+                    source = newSourceFileMapSource;
+                }
+
+                if (sourceFileMapTarget !== newSourceFileMapTarget) {
+                    // Add a space if source was changed, else just tab the target message.
+                    message +=  (message ? ' ' : '\t');
+                    message += `Replacing targetPath '${sourceFileMapTarget}' with '${newSourceFileMapTarget}'.`;
+                    target = newSourceFileMapTarget;
+                }
+
+                if (message) {
+                    config.sourceFileMap[source] = target;
+                    messages.push(message);
+                }
+            }
+
+            if (messages.length > 0) {
+                logger.getOutputChannel().appendLine("Resolving variables in sourceFileMap...");
+                messages.forEach((message) => {
+                    logger.getOutputChannel().appendLine(message);
+                });
+                logger.showOutputChannel();
+            }
+        }
     }
 
     private static async showFileWarningAsync(message: string, fileName: string) : Promise<void> {
@@ -416,10 +466,10 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
             items = [];
 
             // Make a copy of each snippet since we are adding a comma to the end of the insertText.
-            this.snippets.forEach((item) => items.push(Object.assign({}, item)));
+            this.snippets.forEach((item) => items.push({...item}));
 
             items.map((item) => {
-                item.insertText = item.insertText + ','; // Add comma 
+                item.insertText = item.insertText + ','; // Add comma
             });
         }
 
