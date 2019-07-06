@@ -68,6 +68,11 @@ export interface ConfigurationErrors {
     compilerPath?: string;
     includePath?: string;
     intelliSenseMode?: string;
+    macFrameworkPath?: string;
+    forcedInclude?: string;
+    compileCommands?: string;
+    browsePath?: string;
+    databaseFilename?: string;
 }
 
 export interface Browse {
@@ -178,7 +183,7 @@ export class CppProperties {
         } else {
             this.propertiesFile = null;
         }
-        
+
         let settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(settingsPath);
         this.disposables.push(this.configFileWatcher);
@@ -554,9 +559,9 @@ export class CppProperties {
                 } else if (configuration.includePath) {
                     // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
                     configuration.browse.path = configuration.includePath.slice(0);
-                    if (-1 === configuration.includePath.findIndex((value: string, index: number) => {
-                        return !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\\*{0,2}|\/\*{0,2})?$/g);
-                    })) {
+                    if (configuration.includePath.findIndex((value: string, index: number) =>
+                        !!value.match(/^\$\{(workspaceRoot|workspaceFolder)\}(\\\*{0,2}|\/\*{0,2})?$/g)) === -1
+                    ) {
                         configuration.browse.path.push("${workspaceFolder}");
                     }
                 }
@@ -907,7 +912,6 @@ export class CppProperties {
     private getErrorsForConfigUI(configIndex: number): ConfigurationErrors {
         let errors: ConfigurationErrors = {};
         const isWindows: boolean = os.platform() === 'win32';
-
         let config: Configuration = this.configurationJson.configurations[configIndex];
 
         // Validate compilerPath
@@ -924,7 +928,7 @@ export class CppProperties {
                 compilerPathAndArgs.additionalArgs &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath.includes(" ");
-            
+
             let compilerPathErrors: string[] = [];
             if (compilerPathNeedsQuotes) {
                 compilerPathErrors.push(`Compiler path with spaces and arguments is missing double quotes " around the path.`);
@@ -971,44 +975,15 @@ export class CppProperties {
             }
         }
 
-        // Validate includePath
-        let includePathErrors: string[] = [];
-        if (config.includePath) {
-            for (let includePath of config.includePath) {
-                let pathExists: boolean = true;
-                let resolvedIncludePath: string = this.resolvePath(includePath, isWindows);
-                if (!resolvedIncludePath) {
-                    continue;
-                }
+        // Validate paths (directories)
+        errors.includePath = this.validatePath(config.includePath);
+        errors.macFrameworkPath = this.validatePath(config.macFrameworkPath);
+        errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
 
-                // Check if resolved path exists
-                if (!fs.existsSync(resolvedIncludePath)) {
-                    // Check for relative path if resolved path does not exists
-                    const relativePath: string = this.rootUri.fsPath + path.sep + resolvedIncludePath;
-                    if (!fs.existsSync(relativePath)) {
-                        pathExists = false;
-                    } else {
-                        resolvedIncludePath = relativePath;
-                    }
-                }
-
-                if (!pathExists) {
-                    let message: string = `Cannot find: ${resolvedIncludePath}`;
-                    includePathErrors.push(message);
-                    continue;
-                }
-
-                // Check if path is a directory
-                if (!util.checkDirectoryExistsSync(resolvedIncludePath)) {
-                    let message: string = `Path is not a directory: ${resolvedIncludePath}`;
-                    includePathErrors.push(message);
-                }
-            }
-
-            if (includePathErrors.length > 0) {
-                errors.includePath = includePathErrors.join('\n');
-            }
-        }
+        // Validate files
+        errors.forcedInclude = this.validatePath(config.forcedInclude, false);
+        errors.compileCommands = this.validatePath(config.compileCommands, false);
+        errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
         // Validate intelliSenseMode
         if (isWindows && !this.isCompilerIntelliSenseModeCompatible(config)) {
@@ -1018,18 +993,75 @@ export class CppProperties {
         return errors;
     }
 
+    private validatePath(input: string|string[], isDirectory: boolean = true): string {
+        if (!input) {
+            return undefined;
+        }
+
+        const isWindows: boolean = os.platform() === 'win32';
+        let errorMsg: string;
+        let errors: string[] = [];
+        let paths: string[] = [];
+
+        if (util.isString(input)) {
+            paths.push(input);
+        } else {
+            paths = input;
+        }
+
+        for (let p of paths) {
+            let pathExists: boolean = true;
+            let resolvedPath: string = this.resolvePath(p, isWindows);
+            if (!resolvedPath) {
+                continue;
+            }
+
+            // Check if resolved path exists
+            if (!fs.existsSync(resolvedPath)) {
+                // Check for relative path if resolved path does not exists
+                const relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
+                if (!fs.existsSync(relativePath)) {
+                    pathExists = false;
+                } else {
+                    resolvedPath = relativePath;
+                }
+            }
+
+            if (!pathExists) {
+                let message: string = `Cannot find: ${resolvedPath}`;
+                errors.push(message);
+                continue;
+            }
+
+            // Check if path is a directory or file
+            if (isDirectory && !util.checkDirectoryExistsSync(resolvedPath)) {
+                let message: string = `Path is not a directory: ${resolvedPath}`;
+                errors.push(message);
+            } else if (!isDirectory && !util.checkFileExistsSync(resolvedPath)) {
+                let message: string = `Path is not a file: ${resolvedPath}`;
+                errors.push(message);
+            }
+        }
+
+        if (errors.length > 0) {
+            errorMsg = errors.join('\n');
+        }
+
+        return errorMsg;
+    }
+
     private handleSquiggles(): void {
         if (!this.propertiesFile) {
             return;
         }
 
-        if (this.configurationJson.enableConfigurationSquiggles === false) {
+        if (!this.configurationJson.enableConfigurationSquiggles) {
             this.diagnosticCollection.clear();
             return;
         }
 
         const settings: CppSettings = new CppSettings(this.rootUri);
-        if (settings.defaultEnableConfigurationSquiggles === false) {
+        if (!settings.defaultEnableConfigurationSquiggles) {
             this.diagnosticCollection.clear();
             return;
         }
@@ -1101,7 +1133,7 @@ export class CppProperties {
             // Check for path-related squiggles.
             let paths: Set<string> = new Set<string>();
             for (let pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
-                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ] ) {
+                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
                         paths.add(`${curPath}`);
