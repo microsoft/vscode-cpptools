@@ -36,7 +36,7 @@ export interface IPackage {
     binaries: string[];
 
     // Internal location to which the package was downloaded
-    tmpFile: tmp.SyncResult;
+    tmpFile: tmp.FileResult;
 }
 
 export class PackageManagerError extends Error {
@@ -151,23 +151,23 @@ export class PackageManager {
 
         progress.report({message: `Downloading ${progressCount}: ${pkg.description}`});
 
-        const tmpResult: tmp.SyncResult = await this.CreateTempFile(pkg);
+        const tmpResult: tmp.FileResult = await this.CreateTempFile(pkg);
         await this.DownloadPackageWithRetries(pkg, tmpResult, progress);
     }
 
-    private async CreateTempFile(pkg: IPackage): Promise<tmp.SyncResult> {
-        return new Promise<tmp.SyncResult>((resolve, reject) => {
+    private async CreateTempFile(pkg: IPackage): Promise<tmp.FileResult> {
+        return new Promise<tmp.FileResult>((resolve, reject) => {
             tmp.file({ prefix: "package-" }, (err, path, fd, cleanupCallback) => {
                 if (err) {
                     return reject(new PackageManagerError('Error from temp.file', 'DownloadPackage', pkg, err));
                 }
 
-                return resolve(<tmp.SyncResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
+                return resolve(<tmp.FileResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
             });
         });
     }
 
-    private async DownloadPackageWithRetries(pkg: IPackage, tmpResult: tmp.SyncResult, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    private async DownloadPackageWithRetries(pkg: IPackage, tmpResult: tmp.FileResult, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
         pkg.tmpFile = tmpResult;
 
         let success: boolean = false;
@@ -333,7 +333,7 @@ export class PackageManager {
 
                     if (entry.fileName.endsWith("/")) {
                         // Directory - create it
-                        mkdirp.mkdirp(absoluteEntryPath, { mode: 0o775 }, (err) => {
+                        mkdirp(absoluteEntryPath, { mode: 0o775 }, (err) => {
                             if (err) {
                                 return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
                             }
@@ -353,7 +353,7 @@ export class PackageManager {
                                         return reject(new PackageManagerError('Error in readStream', 'InstallPackage', pkg, err));
                                     });
 
-                                    mkdirp.mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
+                                    mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
                                         if (err) {
                                             return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
                                         }
