@@ -70,10 +70,10 @@
 * #### `cppStandard`
   The version of the C++ language standard to use for IntelliSense.
 
-* #### `Configuration provider`
+* #### `configurationProvider`
   The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
 
-* #### `Windows SDK version`
+* #### `windowsSdkVersion`
   The version of the Windows SDK include path to use on Windows, e.g. `10.0.17134.0`.
 
 * #### `macFrameworkPath`
@@ -96,7 +96,7 @@
   A list of paths for the Tag Parser to search for headers included by your source files. If omitted, `includePath` will be used as the `path`. Searching on these paths is recursive by default. Specify `*` to indicate non-recursive search. For example: `/usr/include` will search through all subdirectories while `/usr/include/*` will not.
 
 * #### `limitSymbolsToIncludedHeaders`
-  When true, the Tag Parser will only parse code files that have been directly or indirectly included by a source file in `${workspaceFolder}`. When false, the Tag Parser will parse all code files found in the paths specified in the `Browse:path` list.
+  When true, the Tag Parser will only parse code files that have been directly or indirectly included by a source file in `${workspaceFolder}`. When false, the Tag Parser will parse all code files found in the paths specified in the `browse.path` list.
 
 * #### `databaseFilename`
   The path to the generated symbol database. This instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The `${workspaceFolder}` variable can be used to specify a path relative to the workspace folder (e.g. `${workspaceFolder}/.vscode/browse.vc.db`)
