@@ -24,7 +24,7 @@ The language server caches information about included header files to improve th
 VS Code per-workspace storage folders were not selected for the following reason:
 * The workspace storage location provided by VS Code is somewhat obscure and we had reservations about writing GB's worth of files in this location where users may not see them or know where to find them.
 
-With this in mind we knew that we would not be able to meet the needs of every different development environments, so we provided settings to allow you to customize the way that works best for your situation.
+With this in mind we knew that we would not be able to meet the needs of every different development environment, so we provided settings to allow you to customize the way that works best for your situation.
 
 #### `"C_Cpp.intelliSenseCachePath": <string>`
 This setting allows you to set workspace or global overrides for the cache path. For example, if you want to share a single cache location for all workspace folders, open the VS Code settings, and add a "User" setting for "IntelliSense Cache Path".
