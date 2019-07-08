@@ -2,7 +2,7 @@
 
 ## Table of Contents
 * Setup: [Debugging Setup](#debugging-setup)
-* Setup: [What is the */ipch folder?](#What-is-the-*/ipch-folder)
+* Setup: [What is the ipch folder?](#What-is-the-ipch-folder)
 * Setup: [How do I disable the IntelliSense cache (ipch)?](#how-do-i-disable-the-intellisense-cache-ipch)
 * Debugger: [Why is debugging not working?](#why-is-debugging-not-working)
 * Build: [How to enable debug symbols](#how-to-enable-debug-symbols)
@@ -17,9 +17,9 @@ The file **launch.json** will now be open for editing with a new configuration. 
 
 See the [**Documentation/Debugger**](https://github.com/Microsoft/vscode-cpptools/tree/master/Documentation/Debugger) folder in this repository for more in-depth documentation on how to configure the debugger.
 
-## What is the */ipch folder?
+## What is the ipch folder?
 
-The language server caches information about included header files to improve the performance of IntelliSense. When you edit C/C++ files in your workspace folder, the language server will store cache files in the `*/ipch` folder. By default, the `*/ipch` folder is stored under the user directory. Specifically, it is stored under `%LocalAppData%\vscode-cpptools` on Windows, and for Linux and Mac it is under `~/.vscode-cpptools`. By using the user directory as the default path, it will create one cache location per user for the extension. As the cache size limit is applied to a cache location, having one cache location per user will limit the disk space usage of the cache to that one folder for everyone using the default setting value.
+The language server caches information about included header files to improve the performance of IntelliSense. When you edit C/C++ files in your workspace folder, the language server will store cache files in the `ipch` folder. By default, the `ipch` folder is stored under the user directory. Specifically, it is stored under `%LocalAppData%\vscode-cpptools` on Windows, and for Linux and Mac it is under `~/.vscode-cpptools`. By using the user directory as the default path, it will create one cache location per user for the extension. As the cache size limit is applied to a cache location, having one cache location per user will limit the disk space usage of the cache to that one folder for everyone using the default setting value.
 
 VS Code per-workspace storage folders were not selected for the following reason:
 * The workspace storage location provided by VS Code is somewhat obscure and we had reservations about writing GB's worth of files in this location where users may not see them or know where to find them.
