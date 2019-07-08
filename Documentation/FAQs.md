@@ -2,7 +2,7 @@
 
 ## Table of Contents
 * Setup: [Debugging Setup](#debugging-setup)
-* Setup: [What is the .vscode/ipch folder?](#what-is-the-vscodeipch-folder)
+* Setup: [What is the */ipch folder?](#What-is-the-*/ipch-folder)
 * Setup: [How do I disable the IntelliSense cache (ipch)?](#how-do-i-disable-the-intellisense-cache-ipch)
 * Debugger: [Why is debugging not working?](#why-is-debugging-not-working)
 * Build: [How to enable debug symbols](#how-to-enable-debug-symbols)
