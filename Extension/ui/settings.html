@@ -448,7 +448,7 @@
       <div class="section-title">Configuration name</div>
       <div class="section-text">
         A friendly name that identifies a configuration. <code>Linux</code>, <code>Mac</code>, and <code>Win32</code> are special identifiers 
-        for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything.
+        for configurations that will be auto-selected on those platforms.
       </div>
       <div>
         <div class="section-note">Select a configuration set to edit.</div>
@@ -579,7 +579,8 @@
         <div class="section">
             <div class="section-title">Configuration provider</div>
             <div class="section-text">
-                The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
+                The ID of a VS Code extension that can provide IntelliSense configuration information for source files. For example, use the VS Code extension ID
+                <code>vector-of-bool.cmake-tools</code> to provide configuration information from the CMake Tools extension.
             </div>
             <div>
                 <input name="inputValue" id="configurationProvider" style="width: 290px"></input>
@@ -599,7 +600,7 @@
         <div class="section">
             <div class="section-title">Mac framework path</div>
             <div class="section-text">
-                A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.
+                A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on configuration for Mac platform.
             </div>
             <div>
                 <div class="section-note">One path per line.</div>

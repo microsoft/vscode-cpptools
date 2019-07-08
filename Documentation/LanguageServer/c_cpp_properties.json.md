@@ -50,7 +50,7 @@
 ## Configuration properties
 
 * #### `name`
-  A friendly name that identifies a configuration. `Linux`, `Mac`, and `Win32` are special identifiers for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything. The status bar in VS Code will show you which configuration is active. You can also click on the label in the status bar to change the active configuration.
+  A friendly name that identifies a configuration. `Linux`, `Mac`, and `Win32` are special identifiers for configurations that will be auto-selected on those platforms. The status bar in VS Code will show you which configuration is active. You can also click on the label in the status bar to change the active configuration.
 
 * #### `compilerPath` (optional)
   The full path to the compiler you use to build your project, e.g. `/usr/bin/gcc`, to enable more accurate IntelliSense. Arguments can be added to modify the includes/defines used, e.g. `-nostdinc++`, `-m32`, etc., but paths with spaces must be surrounded by double quotes `"` if arguments are used. The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.
@@ -71,13 +71,13 @@
   The version of the C++ language standard to use for IntelliSense.
 
 * #### `configurationProvider`
-  The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
+  The ID of a VS Code extension that can provide IntelliSense configuration information for source files. For example, use the VS Code extension ID `vector-of-bool.cmake-tools` to provide configuration information from the CMake Tools extension.
 
 * #### `windowsSdkVersion`
   The version of the Windows SDK include path to use on Windows, e.g. `10.0.17134.0`.
 
 * #### `macFrameworkPath`
-  A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.
+  A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on configurations for Mac platform.
 
 * #### `forcedInclude` (optional)
   A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.
