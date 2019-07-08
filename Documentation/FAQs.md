@@ -17,16 +17,17 @@ The file **launch.json** will now be open for editing with a new configuration. 
 
 See the [**Documentation/Debugger**](https://github.com/Microsoft/vscode-cpptools/tree/master/Documentation/Debugger) folder in this repository for more in-depth documentation on how to configure the debugger.
 
-## What is the .vscode/ipch folder?
+## What is the */ipch folder?
 
-The language server caches information about included header files to improve the performance of IntelliSense. When you edit C/C++ files in your workspace folder, the language server will store cache files in the `.vscode/ipch` folder by default. VS Code per-workspace storage folders were not selected for the following reasons:
+The language server caches information about included header files to improve the performance of IntelliSense. When you edit C/C++ files in your workspace folder, the language server will store cache files in the `*/ipch` folder. By default, the `*/ipch` folder is stored under the user directory. Specifically, it is stored under `%LocalAppData%\vscode-cpptools` on Windows, and for Linux and Mac it is under `~/.vscode-cpptools`. By using the user directory as the default path, it will create one cache location per user for the extension. As the cache size limit is applied to a cache location, having one cache location per user will limit the disk space usage of the cache to that one folder for everyone using the default setting value.
+
+VS Code per-workspace storage folders were not selected for the following reason:
 * The workspace storage location provided by VS Code is somewhat obscure and we had reservations about writing GB's worth of files in this location where users may not see them or know where to find them.
-* Parity with Visual Studio. This is how Visual Studio works and they receive little to no feedback/complaints on the location.
 
-With this in mind we knew that we wouldn't be able to please everyone, so we provided settings to allow you to customize this the way that works best for your situation.  We also figured that putting the files in the workspace folder would bring the issue to your attention quickly so that you can take action if you don't like the default behavior.
+With this in mind we knew that we would not be able to meet the needs of every different development environments, so we provided settings to allow you to customize the way that works best for your situation.
 
 #### `"C_Cpp.intelliSenseCachePath": <string>`
-This setting allows you to set workspace or global overrides for the cache path. For example, if you want to share a single cache location for all workspace folders, you just open the VS Code settings, and add a "User" setting for "IntelliSense Cache Path".
+This setting allows you to set workspace or global overrides for the cache path. For example, if you want to share a single cache location for all workspace folders, open the VS Code settings, and add a "User" setting for "IntelliSense Cache Path".
 
 #### `"C_Cpp.intelliSenseCacheSize": <number>`
 This setting allows you to set a limit on the amount of caching the extension does. This is an approximation, but the extension will make a best effort to keep the cache size as close to the limit you set as possible. If you are sharing the cache location across workspaces as explained above, you can still increase/decrease the limit, but you should make sure that you add a "User" setting for "IntelliSense Cache Size".
