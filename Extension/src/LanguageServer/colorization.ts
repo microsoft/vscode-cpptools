@@ -213,7 +213,7 @@ export class ColorizationSettings {
         this.calculateStyleForToken(TokenKind.GlobalVariable, "variable.other.global", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.LocalVariable, "variable.other.local", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Parameter, "variable.parameter", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Type, "entity.name.type", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.Type, "entity.name.type.class", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.RefType, "entity.name.type.class.reference", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.ValueType, "entity.name.type.class.value", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Function, "entity.name.function", themeName, textMateRules);
