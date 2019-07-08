@@ -19,32 +19,32 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 
 | Token         | Scope         |
 | ------------- |:-------------:|
-| Class Template | entity.name.class.template |
+| Class Template | entity.name.type.class.templated |
 | Enumerator | variable.other.enummember |
 | Event  (C++/CLI) | variable.other.event |
 | Function | entity.name.function |
-| Function Template | entity.name.function.template |
-| Generic Type (C++/CLI) | entity.name.class.generic |
+| Function Template | entity.name.function.templated |
+| Generic Type (C++/CLI) | entity.name.type.class.generic |
 | Global Variable | variable.other.global |
 | Label | entity.name.label |
 | Local Variable | variable.other.local |
 | Macro | entity.name.function.preprocessor |
-| Member Field  | variable.other.member |
+| Member Field  | variable.other.property |
 | Member Function | entity.name.function.member |
-| Member Operator | keyword.operator.member |
-| Namespace | entity.name.type.namespace |
+| Namespace | entity.name.namespace |
 | New / Delete | keyword.operator.new |
-| Operator Function | entity.name.function.operator |
+| Operator Overload Function | keyword.operator.overload.function |
+| Operator Overload Member | keyword.operator.overload.member |
 | Parameter | variable.parameter |
-| Property (C++/CLI) | variable.other.property |
-| Reference Type (C++/CLI) | entity.name.class.reference |
-| Static Member Field | variable.other.member.static |
+| Property (C++/CLI) | variable.other.property.cli |
+| Reference Type (C++/CLI) | entity.name.type.class.reference |
+| Static Member Field | variable.other.property.static |
 | Static Member Function | entity.name.function.member.static |
 | Type | entity.name.type |
-| User-Defined Literal - Number | entity.name.user-defined-literal.number |
-| User-Defined Literal - Raw | entity.name.user-defined-literal |
-| User-Defined Literal - String | entity.name.user-defined-literal.string |
-| Value Type (C++/CLI) | entity.name.class.value |
+| User-Defined Literal - Number | entity.name.operator.custom-literal.number |
+| User-Defined Literal - Raw | entity.name.operator.custom-literal |
+| User-Defined Literal - String | entity.name.operator.custom-literal.string |
+| Value Type (C++/CLI) | entity.name.type.class.value |
 
 Many of the tokens recognized by IntelliSense do not directly map to existing scopes in the VS Code's default C/C++ TextMate grammar, so are likely not colored by existing VS Code themes.
 
