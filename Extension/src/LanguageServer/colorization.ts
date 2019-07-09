@@ -231,8 +231,8 @@ export class ColorizationSettings {
         this.calculateStyleForToken(TokenKind.UdlRaw, "entity.name.operator.custom-literal", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.UdlNumber, "entity.name.operator.custom-literal.number", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.UdlString, "entity.name.operator.custom-literal.string", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.OperatorFunction, "keyword.operator.overload.function", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.MemberOperator, "keyword.operator.overload.member", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.OperatorFunction, "entity.name.function.operator", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.MemberOperator, "entity.name.function.operator.member", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.NewDelete, "keyword.operator.new", themeName, textMateRules);
     }
 

@@ -33,8 +33,8 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 | Member Function | entity.name.function.member |
 | Namespace | entity.name.namespace |
 | New / Delete | keyword.operator.new |
-| Operator Overload Function | keyword.operator.overload.function |
-| Operator Overload Member | keyword.operator.overload.member |
+| Operator Overload Function | entity.name.function.operator |
+| Operator Overload Member | entity.name.function.operator.member |
 | Parameter | variable.parameter |
 | Property (C++/CLI) | variable.other.property.cli |
 | Reference Type (C++/CLI) | entity.name.type.class.reference |
