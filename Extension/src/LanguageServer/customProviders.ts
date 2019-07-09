@@ -171,7 +171,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public forEach(func: (provider: CustomConfigurationProvider1) => void): void {
-        this.providers.forEach(provider => func(provider));
+        this.providers.forEach(func);
     }
 
     public remove(provider: CustomConfigurationProvider): void {
