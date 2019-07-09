@@ -1,30 +1,120 @@
 {
     "rules": {
+        "adjacent-overload-signatures": true,
+        "align": true,
+        "array-type": [true, "array"],
+        "arrow-return-shorthand": true,
+        "ban-comma-operator": true,
+        "binary-expression-operand-order": true,
+        "callable-types": true,
+        "class-name": true,
+        "comment-format": true,
         "curly": true,
+        "encoding": true,
+        "eofline": true,
         "ext-variable-name": [
             true,
-            ["class", "pascal"],
-            ["function", "camel"]
+            [
+                "class",
+                "pascal"
+            ],
+            [
+                "function",
+                "camel"
+            ]
         ],
-        "file-header": [true, ".*"],
-        "indent": [true, "spaces", 4],
+        "file-header": [
+            true,
+            ".*"
+        ],
+        "import-spacing": true,
+        "indent": [
+            true,
+            "spaces",
+            4
+        ],
+        "label-position": true,
+        "match-default-export-name": true,
+        "member-ordering": true,
         "new-parens": true,
+        "no-arg": true,
+        "no-bitwise": true,
+        "no-boolean-literal-compare": true,
+        "no-conditional-assignment": true,
         "no-consecutive-blank-lines": true,
         "no-construct": true,
+        "no-debugger": true,
+        "no-default-export": true,
+        "no-duplicate-imports": true,
+        "no-duplicate-super": true,
+        "no-duplicate-switch-case": true,
         "no-duplicate-variable": true,
         "no-unused-expression-chai": true,
+        "no-eval": true,
+        "no-import-side-effect": true,
+        "no-internal-module": true,
+        "no-invalid-this": true,
+        "no-irregular-whitespace": true,
+        "no-mergeable-namespace": true,
+        "no-misused-new": true,
+        "no-namespace": true,
+        "no-non-null-assertion": true,
+        "no-redundant-jsdoc": true,
+        "no-reference": true,
+        "no-reference-import": true,
+        "no-return-await": true,
+        "no-sparse-arrays": true,
+        "no-switch-case-fall-through": true,
+        "no-this-assignment": true,
+        "no-trailing-whitespace": true,
+        "no-unnecessary-callback-wrapper": true,
+        "no-unnecessary-initializer": true,
+        "no-unnecessary-qualifier": true,
+        "no-unsafe-finally": true,
+        "no-unused-expression": true,
         "no-unused-variable": true,
         "no-var-keyword": true,
-        "one-line": [true, "check-catch", "check-finally", "check-else", "check-open-brace", "check-whitespace"],
+        "no-var-requires": true,
+        "number-literal-format": true,
+        "one-line": [
+            true,
+            "check-catch",
+            "check-finally",
+            "check-else",
+            "check-open-brace",
+            "check-whitespace"
+        ],
+        "one-variable-per-declaration": true,
+        "prefer-method-signature": true,
+        "prefer-object-spread": true,
+        "prefer-while": true,
         "promise-must-complete": true,
         "semicolon": true,
+        "space-within-parens": true,
+        "trailing-comma": true,
         "triple-equals": true,
         "type-literal-delimiter": true,
-        "typedef": [true, "variable-declaration", "call-signature"],
-        "whitespace": [true, "check-branch", "check-operator", "check-separator", "check-preblock", "check-type"]
+        "typedef": [
+            true,
+            "variable-declaration",
+            "call-signature"
+        ],
+        "typedef-whitespace": true,
+        "typeof-compare": true,
+        "unified-signatures": true,
+        "use-default-type-parameter": true,
+        "use-isnan": true,
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-operator",
+            "check-separator",
+            "check-preblock",
+            "check-type"
+        ]
     },
     "rulesDirectory": [
-        "node_modules/tslint-microsoft-contrib", 
+        "node_modules/tslint-microsoft-contrib",
         "node_modules/tslint-no-unused-expression-chai/rules",
         "node_modules/vrsource-tslint-rules/rules"
     ]

@@ -48,14 +48,20 @@ export class PackageVersion {
         let diff: number = this.major - other.major;
         if (diff) {
             return diff > 0;
-        } else if (diff = this.minor - other.minor) {
-            return diff > 0;
-        } else if (diff = this.patch - other.patch) {
-            return diff > 0;
-        } else if (this.suffix) {
-            return (other.suffix && this.suffixVersion > other.suffixVersion);
         } else {
-            return other.suffix ? true : false;
+            diff = this.minor - other.minor;
+            if (diff) {
+                return diff > 0;
+            } else {
+                diff = this.patch - other.patch;
+                if (diff) {
+                    return diff > 0;
+                } else if (this.suffix) {
+                    return (other.suffix && this.suffixVersion > other.suffixVersion);
+                } else {
+                    return other.suffix ? true : false;
+                }
+            }
         }
     }
 }
