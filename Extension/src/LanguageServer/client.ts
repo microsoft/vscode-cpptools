@@ -442,6 +442,16 @@ class DefaultClient implements Client {
             }
         }
 
+        // Get current locale from vscode
+        let locale: string = "en";
+        let vscodeNlsConfigString: string = process.env.VSCODE_NLS_CONFIG;
+        if (vscodeNlsConfigString) {
+            let vscodeNlsConfigJson: any = JSON.parse(process.env.VSCODE_NLS_CONFIG);
+            if (vscodeNlsConfigJson && vscodeNlsConfigJson.locale) {
+                locale = vscodeNlsConfigJson.locale;
+            }
+        }
+
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'cpp' },
@@ -482,7 +492,8 @@ class DefaultClient implements Client {
                     systemIncludePath: settings.defaultSystemIncludePath
                 },
                 vcpkg_root: util.getVcpkgRoot(),
-                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense
+                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
+                locale: locale
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {

@@ -12,6 +12,7 @@ import * as os from 'os';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
@@ -21,6 +22,8 @@ import { PersistentState } from './LanguageServer/persistentState';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
+
+nls.config({ messageFormat: nls.MessageFormat.file })();
 
 const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();

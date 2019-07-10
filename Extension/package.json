@@ -1492,6 +1492,7 @@
     "typescript": "^3.5.2",
     "vrsource-tslint-rules": "^6.0.0",
     "vscode": "^1.1.35",
+    "vscode-nls-dev": "^3.2.6",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5"
   },
@@ -1509,6 +1510,7 @@
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
     "vscode-languageclient": "^5.2.1",
+    "vscode-nls": "^3.2.5",
     "yauzl": "^2.10.0"
   },
   "runtimeDependencies": [
