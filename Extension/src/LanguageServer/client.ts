@@ -1297,7 +1297,7 @@ class DefaultClient implements Client {
                 let numLexing: number = 0;
                 let numInitializingIntelliSense: number = 0;
                 let numConfirmingReferences: number = 0;
-                let numFinished: number = 0;
+                let numFinished: number = 1;
                 for (let targetLocationProgress of this.currentReferencesProgress.targetLocationReferencesProgress) {
                     switch (targetLocationProgress) {
                         case TargetLocationReferencesProgress.Lexing:
@@ -1316,7 +1316,7 @@ class DefaultClient implements Client {
                             break;
                     }
                 }
-                let currentProgress: number = 4 + numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
+                let currentProgress: number = numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
                 let currentMessage: string = ` Finished(${numFinished}/${numFilesToProcess})`;
                 if (numLexing > 0) {
                     currentMessage += ` Lexing(${numLexing})`;
