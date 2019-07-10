@@ -1356,6 +1356,7 @@ class DefaultClient implements Client {
                 }, 2000);
                 break;
             case ReferencesProgress.Finished:
+                this.currentReferencesProgress = notificationBody;
                 clearInterval(this.delayReferencesProgress);
                 break;
             default:
