@@ -55,7 +55,7 @@ Colors can also be overridden globally, in settings:
     "editor.tokenColorCustomizations": {
         "textMateRules": [
             {
-                "scope": "entity.name.type",
+                "scope": "entity.name.type.class",
                 "settings": {
                     "foreground": "#FF0000",
                     "fontStyle": "italic bold underline"
@@ -70,7 +70,7 @@ Or, overridden on a per-theme basis:
         "[Visual Studio Dark]": {
             "textMateRules": [
                 {
-                    "scope": "entity.name.type",
+                    "scope": "entity.name.type.class",
                     "settings": {
                         "foreground": "#FF0000",
                         "fontStyle": "italic bold underline"
@@ -171,19 +171,19 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.type",
+                    "scope": "entity.name.type.class",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
                 },
                 {
-                    "scope": "entity.name.class.reference",
+                    "scope": "entity.name.type.class.reference",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
                 },
                 {
-                    "scope": "entity.name.class.value",
+                    "scope": "entity.name.type.class.value",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
@@ -201,7 +201,7 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "variable.other.member",
+                    "scope": "variable.other.property",
                     "settings": {
                         "foreground": "#DADADA"
                     }
@@ -213,7 +213,7 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "variable.other.member.static",
+                    "scope": "variable.other.property.static",
                     "settings": {
                         "foreground": "#C8C8C8"
                     }
@@ -225,19 +225,19 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.class.template",
+                    "scope": "entity.name.type.class.templated",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
                 },
                 {
-                    "scope": "entity.name.class.generic",
+                    "scope": "entity.name.type.class.generic",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
                 },
                 {
-                    "scope": "entity.name.function.template",
+                    "scope": "entity.name.function.templated",
                     "settings": {
                         "foreground": "#C8C8C8"
                     }
@@ -255,19 +255,19 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal",
+                    "scope": "entity.name.operator.custom-literal",
                     "settings": {
                         "foreground": "#DADADA"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.string",
+                    "scope": "entity.name.operator.custom-literal.string",
                     "settings": {
                         "foreground": "#D69D85"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.number",
+                    "scope": "entity.name.operator.custom-literal.number",
                     "settings": {
                         "foreground": "#B5CEA8"
                     }
@@ -386,19 +386,19 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.type",
+                    "scope": "entity.name.type.class",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
                 },
                 {
-                    "scope": "entity.name.class.reference",
+                    "scope": "entity.name.type.class.reference",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
                 },
                 {
-                    "scope": "entity.name.class.value",
+                    "scope": "entity.name.type.class.value",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
@@ -416,7 +416,7 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "variable.other.member",
+                    "scope": "variable.other.property",
                     "settings": {
                         "foreground": "#000000"
                     }
@@ -428,7 +428,7 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "variable.other.member.static",
+                    "scope": "variable.other.property.static",
                     "settings": {
                         "foreground": "#000000"
                     }
@@ -440,19 +440,19 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.class.template",
+                    "scope": "entity.name.type.class.templated",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
                 },
                 {
-                    "scope": "entity.name.class.generic",
+                    "scope": "entity.name.type.class.generic",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
                 },
                 {
-                    "scope": "entity.name.function.template",
+                    "scope": "entity.name.function.templated",
                     "settings": {
                         "foreground": "#000000"
                     }
@@ -470,19 +470,19 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal",
+                    "scope": "entity.name.operator.custom-literal",
                     "settings": {
                         "foreground": "#000000"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.string",
+                    "scope": "entity.name.operator.custom-literal.string",
                     "settings": {
                         "foreground": "#A31515"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.number",
+                    "scope": "entity.name.operator.custom-literal.number",
                     "settings": {
                         "foreground": "#000000"
                     }
