@@ -217,7 +217,6 @@ const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void>
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
-const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cppTools/didOpenForReferenceConfirmation');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
 const FileDeletedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileDeleted');
 const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
@@ -236,6 +235,8 @@ const RescanFolderNotification: NotificationType<void, void> = new NotificationT
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
 const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
+const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cppTools/didOpenForReferenceConfirmation');
+const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cppTools/cancelReferences');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -1076,7 +1077,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(ReferencesNotification, (e) => this.processTypedReferences(e.referencesResult));
+        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.setupOutputHandlers();
     }
@@ -1344,6 +1345,9 @@ class DefaultClient implements Client {
                             this.reportReferencesProgress(progress);
                             let updateProgress: NodeJS.Timeout = setInterval(() => {
                                 if (token.isCancellationRequested || this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
+                                    if (token.isCancellationRequested) {
+                                        this.languageClient.sendNotification(CancelReferencesNotification);
+                                    }
                                     clearInterval(updateProgress);
                                     resolve();
                                 } else {
@@ -1735,7 +1739,7 @@ class DefaultClient implements Client {
     private documentsForReferences: Map<string, vscode.TextDocument> = new Map<string, vscode.TextDocument>();
     private referencesProgress: vscode.Progress<{message?: string; increment?: number }>;
 
-    private processTypedReferences(referencesResult: ReferencesResult): void {
+    private processReferencesResult(referencesResult: ReferencesResult): void {
         if (!this.referencesChannel) {
             this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
             this.disposables.push(this.referencesChannel);
