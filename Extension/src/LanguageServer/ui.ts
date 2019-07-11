@@ -34,6 +34,7 @@ export class UI {
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
+    private referencesStatusBarItem: vscode.StatusBarItem;
     private configurationUIPromise: Thenable<ConfigurationResult>;
 
     constructor() {
@@ -43,10 +44,17 @@ export class UI {
         this.navigationStatusBarItem.command = "C_Cpp.Navigate";
         this.ShowNavigation = true;
 
-        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
+        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 3);
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
         this.configStatusBarItem.tooltip = "C/C++ Configuration";
         this.ShowConfiguration = true;
+
+        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
+        this.referencesStatusBarItem.text = "";
+        this.referencesStatusBarItem.tooltip = "Find All References...";
+        this.referencesStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
+        this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesCommands";
+        this.ShowReferencesIcon = true;
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
         this.intelliSenseStatusBarItem.text = "";
@@ -85,9 +93,19 @@ export class UI {
     private get IsUpdatingIntelliSense(): boolean {
         return this.intelliSenseStatusBarItem.text !== "";
     }
+
     private set IsUpdatingIntelliSense(val: boolean) {
         this.intelliSenseStatusBarItem.text = val ? "$(flame)" : "";
         this.ShowFlameIcon = val;
+    }
+
+    private get IsFindingReferences(): boolean {
+        return this.referencesStatusBarItem.text !== "";
+    }
+
+    private set IsFindingReferences(val: boolean) {
+        this.referencesStatusBarItem.text = val ? "$(search)" : "";
+        this.ShowReferencesIcon = val;
     }
 
     private set ShowNavigation(show: boolean) {
@@ -111,6 +129,14 @@ export class UI {
             this.intelliSenseStatusBarItem.show();
         } else {
             this.intelliSenseStatusBarItem.hide();
+        }
+    }
+
+    private set ShowReferencesIcon(show: boolean) {
+        if (show && this.IsFindingReferences) {
+            this.referencesStatusBarItem.show();
+        } else {
+            this.referencesStatusBarItem.hide();
         }
     }
 
@@ -138,6 +164,7 @@ export class UI {
     public bind(client: Client): void {
         client.TagParsingChanged(value => { this.IsTagParsing = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
+        client.FindingReferencesChanged(value => { this.IsFindingReferences = value; });
         client.NavigationLocationChanged(value => { this.NavigationLocation = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
@@ -284,6 +311,7 @@ export class UI {
         this.configStatusBarItem.dispose();
         this.browseEngineStatusBarItem.dispose();
         this.intelliSenseStatusBarItem.dispose();
+        this.referencesStatusBarItem.dispose();
         this.navigationStatusBarItem.dispose();
     }
 }

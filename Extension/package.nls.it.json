@@ -16,6 +16,7 @@
     "c_cpp.command.pauseParsing.title": "Metti in pausa l'analisi del codice",
     "c_cpp.command.resumeParsing.title": "Riprendi l'analisi del codice",
     "c_cpp.command.showParsingCommands.title": "Mostra comandi per l'analisi del codice",
+    "c_cpp.command.showReferencesCommands.title": "Show References Commands",
     "c_cpp.command.takeSurvey.title": "Partecipa al sondaggio",
     "c_cpp.command.buildAndDebugActiveFile.title": "Compila ed esegui il debug del file attivo",
     "c_cpp.command.logDiagnostics.title": "Registra diagnostica",

@@ -596,6 +596,11 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.ShowReferencesCommands",
+        "title": "%c_cpp.command.showReferencesCommands.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
         "category": "C/C++"

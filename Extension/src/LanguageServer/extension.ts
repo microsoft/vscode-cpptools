@@ -722,6 +722,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesCommands', onShowReferencesCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
@@ -925,6 +926,11 @@ function onResumeParsing(): void {
 function onShowParsingCommands(): void {
     onActivationEvent();
     selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
+}
+
+function onShowReferencesCommands(): void {
+    onActivationEvent();
+    selectClient().then(client => client.handleShowReferencesCommands(), rejected => {});
 }
 
 function onTakeSurvey(): void {

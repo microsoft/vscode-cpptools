@@ -235,8 +235,8 @@ const RescanFolderNotification: NotificationType<void, void> = new NotificationT
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
 const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
-const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cppTools/didOpenForReferenceConfirmation');
-const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cppTools/cancelReferences');
+const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/didOpenForReferenceConfirmation');
+const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -258,6 +258,7 @@ let failureMessageShown: boolean = false;
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
     isUpdatingIntelliSense: DataBinding<boolean>;
+    isFindingReferences: DataBinding<boolean>;
     navigationLocation: DataBinding<string>;
     tagParserStatus: DataBinding<string>;
     activeConfigName: DataBinding<string>;
@@ -266,6 +267,7 @@ interface ClientModel {
 export interface Client {
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
+    FindingReferencesChanged: vscode.Event<boolean>;
     NavigationLocationChanged: vscode.Event<string>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
@@ -304,6 +306,7 @@ export interface Client {
     handleConfigurationSelectCommand(): void;
     handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
+    handleShowReferencesCommands(): void;
     handleConfigurationEditCommand(): void;
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
@@ -345,6 +348,7 @@ class DefaultClient implements Client {
     private model: ClientModel = {
         isTagParsing: new DataBinding<boolean>(false),
         isUpdatingIntelliSense: new DataBinding<boolean>(false),
+        isFindingReferences: new DataBinding<boolean>(false),
         navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
@@ -352,6 +356,7 @@ class DefaultClient implements Client {
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
+    public get FindingReferencesChanged(): vscode.Event<boolean> { return this.model.isFindingReferences.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
@@ -1333,14 +1338,26 @@ class DefaultClient implements Client {
         }
     }
 
+    public handleShowReferencesCommands(): void {
+        this.notifyWhenReady(() => {
+            vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+        });
+    }
+
     private delayReferencesProgress: NodeJS.Timeout;
+    private referencesProgressOptions: vscode.ProgressOptions;
+    private referencesProgressMethod: (progress: vscode.Progress<{
+        message?: string;
+        increment?: number;
+    }>, token: vscode.CancellationToken) => Thenable<unknown>;
     private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
+                this.model.isFindingReferences.Value = true;
                 this.delayReferencesProgress = setInterval(() => {
-                    vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true },
-                        (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
-// tslint:disable-next-line: promise-must-complete
+                    this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
+                    this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
+                    // tslint:disable-next-line: promise-must-complete
                         new Promise((resolve) => {
                             this.reportReferencesProgress(progress);
                             let updateProgress: NodeJS.Timeout = setInterval(() => {
@@ -1354,13 +1371,14 @@ class DefaultClient implements Client {
                                     this.reportReferencesProgress(progress);
                                 }
                             }, 1000);
-                        })
-                    );
+                        });
+                    vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
                     clearInterval(this.delayReferencesProgress);
                 }, 2000);
                 break;
             case ReferencesProgress.Finished:
                 this.currentReferencesProgress = notificationBody;
+                this.model.isFindingReferences.Value = false;
                 clearInterval(this.delayReferencesProgress);
                 break;
             default:
@@ -1799,6 +1817,7 @@ class NullClient implements Client {
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get FindingReferencesChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
@@ -1837,6 +1856,7 @@ class NullClient implements Client {
     handleConfigurationSelectCommand(): void {}
     handleConfigurationProviderSelectCommand(): void {}
     handleShowParsingCommands(): void {}
+    handleShowReferencesCommands(): void {}
     handleConfigurationEditCommand(): void {}
     handleConfigurationEditJSONCommand(): void {}
     handleConfigurationEditUICommand(): void {}
