@@ -163,6 +163,7 @@ interface ColorThemeChangedParams {
 enum ReferenceType {
     Confirmed,
     ConfirmationInProgress,
+    ConfirmationCanceled,
     Comment,
     String,
     Inactive,
@@ -1744,6 +1745,7 @@ class DefaultClient implements Client {
     private convertReferenceTypeToString(referenceType: ReferenceType): string {
         switch (referenceType) {
             case ReferenceType.ConfirmationInProgress: return "Possible reference (confirmation in progress)";
+            case ReferenceType.ConfirmationCanceled: return "Possible reference (confirmation canceled)";
             case ReferenceType.Comment: return "Comment reference";
             case ReferenceType.String: return "String reference";
             case ReferenceType.Inactive: return "Inactive reference";
