@@ -1459,15 +1459,16 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
-    "compileDev": "npm run prepublishjs && webpack --mode development",
+    "compileDev": "npm run prepublishjs && webpack --mode development && npm run generateLocalizationFiles",
     "generateOptionsSchema": "gulp generateOptionsSchema",
+    "generateLocalizationFiles": "gulp generateLocalizationFiles",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "npm run prepublishjs && webpack --mode production",
+    "vscode:prepublish": "npm run prepublishjs && webpack --mode production && npm run generateLocalizationFiles",
     "watch": "webpack --watch --mode development"
   },
   "devDependencies": {

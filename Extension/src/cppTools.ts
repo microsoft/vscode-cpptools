@@ -29,7 +29,7 @@ export class CppTools implements CppToolsTestApi {
     private addNotifyReadyTimer(provider: CustomConfigurationProvider1): void {
         if (this.version >= Version.v2) {
             const timeout: number = 30;
-            let timer: NodeJS.Timer = setTimeout(() => {
+            let timer: NodeJS.Timer = global.setTimeout(() => {
                 console.warn(`registered provider ${provider.extensionId} did not call 'notifyReady' within ${timeout} seconds`);
             }, timeout * 1000);
             this.timers.set(provider.extensionId, timer);

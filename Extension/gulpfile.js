@@ -11,6 +11,7 @@ const tslint = require('gulp-tslint');
 const mocha = require('gulp-mocha');
 const fs = require('fs');
 const optionsSchemaGenerator = require('./out/tools/GenerateOptionsSchema');
+const nls = require('vscode-nls-dev');
 
 gulp.task('unitTests', (done) => {
     env.set({
@@ -70,6 +71,26 @@ gulp.task('pr-check', (done) => {
 
 gulp.task('generateOptionsSchema', (done) => {
     optionsSchemaGenerator.generateOptionsSchema();
-
     done();
 });
+
+// If all VS Code languages are support you can use nls.coreLanguages
+const languages = [
+    { folderName: 'it', id: 'it' },
+    { folderName: 'zh-cn', id: 'zh-cn' }
+];
+
+const generatedAdditionalLocFiles = () => {
+    return gulp.src(['package.nls.json'])
+        .pipe(nls.createAdditionalLanguageFiles(languages, 'loc'))
+        .pipe(gulp.dest('.'));
+};
+
+const generatedSrcLocFiles = () => {
+    return gulp.src(['./out/loc/resources.js'])
+        .pipe(nls.rewriteLocalizeCalls())
+        .pipe(nls.createAdditionalLanguageFiles(languages, 'loc', 'src'))
+        .pipe(gulp.dest('out/loc'));
+};
+
+gulp.task('generateLocalizationFiles', gulp.series(generatedAdditionalLocFiles, generatedSrcLocFiles));

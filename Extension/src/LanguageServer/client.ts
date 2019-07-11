@@ -31,6 +31,7 @@ import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
+import * as resources from '../../loc/resources';
 
 let ui: UI;
 let timeStamp: number = 0;
@@ -451,6 +452,8 @@ class DefaultClient implements Client {
                 locale = vscodeNlsConfigJson.locale;
             }
         }
+
+        vscode.window.showErrorMessage(`test string: ${resources.testString}`);
 
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
@@ -959,7 +962,7 @@ class DefaultClient implements Client {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
         let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
-            timer = setTimeout(() => {
+            timer = global.setTimeout(() => {
                 clearTimeout(timer);
                 if (cancelToken) {
                     cancelToken.cancel();
@@ -986,7 +989,7 @@ class DefaultClient implements Client {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
         let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
-            timer = setTimeout(() => {
+            timer = global.setTimeout(() => {
                 clearTimeout(timer);
                 if (cancelToken) {
                     cancelToken.cancel();

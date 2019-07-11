@@ -337,11 +337,11 @@ function realActivation(): void {
     if (settings.updateChannel === 'Default') {
         suggestInsidersChannel();
     } else if (settings.updateChannel === 'Insiders') {
-        insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+        insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
         checkAndApplyUpdate(settings.updateChannel);
     }
 
-    intervalTimer = setInterval(onInterval, 2500);
+    intervalTimer = global.setInterval(onInterval, 2500);
 }
 
 export function updateLanguageConfigurations(): void {
@@ -370,7 +370,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
         if (newUpdateChannel === 'Default') {
             clearInterval(insiderUpdateTimer);
         } else if (newUpdateChannel === 'Insiders') {
-            insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+            insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
 
         checkAndApplyUpdate(newUpdateChannel);
@@ -510,7 +510,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
 
                     // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-                    const timer: NodeJS.Timer = setTimeout(() => {
+                    const timer: NodeJS.Timer = global.setTimeout(() => {
                         process.kill();
                         reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
                     }, 30000);
@@ -546,7 +546,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
             }
 
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-            const timer: NodeJS.Timer = setTimeout(() => {
+            const timer: NodeJS.Timer = global.setTimeout(() => {
                 process.kill();
                 reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
             }, 30000);
