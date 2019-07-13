@@ -237,6 +237,7 @@ const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRange
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
 const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
 const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/didOpenForReferenceConfirmation');
+const PreviewReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/previewReferences');
 const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
 
 // Notifications from the server
@@ -307,7 +308,7 @@ export interface Client {
     handleConfigurationSelectCommand(): void;
     handleConfigurationProviderSelectCommand(): void;
     handleShowParsingCommands(): void;
-    handleShowReferencesCommands(): void;
+    handleReferencesIcon(): void;
     handleConfigurationEditCommand(): void;
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
@@ -1339,10 +1340,20 @@ class DefaultClient implements Client {
         }
     }
 
-    public handleShowReferencesCommands(): void {
+    public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+            if (this.model.isFindingReferences.Value) {
+                vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+            }
+            this.sendPreviewReferences();
         });
+    }
+
+    private sendPreviewReferences(): void {
+        if (this.model.isFindingReferences.Value) {
+            this.languageClient.sendNotification(PreviewReferencesNotification);
+            vscode.commands.executeCommand("references-view.find");
+        }
     }
 
     private delayReferencesProgress: NodeJS.Timeout;
@@ -1364,6 +1375,7 @@ class DefaultClient implements Client {
                             let updateProgress: NodeJS.Timeout = setInterval(() => {
                                 if (token.isCancellationRequested || this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
                                     if (token.isCancellationRequested) {
+                                        this.sendPreviewReferences();
                                         this.languageClient.sendNotification(CancelReferencesNotification);
                                     }
                                     clearInterval(updateProgress);
@@ -1858,7 +1870,7 @@ class NullClient implements Client {
     handleConfigurationSelectCommand(): void {}
     handleConfigurationProviderSelectCommand(): void {}
     handleShowParsingCommands(): void {}
-    handleShowReferencesCommands(): void {}
+    handleReferencesIcon(): void {}
     handleConfigurationEditCommand(): void {}
     handleConfigurationEditJSONCommand(): void {}
     handleConfigurationEditUICommand(): void {}

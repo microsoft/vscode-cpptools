@@ -366,7 +366,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.PauseParsing",
         "onCommand:C_Cpp.ResumeParsing",
         "onCommand:C_Cpp.ShowParsingCommands",
-        "onCommand:C_Cpp.ShowReferencesCommands",
+        "onCommand:C_Cpp.ShowReferencesProgress",
         "onCommand:C_Cpp.TakeSurvey",
         "onCommand:C_Cpp.LogDiagnostics",
         "onCommand:C_Cpp.RescanWorkspace",
