@@ -418,7 +418,8 @@
             "c++03",
             "c++11",
             "c++14",
-            "c++17"
+            "c++17",
+            "c++20"
           ],
           "default": null,
           "description": "The value to use in a configuration if \"cppStandard\" is either not specified or set to \"${default}\".",
