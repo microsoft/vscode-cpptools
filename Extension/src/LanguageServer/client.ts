@@ -543,7 +543,8 @@ class DefaultClient implements Client {
                     systemIncludePath: settings.defaultSystemIncludePath
                 },
                 vcpkg_root: util.getVcpkgRoot(),
-                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense
+                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
+                experimentalFeatures: settings.experimentalFeatures
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {

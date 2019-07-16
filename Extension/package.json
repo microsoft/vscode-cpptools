@@ -491,6 +491,16 @@
           "description": "Set to \"Insiders\" to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
           "scope": "resource"
         },
+        "C_Cpp.experimentalFeatures": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Disabled",
+          "description": "Controls whether \"experimental\" features are usable.",
+          "scope": "resource"
+        },
         "C_Cpp.suggestSnippets": {
           "type": "boolean",
           "default": true,
