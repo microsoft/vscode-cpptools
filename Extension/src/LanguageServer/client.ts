@@ -190,22 +190,24 @@ interface ReferencesResultMessage {
 
 enum ReferencesProgress {
     Started,
-    ProcessingSourceLocation,
-    ProcessingTargetLocations,
+    ProcessingSource,
+    ProcessingTargets,
     Finished
 }
 
-enum TargetLocationReferencesProgress {
-    Waiting,
+enum TargetReferencesProgress {
+    WaitingToLex,
     Lexing,
-    InitializingIntelliSense,
+    WaitingToParse,
+    Parsing,
     ConfirmingReferences,
-    Finished
+    FinishedWithoutConfirming,
+    FinishedConfirming
 }
 
 interface ReportReferencesProgressNotification {
     referencesProgress: ReferencesProgress;
-    targetLocationReferencesProgress: TargetLocationReferencesProgress[];
+    targetReferencesProgress: TargetReferencesProgress[];
 }
 
 // Requests
@@ -1296,44 +1298,56 @@ class DefaultClient implements Client {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
                 break;
-            case ReferencesProgress.ProcessingSourceLocation:
-                progress.report({ message: 'Processing source location.', increment: 1 });
+            case ReferencesProgress.ProcessingSource:
+                progress.report({ message: 'Processing source.', increment: 1 });
                 break;
-            case ReferencesProgress.ProcessingTargetLocations:
-                let numFilesToProcess: number = this.currentReferencesProgress.targetLocationReferencesProgress.length + 1;
-                let maxProgress: number = numFilesToProcess * 4;
+            case ReferencesProgress.ProcessingTargets:
+                let numFilesToProcess: number = this.currentReferencesProgress.targetReferencesProgress.length;
+                let maxProgress: number = numFilesToProcess * 10;
+                let numWaitingToLex: number = 0;
                 let numLexing: number = 0;
-                let numInitializingIntelliSense: number = 0;
+                let numWaitingToParse: number = 0;
+                let numParsing: number = 0;
                 let numConfirmingReferences: number = 0;
-                let numFinished: number = 1;
-                for (let targetLocationProgress of this.currentReferencesProgress.targetLocationReferencesProgress) {
+                let numFinishedWithoutConfirming: number = 0;
+                let numFinishedConfirming: number = 0;
+                for (let targetLocationProgress of this.currentReferencesProgress.targetReferencesProgress) {
                     switch (targetLocationProgress) {
-                        case TargetLocationReferencesProgress.Lexing:
+                        case TargetReferencesProgress.WaitingToLex:
+                            ++numWaitingToLex;
+                            break;
+                        case TargetReferencesProgress.Lexing:
                             ++numLexing;
                             break;
-                        case TargetLocationReferencesProgress.InitializingIntelliSense:
-                            ++numInitializingIntelliSense;
+                        case TargetReferencesProgress.WaitingToParse:
+                            ++numWaitingToParse;
                             break;
-                        case TargetLocationReferencesProgress.ConfirmingReferences:
+                        case TargetReferencesProgress.Parsing:
+                            ++numParsing;
+                            break;
+                        case TargetReferencesProgress.ConfirmingReferences:
                             ++numConfirmingReferences;
                             break;
-                        case TargetLocationReferencesProgress.Finished:
-                            ++numFinished;
+                        case TargetReferencesProgress.FinishedWithoutConfirming:
+                            ++numFinishedWithoutConfirming;
+                            break;
+                        case TargetReferencesProgress.FinishedConfirming:
+                            ++numFinishedConfirming;
                             break;
                         default:
                             break;
                     }
                 }
-                let currentProgress: number = numLexing + numInitializingIntelliSense * 2 + numConfirmingReferences * 3 + numFinished * 4;
-                let currentMessage: string = ` Finished(${numFinished}/${numFilesToProcess})`;
-                if (numLexing > 0) {
-                    currentMessage += ` Lexing(${numLexing})`;
-                }
-                if (numInitializingIntelliSense > 0) {
-                    currentMessage += ` Parsing(${numInitializingIntelliSense})`;
-                }
-                if (numConfirmingReferences > 0) {
-                    currentMessage += ` Confirming(${numConfirmingReferences})`;
+                let currentProgress: number = numWaitingToParse + numParsing + numConfirmingReferences * 9 + (numFinishedWithoutConfirming + numFinishedConfirming) * 10;
+                let currentMessage: string;
+                if (numLexing > numParsing) {
+                    let numTotalToLex: number = this.currentReferencesProgress.targetReferencesProgress.length;
+                    let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
+                    currentMessage += ` Lexing(${numFinishedLexing}/${numTotalToLex})`;
+                } else {
+                    let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
+                    let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences;
+                    currentMessage += ` Parsing(${numFinishedParsing}/${numTotalToParse})`;
                 }
                 progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
                 break;
