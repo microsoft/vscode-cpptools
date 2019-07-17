@@ -1355,6 +1355,7 @@ class DefaultClient implements Client {
         }
     }
 
+    private previewHasOcurred: boolean;
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
             if (this.model.isFindingReferences.Value) {
@@ -1366,6 +1367,7 @@ class DefaultClient implements Client {
 
     private sendPreviewReferences(): void {
         if (this.model.isFindingReferences.Value) {
+            this.previewHasOcurred = true;
             this.languageClient.sendNotification(PreviewReferencesNotification);
             vscode.commands.executeCommand("references-view.find");
         }
@@ -1381,6 +1383,7 @@ class DefaultClient implements Client {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
                 this.model.isFindingReferences.Value = true;
+                this.previewHasOcurred = false;
                 this.delayReferencesProgress = setInterval(() => {
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
@@ -1401,12 +1404,16 @@ class DefaultClient implements Client {
                             }, 1000);
                         });
                     vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+                    this.sendPreviewReferences();
                     clearInterval(this.delayReferencesProgress);
                 }, 2000);
                 break;
             case ReferencesProgress.Finished:
                 this.currentReferencesProgress = notificationBody;
                 this.model.isFindingReferences.Value = false;
+                if (this.previewHasOcurred) {
+                    this.sendPreviewReferences();
+                }
                 clearInterval(this.delayReferencesProgress);
                 break;
             default:
