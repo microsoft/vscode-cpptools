@@ -239,7 +239,7 @@ const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRange
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
 const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
 const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/didOpenForReferenceConfirmation');
-const PreviewReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/previewReferences');
+const RequestReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/requestReferences');
 const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
 
 // Notifications from the server
@@ -714,6 +714,7 @@ class DefaultClient implements Client {
 
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
         if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
+            this.sendRequestReferencesIfNewProgress();
             this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
         }
     }
@@ -1355,24 +1356,36 @@ class DefaultClient implements Client {
         }
     }
 
-    private previewHasOcurred: boolean;
+    private referencesRequestHasOccurred: boolean;
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
             if (this.model.isFindingReferences.Value) {
                 vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
             }
-            this.sendPreviewReferences();
+            this.sendRequestReferences();
         });
     }
 
-    private sendPreviewReferences(): void {
-        if (this.model.isFindingReferences.Value) {
-            this.previewHasOcurred = true;
-            this.languageClient.sendNotification(PreviewReferencesNotification);
-            vscode.commands.executeCommand("references-view.find");
+    private sendRequestReferencesIfNewProgress(): void {
+        if (this.newReferencesProgress) {
+            this.newReferencesProgress = false;
+            this.sendRequestReferences();
         }
     }
 
+    private sendRequestReferences(): void {
+        if (this.model.isFindingReferences.Value) {
+            if (this.referencesRequestHasOccurred) {
+                // References are not usable if a references request is pending,
+                // So after the initial request, we don't send a 2nd references request until the next request occurs.
+                vscode.commands.executeCommand("references-view.find");
+            }
+            this.languageClient.sendNotification(RequestReferencesNotification);
+            this.referencesRequestHasOccurred = true;
+        }
+    }
+
+    private newReferencesProgress: boolean;
     private delayReferencesProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
     private referencesProgressMethod: (progress: vscode.Progress<{
@@ -1383,7 +1396,7 @@ class DefaultClient implements Client {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
                 this.model.isFindingReferences.Value = true;
-                this.previewHasOcurred = false;
+                this.referencesRequestHasOccurred = false;
                 this.delayReferencesProgress = setInterval(() => {
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
@@ -1393,27 +1406,26 @@ class DefaultClient implements Client {
                             let updateProgress: NodeJS.Timeout = setInterval(() => {
                                 if (token.isCancellationRequested || this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
                                     if (token.isCancellationRequested) {
-                                        this.sendPreviewReferences();
+                                        this.sendRequestReferences();
                                         this.languageClient.sendNotification(CancelReferencesNotification);
                                     }
                                     clearInterval(updateProgress);
                                     resolve();
                                 } else {
+                                    this.newReferencesProgress = true;
                                     this.reportReferencesProgress(progress);
                                 }
-                            }, 1000);
+                            }, 2000);
                         });
                     vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                    this.sendPreviewReferences();
+                    this.sendRequestReferences();
                     clearInterval(this.delayReferencesProgress);
                 }, 2000);
                 break;
             case ReferencesProgress.Finished:
                 this.currentReferencesProgress = notificationBody;
                 this.model.isFindingReferences.Value = false;
-                if (this.previewHasOcurred) {
-                    this.sendPreviewReferences();
-                }
+                this.sendRequestReferences();
                 clearInterval(this.delayReferencesProgress);
                 break;
             default:
@@ -1539,7 +1551,10 @@ class DefaultClient implements Client {
     }
 
     public selectionChanged(selection: Range): void {
-        this.notifyWhenReady(() => this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection));
+        this.notifyWhenReady(() => {
+            this.sendRequestReferencesIfNewProgress();
+            this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
+        });
     }
 
     public resetDatabase(): void {
