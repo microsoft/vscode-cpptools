@@ -180,12 +180,6 @@ interface ReferenceInfo {
 
 interface ReferencesResult {
     referenceInfos: ReferenceInfo[];
-    isInitialResult: boolean;
-    isFinalResult: boolean;
-}
-
-interface ReferencesResultMessage {
-    referencesResult: ReferencesResult;
 }
 
 enum ReferencesProgress {
@@ -254,7 +248,7 @@ const SemanticColorizationRegionsNotification:  NotificationType<SemanticColoriz
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
-const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
+const ReferencesNotification: NotificationType<ReferencesResult, void> = new NotificationType<ReferencesResult, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<ReportReferencesProgressNotification, void> = new NotificationType<ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 
 let failureMessageShown: boolean = false;
@@ -1088,7 +1082,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
+        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.setupOutputHandlers();
     }
@@ -1804,10 +1798,6 @@ class DefaultClient implements Client {
         return "";
     }
 
-    private referencesSavedResults: ReferenceInfo[] = null;
-    private documentsForReferences: Map<string, vscode.TextDocument> = new Map<string, vscode.TextDocument>();
-    private referencesProgress: vscode.Progress<{message?: string; increment?: number }>;
-
     private processReferencesResult(referencesResult: ReferencesResult): void {
         if (!this.referencesChannel) {
             this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
@@ -1815,35 +1805,14 @@ class DefaultClient implements Client {
         } else {
             this.referencesChannel.clear();
         }
-        if (referencesResult.isInitialResult) {
-            this.referencesSavedResults = [];
-            this.documentsForReferences.clear();
-        }
         for (let reference of referencesResult.referenceInfos) {
             if (reference.type === ReferenceType.Confirmed) {
                 continue; // Already displayed in VS Code's References.
-            }
-            if (reference.type === ReferenceType.ConfirmationInProgress) {
-                if (!this.documentsForReferences.has(reference.file)) {
-                    this.documentsForReferences.set(reference.file, null);
-                    this.languageClient.sendNotification(DidOpenForReferenceConfirmationNotification, reference.file);
-                    vscode.workspace.openTextDocument(reference.file).then((document: vscode.TextDocument) => {
-                        this.documentsForReferences.set(reference.file, document);
-                    });
-                }
-            } else {
-                this.referencesSavedResults.push(reference);
             }
             this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type) + ": " + reference.text);
             this.referencesChannel.appendLine(reference.file + ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1));
         }
         this.referencesChannel.show(true);
-
-        if (referencesResult.isFinalResult) {
-            this.documentsForReferences.clear();
-        } else {
-            vscode.commands.executeCommand("references-view.find");
-        }
     }
 }
 
