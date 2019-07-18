@@ -182,6 +182,10 @@ interface ReferencesResult {
     referenceInfos: ReferenceInfo[];
 }
 
+interface ReferencesResultMessage {
+    referencesResult: ReferencesResult;
+}
+
 enum ReferencesProgress {
     Started,
     ProcessingSource,
@@ -248,7 +252,7 @@ const SemanticColorizationRegionsNotification:  NotificationType<SemanticColoriz
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
-const ReferencesNotification: NotificationType<ReferencesResult, void> = new NotificationType<ReferencesResult, void>('cpptools/references');
+const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<ReportReferencesProgressNotification, void> = new NotificationType<ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 
 let failureMessageShown: boolean = false;
@@ -1082,7 +1086,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
+        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.setupOutputHandlers();
     }
@@ -1810,7 +1814,8 @@ class DefaultClient implements Client {
                 continue; // Already displayed in VS Code's References.
             }
             this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type) + ": " + reference.text);
-            this.referencesChannel.appendLine(reference.file + ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1));
+            let useLineColumn: boolean = reference.position.line !== 0 && reference.position.character !== 0;
+            this.referencesChannel.appendLine(reference.file + (useLineColumn ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : ""));
         }
         this.referencesChannel.show(true);
     }
