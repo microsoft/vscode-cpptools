@@ -586,9 +586,11 @@ export class CppProperties {
         this.compileCommandFileWatchers = []; //reset it
         let filePaths: Set<string> = new Set<string>();
         this.configurationJson.configurations.forEach(c => {
-            let fileSystemCompileCommandsPath = this.resolvePath(c.compileCommands, os.platform() === "win32");
-            if (c.compileCommands !== undefined && fs.existsSync(fileSystemCompileCommandsPath)) {
-                filePaths.add(fileSystemCompileCommandsPath);
+            if (c.compileCommands !== undefined) {
+                let fileSystemCompileCommandsPath = this.resolvePath(c.compileCommands, os.platform() === "win32");
+                if (fs.existsSync(fileSystemCompileCommandsPath)) {
+                    filePaths.add(fileSystemCompileCommandsPath);
+                }
             }
         });
         try {
