@@ -1343,11 +1343,11 @@ class DefaultClient implements Client {
                 if (numLexing > numParsing) {
                     let numTotalToLex: number = this.currentReferencesProgress.targetReferencesProgress.length;
                     let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
-                    currentMessage += ` Lexing(${numFinishedLexing}/${numTotalToLex})`;
+                    currentMessage = `Lexing(${numFinishedLexing}/${numTotalToLex})`;
                 } else {
                     let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                     let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences;
-                    currentMessage += ` Parsing(${numFinishedParsing}/${numTotalToParse})`;
+                    currentMessage = `Parsing(${numFinishedParsing}/${numTotalToParse})`;
                 }
                 progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
                 break;
