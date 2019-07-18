@@ -418,7 +418,8 @@
             "c++03",
             "c++11",
             "c++14",
-            "c++17"
+            "c++17",
+            "c++20"
           ],
           "default": null,
           "description": "The value to use in a configuration if \"cppStandard\" is either not specified or set to \"${default}\".",
@@ -1474,10 +1475,10 @@
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.0.12",
+    "@types/node": "^12.6.3",
     "@types/plist": "^3.0.2",
     "@types/tmp": "^0.1.0",
-    "@types/webpack": "^4.4.34",
+    "@types/webpack": "^4.4.35",
     "@types/yauzl": "^2.9.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
@@ -1489,16 +1490,16 @@
     "tslint": "^5.18.0",
     "tslint-microsoft-contrib": "^6.2.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
-    "typescript": "^3.5.2",
+    "typescript": "^3.5.3",
     "vrsource-tslint-rules": "^6.0.0",
     "vscode": "^1.1.35",
-    "webpack": "^4.35.2",
-    "webpack-cli": "^3.3.5"
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.6"
   },
   "dependencies": {
     "escape-string-regexp": "^2.0.0",
     "http-proxy-agent": "^2.1.0",
-    "https-proxy-agent": "^2.2.1",
+    "https-proxy-agent": "^2.2.2",
     "jsonc-parser": "^2.1.0",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
