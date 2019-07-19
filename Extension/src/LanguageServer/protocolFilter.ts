@@ -33,8 +33,11 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 }
 
                 me.onDidOpenTextDocument(document);
-                me.provideCustomConfiguration(document);
-                me.notifyWhenReady(() => sendMessage(document));
+                me.provideCustomConfiguration(document).then(() => {
+                    sendMessage(document);
+                }, () => {
+                    sendMessage(document);
+                });
             }
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
