@@ -786,75 +786,76 @@ class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
-        let tokenSource: CancellationTokenSource = new CancellationTokenSource();
-        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-        if (providers.size === 0) {
-            return Promise.resolve();
-        }
-        console.log("provideCustomConfiguration");
-        let providerId: string|undefined = await this.getCustomConfigurationProviderId();
-        if (!providerId) {
-            return Promise.resolve();
-        }
-
-        let providerName: string = providerId;
-        let params: QueryTranslationUnitSourceParams = {
-            uri: document.uri.toString()
-        };
-        let response: QueryTranslationUnitSourceResult = await this.requestWhenReady(() => this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params));
-        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
-            return Promise.resolve();
-        }
-
-        let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
-        let configName: string = await this.getCurrentConfigName();
-        const notReadyMessage: string = `${providerName} is not ready`;
-        let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
-            // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
-            try {
-                let provider: CustomConfigurationProvider1|null = providers.get(providerId);
-                if (provider) {
-                    if (!provider.isReady) {
-                        return Promise.reject(notReadyMessage);
-                    }
-
-                    providerName = provider.name;
-                    if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                        return provider.provideConfigurations([tuUri], tokenSource.token);
-                    }
-                }
-            } catch (err) {
+        return this.queueBlockingTask(async () => {
+            let tokenSource: CancellationTokenSource = new CancellationTokenSource();
+            let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+            if (providers.size === 0) {
+                return Promise.resolve();
             }
-            console.warn("failed to provide configuration");
-            return Promise.reject("");
-        };
+            console.log("provideCustomConfiguration");
+            let providerId: string|undefined = this.configuration.CurrentConfigurationProvider;
+            if (!providerId) {
+                return Promise.resolve();
+            }
 
-        return this.queueTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
-            (configs: SourceFileConfigurationItem[]) => {
-                if (configs && configs.length > 0) {
-                    this.sendCustomConfigurations(configs, true);
-                    if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.AncestorConfigNeeded) {
-                        // replacing uri with original uri
-                        let newConfig: SourceFileConfigurationItem =  { uri: document.uri, configuration: configs[0].configuration };
-                        this.sendCustomConfigurations([newConfig], true);
-                    }
-                }
-            },
-            (err) => {
-                if (err === notReadyMessage) {
-                    return;
-                }
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document.uri) && !vscode.debug.activeDebugSession) {
-                    const dismiss: string = "Dismiss";
-                    const disable: string = "Disable Warnings";
-                    let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
-                        `Settings from the '${configName}' configuration will be used instead.`;
-                    if (err) {
-                        message += ` (${err})`;
-                    }
+            let providerName: string = providerId;
+            let params: QueryTranslationUnitSourceParams = {
+                uri: document.uri.toString()
+            };
+            let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
+            if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
+                return Promise.resolve();
+            }
 
-                    vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
+            let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
+            let configName: string = this.configuration.CurrentConfiguration.name;
+            const notReadyMessage: string = `${providerName} is not ready`;
+            let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
+                // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
+                try {
+                    let provider: CustomConfigurationProvider1|null = providers.get(providerId);
+                    if (provider) {
+                        if (!provider.isReady) {
+                            return Promise.reject(notReadyMessage);
+                        }
+
+                        providerName = provider.name;
+                        if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+                            return provider.provideConfigurations([tuUri], tokenSource.token);
+                        }
+                    }
+                } catch (err) {
+                }
+                console.warn("failed to provide configuration");
+                return Promise.reject("");
+            };
+
+            return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
+                (configs: SourceFileConfigurationItem[]) => {
+                    if (configs && configs.length > 0) {
+                        this.sendCustomConfigurations(configs, false);
+                        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.AncestorConfigNeeded) {
+                            // replacing uri with original uri
+                            let newConfig: SourceFileConfigurationItem =  { uri: document.uri, configuration: configs[0].configuration };
+                            this.sendCustomConfigurations([newConfig], false);
+                        }
+                    }
+                },
+                (err) => {
+                    if (err === notReadyMessage) {
+                        return;
+                    }
+                    let settings: CppSettings = new CppSettings(this.RootUri);
+                    if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document.uri) && !vscode.debug.activeDebugSession) {
+                        const dismiss: string = "Dismiss";
+                        const disable: string = "Disable Warnings";
+                        let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                            `Settings from the '${configName}' configuration will be used instead.`;
+                        if (err) {
+                            message += ` (${err})`;
+                        }
+
+                        vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
                             switch (response) {
                                 case disable: {
                                     settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
@@ -862,16 +863,13 @@ class DefaultClient implements Client {
                                 }
                             }
                         });
-                }
-            });
+                    }
+                });
+        });
     }
 
     private isExternalHeader(uri: vscode.Uri): boolean {
         return util.isHeader(uri) && !uri.toString().startsWith(this.RootUri.toString());
-    }
-
-    private getCustomConfigurationProviderId(): Thenable<string|undefined> {
-        return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfigurationProvider));
     }
 
     public getCurrentConfigName(): Thenable<string> {
@@ -923,7 +921,7 @@ class DefaultClient implements Client {
             
             if (this.pendingTask && !this.pendingTask.Done) {
                 // We don't want the queue to stall because of a rejected promise.
-                return this.pendingTask.then(nextTask, nextTask);
+                return this.pendingTask.getPromise().then(nextTask, nextTask);
             } else {
                 this.pendingTask = undefined;
                 return nextTask();
@@ -941,6 +939,7 @@ class DefaultClient implements Client {
     private queueBlockingTask(task: () => Thenable<void>): Thenable<void> {
         if (this.isSupported) {
             this.pendingTask = new util.BlockingTask<void>(task, this.pendingTask);
+            return this.pendingTask.getPromise();
         } else {
             return Promise.reject("Unsupported client");
         }
@@ -971,6 +970,31 @@ class DefaultClient implements Client {
                     throw error;
                 });
         });
+    }
+
+    private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: CancellationTokenSource): Thenable<any> {
+        let timer: NodeJS.Timer;
+        // Create a promise that rejects in <ms> milliseconds
+        let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
+            timer = setTimeout(() => {
+                clearTimeout(timer);
+                if (cancelToken) {
+                    cancelToken.cancel();
+                }
+                reject("Timed out in " + ms + "ms.");
+            }, ms);
+        });
+
+        // Returns a race between our timeout and the passed in promise
+        return Promise.race([task(), timeout()]).then(
+            (result: any) => {
+                clearTimeout(timer);
+                return result;
+            },
+            (error: any) => {
+                clearTimeout(timer);
+                throw error;
+            });
     }
 
     public requestWhenReady(request: () => Thenable<any>): Thenable<any> {
