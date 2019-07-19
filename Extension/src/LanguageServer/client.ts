@@ -31,7 +31,7 @@ import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
-import * as resources from '../../loc/resources';
+import * as resources from '../resources';
 
 let ui: UI;
 let timeStamp: number = 0;

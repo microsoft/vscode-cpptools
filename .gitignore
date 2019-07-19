@@ -5,6 +5,3 @@ browse*.db*
 *.pdb
 *.exe
 *.ilk
-
-# ignore generated localization file
-package.nls.*.json

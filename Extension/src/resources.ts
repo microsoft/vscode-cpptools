@@ -6,7 +6,8 @@
 
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.file })();
+
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export const testString: string = localize('test', 'value1');
-

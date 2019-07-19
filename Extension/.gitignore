@@ -19,3 +19,8 @@ install.lock
 
 # ignore vscode test
 .vscode-test/
+
+# ignore generated localization file
+**/nls.*.json
+**/*.nls.json
+**/*.nls.*.json

@@ -1459,7 +1459,7 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
-    "compileDev": "npm run prepublishjs && webpack --mode development && npm run generateLocalizationFiles",
+    "compileDev": "npm run prepublishjs && npm run generateLocalizationFiles && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "generateLocalizationFiles": "gulp generateLocalizationFiles",
     "postinstall": "node ./node_modules/vscode/bin/install",
@@ -1468,8 +1468,10 @@
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "npm run prepublishjs && webpack --mode production && npm run generateLocalizationFiles",
-    "watch": "webpack --watch --mode development"
+    "vscode:prepublish": "npm run prepublishjs && npm run generateLocalizationFiles && webpack --mode production",
+    "watch": "webpack --watch --mode development",
+    "translations-export": "gulp translations-export",
+    "translations-import": "gulp translations-import"
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
@@ -1486,6 +1488,7 @@
     "gulp-env": "^0.4.0",
     "gulp-mocha": "^6.0.0",
     "gulp-tslint": "^8.1.4",
+    "minimist": "^1.2.0",
     "ts-loader": "^6.0.4",
     "tslint": "^5.18.0",
     "tslint-microsoft-contrib": "^6.2.0",
@@ -1499,6 +1502,10 @@
   },
   "dependencies": {
     "escape-string-regexp": "^2.0.0",
+    "event-stream": "^4.0.1",
+    "gulp-filter": "^6.0.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.1",
     "jsonc-parser": "^2.1.0",

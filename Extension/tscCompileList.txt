@@ -11,4 +11,3 @@
 tools/GenerateOptionsSchema.ts
 tools/copyDebuggerDependencies.ts
 ui/settings.ts
-loc/resources.ts
