@@ -1377,9 +1377,10 @@ class DefaultClient implements Client {
                 // References are not usable if a references request is pending,
                 // So after the initial request, we don't send a 2nd references request until the next request occurs.
                 vscode.commands.executeCommand("references-view.find");
+            } else {
+                this.languageClient.sendNotification(RequestReferencesNotification);
+                this.referencesRequestHasOccurred = true;
             }
-            this.languageClient.sendNotification(RequestReferencesNotification);
-            this.referencesRequestHasOccurred = true;
         }
     }
 
@@ -1400,6 +1401,7 @@ class DefaultClient implements Client {
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                     // tslint:disable-next-line: promise-must-complete
                         new Promise((resolve) => {
+                            this.newReferencesProgress = true;
                             this.reportReferencesProgress(progress);
                             let updateProgress: NodeJS.Timeout = setInterval(() => {
                                 if (token.isCancellationRequested || this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
@@ -1413,7 +1415,7 @@ class DefaultClient implements Client {
                                     this.newReferencesProgress = true;
                                     this.reportReferencesProgress(progress);
                                 }
-                            }, 2000);
+                            }, 1000);
                         });
                     vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
                     clearInterval(this.delayReferencesProgress);
