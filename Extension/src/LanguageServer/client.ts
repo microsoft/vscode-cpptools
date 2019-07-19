@@ -1416,14 +1416,13 @@ class DefaultClient implements Client {
                             }, 2000);
                         });
                     vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                    this.sendRequestReferences();
                     clearInterval(this.delayReferencesProgress);
                 }, 2000);
                 break;
             case ReferencesProgress.Finished:
+                this.sendRequestReferences();
                 this.currentReferencesProgress = notificationBody;
                 this.model.isFindingReferences.Value = false;
-                this.sendRequestReferences();
                 clearInterval(this.delayReferencesProgress);
                 break;
             default:
