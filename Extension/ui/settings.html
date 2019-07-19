@@ -434,7 +434,7 @@
     <div style=" height: 90px; display: inline-block;">
       <div class="main-title">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
-        Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
+        Use this editor to edit IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
         Changes made in this editor only apply to the selected configuration. 
         To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
       </div>
@@ -481,8 +481,6 @@
         <div class="section-title">Compiler path</div>
         <div class="section-text">
             The full path to the compiler you use to build your project, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.
-            Arguments can be added to modify the includes/defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc., 
-            but paths with spaces must be surrounded by double quotes <code>"</code> if arguments are used. 
             The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.
         </div>
         <!-- input compilerPath -->
@@ -493,6 +491,17 @@
             </div>
         <div id="compilerPathInvalid" class="error" style="width: 800px"></div>
         <!-- input compilerPath end -->
+    </div>
+
+    <div class="section">
+        <div class="section-title">Compiler arguments</div>
+        <div class="section-text">
+            Compiler arguments to modify the includes or defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc.
+        </div>
+        <div>
+            <div class="section-note">One argument per line.</div>
+            <textarea name="inputValue" id="compilerArgs" rows="4" cols="93" style="width: 800px"></textarea>
+        </div>
     </div>
 
     <div class="section">

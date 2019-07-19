@@ -18,6 +18,7 @@ const elementId: { [key: string]: string } = {
     compilerPath: "compilerPath",
     compilerPathInvalid: "compilerPathInvalid",
     knownCompilers: "knownCompilers",
+    compilerArgs: "compilerArgs",
 
     intelliSenseMode: "intelliSenseMode",
     intelliSenseModeInvalid: "intelliSenseModeInvalid",
@@ -245,35 +246,30 @@ class SettingsApp {
     private updateConfig(config: any): void {
         this.updating = true;
         try {
+            let joinEntries: (input: any) => string = (input: string[]) => {
+                return (input && input.length) ? input.join("\n") : "";
+            };
+
             // Basic settings
             (<HTMLInputElement>document.getElementById(elementId.configName)).value = config.name;
             (<HTMLInputElement>document.getElementById(elementId.compilerPath)).value = config.compilerPath ? config.compilerPath : "";
+            (<HTMLInputElement>document.getElementById(elementId.compilerArgs)).value = joinEntries(config.compilerArgs);
+
             (<HTMLInputElement>document.getElementById(elementId.intelliSenseMode)).value = config.intelliSenseMode ? config.intelliSenseMode : "${default}";
-
-            (<HTMLInputElement>document.getElementById(elementId.includePath)).value =
-                (config.includePath && config.includePath.length > 0) ? config.includePath.join("\n") : "";
-
-            (<HTMLInputElement>document.getElementById(elementId.defines)).value =
-                (config.defines && config.defines.length > 0) ? config.defines.join("\n") : "";
-
+            (<HTMLInputElement>document.getElementById(elementId.includePath)).value = joinEntries(config.includePath);
+            (<HTMLInputElement>document.getElementById(elementId.defines)).value = joinEntries(config.defines);
             (<HTMLInputElement>document.getElementById(elementId.cStandard)).value = config.cStandard;
             (<HTMLInputElement>document.getElementById(elementId.cppStandard)).value = config.cppStandard;
 
             // Advanced settings
             (<HTMLInputElement>document.getElementById(elementId.windowsSdkVersion)).value = config.windowsSdkVersion ? config.windowsSdkVersion : "";
-
-            (<HTMLInputElement>document.getElementById(elementId.macFrameworkPath)).value =
-                (config.macFrameworkPath && config.macFrameworkPath.length > 0) ? config.macFrameworkPath.join("\n") : "";
-
+            (<HTMLInputElement>document.getElementById(elementId.macFrameworkPath)).value = joinEntries(config.macFrameworkPath);
             (<HTMLInputElement>document.getElementById(elementId.compileCommands)).value = config.compileCommands ? config.compileCommands : "";
             (<HTMLInputElement>document.getElementById(elementId.configurationProvider)).value = config.configurationProvider ? config.configurationProvider : "";
-
-            (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value =
-                (config.forcedInclude && config.forcedInclude.length > 0) ? config.forcedInclude.join("\n") : "";
+            (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
 
             if (config.browse) {
-                (<HTMLInputElement>document.getElementById(elementId.browsePath)).value =
-                    (config.browse.path && config.browse.path.length > 0) ? config.browse.path.join("\n") : "";
+                (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = joinEntries(config.browse.path);
                 (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked =
                     (config.browse.limitSymbolsToIncludedHeaders && config.browse.limitSymbolsToIncludedHeaders);
                 (<HTMLInputElement>document.getElementById(elementId.databaseFilename)).value = config.browse.databaseFilename ? config.browse.databaseFilename : "";
