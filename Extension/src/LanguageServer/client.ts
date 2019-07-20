@@ -190,6 +190,7 @@ enum ReferencesProgress {
     Started,
     ProcessingSource,
     ProcessingTargets,
+    FinalResultsAvailable,
     Finished
 }
 
@@ -254,6 +255,7 @@ const UpdateClangFormatPathNotification: NotificationType<string, void> = new No
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
 const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<ReportReferencesProgressNotification, void> = new NotificationType<ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
+const ReferencesBlockedByCursor: NotificationType<void, void> = new NotificationType<void, void>('cpptools/referencesBlockedByCursor');
 
 let failureMessageShown: boolean = false;
 
@@ -1088,6 +1090,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
+        this.languageClient.onNotification(ReferencesBlockedByCursor, () => this.handleReferencesBlockedByCursor());
         this.setupOutputHandlers();
     }
 
@@ -1294,6 +1297,7 @@ class DefaultClient implements Client {
 
     private currentReferencesProgress: ReportReferencesProgressNotification;
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>): void {
+        let blockedMessage: string = this.blockedByCursorPosition ? ". Move your cursor to any identifier to get results." : "";
         switch (this.currentReferencesProgress.referencesProgress) {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
@@ -1349,7 +1353,10 @@ class DefaultClient implements Client {
                     let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences;
                     currentMessage = `Parsing(${numFinishedParsing}/${numTotalToParse})`;
                 }
-                progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
+                progress.report({ message: currentMessage + blockedMessage, increment: currentProgress / maxProgress });
+                break;
+            case ReferencesProgress.FinalResultsAvailable:
+                progress.report({ message: 'Finished' + blockedMessage, increment: 100 });
                 break;
         }
     }
@@ -1371,12 +1378,24 @@ class DefaultClient implements Client {
         }
     }
 
+    private referencesViewFindPending: boolean = false;
     private sendRequestReferences(): void {
         if (this.model.isFindingReferences.Value) {
             if (this.referencesRequestHasOccurred) {
                 // References are not usable if a references request is pending,
                 // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                vscode.commands.executeCommand("references-view.find");
+                // However, this command is a no-op if the cursor is not on a valid source location.
+                //if (this.numFinalResultsAvailableReceived > 0) {
+                //    if (this.numFinalResultsAvailableReceived === this.numFinalResultsAvailableReceivedAtLastRequest) {
+                //        return; // Don't execute references-view.find until after the requestReferences response is received.
+                //    }
+                //    this.numFinalResultsAvailableReceivedAtLastRequest = this.numFinalResultsAvailableReceived;
+                //}
+                if (!this.referencesViewFindPending) {
+                    this.referencesViewFindPending = true;
+                    vscode.commands.executeCommand("references-view.find").then(() => {
+                        this.languageClient.sendNotification(RequestReferencesNotification); });
+                }
             } else {
                 this.languageClient.sendNotification(RequestReferencesNotification);
                 this.referencesRequestHasOccurred = true;
@@ -1384,9 +1403,18 @@ class DefaultClient implements Client {
         }
     }
 
+    private blockedByCursorPosition: boolean;
+    private handleReferencesBlockedByCursor(): void {
+        this.blockedByCursorPosition = true;
+        this.referencesViewFindPending = false;
+    }
+
     private newReferencesProgress: boolean;
     private delayReferencesProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
+    //private numFinalResultsAvailableReceived: number;
+    //private numFinalResultsAvailableReceivedAtLastRequest: number;
+    //private finalResultsReported: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
         increment?: number;
@@ -1396,6 +1424,10 @@ class DefaultClient implements Client {
             case ReferencesProgress.Started:
                 this.model.isFindingReferences.Value = true;
                 this.referencesRequestHasOccurred = false;
+                this.blockedByCursorPosition = false;
+                //this.finalResultsReported = false;
+                //this.numFinalResultsAvailableReceived = 0;
+                //this.numFinalResultsAvailableReceivedAtLastRequest = 0;
                 this.delayReferencesProgress = setInterval(() => {
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
@@ -1406,14 +1438,21 @@ class DefaultClient implements Client {
                             let updateProgress: NodeJS.Timeout = setInterval(() => {
                                 if (token.isCancellationRequested || this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
                                     if (token.isCancellationRequested) {
-                                        this.sendRequestReferences();
                                         this.languageClient.sendNotification(CancelReferencesNotification);
+                                        this.sendRequestReferences();
                                     }
                                     clearInterval(updateProgress);
                                     resolve();
                                 } else {
                                     this.newReferencesProgress = true;
                                     this.reportReferencesProgress(progress);
+                                    //if (this.currentReferencesProgress.referencesProgress === ReferencesProgress.FinalResultsAvailable) {
+                                    //if (this.numFinalResultsAvailableReceived > 0) {
+                                    //    this.sendRequestReferences();
+                                    if (this.blockedByCursorPosition) {
+                                        this.sendRequestReferences();
+                                    }
+                                    //}
                                 }
                             }, 1000);
                         });
@@ -1421,8 +1460,13 @@ class DefaultClient implements Client {
                     clearInterval(this.delayReferencesProgress);
                 }, 2000);
                 break;
-            case ReferencesProgress.Finished:
+            case ReferencesProgress.FinalResultsAvailable:
+                this.currentReferencesProgress = notificationBody;
                 this.sendRequestReferences();
+                //this.finalResultsReported = false;
+                //++this.numFinalResultsAvailableReceived;
+                break;
+            case ReferencesProgress.Finished:
                 this.currentReferencesProgress = notificationBody;
                 this.model.isFindingReferences.Value = false;
                 clearInterval(this.delayReferencesProgress);
@@ -1819,6 +1863,7 @@ class DefaultClient implements Client {
             this.referencesChannel.appendLine(reference.file + (useLineColumn ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : ""));
         }
         this.referencesChannel.show(true);
+        this.referencesViewFindPending = false;
     }
 }
 
