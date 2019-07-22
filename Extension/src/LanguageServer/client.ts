@@ -1847,6 +1847,7 @@ class DefaultClient implements Client {
             this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type) + ": " + reference.text);
             let useLineColumn: boolean = reference.position.line !== 0 || reference.position.character !== 0;
             this.referencesChannel.appendLine(reference.file + (useLineColumn ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : ""));
+            this.referencesChannel.appendLine("");
         }
         this.referencesChannel.show(true);
         this.referencesViewFindPending = false;
