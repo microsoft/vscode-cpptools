@@ -1385,12 +1385,6 @@ class DefaultClient implements Client {
                 // References are not usable if a references request is pending,
                 // So after the initial request, we don't send a 2nd references request until the next request occurs.
                 // However, this command is a no-op if the cursor is not on a valid source location.
-                //if (this.numFinalResultsAvailableReceived > 0) {
-                //    if (this.numFinalResultsAvailableReceived === this.numFinalResultsAvailableReceivedAtLastRequest) {
-                //        return; // Don't execute references-view.find until after the requestReferences response is received.
-                //    }
-                //    this.numFinalResultsAvailableReceivedAtLastRequest = this.numFinalResultsAvailableReceived;
-                //}
                 if (!this.referencesViewFindPending) {
                     this.referencesViewFindPending = true;
                     vscode.commands.executeCommand("references-view.find").then(() => {
@@ -1412,9 +1406,7 @@ class DefaultClient implements Client {
     private newReferencesProgress: boolean;
     private delayReferencesProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
-    //private numFinalResultsAvailableReceived: number;
-    //private numFinalResultsAvailableReceivedAtLastRequest: number;
-    //private finalResultsReported: boolean;
+    private referencesCanceled: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
         increment?: number;
@@ -1425,9 +1417,7 @@ class DefaultClient implements Client {
                 this.model.isFindingReferences.Value = true;
                 this.referencesRequestHasOccurred = false;
                 this.blockedByCursorPosition = false;
-                //this.finalResultsReported = false;
-                //this.numFinalResultsAvailableReceived = 0;
-                //this.numFinalResultsAvailableReceivedAtLastRequest = 0;
+                this.referencesCanceled = false;
                 this.delayReferencesProgress = setInterval(() => {
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
@@ -1436,19 +1426,17 @@ class DefaultClient implements Client {
                             this.newReferencesProgress = true;
                             this.reportReferencesProgress(progress);
                             let updateProgress: NodeJS.Timeout = setInterval(() => {
-                                if (token.isCancellationRequested || this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
-                                    if (token.isCancellationRequested) {
-                                        this.languageClient.sendNotification(CancelReferencesNotification);
-                                        this.sendRequestReferences();
-                                    }
+                                if (token.isCancellationRequested && !this.referencesCanceled) {
+                                    this.languageClient.sendNotification(CancelReferencesNotification);
+                                    this.sendRequestReferences();
+                                    this.referencesCanceled = true;
+                                }
+                                if (this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
                                     clearInterval(updateProgress);
                                     resolve();
                                 } else {
                                     this.newReferencesProgress = true;
                                     this.reportReferencesProgress(progress);
-                                    //if (this.currentReferencesProgress.referencesProgress === ReferencesProgress.FinalResultsAvailable) {
-                                    //if (this.numFinalResultsAvailableReceived > 0) {
-                                    //    this.sendRequestReferences();
                                     if (this.blockedByCursorPosition) {
                                         this.sendRequestReferences();
                                     }
@@ -1463,8 +1451,6 @@ class DefaultClient implements Client {
             case ReferencesProgress.FinalResultsAvailable:
                 this.currentReferencesProgress = notificationBody;
                 this.sendRequestReferences();
-                //this.finalResultsReported = false;
-                //++this.numFinalResultsAvailableReceived;
                 break;
             case ReferencesProgress.Finished:
                 this.currentReferencesProgress = notificationBody;
