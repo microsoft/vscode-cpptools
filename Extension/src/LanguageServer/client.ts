@@ -1845,7 +1845,7 @@ class DefaultClient implements Client {
                 continue; // Already displayed in VS Code's References.
             }
             this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type) + ": " + reference.text);
-            let useLineColumn: boolean = reference.position.line !== 0 && reference.position.character !== 0;
+            let useLineColumn: boolean = reference.position.line !== 0 || reference.position.character !== 0;
             this.referencesChannel.appendLine(reference.file + (useLineColumn ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : ""));
         }
         this.referencesChannel.show(true);
