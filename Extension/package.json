@@ -1459,7 +1459,7 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
-    "compileDev": "npm run prepublishjs webpack --mode development",
+    "compileDev": "npm run prepublishjs && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "generateLocalizationFiles": "gulp generateLocalizationFiles",
     "postinstall": "node ./node_modules/vscode/bin/install",
