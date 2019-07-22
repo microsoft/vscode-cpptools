@@ -18,6 +18,9 @@ import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { getBuildTasks } from './LanguageServer/extension';
 import { OtherSettings } from './LanguageServer/settings';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext;
@@ -29,7 +32,7 @@ export function setExtensionPath(path: string): void {
     extensionPath = path;
 }
 
-export const failedToParseTasksJson: string = "Failed to parse tasks.json, possibly due to comments or trailing commas.";
+export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
 
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
@@ -174,7 +177,7 @@ export async function isExtensionReady(): Promise<boolean> {
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
-export const extensionNotReadyString: string = 'The C/C++ extension is still installing. See the output window for more information.';
+export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
 export function displayExtensionNotReadyPrompt(): void {
 
@@ -218,11 +221,11 @@ export function setProgress(progress: number): void {
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
         switch (progress) {
-            case 0: progressName = "install started"; break;
-            case progressInstallSuccess: progressName = "install succeeded"; break;
-            case progressExecutableStarted: progressName = "executable started"; break;
-            case progressExecutableSuccess: progressName = "executable succeeded"; break;
-            case progressParseRootSuccess: progressName = "parse root succeeded"; break;
+            case 0: progressName = localize("install.started", "install started"); break;
+            case progressInstallSuccess: progressName = localize("install.succeeded", "install succeeded"); break;
+            case progressExecutableStarted: progressName = localize("executable.started", "executable started"); break;
+            case progressExecutableSuccess: progressName = localize("executable.succeeded", "executable succeeded"); break;
+            case progressParseRootSuccess: progressName = localize("parse.root.succeeded", "parse root succeeded"); break;
         }
         telemetryProperties['progress'] = progressName;
         Telemetry.logDebuggerEvent("progress", telemetryProperties);
@@ -235,7 +238,7 @@ export function setIntelliSenseProgress(progress: number): void {
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
         switch (progress) {
-            case progressIntelliSenseNoSquiggles: progressName = "IntelliSense no squiggles"; break;
+            case progressIntelliSenseNoSquiggles: progressName = "IntelliSense " + localize("no.squiggles", "no squiggles"); break;
         }
         telemetryProperties['progress'] = progressName;
         Telemetry.logDebuggerEvent("progress", telemetryProperties);
@@ -254,7 +257,7 @@ export async function showReleaseNotes(): Promise<void> {
     if (releaseNotesPanel) {
         releaseNotesPanel.reveal();
     } else {
-        releaseNotesPanel = vscode.window.createWebviewPanel('releaseNotes', "C/C++ Extension Release Notes", vscode.ViewColumn.One);
+        releaseNotesPanel = vscode.window.createWebviewPanel('releaseNotes', localize("extension.release.notes", "C/C++ Extension Release Notes"), vscode.ViewColumn.One);
         releaseNotesPanel.webview.html = await readFileText(getExtensionFilePath("ReleaseNotes.html"));
         releaseNotesPanel.onDidDispose(() => releaseNotesPanel = undefined, null, extensionContext.subscriptions);
     }
@@ -560,7 +563,7 @@ export function getInstallLockPath(): string {
 
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
-    const readmeMessage: string = `Please refer to ${readmePath} for troubleshooting information. Issues can be created at https://github.com/Microsoft/vscode-cpptools/issues`;
+    const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", "readmePath", "https://github.com/Microsoft/vscode-cpptools/issues");
     return readmeMessage;
 }
 
@@ -627,7 +630,7 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
 
         child.on('exit', (code: number) => {
             if (code !== 0) {
-                reject(new Error(`${process} exited with error code ${code}`));
+                reject(new Error(localize("process.exited.with.code", "{0} exited with error code {1}", process, code)));
             } else {
                 resolve();
             }
@@ -649,7 +652,7 @@ export function allowExecution(file: string): Promise<void> {
                     });
                 } else {
                     getOutputChannelLogger().appendLine("");
-                    getOutputChannelLogger().appendLine(`Warning: Expected file ${file} is missing.`);
+                    getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
                     resolve();
                 }
             });
@@ -676,7 +679,7 @@ export function checkDistro(platformInfo: PlatformInformation): void {
     if (platformInfo.platform !== 'win32' && platformInfo.platform !== 'linux' && platformInfo.platform !== 'darwin') {
         // this should never happen because VSCode doesn't run on FreeBSD
         // or SunOS (the other platforms supported by node)
-        getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
+        getOutputChannelLogger().appendLine(localize("warning.debugging.not.tested", "Warning: Debugging has not been tested for this platform.") + " " + getReadmeMessage());
     }
 }
 
@@ -703,11 +706,11 @@ export async function renamePromise(oldName: string, newName: string): Promise<v
 }
 
 export function promptForReloadWindowDueToSettingsChange(): void {
-    promptReloadWindow("Reload the workspace for the settings change to take effect.");
+    promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
 export function promptReloadWindow(message: string): void {
-    let reload: string = "Reload";
+    let reload: string = localize("reload.string", "Reload");
     vscode.window.showInformationMessage(message, reload).then((value: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");

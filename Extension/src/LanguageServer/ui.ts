@@ -7,6 +7,9 @@
 import * as vscode from 'vscode';
 import { Client } from './client';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection } from './customProviders';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let ui: UI;
 
@@ -39,24 +42,26 @@ export class UI {
     constructor() {
         // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
         this.navigationStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
-        this.navigationStatusBarItem.tooltip = "C/C++ Navigation";
+        let navigationString: string = localize("navigation.string", "Navigation");
+        this.navigationStatusBarItem.tooltip = `C/C++ ${navigationString}`;
         this.navigationStatusBarItem.command = "C_Cpp.Navigate";
         this.ShowNavigation = true;
 
         this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
-        this.configStatusBarItem.tooltip = "C/C++ Configuration";
+        let configurationString: string = localize("configuration.string", "Configuration");
+        this.configStatusBarItem.tooltip = `C/C++ ${configurationString}`;
         this.ShowConfiguration = true;
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
         this.intelliSenseStatusBarItem.text = "";
-        this.intelliSenseStatusBarItem.tooltip = "Updating IntelliSense...";
+        this.intelliSenseStatusBarItem.tooltip = localize("updating.intellisense", "Updating IntelliSense...");
         this.intelliSenseStatusBarItem.color = "Red";
         this.ShowFlameIcon = true;
 
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.browseEngineStatusBarItem.text = "";
-        this.browseEngineStatusBarItem.tooltip = "Discovering files...";
+        this.browseEngineStatusBarItem.tooltip = localize("discovering.files", "Discovering files...");
         this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
@@ -171,8 +176,8 @@ export class UI {
         for (let i: number = 0; i < configurationNames.length; i++) {
             items.push({ label: configurationNames[i], description: "", index: i });
         }
-        items.push({ label: "Edit Configurations (UI)", description: "", index: configurationNames.length });
-        items.push({ label: "Edit Configurations (JSON)", description: "", index: configurationNames.length + 1 });
+        items.push({ label: localize("edit.configuration.ui", "Edit Configurations (UI)"), description: "", index: configurationNames.length });
+        items.push({ label: localize("edit.configuration.json", "Edit Configurations (JSON)"), description: "", index: configurationNames.length + 1 });
 
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.index : -1);
@@ -180,7 +185,7 @@ export class UI {
 
     public showConfigurationProviders(currentProvider: string|null): Thenable<string|undefined> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a Configuration Provider...";
+        options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
 
         let items: KeyedQuickPickItem[] = [];
@@ -191,7 +196,7 @@ export class UI {
             }
             items.push({ label: label, description: "", key: provider.extensionId });
         });
-        items.push({ label: "(none)", description: "Disable the active configuration provider, if applicable.", key: "" });
+        items.push({ label: "(none)", description: localize("disable.configuration.provider", "Disable the active configuration provider, if applicable."), key: "" });
 
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.key : undefined);
@@ -199,7 +204,7 @@ export class UI {
 
     public showCompileCommands(paths: string[]): Thenable<number> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a compile_commands.json...";
+        options.placeHolder = localize("select.compile.commands", "Select a compile_commands.json...");
 
         let items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
@@ -212,7 +217,7 @@ export class UI {
 
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a Workspace...";
+        options.placeHolder = localize("select.workspace", "Select a Workspace...");
 
         let items: KeyedQuickPickItem[] = [];
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
@@ -223,14 +228,14 @@ export class UI {
 
     public showParsingCommands(): Thenable<number> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a parsing command...";
+        options.placeHolder = localize("select.parsing.command", "Select a parsing command...");
 
         let items: IndexableQuickPickItem[];
         items = [];
         if (this.browseEngineStatusBarItem.tooltip === "Parsing paused") {
-            items.push({ label: "Resume Parsing", description: "", index: 1 });
+            items.push({ label: localize("resume.parsing", "Resume Parsing"), description: "", index: 1 });
         } else {
-            items.push({ label: "Pause Parsing", description: "", index: 0 });
+            items.push({ label: localize("pause.parsing", "Pause Parsing"), description: "", index: 0 });
         }
 
         return vscode.window.showQuickPick(items, options)

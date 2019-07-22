@@ -16,6 +16,9 @@ import { getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
@@ -778,7 +781,8 @@ export class CppProperties {
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
             } catch (err) {
-                vscode.window.showErrorMessage(`Failed to create "${this.configFolder}": ${err.message}`);
+                let failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', this.configFolder);
+                vscode.window.showErrorMessage(`${failedToCreate}: ${err.message}`);
             }
         }
         return;
@@ -795,7 +799,7 @@ export class CppProperties {
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
-                throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
+                throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
             }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
                 this.CurrentConfigurationIndex >= 0 && this.CurrentConfigurationIndex < this.configurationJson.configurations.length) {
@@ -846,7 +850,7 @@ export class CppProperties {
                     this.updateToVersion4();
                 } else {
                     this.configurationJson.version = configVersion;
-                    vscode.window.showErrorMessage('Unknown version number found in c_cpp_properties.json. Some features may not work as expected.');
+                    vscode.window.showErrorMessage(localize("unknown.properties.version", 'Unknown version number found in c_cpp_properties.json. Some features may not work as expected.'));
                 }
             }
 
@@ -855,13 +859,14 @@ export class CppProperties {
                     this.writeToJson();
                 } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
-                    vscode.window.showWarningMessage(`Attempt to update "${this.propertiesFile.fsPath}" failed (do you have write access?)`);
+                    vscode.window.showWarningMessage(localize('update.properties.failed', 'Attempt to update "{0}" failed (do you have write access?)', this.propertiesFile.fsPath));
                     success = false;
                 }
             }
 
         } catch (err) {
-            vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
+            let failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
+            vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
         }
 
@@ -931,7 +936,7 @@ export class CppProperties {
 
             let compilerPathErrors: string[] = [];
             if (compilerPathNeedsQuotes) {
-                compilerPathErrors.push(`Compiler path with spaces and arguments is missing double quotes " around the path.`);
+                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.'));
             }
 
             // Get compiler path without arguments before checking if it exists
@@ -960,13 +965,13 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                let message: string = `Cannot find: ${resolvedCompilerPath}`;
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
                 compilerPathErrors.push(message);
             } else if (compilerPathAndArgs.compilerPath === "") {
-                let message: string = `Invalid input, cannot resolve compiler path`;
+                let message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
                 compilerPathErrors.push(message);
             } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
-                let message: string = `Path is not a file: ${resolvedCompilerPath}`;
+                let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
                 compilerPathErrors.push(message);
             }
 
@@ -987,7 +992,7 @@ export class CppProperties {
 
         // Validate intelliSenseMode
         if (isWindows && !this.isCompilerIntelliSenseModeCompatible(config)) {
-            errors.intelliSenseMode = `IntelliSense mode ${config.intelliSenseMode} is incompatible with compiler path.`;
+            errors.intelliSenseMode = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", config.intelliSenseMode);
         }
 
         return errors;
@@ -1035,10 +1040,10 @@ export class CppProperties {
 
             // Check if path is a directory or file
             if (isDirectory && !util.checkDirectoryExistsSync(resolvedPath)) {
-                let message: string = `Path is not a directory: ${resolvedPath}`;
+                let message: string = localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
                 errors.push(message);
             } else if (!isDirectory && !util.checkFileExistsSync(resolvedPath)) {
-                let message: string = `Path is not a file: ${resolvedPath}`;
+                let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
                 errors.push(message);
             }
         }
@@ -1084,7 +1089,7 @@ export class CppProperties {
             }
             const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
-                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
+                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": localize("config.name.not.first.error", "config name not first") });
                 return;
             }
             curTextStartOffset = configStart + 1;
@@ -1097,7 +1102,7 @@ export class CppProperties {
                 curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
                 const nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
                 if (nextNameStart2 === -1) {
-                    telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
+                    telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": localize("next.config.name.not.first.error", "next config name not first") });
                     return;
                 }
                 curText = curText.substr(0, nextNameStart2);
@@ -1119,7 +1124,7 @@ export class CppProperties {
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
                     if (!this.isCompilerIntelliSenseModeCompatible(currentConfiguration)) {
-                        let message: string = `intelliSenseMode ${currentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
+                        let message: string = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", currentConfiguration.intelliSenseMode);
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
@@ -1241,20 +1246,20 @@ export class CppProperties {
                                 (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
                                 (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
                                 if (compilerPathNeedsQuotes) {
-                                    message = `Compiler path with spaces and arguments is missing \\" around the path.`;
+                                    message = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
                                     newSquiggleMetrics.CompilerPathMissingQuotes++;
                                 } else {
                                     if (util.checkFileExistsSync(resolvedPath)) {
                                         continue;
                                     }
-                                    message = `Path is not a file: "${resolvedPath}".`;
+                                    message = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
                                     newSquiggleMetrics.PathNotAFile++;
                                 }
                             } else {
                                 if (util.checkDirectoryExistsSync(resolvedPath)) {
                                     continue;
                                 }
-                                message = `Path is not a directory: "${resolvedPath}".`;
+                                message =  localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
                                 newSquiggleMetrics.PathNotADirectory++;
                             }
                         }

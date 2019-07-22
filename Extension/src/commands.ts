@@ -7,6 +7,9 @@
 import * as vscode from 'vscode';
 import * as LanguageServer from './LanguageServer/extension';
 import * as util from './common';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 class TemporaryCommandRegistrar {
     // Used to save/re-execute commands used before the extension has activated (e.g. delayed by dependency downloading).
@@ -53,7 +56,7 @@ class TemporaryCommandRegistrar {
     public registerTempCommand(command: string): void {
         this.tempCommands.push(vscode.commands.registerCommand(command, () => {
             if (this.isLanguageServerDisabled) {
-                vscode.window.showInformationMessage("The command is disabled because \"C_Cpp.intelliSenseEngine\" is set to \"Disabled\".");
+                vscode.window.showInformationMessage(localize("command.disabled", 'The command is disabled because "{0}" is set to "{1}".', "C_Cpp.intelliSenseEngine", "Disabled"));
                 return;
             }
             this.delayedCommandsToExecute.add(command);

@@ -10,12 +10,10 @@ tools/**
 notices/**
 test/**
 src/**
-loc/**
 
 # ignore .js files that are webpacked or only used for development
 out/src/**
 out/tools/**
-out/loc/**
 
 # ignore ts files in ui
 ui/*.ts

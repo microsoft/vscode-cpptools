@@ -24,3 +24,6 @@ install.lock
 **/nls.*.json
 **/*.nls.json
 **/*.nls.*.json
+
+# ignore exported localization xlf directory
+localization-export

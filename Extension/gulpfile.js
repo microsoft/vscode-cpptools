@@ -100,12 +100,16 @@ gulp.task('generateOptionsSchema', (done) => {
     done();
 });
 
+// Generate package.nls.*.json files from: ./i18n/*/package.i18n.json
 const generatedAdditionalLocFiles = () => {
     return gulp.src(['package.nls.json'])
         .pipe(nls.createAdditionalLanguageFiles(languages, 'i18n'))
         .pipe(gulp.dest('.'));
 };
 
+// Generates ./dist/<src_path>/<filename>.nls.<language_id>.json, from files in ./i18n/*/<src_path>/<filename>.i18n.json
+// Localized strings are read from these files at runtime.
+// Also generates ./dist/nls.metadata.header.json and ./dist/nls.metadata.json, 
 const generatedSrcLocFiles = () => {
     return tsProject.src()
         .pipe(sourcemaps.init())
@@ -120,14 +124,18 @@ const generatedSrcLocFiles = () => {
 gulp.task('generateLocalizationFiles', gulp.series(generatedAdditionalLocFiles, generatedSrcLocFiles));
 
 
-const translationProjectName  = "vscode-cpptools-project";
-const translationExtensionName  = "vscode-cpptools";
+// These seem to be hold-overs from transifex, which is no longer used.
+// createXlfFiles() requires 2 strings, but doesn't appear to use them.
+const translationProjectName  = "ms-vscode";
+const translationExtensionName  = "cpptools";
+
 
 // Creates MLCP readable .xliff file and saves it locally
-gulp.task("translations-export", function runTranslationExport() {
-    return gulp.src(["package.nls.json", "out/nls.metadata.header.json", "out/nls.metadata.json"])
+// generateLocalizationFiles must be run first to generate dependencies.
+gulp.task("localization-export", function runTranslationExport() {
+    return gulp.src(["package.nls.json", "dist/nls.metadata.header.json", "dist/nls.metadata.json"])
         .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
-        .pipe(gulp.dest(path.join("..", `${translationProjectName}-localization-export`)));
+        .pipe(gulp.dest(path.join("..", `localization-export`)));
 });
 
 
@@ -141,12 +149,13 @@ gulp.task("translations-import", (done) => {
     });
     es.merge(languages.map((language) => {
         let id = language.transifexId || language.id;
+
+        // This path needs to be revisited once we iron out the process for receiving this xlf and running this scripts.
         return gulp.src(path.join(options.location, id, translationProjectName, `${translationExtensionName}.xlf`), { allowEmpty: true })
             .pipe(nls.prepareJsonFiles())
             .pipe(gulp.dest(path.join("./i18n", language.folderName)));
     }))
-        .pipe(es.wait(() => {
-            done();
-        }));
+    .pipe(es.wait(() => {
+        done();
+    }));
 });
-

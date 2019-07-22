@@ -12,6 +12,7 @@ import * as os from 'os';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
@@ -22,6 +23,9 @@ import { getInstallationInformation, InstallationInformation, setInstallationSta
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
+nls.config({ messageFormat: nls.MessageFormat.file })();
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
@@ -62,7 +66,7 @@ async function processRuntimeDependencies(): Promise<void> {
             try {
                 await offlineInstallation();
             } catch (error) {
-                getOutputChannelLogger().showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
+                getOutputChannelLogger().showErrorMessage(localize('initialization.failed', 'The installation of the C/C++ extension failed. Please see the output window for more information.'));
                 showOutputChannel();
 
                 // Send the failure telemetry since postInstall will not be called.
@@ -131,7 +135,7 @@ async function onlineInstallation(): Promise<void> {
 
 async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
     let outputChannelLogger: Logger = getOutputChannelLogger();
-    outputChannelLogger.appendLine("Updating C/C++ dependencies...");
+    outputChannelLogger.appendLine(localize("updating.dependencies", "Updating C/C++ dependencies..."));
 
     let packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
 
@@ -174,7 +178,8 @@ function removeUnnecessaryFile(): Promise<void> {
         if (fs.existsSync(sourcePath)) {
             fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException) => {
                 if (err) {
-                    getOutputChannelLogger().appendLine(`ERROR: fs.rename failed with "${err.message}". Delete ${sourcePath} manually to enable debugging.`);
+                    getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
+                        'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
                 }
             });
         }
@@ -224,10 +229,10 @@ function handleError(error: any): void {
         outputChannelLogger.appendLine("");
     }
     // Show the actual message and not the sanitized one
-    outputChannelLogger.appendLine(`Failed at stage: ${installationInformation.stage}`);
+    outputChannelLogger.appendLine(localize('failed.at.stage', "Failed at stage: {0}", installationInformation.stage));
     outputChannelLogger.appendLine(errorMessage);
     outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
+    outputChannelLogger.appendLine(localize('failed.at.stage2', 'If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.'));
     showOutputChannel();
 }
 
@@ -264,7 +269,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
 async function postInstall(info: PlatformInformation): Promise<void> {
     let outputChannelLogger: Logger = getOutputChannelLogger();
     outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine("Finished installing dependencies");
+    outputChannelLogger.appendLine(localize('finished.installing.dependencies', "Finished installing dependencies"));
     outputChannelLogger.appendLine("");
 
     const installSuccess: boolean = sendTelemetry(info);

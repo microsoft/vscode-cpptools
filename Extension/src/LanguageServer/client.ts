@@ -31,7 +31,9 @@ import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
-import * as resources from '../resources';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let ui: UI;
 let timeStamp: number = 0;
@@ -398,7 +400,7 @@ class DefaultClient implements Client {
                     this.isSupported = false;   // Running on an OS we don't support yet.
                     if (!failureMessageShown) {
                         failureMessageShown = true;
-                        vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
+                        vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
                     }
                 }));
         } catch (err) {
@@ -407,11 +409,11 @@ class DefaultClient implements Client {
                 failureMessageShown = true;
                 let additionalInfo: string;
                 if (err.code === "EPERM") {
-                    additionalInfo = `EPERM: Check permissions for '${getLanguageServerFileName()}'`;
+                    additionalInfo = localize('check.permissions', "EPERM: Check permissions for '{0}'", getLanguageServerFileName());
                 } else {
                     additionalInfo = String(err);
                 }
-                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + additionalInfo);
+                vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
             }
         }
 
@@ -452,8 +454,6 @@ class DefaultClient implements Client {
                 locale = vscodeNlsConfigJson.locale;
             }
         }
-
-        vscode.window.showErrorMessage(`test string: ${resources.testString}`);
 
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
@@ -510,9 +510,9 @@ class DefaultClient implements Client {
                             let elapsed: number = this.crashTimes[this.crashTimes.length - 1] - this.crashTimes[0];
                             if (elapsed <= 3 * 60 * 1000) {
                                 if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-                                    vscode.window.showErrorMessage(`The language server for '${serverName}' crashed 5 times in the last 3 minutes. It will not be restarted.`);
+                                    vscode.window.showErrorMessage(localize('server.crashed', "The language server for '{0}' crashed 5 times in the last 3 minutes. It will not be restarted.", serverName));
                                 } else {
-                                    vscode.window.showErrorMessage(`The language server crashed 5 times in the last 3 minutes. It will not be restarted.`);
+                                    vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
                                 }
                                 allClients.replace(this, false);
                             } else {
@@ -688,10 +688,10 @@ class DefaultClient implements Client {
                 if (ask.Value) {
                     ui.showConfigureCustomProviderMessage(() => {
                         let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
-                        const message: string = `${provider.name} would like to configure IntelliSense for ${folderStr} folder.`;
-                        const allow: string = "Allow";
-                        const dontAllow: string = "Don't Allow";
-                        const askLater: string = "Ask Me Later";
+                        const message: string = localize("provider.configure.folder", "{0} would like to configure IntelliSense for {1} folder.", provider.name, folderStr);
+                        const allow: string = localize("allow.button", "Allow");
+                        const dontAllow: string = localize("dont.allow.button", "Don't Allow");
+                        const askLater: string = localize("ask.me.later.button", "Ask Me Later");
 
                         return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(result => {
                             switch (result) {
@@ -860,10 +860,11 @@ class DefaultClient implements Client {
                     }
                     let settings: CppSettings = new CppSettings(this.RootUri);
                     if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document.uri) && !vscode.debug.activeDebugSession) {
-                        const dismiss: string = "Dismiss";
-                        const disable: string = "Disable Warnings";
-                        let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
-                            `Settings from the '${configName}' configuration will be used instead.`;
+                        const dismiss: string = localize("dismiss.button", "Dismiss");
+                        const disable: string = localize("diable.warnings.button", "Disable Warnings");
+                        let message: string = localize("unable.to.provide.configuraiton",
+                            "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
+                            providerName, document.uri.fsPath, configName);
                         if (err) {
                             message += ` (${err})`;
                         }
@@ -940,7 +941,7 @@ class DefaultClient implements Client {
                 return nextTask();
             }
         } else {
-            return Promise.reject("Unsupported client");
+            return Promise.reject(localize("unsupported.client", "Unsupported client"));
         }
     }
 
@@ -954,7 +955,7 @@ class DefaultClient implements Client {
             this.pendingTask = new util.BlockingTask<void>(task, this.pendingTask);
             return this.pendingTask.getPromise();
         } else {
-            return Promise.reject("Unsupported client");
+            return Promise.reject(localize("unsupported.client", "Unsupported client"));
         }
     }
 
@@ -967,7 +968,7 @@ class DefaultClient implements Client {
                 if (cancelToken) {
                     cancelToken.cancel();
                 }
-                reject("Timed out in " + ms + "ms.");
+                reject(localize("timed.out", "Timed out in {0}ms.", ms));
             }, ms);
         });
 
@@ -994,7 +995,7 @@ class DefaultClient implements Client {
                 if (cancelToken) {
                     cancelToken.cancel();
                 }
-                reject("Timed out in " + ms + "ms.");
+                reject(localize("timed.out", "Timed out in {0}ms.", ms));
             }, ms);
         });
 
@@ -1187,7 +1188,7 @@ class DefaultClient implements Client {
             if (settings.loggingLevel === "Debug") {
                 let out: logger.Logger = logger.getOutputChannelLogger();
                 let duration: number = Date.now() - timeStamp;
-                out.appendLine(`Update IntelliSense time (sec): ${duration / 1000}`);
+                out.appendLine(localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", duration / 1000));
             }
             this.model.isUpdatingIntelliSense.Value = false;
             testHook.updateStatus(Status.IntelliSenseReady);
@@ -1201,12 +1202,12 @@ class DefaultClient implements Client {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
                 ui.showConfigureIncludePathMessage(() => {
-                    let configJSON: string = "Configure (JSON)";
-                    let configUI: string = "Configure (UI)";
-                    let dontShowAgain: string = "Don't Show Again";
+                    let configJSON: string = localize("configure.json.button", "Configure (JSON)");
+                    let configUI: string = localize("configure.ui.button", "Configure (UI)");
+                    let dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
                     let fallbackMsg: string = this.configuration.VcpkgInstalled ?
-                        "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers." :
-                        "Configure your IntelliSense settings to help find missing headers.";
+                        localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
+                        localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
                     return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then((value) => {
                         switch (value) {
                             case configJSON:
@@ -1282,14 +1283,15 @@ class DefaultClient implements Client {
             return;
         }
 
-        let compileCommandStr: string = params.paths.length > 1 ? "a compile_commands.json file" : params.paths[0];
+        let aCompileCommandsFile: string = localize("a.compile.commands.file", "a compile_commands.json file");
+        let compileCommandStr: string = params.paths.length > 1 ? aCompileCommandsFile : params.paths[0];
         let folderStr: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) ? "the '" + this.Name + "'" : "this";
-        const message: string = `Would you like to use ${compileCommandStr} to auto-configure IntelliSense for ${folderStr} folder?`;
+        const message: string = localize("auto-configure.intellisense", "Would you like to use {0} to auto-configure IntelliSense for {1} folder?", compileCommandStr, folderStr);
 
         ui.showConfigureCompileCommandsMessage(() => {
-            const yes: string = "Yes";
-            const no: string = "No";
-            const askLater: string = "Ask Me Later";
+            const yes: string = localize("yes.button", "Yes");
+            const no: string = localize("no.button", "No");
+            const askLater: string = localize("ask.me.later", "Ask Me Later");
             return vscode.window.showInformationMessage(message, yes, no, askLater).then(async (value) => {
                 switch (value) {
                     case yes:
@@ -1442,7 +1444,7 @@ class DefaultClient implements Client {
         let settings: CppSettings = new CppSettings(this.RootUri);
         let out: logger.Logger = logger.getOutputChannelLogger();
         if (settings.loggingLevel === "Debug") {
-            out.appendLine("Custom configurations received:");
+            out.appendLine(localize("configurations.received", "Custom configurations received:"));
         }
         let sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
@@ -1489,7 +1491,7 @@ class DefaultClient implements Client {
         let settings: CppSettings = new CppSettings(this.RootUri);
         let out: logger.Logger = logger.getOutputChannelLogger();
         if (settings.loggingLevel === "Debug") {
-            out.appendLine(`Custom browse configuration received: ${JSON.stringify(sanitized, null, 2)}`);
+            out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
         }
 
         let params: CustomBrowseConfigurationParams = {

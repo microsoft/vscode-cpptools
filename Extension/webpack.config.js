@@ -20,7 +20,7 @@ const config = {
         devtoolModuleFilenameTemplate: "../[resource-path]",
     },
     node: {
-        __dirname: false, // leave the __dirname-behaviour intact
+        __dirname: false, // leave the __dirname behavior intact
     },
     devtool: 'source-map',
     externals: {
@@ -35,13 +35,6 @@ const config = {
             test: /\.ts$/,
             exclude: /node_modules/,
             use: [{
-                // vscode-nls-dev loader:
-                // * rewrite nls-calls
-                loader: 'vscode-nls-dev/lib/webpack-loader',
-                options: {
-                    base: __dirname
-                }
-            }, {
                 // configure TypeScript loader:
                 // * enable sources maps for end-to-end source maps
                 loader: 'ts-loader',
@@ -59,6 +52,16 @@ const config = {
     stats: {
         warnings: false
     }
+}
+
+if (process.argv.includes('--vscode-nls')) {
+	// rewrite nls call when being asked for
+	config.module.rules.unshift({
+		loader: 'vscode-nls-dev/lib/webpack-loader',
+		options: {
+			base: __dirname
+		}
+	})
 }
 
 module.exports = config;
