@@ -1387,6 +1387,7 @@ class DefaultClient implements Client {
                 // However, this command is a no-op if the cursor is not on a valid source location.
                 if (!this.referencesViewFindPending) {
                     this.referencesViewFindPending = true;
+                    this.blockedByCursorPosition = false;
                     vscode.commands.executeCommand("references-view.find").then(() => {
                         this.languageClient.sendNotification(RequestReferencesNotification); });
                 }
@@ -1403,6 +1404,7 @@ class DefaultClient implements Client {
         this.referencesViewFindPending = false;
     }
 
+    private activeDocumentChangedBeforeSelectionChanged: boolean;
     private newReferencesProgress: boolean;
     private delayReferencesProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
@@ -1437,10 +1439,6 @@ class DefaultClient implements Client {
                                 } else {
                                     this.newReferencesProgress = true;
                                     this.reportReferencesProgress(progress);
-                                    if (this.blockedByCursorPosition) {
-                                        this.sendRequestReferences();
-                                    }
-                                    //}
                                 }
                             }, 1000);
                         });
@@ -1563,6 +1561,7 @@ class DefaultClient implements Client {
 
     public activeDocumentChanged(document: vscode.TextDocument): void {
         this.notifyWhenReady(() => {
+            this.activeDocumentChangedBeforeSelectionChanged = true;
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
     }
@@ -1581,7 +1580,11 @@ class DefaultClient implements Client {
 
     public selectionChanged(selection: Range): void {
         this.notifyWhenReady(() => {
-            this.sendRequestReferencesIfNewProgress();
+            if (this.activeDocumentChangedBeforeSelectionChanged) {
+                this.activeDocumentChangedBeforeSelectionChanged = false;
+            } else {
+                this.sendRequestReferencesIfNewProgress();
+            }
             this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
         });
     }
