@@ -42,7 +42,7 @@ export class UI {
     constructor() {
         // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
         this.navigationStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
-        this.navigationStatusBarItem.tooltip = localize("navigation.tooltip", "C/C++ Navigation");;
+        this.navigationStatusBarItem.tooltip = localize("navigation.tooltip", "C/C++ Navigation");
         this.navigationStatusBarItem.command = "C_Cpp.Navigate";
         this.ShowNavigation = true;
 
