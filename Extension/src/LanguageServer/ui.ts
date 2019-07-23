@@ -42,26 +42,24 @@ export class UI {
     constructor() {
         // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
         this.navigationStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
-        let navigationString: string = localize("navigation.string", "Navigation");
-        this.navigationStatusBarItem.tooltip = `C/C++ ${navigationString}`;
+        this.navigationStatusBarItem.tooltip = localize("navigation.tooltip", "C/C++ Navigation");;
         this.navigationStatusBarItem.command = "C_Cpp.Navigate";
         this.ShowNavigation = true;
 
         this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
-        let configurationString: string = localize("configuration.string", "Configuration");
-        this.configStatusBarItem.tooltip = `C/C++ ${configurationString}`;
+        this.configStatusBarItem.tooltip = localize("configuration.tooltip", "C/C++ Configuration");
         this.ShowConfiguration = true;
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
         this.intelliSenseStatusBarItem.text = "";
-        this.intelliSenseStatusBarItem.tooltip = localize("updating.intellisense", "Updating IntelliSense...");
+        this.intelliSenseStatusBarItem.tooltip = localize("updating.intellisense.tooltip", "Updating IntelliSense...");
         this.intelliSenseStatusBarItem.color = "Red";
         this.ShowFlameIcon = true;
 
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.browseEngineStatusBarItem.text = "";
-        this.browseEngineStatusBarItem.tooltip = localize("discovering.files", "Discovering files...");
+        this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files...");
         this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
