@@ -591,8 +591,8 @@ async function suggestInsidersChannel(): Promise<void> {
     }
     const message: string = localize('insiders.available', "Insiders version {0} is available. Would you like to switch to the Insiders channel and install this update?", buildInfo.name);
     const yes: string = localize("yes.button", "Yes");
-    const askLater: string = localize("ask.me.later", "Ask Me Later");
-    const dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
+    const askLater: string = localize("ask.me.later.button", "Ask Me Later");
+    const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
     let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:

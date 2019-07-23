@@ -1291,7 +1291,7 @@ class DefaultClient implements Client {
         ui.showConfigureCompileCommandsMessage(() => {
             const yes: string = localize("yes.button", "Yes");
             const no: string = localize("no.button", "No");
-            const askLater: string = localize("ask.me.later", "Ask Me Later");
+            const askLater: string = localize("ask.me.later.button", "Ask Me Later");
             return vscode.window.showInformationMessage(message, yes, no, askLater).then(async (value) => {
                 switch (value) {
                     case yes:
