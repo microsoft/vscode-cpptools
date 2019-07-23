@@ -1092,7 +1092,7 @@ export class CppProperties {
             }
             const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
-                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": localize("config.name.not.first.error", "config name not first") });
+                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
                 return;
             }
             curTextStartOffset = configStart + 1;
@@ -1105,7 +1105,7 @@ export class CppProperties {
                 curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
                 const nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
                 if (nextNameStart2 === -1) {
-                    telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": localize("next.config.name.not.first.error", "next config name not first") });
+                    telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
                     return;
                 }
                 curText = curText.substr(0, nextNameStart2);
