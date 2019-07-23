@@ -563,7 +563,7 @@ export function getInstallLockPath(): string {
 
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
-    const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", "readmePath", "https://github.com/Microsoft/vscode-cpptools/issues");
+    const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
     return readmeMessage;
 }
 
