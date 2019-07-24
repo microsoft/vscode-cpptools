@@ -1388,8 +1388,10 @@ class DefaultClient implements Client {
                 if (!this.referencesViewFindPending) {
                     this.referencesViewFindPending = true;
                     this.blockedByCursorPosition = false;
-                    vscode.commands.executeCommand("references-view.find").then(() => {
-                        this.languageClient.sendNotification(RequestReferencesNotification); });
+                    vscode.commands.executeCommand("references-view.find").then((val: any) => {
+                        // This either early fails (blockedByCursor) or blocks until references are returned.
+                        this.languageClient.sendNotification(RequestReferencesNotification);
+                    });
                 }
             } else {
                 this.languageClient.sendNotification(RequestReferencesNotification);
