@@ -39,7 +39,7 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 | Reference Type (C++/CLI) | entity.name.type.class.reference |
 | Static Member Field | variable.other.property.static |
 | Static Member Function | entity.name.function.member.static |
-| Type | entity.name.type.class |
+| Type | entity.name.type |
 | User-Defined Literal - Number | entity.name.operator.custom-literal.number |
 | User-Defined Literal - Raw | entity.name.operator.custom-literal |
 | User-Defined Literal - String | entity.name.operator.custom-literal.string |
