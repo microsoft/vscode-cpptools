@@ -11,6 +11,9 @@ import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppV
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
 import * as util from '../common';
 import * as Telemetry from '../telemetry';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
 let disposables: vscode.Disposable[] = [];
@@ -50,7 +53,7 @@ export function initialize(context: vscode.ExtensionContext): void {
         }
 
         if (!util.fileIsCOrCppSource(textEditor.document.uri.fsPath)) {
-            vscode.window.showErrorMessage('Cannot build and debug because the active file is not a C or C++ source file.');
+            vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
             return Promise.resolve();
         }
 
@@ -75,13 +78,13 @@ export function initialize(context: vscode.ExtensionContext): void {
             return {label: config.name, configuration: config};
         });
 
-        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? "No compiler found" : "Select a compiler")}).then(async selection => {
+        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.compiler", "Select a compiler"))}).then(async selection => {
             if (!selection) {
                 return; // User canceled it.
             }
             if (selection.label.startsWith("cl.exe")) {
                 if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-                    vscode.window.showErrorMessage('cl.exe build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.');
+                    vscode.window.showErrorMessage(localize("cl.exe.not.available", '{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.', "cl.exe"));
                     return;
                 }
             }

@@ -12,6 +12,9 @@ import * as os from 'os';
 import * as path from 'path';
 import * as util from '../common';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface AttachItemsProvider {
     getAttachItems(): Promise<AttachItem[]>;
@@ -48,7 +51,7 @@ export class RemoteAttachPicker {
                 let pipeTransport: any = config ? config.pipeTransport : null;
 
                 if (pipeTransport === null) {
-                    return Promise.reject<string>(new Error("Chosen debug configuration does not contain pipeTransport"));
+                    return Promise.reject<string>(new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport")));
                 }
 
                 let pipeProgram: string = null;
@@ -90,12 +93,12 @@ export class RemoteAttachPicker {
                         let attachPickOptions: vscode.QuickPickOptions = {
                             matchOnDetail: true,
                             matchOnDescription: true,
-                            placeHolder: "Select the process to attach to"
+                            placeHolder: localize("select.process.attach", "Select the process to attach to")
                         };
 
                         return vscode.window.showQuickPick(processes, attachPickOptions)
                             .then(item => {
-                                return item ? item.id : Promise.reject<string>(new Error("Process not selected."));
+                                return item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected.")));
                             });
                     });
             }
@@ -128,7 +131,7 @@ export class RemoteAttachPicker {
             let lines: string[] = output.split(/\r?\n/);
 
             if (lines.length === 0) {
-                return Promise.reject<AttachItem[]>(new Error("Pipe transport failed to get OS and processes."));
+                return Promise.reject<AttachItem[]>(new Error(localize("pipe.failed", "Pipe transport failed to get OS and processes.")));
             } else {
                 let remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
@@ -138,7 +141,7 @@ export class RemoteAttachPicker {
 
                 // Only got OS from uname
                 if (lines.length === 1) {
-                    return Promise.reject<AttachItem[]>(new Error("Transport attach could not obtain processes list."));
+                    return Promise.reject<AttachItem[]>(new Error(localize("no.process.list", "Transport attach could not obtain processes list.")));
                 } else {
                     let processes: string[] = lines.slice(1);
                     return PsProcessParser.ParseProcessFromPsArray(processes)

@@ -208,7 +208,7 @@ function handleError(error: any): void {
             errorMessage = packageError.innerError.toString();
             installationInformation.telemetryProperties['error.innerError'] = util.removePotentialPII(errorMessage);
         } else {
-            errorMessage = packageError.message;
+            errorMessage = packageError.localizedMessageText;
         }
 
         if (packageError.pkg) {

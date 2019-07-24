@@ -501,7 +501,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
             }
         }(platformInfo);
         if (!vsCodeScriptPath) {
-            return Promise.reject(new Error(localize('failed.to.find.scipt', 'Failed to find VS Code script')));
+            return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
         // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
@@ -515,13 +515,13 @@ function installVsix(vsixLocation: string): Thenable<void> {
                     // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
                     const timer: NodeJS.Timer = global.setTimeout(() => {
                         process.kill();
-                        reject(new Error(localize('script.no.respnse', 'Failed to receive response from VS Code script process for installation within 30s.')));
+                        reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
                     }, 30000);
 
                     process.on('exit', (code: number) => {
                         clearInterval(timer);
                         if (code !== 0) {
-                            reject(new Error(localize("script.error", "VS Code script exited with error code {0}", code)));
+                            reject(new Error(`VS Code script exited with error code ${code}`));
                         } else {
                             resolve();
                         }
@@ -530,7 +530,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
                         throw new Error();
                     }
                 } catch (error) {
-                    reject(new Error(localize("script.launch.failed", 'Failed to launch VS Code script process for installation')));
+                    reject(new Error('Failed to launch VS Code script process for installation'));
                     return;
                 }
             });
@@ -544,14 +544,14 @@ function installVsix(vsixLocation: string): Thenable<void> {
                     throw new Error();
                 }
             } catch (error) {
-                reject(new Error(localize("script.launch.failed", 'Failed to launch VS Code script process for installation')));
+                reject(new Error('Failed to launch VS Code script process for installation'));
                 return;
             }
 
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
             const timer: NodeJS.Timer = global.setTimeout(() => {
                 process.kill();
-                reject(new Error(localize('script.no.respnse', 'Failed to receive response from VS Code script process for installation within 30s.')));
+                reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
             }, 30000);
 
             // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
@@ -615,7 +615,7 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
             if (err) {
-                reject(new Error(localize("failed.to.create.vsix", 'Failed to create vsix file')));
+                reject(new Error('Failed to create vsix file'));
                 return;
             }
 
@@ -632,14 +632,14 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
                     // Try again with the proxySupport to "off".
                     if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
                         config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                        reject(new Error(localize("vsix.proxySupport.off.failed", 'Failed to download VSIX package with proxySupport off'))); // Changing the proxySupport didn't help.
+                        reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
                         return;
                     }
                     if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
                         config.update('http.proxySupport', "off", true);
                         continue;
                     }
-                    reject(new Error(localize('vsix.download.failed', 'Failed to download VSIX package')));
+                    reject(new Error('Failed to download VSIX package'));
                     return;
                 }
                 if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {

@@ -7,6 +7,9 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 import { AttachItemsProvider } from './attachToProcess';
 import { AttachItem } from './attachQuickPick';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class Process {
     constructor(public name: string, public pid: string, public commandLine: string) { }
@@ -96,7 +99,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
                 processCmd = PsProcessParser.psLinuxCommand;
                 break;
             default:
-                return Promise.reject<Process[]>(new Error(`Operating system "${os.platform()}" not support.`));
+                return Promise.reject<Process[]>(new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform())));
         }
         return execChildProcess(processCmd, null).then(processes => {
             return PsProcessParser.ParseProcessFromPs(processes);

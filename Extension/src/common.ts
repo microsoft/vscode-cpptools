@@ -221,11 +221,11 @@ export function setProgress(progress: number): void {
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
         switch (progress) {
-            case 0: progressName = localize("install.started", "install started"); break;
-            case progressInstallSuccess: progressName = localize("install.succeeded", "install succeeded"); break;
-            case progressExecutableStarted: progressName = localize("executable.started", "executable started"); break;
-            case progressExecutableSuccess: progressName = localize("executable.succeeded", "executable succeeded"); break;
-            case progressParseRootSuccess: progressName = localize("parse.root.succeeded", "parse root succeeded"); break;
+            case 0: progressName = "install started"; break;
+            case progressInstallSuccess: progressName = "install succeeded"; break;
+            case progressExecutableStarted: progressName = "executable started"; break;
+            case progressExecutableSuccess: progressName = "executable succeeded"; break;
+            case progressParseRootSuccess: progressName = "parse root succeeded"; break;
         }
         telemetryProperties['progress'] = progressName;
         Telemetry.logDebuggerEvent("progress", telemetryProperties);
@@ -238,7 +238,7 @@ export function setIntelliSenseProgress(progress: number): void {
         let telemetryProperties: { [key: string]: string } = {};
         let progressName: string;
         switch (progress) {
-            case progressIntelliSenseNoSquiggles: progressName = "IntelliSense " + localize("no.squiggles", "no squiggles"); break;
+            case progressIntelliSenseNoSquiggles: progressName = "IntelliSense no squiggles"; break;
         }
         telemetryProperties['progress'] = progressName;
         Telemetry.logDebuggerEvent("progress", telemetryProperties);

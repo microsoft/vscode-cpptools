@@ -4,10 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as nls from 'vscode-nls';
-
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-
 export class PackageVersion {
     major: number;
     minor: number;
@@ -18,7 +14,7 @@ export class PackageVersion {
     constructor(version: string) {
         const tokens: string[] = version.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
         if (tokens.length < 3) {
-            throw new Error(localize("version.string.parse.failed", "Failed to parse version string: {0}", version));
+            throw new Error(`Failed to parse version string: ${version}`);
         }
 
         this.major = parseInt(tokens[0]);
@@ -40,7 +36,7 @@ export class PackageVersion {
         }
 
         if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
-            throw new Error(localize("version.string.parse.failed", "Failed to parse version string: {0}", version));
+            throw new Error(`Failed to parse version string: ${version}`);
         }
     }
 

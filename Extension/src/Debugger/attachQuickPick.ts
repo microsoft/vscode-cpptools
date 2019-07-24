@@ -5,6 +5,9 @@
 
 import * as util from '../common';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 class RefreshButton implements vscode.QuickInputButton {
     get iconPath(): { dark: vscode.Uri; light: vscode.Uri } {
@@ -18,7 +21,7 @@ class RefreshButton implements vscode.QuickInputButton {
     }
 
     get tooltip(): string {
-        return "Refresh process list";
+        return localize("refresh.process.list.tooltip", "Refresh process list");
     }
 }
 
@@ -30,11 +33,11 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
     return getAttachItems().then(processEntries => {
         return new Promise<string>((resolve, reject) => {
             let quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();
-            quickPick.title = "Attach to process";
+            quickPick.title = localize("attach.to.process", "Attach to process");
             quickPick.canSelectMany = false;
             quickPick.matchOnDescription = true;
             quickPick.matchOnDetail = true;
-            quickPick.placeholder = "Select the process to attach to";
+            quickPick.placeholder = localize("select.process.attach", "Select the process to attach to");
             quickPick.items = processEntries;
             quickPick.buttons = [new RefreshButton()];
 
@@ -46,7 +49,7 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
 
             quickPick.onDidAccept(() => {
                 if (quickPick.selectedItems.length !== 1) {
-                    reject(new Error("Process not selected"));
+                    reject(new Error(localize("process.not.selected", "Process not selected.")));
                 }
 
                 let selectedId: string = quickPick.selectedItems[0].id;
@@ -61,7 +64,7 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
                 disposables.forEach(item => item.dispose());
                 quickPick.dispose();
 
-                reject(new Error("Process not selected."));
+                reject(new Error(localize("process.not.selected", "Process not selected.")));
             }, undefined, disposables);
 
             quickPick.show();

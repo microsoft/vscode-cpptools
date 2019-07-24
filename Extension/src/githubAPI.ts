@@ -8,9 +8,7 @@ import { PackageVersion } from './packageVersion';
 import * as util from './common';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
-import * as nls from 'vscode-nls';
 
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
 
 /**
@@ -40,7 +38,7 @@ function getVsixDownloadUrl(build: Build, vsixName: string): string {
         return asset.name === vsixName;
     }).browser_download_url;
     if (!downloadUrl) {
-        throw new Error(localize("failed.to.find.vsix", "Failed to find VSIX: {0} in build: {1}", vsixName, build.name));
+        throw new Error(`Failed to find VSIX: ${vsixName} in build: ${build.name}`);
     }
     return downloadUrl;
 }
@@ -113,7 +111,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
         }
     }(info);
     if (!vsixName) {
-        throw new Error(localize("failed.to.match.vsix.platform.architecture", "Failed to match VSIX name for: {0}: {1}", info.platform, info.architecture));
+        throw new Error(`Failed to match VSIX name for: ${info.platform}: ${info.architecture}`);
     }
     return vsixName;
 }
@@ -188,7 +186,7 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
     // Get the build to install
     const targetBuild: Build = builds.find(useBuild);
     if (!targetBuild) {
-        throw new Error(localize("failed.to.find.install.candidate", 'Failed to determine installation candidate'));
+        throw new Error('Failed to determine installation candidate');
     }
 
     // Check current version against target's version to determine if the installation should happen
@@ -232,13 +230,13 @@ async function getRateLimit(): Promise<RateLimit> {
     try {
         rateLimit = JSON.parse(data);
     } catch (error) {
-        throw new Error(localize("failed.to.parse.rate.limit", 'Failed to parse rate limit JSON'));
+        throw new Error('Failed to parse rate limit JSON');
     }
 
     if (isRateLimit(rateLimit)) {
         return Promise.resolve(rateLimit);
     } else {
-        throw new Error(localize("invalid.rate.limite", 'Rate limit JSON is not of type {0}', "RateLimit"));
+        throw new Error('Rate limit JSON is not of type RateLimit');
     }
 }
 
@@ -253,7 +251,7 @@ async function rateLimitExceeded(): Promise<boolean> {
  */
 async function getReleaseJson(): Promise<Build[]> {
     if (await rateLimitExceeded()) {
-        throw new Error(localize("failed.rate.limite", 'Failed to stay within GitHub API rate limit'));
+        throw new Error('Failed to stay within GitHub API rate limit');
     }
 
     // Download release JSON
@@ -264,7 +262,7 @@ async function getReleaseJson(): Promise<Build[]> {
         .catch((error) => {
             if (error && error.code && error.code !== "ENOENT") {
                 // Only throw if the user is connected to the Internet.
-                throw new Error(localize("failed.download.release", 'Failed to download release JSON'));
+                throw new Error('Failed to download release JSON');
             }
         });
     if (!data) {
@@ -276,13 +274,13 @@ async function getReleaseJson(): Promise<Build[]> {
     try {
         releaseJson = JSON.parse(data);
     } catch (error) {
-        throw new Error(localize("failed.parse.release", 'Failed to parse release JSON'));
+        throw new Error('Failed to parse release JSON');
     }
 
     // Type check
     if (isArrayOfBuilds(releaseJson)) {
         return releaseJson;
     } else {
-        throw new Error(localize('failed.release.type', 'Release JSON is not of type {0}', "Build[]"));
+        throw new Error('Release JSON is not of type Build[]');
     }
 }

@@ -43,13 +43,17 @@ export interface IPackage {
 }
 
 export class PackageManagerError extends Error {
+    public localizedMessageText: string;
+
     constructor(
         public message: string,
+        public localizedMessage: string,
         public methodName: string,
         public pkg: IPackage = null,
         public innerError: any = null,
         public errorCode: string = '') {
         super(message);
+        this.localizedMessageText = localizedMessage;
     }
 }
 
@@ -57,11 +61,12 @@ export class PackageManagerWebResponseError extends PackageManagerError {
     constructor(
         public socket: net.Socket,
         public message: string,
+        public localizedMessage: string,
         public methodName: string,
         public pkg: IPackage = null,
         public innerError: any = null,
         public errorCode: string = '') {
-        super(message, methodName, pkg, innerError, errorCode);
+        super(message, localizedMessage, methodName, pkg, innerError, errorCode);
     }
 }
 
@@ -131,7 +136,7 @@ export class PackageManager {
 
                     resolve(this.allPackages);
                 } else {
-                    reject(new PackageManagerError(localize("package.manager.missing", 'Package manifest does not exist'), 'GetPackageList'));
+                    reject(new PackageManagerError("Package manifest does not exist", localize("package.manager.missing", 'Package manifest does not exist'), 'GetPackageList'));
                 }
             } else {
                 resolve(this.allPackages);
@@ -162,7 +167,7 @@ export class PackageManager {
         return new Promise<tmp.FileResult>((resolve, reject) => {
             tmp.file({ prefix: "package-" }, (err, path, fd, cleanupCallback) => {
                 if (err) {
-                    return reject(new PackageManagerError(localize("error.from", 'Error from {0}', "temp.file"), 'DownloadPackage', pkg, err));
+                    return reject(new PackageManagerError("Error from temp.file", localize("error.from", 'Error from {0}', "temp.file"), 'DownloadPackage', pkg, err));
                 }
 
                 return resolve(<tmp.FileResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
@@ -239,7 +244,7 @@ export class PackageManager {
             }
             setTimeout(() => {
                 if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
-                    return reject(new PackageManagerError(localize("temp.package.unavailable", 'Temporary Package file unavailable'), 'DownloadFile', pkg));
+                    return reject(new PackageManagerError('Temporary Package file unavailable', localize("temp.package.unavailable", 'Temporary Package file unavailable'), 'DownloadFile', pkg));
                 }
 
                 let handleHttpResponse: (response: IncomingMessage) => void = (response: IncomingMessage) => {
@@ -255,7 +260,7 @@ export class PackageManager {
                     } else if (response.statusCode !== 200) {
                         // Download failed - print error message
                         let errorMessage: string = localize("failed.web.error", "failed (error code '{0}')", response.statusCode);
-                        return reject(new PackageManagerWebResponseError(response.socket, localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
+                        return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
                     } else {
                         // Downloading - hook up events
                         let contentLength: any = response.headers['content-length'];
@@ -285,7 +290,7 @@ export class PackageManager {
                         });
 
                         response.on('error', (error) => {
-                            return reject(new PackageManagerWebResponseError(response.socket, localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error.stack, error.name));
+                            return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error.stack, error.name));
                         });
 
                         // Begin piping data from the response to the package file
@@ -296,7 +301,10 @@ export class PackageManager {
                 let request: ClientRequest = https.request(options, handleHttpResponse);
 
                 request.on('error', (error) => {
-                    return reject(new PackageManagerError(localize("web.request.error", 'HTTP/HTTPS Request error') + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
+                    return reject(new PackageManagerError(
+                        'HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""),
+                        localize("web.request.error", 'HTTP/HTTPS Request error') + (urlString.includes("fwlink") ? ": fwlink" : ""),
+                        'DownloadFile', pkg, error.stack, error.message));
                 });
 
                 // Execute the request
@@ -312,12 +320,12 @@ export class PackageManager {
 
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
-                return reject(new PackageManagerError(localize("downloaded.unavailable", 'Downloaded file unavailable'), 'InstallPackage', pkg));
+                return reject(new PackageManagerError('Downloaded file unavailable', localize("downloaded.unavailable", 'Downloaded file unavailable'), 'InstallPackage', pkg));
             }
 
             yauzl.fromFd(pkg.tmpFile.fd, { lazyEntries: true }, (err, zipfile) => {
                 if (err) {
-                    return reject(new PackageManagerError(localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err));
+                    return reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err));
                 }
 
                 // setup zip file events
@@ -326,7 +334,7 @@ export class PackageManager {
                 });
 
                 zipfile.on('error', err => {
-                    return reject(new PackageManagerError(localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err, err.code));
+                    return reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err, err.code));
                 });
 
                 zipfile.readEntry();
@@ -338,7 +346,7 @@ export class PackageManager {
                         // Directory - create it
                         mkdirp(absoluteEntryPath, { mode: 0o775 }, (err) => {
                             if (err) {
-                                return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
+                                return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
                             }
 
                             zipfile.readEntry();
@@ -349,16 +357,16 @@ export class PackageManager {
                                 // File - extract it
                                 zipfile.openReadStream(entry, (err, readStream: fs.ReadStream) => {
                                     if (err) {
-                                        return reject(new PackageManagerError(localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
+                                        return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
                                     }
 
                                     readStream.on('error', (err) => {
-                                        return reject(new PackageManagerError(localize("read.stream.error", 'Error in readStream'), 'InstallPackage', pkg, err));
+                                        return reject(new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err));
                                     });
 
                                     mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
                                         if (err) {
-                                            return reject(new PackageManagerError(localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
+                                            return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
                                         }
 
                                         // Create as a .tmp file to avoid partially unzipped files
@@ -368,7 +376,7 @@ export class PackageManager {
                                             try {
                                                 await util.unlinkPromise(absoluteEntryTempFile);
                                             } catch (err) {
-                                                return reject(new PackageManagerError(localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
+                                                return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
                                         }
 
@@ -381,7 +389,7 @@ export class PackageManager {
                                                 // Remove .tmp extension from the file.
                                                 await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
                                             } catch (err) {
-                                                return reject(new PackageManagerError(localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
+                                                return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
                                             // Wait till output is done writing before reading the next zip entry.
                                             // Otherwise, it's possible to try to launch the .exe before it is done being created.
@@ -389,7 +397,7 @@ export class PackageManager {
                                         });
 
                                         writeStream.on('error', (err) => {
-                                            return reject(new PackageManagerError(localize("write.stream.error", 'Error in writeStream'), 'InstallPackage', pkg, err));
+                                            return reject(new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err));
                                         });
 
                                         readStream.pipe(writeStream);
