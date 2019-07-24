@@ -1583,7 +1583,9 @@ class DefaultClient implements Client {
     public selectionChanged(selection: Range): void {
         this.notifyWhenReady(() => {
             if (this.activeDocumentChangedBeforeSelectionChanged) {
-                this.activeDocumentChangedBeforeSelectionChanged = false;
+                if (selection.start.line !== 0 && selection.start.character !== 0) {
+                    this.activeDocumentChangedBeforeSelectionChanged = false;
+                }
             } else {
                 this.sendRequestReferencesIfNewProgress();
             }
