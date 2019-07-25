@@ -163,7 +163,6 @@ interface ColorThemeChangedParams {
 enum ReferenceType {
     Confirmed,
     ConfirmationInProgress,
-    ConfirmationCanceled,
     Comment,
     String,
     Inactive,
@@ -1296,6 +1295,8 @@ class DefaultClient implements Client {
     }
 
     private currentReferencesProgress: ReportReferencesProgressNotification;
+    private prevReferencesProgressCount: number;
+    private prevReferencesProgressMessage: string;
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>): void {
         let blockedMessage: string = this.blockedByCursorPosition ? ". Move your cursor to any identifier to get results." : "";
         switch (this.currentReferencesProgress.referencesProgress) {
@@ -1347,13 +1348,18 @@ class DefaultClient implements Client {
                 if (numLexing > numParsing) {
                     let numTotalToLex: number = this.currentReferencesProgress.targetReferencesProgress.length;
                     let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
-                    currentMessage = `Lexing(${numFinishedLexing}/${numTotalToLex})`;
+                    currentMessage = `Lexing(${numFinishedLexing}/${numTotalToLex})` + blockedMessage;
                 } else {
                     let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                     let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences;
-                    currentMessage = `Parsing(${numFinishedParsing}/${numTotalToParse})`;
+                    currentMessage = `Parsing(${numFinishedParsing}/${numTotalToParse})` + blockedMessage;
                 }
-                progress.report({ message: currentMessage + blockedMessage, increment: currentProgress / maxProgress });
+                if (currentProgress > this.prevReferencesProgressCount || currentMessage !== this.prevReferencesProgressMessage) {
+                    this.prevReferencesProgressCount = currentProgress;
+                    this.prevReferencesProgressMessage = currentMessage;
+
+                    progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
+                }
                 break;
             case ReferencesProgress.FinalResultsAvailable:
                 progress.report({ message: 'Finished' + blockedMessage, increment: 100 });
@@ -1422,6 +1428,8 @@ class DefaultClient implements Client {
                 this.referencesRequestHasOccurred = false;
                 this.blockedByCursorPosition = false;
                 this.referencesCanceled = false;
+                this.prevReferencesProgressCount = 0;
+                this.prevReferencesProgressMessage = "";
                 this.delayReferencesProgress = setInterval(() => {
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
@@ -1829,8 +1837,7 @@ class DefaultClient implements Client {
 
     private convertReferenceTypeToString(referenceType: ReferenceType): string {
         switch (referenceType) {
-            case ReferenceType.ConfirmationInProgress: return "Possible reference (confirmation in progress)";
-            case ReferenceType.ConfirmationCanceled: return "Possible reference (confirmation canceled)";
+            case ReferenceType.ConfirmationInProgress: return "Possible reference (confirmation " + (this.referencesCanceled ? "canceled" : "in progress") + ")";
             case ReferenceType.Comment: return "Comment reference";
             case ReferenceType.String: return "String reference";
             case ReferenceType.Inactive: return "Inactive reference";
