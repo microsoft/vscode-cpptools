@@ -37,6 +37,7 @@
                             "c++11",
                             "c++14",
                             "c++17",
+                            "c++20",
                             "${default}"
                         ]
                     },
@@ -71,7 +72,7 @@
                         }
                     },
                     "intelliSenseMode": {
-                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64, Linux defaults to gcc-x64, and Mac default to clang-x64.",
+                        "description": "If set, it overrides the default mode used by the IntelliSense engine. Windows defaults to msvc-x64, Linux defaults to gcc-x64, and Mac defaults to clang-x64.",
                         "type": "string",
                         "enum": [
                             "msvc-x64",
@@ -142,6 +143,11 @@
         "version": {
             "type": "integer",
             "description": "Version of the configuration file. This property is managed by the extension. Please do not change it."
+        },
+        "enableConfigurationSquiggles": {
+            "type": "boolean",
+            "default": true,
+            "description": "Controls whether the extension will report errors detected in c_cpp_properties.json."
         }
     },
     "properties": {
@@ -153,6 +159,9 @@
         },
         "version": {
             "$ref": "#/definitions/version"
+        },
+        "enableConfigurationSquiggles": {
+            "$ref": "#/definitions/enableConfigurationSquiggles"
         }
     },
     "required": [

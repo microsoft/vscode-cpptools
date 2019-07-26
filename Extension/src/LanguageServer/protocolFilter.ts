@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
@@ -23,14 +24,25 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             if (clients.checkOwnership(me, document)) {
                 me.TrackedDocuments.add(document);
-                me.provideCustomConfiguration(document).then(() => {
-                    sendMessage(document);
-                }, () => {
-                    sendMessage(document);
-                });
+
+                // Work around vscode treating ".C" as c, by adding this file name to file associations as cpp
+                if (document.uri.path.endsWith(".C")) {
+                    let fileName: string = path.basename(document.uri.fsPath);
+                    let mappingString: string = fileName + "@" + document.uri.fsPath;
+                    me.addFileAssociations(mappingString, false);
+                }
+
+                me.onDidOpenTextDocument(document);
+                me.provideCustomConfiguration(document);
+                me.notifyWhenReady(() => sendMessage(document));
             }
         },
-        didChange: defaultHandler,
+        didChange: (textDocumentChangeEvent, sendMessage) => {
+            if (clients.ActiveClient === me) {
+                me.onDidChangeTextDocument(textDocumentChangeEvent);
+                me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
+            }
+        },
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
             if (clients.ActiveClient === me) {
@@ -49,7 +61,12 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
 
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: invoke3,
+        provideHover: (document, position, token, next: (document, position, token) => any) => {
+            if (clients.checkOwnership(me, document)) {
+                return me.requestWhenReady(() => next(document, position, token));
+            }
+            return null;
+        },
         provideSignatureHelp: invoke3,
         provideDefinition: invoke3,
         provideReferences: invoke4,

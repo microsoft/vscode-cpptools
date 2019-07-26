@@ -10,7 +10,7 @@ function appendFieldsToObject(reference: any, obj: any): any {
     // Make sure it is an object type
     if (typeof obj === 'object') {
         for (let referenceKey in reference) {
-            // If key exists in original object and is an object. 
+            // If key exists in original object and is an object.
             if (obj.hasOwnProperty(referenceKey)) {
                 obj[referenceKey] = appendFieldsToObject(reference[referenceKey], obj[referenceKey]);
             } else {
@@ -23,7 +23,7 @@ function appendFieldsToObject(reference: any, obj: any): any {
     return obj;
 }
 
-// Combines two object's fields, giving the parentDefault a higher precedence. 
+// Combines two object's fields, giving the parentDefault a higher precedence.
 function mergeDefaults(parentDefault: any, childDefault: any): any {
     let newDefault: any = {};
 
@@ -80,7 +80,7 @@ function replaceReferences(definitions: any, objects: any): any {
             objects[key] = refReplace(definitions, objects[key]);
         }
 
-        // Recursively replace references if this object has properties. 
+        // Recursively replace references if this object has properties.
         if (objects[key].hasOwnProperty('type') && objects[key].type === 'object' && objects[key].properties !== null) {
             objects[key].properties = replaceReferences(definitions, objects[key].properties);
             objects[key].properties = updateDefaults(objects[key].properties, objects[key].default);
@@ -114,7 +114,7 @@ export function generateOptionsSchema(): void {
     if (os.platform() === 'win32') {
         content = content.replace(/\n/gm, "\r\n");
     }
-    
+
     // We use '\u200b' (unicode zero-length space character) to break VS Code's URL detection regex for URLs that are examples. This process will
     // convert that from the readable espace sequence, to just an invisible character. Convert it back to the visible espace sequence.
     content = content.replace(/\u200b/gm, "\\u200b");

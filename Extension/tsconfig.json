@@ -4,15 +4,16 @@
 		"target": "es6",
 		"outDir": "out",
 		"lib": [
-			"es6"
+			"es6", "dom"
 		],
 		"sourceMap": true,
 		"rootDir": ".",
 		"removeComments": true,
 		"noImplicitUseStrict": true
 	},
-	"exclude": [
-		"node_modules",
-		"server"
+	"include": [
+		"src/**/*.ts",
+		"./node_modules/vscode/vscode.d.ts",
+		"./node_modules/vscode/lib/*",
 	]
 }

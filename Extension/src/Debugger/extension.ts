@@ -53,7 +53,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             vscode.window.showErrorMessage('Cannot build and debug because the active file is not a C or C++ source file.');
             return Promise.resolve();
         }
-        
+
         let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
             return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
         });
@@ -75,7 +75,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             return {label: config.name, configuration: config};
         });
 
-        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? "No compiler found" : "Select a compiler" )}).then(async selection => {
+        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? "No compiler found" : "Select a compiler")}).then(async selection => {
             if (!selection) {
                 return; // User canceled it.
             }

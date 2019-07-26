@@ -18,19 +18,19 @@ import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistr
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, IPackage } from './packageManager';
 import { PersistentState } from './LanguageServer/persistentState';
-import { getInstallationInformation, InstallationInformation, setInstallationStage } from './installationInformation';
+import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
-const releaseNotesVersion: number = 4;
+const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
-    initializeTemporaryCommandRegistrar();
     util.setExtensionContext(context);
+    initializeTemporaryCommandRegistrar();
     Telemetry.activate();
     util.setProgress(0);
 
@@ -78,7 +78,7 @@ async function processRuntimeDependencies(): Promise<void> {
             await onlineInstallation();
         } catch (error) {
             handleError(error);
-            
+
             // Send the failure telemetry since postInstall will not be called.
             sendTelemetry(await PlatformInformation.GetPlatformInformation());
         }
@@ -87,6 +87,7 @@ async function processRuntimeDependencies(): Promise<void> {
 
 async function offlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
+    setInstallationType(InstallationType.Offline);
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     setInstallationStage('makeBinariesExecutable');
@@ -107,6 +108,7 @@ async function offlineInstallation(): Promise<void> {
 
 async function onlineInstallation(): Promise<void> {
     setInstallationStage('getPlatformInfo');
+    setInstallationType(InstallationType.Online);
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     await downloadAndInstallPackages(info);
@@ -234,6 +236,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
+    installBlob.telemetryProperties['type'] = installBlob.type === InstallationType.Online ? "online" : "offline";
 
     if (info.distribution) {
         installBlob.telemetryProperties['linuxDistroName'] = info.distribution.name;
@@ -244,7 +247,9 @@ function sendTelemetry(info: PlatformInformation): boolean {
         util.setProgress(util.getProgressInstallSuccess());
         let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
         if (versionShown.Value < releaseNotesVersion) {
-            util.showReleaseNotes();
+            if (versionShown.Value !== versionShown.DefaultValue) {
+                util.showReleaseNotes();
+            }
             versionShown.Value = releaseNotesVersion;
         }
     }
@@ -297,11 +302,12 @@ async function finalizeExtensionActivation(): Promise<void> {
 
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
     // (this may result in rewriting the package.json file)
-    
+
+    let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
+    let packageJson: any = util.getRawPackageJson();
+    let writePackageJson: boolean = false;
     let packageJsonPath: string = util.getExtensionFilePath("package.json");
     if (!packageJsonPath.includes(".vscode-insiders") && !packageJsonPath.includes(".vscode-exploration")) {
-        let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
-        let packageJson: any = util.getRawPackageJson();
         let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
         if (abTestSettings.UseDefaultIntelliSenseEngine) {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
@@ -309,35 +315,50 @@ async function finalizeExtensionActivation(): Promise<void> {
             packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
         }
         if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
-            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+            writePackageJson = true;
         }
     } else {
-        let packageJson: any = util.getRawPackageJson();
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
-            return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+            writePackageJson = true;
         }
+    }
+
+    let prevEnhancedColorizationDefault: any = packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default;
+    if (abTestSettings.UseEnhancedColorization) {
+        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Enabled";
+    } else {
+        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Disabled";
+    }
+    if (prevEnhancedColorizationDefault !== packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default) {
+        writePackageJson = true;
+    }
+
+    if (writePackageJson) {
+        return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
     }
 }
 
 function rewriteManifest(): Promise<void> {
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
     let packageJson: any = util.getRawPackageJson();
-    
+
     packageJson.activationEvents = [
         "onLanguage:cpp",
         "onLanguage:c",
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.BuildAndDebugActiveFile",
-        "onCommand:C_Cpp.ConfigurationEdit",
+        "onCommand:C_Cpp.ConfigurationEditJSON",
+        "onCommand:C_Cpp.ConfigurationEditUI",
         "onCommand:C_Cpp.ConfigurationSelect",
         "onCommand:C_Cpp.ConfigurationProviderSelect",
         "onCommand:C_Cpp.SwitchHeaderSource",
         "onCommand:C_Cpp.Navigate",
         "onCommand:C_Cpp.GoToDeclaration",
         "onCommand:C_Cpp.PeekDeclaration",
-        "onCommand:C_Cpp.ToggleErrorSquiggles",
+        "onCommand:C_Cpp.EnableErrorSquiggles",
+        "onCommand:C_Cpp.DisableErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
         "onCommand:C_Cpp.ShowReleaseNotes",
@@ -346,6 +367,8 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ResumeParsing",
         "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
+        "onCommand:C_Cpp.LogDiagnostics",
+        "onCommand:C_Cpp.RescanWorkspace",
         "onDebug",
         "workspaceContains:/.vscode/c_cpp_properties.json"
     ];
