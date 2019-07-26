@@ -746,13 +746,16 @@ class DefaultClient implements Client {
 
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let task: () => Thenable<WorkspaceBrowseConfiguration> = async () => {
+                if (this.RootUri && await currentProvider.canProvideBrowseConfigurationsPerFolder(tokenSource.token)) {
+                    return (currentProvider.provideFolderBrowseConfiguration(this.RootUri, tokenSource.token));
+                }
                 if (await currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
                     return currentProvider.provideBrowseConfiguration(tokenSource.token);
                 }
                 if (currentProvider.version >= Version.v2) {
                     console.warn("failed to provide browse configuration");
                 }
-                return Promise.reject("");
+                throw new Error("No browse configuration provided");
             };
             this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(
                 async config => {
