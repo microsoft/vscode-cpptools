@@ -1835,9 +1835,9 @@ class DefaultClient implements Client {
         });
     }
 
-    private convertReferenceTypeToString(referenceType: ReferenceType): string {
+    private convertReferenceTypeToString(referenceType: ReferenceType, isFileReference: boolean): string {
         switch (referenceType) {
-            case ReferenceType.ConfirmationInProgress: return "Possible reference (confirmation " + (this.referencesCanceled ? "canceled" : "in progress") + ")";
+            case ReferenceType.ConfirmationInProgress: return "Possible reference" + (isFileReference ? "s" : "") + " (confirmation " + (this.referencesCanceled ? "canceled" : "in progress") + ")";
             case ReferenceType.Comment: return "Comment reference";
             case ReferenceType.String: return "String reference";
             case ReferenceType.Inactive: return "Inactive reference";
@@ -1858,9 +1858,9 @@ class DefaultClient implements Client {
             if (reference.type === ReferenceType.Confirmed) {
                 continue; // Already displayed in VS Code's References.
             }
-            this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type) + ": " + reference.text);
-            let useLineColumn: boolean = reference.position.line !== 0 || reference.position.character !== 0;
-            this.referencesChannel.appendLine(reference.file + (useLineColumn ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : ""));
+            let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
+            this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type, isFileReference) + ": " + reference.text);
+            this.referencesChannel.appendLine(reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : ""));
             this.referencesChannel.appendLine("");
         }
         this.referencesChannel.show(true);
