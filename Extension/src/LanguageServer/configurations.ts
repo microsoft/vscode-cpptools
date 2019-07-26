@@ -178,7 +178,7 @@ export class CppProperties {
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
         let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
-        if (fs.existsSync(configFilePath)) {
+        if (fs.existsSync(configFilePath) && this.rootUri !== null) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
         } else {
             this.propertiesFile = null;
