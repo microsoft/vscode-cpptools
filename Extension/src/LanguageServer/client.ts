@@ -1708,7 +1708,14 @@ class DefaultClient implements Client {
         let params: CustomConfigurationParams = {
             configurationItems: sanitized
         };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params), blockingTask);
+
+        if (blockingTask) {
+            this.notifyWhenReady(() => {
+                this.languageClient.sendNotification(CustomConfigurationNotification, params);
+            } , blockingTask);
+        } else {
+            this.languageClient.sendNotification(CustomConfigurationNotification, params);
+        }
     }
 
     private sendCustomBrowseConfiguration(config: any): Thenable<void> {
