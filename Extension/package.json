@@ -73,7 +73,7 @@
           ],
           "default": null,
           "description": "The full path of the clang-format executable.",
-          "scope": "resource"
+          "scope": "machine"
         },
         "C_Cpp.clang_format_style": {
           "type": "string",
@@ -146,7 +146,7 @@
         "C_Cpp.dimInactiveRegions": {
           "type": "boolean",
           "default": true,
-          "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting is ignored by the Tag Parser engine.",
+          "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
           "scope": "resource"
         },
         "C_Cpp.inactiveRegionOpacity": {
@@ -503,8 +503,8 @@
             "Enabled",
             "Disabled"
           ],
-          "default": "Disabled",
-          "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled.",
+          "default": "Enabled",
+          "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
           "scope": "resource"
         },
         "C_Cpp.dependencyManager": {
@@ -1478,14 +1478,15 @@
   },
   "scripts": {
     "compile": "npm run vscode:prepublish",
-    "compileDev": "webpack --mode development",
+    "compileDev": "npm run prepublishjs && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "postinstall": "node ./node_modules/vscode/bin/install",
+    "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "node ./tools/prepublish.js && webpack --mode production",
+    "vscode:prepublish": "npm run prepublishjs && webpack --mode production",
     "watch": "webpack --watch --mode development"
   },
   "devDependencies": {

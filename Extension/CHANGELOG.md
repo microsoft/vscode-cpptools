@@ -1,11 +1,34 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.24.0-insiders3: June 27, 2019
+### Enhancements
+* Add validation to the advanced configuration UI settings. [PR #3838](https://github.com/microsoft/vscode-cpptools/pull/3838)
+
+### Bug Fixes
+* Fix IntelliSense process crash on hover with certain arrays. [#3081](https://github.com/Microsoft/vscode-cpptools/issues/3081)
+* Fix crashes after edits, document highlighting, completion, hover, and squiggles. [#3834](https://github.com/microsoft/vscode-cpptools/issues/3834)
+* Fix `envFile` variable substitution. [#3836](https://github.com/microsoft/vscode-cpptools/issues/3836)
+* Fix missing headers popup. [PR #3840](https://github.com/microsoft/vscode-cpptools/pull/3840)
+
+## Version 0.24.0-insiders2: June 25, 2019
+### Enhancements
+* Change `C_Cpp.clang_format_path` to `machine` scope. [#3774](https://github.com/microsoft/vscode-cpptools/issues/3774)
+* Removed syntactic/lexical colorization from `enhancedColorization`.  [PR #3821](https://github.com/microsoft/vscode-cpptools/pull/3821)
+
+### Bug Fixes
+* Fix crash when tag parsing Objective-C code. [#3776](https://github.com/microsoft/vscode-cpptools/issues/3776)
+* Fix duplicate slashes getting added to `c_cpp_properties.json`. [PR #3778](https://github.com/microsoft/vscode-cpptools/pull/3778)
+* Fix incorrect "file already opened in editor" message on Linux/Mac. [#3786](https://github.com/microsoft/vscode-cpptools/issues/3786)
+* Fix colorization for themes with background colors equal to the editor background color. [#3780](https://github.com/microsoft/vscode-cpptools/issues/3780)
+* Improve performance of colorization. [#3781](https://github.com/microsoft/vscode-cpptools/issues/3781)
+* Fix regression crash on hover. [#3792](https://github.com/microsoft/vscode-cpptools/issues/3792)
+
 ## Version 0.24.0-insiders: June 14, 2019
 ### New Features
-* Syntactic/lexical and semantic colorization [PR #3651](https://github.com/microsoft/vscode-cpptools/pull/3651) [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md)
+* Semantic colorization [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md)  [#230](https://github.com/microsoft/vscode-cpptools/issues/230)
 * Add `Rescan Workspace` command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
 
-### Minor Changes
+### Enhancements
 * Configuration UI editor improvements:  
   * Add list of detected compiler paths. [PR #3708](https://github.com/microsoft/vscode-cpptools/pull/3708)
   * Enable selecting/editing of other configurations and add "Advanced Settings" section. [PR #3732](https://github.com/microsoft/vscode-cpptools/pull/3732)
