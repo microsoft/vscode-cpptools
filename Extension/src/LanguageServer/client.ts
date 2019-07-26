@@ -291,10 +291,10 @@ class DefaultClient implements Client {
         return workspaceFolder ? workspaceFolder.name : "untitled";
     }
 
-    private getUnsupportedErrorMessage() {
-        let msg:string = '';
+    private getUnsupportedErrorMessage() : string {
+        let msg: string = '';
 
-        if (process.arch != 'x32' && process.arch != 'x64') {
+        if (process.arch !== 'x32' && process.arch !== 'x64') {
             msg += "Architecture " + String(process.arch) + " is not supported. ";
         }
 
