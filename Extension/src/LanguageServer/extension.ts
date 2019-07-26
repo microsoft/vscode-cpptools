@@ -181,7 +181,7 @@ export function activate(activationEventOccurred: boolean): void {
                 return Promise.resolve([]);
             }
 
-            telemetry.logLanguageServerEvent('onVcpkgCodeActionsProvided');
+            telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
 
             if (!await clients.ActiveClient.getVcpkgInstalled()) {
                 return Promise.resolve([getVcpkgHelpAction()]);
@@ -1042,16 +1042,18 @@ function onTakeSurvey(): void {
 }
 
 async function onVcpkgOnlineHelpSuggested(dummy?: any): Promise<void> {
-    telemetry.logLanguageServerEvent(dummy ? 'onVcpkgHelpCodeAction' : 'onVcpkgHelpCommandPalette');
+    telemetry.logLanguageServerEvent('vcpkgAction', { 'source': dummy ? 'CodeAction' : 'CommandPalette', 'action': 'vcpkgHelp' });
     const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
 async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void> {
     onActivationEvent();
+    let source: string;
     if (ports && ports.length) {
-        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCodeAction');
+        source = 'CodeAction';
     } else {
+        source = 'CommandPalette';
         // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
         const missingIncludeLocations: [vscode.TextDocument, number[]][] = [];
         vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
@@ -1091,13 +1093,11 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
             return Promise.resolve();
         }
         ports = ports.filter((port: string, index: number) => { return ports.indexOf(port) === index; });
-
-        telemetry.logLanguageServerEvent('onVcpkgClipboardInstallSuggestedCommand');
     }
 
     let installCommand: string = 'vcpkg install';
     ports.forEach(port => installCommand += ` ${port}`);
-    telemetry.logLanguageServerEvent('vcpkgClipboardInstallSuggestedPorts', { 'ports': ports.toString() });
+    telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
 
     return vscode.env.clipboard.writeText(installCommand);
 }
