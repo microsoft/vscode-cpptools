@@ -291,6 +291,20 @@ class DefaultClient implements Client {
         return workspaceFolder ? workspaceFolder.name : "untitled";
     }
 
+    private getUnsupportedErrorMessage() {
+        let msg:string = '';
+
+        if (process.arch != 'x32' && process.arch != 'x64') {
+            msg += "Architecture " + String(process.arch) + " is not supported. ";
+        }
+
+        if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
+            msg += "Alpine containers are not supported. ";
+        }
+
+        return msg;
+    }
+
     /**
      * All public methods on this class must be guarded by the "pendingTask" promise. Requests and notifications received before the task is
      * complete are executed after this promise is resolved.
@@ -342,7 +356,10 @@ class DefaultClient implements Client {
                     this.isSupported = false;   // Running on an OS we don't support yet.
                     if (!failureMessageShown) {
                         failureMessageShown = true;
-                        vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + String(err));
+                        vscode.window.showErrorMessage(
+                            this.getUnsupportedErrorMessage() +
+                            "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " +
+                            String(err));
                     }
                 }));
         } catch (err) {
@@ -355,7 +372,11 @@ class DefaultClient implements Client {
                 } else {
                     additionalInfo = String(err);
                 }
-                vscode.window.showErrorMessage("Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " + additionalInfo);
+
+                vscode.window.showErrorMessage(
+                    this.getUnsupportedErrorMessage() +
+                    "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: " +
+                    additionalInfo);
             }
         }
     }
