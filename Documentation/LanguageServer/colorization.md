@@ -18,32 +18,32 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 
 | Token         | Scope         |
 | ------------- |:-------------:|
-| Class Template | entity.name.class.template |
+| Class Template | entity.name.type.class.templated |
 | Enumerator | variable.other.enummember |
 | Event  (C++/CLI) | variable.other.event |
 | Function | entity.name.function |
-| Function Template | entity.name.function.template |
-| Generic Type (C++/CLI) | entity.name.class.generic |
+| Function Template | entity.name.function.templated |
+| Generic Type (C++/CLI) | entity.name.type.class.generic |
 | Global Variable | variable.other.global |
 | Label | entity.name.label |
 | Local Variable | variable.other.local |
 | Macro | entity.name.function.preprocessor |
-| Member Field  | variable.other.member |
+| Member Field  | variable.other.property |
 | Member Function | entity.name.function.member |
-| Member Operator | keyword.operator.member |
-| Namespace | entity.name.type.namespace |
+| Namespace | entity.name.namespace |
 | New / Delete | keyword.operator.new |
-| Operator Function | entity.name.function.operator |
+| Operator Overload Function | entity.name.function.operator |
+| Operator Overload Member | entity.name.function.operator.member |
 | Parameter | variable.parameter |
-| Property (C++/CLI) | variable.other.property |
-| Reference Type (C++/CLI) | entity.name.class.reference |
-| Static Member Field | variable.other.member.static |
+| Property (C++/CLI) | variable.other.property.cli |
+| Reference Type (C++/CLI) | entity.name.type.class.reference |
+| Static Member Field | variable.other.property.static |
 | Static Member Function | entity.name.function.member.static |
 | Type | entity.name.type |
-| User-Defined Literal - Number | entity.name.user-defined-literal.number |
-| User-Defined Literal - Raw | entity.name.user-defined-literal |
-| User-Defined Literal - String | entity.name.user-defined-literal.string |
-| Value Type (C++/CLI) | entity.name.class.value |
+| User-Defined Literal - Number | entity.name.operator.custom-literal.number |
+| User-Defined Literal - Raw | entity.name.operator.custom-literal |
+| User-Defined Literal - String | entity.name.operator.custom-literal.string |
+| Value Type (C++/CLI) | entity.name.type.class.value |
 
 Many of the tokens recognized by IntelliSense do not directly map to existing scopes in the VS Code's default C/C++ TextMate grammar, so are likely not colored by existing VS Code themes.
 
@@ -176,13 +176,13 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.class.reference",
+                    "scope": "entity.name.type.class.reference",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
                 },
                 {
-                    "scope": "entity.name.class.value",
+                    "scope": "entity.name.type.class.value",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
@@ -200,7 +200,7 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "variable.other.member",
+                    "scope": "variable.other.property",
                     "settings": {
                         "foreground": "#DADADA"
                     }
@@ -212,7 +212,7 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "variable.other.member.static",
+                    "scope": "variable.other.property.static",
                     "settings": {
                         "foreground": "#C8C8C8"
                     }
@@ -224,19 +224,19 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.class.template",
+                    "scope": "entity.name.type.class.templated",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
                 },
                 {
-                    "scope": "entity.name.class.generic",
+                    "scope": "entity.name.type.class.generic",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
                 },
                 {
-                    "scope": "entity.name.function.template",
+                    "scope": "entity.name.function.templated",
                     "settings": {
                         "foreground": "#C8C8C8"
                     }
@@ -254,19 +254,19 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal",
+                    "scope": "entity.name.operator.custom-literal",
                     "settings": {
                         "foreground": "#DADADA"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.string",
+                    "scope": "entity.name.operator.custom-literal.string",
                     "settings": {
                         "foreground": "#D69D85"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.number",
+                    "scope": "entity.name.operator.custom-literal.number",
                     "settings": {
                         "foreground": "#B5CEA8"
                     }
@@ -391,13 +391,13 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.class.reference",
+                    "scope": "entity.name.type.class.reference",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
                 },
                 {
-                    "scope": "entity.name.class.value",
+                    "scope": "entity.name.type.class.value",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
@@ -415,7 +415,7 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "variable.other.member",
+                    "scope": "variable.other.property",
                     "settings": {
                         "foreground": "#000000"
                     }
@@ -427,7 +427,7 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "variable.other.member.static",
+                    "scope": "variable.other.property.static",
                     "settings": {
                         "foreground": "#000000"
                     }
@@ -439,19 +439,19 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.class.template",
+                    "scope": "entity.name.type.class.templated",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
                 },
                 {
-                    "scope": "entity.name.class.generic",
+                    "scope": "entity.name.type.class.generic",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
                 },
                 {
-                    "scope": "entity.name.function.template",
+                    "scope": "entity.name.function.templated",
                     "settings": {
                         "foreground": "#000000"
                     }
@@ -469,19 +469,19 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal",
+                    "scope": "entity.name.operator.custom-literal",
                     "settings": {
                         "foreground": "#000000"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.string",
+                    "scope": "entity.name.operator.custom-literal.string",
                     "settings": {
                         "foreground": "#A31515"
                     }
                 },
                 {
-                    "scope": "entity.name.user-defined-literal.number",
+                    "scope": "entity.name.operator.custom-literal.number",
                     "settings": {
                         "foreground": "#000000"
                     }
