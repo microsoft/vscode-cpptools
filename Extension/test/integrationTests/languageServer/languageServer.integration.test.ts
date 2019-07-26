@@ -1,6 +1,6 @@
-/*--------------------------------------------------------------------------------------------- 
- *  Copyright (c) Microsoft Corporation. All rights reserved. 
- *  Licensed under the MIT License. See License.txt in the project root for license information. 
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
@@ -10,14 +10,18 @@ import * as util from '../../../src/common';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../../src/LanguageServer/configurations';
-import { CppSettings } from '../../../src/LanguageServer/settings';
 import { getActiveClient } from '../../../src/LanguageServer/extension';
+import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
+
+const defaultTimeout: number = 60000;
 
 suite("multiline comment setting tests", function(): void {
-    suiteSetup(async function(): Promise<void> { 
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
-        if (!extension.isActive) { 
-            await extension.activate(); 
+    suiteSetup(async function(): Promise<void> {
+        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        util.setExtensionPath(extension.extensionPath);
+        initializeTemporaryCommandRegistrar();
+        if (!extension.isActive) {
+            await extension.activate();
         }
     });
 
@@ -187,7 +191,7 @@ suite("extensibility tests v2", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, 2500);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -262,7 +266,7 @@ suite("extensibility tests v1", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, 2500);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -334,7 +338,7 @@ suite("extensibility tests v0", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, 2500);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -345,10 +349,10 @@ suite("extensibility tests v0", function(): void {
 
 /*
 suite("configuration tests", function() {
-    suiteSetup(async function() { 
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
-        if (!extension.isActive) { 
-            await extension.activate(); 
+    suiteSetup(async function() {
+        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        if (!extension.isActive) {
+            await extension.activate();
         }
         // Open a c++ file to start the language server.
         await vscode.workspace.openTextDocument({ language: "cpp", content: "int main() { return 0; }"});

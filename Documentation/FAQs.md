@@ -2,6 +2,8 @@
 
 ## Table of Contents
 * Setup: [Debugging Setup](#debugging-setup)
+* Setup: [What is the ipch folder?](#What-is-the-ipch-folder)
+* Setup: [How do I disable the IntelliSense cache (ipch)?](#how-do-i-disable-the-intellisense-cache-ipch)
 * Debugger: [Why is debugging not working?](#why-is-debugging-not-working)
 * Build: [How to enable debug symbols](#how-to-enable-debug-symbols)
 * Logging: [How to enable logging](#how-to-enable-logging)
@@ -14,6 +16,25 @@ Click menu item: `Debug` -> `Add Configuration...`
 The file **launch.json** will now be open for editing with a new configuration. The default settings will *probably* work except that you need to specify the **program** setting.
 
 See the [**Documentation/Debugger**](https://github.com/Microsoft/vscode-cpptools/tree/master/Documentation/Debugger) folder in this repository for more in-depth documentation on how to configure the debugger.
+
+## What is the ipch folder?
+
+The language server caches information about included header files to improve the performance of IntelliSense. When you edit C/C++ files in your workspace folder, the language server will store cache files in the `ipch` folder. By default, the `ipch` folder is stored under the user directory. Specifically, it is stored under `%LocalAppData%\vscode-cpptools` on Windows, and for Linux and macOS it is under `~/.vscode-cpptools`. By using the user directory as the default path, it will create one cache location per user for the extension. As the cache size limit is applied to a cache location, having one cache location per user will limit the disk space usage of the cache to that one folder for everyone using the default setting value.
+
+VS Code per-workspace storage folders were not selected for the following reason:
+* The workspace storage location provided by VS Code is somewhat obscure and we had reservations about writing GB's worth of files in this location where users may not see them or know where to find them.
+
+With this in mind we knew that we would not be able to meet the needs of every different development environment, so we provided settings to allow you to customize the way that works best for your situation.
+
+#### `"C_Cpp.intelliSenseCachePath": <string>`
+This setting allows you to set workspace or global overrides for the cache path. For example, if you want to share a single cache location for all workspace folders, open the VS Code settings, and add a "User" setting for "IntelliSense Cache Path".
+
+#### `"C_Cpp.intelliSenseCacheSize": <number>`
+This setting allows you to set a limit on the amount of caching the extension does. This is an approximation, but the extension will make a best effort to keep the cache size as close to the limit you set as possible. If you are sharing the cache location across workspaces as explained above, you can still increase/decrease the limit, but you should make sure that you add a "User" setting for "IntelliSense Cache Size".
+
+## How do I disable the IntelliSense cache (ipch)?
+
+If you do not want to use the IntelliSense caching feature to improve the performance of IntelliSense, you can disable the feature by setting the "IntelliSense Cache Size" setting to 0. (or `"C_Cpp.intelliSenseCacheSize": 0"` in the JSON settings editor)
 
 ## Why is debugging not working?
 

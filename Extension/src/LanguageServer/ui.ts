@@ -171,7 +171,8 @@ export class UI {
         for (let i: number = 0; i < configurationNames.length; i++) {
             items.push({ label: configurationNames[i], description: "", index: i });
         }
-        items.push({ label: "Edit Configurations...", description: "", index: configurationNames.length });
+        items.push({ label: "Edit Configurations (UI)", description: "", index: configurationNames.length });
+        items.push({ label: "Edit Configurations (JSON)", description: "", index: configurationNames.length + 1 });
 
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.index : -1);
@@ -231,7 +232,7 @@ export class UI {
         } else {
             items.push({ label: "Pause Parsing", description: "", index: 0 });
         }
-        
+
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.index : -1);
     }

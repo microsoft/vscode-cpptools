@@ -12,19 +12,24 @@ class PersistentStateBase<T> {
     private key: string;
     private defaultvalue: T;
     private state: vscode.Memento;
+    private curvalue: T;
 
     constructor(key: string, defaultValue: T, state: vscode.Memento) {
         this.key = key;
         this.defaultvalue = defaultValue;
         this.state = state;
+        this.curvalue = defaultValue;
     }
 
     public get Value(): T {
-        return this.state.get<T>(this.key, this.defaultvalue);
+        return this.state ? this.state.get<T>(this.key, this.defaultvalue) : this.curvalue;
     }
 
     public set Value(newValue: T) {
-        this.state.update(this.key, newValue);
+        if (this.state) {
+            this.state.update(this.key, newValue);
+        }
+        this.curvalue = newValue;
     }
 
     public get DefaultValue(): T {
@@ -35,13 +40,13 @@ class PersistentStateBase<T> {
 // Abstraction for global state that persists across activations but is not present in a settings file
 export class PersistentState<T> extends PersistentStateBase<T> {
     constructor(key: string, defaultValue: T) {
-        super(key, defaultValue, util.extensionContext.globalState);
+        super(key, defaultValue, util.extensionContext ? util.extensionContext.globalState : null);
     }
 }
 
 export class PersistentWorkspaceState<T> extends PersistentStateBase<T> {
     constructor(key: string, defaultValue: T) {
-        super(key, defaultValue, util.extensionContext.workspaceState);
+        super(key, defaultValue, util.extensionContext ? util.extensionContext.workspaceState : null);
     }
 }
 

@@ -1,4 +1,4 @@
-name: $(Date:yyyyMMdd).$(Rev:.r)
+name: $(Date:yyyyMMdd).$(Rev:r)
 pr: 
 - 'master'
 jobs:

@@ -1,24 +1,24 @@
-/*--------------------------------------------------------------------------------------------- 
- *  Copyright (c) Microsoft Corporation. All rights reserved. 
- *  Licensed under the MIT License. See License.txt in the project root for license information. 
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
 import * as assert from 'assert';
- 
+
 suite(`Debug Integration Test: `, function(): void {
     let origFactoryFile: string;
     let tempFactoryFile: string;
     let hijackedFactoryFile: string;
 
     suiteSetup(async function(): Promise<void> {
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
+        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
         if (!extension.isActive) {
-            await extension.activate(); 
+            await extension.activate();
         }
     });
- 
-    test("Starting (gdb) Launch from the workspace root should create an Active Debug Session", async function() { 
+
+    test("Starting (gdb) Launch from the workspace root should create an Active Debug Session", async () => {
         // If it is failing on startDebugging. Investigate the SimpleCppProject's tasks.json or launch.json.
         await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "(gdb) Launch");
 
@@ -34,4 +34,4 @@ suite(`Debug Integration Test: `, function(): void {
 
         await debugSessionTerminated;
     });
-}); 
+});
