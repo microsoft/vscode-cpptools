@@ -1297,7 +1297,7 @@ class DefaultClient implements Client {
     private currentReferencesProgress: ReportReferencesProgressNotification;
     private prevReferencesProgressCount: number;
     private prevReferencesProgressMessage: string;
-    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>): void {
+    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
         let blockedMessage: string = this.blockedByCursorPosition ? ". Move your cursor to any identifier to get results." : "";
         switch (this.currentReferencesProgress.referencesProgress) {
             case ReferencesProgress.Started:
@@ -1354,7 +1354,7 @@ class DefaultClient implements Client {
                     let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences;
                     currentMessage = `Parsing(${numFinishedParsing}/${numTotalToParse})` + blockedMessage;
                 }
-                if (currentProgress > this.prevReferencesProgressCount || currentMessage !== this.prevReferencesProgressMessage) {
+                if (forceUpdate || currentProgress > this.prevReferencesProgressCount || currentMessage !== this.prevReferencesProgressMessage) {
                     this.prevReferencesProgressCount = currentProgress;
                     this.prevReferencesProgressMessage = currentMessage;
 
@@ -1421,6 +1421,7 @@ class DefaultClient implements Client {
         message?: string;
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
+    private referenceProgressUICounter: number;
     private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
@@ -1430,25 +1431,27 @@ class DefaultClient implements Client {
                 this.referencesCanceled = false;
                 this.prevReferencesProgressCount = 0;
                 this.prevReferencesProgressMessage = "";
+                this.referenceProgressUICounter = 0;
                 this.delayReferencesProgress = setInterval(() => {
+                    this.newReferencesProgress = true;
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                     // tslint:disable-next-line: promise-must-complete
                         new Promise((resolve) => {
-                            this.newReferencesProgress = true;
-                            this.reportReferencesProgress(progress);
-                            let updateProgress: NodeJS.Timeout = setInterval(() => {
+                            this.reportReferencesProgress(progress, true);
+                            let currentProgressUICounter: number = ++this.referenceProgressUICounter;
+                            let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
                                 if (token.isCancellationRequested && !this.referencesCanceled) {
                                     this.languageClient.sendNotification(CancelReferencesNotification);
                                     this.sendRequestReferences();
                                     this.referencesCanceled = true;
                                 }
-                                if (this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished) {
-                                    clearInterval(updateProgress);
+                                if (this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished || currentProgressUICounter !== this.referenceProgressUICounter) {
+                                    clearInterval(currentUpdateProgressTimer);
                                     resolve();
                                 } else {
                                     this.newReferencesProgress = true;
-                                    this.reportReferencesProgress(progress);
+                                    this.reportReferencesProgress(progress, false);
                                 }
                             }, 1000);
                         });
