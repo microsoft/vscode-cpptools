@@ -755,12 +755,14 @@ class DefaultClient implements Client {
                 if (currentProvider.version >= Version.v2) {
                     console.warn("failed to provide browse configuration");
                 }
-                throw new Error("No browse configuration provided");
+                return null;
             };
             this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(
                 async config => {
                     await this.sendCustomBrowseConfiguration(config);
-                    this.resumeParsing();
+                    if (currentProvider.version >= Version.v2) {
+                        this.resumeParsing();
+                    }
                 },
                 () => {});
         });
