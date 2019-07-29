@@ -507,13 +507,9 @@
           "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
           "scope": "resource"
         },
-        "C_Cpp.dependencyManager": {
-          "type": "string",
-          "enum": [
-            "vcpkg",
-            "none"
-          ],
-          "default": "vcpkg",
+        "C_Cpp.vcpkg.enabled": {
+          "type": "boolean",
+          "default": true,
           "markdownDescription": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/)."
         }
       }
@@ -630,8 +626,8 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.VcpkgOnlineHelp",
-        "title": "%c_cpp.command.vcpkgOnlineHelp.title%",
+        "command": "C_Cpp.VcpkgOnlineHelpSuggested",
+        "title": "%c_cpp.command.vcpkgOnlineHelpSuggested.title%",
         "category": "C/C++"
       }
     ],
