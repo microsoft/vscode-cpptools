@@ -165,7 +165,6 @@ export function activate(activationEventOccurred: boolean): void {
         }
     });
 
-    vcpkgDbPromise = initVcpkgDatabase();
     const selector: vscode.DocumentSelector = [
         { scheme: 'file', language: 'cpp' },
         { scheme: 'file', language: 'c' }
@@ -437,9 +436,11 @@ function realActivation(): void {
     updateLanguageConfigurations();
 
     reportMacCrashes();
-    
+
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    
+
+    vcpkgDbPromise = initVcpkgDatabase();
+
     if (settings.updateChannel === 'Default') {
         suggestInsidersChannel();
     } else if (settings.updateChannel === 'Insiders') {
