@@ -885,7 +885,7 @@ class DefaultClient implements Client {
 
     public getDependencyManager(): Thenable<string> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return this.queueTask(() => Promise.resolve(cppSettings.dependencyManager));
+        return Promise.resolve(cppSettings.dependencyManager);
     }
 
     public getKnownCompilers(): Thenable<configs.KnownCompiler[]> {
