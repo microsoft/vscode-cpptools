@@ -59,7 +59,7 @@ export function getRawTasksJson(): Promise<any> {
             fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
             let rawTasks: any = {};
             try {
-                rawTasks = JSON.parse(fileContents); 
+                rawTasks = JSON.parse(fileContents);
             } catch (error) {
                 return reject(new Error(failedToParseTasksJson));
             }
@@ -89,10 +89,10 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     rawTasksJson.version = "2.0.0";
 
-    if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
+    if (!rawTasksJson.tasks.find(task => task.label === selectedTask.definition.label)) {
         rawTasksJson.tasks.push(selectedTask.definition);
     }
-    
+
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     let settings: OtherSettings = new OtherSettings();
     await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, settings.editorTabSize));
@@ -248,7 +248,7 @@ export function getProgressExecutableSuccess(): number { return progressExecutab
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
-let releaseNotesPanel: vscode.WebviewPanel = undefined;
+let releaseNotesPanel: vscode.WebviewPanel;
 
 export async function showReleaseNotes(): Promise<void> {
     if (releaseNotesPanel) {
@@ -285,7 +285,7 @@ export function isOptionalString(input: any): input is string|undefined {
 }
 
 export function isArrayOfString(input: any): input is string[] {
-    return isArray(input) && input.every(item => isString(item));
+    return isArray(input) && input.every(isString);
 }
 
 export function isOptionalArrayOfString(input: any): input is string[]|undefined {
@@ -797,13 +797,13 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
         if (compilerPath === "cl.exe") {
             // Input is only compiler name, this is only for cl.exe
             compilerName = compilerPath;
-    
+
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
-                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
+                additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
                 compilerPath = compilerPath.substr(1, endQuote - 1);
                 compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
             }
@@ -825,7 +825,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                 if (compilerPath !== potentialCompilerPath) {
                     // Found a valid compilerPath and args.
                     additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
-                    additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
+                    additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
                     compilerPath = potentialCompilerPath;
                 }
             }
@@ -890,16 +890,14 @@ export class BlockingTask<T> {
                 this.dependency.promise.then(f1, f2);
             });
         }
+        this.promise.then(() => this.done = true, () => this.done = true);
     }
 
     public get Done(): boolean {
         return this.done;
     }
 
-    public then<T2>(onSucceeded: (value: T) => T2, onRejected?: (err) => any): Thenable<T2> {
-        if (onRejected) {
-            return this.promise.then(onSucceeded, onRejected);
-        }
-        return this.promise.then(onSucceeded);
+    public getPromise(): Thenable<T> {
+        return this.promise;
     }
 }
