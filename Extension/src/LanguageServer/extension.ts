@@ -171,7 +171,7 @@ export function activate(activationEventOccurred: boolean): void {
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-            if (await clients.ActiveClient.getDependencyManager() !== 'vcpkg') {
+            if (!await clients.ActiveClient.getVcpkgEnabled()) {
                 return Promise.resolve([]);
             }
 
