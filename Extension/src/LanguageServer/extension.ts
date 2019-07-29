@@ -420,7 +420,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();
     }
-    clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
+    clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end), event.kind);
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {

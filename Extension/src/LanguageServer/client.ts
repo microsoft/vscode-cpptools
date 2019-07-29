@@ -301,7 +301,7 @@ export interface Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
-    selectionChanged(selection: Range): void;
+    selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -713,7 +713,6 @@ class DefaultClient implements Client {
 
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
         if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
-            this.sendRequestReferencesIfNewProgress();
             this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
         }
     }
@@ -1456,7 +1455,7 @@ class DefaultClient implements Client {
                                     resolve();
                                 } else {
                                     if (this.reportReferencesProgress(progress, false)) {
-                                        if (this.blockedByCursorPosition || Date.now() - this.lastUpdateTicks >= 5000) {
+                                        if (this.blockedByCursorPosition || Date.now() - this.lastUpdateTicks >= 2000) {
                                             this.lastUpdateTicks = Date.now();
                                             this.newReferencesProgress = true;
                                         }
@@ -1600,14 +1599,20 @@ class DefaultClient implements Client {
         this.resumeParsing();
     }
 
-    public selectionChanged(selection: Range): void {
+    private previousEditVersionDuringSelectionChange: number = 0;
+    public selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void {
         this.notifyWhenReady(() => {
             if (this.activeDocumentChangedBeforeSelectionChanged) {
                 if (selection.start.line !== 0 && selection.start.character !== 0) {
                     this.activeDocumentChangedBeforeSelectionChanged = false;
                 }
-            } else {
+            } else if (kind === vscode.TextEditorSelectionChangeKind.Mouse) {
                 this.sendRequestReferencesIfNewProgress();
+            } else if (kind === vscode.TextEditorSelectionChangeKind.Keyboard) {
+                if (this.editVersion <= this.previousEditVersionDuringSelectionChange) {
+                    this.sendRequestReferencesIfNewProgress();
+                }
+                this.previousEditVersionDuringSelectionChange = this.editVersion;
             }
             this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
         });
@@ -1939,7 +1944,7 @@ class NullClient implements Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
     activate(): void {}
-    selectionChanged(selection: Range): void {}
+    selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void {}
     resetDatabase(): void {}
     deactivate(): void {}
     pauseParsing(): void {}
