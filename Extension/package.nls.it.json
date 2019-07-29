@@ -19,5 +19,7 @@
     "c_cpp.command.takeSurvey.title": "Partecipa al sondaggio",
     "c_cpp.command.buildAndDebugActiveFile.title": "Compila ed esegui il debug del file attivo",
     "c_cpp.command.logDiagnostics.title": "Registra diagnostica",
-    "c_cpp.command.rescanWorkspace.title": "Ripetere l'analisi dell'area di lavoro"
+    "c_cpp.command.rescanWorkspace.title": "Ripetere l'analisi dell'area di lavoro",
+    "c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copia il comando di installazione di vcpkg negli appunti",
+    "c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visita la pagina di aiuto di vcpkg"
 }
