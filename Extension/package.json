@@ -630,8 +630,8 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.VcpkgOnlineHelpSuggested",
-        "title": "%c_cpp.command.vcpkgOnlineHelpSuggested.title%",
+        "command": "C_Cpp.VcpkgOnlineHelp",
+        "title": "%c_cpp.command.vcpkgOnlineHelp.title%",
         "category": "C/C++"
       }
     ],

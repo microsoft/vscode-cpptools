@@ -90,7 +90,7 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
 function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
-        command: { title: 'VcpkgOnlineHelp', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
+        command: { title: 'vcpkgOnlineHelpSuggested', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
         title: "Learn how to install a library for this header with vcpkg",
         kind: vscode.CodeActionKind.QuickFix
     };
@@ -98,7 +98,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
 
 function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
     return {
-        command: { title: 'VcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
+        command: { title: 'vcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
         title: `Copy vcpkg command to install '${port}' to the clipboard`,
         kind: vscode.CodeActionKind.QuickFix
     };
@@ -1042,7 +1042,7 @@ function onTakeSurvey(): void {
 }
 
 async function onVcpkgOnlineHelpSuggested(dummy?: any): Promise<void> {
-    telemetry.logLanguageServerEvent('vcpkgAction', { 'source': dummy ? 'CodeAction' : 'CommandPalette', 'action': 'vcpkgHelp' });
+    telemetry.logLanguageServerEvent('vcpkgAction', { 'source': dummy ? 'CodeAction' : 'CommandPalette', 'action': 'vcpkgOnlineHelpSuggested' });
     const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
     vscode.commands.executeCommand('vscode.open', uri);
 }
