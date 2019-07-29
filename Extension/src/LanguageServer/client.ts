@@ -1297,7 +1297,7 @@ class DefaultClient implements Client {
     private currentReferencesProgress: ReportReferencesProgressNotification;
     private prevReferencesProgressCount: number;
     private prevReferencesProgressMessage: string;
-    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
+    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): boolean {
         let blockedMessage: string = this.blockedByCursorPosition ? ". Move your cursor to any identifier to get results." : "";
         switch (this.currentReferencesProgress.referencesProgress) {
             case ReferencesProgress.Started:
@@ -1359,12 +1359,15 @@ class DefaultClient implements Client {
                     this.prevReferencesProgressMessage = currentMessage;
 
                     progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
+                } else {
+                    return false;
                 }
                 break;
             case ReferencesProgress.FinalResultsAvailable:
                 progress.report({ message: 'Finished' + blockedMessage, increment: 100 });
                 break;
         }
+        return true;
     }
 
     private referencesRequestHasOccurred: boolean;
@@ -1422,6 +1425,7 @@ class DefaultClient implements Client {
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
     private referenceProgressUICounter: number;
+    private lastUpdateTicks: number;
     private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
@@ -1434,6 +1438,7 @@ class DefaultClient implements Client {
                 this.referenceProgressUICounter = 0;
                 this.delayReferencesProgress = setInterval(() => {
                     this.newReferencesProgress = true;
+                    this.lastUpdateTicks = Date.now();
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                     // tslint:disable-next-line: promise-must-complete
@@ -1450,8 +1455,12 @@ class DefaultClient implements Client {
                                     clearInterval(currentUpdateProgressTimer);
                                     resolve();
                                 } else {
-                                    this.newReferencesProgress = true;
-                                    this.reportReferencesProgress(progress, false);
+                                    if (this.reportReferencesProgress(progress, false)) {
+                                        if (this.blockedByCursorPosition || Date.now() - this.lastUpdateTicks >= 5000) {
+                                            this.lastUpdateTicks = Date.now();
+                                            this.newReferencesProgress = true;
+                                        }
+                                    }
                                 }
                             }, 1000);
                         });
