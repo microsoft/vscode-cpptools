@@ -305,7 +305,9 @@ export class CppProperties {
             // don't set a default when compileCommands is in use.
             configuration.compilerPath = this.defaultCompilerPath;
         }
-        if (isUnset(settings.defaultCompilerArgs)) { // Should this also have the other validations above?
+        if (isUnset(settings.defaultCompilerArgs) && this.defaultCompilerArgs &&
+            isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
+            // Don't set a default when compileCommands is in use.
             configuration.compilerArgs = this.defaultCompilerArgs;
         }
         if (this.knownCompilers) {
