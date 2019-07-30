@@ -68,11 +68,11 @@ async function processRuntimeDependencies(): Promise<void> {
                 // Send the failure telemetry since postInstall will not be called.
                 sendTelemetry(await PlatformInformation.GetPlatformInformation());
             }
-        // The extension have been installed and activated before.
+            // The extension have been installed and activated before.
         } else {
             await finalizeExtensionActivation();
         }
-    // No lock file, need to download and install dependencies.
+        // No lock file, need to download and install dependencies.
     } else {
         try {
             await onlineInstallation();
@@ -273,7 +273,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
     if (!installSuccess) {
         return Promise.reject<void>("");
     } else {
-        // Notify user's if debugging may not be supported on their OS.
+        // Notify users if debugging may not be supported on their OS.
         util.checkDistro(info);
 
         return finalizeExtensionActivation();
