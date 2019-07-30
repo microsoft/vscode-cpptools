@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
-    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range
+    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, DocumentFilter
 } from 'vscode-languageclient';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
@@ -32,6 +32,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
 import * as nls from 'vscode-nls';
+import { lookupString } from './loctable';
 
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -49,9 +50,10 @@ interface TelemetryPayload {
     metrics?: { [key: string]: number };
 }
 
-interface OutputNotificationBody {
-    category: string;
-    output: string;
+interface DebugProtocolParams {
+    jsonrpc: string;
+    method: string;
+    params?: any;
 }
 
 interface ReportStatusNotificationBody {
@@ -77,11 +79,6 @@ interface SwitchHeaderSourceParams {
 
 interface FileChangedParams {
     uri: string;
-}
-
-interface OutputNotificationBody {
-    category: string;
-    output: string;
 }
 
 interface SemanticColorizationRegionsParams {
@@ -163,6 +160,44 @@ interface ColorThemeChangedParams {
     name: string;
 }
 
+export interface Diagnostic {
+    range: Range;
+    code?: number | string;
+    source?: string;
+    severity: vscode.DiagnosticSeverity;
+    message?: string;
+    stringId?: number;
+    stringArgs?: string[];
+}
+
+interface PublishDiagnosticsParams {
+    uri: string;
+    diagnostics: Diagnostic[];
+}
+
+interface GetCodeActionsRequestParams {
+    uri: string;
+    range: Range;
+}
+
+interface CodeActionCommand {
+    stringId: number;
+    stringArgs?: string[];
+    command: string;
+    arguments?: any[];
+}
+
+interface ShowMessageWindowParams {
+    type: number;
+    stringId: number;
+    stringArgs?: string[];
+}
+
+interface LocalizeStringParams {
+    stringId: number;
+    stringArgs: string[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
@@ -170,6 +205,7 @@ const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, con
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void> = new RequestType<void, GetDiagnosticsResult, void, void>('cpptools/getDiagnostics');
+const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void> = new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void>('cpptools/getCodeActions');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -196,14 +232,17 @@ const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, v
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
 const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
 const ReportNavigationNotification: NotificationType<NavigationPayload, void> = new NotificationType<NavigationPayload, void>('cpptools/reportNavigation');
-const ReportTagParseStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportTagParseStatus');
+const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
-const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
-const DebugLogNotification:  NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugLog');
+const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = new NotificationType<DebugProtocolParams, void>('cpptools/debugProtocol');
+const DebugLogNotification:  NotificationType<string, void> = new NotificationType<string, void>('cpptools/debugLog');
+const DebugLogLocalizedNotification:  NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLogLocalized');
 const SemanticColorizationRegionsNotification:  NotificationType<SemanticColorizationRegionsParams, void> = new NotificationType<SemanticColorizationRegionsParams, void>('cpptools/semanticColorizationRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
+const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
+const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
 
 let failureMessageShown: boolean = false;
 
@@ -381,6 +420,47 @@ class DefaultClient implements Client {
                     this.settingsTracker = getTracker(this.RootUri);
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
+
+                    // Set up code action provider
+                    let documentSelector: DocumentFilter[] = [
+                        { scheme: 'file', language: 'cpp' },
+                        { scheme: 'file', language: 'c' }
+                    ];
+
+                    class CodeActionProvider implements vscode.CodeActionProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient)
+                        {
+                            this.client = client;
+                        }
+
+                        public provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
+                            let params: GetCodeActionsRequestParams = {
+                                range: range,
+                                uri: document.uri.toString()
+                            };
+
+                            return this.client.languageClient.sendRequest(GetCodeActionsRequest, params)
+                            .then((commands) => {
+                                let resultCommands: vscode.Command[] = [];
+
+                                // Convert to vscode.Command array
+                                commands.forEach((command) => {
+                                    let title: string = lookupString(command.stringId, command.stringArgs);
+                                    let vscodeCommand: vscode.Command = {
+                                        title: title,
+                                        command: command.command,
+                                        arguments: command.arguments
+                                    };
+                                    resultCommands.push(vscodeCommand);
+                                });
+
+                                return resultCommands;
+                            });
+                        }
+                    }
+
+                    this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
 
                     // Listen for messages from the language server.
                     this.registerNotifications();
@@ -950,9 +1030,9 @@ class DefaultClient implements Client {
      * during language client startup and for custom configuration providers.
      * @param task The task that blocks all future tasks
      */
-    private queueBlockingTask(task: () => Thenable<void>): Thenable<void> {
+    private queueBlockingTask(task: () => Thenable<any>): Thenable<any> {
         if (this.isSupported) {
-            this.pendingTask = new util.BlockingTask<void>(task, this.pendingTask);
+            this.pendingTask = new util.BlockingTask<any>(task, this.pendingTask);
             return this.pendingTask.getPromise();
         } else {
             return Promise.reject(localize("unsupported.client", "Unsupported client"));
@@ -1040,6 +1120,8 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
+        this.languageClient.onNotification(PublishDiagnosticsNotification, (e) => this.publishDiagnostics(e));
+        this.languageClient.onNotification(ShowMessageWindowNotification, (e) => this.showMessageWindow(e));
         this.setupOutputHandlers();
     }
 
@@ -1087,17 +1169,24 @@ class DefaultClient implements Client {
             this.debugChannel.append(`${output}`);
         });
 
-        this.languageClient.onNotification(DebugLogNotification, (output) => {
-            if (!this.outputChannel) {
-                if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-                    this.outputChannel = vscode.window.createOutputChannel(`C/C++: ${this.Name}`);
-                } else {
-                    this.outputChannel = logger.getOutputChannel();
-                }
-                this.disposables.push(this.outputChannel);
+        this.languageClient.onNotification(DebugLogNotification, (params) => this.log(params));
+        this.languageClient.onNotification(DebugLogLocalizedNotification, (params) => this.logLocalized(params));
+    }
+
+    private log(output: string): void {
+        if (!this.outputChannel) {
+            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
+                this.outputChannel = vscode.window.createOutputChannel(`C/C++: ${this.Name}`);
+            } else {
+                this.outputChannel = logger.getOutputChannel();
             }
-            this.outputChannel.appendLine(`${output}`);
-        });
+            this.disposables.push(this.outputChannel);
+        }
+        this.outputChannel.appendLine(`${output}`);
+    }
+
+    private logLocalized(params: LocalizeStringParams): void {
+        this.log(lookupString(params.stringId, params.stringArgs));
     }
 
     /*******************************************************
@@ -1240,8 +1329,8 @@ class DefaultClient implements Client {
         }
     }
 
-    private updateTagParseStatus(notificationBody: ReportStatusNotificationBody): void {
-        this.model.tagParserStatus.Value = notificationBody.status;
+    private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
+        this.model.tagParserStatus.Value = lookupString(notificationBody.stringId, notificationBody.stringArgs);
     }
 
     private getColorizationState(uri: string): ColorizationState {
@@ -1271,6 +1360,52 @@ class DefaultClient implements Client {
         let colorizationState: ColorizationState = this.getColorizationState(params.uri);
         colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
         this.languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri });
+    }
+
+    diagnosticsCollection: vscode.DiagnosticCollection;
+
+    private publishDiagnostics(params: PublishDiagnosticsParams): void {
+        if (!this.diagnosticsCollection) {
+            this.diagnosticsCollection = vscode.languages.createDiagnosticCollection("C/C++");
+        }
+
+        // Convert from our Diagnostic objects to vscode Diagnostic objects
+        let diagnostics: vscode.Diagnostic[] = [];
+        params.diagnostics.forEach((d) => {
+            let message: string;
+            if (!d.stringId) {
+                message = d.message;
+            } else {
+                message = lookupString(d.stringId, d.stringArgs);
+            }
+
+            let r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
+            let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
+            diagnostic.code = d.code;
+            diagnostic.source = d.source;
+            diagnostics.push(diagnostic);
+        });
+
+        let realUri: vscode.Uri = vscode.Uri.parse(params.uri);
+        this.diagnosticsCollection.set(realUri, diagnostics);
+    }
+
+    private showMessageWindow(params: ShowMessageWindowParams): void {
+        let message: string = lookupString(params.stringId, params.stringArgs);
+        switch (params.type) {
+            case 1: // Error
+                vscode.window.showErrorMessage(message);
+                break;
+            case 2: // Warning
+                vscode.window.showWarningMessage(message);
+                break;
+            case 3: // Info
+                vscode.window.showInformationMessage(message);
+                break;
+            default:
+                console.assert("Unrecognized type for showMessageWindow");
+                break;
+        }
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
