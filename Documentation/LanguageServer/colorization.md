@@ -39,7 +39,7 @@ Colors are associated with [TextMate scopes](https://macromates.com/manual/en/la
 | Reference Type (C++/CLI) | entity.name.type.class.reference |
 | Static Member Field | variable.other.property.static |
 | Static Member Function | entity.name.function.member.static |
-| Type | entity.name.type.class |
+| Type | entity.name.type |
 | User-Defined Literal - Number | entity.name.operator.custom-literal.number |
 | User-Defined Literal - Raw | entity.name.operator.custom-literal |
 | User-Defined Literal - String | entity.name.operator.custom-literal.string |
@@ -54,7 +54,7 @@ Colors can also be overridden globally, in settings:
     "editor.tokenColorCustomizations": {
         "textMateRules": [
             {
-                "scope": "entity.name.type.class",
+                "scope": "entity.name.type",
                 "settings": {
                     "foreground": "#FF0000",
                     "fontStyle": "italic bold underline"
@@ -69,7 +69,7 @@ Or, overridden on a per-theme basis:
         "[Visual Studio Dark]": {
             "textMateRules": [
                 {
-                    "scope": "entity.name.type.class",
+                    "scope": "entity.name.type",
                     "settings": {
                         "foreground": "#FF0000",
                         "fontStyle": "italic bold underline"
@@ -170,7 +170,7 @@ Use the following to augment the Visual Studio Dark theme to match what Visual S
                     }
                 },
                 {
-                    "scope": "entity.name.type.class",
+                    "scope": "entity.name.type",
                     "settings": {
                         "foreground": "#4EC9B0"
                     }
@@ -385,7 +385,7 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
                     }
                 },
                 {
-                    "scope": "entity.name.type.class",
+                    "scope": "entity.name.type",
                     "settings": {
                         "foreground": "#2B91AF"
                     }
