@@ -499,7 +499,9 @@
         <div class="section-title">IntelliSense mode</div>
         <div class="section-text">
             The IntelliSense mode used by the IntelliSense engine. <code>msvc-x64</code> maps to Visual Studio mode with 64-bit pointer sizes. 
-            <code>clang-x64</code> maps to CLang mode with 64-bit pointer sizes. <code>gcc-x64</code> maps to GCC mode with 64-bit pointer sizes. 
+            <code>clang-x64</code> maps to CLang mode with 64-bit pointer sizes. <code>gcc-x64</code> maps to GCC mode with 64-bit pointer sizes.
+            <code>msvc-x86</code> maps to Visual Studio mode with 32-bit pointer sizes. <code>clang-x86</code> maps to CLang mode with 32-bit pointer sizes.
+            <code>gcc-x86</code> maps to GCC mode with 32-bit pointer sizes.  
             The <code>${default}</code> mode will choose the default for that platform. 
             Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and macOS defaults to <code>clang-x64</code>. 
             Select a specific IntelliSense mode to override the <code>${default}</code> mode.
@@ -510,6 +512,9 @@
             <option value="msvc-x64">msvc-x64</option>
             <option value="gcc-x64">gcc-x64</option>
             <option value="clang-x64">clang-x64</option>
+            <option value="msvc-x86">msvc-x86</option>
+            <option value="gcc-x86">gcc-x86</option>
+            <option value="clang-x86">clang-x86</option>
           </select>
         </div>
         <div id="intelliSenseModeInvalid" class="error" style="width: 290px"></div>
