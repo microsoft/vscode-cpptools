@@ -429,8 +429,7 @@ class DefaultClient implements Client {
 
                     class CodeActionProvider implements vscode.CodeActionProvider {
                         private client: DefaultClient;
-                        constructor(client: DefaultClient)
-                        {
+                        constructor(client: DefaultClient) {
                             this.client = client;
                         }
 
