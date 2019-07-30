@@ -711,8 +711,21 @@ class DefaultClient implements Client {
         }
     }
 
+    private prevVisibleRangesLength: number = 0;
+    private visibleRangesDecreased: boolean = false;
+    private visibleRangesDecreasedTicks: number = 0;
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
         if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
+            if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
+                if (textEditorVisibleRangesChangeEvent.visibleRanges.length === 1) {
+                    let visibleRangesLength: number = textEditorVisibleRangesChangeEvent.visibleRanges[0].end.line - textEditorVisibleRangesChangeEvent.visibleRanges[0].start.line;
+                    this.visibleRangesDecreased = visibleRangesLength < this.prevVisibleRangesLength;
+                    if (this.visibleRangesDecreased) {
+                        this.visibleRangesDecreasedTicks = Date.now();
+                    }
+                    this.prevVisibleRangesLength = visibleRangesLength;
+                }
+            }
             this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
         }
     }
@@ -1294,10 +1307,10 @@ class DefaultClient implements Client {
     }
 
     private currentReferencesProgress: ReportReferencesProgressNotification;
-    private prevReferencesProgressCount: number;
+    private prevReferencesProgressIncrement: number;
     private prevReferencesProgressMessage: string;
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): boolean {
-        let blockedMessage: string = this.blockedByCursorPosition ? ". Move your cursor to any identifier to get results." : "";
+        let blockedMessage: string = this.blockedByCursorPosition ? " Move your cursor to any identifier to get results." : "";
         switch (this.currentReferencesProgress.referencesProgress) {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
@@ -1307,7 +1320,6 @@ class DefaultClient implements Client {
                 break;
             case ReferencesProgress.ProcessingTargets:
                 let numFilesToProcess: number = this.currentReferencesProgress.targetReferencesProgress.length;
-                let maxProgress: number = numFilesToProcess * 10;
                 let numWaitingToLex: number = 0;
                 let numLexing: number = 0;
                 let numWaitingToParse: number = 0;
@@ -1342,28 +1354,30 @@ class DefaultClient implements Client {
                             break;
                     }
                 }
-                let currentProgress: number = numWaitingToParse + numParsing + numConfirmingReferences * 9 + (numFinishedWithoutConfirming + numFinishedConfirming) * 10;
-                let currentMessage: string;
-                if (numLexing > numParsing) {
-                    let numTotalToLex: number = this.currentReferencesProgress.targetReferencesProgress.length;
-                    let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
-                    currentMessage = `Lexing(${numFinishedLexing}/${numTotalToLex})` + blockedMessage;
-                } else {
-                    let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
-                    let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences;
-                    currentMessage = `Parsing(${numFinishedParsing}/${numTotalToParse})` + blockedMessage;
-                }
-                if (forceUpdate || currentProgress > this.prevReferencesProgressCount || currentMessage !== this.prevReferencesProgressMessage) {
-                    this.prevReferencesProgressCount = currentProgress;
-                    this.prevReferencesProgressMessage = currentMessage;
 
-                    progress.report({ message: currentMessage, increment: currentProgress / maxProgress });
+                let currentMessage: string;
+                let numTotalToLex: number = this.currentReferencesProgress.targetReferencesProgress.length;
+                let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
+                let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
+                let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences - numWaitingToLex - numLexing;
+                if (numLexing > numParsing) {
+                    currentMessage = `Searching ${numFinishedLexing}/${numTotalToLex} files.` + blockedMessage;
+                } else {
+                    currentMessage = `Confirming ${numFinishedParsing}/${numTotalToParse} files.` + blockedMessage;
+                }
+                let currentLexProgress: number = numFinishedLexing / numTotalToLex;
+                let currentParseProgress: number = numFinishedParsing / numTotalToParse;
+                let currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70);
+                if (forceUpdate || currentIncrement > this.prevReferencesProgressIncrement || currentMessage !== this.prevReferencesProgressMessage) {
+                    progress.report({ message: currentMessage, increment: currentIncrement - this.prevReferencesProgressIncrement });
+                    this.prevReferencesProgressIncrement = currentIncrement;
+                    this.prevReferencesProgressMessage = currentMessage;
                 } else {
                     return false;
                 }
                 break;
             case ReferencesProgress.FinalResultsAvailable:
-                progress.report({ message: 'Finished' + blockedMessage, increment: 100 });
+                progress.report({ message: 'Finished.' + blockedMessage, increment: 100 });
                 break;
         }
         return true;
@@ -1380,7 +1394,7 @@ class DefaultClient implements Client {
     }
 
     private sendRequestReferencesIfNewProgress(): void {
-        if (this.newReferencesProgress) {
+        if (this.newReferencesProgress && !this.referencesIsPeek) {
             this.newReferencesProgress = false;
             this.sendRequestReferences();
         }
@@ -1396,7 +1410,7 @@ class DefaultClient implements Client {
                 if (!this.referencesViewFindPending) {
                     this.referencesViewFindPending = true;
                     this.blockedByCursorPosition = false;
-                    vscode.commands.executeCommand("references-view.find").then((val: any) => {
+                    vscode.commands.executeCommand(this.referencesIsPeek ? "editor.action.referenceSearch.trigger" : "references-view.find").then((val: any) => {
                         // This either early fails (blockedByCursor) or blocks until references are returned.
                         this.languageClient.sendNotification(RequestReferencesNotification);
                     });
@@ -1425,6 +1439,7 @@ class DefaultClient implements Client {
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
     private referenceProgressUICounter: number;
     private lastUpdateTicks: number;
+    private referencesIsPeek: boolean;
     private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
@@ -1432,9 +1447,10 @@ class DefaultClient implements Client {
                 this.referencesRequestHasOccurred = false;
                 this.blockedByCursorPosition = false;
                 this.referencesCanceled = false;
-                this.prevReferencesProgressCount = 0;
+                this.prevReferencesProgressIncrement = 0;
                 this.prevReferencesProgressMessage = "";
                 this.referenceProgressUICounter = 0;
+                this.referencesIsPeek = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < 1000); // TODO: Might need tweeking.
                 this.delayReferencesProgress = setInterval(() => {
                     this.newReferencesProgress = true;
                     this.lastUpdateTicks = Date.now();
