@@ -338,7 +338,7 @@ class SettingsApp {
             // No need to add items unless webview is reloaded, in which case it will not have any elements.
             // Otherwise, add items again.
             if (list.firstChild) {
-               return;
+                return;
             }
 
             if (compilers.length === 0) {
