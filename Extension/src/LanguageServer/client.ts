@@ -1316,7 +1316,7 @@ class DefaultClient implements Client {
                 progress.report({ message: 'Started.', increment: 0 });
                 break;
             case ReferencesProgress.ProcessingSource:
-                progress.report({ message: 'Processing source.', increment: 1 });
+                progress.report({ message: 'Processing source.', increment: 0 });
                 break;
             case ReferencesProgress.ProcessingTargets:
                 let numFilesToProcess: number = this.currentReferencesProgress.targetReferencesProgress.length;
@@ -1361,9 +1361,9 @@ class DefaultClient implements Client {
                 let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                 let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences - numWaitingToLex - numLexing;
                 if (numLexing > numParsing) {
-                    currentMessage = `Searching ${numFinishedLexing}/${numTotalToLex} files.` + blockedMessage;
+                    currentMessage = `Searching ` + (numFinishedLexing + 1) + `/${numTotalToLex} files.` + blockedMessage;
                 } else {
-                    currentMessage = `Confirming ${numFinishedParsing}/${numTotalToParse} files.` + blockedMessage;
+                    currentMessage = `Confirming ` + (numFinishedParsing + 1) + `/${numTotalToParse} files.` + blockedMessage;
                 }
                 let currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 let currentParseProgress: number = numFinishedParsing / numTotalToParse;
