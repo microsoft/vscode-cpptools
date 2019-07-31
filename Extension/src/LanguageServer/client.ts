@@ -1875,9 +1875,9 @@ class DefaultClient implements Client {
         });
     }
 
-    private convertReferenceTypeToString(referenceType: ReferenceType, isFileReference: boolean): string {
+    private convertReferenceTypeToString(referenceType: ReferenceType): string {
         switch (referenceType) {
-            case ReferenceType.ConfirmationInProgress: return "Possible reference" + (isFileReference ? "s" : "") + " (confirmation " + (this.referencesCanceled ? "canceled" : "in progress") + ")";
+            case ReferenceType.ConfirmationInProgress: return this.referencesCanceled ? "Confirmation canceled" : "Confirmation in progress";
             case ReferenceType.Comment: return "Comment reference";
             case ReferenceType.String: return "String reference";
             case ReferenceType.Inactive: return "Inactive reference";
@@ -1896,12 +1896,11 @@ class DefaultClient implements Client {
         }
         for (let reference of referencesResult.referenceInfos) {
             if (reference.type === ReferenceType.Confirmed) {
-                continue; // Already displayed in VS Code's References.
+                continue; // Already displayed in VS Code's References (and not currently sent anyway).
             }
             let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
-            this.referencesChannel.appendLine(this.convertReferenceTypeToString(reference.type, isFileReference) + ": " + reference.text);
-            this.referencesChannel.appendLine(reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : ""));
-            this.referencesChannel.appendLine("");
+            this.referencesChannel.appendLine("[" + this.convertReferenceTypeToString(reference.type) + "] " +
+                reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
         }
         this.referencesChannel.show(true);
         this.referencesViewFindPending = false;
