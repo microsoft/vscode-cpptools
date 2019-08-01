@@ -68,12 +68,10 @@ async function processRuntimeDependencies(): Promise<void> {
                 // Send the failure telemetry since postInstall will not be called.
                 sendTelemetry(await PlatformInformation.GetPlatformInformation());
             }
-
         } else {
             // The extension has been installed and activated before.
             await finalizeExtensionActivation();
         }
-
     } else {
         // No lock file, need to download and install dependencies.
         try {
