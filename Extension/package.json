@@ -592,26 +592,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.PauseParsing",
-        "title": "%c_cpp.command.pauseParsing.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.ResumeParsing",
-        "title": "%c_cpp.command.resumeParsing.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.ShowParsingCommands",
-        "title": "%c_cpp.command.showParsingCommands.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.ShowReferencesProgress",
-        "title": "%c_cpp.command.showReferencesProgress.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
         "category": "C/C++"
