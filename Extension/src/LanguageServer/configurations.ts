@@ -110,7 +110,6 @@ export class CppProperties {
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandFileWatchers: fs.FSWatcher[] = [];
     private defaultCompilerPath: string = null;
-    private defaultCompilerArgs: string[] = null;
     private knownCompilers: KnownCompiler[] = null;
     private defaultCStandard: string = null;
     private defaultCppStandard: string = null;
@@ -168,7 +167,6 @@ export class CppProperties {
 
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
         this.defaultCompilerPath = compilerDefaults.compilerPath;
-        this.defaultCompilerArgs = compilerDefaults.compilerArgs;
         this.knownCompilers = compilerDefaults.knownCompilers;
         this.defaultCStandard = compilerDefaults.cStandard;
         this.defaultCppStandard = compilerDefaults.cppStandard;
@@ -304,11 +302,6 @@ export class CppProperties {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
             configuration.compilerPath = this.defaultCompilerPath;
-        }
-        if (isUnset(settings.defaultCompilerArgs) && this.defaultCompilerArgs &&
-            isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
-            // Don't set a default when compileCommands is in use.
-            configuration.compilerArgs = this.defaultCompilerArgs;
         }
         if (this.knownCompilers) {
             configuration.knownCompilers = this.knownCompilers;
