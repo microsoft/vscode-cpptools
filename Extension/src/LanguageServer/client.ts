@@ -1361,9 +1361,9 @@ class DefaultClient implements Client {
                 let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                 let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences - numWaitingToLex - numLexing;
                 if (numLexing > numParsing) {
-                    currentMessage = `Searching ` + (numFinishedLexing + 1) + `/${numTotalToLex} files.` + blockedMessage;
+                    currentMessage = `Searching ` + (numFinishedLexing + (numFinishedLexing < numTotalToLex ? 1 : 0)) + `/${numTotalToLex} files.` + blockedMessage;
                 } else {
-                    currentMessage = `Confirming ` + (numFinishedParsing + 1) + `/${numTotalToParse} files.` + blockedMessage;
+                    currentMessage = `Confirming ` + (numFinishedParsing + (numFinishedParsing < numTotalToParse ? 1 : 0)) + `/${numTotalToParse} files.` + blockedMessage;
                 }
                 let currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 let currentParseProgress: number = numFinishedParsing / numTotalToParse;

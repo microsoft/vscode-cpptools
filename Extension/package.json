@@ -1450,6 +1450,9 @@
       },
       "[c]": {
         "editor.wordBasedSuggestions": false
+      },
+      "[Log]": {
+        "editor.wordWrap": "off"
       }
     }
   },
