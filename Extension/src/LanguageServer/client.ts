@@ -1888,12 +1888,14 @@ class DefaultClient implements Client {
     }
 
     private processReferencesResult(referencesResult: ReferencesResult): void {
+        this.referencesViewFindPending = false;
         if (!this.referencesChannel) {
             this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
             this.disposables.push(this.referencesChannel);
         } else {
             this.referencesChannel.clear();
         }
+
         for (let reference of referencesResult.referenceInfos) {
             if (reference.type === ReferenceType.Confirmed) {
                 continue; // Already displayed in VS Code's References (and not currently sent anyway).
@@ -1902,8 +1904,10 @@ class DefaultClient implements Client {
             this.referencesChannel.appendLine("[" + this.convertReferenceTypeToString(reference.type) + "] " +
                 reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
         }
-        this.referencesChannel.show(true);
-        this.referencesViewFindPending = false;
+
+        if (referencesResult.referenceInfos.length !== 0) {
+            this.referencesChannel.show(true);
+        }
     }
 }
 
