@@ -115,7 +115,7 @@ export interface BuildTaskDefinition extends vscode.TaskDefinition {
 /**
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
-export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.Task[]> {
+export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode.Task[]> {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!editor) {
         return [];
@@ -173,7 +173,7 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
 
     // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
     // Filter them based on the file type to get a reduced list appropriate for the active file.
-    let KnownCompilerPaths: string[];
+    let knownCompilerPaths: string[];
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info => {
@@ -181,10 +181,10 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
                 (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
         });
-        KnownCompilerPaths = knownCompilers.map<string>(info => info.path);
+        knownCompilerPaths = knownCompilers.map<string>(info => info.path);
     }
 
-    if (!KnownCompilerPaths || !userCompilerPath) {
+    if (!knownCompilerPaths || !userCompilerPath) {
         // Don't prompt a message yet until we can make a data-based decision.
         telemetry.logLanguageServerEvent('noCompilerFound');
         // Display a message prompting the user to install compilers if none were found.
@@ -230,8 +230,8 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
             options: isCl ? undefined : {"cwd": cwd},
         };
 
-        if (returnComplerPath) {
-            kind = kind as BuildTaskDefinition; // does this cast work?
+        if (returnCompilerPath) {
+            kind = kind as BuildTaskDefinition;
             kind.compilerPath = isCl ? compilerPathBase : compilerPath;
         }
 
@@ -248,8 +248,8 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
     let buildTasks: vscode.Task[] = [];
 
     // Tasks for known compiler paths
-    if (KnownCompilerPaths) {
-        buildTasks = KnownCompilerPaths.map<vscode.Task>(compilerPath => {
+    if (knownCompilerPaths) {
+        buildTasks = knownCompilerPaths.map<vscode.Task>(compilerPath => {
             return createTask(compilerPath);
         });
     }
