@@ -27,6 +27,7 @@ import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
+import { Readable } from 'stream';
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -63,7 +64,11 @@ function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                     return;
                 }
                 dbFound = true;
-                zipfile.openReadStream(entry, (err?: Error, stream?: any) => {
+                zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
+                    if (err) {
+                        resolve({});
+                        return;
+                    }
                     let database: vcpkgDatabase = {};
                     let reader: rd.ReadLine = rd.createInterface(stream);
                     reader.on('line', (lineText: string) => {
