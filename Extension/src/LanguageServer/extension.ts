@@ -49,7 +49,7 @@ const intelliSenseDisabledError: string = "Do not activate the extension when In
 
 type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<vcpkgDatabase>;
-async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
+function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     return new Promise((resolve, reject) => {
         yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err? : Error, zipfile?: yauzl.ZipFile) => {
             if (err) {
