@@ -53,12 +53,14 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     return new Promise((resolve, reject) => {
         yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, async (err? : Error, zipfile?: yauzl.ZipFile) => {
             if (err) {
-                return resolve({});
+                resolve({});
+                return;
             }
             zipfile.readEntry();
             zipfile.on('entry', entry => {
                 if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
-                    return resolve({});
+                    resolve({});
+                    return;
                 }
                 zipfile.openReadStream(entry, (err?: Error, stream?: any) => {
                     let database: vcpkgDatabase = {};
@@ -79,7 +81,8 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                         database[relativeHeader].push(portName);
                     });
                     reader.on('close', () => {
-                        return resolve(database);
+                        resolve(database);
+                        return;
                     });
                 });
             });
