@@ -81,7 +81,6 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                     });
                     reader.on('close', () => {
                         resolve(database);
-                        return;
                     });
                 });
             });
