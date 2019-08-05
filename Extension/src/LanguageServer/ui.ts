@@ -156,8 +156,6 @@ export class UI {
         let isSettingsJson: boolean = (activeEditor && (activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
 
         this.ShowConfiguration = isCpp || isSettingsJson;
-        this.ShowDBIcon = isCpp || isSettingsJson;
-        this.ShowFlameIcon = isCpp || isSettingsJson;
         this.ShowNavigation = isCpp;
     }
 

@@ -33,7 +33,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 }
 
                 me.onDidOpenTextDocument(document);
-                me.provideCustomConfiguration(document);
+                me.provideCustomConfiguration(document.uri, null);
                 me.notifyWhenReady(() => sendMessage(document));
             }
         },

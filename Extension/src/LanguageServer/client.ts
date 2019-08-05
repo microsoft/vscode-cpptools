@@ -236,9 +236,9 @@ const RescanFolderNotification: NotificationType<void, void> = new NotificationT
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
 const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
-const DidOpenForReferenceConfirmationNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/didOpenForReferenceConfirmation');
 const RequestReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/requestReferences');
 const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
+const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -255,6 +255,7 @@ const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = 
 const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<ReportReferencesProgressNotification, void> = new NotificationType<ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const ReferencesBlockedByCursor: NotificationType<void, void> = new NotificationType<void, void>('cpptools/referencesBlockedByCursor');
+const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
 
 let failureMessageShown: boolean = false;
 
@@ -286,7 +287,7 @@ export interface Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
-    provideCustomConfiguration(document: vscode.TextDocument): Promise<void>;
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
@@ -858,7 +859,7 @@ class DefaultClient implements Client {
         await this.notifyWhenReady(() => this.languageClient.sendNotification(RescanFolderNotification));
     }
 
-    public async provideCustomConfiguration(document: vscode.TextDocument): Promise<void> {
+    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
         return this.queueBlockingTask(async () => {
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
@@ -873,7 +874,7 @@ class DefaultClient implements Client {
 
             let providerName: string = providerId;
             let params: QueryTranslationUnitSourceParams = {
-                uri: document.uri.toString()
+                uri: docUri.toString()
             };
             let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
             if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
@@ -909,20 +910,26 @@ class DefaultClient implements Client {
                         this.sendCustomConfigurations(configs, false);
                         if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.AncestorConfigNeeded) {
                             // replacing uri with original uri
-                            let newConfig: SourceFileConfigurationItem =  { uri: document.uri, configuration: configs[0].configuration };
+                            let newConfig: SourceFileConfigurationItem =  { uri: docUri, configuration: configs[0].configuration };
                             this.sendCustomConfigurations([newConfig], false);
                         }
                     }
+                    if (requestFile) {
+                        this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+                    }
                 },
                 (err) => {
+                    if (requestFile) {
+                        this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+                    }
                     if (err === notReadyMessage) {
                         return;
                     }
                     let settings: CppSettings = new CppSettings(this.RootUri);
-                    if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(document.uri) && !vscode.debug.activeDebugSession) {
+                    if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                         const dismiss: string = "Dismiss";
                         const disable: string = "Disable Warnings";
-                        let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${document.uri.fsPath}'. ` +
+                        let message: string = `'${providerName}' is unable to provide IntelliSense configuration information for '${docUri.fsPath}'. ` +
                             `Settings from the '${configName}' configuration will be used instead.`;
                         if (err) {
                             message += ` (${err})`;
@@ -939,6 +946,10 @@ class DefaultClient implements Client {
                     }
                 });
         });
+    }
+
+    private async handleRequestCustomConfig(requestFile: string): Promise<void> {
+        await this.provideCustomConfiguration(vscode.Uri.file(requestFile), requestFile);
     }
 
     private isExternalHeader(uri: vscode.Uri): boolean {
@@ -1102,6 +1113,7 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.languageClient.onNotification(ReferencesBlockedByCursor, () => this.handleReferencesBlockedByCursor());
+        this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
         this.setupOutputHandlers();
     }
 
@@ -1948,7 +1960,7 @@ class NullClient implements Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
-    provideCustomConfiguration(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
