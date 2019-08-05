@@ -25,7 +25,7 @@ suite("ParsedEnvironmentFile", () => {
         const fakeConfig : Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning = null, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert(result.Warning === null, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
     });
 
