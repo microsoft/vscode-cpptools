@@ -51,7 +51,7 @@ type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entr
 let vcpkgDbPromise: Promise<vcpkgDatabase>;
 async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     return new Promise((resolve, reject) => {
-        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, async (err? : Error, zipfile?: yauzl.ZipFile) => {
+        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err? : Error, zipfile?: yauzl.ZipFile) => {
             if (err) {
                 resolve({});
                 return;
@@ -1071,7 +1071,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
             }
 
             // Extract lines numbers for missing include diagnostics
-            let lines: number[] = uriAndDiagnostics[1].filter(isMissingIncludeDiagnostic).map<number>(d => { return d.range.start.line; });
+            let lines: number[] = uriAndDiagnostics[1].filter(isMissingIncludeDiagnostic).map<number>(d => d.range.start.line);
             if (!lines.length) {
                 return;
             }
@@ -1087,7 +1087,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         if (!missingIncludeLocations.length) {
             return;
         }
-        
+
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         let portsPromises: Promise<string[]>[] = [];
         missingIncludeLocations.forEach(docAndLineNumbers => {
@@ -1099,14 +1099,14 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         if (!ports.length) {
             return;
         }
-        ports = ports.filter((port: string, index: number) => { return ports.indexOf(port) === index; });
+        ports = ports.filter((port: string, index: number) => ports.indexOf(port) === index);
     }
 
     let installCommand: string = 'vcpkg install';
     ports.forEach(port => installCommand += ` ${port}`);
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
 
-    return vscode.env.clipboard.writeText(installCommand);
+    await vscode.env.clipboard.writeText(installCommand);
 }
 
 function onGetActiveConfigName(): Thenable<string> {
