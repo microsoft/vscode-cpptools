@@ -921,6 +921,7 @@ class DefaultClient implements Client {
                 (err) => {
                     if (requestFile) {
                         this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+                        return;
                     }
                     if (err === notReadyMessage) {
                         return;
@@ -1445,6 +1446,7 @@ class DefaultClient implements Client {
     private delayReferencesProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
     private referencesCanceled: boolean;
+    private referencesDoneWhileTagParsing: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
         increment?: number;
@@ -1455,6 +1457,7 @@ class DefaultClient implements Client {
     private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
+                this.referencesDoneWhileTagParsing = this.model.isTagParsing.Value;
                 this.model.isFindingReferences.Value = true;
                 this.referencesRequestHasOccurred = false;
                 this.blockedByCursorPosition = false;
@@ -1908,16 +1911,21 @@ class DefaultClient implements Client {
             this.referencesChannel.clear();
         }
 
+        if (this.referencesDoneWhileTagParsing) {
+            this.referencesChannel.appendLine("[Warning] Some references may be missing, because workspace indexing and parsing was incomplete.");
+        }
+
         for (let reference of referencesResult.referenceInfos) {
-            if (reference.type === ReferenceType.Confirmed) {
-                continue; // Already displayed in VS Code's References (and not currently sent anyway).
-            }
+            // Confirmed references are not currently sent here, but that might change later.
+            //if (reference.type === ReferenceType.Confirmed) {
+            //    continue; // Already displayed in VS Code's References
+            //}
             let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
             this.referencesChannel.appendLine("[" + this.convertReferenceTypeToString(reference.type) + "] " +
                 reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
         }
 
-        if (referencesResult.referenceInfos.length !== 0) {
+        if (this.referencesDoneWhileTagParsing || referencesResult.referenceInfos.length !== 0) {
             this.referencesChannel.show(true);
         }
     }
