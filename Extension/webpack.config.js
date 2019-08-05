@@ -38,6 +38,9 @@ const config = {
     },
     optimization: {
         minimize: false
+    },
+    stats: {
+        warnings: false
     }
 }
 

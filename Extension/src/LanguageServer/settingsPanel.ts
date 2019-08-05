@@ -103,8 +103,8 @@ export class SettingsPanel {
 
                 // Restrict the webview to only loading content from these directories
                 localResourceRoots: [
-                    vscode.Uri.file(util.extensionPath), 
-                    vscode.Uri.file(path.join(util.extensionPath, 'ui')), 
+                    vscode.Uri.file(util.extensionPath),
+                    vscode.Uri.file(path.join(util.extensionPath, 'ui')),
                     vscode.Uri.file(path.join(util.extensionPath, 'out', 'ui'))]
             }
         );
@@ -124,11 +124,11 @@ export class SettingsPanel {
         this.updateWebview(configSelection, activeConfiguration, errors);
     }
 
-    public get SettingsPanelActivated(): vscode.Event<void> { 
+    public get SettingsPanelActivated(): vscode.Event<void> {
         return this.settingsPanelActivated.event;
     }
 
-    public get ConfigValuesChanged(): vscode.Event<void> { 
+    public get ConfigValuesChanged(): vscode.Event<void> {
         return this.configValuesChanged.event;
     }
 
@@ -195,20 +195,20 @@ export class SettingsPanel {
             this.disposable.dispose();
         }
 
-        if (this.disposablesPanel) { 
-            this.disposablesPanel.dispose(); 
+        if (this.disposablesPanel) {
+            this.disposablesPanel.dispose();
         }
     }
 
     private onPanelDisposed(): void {
-        if (this.disposablesPanel) { 
-            this.disposablesPanel.dispose(); 
+        if (this.disposablesPanel) {
+            this.disposablesPanel.dispose();
             this.panel = undefined;
         }
     }
 
     private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
-        this.configValues = Object.assign({}, configuration); // Copy configuration values
+        this.configValues = {...configuration}; // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
             this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
@@ -353,13 +353,13 @@ export class SettingsPanel {
         content = fs.readFileSync(util.getExtensionFilePath("ui/settings.html")).toString();
 
         content = content.replace(
-            /{{root}}/g, 
+            /{{root}}/g,
             vscode.Uri.file(util.extensionPath)
             .with({ scheme: 'vscode-resource' })
             .toString());
 
         content = content.replace(
-            /{{nonce}}/g, 
+            /{{nonce}}/g,
             this.getNonce());
 
         return content;

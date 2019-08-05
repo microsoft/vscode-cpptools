@@ -447,7 +447,8 @@
     <div class="section">
       <div class="section-title">Configuration name</div>
       <div class="section-text">
-        A friendly name that identifies a configuration. <code>Mac</code>, <code>Linux</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms, but the name of the identifier can be anything.
+        A friendly name that identifies a configuration. <code>Linux</code>, <code>Mac</code>, and <code>Win32</code> are special identifiers 
+        for configurations that will be auto-selected on those platforms.
       </div>
       <div>
         <div class="section-note">Select a configuration set to edit.</div>
@@ -479,8 +480,10 @@
     <div class="section">
         <div class="section-title">Compiler path</div>
         <div class="section-text">
-            The full path of the compiler being used to build, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.
-            Arguments can be added to modify the includes/defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc., but paths with spaces must be surrounded by double quotes <code>"</code> if arguments are used.
+            The full path to the compiler you use to build your project, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.
+            Arguments can be added to modify the includes/defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc., 
+            but paths with spaces must be surrounded by double quotes <code>"</code> if arguments are used. 
+            The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.
         </div>
         <!-- input compilerPath -->
         <div class="section-note">Specify a compiler path or select a detected compiler path from the drop-down list.</div>
@@ -495,8 +498,10 @@
     <div class="section">
         <div class="section-title">IntelliSense mode</div>
         <div class="section-text">
-            The IntelliSense mode used by the IntelliSense engine. The <code>${default}</code> mode will choose the default for that platform. 
-            Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and Mac defaults to <code>clang-x64</code>. 
+            The IntelliSense mode used by the IntelliSense engine. <code>msvc-x64</code> maps to Visual Studio mode with 64-bit pointer sizes. 
+            <code>clang-x64</code> maps to CLang mode with 64-bit pointer sizes. <code>gcc-x64</code> maps to GCC mode with 64-bit pointer sizes. 
+            The <code>${default}</code> mode will choose the default for that platform. 
+            Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and macOS defaults to <code>clang-x64</code>. 
             Select a specific IntelliSense mode to override the <code>${default}</code> mode.
         </div>
         <div>
@@ -515,7 +520,9 @@
         <div class="section-text">
             An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. 
             Specify a list paths for the IntelliSense engine to use while searching for included header files. 
-            If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for header files starting from that directory.
+            If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for header files starting from that directory. 
+            If on Windows with Visual Studio installed, or if a compiler is specified in the <code>compilerPath</code> setting, 
+            it is not necessary to list the system include paths in this list.
         </div>
         <div>
           <div class="section-note">One include path per line.</div>
@@ -552,6 +559,7 @@
         <div class="section-text">The version of the C++ language standard to use for IntelliSense.</div>
         <div>
             <select name="inputValue" id="cppStandard" class="select-default">
+                <option value="c++20">c++20</option>
                 <option value="c++17">c++17</option>
                 <option value="c++14">c++14</option>
                 <option value="c++11">c++11</option>
@@ -572,7 +580,8 @@
         <div class="section">
             <div class="section-title">Configuration provider</div>
             <div class="section-text">
-                The ID of a VS Code extension that can provide IntelliSense configuration information for source files.
+                The ID of a VS Code extension that can provide IntelliSense configuration information for source files. For example, use the VS Code extension ID
+                <code>vector-of-bool.cmake-tools</code> to provide configuration information from the CMake Tools extension.
             </div>
             <div>
                 <input name="inputValue" id="configurationProvider" style="width: 290px"></input>
@@ -582,7 +591,7 @@
         <div class="section">
             <div class="section-title">Windows SDK version</div>
             <div class="section-text">
-                Version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.
+                The version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.
             </div>
             <div>
                 <input name="inputValue" id="windowsSdkVersion" style="width: 290px"></input>
@@ -592,7 +601,7 @@
         <div class="section">
             <div class="section-title">Mac framework path</div>
             <div class="section-text">
-                A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.
+                A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on configurations for macOS.
             </div>
             <div>
                 <div class="section-note">One path per line.</div>
@@ -616,7 +625,10 @@
         <div class="section">
             <div class="section-title">Compile commands</div>
             <div class="section-text">
-                Full path to <code>compile_commands.json</code> file for the workspace.
+                The full path to the <code>compile_commands.json</code> file for the workspace. The include paths and defines discovered in this file will 
+                be used instead of the values set for <code>includePath</code> and <code>defines</code> settings. If the compile commands database 
+                does not contain an entry for the translation unit that corresponds to the file you opened in the editor, 
+                then a warning message will appear and the extension will use the <code>includePath</code> and <code>defines</code> settings instead.
             </div>
             <div>
                 <input name="inputValue" id="compileCommands" style="width: 798px"></input>
@@ -627,7 +639,7 @@
         <div class="section">
             <div class="section-title">Browse: path</div>
             <div class="section-text">
-                A list of paths for the tag parser to use while searching for included headers. 
+                A list of paths for the Tag Parser to search for headers included by your source files. If omitted, <code>includePath</code> will be used as the <code>path</code>. 
                 Searching on these paths is recursive by default. Specify <code>*</code> to indicate non-recursive search. 
                 For example: <code>/usr/include</code> will search through all subdirectories while <code>/usr/include/*</code> will not.
             </div>
@@ -642,7 +654,9 @@
             <div class="section-title">Browse: limit symbols to included headers</div>
             <div>
             <input type="checkbox" id="limitSymbolsToIncludedHeaders" style="vertical-align: middle; transform: scale(1.5)">
-                Process only those files directly or indirectly included as headers. If not set, process all files under the specified include paths.
+                When true (or checked), the Tag Parser will only parse code files that have been directly or indirectly included by a source file 
+                in <code>${workspaceFolder}</code>. When false (or not checked), the Tag Parser will parse all code files found in the paths specified 
+                in the <code>Browse: path</code> list.
             </input>
             </div>
         </div>
@@ -650,8 +664,10 @@
         <div class="section">
             <div class="section-title">Browse: database filename</div>
             <div class="section-text">
-                Path to the generated symbol database. If a relative path is specified, 
-                it will be made relative to the workspace's default storage location.
+                The path to the generated symbol database. This instructs the extension to save the Tag Parser's symbol database somewhere other than 
+                the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, 
+                not the workspace folder itself. The <code>${workspaceFolder}</code> variable can be used to specify a path relative to the workspace folder 
+                (e.g. <code>${workspaceFolder}/.vscode/browse.vc.db</code>)
             </div>
             <div>
                 <input name="inputValue" id="databaseFilename" style="width: 798px"></input>

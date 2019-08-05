@@ -78,7 +78,7 @@ async function processRuntimeDependencies(): Promise<void> {
             await onlineInstallation();
         } catch (error) {
             handleError(error);
-            
+
             // Send the failure telemetry since postInstall will not be called.
             sendTelemetry(await PlatformInformation.GetPlatformInformation());
         }
@@ -302,7 +302,7 @@ async function finalizeExtensionActivation(): Promise<void> {
 
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
     // (this may result in rewriting the package.json file)
-    
+
     let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
     let packageJson: any = util.getRawPackageJson();
     let writePackageJson: boolean = false;
@@ -342,7 +342,7 @@ async function finalizeExtensionActivation(): Promise<void> {
 function rewriteManifest(): Promise<void> {
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
     let packageJson: any = util.getRawPackageJson();
-    
+
     packageJson.activationEvents = [
         "onLanguage:cpp",
         "onLanguage:c",

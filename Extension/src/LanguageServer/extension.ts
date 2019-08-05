@@ -144,7 +144,7 @@ export function activate(activationEventOccurred: boolean): void {
     }
 
     if (tempCommands.length === 0) { // Only needs to be added once.
-        tempCommands.push(vscode.workspace.onDidOpenTextDocument(d => onDidOpenTextDocument(d)));
+        tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
     }
 
     // Check if an activation event has already occurred.
@@ -286,7 +286,7 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
             return ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
                 (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
         });
-        compilerPaths = knownCompilers.map<string>(info => { return info.path; });
+        compilerPaths = knownCompilers.map<string>(info => info.path);
 
         let map: Map<string, string> = new Map<string, string>();
         const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
@@ -484,7 +484,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
         } else if (newUpdateChannel === 'Insiders') {
             insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
-        
+
         checkAndApplyUpdate(newUpdateChannel);
     }
 }
@@ -727,7 +727,7 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
                 reject(new Error('Failed to create vsix file'));
                 return;
             }
-    
+
             // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
             // then the .catch call will return a resolved promise
             // Thusly, the .catch call must also throw, as a return would simply return an unused promise
@@ -789,7 +789,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     let buildInfo: BuildInfo | null = buildInfoCache;
     // clear buildInfo cache.
     buildInfoCache = null;
-    
+
     if (!buildInfo) {
         try {
             buildInfo = await getTargetBuildInfo(updateChannel);
@@ -812,6 +812,7 @@ export function registerCommands(): void {
     if (commandsRegistered) {
         return;
     }
+
     commandsRegistered = true;
     getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
@@ -1178,6 +1179,16 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
         return logCrashTelemetry("readFile: " + err.code);
     }
 
+    // Extract the crashing process version, because the version might not match
+    // if multiple VS Codes are running with different extension versions.
+    let binaryVersion: string = "";
+    let startVersion: number = data.indexOf("Version:");
+    if (startVersion >= 0) {
+        data = data.substr(startVersion);
+        const binaryVersionMatches: string[] = data.match(/^Version:\s*(\d*\.\d*\.\d*\.\d*|\d)/);
+        binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
+    }
+
     // Extract the crashing thread's call stack.
     const crashStart: string = " Crashed:";
     let startCrash: number = data.indexOf(crashStart);
@@ -1193,7 +1204,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
         return logCrashTelemetry("No crash end");
     }
     data = data.substr(startCrash, endCrash - startCrash);
-    
+
     // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
     data = data.replace(/0x................ /g, "");
     data = data.replace(/0x1........ \+ 0/g, "");
@@ -1203,10 +1214,10 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     const process2: string = "Microsoft.VSCode.CPP.Extension.darwin\t";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
-        data = process1 + "\n" + data;
+        data = `${process1}${binaryVersion}\n${data}`;
     } else if (data.includes(process2)) {
         data = data.replace(new RegExp(process2, "g"), "");
-        data = process2 + "\n" + data;
+        data = `${process2}${binaryVersion}\n${data}`;
     } else {
         return logCrashTelemetry("No process"); // Not expected, but just in case.
     }
