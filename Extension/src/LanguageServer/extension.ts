@@ -107,7 +107,7 @@ function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
 async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number): Promise<string[]> {
     const matches : RegExpMatchArray = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
     if (!matches.length) {
-        return Promise.resolve([]);
+        return [];
     }
     const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
 
@@ -116,7 +116,7 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
     if (vcpkgDb) {
         portsWithHeader = vcpkgDb[missingHeader];
     }
-    return Promise.resolve(portsWithHeader ? portsWithHeader : []);
+    return portsWithHeader ? portsWithHeader : [];
 }
 
 function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
@@ -172,21 +172,23 @@ export function activate(activationEventOccurred: boolean): void {
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
             if (!await clients.ActiveClient.getVcpkgEnabled()) {
-                return Promise.resolve([]);
+                return [];
             }
 
             // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
             if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
-                return Promise.resolve([]);
+                return [];
             }
 
             telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
 
             if (!await clients.ActiveClient.getVcpkgInstalled()) {
-                return Promise.resolve([getVcpkgHelpAction()]);
+                return [getVcpkgHelpAction()];
             }
 
-            return lookupIncludeInVcpkg(document, range.start.line).then(ports => ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction));
+            const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
+            const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
+            return actions;
         }
     });
 
@@ -1042,7 +1044,7 @@ function onTakeSurvey(): void {
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
-async function onVcpkgOnlineHelpSuggested(dummy?: any): Promise<void> {
+function onVcpkgOnlineHelpSuggested(dummy?: any): void {
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': dummy ? 'CodeAction' : 'CommandPalette', 'action': 'vcpkgOnlineHelpSuggested' });
     const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
     vscode.commands.executeCommand('vscode.open', uri);
@@ -1079,7 +1081,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
             missingIncludeLocations.push([textDocument, lines]);
         });
         if (!missingIncludeLocations.length) {
-            return Promise.resolve();
+            return;
         }
         
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
@@ -1091,7 +1093,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         });
         ports = [].concat(...(await Promise.all(portsPromises)));
         if (!ports.length) {
-            return Promise.resolve();
+            return;
         }
         ports = ports.filter((port: string, index: number) => { return ports.indexOf(port) === index; });
     }
