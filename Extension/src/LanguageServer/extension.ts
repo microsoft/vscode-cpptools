@@ -59,7 +59,6 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
             zipfile.readEntry();
             zipfile.on('entry', entry => {
                 if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
-                    resolve({});
                     return;
                 }
                 zipfile.openReadStream(entry, (err?: Error, stream?: any) => {
@@ -85,6 +84,10 @@ async function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                         return;
                     });
                 });
+            });
+            zipfile.on('end', () => { // In case the header db was not found
+                resolve({});
+                return;
             });
         });
     });
