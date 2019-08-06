@@ -394,6 +394,18 @@
           "description": "The value to use in a configuration if \"compilerPath\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
+        "C_Cpp.default.compilerArgs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use in configuration if \"compilerArgs\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
         "C_Cpp.default.cStandard": {
           "type": [
             "string",
