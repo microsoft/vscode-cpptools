@@ -210,7 +210,6 @@ interface ReportReferencesProgressNotification {
 
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
-const GoToDeclarationRequest: RequestType<void, void, void, void> = new RequestType<void, void, void, void>('cpptools/goToDeclaration');
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
@@ -297,7 +296,6 @@ export interface Client {
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
     requestWhenReady(request: () => Thenable<any>): Thenable<any>;
     notifyWhenReady(notify: () => void): void;
-    requestGoToDeclaration(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
@@ -1597,10 +1595,6 @@ class DefaultClient implements Client {
      * requests to the language server
      *********************************************/
 
-    public requestGoToDeclaration(): Thenable<void> {
-        return this.requestWhenReady(() => this.languageClient.sendRequest(GoToDeclarationRequest, null));
-    }
-
     public requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> {
         let params: SwitchHeaderSourceParams = {
             rootPath: rootPath,
@@ -1986,7 +1980,6 @@ class NullClient implements Client {
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
-    requestGoToDeclaration(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}

@@ -704,8 +704,6 @@ export function registerCommands(): void {
     commandsRegistered = true;
     getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToDeclaration', onGoToDeclaration));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.PeekDeclaration', onPeekDeclaration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
@@ -740,16 +738,6 @@ function onNavigate(): void {
     clients.ActiveClient.requestNavigationList(activeEditor.document).then((navigationList: string) => {
         ui.showNavigationOptions(navigationList);
     });
-}
-
-function onGoToDeclaration(): void {
-    onActivationEvent();
-    clients.ActiveClient.requestGoToDeclaration().then(() => vscode.commands.executeCommand("editor.action.goToDeclaration"));
-}
-
-function onPeekDeclaration(): void {
-    onActivationEvent();
-    clients.ActiveClient.requestGoToDeclaration().then(() => vscode.commands.executeCommand("editor.action.previewDeclaration"));
 }
 
 function onSwitchHeaderSource(): void {

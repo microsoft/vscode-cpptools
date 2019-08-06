@@ -542,16 +542,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.GoToDeclaration",
-        "title": "%c_cpp.command.goToDeclaration.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.PeekDeclaration",
-        "title": "%c_cpp.command.peekDeclaration.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.SwitchHeaderSource",
         "title": "%c_cpp.command.switchHeaderSource.title%",
         "category": "C/C++"
@@ -613,26 +603,6 @@
       }
     ],
     "keybindings": [
-      {
-        "command": "C_Cpp.GoToDeclaration",
-        "key": "Ctrl+F12",
-        "when": "editorTextFocus && editorLangId == 'cpp'"
-      },
-      {
-        "command": "C_Cpp.GoToDeclaration",
-        "key": "Ctrl+F12",
-        "when": "editorTextFocus && editorLangId == 'c'"
-      },
-      {
-        "command": "C_Cpp.PeekDeclaration",
-        "key": "Ctrl+Alt+F12",
-        "when": "editorTextFocus && editorLangId == 'cpp'"
-      },
-      {
-        "command": "C_Cpp.PeekDeclaration",
-        "key": "Ctrl+Alt+F12",
-        "when": "editorTextFocus && editorLangId == 'c'"
-      },
       {
         "command": "C_Cpp.SwitchHeaderSource",
         "key": "Alt+O",
@@ -1372,26 +1342,6 @@
     ],
     "menus": {
       "editor/context": [
-        {
-          "when": "editorLangId == c",
-          "command": "C_Cpp.GoToDeclaration",
-          "group": "navigation@2"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.GoToDeclaration",
-          "group": "navigation@2"
-        },
-        {
-          "when": "editorLangId == c",
-          "command": "C_Cpp.PeekDeclaration",
-          "group": "navigation@3"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.PeekDeclaration",
-          "group": "navigation@3"
-        },
         {
           "when": "editorLangId == c",
           "command": "C_Cpp.SwitchHeaderSource",

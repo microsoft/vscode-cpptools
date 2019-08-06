@@ -355,8 +355,6 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ConfigurationProviderSelect",
         "onCommand:C_Cpp.SwitchHeaderSource",
         "onCommand:C_Cpp.Navigate",
-        "onCommand:C_Cpp.GoToDeclaration",
-        "onCommand:C_Cpp.PeekDeclaration",
         "onCommand:C_Cpp.EnableErrorSquiggles",
         "onCommand:C_Cpp.DisableErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",

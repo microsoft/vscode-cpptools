@@ -3,8 +3,6 @@
     "c_cpp.command.configurationProviderSelect.title": "Change Configuration Provider...",
     "c_cpp.command.configurationEditJSON.title": "Edit Configurations (JSON)",
     "c_cpp.command.configurationEditUI.title": "Edit Configurations (UI)",
-    "c_cpp.command.goToDeclaration.title": "Go to Declaration",
-    "c_cpp.command.peekDeclaration.title": "Peek Declaration",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
     "c_cpp.command.navigate.title": "Navigate...",
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",

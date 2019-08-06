@@ -3,8 +3,6 @@
     "c_cpp.command.configurationProviderSelect.title": "更换配置提供程序...",
     "c_cpp.command.configurationEditJSON.title": "编辑配置 (JSON)",
     "c_cpp.command.configurationEditUI.title": "编辑配置 (UI)",
-    "c_cpp.command.goToDeclaration.title": "跳转到声明",
-    "c_cpp.command.peekDeclaration.title": "查看声明",
     "c_cpp.command.switchHeaderSource.title": "切换头文件/源文件",
     "c_cpp.command.navigate.title": "导航...",
     "c_cpp.command.enableErrorSquiggles.title": "启用错误下划线",

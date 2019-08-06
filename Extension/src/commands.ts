@@ -22,8 +22,6 @@ class TemporaryCommandRegistrar {
         "C_Cpp.ConfigurationProviderSelect",
         "C_Cpp.SwitchHeaderSource",
         "C_Cpp.Navigate",
-        "C_Cpp.GoToDeclaration",
-        "C_Cpp.PeekDeclaration",
         "C_Cpp.EnableErrorSquiggles",
         "C_Cpp.DisableErrorSquiggles",
         "C_Cpp.ToggleIncludeFallback",
