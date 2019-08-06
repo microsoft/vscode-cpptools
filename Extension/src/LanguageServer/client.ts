@@ -860,15 +860,22 @@ class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
+        let onFinished: () => void = () => {
+            if (requestFile) {
+                this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+            }
+        };
         return this.queueBlockingTask(async () => {
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
             if (providers.size === 0) {
+                onFinished();
                 return Promise.resolve();
             }
             console.log("provideCustomConfiguration");
             let providerId: string|undefined = this.configuration.CurrentConfigurationProvider;
             if (!providerId) {
+                onFinished();
                 return Promise.resolve();
             }
 
@@ -878,6 +885,7 @@ class DefaultClient implements Client {
             };
             let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
             if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
+                onFinished();
                 return Promise.resolve();
             }
 
@@ -914,13 +922,11 @@ class DefaultClient implements Client {
                             this.sendCustomConfigurations([newConfig], false);
                         }
                     }
-                    if (requestFile) {
-                        this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
-                    }
+                    onFinished();
                 },
                 (err) => {
                     if (requestFile) {
-                        this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+                        onFinished();
                         return;
                     }
                     if (err === notReadyMessage) {
