@@ -50,6 +50,7 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPath?: string;
+    compilerArgs?: string[];
     knownCompilers?: KnownCompiler[];
     cStandard?: string;
     cppStandard?: string;
@@ -88,6 +89,7 @@ export interface KnownCompiler {
 
 export interface CompilerDefaults {
     compilerPath: string;
+    compilerArgs: string[];
     knownCompilers: KnownCompiler[];
     cStandard: string;
     cppStandard: string;
@@ -148,7 +150,6 @@ export class CppProperties {
     public get Configurations(): Configuration[] { return this.configurationJson ? this.configurationJson.configurations : null; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : null; }
-    public get CompilerPath(): string { return this.CurrentConfiguration ? this.CurrentConfiguration.compilerPath : null; }
     public get KnownCompiler(): KnownCompiler[] { return this.knownCompilers; }
 
     public get CurrentConfigurationProvider(): string|null {
@@ -544,6 +545,7 @@ export class CppProperties {
             configuration.forcedInclude = this.updateConfiguration(configuration.forcedInclude, settings.defaultForcedInclude, env);
             configuration.compileCommands = this.updateConfiguration(configuration.compileCommands, settings.defaultCompileCommands, env);
             configuration.compilerPath = this.updateConfiguration(configuration.compilerPath, settings.defaultCompilerPath, env);
+            configuration.compilerArgs = this.updateConfiguration(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfiguration(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);

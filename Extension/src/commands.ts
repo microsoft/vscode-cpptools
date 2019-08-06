@@ -55,7 +55,7 @@ class TemporaryCommandRegistrar {
     public registerTempCommand(command: string): void {
         this.tempCommands.push(vscode.commands.registerCommand(command, () => {
             if (this.isLanguageServerDisabled) {
-                vscode.window.showInformationMessage("The command is disabled because \"C_Cpp.intelliSenseEngine\" is set to \"Disabled\".");
+                vscode.window.showInformationMessage("This command is disabled because \"C_Cpp.intelliSenseEngine\" is set to \"Disabled\".");
                 return;
             }
             this.delayedCommandsToExecute.add(command);

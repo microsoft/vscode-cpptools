@@ -394,6 +394,18 @@
           "description": "The value to use in a configuration if \"compilerPath\" is either not specified or set to \"${default}\".",
           "scope": "resource"
         },
+        "C_Cpp.default.compilerArgs": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": null,
+          "description": "The value to use in configuration if \"compilerArgs\" is either not specified or set to \"${default}\".",
+          "scope": "resource"
+        },
         "C_Cpp.default.cStandard": {
           "type": [
             "string",
@@ -1521,7 +1533,7 @@
     "mkdirp": "^0.5.1",
     "plist": "^2.0.1",
     "tmp": "^0.1.0",
-    "vscode-cpptools": "^2.1.2",
+    "vscode-cpptools": "^3.0.0",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
