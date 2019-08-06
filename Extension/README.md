@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code
 
-### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://github.com/microsoft/vscode-cpptools/tree/master/Documentation)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/master/Code%20Samples)&nbsp;&nbsp;|&nbsp;&nbsp;[Offline Installers](https://github.com/microsoft/vscode-cpptools/releases)
+### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://code.visualstudio.com/docs/languages/cpp)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/master/Code%20Samples)&nbsp;&nbsp;|&nbsp;&nbsp;[Offline Installers](https://github.com/microsoft/vscode-cpptools/releases)
 
 [![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
 
@@ -26,7 +26,7 @@ This preview release of the extension adds language support for C/C++ to Visual 
   * For help configuring the debugger see [Configuring launch.json for C/C++ debugging](https://github.com/Microsoft/vscode-cpptools/blob/master/launch.md)
     on our [GitHub page](https://github.com/Microsoft/vscode-cpptools).
 
-You can find more detailed information about C/C++ support for Visual Studio Code at our [GitHub page](https://github.com/Microsoft/vscode-cpptools/tree/master/Documentation) and our [VS Code documentation page](https://code.visualstudio.com/docs/languages/cpp).
+You can find more detailed information about C/C++ support for Visual Studio Code at our [VS Code documentation page](https://code.visualstudio.com/docs/languages/cpp).
 
 ## Installation
 The extension has OS-specific binary dependencies, so installation via the Marketplace requires an Internet connection so that these additional dependencies can be downloaded. If you are working on a computer that does not have access to the Internet or is behind a strict firewall, you may need to use our OS-specific packages and install them by invoking VS Code's `"Install from VSIX..."` command. These "offline' packages are available at: https://github.com/Microsoft/vscode-cpptools/releases.

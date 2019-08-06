@@ -1,3 +1,9 @@
+
+# This file is deprecated.
+
+### The [documentation for GCC on Windows Subsystem for Linux (WSL)](https://code.visualstudio.com/docs/cpp/config-wsl) is now located under [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+
+<s>
 # Windows Subsystem for Linux
 
 > **Note:** If you are on **build 17110 of Windows or higher**, you must use extension version 0.17.0 or higher for IntelliSense to work. The Windows team turned on case-sensitive folders for the WSL environment and the C/C++ extension doesn't support case-sensitive folders until version 0.17.0.
@@ -31,3 +37,4 @@ If you are on a build of Windows prior to 17110 and you have an older version of
 ---
 
 Remember to [heed the warnings of the Windows team about not creating or editing Linux files from a Windows app](https://blogs.msdn.microsoft.com/commandline/2016/11/17/do-not-change-linux-files-using-windows-apps-and-tools/)!
+</s>

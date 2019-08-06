@@ -1,3 +1,8 @@
+# This file is deprecated.
+
+### The [documentation for customizing default settings](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp) is now located under [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+
+<s>
 # Customizing Default Settings
 
 In version 0.17.0 we introduced new settings that allow you to override the extension's default values for properties set in **c_cpp_properties.json**.
@@ -97,3 +102,4 @@ The extension determines the system includePath and defines to send to the Intel
         4. If `compilerPath` is undefined, look for a compiler on the system and query it.
 
 System includes should no longer be added to the `"includePath"` or `"browse.path"` variables. If the extension detects any system include paths in the `"includePath"` property it will silently remove them so that it can ensure system include paths are added last and in the correct order (this is especially important for GCC/Clang). In a future update we may add a notification message to the extension to remind developers to remove system include paths from their `"includePath"` and `'browse.path"` as they will be ignored.
+</s>

@@ -1,3 +1,9 @@
+
+# This file is deprecated.
+
+### The [documentation for custom views for native objects](https://code.visualstudio.com/docs/cpp/natvis) is now located under [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+
+<s>
 # Natvis - Custom views for native objects
 
 The Natvis framework allows developers to write custom schemas to help visualize native objects.
@@ -13,3 +19,4 @@ The official documentation can be found [here](https://docs.microsoft.com/en-us/
 ## Schema
 
 The Natvis schema can be found [here](natvis.xsd).
+</s>

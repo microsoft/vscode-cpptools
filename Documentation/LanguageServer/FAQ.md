@@ -1,3 +1,8 @@
+# This file is deprecated.
+
+### [FAQs](https://code.visualstudio.com/docs/cpp/faq-cpp) is now located under [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+
+<s>
 # Frequently asked questions
 
 * [Why are my files corrupted on format?](#why-are-my-files-corrupted-on-format)
@@ -69,3 +74,4 @@ When you open a workspace for the first time, the extension adds `${workspaceRoo
 ## How do I re-create the IntelliSense database?
 
 Starting in version 0.12.3 of the extension, we added a command that will reset your IntelliSense database. Open the command palette and choose the "C/Cpp: Reset IntelliSense Database" command.
+</s>

@@ -1,3 +1,9 @@
+
+# This file is deprecated.
+
+### The [documentation for Mingw-w64](https://code.visualstudio.com/docs/cpp/config-mingw) is now located under [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+
+<s>
 # MinGW
 
 To use MinGW on Windows, we recommend you add the following configuration to your **c_cpp_properties.json** file.  Select "C/Cpp: Edit Configurations" from the command palette to create this file if you haven't already.
@@ -29,3 +35,4 @@ If it seems like the `compilerPath` is not getting used, you can debug the issue
 ## Extension version 0.16.1 and earlier:
 
 If you have an older version of the C/C++ extension installed, use [these instructions](Archive/MinGW.md) instead.
+</s>

@@ -1,3 +1,8 @@
+# This file is deprecated.
+
+### The [documentation for logging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp) is now located under [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+
+<s>
 # How to enable logging in the extension
 
 If you are experiencing a problem that we are unable to diagnose based on information in your issue report, we might ask you to enable logging and send us your logs.
@@ -10,3 +15,4 @@ VS Code organizes the logging from different extensions to improve readability s
 
 ![image](https://user-images.githubusercontent.com/12818240/39769357-d6673bea-52a0-11e8-86c6-3be91618e8fc.png)
 
+</s>

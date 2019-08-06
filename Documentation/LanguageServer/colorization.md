@@ -1,3 +1,8 @@
+# This file is deprecated.
+
+### The [documentation for enhanced colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp) is now located under [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+
+<s>
 # VS Code C/C++ Extension - Enhanced Colorization
 
 The VS Code C/C++ extension now supports semantic colorization, when IntelliSense is enabled.  Enhanced colorization can be enabled using the enhancedColorization setting:
@@ -508,3 +513,4 @@ Use the following to augment the Visual Studio Light theme to match what Visual 
         }
     }
 ````
+</s>
