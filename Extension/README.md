@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code
 
-### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://code.visualstudio.com/docs/languages/cpp)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/master/Code%20Samples)&nbsp;&nbsp;|&nbsp;&nbsp;[Offline Installers](https://github.com/microsoft/vscode-cpptools/releases)
+#### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://code.visualstudio.com/docs/languages/cpp)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/master/Code%20Samples)&nbsp;&nbsp;|&nbsp;&nbsp;[Offline Installers](https://github.com/microsoft/vscode-cpptools/releases)
 
 [![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
 
@@ -15,7 +15,7 @@ This preview release of the C/C++ extension adds language support for C/C++ to V
 
 ## Main features
 * [IntelliSense](https://code.visualstudio.com/docs/cpp/cpp-ide) and [IntelliSense configuration](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp)
-* [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug) and [debug configuratio](https://code.visualstudio.com/docs/cpp/launch-json-reference)
+* [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug) and [debug configuration](https://code.visualstudio.com/docs/cpp/launch-json-reference)
 * [Semantic colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp)
 * [Logging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp) for IntelliSense and debugger
 
@@ -39,7 +39,6 @@ If someone has already filed an issue that encompasses your feedback, please lea
 **[Quick survey](https://www.research.net/r/VBVV6C6)**
 <br>
 Let us know what you think of the extension by taking the quick survey.
-
 
 ## Offline installation
 
