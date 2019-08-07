@@ -16,17 +16,16 @@ This preview release of the C/C++ extension adds language support for C/C++ to V
 ## Quick links
 * [Editing features (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide) 
 * [IntelliSense configuration](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp)
-* [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug) 
-* [Debug configuration](https://code.visualstudio.com/docs/cpp/launch-json-reference)
 * [Enhanced colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp)
-* [c_cpp_properties.json reference guide](https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference)
-* [Enable logging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp)
+* [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug)
+* [Debug configuration](https://code.visualstudio.com/docs/cpp/launch-json-reference)
+* [Enable logging for IntelliSense or debugging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp)
 
 ## Questions and feedback
 
 **[FAQs](https://code.visualstudio.com/docs/cpp/faq-cpp)**
 <br>
-Checkout the FAQs before filing a question.
+Check out the FAQs before filing a question.
 <br>
 
 **[Provide feedback](https://github.com/microsoft/vscode-cpptools/issues/new/choose)**
