@@ -70,17 +70,6 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    let errMsg: string;
-    if (process.arch !== 'x32' && process.arch !== 'x64') {
-        errMsg = "Architecture " + String(process.arch) + " is not supported. ";
-    } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
-        errMsg = "Alpine containers are not supported. ";
-    }
-    if (errMsg) {
-        vscode.window.showErrorMessage(errMsg);
-        return;
-    }
-
     taskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
         provideTasks: () => {
             return getBuildTasks(false);

@@ -29,6 +29,17 @@ let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    let errMsg: string = "";
+    if (process.arch !== 'x32' && process.arch !== 'x64') {
+        errMsg = "Architecture " + String(process.arch) + " is not supported. ";
+    } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
+        errMsg = "Alpine containers are not supported. ";
+    }
+    if (errMsg) {
+        vscode.window.showErrorMessage(errMsg);
+        return;
+    }
+
     util.setExtensionContext(context);
     initializeTemporaryCommandRegistrar();
     Telemetry.activate();
