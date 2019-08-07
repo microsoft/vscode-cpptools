@@ -1678,7 +1678,6 @@ class NullClient implements Client {
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
-    getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs> { return Promise.resolve(undefined); }
