@@ -290,7 +290,7 @@ export interface Client {
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
-    getCompilerPath(): Thenable<string>;
+    getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
@@ -819,18 +819,23 @@ class DefaultClient implements Client {
 
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let task: () => Thenable<WorkspaceBrowseConfiguration> = async () => {
+                if (this.RootUri && await currentProvider.canProvideBrowseConfigurationsPerFolder(tokenSource.token)) {
+                    return (currentProvider.provideFolderBrowseConfiguration(this.RootUri, tokenSource.token));
+                }
                 if (await currentProvider.canProvideBrowseConfiguration(tokenSource.token)) {
                     return currentProvider.provideBrowseConfiguration(tokenSource.token);
                 }
                 if (currentProvider.version >= Version.v2) {
                     console.warn("failed to provide browse configuration");
                 }
-                return Promise.reject("");
+                return null;
             };
             this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(
                 async config => {
                     await this.sendCustomBrowseConfiguration(config);
-                    this.resumeParsing();
+                    if (currentProvider.version >= Version.v2) {
+                        this.resumeParsing();
+                    }
                 },
                 () => {});
         });
@@ -965,10 +970,13 @@ class DefaultClient implements Client {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
     }
 
-    public getCompilerPath(): Thenable<string> {
-        return this.queueTask(() => Promise.resolve(this.configuration.CompilerPath));
+    public getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs> {
+        return this.queueTask(() => Promise.resolve(
+            util.extractCompilerPathAndArgs(
+                this.configuration.CurrentConfiguration.compilerPath,
+                this.configuration.CurrentConfiguration.compilerArgs)
+        ));
     }
-
     public getKnownCompilers(): Thenable<configs.KnownCompiler[]> {
         return this.queueTask(() => Promise.resolve(this.configuration.KnownCompiler));
     }
@@ -1680,6 +1688,13 @@ class DefaultClient implements Client {
             configurations: configurations,
             currentConfiguration: this.configuration.CurrentConfigurationIndex
         };
+        // Separate compiler path and args before sending to language client
+        params.configurations.forEach((c: configs.Configuration) => {
+            let compilerPathAndArgs: util.CompilerPathAndArgs =
+                util.extractCompilerPathAndArgs(c.compilerPath, c.compilerArgs);
+            c.compilerPath = compilerPathAndArgs.compilerPath;
+            c.compilerArgs = compilerPathAndArgs.additionalArgs;
+        });
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
             this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
@@ -1715,8 +1730,13 @@ class DefaultClient implements Client {
 
     private isSourceFileConfigurationItem(input: any): input is SourceFileConfigurationItem {
         return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
-            input.configuration && util.isArrayOfString(input.configuration.includePath) && util.isArrayOfString(input.configuration.defines) &&
-            util.isString(input.configuration.intelliSenseMode) && util.isString(input.configuration.standard) && util.isOptionalString(input.configuration.compilerPath) &&
+            input.configuration &&
+            util.isArrayOfString(input.configuration.includePath) &&
+            util.isArrayOfString(input.configuration.defines) &&
+            util.isString(input.configuration.intelliSenseMode) &&
+            util.isString(input.configuration.standard) &&
+            util.isOptionalString(input.configuration.compilerPath) &&
+            util.isOptionalArrayOfString(input.configuration.compilerArgs) &&
             util.isOptionalArrayOfString(input.configuration.forcedInclude));
     }
 
@@ -1735,10 +1755,6 @@ class DefaultClient implements Client {
         let sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item)) {
-                sanitized.push({
-                    uri: item.uri.toString(),
-                    configuration: item.configuration
-                });
                 if (settings.loggingLevel === "Debug") {
                     out.appendLine(`  uri: ${item.uri.toString()}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
@@ -1746,6 +1762,19 @@ class DefaultClient implements Client {
                 if (item.configuration.includePath.some(path => path.endsWith('**'))) {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
+                // Separate compiler path and args before sending to language client
+                let itemConfig: util.Mutable<SourceFileConfiguration> = {...item.configuration};
+                if (util.isString(itemConfig.compilerPath)) {
+                    let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
+                        itemConfig.compilerPath,
+                        util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
+                    itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
+                    itemConfig.compilerArgs = compilerPathAndArgs.additionalArgs;
+                }
+                sanitized.push({
+                    uri: item.uri.toString(),
+                    configuration: itemConfig
+                });
             } else {
                 console.warn("discarding invalid SourceFileConfigurationItem: " + item);
             }
@@ -1774,9 +1803,13 @@ class DefaultClient implements Client {
             console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
             return Promise.resolve();
         }
-        let sanitized: WorkspaceBrowseConfiguration = <WorkspaceBrowseConfiguration>config;
-        if (!util.isArrayOfString(sanitized.browsePath) || !util.isOptionalString(sanitized.compilerPath) ||
-            !util.isOptionalString(sanitized.standard) || !util.isOptionalString(sanitized.windowsSdkVersion)) {
+
+        let sanitized: util.Mutable<WorkspaceBrowseConfiguration> = {...<WorkspaceBrowseConfiguration>config};
+        if (!util.isArrayOfString(sanitized.browsePath) ||
+            !util.isOptionalString(sanitized.compilerPath) ||
+            !util.isOptionalArrayOfString(sanitized.compilerArgs) ||
+            !util.isOptionalString(sanitized.standard) ||
+            !util.isOptionalString(sanitized.windowsSdkVersion)) {
             console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
             return Promise.resolve();
         }
@@ -1785,6 +1818,15 @@ class DefaultClient implements Client {
         let out: logger.Logger = logger.getOutputChannelLogger();
         if (settings.loggingLevel === "Debug") {
             out.appendLine(`Custom browse configuration received: ${JSON.stringify(sanitized, null, 2)}`);
+        }
+
+        // Separate compiler path and args before sending to language client
+        if (util.isString(sanitized.compilerPath)) {
+            let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
+                sanitized.compilerPath,
+                util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
+            sanitized.compilerPath = compilerPathAndArgs.compilerPath;
+            sanitized.compilerArgs = compilerPathAndArgs.additionalArgs;
         }
 
         let params: CustomBrowseConfigurationParams = {
@@ -1974,7 +2016,7 @@ class NullClient implements Client {
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
-    getCompilerPath(): Thenable<string> { return Promise.resolve(""); }
+    getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
