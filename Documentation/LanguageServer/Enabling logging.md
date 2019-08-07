@@ -1,1 +1,1 @@
-The [documentation for logging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp) has moved to [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+The documentation for logging has moved to https://code.visualstudio.com/docs/cpp/enable-logging-cpp.

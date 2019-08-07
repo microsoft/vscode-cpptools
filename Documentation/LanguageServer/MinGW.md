@@ -1,2 +1,2 @@
 
-The [documentation for Mingw-w64](https://code.visualstudio.com/docs/cpp/config-mingw) has moved to [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+The documentation for Mingw-w64 has moved to https://code.visualstudio.com/docs/cpp/config-mingw.

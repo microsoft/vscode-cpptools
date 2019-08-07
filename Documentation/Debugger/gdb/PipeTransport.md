@@ -1,1 +1,1 @@
-The [documentation for pipe transport](https://code.visualstudio.com/docs/cpp/pipe-transport) has moved to [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+The documentation for pipe transport has moved to https://code.visualstudio.com/docs/cpp/pipe-transport.

@@ -1,1 +1,1 @@
-The [FAQs for the C/C++ extension](https://code.visualstudio.com/docs/cpp/faq-cpp) has moved to [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+The FAQs for the C/C++ extension has moved to https://code.visualstudio.com/docs/cpp/faq-cpp.

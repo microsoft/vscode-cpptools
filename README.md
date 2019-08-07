@@ -13,11 +13,14 @@ This preview release of the C/C++ extension adds language support for C/C++ to V
 * [Get Started with C++ and Clang/LLVM on macOS](https://code.visualstudio.com/docs/cpp/config-clang-mac)
 * [Get Started with C++ and Microsoft C++ compiler (MSVC)](https://code.visualstudio.com/docs/cpp/config-msvc)
 
-## Main features
-* [IntelliSense](https://code.visualstudio.com/docs/cpp/cpp-ide) and [IntelliSense configuration](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp)
-* [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug) and [debug configuration](https://code.visualstudio.com/docs/cpp/launch-json-reference)
-* [Semantic colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp)
-* [Logging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp) for IntelliSense and debugger
+## Quick links
+* [Editing features (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide) 
+* [IntelliSense configuration](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp)
+* [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug) 
+* [Debug configuration](https://code.visualstudio.com/docs/cpp/launch-json-reference)
+* [Enhanced colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp)
+* [c_cpp_properties.json reference guide](https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference)
+* [Enable logging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp)
 
 ## Questions and feedback
 

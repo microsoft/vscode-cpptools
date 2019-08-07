@@ -1,1 +1,1 @@
-The [documentation for GCC on Windows Subsystem for Linux (WSL)](https://code.visualstudio.com/docs/cpp/config-wsl) has moved to [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+The documentation for GCC on Windows Subsystem for Linux (WSL) has moved to https://code.visualstudio.com/docs/cpp/config-wsl.

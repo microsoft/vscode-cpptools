@@ -1,1 +1,1 @@
-The [documentation for enhanced colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp) has moved to [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+The documentation for enhanced colorization has moved to https://code.visualstudio.com/docs/cpp/colorization-cpp.

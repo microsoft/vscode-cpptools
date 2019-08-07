@@ -1,1 +1,1 @@
-The [documentation for customizing default settings](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp) has moved to [Visual Studio Code Docs](https://code.visualstudio.com/docs).
+The documentation for customizing default settings has moved to https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp.
