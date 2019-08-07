@@ -64,6 +64,7 @@ export class CppSettings extends Settings {
     public get defaultForcedInclude(): string[] { return super.Section.get<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string { return super.Section.get<string>("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string { return super.Section.get<string>("default.compilerPath"); }
+    public get defaultCompilerArgs(): string[] { return super.Section.get<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string { return super.Section.get<string>("default.cppStandard"); }
     public get defaultConfigurationProvider(): string { return super.Section.get<string>("default.configurationProvider"); }
