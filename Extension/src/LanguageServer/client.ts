@@ -1331,202 +1331,6 @@ class DefaultClient implements Client {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
-    private currentReferencesProgress: ReportReferencesProgressNotification;
-    private prevReferencesProgressIncrement: number;
-    private prevReferencesProgressMessage: string;
-    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): boolean {
-        const helpMessage: string = this.blockedByCursorPosition ? " Move the cursor to any identifier to get results." : " Click the search icon to preview results.";
-        switch (this.currentReferencesProgress.referencesProgress) {
-            case ReferencesProgress.Started:
-                progress.report({ message: 'Started.', increment: 0 });
-                break;
-            case ReferencesProgress.ProcessingSource:
-                progress.report({ message: 'Processing source.', increment: 0 });
-                break;
-            case ReferencesProgress.ProcessingTargets:
-                let numFilesToProcess: number = this.currentReferencesProgress.targetReferencesProgress.length;
-                let numWaitingToLex: number = 0;
-                let numLexing: number = 0;
-                let numWaitingToParse: number = 0;
-                let numParsing: number = 0;
-                let numConfirmingReferences: number = 0;
-                let numFinishedWithoutConfirming: number = 0;
-                let numFinishedConfirming: number = 0;
-                for (let targetLocationProgress of this.currentReferencesProgress.targetReferencesProgress) {
-                    switch (targetLocationProgress) {
-                        case TargetReferencesProgress.WaitingToLex:
-                            ++numWaitingToLex;
-                            break;
-                        case TargetReferencesProgress.Lexing:
-                            ++numLexing;
-                            break;
-                        case TargetReferencesProgress.WaitingToParse:
-                            ++numWaitingToParse;
-                            break;
-                        case TargetReferencesProgress.Parsing:
-                            ++numParsing;
-                            break;
-                        case TargetReferencesProgress.ConfirmingReferences:
-                            ++numConfirmingReferences;
-                            break;
-                        case TargetReferencesProgress.FinishedWithoutConfirming:
-                            ++numFinishedWithoutConfirming;
-                            break;
-                        case TargetReferencesProgress.FinishedConfirming:
-                            ++numFinishedConfirming;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                let currentMessage: string;
-                let numTotalToLex: number = this.currentReferencesProgress.targetReferencesProgress.length;
-                let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
-                let numTotalToParse: number = this.currentReferencesProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
-                let numFinishedParsing: number = numTotalToParse - numWaitingToParse - numParsing - numConfirmingReferences - numWaitingToLex - numLexing;
-                if (numLexing > numParsing) {
-                    currentMessage = `Searching ` + (numFinishedLexing + (numFinishedLexing < numTotalToLex ? 1 : 0)) + `/${numTotalToLex} files.` + helpMessage;
-                } else {
-                    currentMessage = `Confirming ` + (numFinishedParsing + (numFinishedParsing < numTotalToParse ? 1 : 0)) + `/${numTotalToParse} files.` + helpMessage;
-                }
-                let currentLexProgress: number = numFinishedLexing / numTotalToLex;
-                let currentParseProgress: number = numFinishedParsing / numTotalToParse;
-                let currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70);
-                if (forceUpdate || currentIncrement > this.prevReferencesProgressIncrement || currentMessage !== this.prevReferencesProgressMessage) {
-                    progress.report({ message: currentMessage, increment: currentIncrement - this.prevReferencesProgressIncrement });
-                    this.prevReferencesProgressIncrement = currentIncrement;
-                    this.prevReferencesProgressMessage = currentMessage;
-                } else {
-                    return false;
-                }
-                break;
-            case ReferencesProgress.FinalResultsAvailable:
-                progress.report({ message: 'Finished.' + (this.blockedByCursorPosition ? helpMessage : ""), increment: 100 });
-                break;
-        }
-        return true;
-    }
-
-    private referencesRequestHasOccurred: boolean;
-    public handleReferencesIcon(): void {
-        this.notifyWhenReady(() => {
-            if (this.model.isFindingReferences.Value) {
-                ++this.referencesCurrentProgressUICounter;
-            }
-            this.sendRequestReferences();
-        });
-    }
-
-    private sendRequestReferencesIfBlockedByCursor(): void {
-        if (this.newReferencesProgress && this.blockedByCursorPosition) {
-            this.newReferencesProgress = false;
-            this.sendRequestReferences();
-        }
-    }
-
-    private referencesViewFindPending: boolean = false;
-    private sendRequestReferences(): void {
-        if (this.model.isFindingReferences.Value) {
-            if (this.referencesRequestHasOccurred) {
-                // References are not usable if a references request is pending,
-                // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                // However, this command is a no-op if the cursor is not on a valid source location.
-                if (!this.referencesViewFindPending) {
-                    this.referencesViewFindPending = true;
-                    this.blockedByCursorPosition = false;
-                    vscode.commands.executeCommand(this.referencesIsPeek ? "editor.action.referenceSearch.trigger" : "references-view.find").then((val: any) => {
-                        // This either early fails (blockedByCursor) or blocks until references are returned.
-                        this.languageClient.sendNotification(RequestReferencesNotification);
-                    });
-                }
-            } else {
-                this.languageClient.sendNotification(RequestReferencesNotification);
-                this.referencesRequestHasOccurred = true;
-            }
-        }
-    }
-
-    private blockedByCursorPosition: boolean;
-    private handleReferencesBlockedByCursor(): void {
-        this.blockedByCursorPosition = true;
-        this.referencesViewFindPending = false;
-    }
-
-    private activeDocumentChangedBeforeSelectionChanged: boolean;
-    private newReferencesProgress: boolean;
-    private delayReferencesProgress: NodeJS.Timeout;
-    private referencesProgressOptions: vscode.ProgressOptions;
-    private referencesCanceled: boolean;
-    private referencesDoneWhileTagParsing: boolean;
-    private referencesProgressMethod: (progress: vscode.Progress<{
-        message?: string;
-        increment?: number;
-    }>, token: vscode.CancellationToken) => Thenable<unknown>;
-    private referencePreviousProgressUICounter: number;
-    private referencesCurrentProgressUICounter: number;
-    private referencesIsPeek: boolean;
-    private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
-        switch (notificationBody.referencesProgress) {
-            case ReferencesProgress.Started:
-                this.referencesDoneWhileTagParsing = this.model.isTagParsing.Value;
-                this.model.isFindingReferences.Value = true;
-                this.referencesRequestHasOccurred = false;
-                this.blockedByCursorPosition = false;
-                this.referencesCanceled = false;
-                this.prevReferencesProgressIncrement = 0;
-                this.prevReferencesProgressMessage = "";
-                this.referencePreviousProgressUICounter = 0;
-                this.referencesCurrentProgressUICounter = 0;
-                this.referencesIsPeek = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < 1000); // TODO: Might need tweeking.
-                this.delayReferencesProgress = setInterval(() => {
-                    this.newReferencesProgress = true;
-                    this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
-                    this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
-                    // tslint:disable-next-line: promise-must-complete
-                        new Promise((resolve) => {
-                            this.reportReferencesProgress(progress, true);
-                            let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
-                                if (token.isCancellationRequested && !this.referencesCanceled) {
-                                    this.languageClient.sendNotification(CancelReferencesNotification);
-                                    this.sendRequestReferences();
-                                    this.referencesCanceled = true;
-                                }
-                                if (this.currentReferencesProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
-                                    clearInterval(currentUpdateProgressTimer);
-                                    if (this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
-                                        this.referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
-                                        vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                                    }
-                                    resolve();
-                                } else {
-                                    if (this.reportReferencesProgress(progress, false)) {
-                                        if (this.blockedByCursorPosition) {
-                                            this.newReferencesProgress = true;
-                                        }
-                                    }
-                                }
-                            }, 1000);
-                        });
-                    vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                    clearInterval(this.delayReferencesProgress);
-                }, 2000);
-                break;
-            case ReferencesProgress.FinalResultsAvailable:
-                this.currentReferencesProgress = notificationBody;
-                this.sendRequestReferences();
-                break;
-            case ReferencesProgress.Finished:
-                this.currentReferencesProgress = notificationBody;
-                this.model.isFindingReferences.Value = false;
-                clearInterval(this.delayReferencesProgress);
-                break;
-            default:
-                this.currentReferencesProgress = notificationBody;
-                break;
-        }
-    }
-
     private getColorizationState(uri: string): ColorizationState {
         let colorizationState: ColorizationState = this.colorizationState.get(uri);
         if (!colorizationState) {
@@ -1641,6 +1445,8 @@ class DefaultClient implements Client {
     }
 
     private previousEditVersionDuringSelectionChange: number = 0;
+    private activeDocumentChangedBeforeSelectionChanged: boolean;
+
     public selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void {
         this.notifyWhenReady(() => {
             if (this.activeDocumentChangedBeforeSelectionChanged) {
@@ -1932,6 +1738,206 @@ class DefaultClient implements Client {
                 }
             }
         });
+    }
+
+    // Find All References data.
+    private referencesCurrentProgress: ReportReferencesProgressNotification;
+    private referencesPrevProgressIncrement: number;
+    private referencesPrevProgressMessage: string;
+    private referencesRequestHasOccurred: boolean;
+    private referencesViewFindPending: boolean = false;
+    private referencesBlockedByCursorPosition: boolean;
+    private newReferencesProgress: boolean;
+    private delayReferencesProgress: NodeJS.Timeout;
+    private referencesProgressOptions: vscode.ProgressOptions;
+    private referencesCanceled: boolean;
+    private referencesDoneWhileTagParsing: boolean;
+    private referencesProgressMethod: (progress: vscode.Progress<{
+        message?: string;
+        increment?: number;
+    }>, token: vscode.CancellationToken) => Thenable<unknown>;
+    private referencePreviousProgressUICounter: number;
+    private referencesCurrentProgressUICounter: number;
+    private referencesIsPeek: boolean;
+
+    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): boolean {
+        const helpMessage: string = this.referencesBlockedByCursorPosition ? " Something is preventing results from updating." : " Click the search icon to preview.";
+        switch (this.referencesCurrentProgress.referencesProgress) {
+            case ReferencesProgress.Started:
+                progress.report({ message: 'Started.', increment: 0 });
+                break;
+            case ReferencesProgress.ProcessingSource:
+                progress.report({ message: 'Processing source.', increment: 0 });
+                break;
+            case ReferencesProgress.ProcessingTargets:
+                let numWaitingToLex: number = 0;
+                let numLexing: number = 0;
+                //let numWaitingToParse: number = 0;
+                let numParsing: number = 0;
+                //let numConfirmingReferences: number = 0;
+                let numFinishedWithoutConfirming: number = 0;
+                let numFinishedConfirming: number = 0;
+                for (let targetLocationProgress of this.referencesCurrentProgress.targetReferencesProgress) {
+                    switch (targetLocationProgress) {
+                        case TargetReferencesProgress.WaitingToLex:
+                            ++numWaitingToLex;
+                            break;
+                        case TargetReferencesProgress.Lexing:
+                            ++numLexing;
+                            break;
+                        case TargetReferencesProgress.WaitingToParse:
+                            //++numWaitingToParse;
+                            break;
+                        case TargetReferencesProgress.Parsing:
+                            ++numParsing;
+                            break;
+                        case TargetReferencesProgress.ConfirmingReferences:
+                            //++numConfirmingReferences;
+                            break;
+                        case TargetReferencesProgress.FinishedWithoutConfirming:
+                            ++numFinishedWithoutConfirming;
+                            break;
+                        case TargetReferencesProgress.FinishedConfirming:
+                            ++numFinishedConfirming;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                let currentMessage: string;
+                let numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
+                let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
+                let numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
+                if (numLexing > numParsing) {
+                    currentMessage = `` + numFinishedLexing + `/${numTotalToLex} files searched.` + helpMessage;
+                } else {
+                    currentMessage = `` + numFinishedConfirming + `/${numTotalToParse} files confirmed.` + helpMessage;
+                }
+                let currentLexProgress: number = numFinishedLexing / numTotalToLex;
+                let currentParseProgress: number = numFinishedConfirming / numTotalToParse;
+                let currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70);
+                if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
+                    progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
+                    this.referencesPrevProgressIncrement = currentIncrement;
+                    this.referencesPrevProgressMessage = currentMessage;
+                } else {
+                    return false;
+                }
+                break;
+            case ReferencesProgress.FinalResultsAvailable:
+                progress.report({ message: 'Finished.' + (this.referencesBlockedByCursorPosition ? helpMessage : ""), increment: 100 });
+                break;
+        }
+        return true;
+    }
+
+    public handleReferencesIcon(): void {
+        this.notifyWhenReady(() => {
+            if (this.model.isFindingReferences.Value) {
+                ++this.referencesCurrentProgressUICounter;
+            }
+            this.sendRequestReferences();
+        });
+    }
+
+    private sendRequestReferencesIfBlockedByCursor(): void {
+        if (this.newReferencesProgress && this.referencesBlockedByCursorPosition) {
+            this.newReferencesProgress = false;
+            this.sendRequestReferences();
+        }
+    }
+
+    private sendRequestReferences(): void {
+        if (this.model.isFindingReferences.Value) {
+            if (this.referencesRequestHasOccurred) {
+                // References are not usable if a references request is pending,
+                // So after the initial request, we don't send a 2nd references request until the next request occurs.
+                // However, this command is a no-op if the cursor is not on a valid source location.
+                if (!this.referencesViewFindPending) {
+                    this.referencesViewFindPending = true;
+                    this.referencesBlockedByCursorPosition = false;
+                    vscode.commands.executeCommand(this.referencesIsPeek ? "editor.action.referenceSearch.trigger" : "references-view.refresh").then((val: any) => {
+                        // This either early fails (blockedByCursor) or blocks until references are returned.
+                        this.languageClient.sendNotification(RequestReferencesNotification);
+                    });
+                }
+            } else {
+                this.languageClient.sendNotification(RequestReferencesNotification);
+                this.referencesRequestHasOccurred = true;
+            }
+        }
+    }
+
+    private handleReferencesBlockedByCursor(): void {
+        this.referencesBlockedByCursorPosition = true;
+        this.referencesViewFindPending = false;
+    }
+
+    private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
+        switch (notificationBody.referencesProgress) {
+            case ReferencesProgress.Started:
+                this.referencesDoneWhileTagParsing = this.model.isTagParsing.Value;
+                this.model.isFindingReferences.Value = true;
+                this.referencesRequestHasOccurred = false;
+                this.referencesBlockedByCursorPosition = false;
+                this.referencesCanceled = false;
+                this.referencesPrevProgressIncrement = 0;
+                this.referencesPrevProgressMessage = "";
+                this.referencePreviousProgressUICounter = 0;
+                this.referencesCurrentProgressUICounter = 0;
+                this.referencesIsPeek = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < 1000); // TODO: Might need tweeking.
+                if (!this.referencesChannel) {
+                    this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
+                    this.disposables.push(this.referencesChannel);
+                }
+                this.referencesChannel.clear();
+                this.delayReferencesProgress = setInterval(() => {
+                    this.newReferencesProgress = true;
+                    this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
+                    this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
+                    // tslint:disable-next-line: promise-must-complete
+                        new Promise((resolve) => {
+                            this.reportReferencesProgress(progress, true);
+                            let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
+                                if (token.isCancellationRequested && !this.referencesCanceled) {
+                                    this.languageClient.sendNotification(CancelReferencesNotification);
+                                    this.sendRequestReferences();
+                                    this.referencesCanceled = true;
+                                }
+                                if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
+                                    clearInterval(currentUpdateProgressTimer);
+                                    if (this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
+                                        this.referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
+                                        vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+                                    }
+                                    resolve();
+                                } else {
+                                    if (this.reportReferencesProgress(progress, false)) {
+                                        if (this.referencesBlockedByCursorPosition) {
+                                            this.newReferencesProgress = true;
+                                        }
+                                    }
+                                }
+                            }, 1000);
+                        });
+                    vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+                    clearInterval(this.delayReferencesProgress);
+                }, 2000);
+                break;
+            case ReferencesProgress.FinalResultsAvailable:
+                this.referencesCurrentProgress = notificationBody;
+                this.sendRequestReferences();
+                break;
+            case ReferencesProgress.Finished:
+                this.referencesCurrentProgress = notificationBody;
+                this.model.isFindingReferences.Value = false;
+                clearInterval(this.delayReferencesProgress);
+                break;
+            default:
+                this.referencesCurrentProgress = notificationBody;
+                break;
+        }
     }
 
     private convertReferenceTypeToString(referenceType: ReferenceType): string {
