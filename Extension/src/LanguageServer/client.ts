@@ -253,7 +253,6 @@ const UpdateClangFormatPathNotification: NotificationType<string, void> = new No
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
 const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<ReportReferencesProgressNotification, void> = new NotificationType<ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
-const ReferencesBlockedByCursor: NotificationType<void, void> = new NotificationType<void, void>('cpptools/referencesBlockedByCursor');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
 
 let failureMessageShown: boolean = false;
@@ -1125,7 +1124,6 @@ class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(ReferencesBlockedByCursor, () => this.handleReferencesBlockedByCursor());
         this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
         this.setupOutputHandlers();
     }
@@ -1427,7 +1425,6 @@ class DefaultClient implements Client {
 
     public activeDocumentChanged(document: vscode.TextDocument): void {
         this.notifyWhenReady(() => {
-            this.activeDocumentChangedBeforeSelectionChanged = true;
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
     }
@@ -1444,23 +1441,8 @@ class DefaultClient implements Client {
         this.resumeParsing();
     }
 
-    private previousEditVersionDuringSelectionChange: number = 0;
-    private activeDocumentChangedBeforeSelectionChanged: boolean;
-
     public selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void {
         this.notifyWhenReady(() => {
-            if (this.activeDocumentChangedBeforeSelectionChanged) {
-                if (selection.start.line !== 0 && selection.start.character !== 0) {
-                    this.activeDocumentChangedBeforeSelectionChanged = false;
-                }
-            } else if (kind === vscode.TextEditorSelectionChangeKind.Mouse) {
-                this.sendRequestReferencesIfBlockedByCursor();
-            } else if (kind === vscode.TextEditorSelectionChangeKind.Keyboard) {
-                if (this.editVersion <= this.previousEditVersionDuringSelectionChange) {
-                    this.sendRequestReferencesIfBlockedByCursor();
-                }
-                this.previousEditVersionDuringSelectionChange = this.editVersion;
-            }
             this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
         });
     }
@@ -1746,8 +1728,6 @@ class DefaultClient implements Client {
     private referencesPrevProgressMessage: string;
     private referencesRequestHasOccurred: boolean;
     private referencesViewFindPending: boolean = false;
-    private referencesBlockedByCursorPosition: boolean;
-    private newReferencesProgress: boolean;
     private delayReferencesProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
     private referencesCanceled: boolean;
@@ -1760,8 +1740,8 @@ class DefaultClient implements Client {
     private referencesCurrentProgressUICounter: number;
     private referencesIsPeek: boolean;
 
-    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): boolean {
-        const helpMessage: string = this.referencesBlockedByCursorPosition ? " Something is preventing results from updating." : " Click the search icon to preview.";
+    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
+        const helpMessage: string = " Click the search icon to preview results.";
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
@@ -1809,7 +1789,7 @@ class DefaultClient implements Client {
                 let numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
                 let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
                 let numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
-                if (numLexing > numParsing) {
+                if (numLexing >= numParsing) {
                     currentMessage = `` + numFinishedLexing + `/${numTotalToLex} files searched.` + helpMessage;
                 } else {
                     currentMessage = `` + numFinishedConfirming + `/${numTotalToParse} files confirmed.` + helpMessage;
@@ -1821,15 +1801,12 @@ class DefaultClient implements Client {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
                     this.referencesPrevProgressIncrement = currentIncrement;
                     this.referencesPrevProgressMessage = currentMessage;
-                } else {
-                    return false;
                 }
                 break;
             case ReferencesProgress.FinalResultsAvailable:
-                progress.report({ message: 'Finished.' + (this.referencesBlockedByCursorPosition ? helpMessage : ""), increment: 100 });
+                progress.report({ message: 'Finished.', increment: 100 });
                 break;
         }
-        return true;
     }
 
     public handleReferencesIcon(): void {
@@ -1841,13 +1818,6 @@ class DefaultClient implements Client {
         });
     }
 
-    private sendRequestReferencesIfBlockedByCursor(): void {
-        if (this.newReferencesProgress && this.referencesBlockedByCursorPosition) {
-            this.newReferencesProgress = false;
-            this.sendRequestReferences();
-        }
-    }
-
     private sendRequestReferences(): void {
         if (this.model.isFindingReferences.Value) {
             if (this.referencesRequestHasOccurred) {
@@ -1856,11 +1826,7 @@ class DefaultClient implements Client {
                 // However, this command is a no-op if the cursor is not on a valid source location.
                 if (!this.referencesViewFindPending) {
                     this.referencesViewFindPending = true;
-                    this.referencesBlockedByCursorPosition = false;
-                    vscode.commands.executeCommand(this.referencesIsPeek ? "editor.action.referenceSearch.trigger" : "references-view.refresh").then((val: any) => {
-                        // This either early fails (blockedByCursor) or blocks until references are returned.
-                        this.languageClient.sendNotification(RequestReferencesNotification);
-                    });
+                    vscode.commands.executeCommand(this.referencesIsPeek ? "editor.action.referenceSearch.trigger" : "references-view.refresh");
                 }
             } else {
                 this.languageClient.sendNotification(RequestReferencesNotification);
@@ -1869,18 +1835,12 @@ class DefaultClient implements Client {
         }
     }
 
-    private handleReferencesBlockedByCursor(): void {
-        this.referencesBlockedByCursorPosition = true;
-        this.referencesViewFindPending = false;
-    }
-
     private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
                 this.referencesDoneWhileTagParsing = this.model.isTagParsing.Value;
                 this.model.isFindingReferences.Value = true;
                 this.referencesRequestHasOccurred = false;
-                this.referencesBlockedByCursorPosition = false;
                 this.referencesCanceled = false;
                 this.referencesPrevProgressIncrement = 0;
                 this.referencesPrevProgressMessage = "";
@@ -1893,7 +1853,6 @@ class DefaultClient implements Client {
                 }
                 this.referencesChannel.clear();
                 this.delayReferencesProgress = setInterval(() => {
-                    this.newReferencesProgress = true;
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                     // tslint:disable-next-line: promise-must-complete
@@ -1909,15 +1868,12 @@ class DefaultClient implements Client {
                                     clearInterval(currentUpdateProgressTimer);
                                     if (this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
                                         this.referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
+                                        this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
                                         vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
                                     }
                                     resolve();
                                 } else {
-                                    if (this.reportReferencesProgress(progress, false)) {
-                                        if (this.referencesBlockedByCursorPosition) {
-                                            this.newReferencesProgress = true;
-                                        }
-                                    }
+                                    this.reportReferencesProgress(progress, false);
                                 }
                             }, 1000);
                         });
