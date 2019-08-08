@@ -53,7 +53,7 @@ export class UI {
 
         this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
         this.referencesStatusBarItem.text = "";
-        this.referencesStatusBarItem.tooltip = "Find All References (click to preview results)";
+        this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = true;
