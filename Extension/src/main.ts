@@ -29,6 +29,7 @@ let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    /*
     let errMsg: string = "";
     if (process.arch !== 'x32' && process.arch !== 'x64') {
         errMsg = "Architecture " + String(process.arch) + " is not supported. ";
@@ -38,7 +39,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     if (errMsg) {
         vscode.window.showErrorMessage(errMsg);
         return new NullCppTools();
-    }
+    }*/
 
     util.setExtensionContext(context);
     initializeTemporaryCommandRegistrar();
