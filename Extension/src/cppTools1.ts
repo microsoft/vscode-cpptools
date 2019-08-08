@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CustomConfigurationProvider, Version, CppToolsApi } from 'vscode-cpptools';
+import { CustomConfigurationProvider, Version, CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { CppToolsTestApi, CppToolsTestHook, CppToolsTestExtension } from 'vscode-cpptools/out/testApi';
 import { CppTools } from './cppTools';
 
@@ -61,5 +61,37 @@ export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
 
     getTestHook(): CppToolsTestHook {
         return this.BackupApi.getTestHook();
+    }
+}
+
+/**
+ * This is an empty implementation of the API. Used when the extension is activated on
+ * an unsupported platform.
+ */
+export class NullCppTools implements CppToolsApi, CppToolsExtension {
+    private version: Version;
+
+    getApi(version: Version): CppToolsApi {
+        this.version = version;
+        return this;
+    }
+    
+    getVersion(): Version {
+        return this.version;
+    }
+
+    registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
+    }
+
+    notifyReady(provider: CustomConfigurationProvider): void {
+    }
+
+    didChangeCustomConfiguration(provider: CustomConfigurationProvider): void {
+    }
+
+    didChangeCustomBrowseConfiguration(provider: CustomConfigurationProvider): void {
+    }
+
+    dispose(): void {
     }
 }

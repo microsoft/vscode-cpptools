@@ -20,7 +20,7 @@ import { PackageManager, PackageManagerError, IPackage } from './packageManager'
 import { PersistentState } from './LanguageServer/persistentState';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
-import { CppTools1 } from './cppTools1';
+import { CppTools1, NullCppTools } from './cppTools1';
 
 const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
@@ -37,7 +37,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     }
     if (errMsg) {
         vscode.window.showErrorMessage(errMsg);
-        return;
+        return new NullCppTools();
     }
 
     util.setExtensionContext(context);
