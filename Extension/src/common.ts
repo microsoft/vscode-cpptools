@@ -23,6 +23,10 @@ import * as nls from 'vscode-nls';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
+export type Mutable<T> = {
+    -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
+};
+
 export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -792,10 +796,10 @@ export interface CompilerPathAndArgs {
     additionalArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
+export function extractCompilerPathAndArgs(inputCompilerPath: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string = inputCompilerPath;
     let compilerName: string = "";
-    let additionalArgs: string[];
+    let additionalArgs: string[] = [];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
         if (compilerPath === "cl.exe") {
@@ -809,7 +813,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
                 additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
                 compilerPath = compilerPath.substr(1, endQuote - 1);
-                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
+                compilerName = path.basename(compilerPath);
             }
         } else {
             // Input has no quotes but can have a compiler path with spaces and args.
@@ -835,9 +839,16 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
             }
             // Get compiler name if there are no args but path is valid or a valid path was found with args.
             if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {
-                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
+                compilerName = path.basename(compilerPath);
             }
         }
+    }
+    // Combine args from inputCompilerPath and inputCompilerArgs and remove duplicates
+    if (inputCompilerArgs && inputCompilerArgs.length) {
+        additionalArgs = inputCompilerArgs.concat(additionalArgs.filter(
+            function (item: string): boolean {
+                return inputCompilerArgs.indexOf(item) < 0;
+            }));
     }
     return { compilerPath, compilerName, additionalArgs };
 }

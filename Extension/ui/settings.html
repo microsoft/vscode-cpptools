@@ -434,9 +434,9 @@
     <div style=" height: 90px; display: inline-block;">
       <div class="main-title" data-loc-id="intellisense.configurations">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
-        <span data-loc-id="use.this.editor.to">Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id="edit.configurations.in.json">c_cpp_properties.json</a> file.</span>
-        <span data-loc-id="changes.only.selected">Changes made in this editor only apply to the selected configuration. </span>
-        <span data-loc-id="to.edit.multiple">To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id="edit.configurations.in.json">c_cpp_properties.json</a>.</span>
+        <span data-loc-id="intellisense.configurations.description1">Use this editor to edit IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id="edit.configurations.in.json">c_cpp_properties.json</a> file.</span>
+        <span data-loc-id="intellisense.configurations.description2">Changes made in this editor only apply to the selected configuration.</span>
+        <span data-loc-id="intellisense.configurations.description3">To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.</span>
       </div>
     </div>
 
@@ -478,8 +478,7 @@
         <div class="section-title" data-loc-id="compiler.path">Compiler path</div>
         <div class="section-text">
             <span data-loc-id="compiler.path.description1">The full path to the compiler you use to build your project, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.</span>
-            <span data-loc-id="compiler.path.description2">Arguments can be added to modify the includes/defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc., but paths with spaces must be surrounded by double quotes <code>"</code> if arguments are used.</span>
-            <span data-loc-id="compiler.path.description3">The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.</span>
+            <span data-loc-id="compiler.path.description2">The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.</span>
         </div>
         <!-- input compilerPath -->
         <div class="section-note" data-loc-id="specify.a.compiler">Specify a compiler path or select a detected compiler path from the drop-down list.</div>
@@ -489,6 +488,14 @@
             </div>
         <div id="compilerPathInvalid" class="error" style="width: 800px"></div>
         <!-- input compilerPath end -->
+    </div>
+
+    <div class="section-title">Compiler arguments</div>
+        <div class="section-text" data-loc-id="compiler.arguments">Compiler arguments to modify the includes or defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc.</div>
+        <div>
+            <div class="section-note" data-loc-id="one.argument.per.line">One argument per line.</div>
+            <textarea name="inputValue" id="compilerArgs" rows="4" cols="93" style="width: 800px"></textarea>
+        </div>
     </div>
 
     <div class="section">
@@ -505,9 +512,12 @@
         <div>
           <select name="inputValue" id="intelliSenseMode" class="select-default">
             <option value="${default}">${default}</option>
-            <option value="msvc-x64">msvc-x64</option>
-            <option value="gcc-x64">gcc-x64</option>
+            <option value="clang-x86">clang-x86</option>
             <option value="clang-x64">clang-x64</option>
+            <option value="gcc-x86">gcc-x86</option>
+            <option value="gcc-x64">gcc-x64</option>
+            <option value="msvc-x86">msvc-x86</option>
+            <option value="msvc-x64">msvc-x64</option>
           </select>
         </div>
         <div id="intelliSenseModeInvalid" class="error" style="width: 290px"></div>

@@ -25,6 +25,9 @@ import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
+import * as rd from 'readline';
+import * as yauzl from 'yauzl';
+import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -46,7 +49,97 @@ let buildInfoCache: BuildInfo | null = null;
 const taskSourceStr: string = "C/C++";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
+let codeActionProvider: vscode.Disposable;
 const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
+
+type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
+let vcpkgDbPromise: Promise<vcpkgDatabase>;
+function initVcpkgDatabase(): Promise<vcpkgDatabase> {
+    return new Promise((resolve, reject) => {
+        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err? : Error, zipfile?: yauzl.ZipFile) => {
+            if (err) {
+                resolve({});
+                return;
+            }
+            zipfile.readEntry();
+            let dbFound: boolean = false;
+            zipfile.on('entry', entry => {
+                if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
+                    return;
+                }
+                dbFound = true;
+                zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
+                    if (err) {
+                        resolve({});
+                        return;
+                    }
+                    let database: vcpkgDatabase = {};
+                    let reader: rd.ReadLine = rd.createInterface(stream);
+                    reader.on('line', (lineText: string) => {
+                        let portFilePair: string[] = lineText.split(':');
+                        if (portFilePair.length !== 2) {
+                            return;
+                        }
+
+                        const portName: string = portFilePair[0];
+                        const relativeHeader: string = portFilePair[1];
+
+                        if (!database[relativeHeader]) {
+                            database[relativeHeader] = [];
+                        }
+
+                        database[relativeHeader].push(portName);
+                    });
+                    reader.on('close', () => {
+                        resolve(database);
+                    });
+                });
+            });
+            zipfile.on('end', () => {
+                if (!dbFound) {
+                    resolve({});
+                }
+            });
+        });
+    });
+}
+
+function getVcpkgHelpAction(): vscode.CodeAction {
+    const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
+    return {
+        command: { title: 'vcpkgOnlineHelpSuggested', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
+        title: "Learn how to install a library for this header with vcpkg",
+        kind: vscode.CodeActionKind.QuickFix
+    };
+}
+
+function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
+    return {
+        command: { title: 'vcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
+        title: `Copy vcpkg command to install '${port}' to the clipboard`,
+        kind: vscode.CodeActionKind.QuickFix
+    };
+}
+
+async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number): Promise<string[]> {
+    const matches : RegExpMatchArray = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
+    if (!matches.length) {
+        return [];
+    }
+    const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
+
+    let portsWithHeader: string[];
+    const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
+    if (vcpkgDb) {
+        portsWithHeader = vcpkgDb[missingHeader];
+    }
+    return portsWithHeader ? portsWithHeader : [];
+}
+
+function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
+    const missingIncludeCode: number = 1696;
+    return diagnostic.code && diagnostic.code === missingIncludeCode && diagnostic.source && diagnostic.source === 'cpptools';
+}
 
 /**
  * activate: set up the extension for language services
@@ -89,6 +182,33 @@ export function activate(activationEventOccurred: boolean): void {
         }
     });
 
+    const selector: vscode.DocumentSelector = [
+        { scheme: 'file', language: 'cpp' },
+        { scheme: 'file', language: 'c' }
+    ];
+    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
+        provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
+            if (!await clients.ActiveClient.getVcpkgEnabled()) {
+                return [];
+            }
+
+            // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
+            if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
+                return [];
+            }
+
+            telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
+
+            if (!await clients.ActiveClient.getVcpkgInstalled()) {
+                return [getVcpkgHelpAction()];
+            }
+
+            const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
+            const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
+            return actions;
+        }
+    });
+
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
@@ -119,7 +239,7 @@ export interface BuildTaskDefinition extends vscode.TaskDefinition {
 /**
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
-export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.Task[]> {
+export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode.Task[]> {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor;
     if (!editor) {
         return [];
@@ -127,7 +247,7 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
 
     const fileExt: string = path.extname(editor.document.fileName);
     if (!fileExt) {
-        return;
+        return [];
     }
 
     // Don't offer tasks for header files.
@@ -151,9 +271,7 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
         return [];
     }
 
-    // Get a list of compilers found from the C++ side, then filter them based on the file type to get a reduced list appropriate
-    // for the active file, remove duplicate compiler names, then finally add the user's compilerPath setting.
-    let compilerPaths: string[];
+    // Get compiler paths.
     const isWindows: boolean = os.platform() === 'win32';
     let activeClient: Client;
     try {
@@ -164,8 +282,11 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
         }
         return []; // Language service features may be disabled.
     }
-    let userCompilerPath: string = await activeClient.getCompilerPath();
-    if (userCompilerPath) {
+
+    // Get user compiler path.
+    const userCompilerPathAndArgs: util.CompilerPathAndArgs = await activeClient.getCurrentCompilerPathAndArgs();
+    let userCompilerPath: string = userCompilerPathAndArgs.compilerPath;
+    if (userCompilerPath && userCompilerPathAndArgs.compilerName) {
         userCompilerPath = userCompilerPath.trim();
         if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
             userCompilerPath = null;
@@ -174,38 +295,20 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
         }
     }
 
+    // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
+    // Filter them based on the file type to get a reduced list appropriate for the active file.
+    let knownCompilerPaths: string[];
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info => {
             return ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+                (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
                 (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
         });
-        compilerPaths = knownCompilers.map<string>(info => info.path);
-
-        let map: Map<string, string> = new Map<string, string>();
-        const insertOrAssignEntry: (compilerPath: string) => void = (compilerPath: string): void => {
-            let basename: string = compilerPath;
-            if (compilerPath === userCompilerPath) {
-                // Make sure the compiler args are not part of the basename.
-                const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
-                basename = compilerPathAndArgs.compilerPath;
-            }
-            basename = path.basename(basename);
-            map.set(basename, compilerPath);
-        };
-        compilerPaths.forEach(insertOrAssignEntry);
-
-        // Ensure that the user's compilerPath setting is used by inserting/assigning last.
-        if (userCompilerPath) {
-            insertOrAssignEntry(userCompilerPath);
-        }
-
-        compilerPaths = [...map.values()];
-    } else if (userCompilerPath) {
-        compilerPaths = [userCompilerPath];
+        knownCompilerPaths = knownCompilers.map<string>(info => info.path);
     }
 
-    if (!compilerPaths) {
+    if (!knownCompilerPaths || !userCompilerPath) {
         // Don't prompt a message yet until we can make a data-based decision.
         telemetry.logLanguageServerEvent('noCompilerFound');
         // Display a message prompting the user to install compilers if none were found.
@@ -232,41 +335,56 @@ export async function getBuildTasks(returnComplerPath: boolean): Promise<vscode.
         return [];
     }
 
-    // Generate tasks.
-    return compilerPaths.map<vscode.Task>(compilerPath => {
-        // Handle compiler args in compilerPath.
-        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
-        compilerPath = compilerPathAndArgs.compilerPath;
+    let createTask: (compilerPath: string, compilerArgs?: string []) => vscode.Task = (compilerPath: string, compilerArgs?: string []) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskName: string = compilerPathBase + " build active file";
-        const isCl: boolean = taskName.startsWith("cl.exe");
-        let args: string[] = isCl ? [ '/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'  ] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
-        if (compilerPathAndArgs.additionalArgs) {
-            args = args.concat(compilerPathAndArgs.additionalArgs);
-        }
+        const isCl: boolean = compilerPathBase === "cl.exe";
         const cwd: string = isCl ? "" : path.dirname(compilerPath);
-        const kind: BuildTaskDefinition = {
+        let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+        if (compilerArgs && compilerArgs.length > 0) {
+            args = args.concat(compilerArgs);
+        }
+
+        let kind: vscode.TaskDefinition = {
             type: 'shell',
             label: taskName,
             command: isCl ? compilerPathBase : compilerPath,
             args: args,
             options: isCl ? undefined : {"cwd": cwd},
-            compilerPath: isCl ? compilerPathBase : compilerPath
         };
+
+        if (returnCompilerPath) {
+            kind = kind as BuildTaskDefinition;
+            kind.compilerPath = isCl ? compilerPathBase : compilerPath;
+        }
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
         let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, '$gcc');
-        task.definition = kind; // The constructor for vscode.Task will eat the definition. Reset it by reassigning.
+        task.definition = kind; // The constructor for vscode.Task will consume the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
 
-        if (!returnComplerPath) {
-            delete task.definition.compilerPath;
-        }
-
         return task;
-    });
+    };
+
+    // Create a build task per compiler path
+    let buildTasks: vscode.Task[] = [];
+
+    // Tasks for known compiler paths
+    if (knownCompilerPaths) {
+        buildTasks = knownCompilerPaths.map<vscode.Task>(compilerPath => {
+            return createTask(compilerPath);
+        });
+    }
+
+    // Task for user compiler path setting
+    if (userCompilerPath) {
+        let task: vscode.Task = createTask(userCompilerPath, userCompilerPathAndArgs.additionalArgs);
+        buildTasks.push(task);
+    }
+
+    return buildTasks;
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
@@ -337,6 +455,8 @@ function realActivation(): void {
     reportMacCrashes();
 
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+
+    vcpkgDbPromise = initVcpkgDatabase();
 
     if (settings.updateChannel === 'Default') {
         suggestInsidersChannel();
@@ -730,6 +850,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -939,6 +1061,67 @@ function onTakeSurvey(): void {
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
+function onVcpkgOnlineHelpSuggested(dummy?: any): void {
+    telemetry.logLanguageServerEvent('vcpkgAction', { 'source': dummy ? 'CodeAction' : 'CommandPalette', 'action': 'vcpkgOnlineHelpSuggested' });
+    const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
+    vscode.commands.executeCommand('vscode.open', uri);
+}
+
+async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void> {
+    onActivationEvent();
+    let source: string;
+    if (ports && ports.length) {
+        source = 'CodeAction';
+    } else {
+        source = 'CommandPalette';
+        // Glob up all existing diagnostics for missing includes and look them up in the vcpkg database
+        const missingIncludeLocations: [vscode.TextDocument, number[]][] = [];
+        vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
+            // Extract textDocument
+            const textDocument: vscode.TextDocument = vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === uriAndDiagnostics[0].fsPath);
+            if (!textDocument) {
+                return;
+            }
+
+            // Extract lines numbers for missing include diagnostics
+            let lines: number[] = uriAndDiagnostics[1].filter(isMissingIncludeDiagnostic).map<number>(d => d.range.start.line);
+            if (!lines.length) {
+                return;
+            }
+
+            // Filter duplicate lines
+            lines = lines.filter((line: number, index: number) => {
+                const foundIndex: number = lines.indexOf(line);
+                return foundIndex === index;
+            });
+
+            missingIncludeLocations.push([textDocument, lines]);
+        });
+        if (!missingIncludeLocations.length) {
+            return;
+        }
+
+        // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
+        let portsPromises: Promise<string[]>[] = [];
+        missingIncludeLocations.forEach(docAndLineNumbers => {
+            docAndLineNumbers[1].forEach(async line => {
+                portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
+            });
+        });
+        ports = [].concat(...(await Promise.all(portsPromises)));
+        if (!ports.length) {
+            return;
+        }
+        ports = ports.filter((port: string, index: number) => ports.indexOf(port) === index);
+    }
+
+    let installCommand: string = 'vcpkg install';
+    ports.forEach(port => installCommand += ` ${port}`);
+    telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
+
+    await vscode.env.clipboard.writeText(installCommand);
+}
+
 function onGetActiveConfigName(): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigName();
 }
@@ -1081,6 +1264,9 @@ export function deactivate(): Thenable<void> {
     ui.dispose();
     if (taskProvider) {
         taskProvider.dispose();
+    }
+    if (codeActionProvider) {
+        codeActionProvider.dispose();
     }
     return clients.dispose();
 }

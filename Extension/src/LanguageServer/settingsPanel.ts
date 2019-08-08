@@ -24,6 +24,7 @@ const elementId: { [key: string]: string } = {
     compilerPath: "compilerPath",
     compilerPathInvalid: "compilerPathInvalid",
     knownCompilers: "knownCompilers",
+    compilerArgs: "compilerArgs",
 
     intelliSenseMode: "intelliSenseMode",
     intelliSenseModeInvalid: "intelliSenseModeInvalid",
@@ -159,7 +160,7 @@ export class SettingsPanel {
     }
 
     public setKnownCompilers(knownCompilers: config.KnownCompiler[], pathSeparator: string): void {
-        if (knownCompilers.length > 0) {
+        if (knownCompilers && knownCompilers.length) {
             for (let compiler of knownCompilers) {
                 // Normalize path separators.
                 let path: string = compiler.path;
@@ -184,7 +185,7 @@ export class SettingsPanel {
 
     public dispose(): void {
         // Log any telemetry
-        if (Object.keys(this.telemetry).length > 0) {
+        if (Object.keys(this.telemetry).length) {
             telemetry.logLanguageServerEvent("ConfigUI", null, this.telemetry);
         }
 
@@ -211,11 +212,11 @@ export class SettingsPanel {
         this.configValues = {...configuration}; // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
-            this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected});
-            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
+            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
+            this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });
+            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues });
             if (errors !== null) {
-                this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+                this.panel.webview.postMessage({ command: 'updateErrors', errors: errors });
             }
         }
     }
@@ -282,6 +283,9 @@ export class SettingsPanel {
                 break;
             case elementId.compilerPath:
                 this.configValues.compilerPath = message.value;
+                break;
+            case elementId.compilerArgs:
+                this.configValues.compilerArgs = splitEntries(message.value);
                 break;
             case elementId.includePath:
                 this.configValues.includePath = splitEntries(message.value);
