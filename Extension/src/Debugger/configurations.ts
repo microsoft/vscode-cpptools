@@ -6,6 +6,7 @@
 import * as os from 'os';
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export enum DebuggerType {

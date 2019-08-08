@@ -27,3 +27,9 @@ install.lock
 
 # ignore exported localization xlf directory
 localization-export
+
+# ignore generate native header
+localized_string_ids.h
+
+# ignore generate files.  It will be generated when building
+src/LanguageServer/nativeStrings.ts

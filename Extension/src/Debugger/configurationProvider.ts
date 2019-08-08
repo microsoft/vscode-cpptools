@@ -20,6 +20,7 @@ import { parse } from 'jsonc-parser';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 function isDebugLaunchStr(str: string): boolean {

@@ -39,7 +39,33 @@
     "Snippets"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onCommand:extension.pickNativeProcess",
+    "onCommand:extension.pickRemoteNativeProcess",
+    "onCommand:C_Cpp.BuildAndDebugActiveFile",
+    "onCommand:C_Cpp.ConfigurationEditJSON",
+    "onCommand:C_Cpp.ConfigurationEditUI",
+    "onCommand:C_Cpp.ConfigurationSelect",
+    "onCommand:C_Cpp.ConfigurationProviderSelect",
+    "onCommand:C_Cpp.SwitchHeaderSource",
+    "onCommand:C_Cpp.Navigate",
+    "onCommand:C_Cpp.GoToDeclaration",
+    "onCommand:C_Cpp.PeekDeclaration",
+    "onCommand:C_Cpp.EnableErrorSquiggles",
+    "onCommand:C_Cpp.DisableErrorSquiggles",
+    "onCommand:C_Cpp.ToggleIncludeFallback",
+    "onCommand:C_Cpp.ToggleDimInactiveRegions",
+    "onCommand:C_Cpp.ShowReleaseNotes",
+    "onCommand:C_Cpp.ResetDatabase",
+    "onCommand:C_Cpp.PauseParsing",
+    "onCommand:C_Cpp.ResumeParsing",
+    "onCommand:C_Cpp.ShowParsingCommands",
+    "onCommand:C_Cpp.TakeSurvey",
+    "onCommand:C_Cpp.LogDiagnostics",
+    "onCommand:C_Cpp.RescanWorkspace",
+    "onDebug",
+    "workspaceContains:/.vscode/c_cpp_properties.json"
   ],
   "main": "./dist/main",
   "contributes": {
@@ -1459,20 +1485,22 @@
     }
   },
   "scripts": {
-    "compile": "npm run vscode:prepublish",
-    "compileDev": "npm run prepublishjs && webpack --mode development",
+    "compile": "npm run prepublishjs && npm run generate-native-strings && npm run localization-generate && webpack --mode production --vscode-nls",
+    "compileDev": "npm run prepublishjs && npm run generate-native-strings && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
-    "generateLocalizationFiles": "gulp generateLocalizationFiles",
+    "generate-native-strings": "gulp generate-native-strings",
+    "localization-export.temp": "npm run generate-native-strings && gulp localization-export",
+    "localization-export": "npm run prepublishjs && npm run generate-native-strings && gulp localization-export",
+    "localization-generate": "gulp localization-generate",
+    "localization-import": "gulp localization-import",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "npm run prepublishjs && npm run generateLocalizationFiles && webpack --mode production --vscode-nls",
-    "watch": "webpack --watch --mode development",
-    "localization-export": "gulp localization-export",
-    "translations-import": "gulp translations-import"
+    "vscode:prepublish": "npm run compile",
+    "watch": "webpack --watch --mode development"
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
@@ -1494,6 +1522,8 @@
     "gulp-tslint": "^8.1.4",
     "gulp-typescript": "^5.0.1",
     "minimist": "^1.2.0",
+    "parse5": "^5.1.0",
+    "parse5-traverse": "^1.0.3",
     "ts-loader": "^6.0.4",
     "tslint": "^5.18.0",
     "tslint-microsoft-contrib": "^6.2.0",
@@ -1519,7 +1549,7 @@
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
     "vscode-languageclient": "^5.2.1",
-    "vscode-nls": "^3.2.5",
+    "vscode-nls": "^4.1.1",
     "yauzl": "^2.10.0"
   },
   "runtimeDependencies": [

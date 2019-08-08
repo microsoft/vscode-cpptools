@@ -13,6 +13,7 @@ import * as util from '../common';
 import * as Telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.

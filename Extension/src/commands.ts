@@ -9,6 +9,7 @@ import * as LanguageServer from './LanguageServer/extension';
 import * as util from './common';
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 class TemporaryCommandRegistrar {

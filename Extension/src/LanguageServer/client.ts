@@ -32,8 +32,9 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
 import * as nls from 'vscode-nls';
-import { lookupString } from './loctable';
+import { lookupString } from './nativeStrings';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let ui: UI;
@@ -196,6 +197,7 @@ interface ShowMessageWindowParams {
 interface LocalizeStringParams {
     stringId: number;
     stringArgs: string[];
+    indentSpaces: number;
 }
 
 // Requests
@@ -1190,7 +1192,8 @@ class DefaultClient implements Client {
     }
 
     private logLocalized(params: LocalizeStringParams): void {
-        this.log(lookupString(params.stringId, params.stringArgs));
+        let indent: string = " ".repeat(params.indentSpaces);
+        this.log(indent + lookupString(params.stringId, params.stringArgs));
     }
 
     /*******************************************************
@@ -1205,7 +1208,7 @@ class DefaultClient implements Client {
         let cppSettings: CppSettings = new CppSettings(this.RootUri);
 
         // TODO: Move this code to a different place?
-        if (cppSettings.autoAddFileAssociations && payload.navigation.startsWith("<def")) {
+        if (cppSettings.autoAddFileAssociations && payload.navigation && payload.navigation.startsWith("<def")) {
             let fileAssociations: string = payload.navigation.substr(4);
             let is_c: boolean = fileAssociations.startsWith("c");
             // Skip over rest of header: c>; or >;
@@ -1218,7 +1221,7 @@ class DefaultClient implements Client {
         // The space available depends on the user's resolution and space taken up by other UI.
         let currentNavigation: string = payload.navigation;
         let maxLength: number = cppSettings.navigationLength;
-        if (currentNavigation.length > maxLength) {
+        if (currentNavigation && currentNavigation.length > maxLength) {
             currentNavigation = currentNavigation.substring(0, maxLength - 3).concat("...");
         }
         this.model.navigationLocation.Value = currentNavigation;

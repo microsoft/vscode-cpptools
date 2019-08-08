@@ -23,9 +23,9 @@ import { getInstallationInformation, InstallationInformation, setInstallationSta
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1 } from './cppTools1';
 
-nls.config({ messageFormat: nls.MessageFormat.file })();
-
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
 const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;

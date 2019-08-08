@@ -12,6 +12,7 @@ import * as LanguageServer from './LanguageServer/extension';
 import * as test from './testHook';
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class CppTools implements CppToolsTestApi {

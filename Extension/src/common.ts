@@ -20,6 +20,7 @@ import { getBuildTasks } from './LanguageServer/extension';
 import { OtherSettings } from './LanguageServer/settings';
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export let extensionPath: string;
@@ -903,4 +904,23 @@ export class BlockingTask<T> {
     public getPromise(): Thenable<T> {
         return this.promise;
     }
+}
+
+export function getLocaleId(): string {
+    if (isString(process.env.VSCODE_NLS_CONFIG)) {
+        let vscodeOptions: any = JSON.parse(process.env.VSCODE_NLS_CONFIG);
+        if (isString(vscodeOptions.locale)) {
+            return vscodeOptions.locale.toLowerCase();
+        }
+    }
+    return "en";
+}
+
+export function getLocalizedHtmlPath(originalPath: string): string {
+    let locale: string = getLocaleId();
+    let localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
+    if (fs.existsSync(localizedFilePath)) {
+        return localizedFilePath;
+    }
+    return originalPath;
 }

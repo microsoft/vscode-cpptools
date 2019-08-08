@@ -7,6 +7,7 @@ import * as util from '../common';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 class RefreshButton implements vscode.QuickInputButton {

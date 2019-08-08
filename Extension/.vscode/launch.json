@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"configurations": [
 		{
-			"name": "Launch Extension",
+			"name": "Launch Extension (development)",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -16,6 +16,35 @@
 				"${workspaceFolder}/dist/**/*.js"
 			],
 			"preLaunchTask": "Compile Dev",
+		},
+		{
+			"name": "Launch Extension (production)",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			],
+			"preLaunchTask": "Typescript Compile",
+		},
+		{
+			"name": "Launch Extension (do not build)",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			]
 		},
 		{
 			"name": "Launch Tests",

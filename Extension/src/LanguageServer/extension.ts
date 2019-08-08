@@ -27,6 +27,7 @@ import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as nls from 'vscode-nls';
 
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let prevCrashFile: string;
