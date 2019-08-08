@@ -306,6 +306,8 @@ export interface Client {
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     getCurrentConfigName(): Thenable<string>;
+    getVcpkgInstalled(): Thenable<boolean>;
+    getVcpkgEnabled(): Thenable<boolean>;
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
     takeOwnership(document: vscode.TextDocument): void;
@@ -996,6 +998,16 @@ class DefaultClient implements Client {
                 this.configuration.CurrentConfiguration.compilerArgs)
         ));
     }
+
+    public getVcpkgInstalled(): Thenable<boolean> {
+        return this.queueTask(() => Promise.resolve(this.configuration.VcpkgInstalled));
+    }
+
+    public getVcpkgEnabled(): Thenable<boolean> {
+        const cppSettings: CppSettings = new CppSettings(this.RootUri);
+        return Promise.resolve(cppSettings.vcpkgEnabled);
+    }
+
     public getKnownCompilers(): Thenable<configs.KnownCompiler[]> {
         return this.queueTask(() => Promise.resolve(this.configuration.KnownCompiler));
     }
@@ -2005,6 +2017,8 @@ class NullClient implements Client {
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
+    getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
+    getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}

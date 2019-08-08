@@ -14,5 +14,7 @@
     "c_cpp.command.takeSurvey.title": "调查问卷",
     "c_cpp.command.buildAndDebugActiveFile.title": "生成和调试当前文件",
     "c_cpp.command.logDiagnostics.title": "记录诊断",
-    "c_cpp.command.rescanWorkspace.title": "重新扫描工作区"
+    "c_cpp.command.rescanWorkspace.title": "重新扫描工作区",
+    "c_cpp.command.vcpkgClipboardInstallSuggested.title": "将vcpkg install命令复制到剪贴板",
+    "c_cpp.command.vcpkgOnlineHelpSuggested.title": "访问vcpkg帮助页面"
 }
