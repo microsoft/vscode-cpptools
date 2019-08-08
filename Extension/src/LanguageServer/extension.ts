@@ -824,8 +824,6 @@ export function registerCommands(): void {
     commandsRegistered = true;
     getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToDeclaration', onGoToDeclaration));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.PeekDeclaration', onPeekDeclaration));
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
@@ -842,6 +840,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', onShowReferencesProgress));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
@@ -861,16 +860,6 @@ function onNavigate(): void {
     clients.ActiveClient.requestNavigationList(activeEditor.document).then((navigationList: string) => {
         ui.showNavigationOptions(navigationList);
     });
-}
-
-function onGoToDeclaration(): void {
-    onActivationEvent();
-    clients.ActiveClient.requestGoToDeclaration().then(() => vscode.commands.executeCommand("editor.action.goToDeclaration"));
-}
-
-function onPeekDeclaration(): void {
-    onActivationEvent();
-    clients.ActiveClient.requestGoToDeclaration().then(() => vscode.commands.executeCommand("editor.action.previewDeclaration"));
 }
 
 function onSwitchHeaderSource(): void {
@@ -1047,6 +1036,11 @@ function onResumeParsing(): void {
 function onShowParsingCommands(): void {
     onActivationEvent();
     selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
+}
+
+function onShowReferencesProgress(): void {
+    onActivationEvent();
+    selectClient().then(client => client.handleReferencesIcon(), rejected => {});
 }
 
 function onTakeSurvey(): void {
