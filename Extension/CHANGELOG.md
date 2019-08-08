@@ -5,7 +5,7 @@
 ### New Features
 * Add `Find All References` when `C_Cpp.experimentalFeatures` is set to `"Enabled"`. [#15](https://github.com/microsoft/vscode-cpptools/issues/15)
 * Add `-x86` options for `intelliSenseMode`. [#2312](https://github.com/microsoft/vscode-cpptools/issues/2312)
-* Add `c++20` to `cppStandard`. [#3448](https://github.com/microsoft/vscode-cpptools/issues/3448)
+* Add `c++20` option to `cppStandard`. [#3448](https://github.com/microsoft/vscode-cpptools/issues/3448)
 * Add support for resolving missing includes via the `vcpkg` dependency manager. [PR #3791](https://github.com/microsoft/vscode-cpptools/pull/3791)
 
 ### Enhancements
@@ -23,10 +23,8 @@
 * Fix `compile_commands.json` file changes not updated. [#3864](https://github.com/microsoft/vscode-cpptools/issues/3864).
 * Fix `Failed to parse` error message in the open file scenario. [#3888](https://github.com/microsoft/vscode-cpptools/issues/3888)
 * Fix IntelliSense-based `Go to Definition` failing with `using namespace`. [#3902](https://github.com/microsoft/vscode-cpptools/issues/3902)
-* Fix completion not showing results for smart pointers. [#3930](https://github.com/microsoft/vscode-cpptools/issues/3930)
 * Fix typos and grammar in documentation.
   * @pi1024e [PR #4014](https://github.com/microsoft/vscode-cpptools/pull/4014)
-* Fix wrong IntelliSense for C++ types after editing within a function and after a lambda.
 
 ## Version 0.24.1: July 22, 2019
 ### Bug Fixes
