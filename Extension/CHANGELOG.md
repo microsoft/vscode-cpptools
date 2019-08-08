@@ -1,5 +1,33 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.25.0-insiders: August 8, 2019
+
+### New Features
+* Add `Find All References` when `C_Cpp.experimentalFeatures` is set to `"Enabled"`. [#15](https://github.com/microsoft/vscode-cpptools/issues/15)
+* Add `-x86` options for `intelliSenseMode`. [#2312](https://github.com/microsoft/vscode-cpptools/issues/2312)
+* Add `c++20` to `cppStandard`. [#3448](https://github.com/microsoft/vscode-cpptools/issues/3448)
+* Add support for resolving missing includes via the `vcpkg` dependency manager. [PR #3791](https://github.com/microsoft/vscode-cpptools/pull/3791)
+
+### Enhancements
+* Added support for compile commands: 
+  * `-iquote`. [#2088](https://github.com/microsoft/vscode-cpptools/issues/2088)
+  * `-imacros`. [#2417](https://github.com/microsoft/vscode-cpptools/issues/2417)
+  * `-idirafter`(`--include-directory-after` & `--include-directory-after=`). [#3713](https://github.com/microsoft/vscode-cpptools/issues/3713)
+* Switch to using VS Code's `Go to Declaration`. [#2959](https://github.com/microsoft/vscode-cpptools/issues/2959)
+* Added `compilerArgs` property setting. [PR #3950](https://github.com/microsoft/vscode-cpptools/pull/3950)
+* Added support for V3 API. [#3987](https://github.com/microsoft/vscode-cpptools/pull/3987)
+* Add `not supported` messages for ARM and Alpine containers. [PR #4027](https://github.com/microsoft/vscode-cpptools/pull/4027)
+
+### Bug Fixes
+* Fix previous cache path not deleted when new cache path is specified. Note that the VS Code bug [Microsoft/vscode#59391](https://github.com/microsoft/vscode/issues/59391) still occurs on the settings UI, but this fix should delete any incomplete path names as the extension receives changes from the cache path setting. [#3644](https://github.com/microsoft/vscode-cpptools/issues/3644).
+* Fix `compile_commands.json` file changes not updated. [#3864](https://github.com/microsoft/vscode-cpptools/issues/3864).
+* Fix `Failed to parse` error message in the open file scenario. [#3888](https://github.com/microsoft/vscode-cpptools/issues/3888)
+* Fix IntelliSense-based `Go to Definition` failing with `using namespace`. [#3902](https://github.com/microsoft/vscode-cpptools/issues/3902)
+* Fix completion not showing results for smart pointers. [#3930](https://github.com/microsoft/vscode-cpptools/issues/3930)
+* Fix typos and grammar in documentation.
+  * @pi1024e [PR #4014](https://github.com/microsoft/vscode-cpptools/pull/4014)
+* Fix wrong IntelliSense for C++ types after editing within a function and after a lambda.
+
 ## Version 0.24.1: July 22, 2019
 ### Bug Fixes
 * Fix an issue with the Outline not being populated when a file is opened. [#3877](https://github.com/microsoft/vscode-cpptools/issues/3877)
@@ -11,7 +39,7 @@
 * Add `Rescan Workspace` command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
 
 ### Enhancements
-* Configuration UI editor improvements:  
+* Configuration UI editor improvements:
   * Add list of detected compiler paths. [PR #3708](https://github.com/microsoft/vscode-cpptools/pull/3708)
   * Enable selecting/editing of other configurations and add "Advanced Settings" section. [PR #3732](https://github.com/microsoft/vscode-cpptools/pull/3732)
 * Enable `envFile` for `cppdbg`. [PR #3723](https://github.com/microsoft/vscode-cpptools/pull/3723)
