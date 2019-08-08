@@ -36,6 +36,8 @@ class TemporaryCommandRegistrar {
         "C_Cpp.TakeSurvey",
         "C_Cpp.LogDiagnostics",
         "C_Cpp.RescanWorkspace",
+        "C_Cpp.VcpkgClipboardInstallSuggested",
+        "C_Cpp.VcpkgOnlineHelpSuggested"
     ];
 
     constructor() {
