@@ -519,6 +519,12 @@
           "default": "Enabled",
           "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
           "scope": "resource"
+        },
+        "C_Cpp.vcpkg.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
+          "scope": "resource"
         }
       }
     },
@@ -626,6 +632,16 @@
       {
         "command": "C_Cpp.RescanWorkspace",
         "title": "%c_cpp.command.rescanWorkspace.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.VcpkgClipboardInstallSuggested",
+        "title": "%c_cpp.command.vcpkgClipboardInstallSuggested.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.VcpkgOnlineHelpSuggested",
+        "title": "%c_cpp.command.vcpkgOnlineHelpSuggested.title%",
         "category": "C/C++"
       }
     ],
