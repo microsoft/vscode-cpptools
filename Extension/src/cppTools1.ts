@@ -75,7 +75,7 @@ export class NullCppTools implements CppToolsApi, CppToolsExtension {
         this.version = version;
         return this;
     }
-    
+
     getVersion(): Version {
         return this.version;
     }
