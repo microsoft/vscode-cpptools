@@ -299,7 +299,7 @@ export interface Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
-    selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void;
+    selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
@@ -1443,7 +1443,7 @@ class DefaultClient implements Client {
         this.resumeParsing();
     }
 
-    public selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void {
+    public selectionChanged(selection: Range): void {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
         });
@@ -1790,21 +1790,21 @@ class DefaultClient implements Client {
                 }
 
                 let currentMessage: string;
-                let numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
-                let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
-                let numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
+                const numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
+                const numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
+                const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                 if (numLexing >= numParsing) {
                     if (numTotalToLex === 0) {
-                        currentMessage = "Searching.";
+                        currentMessage = "Searching files."; // TODO: Prevent this from happening.
                     } else {
-                        currentMessage = `` + numFinishedLexing + `/${numTotalToLex} files searched.` + helpMessage;
+                        currentMessage = `${numFinishedLexing}/${numTotalToLex} files searched.${helpMessage}`;
                     }
                 } else {
-                    currentMessage = `` + numFinishedConfirming + `/${numTotalToParse} files confirmed.` + helpMessage;
+                    currentMessage = `${numFinishedConfirming}/${numTotalToParse} files confirmed.${helpMessage}`;
                 }
-                let currentLexProgress: number = numFinishedLexing / numTotalToLex;
-                let currentParseProgress: number = numFinishedConfirming / numTotalToParse;
-                let currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70);
+                const currentLexProgress: number = numFinishedLexing / numTotalToLex;
+                const currentParseProgress: number = numFinishedConfirming / numTotalToParse;
+                const currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70);
                 if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
                     this.referencesPrevProgressIncrement = currentIncrement;
@@ -1995,7 +1995,7 @@ class NullClient implements Client {
     requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
     activate(): void {}
-    selectionChanged(selection: Range, kind?: vscode.TextEditorSelectionChangeKind): void {}
+    selectionChanged(selection: Range): void {}
     resetDatabase(): void {}
     deactivate(): void {}
     pauseParsing(): void {}
