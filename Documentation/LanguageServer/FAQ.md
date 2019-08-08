@@ -1,11 +1,16 @@
 # Frequently asked questions
 
+* [Why are my files corrupted on format?](#why-are-my-files-corrupted-on-format)
 * [How do I get IntelliSense to work correctly?](#how-do-i-get-intellisense-to-work-correctly)
 * [Why do I see red squiggles under Standard Library types?](#why-do-i-see-red-squiggles-under-standard-library-types)
 * [How do I get the new IntelliSense to work with MinGW on Windows?](#how-do-i-get-the-new-intellisense-to-work-with-mingw-on-windows)
 * [How do I get the new IntelliSense to work with the Windows Subsystem for Linux?](#how-do-i-get-the-new-intellisense-to-work-with-the-windows-subsystem-for-linux)
 * [What is the difference between `"includePath"` and `"browse.path"` in **c_cpp_properties.json**?](#what-is-the-difference-between-includepath-and-browsepath-in-c_cpp_propertiesjson)
 * [How do I re-create the IntelliSense database?](#how-do-i-re-create-the-intellisense-database)
+
+## Why are my files corrupted on format?
+
+This is likely due to the fact that you either have a multi-root workspace where one folder is a child of the other, or you are using symlinks to open your file. Reduce the folders in the workspace to one and remove the symlink. This should fix your problem.
 
 ## How do I get IntelliSense to work correctly?
 
