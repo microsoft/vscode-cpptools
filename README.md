@@ -1,31 +1,66 @@
-# vscode-cpptools
+# C/C++ for Visual Studio Code
 
-This is the official repository for the [Microsoft C/C++ extension for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools).
+#### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://code.visualstudio.com/docs/languages/cpp)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/master/Code%20Samples)&nbsp;&nbsp;|&nbsp;&nbsp;[Offline Installers](https://github.com/microsoft/vscode-cpptools/releases)
 
-The `vscode-cpptools` repository is where we do development and there are many ways you can support the extension, for example:
+[![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
 
-* [Report issues or request features](https://github.com/Microsoft/vscode-cpptools/issues)
-   - If someone has filed a similar issue, please provide any additional information that can help us resolve it on the issue
-   - If someone has filed a similar feature request, please leave a thumbs up reaction on the issue
-   - [List of popular feature requests](https://github.com/Microsoft/vscode-cpptools/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+label%3A%22Feature+Request%22)
-* [Contribute to the extension](Extension)
+This preview release of the C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
 
-## Getting Started
+## Overview and getting started
+* [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
+* [Get Started with C++ and Windows Subsystem for Linux (WSL)](https://code.visualstudio.com/docs/cpp/config-wsl)
+* [Get Started with C++ and Mingw-w64](https://code.visualstudio.com/docs/cpp/config-mingw)
+* [Get Started with C++ and Clang/LLVM on macOS](https://code.visualstudio.com/docs/cpp/config-clang-mac)
+* [Get Started with C++ and Microsoft C++ compiler (MSVC)](https://code.visualstudio.com/docs/cpp/config-msvc)
 
-You can learn how to use the extension at [VS Code for C/C++](https://code.visualstudio.com/docs/languages/cpp).
+## Quick links
+* [Editing features (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide) 
+* [IntelliSense configuration](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp)
+* [Enhanced colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp)
+* [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug)
+* [Debug configuration](https://code.visualstudio.com/docs/cpp/launch-json-reference)
+* [Enable logging for IntelliSense or debugging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp)
 
-If you clone this repository, you can also try out our [Code Samples](Code%20Samples).
+## Questions and feedback
 
-If you have any questions, check out our [**Documentation**](Documentation) folder. If you do not find your answer there, feel free to ask it in our [issues page](https://github.com/Microsoft/vscode-cpptools/issues).
+**[FAQs](https://code.visualstudio.com/docs/cpp/faq-cpp)**
+<br>
+Check out the FAQs before filing a question.
+<br>
 
-### Contribution
+**[Provide feedback](https://github.com/microsoft/vscode-cpptools/issues/new/choose)**
+<br>
+File questions, issues, or feature requests for the extension.
+<br>
+
+**[Known issues](https://github.com/Microsoft/vscode-cpptools/issues)**
+<br>
+If someone has already filed an issue that encompasses your feedback, please leave a 👍 or 👎 reaction on the issue to upvote or downvote it to help us prioritize the issue.
+<br>
+
+**[Quick survey](https://www.research.net/r/VBVV6C6)**
+<br>
+Let us know what you think of the extension by taking the quick survey.
+
+## Offline installation
+
+The extension has platform-specific binary dependencies, therfore installation via the Marketplace requires an Internet connection in order to download additional dependencies. If you are working on a computer that does not have access to the Internet or is behind a strict firewall, you may need to use our platform-specific packages and install them by running VS Code's `"Install from VSIX..."` command. These "offline' packages are available at: https://github.com/Microsoft/vscode-cpptools/releases.
+
+ Package | Platform
+:--- | :---
+`cpptools-linux.vsix` | Linux 64-bit
+`cpptools-linux32.vsix` | Linux 32-bit
+`cpptools-osx.vsix` | macOS
+`cpptools-win32.vsix` | Windows 64-bit & 32-bit
+
+## Contribution
 
 Contributions are always welcome. Please see our [contributing guide](CONTRIBUTING.md) for more details.
 
-### Microsoft Open Source Code of Conduct
+## Microsoft Open Source Code of Conduct
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments. 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
 
-### Data/Telemetry
- 
+## Data and telemetry
+
 This extension collects usage data and sends it to Microsoft to help improve our products and services. Collection of telemetry is controlled via the same setting provided by Visual Studio Code: `"telemetry.enableTelemetry"`. Read our [privacy statement](https://privacy.microsoft.com/en-us/privacystatement) to learn more.
