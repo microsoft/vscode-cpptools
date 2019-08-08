@@ -108,7 +108,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
         command: { title: 'vcpkgOnlineHelpSuggested', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
-        title: "Learn how to install a library for this header with vcpkg",
+        title: localize("learn.how.to.install.a.library", "Learn how to install a library for this header with vcpkg"),
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -116,7 +116,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
 function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
     return {
         command: { title: 'vcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
-        title: `Copy vcpkg command to install '${port}' to the clipboard`,
+        title: localize("copy.vcpkg.command", "Copy vcpkg command to install '{0}' to the clipboard", port),
         kind: vscode.CodeActionKind.QuickFix
     };
 }

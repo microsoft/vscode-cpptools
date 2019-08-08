@@ -151,41 +151,29 @@ function removePathPrefix(path, prefix) {
 
 // Helper to traverse HTML tree
 // nodeCallback(locId, node) is invoked for nodes in localizableNodes
-// attribute(locId, nodeAttribute) is invoked for attribtues in localizableAttributes
-const traverseHtml = (contents, nodeCallback, attributesCallback) => {
-    const htmlTree = parse5.parse(contents);//file.contents.toString());
+// attributeCallback(locId, attribute) is invoked for attribtues in localizableAttributes
+const traverseHtml = (contents, nodeCallback, attributeCallback) => {
+    const htmlTree = parse5.parse(contents);
     traverse(htmlTree, {
         pre(node, parent) {
-            // Check for nodes matching localizableNodes
-            localizableNodes.forEach((localizableNode) => {
-                if (node.nodeName.toLowerCase() == localizableNode.toLowerCase()) {
-                    // Find loc-id attribute
-                    let locId = node.attrs.find(nodeAttribute => {
-                        return nodeAttribute.name.toLowerCase() == "data-loc-id";
-                    });
-                    if (locId) {
-                        nodeCallback(locId.value, node);
+            if (node.attrs) {
+                // Check if content text should be localized based on presense of data-loc-id attribute
+                let locId = node.attrs.find(attribute => attribute.name.toLowerCase() == "data-loc-id");
+                if (locId) {
+                    nodeCallback(locId.value, node);
+                }
+                // Check if an attribute should be localized based on presense of data-loc-id-<attribute_name> attribute
+                node.attrs.forEach(attribute => {
+                    const dataLocIdAttributePrefix = "data-loc-id-";
+                    if (attribute.name.startsWith(dataLocIdAttributePrefix))
+                    {
+                        let targetAttributeName = attribute.name.substring(dataLocIdAttributePrefix.length);
+                        let targetAttribute = node.attrs.find(a => a.name == targetAttributeName);
+                        if (targetAttribute) {
+                            attributeCallback(attribute.value, targetAttribute);
+                        }
                     }
-                }
-            });
-            // Check for nodes matching list of nodes in localizableAttributes
-            for (var tag in localizableAttributes) {
-                if (node.nodeName.toLowerCase() == tag.toLowerCase()) {
-                    // Check for attributes on this node that need localizing
-                    localizableAttributes[tag].forEach((localizableAttribute) => {
-                        node.attrs.forEach((nodeAttribute) => {
-                            if (nodeAttribute.name.toLowerCase() == localizableAttribute.toLowerCase()) {
-                                // Find loc-id attribute
-                                let locId = node.attrs.find(nodeAttribute => {
-                                    return nodeAttribute.name.toLowerCase() == "data-loc-id";
-                                });
-                                if (locId) {
-                                    attributesCallback(locId.value, nodeAttribute);
-                                }
-                            }
-                        });
-                    });
-                }
+                });
             }
         }
     });
@@ -220,13 +208,12 @@ const processHtmlFile = () => {
             localizationMetadataContents.keys.push(locId);
             localizationMetadataContents.messages.push(text);
         };
-        let attributesCallback = (locId, nodeAttribute) => {
-            let keyValue = nodeAttribute.name.toLowerCase() + "--" + locId;
-            localizationJsonContents[keyValue] = nodeAttribute.value;
-            localizationMetadataContents.keys.push(keyValue);
-            localizationMetadataContents.messages.push(nodeAttribute.value);
+        let attributeCallback = (locId, attribute) => {
+            localizationJsonContents[locId] = attribute.value;
+            localizationMetadataContents.keys.push(locId);
+            localizationMetadataContents.messages.push(attribute.value);
         };
-        traverseHtml(file.contents.toString(), nodeCallback, attributesCallback);
+        traverseHtml(file.contents.toString(), nodeCallback, attributeCallback);
         this.queue(new vinyl({
             path: path.join(file.path + '.nls.json'),
             contents: Buffer.from(JSON.stringify(localizationJsonContents, null, '\t'), 'utf8')
@@ -392,13 +379,13 @@ const generateLocalizedHtmlFile = () => {
                     node.childNodes = newChildNodes;
                 }
             };
-            let attributesCallback = (locId, nodeAttribute) => {
-                let keyValue = nodeAttribute.name.toLowerCase() + "--" + locId;
-                if (stringTable[keyValue]) {
-                    nodeAttribute.value = stringTable[keyValue];
+            let attributeCallback = (locId, attribute) => {
+                let value = stringTable[locId];
+                if (value) {
+                    attribute.value = value;
                 }
             };
-            let htmlTree = traverseHtml(file.contents.toString(), nodeCallback, attributesCallback);
+            let htmlTree = traverseHtml(file.contents.toString(), nodeCallback, attributeCallback);
             let newContent = parse5.serialize(htmlTree);
             this.queue(new vinyl({
                 path: path.join("html", language.id, relativePath),
