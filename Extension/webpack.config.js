@@ -36,6 +36,12 @@ const config = {
             }]
         }]
     },
+    optimization: {
+        minimize: false
+    },
+    stats: {
+        warnings: false
+    }
 }
 
 module.exports = config;

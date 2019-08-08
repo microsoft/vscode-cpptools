@@ -8,7 +8,7 @@ import * as os from 'os';
 import { AttachItemsProvider } from './attachToProcess';
 import { AttachItem } from './attachQuickPick';
 
-class Process {
+export class Process {
     constructor(public name: string, public pid: string, public commandLine: string) { }
 
     public toAttachItem(): AttachItem {

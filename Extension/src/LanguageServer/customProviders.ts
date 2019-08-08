@@ -50,6 +50,9 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
         if (valid && this._version > Version.v1) {
             valid = !!(this.provider.canProvideBrowseConfiguration && this.provider.provideBrowseConfiguration);
         }
+        if (valid && this._version > Version.v2) {
+            valid = !!(this.provider.canProvideBrowseConfigurationsPerFolder && this.provider.provideFolderBrowseConfiguration);
+        }
         return valid;
     }
 
@@ -80,6 +83,15 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
     public provideBrowseConfiguration(token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
         console.assert(this._version >= Version.v2);
         return this._version < Version.v2 ? Promise.resolve({browsePath: []}) : this.provider.provideBrowseConfiguration(token);
+    }
+
+    public canProvideBrowseConfigurationsPerFolder(token?: vscode.CancellationToken): Thenable<boolean> {
+        return this._version < Version.v3 ? Promise.resolve(false) : this.provider.canProvideBrowseConfigurationsPerFolder(token);
+    }
+
+    public provideFolderBrowseConfiguration(uri: vscode.Uri, token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
+        console.assert(this._version >= Version.v3);
+        return this._version < Version.v3 ? Promise.resolve({browsePath: []}) : this.provider.provideFolderBrowseConfiguration(uri, token);
     }
 
     public dispose(): void {
@@ -114,6 +126,12 @@ export class CustomConfigurationProviderCollection {
         }
         if (version >= Version.v2 && !provider.provideBrowseConfiguration) {
             missing.push("'provideBrowseConfiguration'");
+        }
+        if (version >= Version.v3 && !provider.canProvideBrowseConfigurationsPerFolder) {
+            missing.push("'canProvideBrowseConfigurationsPerFolder'");
+        }
+        if (version >= Version.v3 && !provider.provideFolderBrowseConfiguration) {
+            missing.push("'provideFolderBrowseConfiguration'");
         }
         console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}.`);
     }
@@ -171,7 +189,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public forEach(func: (provider: CustomConfigurationProvider1) => void): void {
-        this.providers.forEach(provider => func(provider));
+        this.providers.forEach(func);
     }
 
     public remove(provider: CustomConfigurationProvider): void {

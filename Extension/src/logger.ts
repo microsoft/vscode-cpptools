@@ -36,13 +36,13 @@ export class Logger {
 
     public showInformationMessage(message: string, items?: string[]): Thenable<string> {
         this.appendLine(message);
-        
+
         return vscode.window.showInformationMessage(message, ...items);
     }
 
     public showWarningMessage(message: string, items?: string[]): Thenable<string> {
         this.appendLine(message);
-        
+
         return vscode.window.showWarningMessage(message, ...items);
     }
 
