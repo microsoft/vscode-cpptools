@@ -160,6 +160,23 @@ interface ColorThemeChangedParams {
     name: string;
 }
 
+export enum ReferencesCommandMode {
+    None,
+    Find,
+    Peek
+}
+
+export function referencesCommandModeToString(referencesCommandMode: ReferencesCommandMode): string {
+    switch (referencesCommandMode) {
+        case ReferencesCommandMode.Find:
+            return "Find All References";
+        case ReferencesCommandMode.Peek:
+            return "Peek References";
+        default:
+            return "";
+    }
+}
+
 enum ReferenceType {
     Confirmed,
     ConfirmationInProgress,
@@ -260,7 +277,7 @@ let failureMessageShown: boolean = false;
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
     isUpdatingIntelliSense: DataBinding<boolean>;
-    FindOrPeekReferences: DataBinding<string>;
+    referencesCommandMode: DataBinding<ReferencesCommandMode>;
     navigationLocation: DataBinding<string>;
     tagParserStatus: DataBinding<string>;
     activeConfigName: DataBinding<string>;
@@ -269,7 +286,7 @@ interface ClientModel {
 export interface Client {
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
-    FindingReferencesChanged: vscode.Event<string>;
+    ReferencesCommandModeChanged: vscode.Event<ReferencesCommandMode>;
     NavigationLocationChanged: vscode.Event<string>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
@@ -349,7 +366,7 @@ class DefaultClient implements Client {
     private model: ClientModel = {
         isTagParsing: new DataBinding<boolean>(false),
         isUpdatingIntelliSense: new DataBinding<boolean>(false),
-        FindOrPeekReferences: new DataBinding<string>(""),
+        referencesCommandMode: new DataBinding<ReferencesCommandMode>(ReferencesCommandMode.None),
         navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
@@ -357,7 +374,7 @@ class DefaultClient implements Client {
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
-    public get FindingReferencesChanged(): vscode.Event<string> { return this.model.FindOrPeekReferences.ValueChanged; }
+    public get ReferencesCommandModeChanged(): vscode.Event<ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
@@ -713,6 +730,7 @@ class DefaultClient implements Client {
     private prevVisibleRangesLength: number = 0;
     private visibleRangesDecreased: boolean = false;
     private visibleRangesDecreasedTicks: number = 0;
+    private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
         if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
@@ -1733,17 +1751,16 @@ class DefaultClient implements Client {
     private referencesDelayProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
     private referencesCanceled: boolean;
-    private referencesDoneWhileTagParsing: boolean;
+    private referencesStartedWhileTagParsing: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
     private referencePreviousProgressUICounter: number;
     private referencesCurrentProgressUICounter: number;
-    private referencesIsPeek: boolean;
 
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
-        const helpMessage: string = this.referencesIsPeek ? "" : " Click the search icon to preview results.";
+        const helpMessage: string = this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek ? "" : " Click the search icon to preview results.";
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
@@ -1819,17 +1836,17 @@ class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            if (this.model.FindOrPeekReferences.Value !== "") {
+            if (this.model.referencesCommandMode.Value !== ReferencesCommandMode.None) {
                 ++this.referencesCurrentProgressUICounter;
             }
-            if (this.model.FindOrPeekReferences.Value !== "peek") {
+            if (this.model.referencesCommandMode.Value !== ReferencesCommandMode.Peek) {
                 this.sendRequestReferences();
             }
         });
     }
 
     private sendRequestReferences(): void {
-        if (this.model.FindOrPeekReferences.Value !== "") {
+        if (this.model.referencesCommandMode.Value !== ReferencesCommandMode.None) {
             if (this.referencesRequestHasOccurred) {
                 // References are not usable if a references request is pending,
                 // So after the initial request, we don't send a 2nd references request until the next request occurs.
@@ -1847,9 +1864,9 @@ class DefaultClient implements Client {
     private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
-                this.referencesDoneWhileTagParsing = this.model.isTagParsing.Value;
-                this.referencesIsPeek = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < 1000); // TODO: Might need tweeking.
-                this.model.FindOrPeekReferences.Value = this.referencesIsPeek ? "peek" : "find";
+                this.referencesStartedWhileTagParsing = this.model.isTagParsing.Value;
+                this.model.referencesCommandMode.Value = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
+                    ReferencesCommandMode.Peek : ReferencesCommandMode.Find;
                 this.referencesRequestHasOccurred = false;
                 this.referencesCanceled = false;
                 this.referencesPrevProgressIncrement = 0;
@@ -1863,7 +1880,7 @@ class DefaultClient implements Client {
                     this.referencesChannel.clear();
                 }
                 this.referencesDelayProgress = setInterval(() => {
-                    this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
+                    this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.model.referencesCommandMode.Value), cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                     // tslint:disable-next-line: promise-must-complete
                         new Promise((resolve) => {
@@ -1897,7 +1914,7 @@ class DefaultClient implements Client {
                 break;
             case ReferencesProgress.Finished:
                 this.referencesCurrentProgress = notificationBody;
-                this.model.FindOrPeekReferences.Value = "";
+                this.model.referencesCommandMode.Value = ReferencesCommandMode.None;
                 clearInterval(this.referencesDelayProgress);
                 break;
             default:
@@ -1928,8 +1945,10 @@ class DefaultClient implements Client {
             this.referencesChannel.clear();
         }
 
-        if (this.referencesDoneWhileTagParsing) {
-            this.referencesChannel.appendLine("[Warning] Some references may be missing, because workspace indexing and parsing was incomplete.");
+        if (this.referencesStartedWhileTagParsing) {
+            this.referencesChannel.appendLine("[Warning] Some references may be missing, because workspace parsing was incomplete when " +
+                referencesCommandModeToString(this.model.referencesCommandMode.Value) + " was started.");
+            this.referencesChannel.appendLine("");
         }
 
         for (let reference of referencesResult.referenceInfos) {
@@ -1938,7 +1957,7 @@ class DefaultClient implements Client {
                 reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
         }
 
-        if (this.referencesDoneWhileTagParsing || referencesResult.referenceInfos.length !== 0) {
+        if (this.referencesStartedWhileTagParsing || referencesResult.referenceInfos.length !== 0) {
             this.referencesChannel.show(true);
         }
     }
@@ -1962,10 +1981,11 @@ function getLanguageServerFileName(): string {
 class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
     private stringEvent = new vscode.EventEmitter<string>();
+    private referencesCommandModeEvent = new vscode.EventEmitter<ReferencesCommandMode>();
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
-    public get FindingReferencesChanged(): vscode.Event<string> { return this.stringEvent.event; }
+    public get ReferencesCommandModeChanged(): vscode.Event<ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }

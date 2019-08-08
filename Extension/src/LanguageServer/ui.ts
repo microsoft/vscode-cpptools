@@ -5,7 +5,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Client } from './client';
+import { Client, ReferencesCommandMode, referencesCommandModeToString } from './client';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection } from './customProviders';
 
 let ui: UI;
@@ -36,8 +36,7 @@ export class UI {
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private configurationUIPromise: Thenable<ConfigurationResult>;
-    private readonly findAllReferencesTooltip: string = "Find All References (click to preview results)";
-    private readonly peekReferencesTooltip: string = "Find All References";
+    private readonly referencesPreviewTooltip: string = " (click to preview results)";
 
     constructor() {
         // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
@@ -101,17 +100,18 @@ export class UI {
         this.ShowFlameIcon = val;
     }
 
-    private get FindOrPeekReferences(): string {
-        return this.referencesStatusBarItem.text !== "" ? "find" : "";
+    private get ReferencesCommand(): ReferencesCommandMode {
+        return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
+            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Peek) ? ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
     }
 
-    private set FindOrPeekReferences(val: string) {
-        if (val === "") {
+    private set ReferencesCommand(val: ReferencesCommandMode) {
+        if (val === ReferencesCommandMode.None) {
             this.referencesStatusBarItem.text = "";
             this.ShowReferencesIcon = false;
         } else {
             this.referencesStatusBarItem.text = "$(search)";
-            this.referencesStatusBarItem.tooltip = val === "find" ? this.findAllReferencesTooltip : this.peekReferencesTooltip;
+            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + (val === ReferencesCommandMode.Find ? this.referencesPreviewTooltip : "");
             this.ShowReferencesIcon = true;
         }
     }
@@ -141,7 +141,7 @@ export class UI {
     }
 
     private set ShowReferencesIcon(show: boolean) {
-        if (show && this.FindOrPeekReferences !== "") {
+        if (show && this.ReferencesCommand !== ReferencesCommandMode.None) {
             this.referencesStatusBarItem.show();
         } else {
             this.referencesStatusBarItem.hide();
@@ -170,7 +170,7 @@ export class UI {
     public bind(client: Client): void {
         client.TagParsingChanged(value => { this.IsTagParsing = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
-        client.FindingReferencesChanged(value => { this.FindOrPeekReferences = value; });
+        client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.NavigationLocationChanged(value => { this.NavigationLocation = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
