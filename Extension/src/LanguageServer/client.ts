@@ -178,7 +178,7 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
 }
 
 enum ReferenceType {
-    Confirmed,
+    Confirmed, // Only sent if VS Code sends a $/cancelRequest (e.g. Peek window is closed).
     ConfirmationInProgress,
     Comment,
     String,
@@ -729,6 +729,7 @@ class DefaultClient implements Client {
     }
 
     // Used to determine if Find or Peek References is used.
+    // TODO: Investigate using onDidExecuteCommand instead.
     private prevVisibleRangesLength: number = 0;
     private visibleRangesDecreased: boolean = false;
     private visibleRangesDecreasedTicks: number = 0;
@@ -1770,6 +1771,8 @@ class DefaultClient implements Client {
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
     private referencePreviousProgressUICounter: number;
     private referencesCurrentProgressUICounter: number;
+    private readonly referencesProgressUpdateInterval: number = 1000;
+    private readonly referencesProgressDelayInterval: number = 2000;
 
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
         const helpMessage: string = this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek ? "" : " Click the search icon to preview results.";
@@ -1833,7 +1836,7 @@ class DefaultClient implements Client {
                 }
                 const currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 const currentParseProgress: number = numFinishedConfirming / numTotalToParse;
-                const currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70);
+                const currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70); // TODO: Update this with a more accurate ratio.
                 if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
                     this.referencesPrevProgressIncrement = currentIncrement;
@@ -1914,11 +1917,11 @@ class DefaultClient implements Client {
                                 } else {
                                     this.reportReferencesProgress(progress, false);
                                 }
-                            }, 1000);
+                            }, this.referencesProgressUpdateInterval);
                         });
                     vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
                     clearInterval(this.referencesDelayProgress);
-                }, 2000);
+                }, this.referencesProgressDelayInterval);
                 break;
             case ReferencesProgress.FinalResultsAvailable:
                 this.referencesCurrentProgress = notificationBody;
