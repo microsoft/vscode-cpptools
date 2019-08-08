@@ -260,7 +260,7 @@ let failureMessageShown: boolean = false;
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
     isUpdatingIntelliSense: DataBinding<boolean>;
-    isFindingReferences: DataBinding<boolean>;
+    FindOrPeekReferences: DataBinding<string>;
     navigationLocation: DataBinding<string>;
     tagParserStatus: DataBinding<string>;
     activeConfigName: DataBinding<string>;
@@ -269,7 +269,7 @@ interface ClientModel {
 export interface Client {
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
-    FindingReferencesChanged: vscode.Event<boolean>;
+    FindingReferencesChanged: vscode.Event<string>;
     NavigationLocationChanged: vscode.Event<string>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
@@ -349,7 +349,7 @@ class DefaultClient implements Client {
     private model: ClientModel = {
         isTagParsing: new DataBinding<boolean>(false),
         isUpdatingIntelliSense: new DataBinding<boolean>(false),
-        isFindingReferences: new DataBinding<boolean>(false),
+        FindOrPeekReferences: new DataBinding<string>(""),
         navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
@@ -357,7 +357,7 @@ class DefaultClient implements Client {
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
-    public get FindingReferencesChanged(): vscode.Event<boolean> { return this.model.isFindingReferences.ValueChanged; }
+    public get FindingReferencesChanged(): vscode.Event<string> { return this.model.FindOrPeekReferences.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
@@ -709,9 +709,11 @@ class DefaultClient implements Client {
         }
     }
 
+    // Used to determine if Find or Peek References is used.
     private prevVisibleRangesLength: number = 0;
     private visibleRangesDecreased: boolean = false;
     private visibleRangesDecreasedTicks: number = 0;
+
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
         if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
             if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
@@ -1728,7 +1730,7 @@ class DefaultClient implements Client {
     private referencesPrevProgressMessage: string;
     private referencesRequestHasOccurred: boolean;
     private referencesViewFindPending: boolean = false;
-    private delayReferencesProgress: NodeJS.Timeout;
+    private referencesDelayProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
     private referencesCanceled: boolean;
     private referencesDoneWhileTagParsing: boolean;
@@ -1741,7 +1743,7 @@ class DefaultClient implements Client {
     private referencesIsPeek: boolean;
 
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
-        const helpMessage: string = " Click the search icon to preview results.";
+        const helpMessage: string = this.referencesIsPeek ? "" : " Click the search icon to preview results.";
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
@@ -1752,8 +1754,10 @@ class DefaultClient implements Client {
             case ReferencesProgress.ProcessingTargets:
                 let numWaitingToLex: number = 0;
                 let numLexing: number = 0;
-                //let numWaitingToParse: number = 0;
                 let numParsing: number = 0;
+                // TODO: Change the increment progress to use these to update more frequently (i.e. when parsing is done, but confirming is not),
+                // even though the user-facing messages only updates when a file is completley done.
+                //let numWaitingToParse: number = 0;
                 //let numConfirmingReferences: number = 0;
                 let numFinishedWithoutConfirming: number = 0;
                 let numFinishedConfirming: number = 0;
@@ -1790,7 +1794,11 @@ class DefaultClient implements Client {
                 let numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
                 let numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                 if (numLexing >= numParsing) {
-                    currentMessage = `` + numFinishedLexing + `/${numTotalToLex} files searched.` + helpMessage;
+                    if (numTotalToLex === 0) {
+                        currentMessage = "Searching.";
+                    } else {
+                        currentMessage = `` + numFinishedLexing + `/${numTotalToLex} files searched.` + helpMessage;
+                    }
                 } else {
                     currentMessage = `` + numFinishedConfirming + `/${numTotalToParse} files confirmed.` + helpMessage;
                 }
@@ -1811,22 +1819,23 @@ class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            if (this.model.isFindingReferences.Value) {
+            if (this.model.FindOrPeekReferences.Value !== "") {
                 ++this.referencesCurrentProgressUICounter;
             }
-            this.sendRequestReferences();
+            if (this.model.FindOrPeekReferences.Value !== "peek") {
+                this.sendRequestReferences();
+            }
         });
     }
 
     private sendRequestReferences(): void {
-        if (this.model.isFindingReferences.Value) {
+        if (this.model.FindOrPeekReferences.Value !== "") {
             if (this.referencesRequestHasOccurred) {
                 // References are not usable if a references request is pending,
                 // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                // However, this command is a no-op if the cursor is not on a valid source location.
                 if (!this.referencesViewFindPending) {
                     this.referencesViewFindPending = true;
-                    vscode.commands.executeCommand(this.referencesIsPeek ? "editor.action.referenceSearch.trigger" : "references-view.refresh");
+                    vscode.commands.executeCommand("references-view.refresh");
                 }
             } else {
                 this.languageClient.sendNotification(RequestReferencesNotification);
@@ -1839,20 +1848,21 @@ class DefaultClient implements Client {
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.Started:
                 this.referencesDoneWhileTagParsing = this.model.isTagParsing.Value;
-                this.model.isFindingReferences.Value = true;
+                this.referencesIsPeek = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < 1000); // TODO: Might need tweeking.
+                this.model.FindOrPeekReferences.Value = this.referencesIsPeek ? "peek" : "find";
                 this.referencesRequestHasOccurred = false;
                 this.referencesCanceled = false;
                 this.referencesPrevProgressIncrement = 0;
                 this.referencesPrevProgressMessage = "";
                 this.referencePreviousProgressUICounter = 0;
                 this.referencesCurrentProgressUICounter = 0;
-                this.referencesIsPeek = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < 1000); // TODO: Might need tweeking.
                 if (!this.referencesChannel) {
                     this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
                     this.disposables.push(this.referencesChannel);
+                } else {
+                    this.referencesChannel.clear();
                 }
-                this.referencesChannel.clear();
-                this.delayReferencesProgress = setInterval(() => {
+                this.referencesDelayProgress = setInterval(() => {
                     this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: "Find All References", cancellable: true };
                     this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                     // tslint:disable-next-line: promise-must-complete
@@ -1878,7 +1888,7 @@ class DefaultClient implements Client {
                             }, 1000);
                         });
                     vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                    clearInterval(this.delayReferencesProgress);
+                    clearInterval(this.referencesDelayProgress);
                 }, 2000);
                 break;
             case ReferencesProgress.FinalResultsAvailable:
@@ -1887,8 +1897,8 @@ class DefaultClient implements Client {
                 break;
             case ReferencesProgress.Finished:
                 this.referencesCurrentProgress = notificationBody;
-                this.model.isFindingReferences.Value = false;
-                clearInterval(this.delayReferencesProgress);
+                this.model.FindOrPeekReferences.Value = "";
+                clearInterval(this.referencesDelayProgress);
                 break;
             default:
                 this.referencesCurrentProgress = notificationBody;
@@ -1898,6 +1908,7 @@ class DefaultClient implements Client {
 
     private convertReferenceTypeToString(referenceType: ReferenceType): string {
         switch (referenceType) {
+            case ReferenceType.Confirmed: return "Confirmed reference";
             case ReferenceType.ConfirmationInProgress: return this.referencesCanceled ? "Confirmation canceled" : "Confirmation in progress";
             case ReferenceType.Comment: return "Comment reference";
             case ReferenceType.String: return "String reference";
@@ -1922,10 +1933,6 @@ class DefaultClient implements Client {
         }
 
         for (let reference of referencesResult.referenceInfos) {
-            // Confirmed references are not currently sent here, but that might change later.
-            //if (reference.type === ReferenceType.Confirmed) {
-            //    continue; // Already displayed in VS Code's References
-            //}
             let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
             this.referencesChannel.appendLine("[" + this.convertReferenceTypeToString(reference.type) + "] " +
                 reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
@@ -1958,7 +1965,7 @@ class NullClient implements Client {
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
-    public get FindingReferencesChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get FindingReferencesChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }

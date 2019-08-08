@@ -36,6 +36,8 @@ export class UI {
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private configurationUIPromise: Thenable<ConfigurationResult>;
+    private readonly findAllReferencesTooltip: string = "Find All References (click to preview results)";
+    private readonly peekReferencesTooltip: string = "Find All References";
 
     constructor() {
         // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
@@ -99,13 +101,19 @@ export class UI {
         this.ShowFlameIcon = val;
     }
 
-    private get IsFindingReferences(): boolean {
-        return this.referencesStatusBarItem.text !== "";
+    private get FindOrPeekReferences(): string {
+        return this.referencesStatusBarItem.text !== "" ? "find" : "";
     }
 
-    private set IsFindingReferences(val: boolean) {
-        this.referencesStatusBarItem.text = val ? "$(search)" : "";
-        this.ShowReferencesIcon = val;
+    private set FindOrPeekReferences(val: string) {
+        if (val === "") {
+            this.referencesStatusBarItem.text = "";
+            this.ShowReferencesIcon = false;
+        } else {
+            this.referencesStatusBarItem.text = "$(search)";
+            this.referencesStatusBarItem.tooltip = val === "find" ? this.findAllReferencesTooltip : this.peekReferencesTooltip;
+            this.ShowReferencesIcon = true;
+        }
     }
 
     private set ShowNavigation(show: boolean) {
@@ -133,7 +141,7 @@ export class UI {
     }
 
     private set ShowReferencesIcon(show: boolean) {
-        if (show && this.IsFindingReferences) {
+        if (show && this.FindOrPeekReferences !== "") {
             this.referencesStatusBarItem.show();
         } else {
             this.referencesStatusBarItem.hide();
@@ -162,7 +170,7 @@ export class UI {
     public bind(client: Client): void {
         client.TagParsingChanged(value => { this.IsTagParsing = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
-        client.FindingReferencesChanged(value => { this.IsFindingReferences = value; });
+        client.FindingReferencesChanged(value => { this.FindOrPeekReferences = value; });
         client.NavigationLocationChanged(value => { this.NavigationLocation = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
