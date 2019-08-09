@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
-    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, DocumentFilter
+    RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter
 } from 'vscode-languageclient';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status } from 'vscode-cpptools/out/testApi';
@@ -438,8 +438,19 @@ class DefaultClient implements Client {
                         }
 
                         public provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
+                            let r: Range;
+                            if (range instanceof vscode.Selection) {
+                                if (range.active.isBefore(range.anchor)) {
+                                    r = Range.create(Position.create(range.active.line, range.active.character), Position.create(range.anchor.line, range.anchor.character));
+                                } else {
+                                    r = Range.create(Position.create(range.anchor.line, range.anchor.character), Position.create(range.active.line, range.active.character));
+                                }
+                            } else {
+                                r = Range.create(Position.create(range.start.line, range.start.character), Position.create(range.end.line, range.end.character));
+                            }
+
                             let params: GetCodeActionsRequestParams = {
-                                range: range,
+                                range: r,
                                 uri: document.uri.toString()
                             };
 
@@ -528,16 +539,6 @@ class DefaultClient implements Client {
             }
         }
 
-        // Get current locale from vscode
-        let locale: string = "en";
-        let vscodeNlsConfigString: string = process.env.VSCODE_NLS_CONFIG;
-        if (vscodeNlsConfigString) {
-            let vscodeNlsConfigJson: any = JSON.parse(process.env.VSCODE_NLS_CONFIG);
-            if (vscodeNlsConfigJson && vscodeNlsConfigJson.locale) {
-                locale = vscodeNlsConfigJson.locale;
-            }
-        }
-
         let clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'cpp' },
@@ -579,7 +580,7 @@ class DefaultClient implements Client {
                 },
                 vcpkg_root: util.getVcpkgRoot(),
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
-                locale: locale
+                localeId: util.getLocaleId()
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {

@@ -30,7 +30,7 @@
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "Typescript Compile",
+			"preLaunchTask": "TypeScript Compile",
 		},
 		{
 			"name": "Launch Extension (do not build)",

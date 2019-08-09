@@ -919,9 +919,9 @@ export class BlockingTask<T> {
 
 export function getLocaleId(): string {
     if (isString(process.env.VSCODE_NLS_CONFIG)) {
-        let vscodeOptions: any = JSON.parse(process.env.VSCODE_NLS_CONFIG);
-        if (isString(vscodeOptions.locale)) {
-            return vscodeOptions.locale.toLowerCase();
+        let vscodeNlsConfigJson: any = JSON.parse(process.env.VSCODE_NLS_CONFIG);
+        if (isString(vscodeNlsConfigJson.locale)) {
+            return vscodeNlsConfigJson.locale;
         }
     }
     return "en";
@@ -933,5 +933,5 @@ export function getLocalizedHtmlPath(originalPath: string): string {
     if (fs.existsSync(localizedFilePath)) {
         return localizedFilePath;
     }
-    return originalPath;
+    return getExtensionFilePath(originalPath);
 }
