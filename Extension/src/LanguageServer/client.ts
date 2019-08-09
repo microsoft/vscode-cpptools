@@ -1825,7 +1825,7 @@ class DefaultClient implements Client {
                 const numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
                 const numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
                 const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
-                if (numLexing >= numParsing) {
+                if (numLexing >= numParsing && numFinishedConfirming === 0) {
                     if (numTotalToLex === 0) {
                         currentMessage = "Searching files."; // TODO: Prevent this from happening.
                     } else {
