@@ -1836,7 +1836,8 @@ class DefaultClient implements Client {
                 }
                 const currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 const currentParseProgress: number = numFinishedConfirming / numTotalToParse;
-                const currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70); // TODO: Update this with a more accurate ratio.
+                const averageLexingPercent: number = 23;
+                const currentIncrement: number = Math.floor(currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent));
                 if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
                     this.referencesPrevProgressIncrement = currentIncrement;
@@ -1953,12 +1954,7 @@ class DefaultClient implements Client {
 
     private processReferencesResult(referencesResult: ReferencesResult): void {
         this.referencesViewFindPending = false;
-        if (!this.referencesChannel) {
-            this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
-            this.disposables.push(this.referencesChannel);
-        } else {
-            this.referencesChannel.clear();
-        }
+        this.referencesChannel.clear();
 
         if (this.referencesStartedWhileTagParsing) {
             this.referencesChannel.appendLine("[Warning] Some references may be missing, because workspace parsing was incomplete when " +

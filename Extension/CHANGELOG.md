@@ -1,7 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.25.0-insiders: August 8, 2019
+## Version 0.25.0-insiders2: August 13, 2019
+### Bug Fixes
+* Fix completion not showing results for smart pointers. [#3930](https://github.com/microsoft/vscode-cpptools/issues/3930)
+* Fix `Cannot confirm reference` sometimes being shown instead of `Inactive reference`. [#4041](https://github.com/microsoft/vscode-cpptools/issues/4041)
+* Fix wrong IntelliSense for C++ types after editing within a function and after a lambda.
 
+## Version 0.25.0-insiders: August 8, 2019
 ### New Features
 * Add `Find All References` when `C_Cpp.experimentalFeatures` is set to `"Enabled"`. [#15](https://github.com/microsoft/vscode-cpptools/issues/15)
 * Add `-x86` options for `intelliSenseMode`. [#2312](https://github.com/microsoft/vscode-cpptools/issues/2312)
