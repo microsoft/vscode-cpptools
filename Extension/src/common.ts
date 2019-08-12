@@ -252,18 +252,6 @@ export function getProgressExecutableSuccess(): number { return progressExecutab
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
-let releaseNotesPanel: vscode.WebviewPanel;
-
-export async function showReleaseNotes(): Promise<void> {
-    if (releaseNotesPanel) {
-        releaseNotesPanel.reveal();
-    } else {
-        releaseNotesPanel = vscode.window.createWebviewPanel('releaseNotes', "C/C++ Extension Release Notes", vscode.ViewColumn.One);
-        releaseNotesPanel.webview.html = await readFileText(getExtensionFilePath("ReleaseNotes.html"));
-        releaseNotesPanel.onDidDispose(() => releaseNotesPanel = undefined, null, extensionContext.subscriptions);
-    }
-}
-
 export function isUri(input: any): input is vscode.Uri {
     return input && input instanceof vscode.Uri;
 }
