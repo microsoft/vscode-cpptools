@@ -20,9 +20,9 @@ const ts = require('gulp-typescript');
 const typescript = require('typescript');
 const tsProject = ts.createProject('./tsconfig.json', { typescript });
 const filter = require('gulp-filter');
-const vinyl = require("vinyl");
-const parse5 = require("parse5");
-const traverse = require("parse5-traverse");
+const vinyl = require('vinyl');
+const parse5 = require('parse5');
+const traverse = require('parse5-traverse');
 
 // Patterns to find HTML files
 const htmlFilesPatterns = [
