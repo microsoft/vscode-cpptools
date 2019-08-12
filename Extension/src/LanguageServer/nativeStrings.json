@@ -14,7 +14,7 @@
     "browse_engine_update_thread_join_failed": "Error calling browse_engine_update_thread.join(): {0}",
     "already_open_different_casing": "This file ({0}) is already opened in the editor but with a different casing. IntelliSense features will be disabled on this copy of the file.",
     "intellisense_client_disconnected": "IntelliSense client has disconnected from the server - {0}",
-    "formatting_failed": "Formatting failed:\n{0}\n  {1}",
+    "formatting_failed": "Formatting failed:",
     "database_add_file_failed": "Unable to add file to database, error = {0}: {1}",
     "reset_timestamp_failed": "Failed to reset timestamp during abort, error = {0}: {1}",
     "update_timestamp_failed": "Unable to update timestamp, error = {0}: {1}",

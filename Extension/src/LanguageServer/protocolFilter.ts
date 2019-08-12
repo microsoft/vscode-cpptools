@@ -33,7 +33,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 }
 
                 me.onDidOpenTextDocument(document);
-                me.provideCustomConfiguration(document);
+                me.provideCustomConfiguration(document.uri, null);
                 me.notifyWhenReady(() => sendMessage(document));
             }
         },
@@ -82,6 +82,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         provideRenameEdits: invoke4,
         provideDocumentLinks: invoke2,
         resolveDocumentLink: invoke2,
+        provideDeclaration: invoke3
 
         // I believe the default handler will do the same thing.
         // workspace: {

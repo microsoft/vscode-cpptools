@@ -21,7 +21,7 @@ import { PackageManager, PackageManagerError, IPackage } from './packageManager'
 import { PersistentState } from './LanguageServer/persistentState';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
-import { CppTools1, NullCppTools } from './cppTools1';
+import { CppTools1 } from './cppTools1';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -33,6 +33,7 @@ let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    /*
     let errMsg: string = "";
     if (process.arch !== 'x32' && process.arch !== 'x64') {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(process.arch));
@@ -42,7 +43,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     if (errMsg) {
         vscode.window.showErrorMessage(errMsg);
         return new NullCppTools();
-    }
+    }*/
 
     util.setExtensionContext(context);
     initializeTemporaryCommandRegistrar();
@@ -371,17 +372,12 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ConfigurationProviderSelect",
         "onCommand:C_Cpp.SwitchHeaderSource",
         "onCommand:C_Cpp.Navigate",
-        "onCommand:C_Cpp.GoToDeclaration",
-        "onCommand:C_Cpp.PeekDeclaration",
         "onCommand:C_Cpp.EnableErrorSquiggles",
         "onCommand:C_Cpp.DisableErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
         "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
-        "onCommand:C_Cpp.PauseParsing",
-        "onCommand:C_Cpp.ResumeParsing",
-        "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
         "onCommand:C_Cpp.LogDiagnostics",
         "onCommand:C_Cpp.RescanWorkspace",

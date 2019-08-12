@@ -262,7 +262,7 @@ export async function showReleaseNotes(): Promise<void> {
     if (releaseNotesPanel) {
         releaseNotesPanel.reveal();
     } else {
-        releaseNotesPanel = vscode.window.createWebviewPanel('releaseNotes', localize("extension.release.notes", "C/C++ Extension Release Notes"), vscode.ViewColumn.One);
+        releaseNotesPanel = vscode.window.createWebviewPanel('releaseNotes', localize("c.cpp.extension.release.notes", "C/C++ Extension Release Notes"), vscode.ViewColumn.One);
         releaseNotesPanel.webview.html = await readFileText(getExtensionFilePath("ReleaseNotes.html"));
         releaseNotesPanel.onDidDispose(() => releaseNotesPanel = undefined, null, extensionContext.subscriptions);
     }

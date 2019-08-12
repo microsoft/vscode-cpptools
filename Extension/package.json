@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.24.0-master",
+  "version": "0.25.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -379,7 +379,10 @@
           "enum": [
             "msvc-x64",
             "gcc-x64",
-            "clang-x64"
+            "clang-x64",
+            "msvc-x86",
+            "gcc-x86",
+            "clang-x86"
           ],
           "default": null,
           "description": "%c_cpp.configuration.default.intelliSenseMode.description%",
@@ -504,6 +507,16 @@
           "description": "%c_cpp.configuration.updateChannel.description%",
           "scope": "resource"
         },
+        "C_Cpp.experimentalFeatures": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Disabled",
+          "description": "%c_cpp.configuration.experimentalFeatures.description%",
+          "scope": "resource"
+        },
         "C_Cpp.suggestSnippets": {
           "type": "boolean",
           "default": true,
@@ -550,16 +563,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.GoToDeclaration",
-        "title": "%c_cpp.command.goToDeclaration.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.PeekDeclaration",
-        "title": "%c_cpp.command.peekDeclaration.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.SwitchHeaderSource",
         "title": "%c_cpp.command.switchHeaderSource.title%",
         "category": "C/C++"
@@ -600,21 +603,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.PauseParsing",
-        "title": "%c_cpp.command.pauseParsing.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.ResumeParsing",
-        "title": "%c_cpp.command.resumeParsing.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.ShowParsingCommands",
-        "title": "%c_cpp.command.showParsingCommands.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
         "category": "C/C++"
@@ -646,26 +634,6 @@
       }
     ],
     "keybindings": [
-      {
-        "command": "C_Cpp.GoToDeclaration",
-        "key": "Ctrl+F12",
-        "when": "editorTextFocus && editorLangId == 'cpp'"
-      },
-      {
-        "command": "C_Cpp.GoToDeclaration",
-        "key": "Ctrl+F12",
-        "when": "editorTextFocus && editorLangId == 'c'"
-      },
-      {
-        "command": "C_Cpp.PeekDeclaration",
-        "key": "Ctrl+Alt+F12",
-        "when": "editorTextFocus && editorLangId == 'cpp'"
-      },
-      {
-        "command": "C_Cpp.PeekDeclaration",
-        "key": "Ctrl+Alt+F12",
-        "when": "editorTextFocus && editorLangId == 'c'"
-      },
       {
         "command": "C_Cpp.SwitchHeaderSource",
         "key": "Alt+O",
@@ -1407,26 +1375,6 @@
       "editor/context": [
         {
           "when": "editorLangId == c",
-          "command": "C_Cpp.GoToDeclaration",
-          "group": "navigation@2"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.GoToDeclaration",
-          "group": "navigation@2"
-        },
-        {
-          "when": "editorLangId == c",
-          "command": "C_Cpp.PeekDeclaration",
-          "group": "navigation@3"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.PeekDeclaration",
-          "group": "navigation@3"
-        },
-        {
-          "when": "editorLangId == c",
           "command": "C_Cpp.SwitchHeaderSource",
           "group": "other1_navigation@1"
         },
@@ -1483,6 +1431,9 @@
       },
       "[c]": {
         "editor.wordBasedSuggestions": false
+      },
+      "[Log]": {
+        "editor.wordWrap": "off"
       }
     }
   },

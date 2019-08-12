@@ -36,6 +36,7 @@ export class CppSettings extends Settings {
     public get clangFormatSortIncludes(): string { return super.Section.get<string>("clang_format_sortIncludes"); }
     public get clangFormatOnSave(): string { return super.Section.get<string>("clang_format_formatOnSave"); }
     public get formatting(): string { return super.Section.get<string>("formatting"); }
+    public get experimentalFeatures(): string { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string { return super.Section.get<string>("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }

@@ -47,7 +47,7 @@ export enum TokenKind {
 
 interface VersionedEdits {
     editVersion: number;
-    changes: vscode.TextDocumentContentChangeEvent[];
+    changes: readonly vscode.TextDocumentContentChangeEvent[];
 }
 
 class ThemeStyle {
@@ -554,7 +554,7 @@ export class ColorizationState {
         return new vscode.Range(range.start.line, range.start.character, range.end.line + deltaLines,  range.end.character);
     }
 
-    private fixRanges(originalRanges: vscode.Range[], changes: vscode.TextDocumentContentChangeEvent[]): vscode.Range[] {
+    private fixRanges(originalRanges: vscode.Range[], changes: readonly vscode.TextDocumentContentChangeEvent[]): vscode.Range[] {
         // outer loop needs to be the versioned edits, then changes within that edit, then ranges
         let ranges: vscode.Range[] = originalRanges;
         if (ranges && ranges.length > 0) {
@@ -574,7 +574,7 @@ export class ColorizationState {
     }
 
     // Add edits to be applied when/if cached tokens need to be reapplied.
-    public addEdits(changes: vscode.TextDocumentContentChangeEvent[], editVersion: number): void {
+    public addEdits(changes: readonly vscode.TextDocumentContentChangeEvent[], editVersion: number): void {
         let edits: VersionedEdits = {
             editVersion: editVersion,
             changes: changes
