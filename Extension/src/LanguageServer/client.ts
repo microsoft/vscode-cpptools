@@ -1834,7 +1834,7 @@ class DefaultClient implements Client {
                 const currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
                 const currentParseProgress: number = (numConfirmingReferences * confirmingWeight + numFinishedConfirming) / numTotalToParse;
-                const averageLexingPercent: number = 23;
+                const averageLexingPercent: number = 22;
                 const currentIncrement: number = currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent);
                 if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
