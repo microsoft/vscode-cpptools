@@ -1,9 +1,6 @@
 ---
 name: Language Service
 about: 'Issues pertaining to IntelliSense, autocomplete, code editing, etc. '
-title: ''
-labels: ''
-assignees: ''
 
 ---
 
