@@ -25,6 +25,7 @@
     "not_directory": "{0} is not a directory",
     "file_discovery_aborted": "File discovery was aborted",
     "aborting_tag_parse": "Aborting tag parse of {0} and dependencies",
+    "aborting_tag_parse_at_root": "Aborting tag parse at root",
     "unable_to_retrieve_to_reset_timestamps": "Unable to retrieve DB records to reset timestamps: error = {0}",
     "failed_to_reset_timestamps_for": "Failed to reset timestamp for {0}: error = {1}",
     "no_suitable_complier": "No suitable compiler found. Please set the \"compilerPath\" in c_cpp_properties.json.",
