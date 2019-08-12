@@ -1,9 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.25.0-insiders2: August 13, 2019
+## Version 0.25.0-insiders2: August 15, 2019
 ### Enhancements
 * Enable `Find All References` without checking `C_Cpp.experimentalFeatures`.
 * Fix `Find All References` progress bar not increasing as often as it should.
+* Add `not supported` messages for ARM and Alpine containers. [PR #4027](https://github.com/microsoft/vscode-cpptools/pull/4027)
 
 ### Bug Fixes
 * Fix completion not showing results for smart pointers. [#3930](https://github.com/microsoft/vscode-cpptools/issues/3930)
