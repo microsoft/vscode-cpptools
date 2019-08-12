@@ -2,13 +2,16 @@
 name: Debugger
 about: Issues pertaining to debugging such as call stack, breakpoints, watch window,
   launching or attaching to a debuggee.
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
 Type: Debugger
 **Input information below**
 
-**Please review existing issues and our documentation at https://github.com/Microsoft/vscode-cpptools/tree/master/Documentation prior to filing an issue.**
+**Please review [existing issues](https://github.com/Microsoft/vscode-cpptools/issues) and our documentation at https://code.visualstudio.com/docs/languages/cpp prior to filing an issue.**
 
 **Describe the bug**
 - OS and Version:
