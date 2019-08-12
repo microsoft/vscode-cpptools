@@ -6,9 +6,14 @@ about: Issues pertaining to debugging such as call stack, breakpoints, watch win
 ---
 
 Type: Debugger
-**Input information below**
+<!----- Input information below ----->
 
-**Please review [existing issues](https://github.com/Microsoft/vscode-cpptools/issues) and our documentation at https://code.visualstudio.com/docs/languages/cpp prior to filing an issue.**
+<!--
+**Prior to filing an issue, please review:**
+- Existing issues at https://github.com/Microsoft/vscode-cpptools/issues
+- Our documentation at https://code.visualstudio.com/docs/languages/cpp
+- FAQs at https://code.visualstudio.com/docs/cpp/faq-cpp
+-->
 
 **Describe the bug**
 - OS and Version:
