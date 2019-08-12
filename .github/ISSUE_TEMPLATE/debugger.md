@@ -1,9 +1,9 @@
----	
-name: Debugger	
-about: Issues pertaining to debugging such as call stack, breakpoints, watch window,	
-  launching or attaching to a debuggee.	
+---
+name: Debugger
+about: Issues pertaining to debugging such as call stack, breakpoints, watch window,
+  launching or attaching to a debuggee.
 
----	
+---
 
 Type: Debugger
 **Input information below**
