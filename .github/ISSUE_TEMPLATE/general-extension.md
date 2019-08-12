@@ -1,9 +1,6 @@
 ---
 name: General Extension
 about: Issues pertaining to downloading, installing, or building the extension.
-title: ''
-labels: ''
-assignees: ''
 
 ---
 
