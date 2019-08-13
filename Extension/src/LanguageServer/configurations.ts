@@ -581,6 +581,8 @@ export class CppProperties {
         }
     }
 
+    private compileCommandsFileWatcherChangedPending: boolean = false;
+
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
     // paths are expected to have variables resolved already
     public updateCompileCommandsFileWatchers(): void {
@@ -598,9 +600,15 @@ export class CppProperties {
         try {
             filePaths.forEach((path: string) => {
                 this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                    if (event !== "rename") {
-                        this.onCompileCommandsChanged(path);
+                    if (event === "rename" || this.compileCommandsFileWatcherChangedPending) {
+                        return;
                     }
+                    // Wait 3 seconds to allow time for compile_commands.json to finish being written.
+                    this.compileCommandsFileWatcherChangedPending = true;
+                    setTimeout(() => {
+                        this.compileCommandsFileWatcherChangedPending = false;
+                        this.onCompileCommandsChanged(path);
+                    }, 3000);
                 }));
             });
         } catch (e) {
