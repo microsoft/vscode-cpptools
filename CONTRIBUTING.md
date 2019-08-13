@@ -18,3 +18,18 @@
 * [**LanguageServer/configurations.ts**](Extension/src/LanguageServer/configurations.ts) handles functionality related to **c_cpp_properties.json**.
 * [**telemetry.ts**](Extension/src/telemetry.ts): Telemetry data gets sent to either `logLanguageServerEvent` or `logDebuggerEvent`.
 * The Tag Parser (symbol database) doesn't automatically expand macros, so the [**cpp.hint**](Extension/cpp.hint) file contains definitions of macros that should be expanded in order for symbols to be parsed correctly.
+
+## String Localization
+
+* [vscode-nls](https://github.com/microsoft/vscode-nls) is used to localize strings in TypeScript code.  To use [vscode-nls](https://github.com/microsoft/vscode-nls), the source file must contain:
+```typescript
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+```
+* For each user-facing string, wrap the string in a call to localize:
+```typescript
+const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
+```
+* The first parameter to localize should be a unique key for that string.  The second parameter is the string to localize.  Both of these parameters must be string literals.  Tokens such as {0} and {1} are supported in the localizable string, with replacement values passed as additional parameters to localize().

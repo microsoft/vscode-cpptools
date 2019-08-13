@@ -485,7 +485,7 @@ export function lookupString(stringId: number, stringArgs?: string[]): string {
     console.log("Writing file: ./src/LanguageServer/nativeStrings.ts");
     fs.writeFileSync("./src/LanguageServer/nativeStrings.ts", typeScriptContents, 'utf8');
     // Terminate native header
-    nativeContents += "\n    count = " + stringIndex + "\n};\n";
+    nativeContents += "\n};\n";
     console.log("Writing file: localized_string_ids.h -- If changed, copy to VS repo: src/vc/designtime/vscode/Common/");
     fs.writeFileSync("localized_string_ids.h", nativeContents, 'utf8');
     done();
