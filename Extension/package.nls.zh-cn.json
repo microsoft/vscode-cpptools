@@ -9,7 +9,6 @@
     "c_cpp.command.disableErrorSquiggles.title": "禁用错误下划线",
     "c_cpp.command.toggleIncludeFallback.title": "切换IntelliSense引擎头文件包含错误回退",
     "c_cpp.command.toggleDimInactiveRegions.title": "切换非活跃区域着色",
-    "c_cpp.command.showReleaseNotes.title": "查看版本说明",
     "c_cpp.command.resetDatabase.title": "重置IntelliSense数据",
     "c_cpp.command.takeSurvey.title": "调查问卷",
     "c_cpp.command.buildAndDebugActiveFile.title": "生成和调试当前文件",
