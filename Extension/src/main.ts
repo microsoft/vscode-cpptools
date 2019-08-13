@@ -17,12 +17,10 @@ import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, IPackage } from './packageManager';
-import { PersistentState } from './LanguageServer/persistentState';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
 
-const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
@@ -256,13 +254,6 @@ function sendTelemetry(info: PlatformInformation): boolean {
 
     if (success) {
         util.setProgress(util.getProgressInstallSuccess());
-        let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
-        if (versionShown.Value < releaseNotesVersion) {
-            if (versionShown.Value !== versionShown.DefaultValue) {
-                util.showReleaseNotes();
-            }
-            versionShown.Value = releaseNotesVersion;
-        }
     }
 
     installBlob.telemetryProperties['osArchitecture'] = info.architecture;
@@ -370,7 +361,6 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.DisableErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
-        "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
         "onCommand:C_Cpp.TakeSurvey",
         "onCommand:C_Cpp.LogDiagnostics",

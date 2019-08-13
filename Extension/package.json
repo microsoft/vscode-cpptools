@@ -593,11 +593,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ShowReleaseNotes",
-        "title": "%c_cpp.command.showReleaseNotes.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.ResetDatabase",
         "title": "%c_cpp.command.resetDatabase.title%",
         "category": "C/C++"
