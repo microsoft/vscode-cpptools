@@ -9,7 +9,6 @@
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
     "c_cpp.command.toggleIncludeFallback.title": "Toggle IntelliSense Engine Fallback on Include Errors",
     "c_cpp.command.toggleDimInactiveRegions.title": "Toggle Inactive Region Colorization",
-    "c_cpp.command.showReleaseNotes.title": "Show Release Notes",
     "c_cpp.command.resetDatabase.title": "Reset IntelliSense Database",
     "c_cpp.command.takeSurvey.title": "Take Survey",
     "c_cpp.command.buildAndDebugActiveFile.title": "Build and Debug Active File",

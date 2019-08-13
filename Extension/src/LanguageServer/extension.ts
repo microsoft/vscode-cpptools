@@ -841,7 +841,6 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', onDisableSquiggles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReleaseNotes', onShowReleaseNotes));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
@@ -1021,11 +1020,6 @@ function onToggleDimInactiveRegions(): void {
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
-}
-
-function onShowReleaseNotes(): void {
-    onActivationEvent();
-    util.showReleaseNotes();
 }
 
 function onPauseParsing(): void {

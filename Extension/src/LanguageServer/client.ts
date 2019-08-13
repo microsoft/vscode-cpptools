@@ -1943,10 +1943,7 @@ class DefaultClient implements Client {
                 let numWaitingToLex: number = 0;
                 let numLexing: number = 0;
                 let numParsing: number = 0;
-                // TODO: Change the increment progress to use these to update more frequently (i.e. when parsing is done, but confirming is not),
-                // even though the user-facing messages only updates when a file is completley done.
-                //let numWaitingToParse: number = 0;
-                //let numConfirmingReferences: number = 0;
+                let numConfirmingReferences: number = 0;
                 let numFinishedWithoutConfirming: number = 0;
                 let numFinishedConfirming: number = 0;
                 for (let targetLocationProgress of this.referencesCurrentProgress.targetReferencesProgress) {
@@ -1958,13 +1955,13 @@ class DefaultClient implements Client {
                             ++numLexing;
                             break;
                         case TargetReferencesProgress.WaitingToParse:
-                            //++numWaitingToParse;
+                            // The count is derived.
                             break;
                         case TargetReferencesProgress.Parsing:
                             ++numParsing;
                             break;
                         case TargetReferencesProgress.ConfirmingReferences:
-                            //++numConfirmingReferences;
+                            ++numConfirmingReferences;
                             break;
                         case TargetReferencesProgress.FinishedWithoutConfirming:
                             ++numFinishedWithoutConfirming;
@@ -1991,8 +1988,10 @@ class DefaultClient implements Client {
                     currentMessage = localize("files.confirmed", "{0}/{1} files confirmed.{2}", numFinishedConfirming, numTotalToParse, helpMessage);
                 }
                 const currentLexProgress: number = numFinishedLexing / numTotalToLex;
-                const currentParseProgress: number = numFinishedConfirming / numTotalToParse;
-                const currentIncrement: number = Math.floor(currentLexProgress * 30 + currentParseProgress * 70); // TODO: Update this with a more accurate ratio.
+                const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
+                const currentParseProgress: number = (numConfirmingReferences * confirmingWeight + numFinishedConfirming) / numTotalToParse;
+                const averageLexingPercent: number = 22;
+                const currentIncrement: number = currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent);
                 if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
                     this.referencesPrevProgressIncrement = currentIncrement;
@@ -2109,12 +2108,7 @@ class DefaultClient implements Client {
 
     private processReferencesResult(referencesResult: ReferencesResult): void {
         this.referencesViewFindPending = false;
-        if (!this.referencesChannel) {
-            this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.references", "C/C++ References"));
-            this.disposables.push(this.referencesChannel);
-        } else {
-            this.referencesChannel.clear();
-        }
+        this.referencesChannel.clear();
 
         if (this.referencesStartedWhileTagParsing) {
             this.referencesChannel.appendLine(localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.", referencesCommandModeToString(this.model.referencesCommandMode.Value)));

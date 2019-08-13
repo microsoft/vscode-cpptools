@@ -593,11 +593,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ShowReleaseNotes",
-        "title": "%c_cpp.command.showReleaseNotes.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.ResetDatabase",
         "title": "%c_cpp.command.resetDatabase.title%",
         "category": "C/C++"
@@ -1459,10 +1454,10 @@
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.6.3",
+    "@types/node": "^12.7.1",
     "@types/plist": "^3.0.2",
     "@types/tmp": "^0.1.0",
-    "@types/webpack": "^4.4.35",
+    "@types/webpack": "^4.32.1",
     "@types/yauzl": "^2.9.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
@@ -1483,9 +1478,9 @@
     "tslint-no-unused-expression-chai": "^0.1.4",
     "typescript": "^3.5.3",
     "vrsource-tslint-rules": "^6.0.0",
-    "vscode": "^1.1.35",
+    "vscode": "^1.1.36",
     "vscode-nls-dev": "^3.2.6",
-    "webpack": "^4.35.3",
+    "webpack": "^4.39.1",
     "webpack-cli": "^3.3.6",
     "xml2js": "^0.4.19"
   },
@@ -1498,7 +1493,7 @@
     "mkdirp": "^0.5.1",
     "plist": "^2.0.1",
     "tmp": "^0.1.0",
-    "vscode-cpptools": "^3.0.0",
+    "vscode-cpptools": "^3.0.1",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
