@@ -476,7 +476,7 @@ export function lookupString(stringId: number, stringArgs?: string[]): string {
         // Handle typescript portion
         if (stringTable[property] != "") {
             typeScriptContents += `        case ${stringIndex}:
-                message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property], null, 2)}`;
+                message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
         }
         let argIndex = 0;
         for (;;) {

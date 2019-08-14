@@ -80,5 +80,5 @@ locFolderNames.forEach((locFolderName) => {
         });
     });
 
-    fs.writeFileSync(outputPath, JSON.stringify(resultArray), 'utf8');
+    fs.writeFileSync(outputPath, JSON.stringify(resultArray, null, 2), 'utf8');
 });
