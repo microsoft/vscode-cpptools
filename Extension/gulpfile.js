@@ -142,13 +142,18 @@ function removePathPrefix(path, prefix) {
     if (!path.startsWith(prefix)) {
         return path;
     }
+    if (path === prefix) {
+        return "";
+    }
     var ch = prefix.charAt(prefix.length - 1);
     if (ch === '/' || ch === '\\') {
         return path.substr(prefix.length);
     }
-    else {
+    ch = path.charAt(prefix.length);
+    if (ch === '/' || ch === '\\') {
         return path.substr(prefix.length + 1);
     }
+    return path;
 }
 
 // Helper to traverse HTML tree
@@ -257,7 +262,7 @@ gulp.task("localization-export", (done) => {
     // Add package.nls.json, used to localized package.json
     .pipe(gulp.src(["package.nls.json"]))
 
-    // package.nsl.json and nls.metadata.json are used to generate the xlf file
+    // package.nls.json and nls.metadata.json are used to generate the xlf file
     // Does not re-queue any files to the stream.  Outputs only the XLF file
     .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
     .pipe(gulp.dest(path.join("..", 'localization-export')))
@@ -471,7 +476,7 @@ export function lookupString(stringId: number, stringArgs?: string[]): string {
         // Handle typescript portion
         if (stringTable[property] != "") {
             typeScriptContents += `        case ${stringIndex}:
-                message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
+                message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property], null, 2)}`;
         }
         let argIndex = 0;
         for (;;) {

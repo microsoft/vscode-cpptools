@@ -25,9 +25,6 @@ install.lock
 **/*.nls.json
 **/*.nls.*.json
 
-# ignore exported localization xlf directory
-localization-export
-
 # ignore generate native header
 localized_string_ids.h
 

@@ -1437,7 +1437,6 @@
     "compileDev": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "generate-native-strings": "gulp generate-native-strings",
-    "localization-export.temp": "npm run generate-native-strings && gulp localization-export",
     "localization-export": "npm run prepublishjs && npm run generate-native-strings && gulp localization-export",
     "localization-generate": "gulp localization-generate",
     "localization-import": "gulp localization-import",

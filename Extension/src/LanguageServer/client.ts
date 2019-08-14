@@ -532,22 +532,22 @@ class DefaultClient implements Client {
                             };
 
                             return this.client.languageClient.sendRequest(GetCodeActionsRequest, params)
-                            .then((commands) => {
-                                let resultCommands: vscode.Command[] = [];
+                                .then((commands) => {
+                                    let resultCommands: vscode.Command[] = [];
 
-                                // Convert to vscode.Command array
-                                commands.forEach((command) => {
-                                    let title: string = lookupString(command.stringId, command.stringArgs);
-                                    let vscodeCommand: vscode.Command = {
-                                        title: title,
-                                        command: command.command,
-                                        arguments: command.arguments
-                                    };
-                                    resultCommands.push(vscodeCommand);
+                                    // Convert to vscode.Command array
+                                    commands.forEach((command) => {
+                                        let title: string = lookupString(command.stringId, command.stringArgs);
+                                        let vscodeCommand: vscode.Command = {
+                                            title: title,
+                                            command: command.command,
+                                            arguments: command.arguments
+                                        };
+                                        resultCommands.push(vscodeCommand);
+                                    });
+
+                                    return resultCommands;
                                 });
-
-                                return resultCommands;
-                            });
                         }
                     }
 
