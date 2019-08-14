@@ -581,7 +581,8 @@ export class CppProperties {
         }
     }
 
-    private compileCommandsFileWatcherChangedPending: boolean = false;
+    private compileCommandsFileWatcherTimer: NodeJS.Timer;
+    private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
 
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
     // paths are expected to have variables resolved already
@@ -600,15 +601,22 @@ export class CppProperties {
         try {
             filePaths.forEach((path: string) => {
                 this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                    if (event === "rename" || this.compileCommandsFileWatcherChangedPending) {
+                    if (event === "rename") {
                         return;
                     }
-                    // Wait 3 seconds to allow time for compile_commands.json to finish being written.
-                    this.compileCommandsFileWatcherChangedPending = true;
-                    setTimeout(() => {
-                        this.compileCommandsFileWatcherChangedPending = false;
-                        this.onCompileCommandsChanged(path);
-                    }, 3000);
+                    // Wait 2 seconds after a change to allow time for the write to finish.
+                    if (this.compileCommandsFileWatcherTimer) {
+                        clearInterval(this.compileCommandsFileWatcherTimer);
+                    }
+                    this.compileCommandsFileWatcherFiles.add(path);
+                    this.compileCommandsFileWatcherTimer = setTimeout(() => {
+                        this.compileCommandsFileWatcherFiles.forEach((path: string) => {
+                            this.onCompileCommandsChanged(path);
+                        });
+                        clearInterval(this.compileCommandsFileWatcherTimer);
+                        this.compileCommandsFileWatcherFiles.clear();
+                        this.compileCommandsFileWatcherTimer = null;
+                    }, 2000);
                 }));
             });
         } catch (e) {
