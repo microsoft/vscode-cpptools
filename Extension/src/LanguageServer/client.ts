@@ -2047,6 +2047,9 @@ class DefaultClient implements Client {
                 this.referencesStartedWhileTagParsing = this.model.isTagParsing.Value;
                 this.model.referencesCommandMode.Value = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
                     ReferencesCommandMode.Peek : ReferencesCommandMode.Find;
+                if (this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek) {
+                    telemetry.logLanguageServerEvent("peekReferences");
+                }
                 this.referencesRequestHasOccurred = false;
                 this.referencesCanceled = false;
                 this.referencesPrevProgressIncrement = 0;
