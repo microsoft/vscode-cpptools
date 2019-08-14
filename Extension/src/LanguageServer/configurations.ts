@@ -604,7 +604,7 @@ export class CppProperties {
                     if (event === "rename") {
                         return;
                     }
-                    // Wait 2 seconds after a change to allow time for the write to finish.
+                    // Wait 1 second after a change to allow time for the write to finish.
                     if (this.compileCommandsFileWatcherTimer) {
                         clearInterval(this.compileCommandsFileWatcherTimer);
                     }
@@ -616,7 +616,7 @@ export class CppProperties {
                         clearInterval(this.compileCommandsFileWatcherTimer);
                         this.compileCommandsFileWatcherFiles.clear();
                         this.compileCommandsFileWatcherTimer = null;
-                    }, 2000);
+                    }, 1000);
                 }));
             });
         } catch (e) {
