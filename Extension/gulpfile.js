@@ -23,6 +23,8 @@ const filter = require('gulp-filter');
 const vinyl = require('vinyl');
 const parse5 = require('parse5');
 const traverse = require('parse5-traverse');
+const jsonc = require('jsonc-parser'); // Used to allow comments in nativeStrings.json
+
 
 // Patterns to find HTML files
 const htmlFilesPatterns = [
@@ -423,7 +425,7 @@ gulp.task('localization-generate', gulp.series(generatedAdditionalLocFiles, gene
 
 // A gulp task to parse ./src/LanguageServer/nativeStrings.json and generate nativeStrings.ts, and localized_string_ids.h
 gulp.task("generate-native-strings", (done) => {
-    const stringTable = JSON.parse(fs.readFileSync('./src/LanguageServer/nativeStrings.json').toString());
+    const stringTable = jsonc.parse(fs.readFileSync('./src/LanguageServer/nativeStrings.json').toString());
 
     let nativeContents = `/* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
@@ -467,8 +469,10 @@ export function lookupString(stringId: number, stringArgs?: string[]): string {
         // Handle native header portion
         nativeContents += "    " + property + " = " + stringIndex + ",\n";
         // Handle typescript portion
-        typeScriptContents += `        case ${stringIndex}:
-            message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
+        if (stringTable[property] != "") {
+            typeScriptContents += `        case ${stringIndex}:
+                message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
+        }
         let argIndex = 0;
         for (;;) {
             if (!stringValue.includes(`{${argIndex}}`)) {

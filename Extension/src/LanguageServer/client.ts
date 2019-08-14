@@ -41,10 +41,6 @@ let ui: UI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
 
-interface NavigationPayload {
-    navigation: string;
-}
-
 interface TelemetryPayload {
     event: string;
     properties?: { [key: string]: string };
@@ -226,7 +222,7 @@ interface ReportReferencesProgressNotification {
     targetReferencesProgress: TargetReferencesProgress[];
 }
 
-export interface Diagnostic {
+interface Diagnostic {
     range: Range;
     code?: number | string;
     source?: string;
@@ -265,6 +261,12 @@ interface LocalizeStringParams {
     indentSpaces: number;
 }
 
+interface StringOrLocalizeStringParams {
+    text: string;
+    stringId: number;
+    stringArgs: string[];
+}
+
 // Requests
 const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
@@ -300,7 +302,7 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
 const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
-const ReportNavigationNotification: NotificationType<NavigationPayload, void> = new NotificationType<NavigationPayload, void>('cpptools/reportNavigation');
+const ReportNavigationNotification: NotificationType<StringOrLocalizeStringParams, void> = new NotificationType<StringOrLocalizeStringParams, void>('cpptools/reportNavigation');
 const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = new NotificationType<DebugProtocolParams, void>('cpptools/debugProtocol');
@@ -1334,22 +1336,30 @@ class DefaultClient implements Client {
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
     }
 
-    private navigate(payload: NavigationPayload): void {
+    private navigate(payload: StringOrLocalizeStringParams): void {
         let cppSettings: CppSettings = new CppSettings(this.RootUri);
 
         // TODO: Move this code to a different place?
-        if (cppSettings.autoAddFileAssociations && payload.navigation && payload.navigation.startsWith("<def")) {
-            let fileAssociations: string = payload.navigation.substr(4);
-            let is_c: boolean = fileAssociations.startsWith("c");
-            // Skip over rest of header: c>; or >;
-            fileAssociations = fileAssociations.substr(is_c ? 3 : 2);
-            this.addFileAssociations(fileAssociations, is_c);
-            return;
+        if (payload.text && payload.text !== "")
+        {
+            if (cppSettings.autoAddFileAssociations && payload.text && payload.text.startsWith("<def")) {
+                let fileAssociations: string = payload.text.substr(4);
+                let is_c: boolean = fileAssociations.startsWith("c");
+                // Skip over rest of header: c>; or >;
+                fileAssociations = fileAssociations.substr(is_c ? 3 : 2);
+                this.addFileAssociations(fileAssociations, is_c);
+                return;
+            }
         }
 
         // If it's too big, it doesn't appear.
         // The space available depends on the user's resolution and space taken up by other UI.
-        let currentNavigation: string = payload.navigation;
+
+        let currentNavigation: string = payload.text;
+        if (payload.stringId !== 0) {
+            currentNavigation = lookupString(payload.stringId, payload.stringArgs);
+        }
+
         let maxLength: number = cppSettings.navigationLength;
         if (currentNavigation && currentNavigation.length > maxLength) {
             currentNavigation = currentNavigation.substring(0, maxLength - 3).concat("...");
