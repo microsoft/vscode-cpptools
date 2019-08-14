@@ -1340,8 +1340,7 @@ class DefaultClient implements Client {
         let cppSettings: CppSettings = new CppSettings(this.RootUri);
 
         // TODO: Move this code to a different place?
-        if (payload.text && payload.text !== "")
-        {
+        if (payload.text && payload.text !== "") {
             if (cppSettings.autoAddFileAssociations && payload.text && payload.text.startsWith("<def")) {
                 let fileAssociations: string = payload.text.substr(4);
                 let is_c: boolean = fileAssociations.startsWith("c");
