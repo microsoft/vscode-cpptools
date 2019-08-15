@@ -489,7 +489,8 @@ ${typeScriptSwitchContent}
             console.assert(\"Unrecognized string ID\");
             break;
     }
-    return message;\n}\n
+    return message;
+}
 `;
     console.log("Writing file: ./src/nativeStrings.ts");
     fs.writeFileSync("./src/nativeStrings.ts", typeScriptContent, 'utf8');
