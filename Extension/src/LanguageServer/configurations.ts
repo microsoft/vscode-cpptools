@@ -586,6 +586,9 @@ export class CppProperties {
         }
     }
 
+    private compileCommandsFileWatcherTimer: NodeJS.Timer;
+    private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
+
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
     // paths are expected to have variables resolved already
     public updateCompileCommandsFileWatchers(): void {
@@ -603,9 +606,22 @@ export class CppProperties {
         try {
             filePaths.forEach((path: string) => {
                 this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                    if (event !== "rename") {
-                        this.onCompileCommandsChanged(path);
+                    if (event === "rename") {
+                        return;
                     }
+                    // Wait 1 second after a change to allow time for the write to finish.
+                    if (this.compileCommandsFileWatcherTimer) {
+                        clearInterval(this.compileCommandsFileWatcherTimer);
+                    }
+                    this.compileCommandsFileWatcherFiles.add(path);
+                    this.compileCommandsFileWatcherTimer = setTimeout(() => {
+                        this.compileCommandsFileWatcherFiles.forEach((path: string) => {
+                            this.onCompileCommandsChanged(path);
+                        });
+                        clearInterval(this.compileCommandsFileWatcherTimer);
+                        this.compileCommandsFileWatcherFiles.clear();
+                        this.compileCommandsFileWatcherTimer = null;
+                    }, 1000);
                 }));
             });
         } catch (e) {
