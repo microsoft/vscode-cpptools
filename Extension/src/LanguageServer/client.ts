@@ -32,10 +32,10 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
 import * as nls from 'vscode-nls';
-import { lookupString } from './nativeStrings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+type LocalizeStringParams = util.LocalizeStringParams;
 
 let ui: UI;
 let timeStamp: number = 0;
@@ -227,9 +227,7 @@ interface Diagnostic {
     code?: number | string;
     source?: string;
     severity: vscode.DiagnosticSeverity;
-    message?: string;
-    stringId?: number;
-    stringArgs?: string[];
+    locaizeStringParams: LocalizeStringParams;
 }
 
 interface PublishDiagnosticsParams {
@@ -243,28 +241,14 @@ interface GetCodeActionsRequestParams {
 }
 
 interface CodeActionCommand {
-    stringId: number;
-    stringArgs?: string[];
+    localizeStringParams: LocalizeStringParams;
     command: string;
     arguments?: any[];
 }
 
 interface ShowMessageWindowParams {
     type: number;
-    stringId: number;
-    stringArgs?: string[];
-}
-
-interface LocalizeStringParams {
-    stringId: number;
-    stringArgs: string[];
-    indentSpaces: number;
-}
-
-interface StringOrLocalizeStringParams {
-    text: string;
-    stringId: number;
-    stringArgs: string[];
+    localizeStringParams: LocalizeStringParams;
 }
 
 // Requests
@@ -302,12 +286,11 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
 const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
-const ReportNavigationNotification: NotificationType<StringOrLocalizeStringParams, void> = new NotificationType<StringOrLocalizeStringParams, void>('cpptools/reportNavigation');
+const ReportNavigationNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportNavigation');
 const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = new NotificationType<DebugProtocolParams, void>('cpptools/debugProtocol');
-const DebugLogNotification:  NotificationType<string, void> = new NotificationType<string, void>('cpptools/debugLog');
-const DebugLogLocalizedNotification:  NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLogLocalized');
+const DebugLogNotification:  NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLog');
 const SemanticColorizationRegionsNotification:  NotificationType<SemanticColorizationRegionsParams, void> = new NotificationType<SemanticColorizationRegionsParams, void>('cpptools/semanticColorizationRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
@@ -537,7 +520,7 @@ class DefaultClient implements Client {
 
                                     // Convert to vscode.Command array
                                     commands.forEach((command) => {
-                                        let title: string = lookupString(command.stringId, command.stringArgs);
+                                        let title: string = util.getLocalizedString(command.localizeStringParams);
                                         let vscodeCommand: vscode.Command = {
                                             title: title,
                                             command: command.command,
@@ -1307,11 +1290,11 @@ class DefaultClient implements Client {
             this.debugChannel.append(`${output}`);
         });
 
-        this.languageClient.onNotification(DebugLogNotification, (params) => this.log(params));
-        this.languageClient.onNotification(DebugLogLocalizedNotification, (params) => this.logLocalized(params));
+        this.languageClient.onNotification(DebugLogNotification, (params) => this.logLocalized(params));
     }
 
-    private log(output: string): void {
+    private logLocalized(params: LocalizeStringParams): void {
+        let output: string = util.getLocalizedString(params);
         if (!this.outputChannel) {
             if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
                 this.outputChannel = vscode.window.createOutputChannel(`C/C++: ${this.Name}`);
@@ -1323,11 +1306,6 @@ class DefaultClient implements Client {
         this.outputChannel.appendLine(`${output}`);
     }
 
-    private logLocalized(params: LocalizeStringParams): void {
-        let indent: string = " ".repeat(params.indentSpaces);
-        this.log(indent + lookupString(params.stringId, params.stringArgs));
-    }
-
     /*******************************************************
      * handle notifications coming from the language server
      *******************************************************/
@@ -1336,7 +1314,7 @@ class DefaultClient implements Client {
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
     }
 
-    private navigate(payload: StringOrLocalizeStringParams): void {
+    private navigate(payload: LocalizeStringParams): void {
         let cppSettings: CppSettings = new CppSettings(this.RootUri);
 
         // TODO: Move this code to a different place?
@@ -1354,11 +1332,7 @@ class DefaultClient implements Client {
         // If it's too big, it doesn't appear.
         // The space available depends on the user's resolution and space taken up by other UI.
 
-        let currentNavigation: string = payload.text;
-        if (payload.stringId !== 0) {
-            currentNavigation = lookupString(payload.stringId, payload.stringArgs);
-        }
-
+        let currentNavigation: string = util.getLocalizedString(payload);
         let maxLength: number = cppSettings.navigationLength;
         if (currentNavigation && currentNavigation.length > maxLength) {
             currentNavigation = currentNavigation.substring(0, maxLength - 3).concat("...");
@@ -1476,7 +1450,7 @@ class DefaultClient implements Client {
     }
 
     private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
-        this.model.tagParserStatus.Value = lookupString(notificationBody.stringId, notificationBody.stringArgs);
+        this.model.tagParserStatus.Value = util.getLocalizedString(notificationBody);
     }
 
     private getColorizationState(uri: string): ColorizationState {
@@ -1518,13 +1492,7 @@ class DefaultClient implements Client {
         // Convert from our Diagnostic objects to vscode Diagnostic objects
         let diagnostics: vscode.Diagnostic[] = [];
         params.diagnostics.forEach((d) => {
-            let message: string;
-            if (!d.stringId) {
-                message = d.message;
-            } else {
-                message = lookupString(d.stringId, d.stringArgs);
-            }
-
+            let message: string = util.getLocalizedString(d.locaizeStringParams);
             let r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
             let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
             diagnostic.code = d.code;
@@ -1537,7 +1505,7 @@ class DefaultClient implements Client {
     }
 
     private showMessageWindow(params: ShowMessageWindowParams): void {
-        let message: string = lookupString(params.stringId, params.stringArgs);
+        let message: string = util.getLocalizedString(params.localizeStringParams);
         switch (params.type) {
             case 1: // Error
                 vscode.window.showErrorMessage(message);

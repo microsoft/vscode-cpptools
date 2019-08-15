@@ -18,6 +18,7 @@ import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { getBuildTasks } from './LanguageServer/extension';
 import { OtherSettings } from './LanguageServer/settings';
+import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -922,4 +923,20 @@ export function getLocalizedHtmlPath(originalPath: string): string {
         return localizedFilePath;
     }
     return getExtensionFilePath(originalPath);
+}
+
+export interface LocalizeStringParams {
+    text: string;
+    stringId: number;
+    stringArgs: string[];
+    indentSpaces: number;
+}
+
+export function getLocalizedString(params: LocalizeStringParams): string {
+    let indent: string = " ".repeat(params.indentSpaces);
+    let text: string = params.text;
+    if (params.stringId !== 0) {
+        text = lookupString(params.stringId, params.stringArgs);
+    }
+    return indent + text;
 }

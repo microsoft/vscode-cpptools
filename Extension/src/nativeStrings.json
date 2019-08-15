@@ -40,7 +40,7 @@
     "symbol_add_failed": "Unable to begin adding code symbols for file, error = {0}: {1}",
     "finalize_updates_failed": "Unable to finalize updates for file, error = {0}: {1}",
     "not_directory_with_mode": "{0} is not a directory (st_mode={1})",
-    "retrieve_fs_info_failed": "Unable to retrieve file system information for {0}. error = {1}}",
+    "retrieve_fs_info_failed": "Unable to retrieve file system information for {0}. error = {1}",
     "not_directory": "{0} is not a directory",
     "file_discovery_aborted": "File discovery was aborted",
     "aborting_tag_parse": "Aborting tag parse of {0} and dependencies",
