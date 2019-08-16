@@ -134,7 +134,7 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
 
 function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
     const missingIncludeCode: number = 1696;
-    return diagnostic.code && diagnostic.code === missingIncludeCode && diagnostic.source && diagnostic.source === 'cpptools';
+    return diagnostic.code && diagnostic.code === missingIncludeCode && diagnostic.source && diagnostic.source === 'C/C++';
 }
 
 /**
