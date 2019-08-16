@@ -933,7 +933,10 @@ export interface LocalizeStringParams {
 }
 
 export function getLocalizedString(params: LocalizeStringParams): string {
-    let indent: string = " ".repeat(params.indentSpaces);
+    let indent: string = "";
+    if (params.indentSpaces) {
+        indent = " ".repeat(params.indentSpaces);
+    }
     let text: string = params.text;
     if (params.stringId !== 0) {
         text = lookupString(params.stringId, params.stringArgs);

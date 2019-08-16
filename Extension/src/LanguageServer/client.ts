@@ -227,7 +227,7 @@ interface Diagnostic {
     code?: number | string;
     source?: string;
     severity: vscode.DiagnosticSeverity;
-    locaizeStringParams: LocalizeStringParams;
+    localizeStringParams: LocalizeStringParams;
 }
 
 interface PublishDiagnosticsParams {
@@ -1492,7 +1492,7 @@ class DefaultClient implements Client {
         // Convert from our Diagnostic objects to vscode Diagnostic objects
         let diagnostics: vscode.Diagnostic[] = [];
         params.diagnostics.forEach((d) => {
-            let message: string = util.getLocalizedString(d.locaizeStringParams);
+            let message: string = util.getLocalizedString(d.localizeStringParams);
             let r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
             let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
             diagnostic.code = d.code;
