@@ -1014,6 +1014,9 @@ export class CppProperties {
             paths = input;
         }
 
+        // Resolve and split any environment variables
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
+
         for (let p of paths) {
             let pathExists: boolean = true;
             let resolvedPath: string = this.resolvePath(p, isWindows);
@@ -1087,6 +1090,15 @@ export class CppProperties {
             if (!currentConfiguration.name) {
                 return;
             }
+
+            // Get env text
+            let envText: string;
+            const envStart: number = curText.search(/\"env\"\s*:\s*\{/);
+            const envEnd: number = envStart === -1 ? -1 : curText.indexOf("},", envStart);
+            envText = curText.substr(envStart, envEnd);
+            const envTextStartOffSet: number = envStart + 1;
+
+            // Get current config text
             const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
@@ -1136,23 +1148,26 @@ export class CppProperties {
             }
 
             // Check for path-related squiggles.
-            let paths: Set<string> = new Set<string>();
+            let paths: string[] = [];
             for (let pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
                 currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
-                        paths.add(`${curPath}`);
+                        paths.push(`${curPath}`);
                     }
                 }
             }
             if (currentConfiguration.compileCommands) {
-                paths.add(`${currentConfiguration.compileCommands}`);
+                paths.push(`${currentConfiguration.compileCommands}`);
             }
 
             if (currentConfiguration.compilerPath) {
                 // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
-                paths.add(`${currentConfiguration.compilerPath}`);
+                paths.push(`${currentConfiguration.compilerPath}`);
             }
+
+            // Resolve and split any environment variables
+            paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
 
             // Get the start/end for properties that are file-only.
             const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1162,6 +1177,7 @@ export class CppProperties {
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
+            // Validate paths
             for (let curPath of paths) {
                 const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
                 // Resolve special path cases.
@@ -1174,8 +1190,6 @@ export class CppProperties {
                 if (!resolvedPath) {
                     continue;
                 }
-
-                // TODO: Invalid paths created from environment variables are not detected.
 
                 let compilerPathNeedsQuotes: boolean = false;
                 if (isCompilerPath) {
@@ -1229,11 +1243,11 @@ export class CppProperties {
                 // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
                 // and extend that pattern to the next quote before and next quote after it.
                 let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
-                let matches: string[] = curText.match(pattern);
-                if (matches) {
+                let configMatches: string[] = curText.match(pattern);
+                if (configMatches) {
                     let curOffset: number = 0;
                     let endOffset: number = 0;
-                    for (let curMatch of matches) {
+                    for (let curMatch of configMatches) {
                         curOffset = curText.substr(endOffset).search(pattern) + endOffset;
                         endOffset = curOffset + curMatch.length;
                         let message: string;
@@ -1265,12 +1279,39 @@ export class CppProperties {
                         }
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                                document.positionAt(curTextStartOffset + endOffset)),
+                                            document.positionAt(curTextStartOffset + endOffset)),
                             message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
                     }
+                } else if (envText) {
+                    let envMatches: string[] = envText.match(pattern);
+                    if (envMatches) {
+                        let curOffset: number = 0;
+                        let endOffset: number = 0;
+                        for (let curMatch of envMatches) {
+                            curOffset = envText.substr(endOffset).search(pattern) + endOffset;
+                            endOffset = curOffset + curMatch.length;
+                            let message: string;
+                            if (!pathExists) {
+                                message = `Cannot find "${resolvedPath}".`;
+                                newSquiggleMetrics.PathNonExistent++;
+                            } else {
+                                if (util.checkDirectoryExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+                                message = `Path is not a directory: "${resolvedPath}".`;
+                                newSquiggleMetrics.PathNotADirectory++;
+                            }
+                            let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                                new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
+                                                document.positionAt(envTextStartOffSet + endOffset)),
+                                message, vscode.DiagnosticSeverity.Warning);
+                            diagnostics.push(diagnostic);
+                        }
+                    }
                 }
             }
+
             if (diagnostics.length !== 0) {
                 this.diagnosticCollection.set(document.uri, diagnostics);
             } else {
