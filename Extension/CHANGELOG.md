@@ -5,10 +5,13 @@
 * Enable `Find All References` without checking `C_Cpp.experimentalFeatures`.
 * Fix `Find All References` progress bar not increasing as often as it should.
 * Add `not supported` messages for ARM and Alpine containers. [PR #4027](https://github.com/microsoft/vscode-cpptools/pull/4027)
+* Add support for `-imsvc` compile commands flag. [#4032](https://github.com/microsoft/vscode-cpptools/issues/4032)
 
 ### Bug Fixes
+* Fix IntelliSense process crash in clang mode. [#3898](https://github.com/microsoft/vscode-cpptools/issues/3898)
 * Fix completion not showing results for smart pointers. [#3930](https://github.com/microsoft/vscode-cpptools/issues/3930)
 * Fix `Cannot confirm reference` sometimes being shown instead of `Inactive reference`. [#4041](https://github.com/microsoft/vscode-cpptools/issues/4041)
+* Fix bug when `compile_commands.json` changes. [#4058](https://github.com/microsoft/vscode-cpptools/issues/4058)
 * Fix wrong IntelliSense for C++ types after editing within a function and after a lambda.
 
 ## Version 0.25.0-insiders: August 8, 2019
