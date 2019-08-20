@@ -5,6 +5,7 @@
 'use strict';
 
 import * as path from 'path';
+import { TextDocument } from 'vscode';
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
@@ -33,8 +34,14 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 }
 
                 me.onDidOpenTextDocument(document);
+
+                // 'document' is a reference to the live TextDocument. Because the document can change while we wait for
+                // custom configurations, we must clone the current state of the object before yielding the thread.
+                // Theoretically, we should do this everywhere, but there are no other callbacks that read the document
+                // state directly (just the Uri) so there doesn't appear to be a need to do it.
+                const documentCopy: TextDocument = {...document};
                 me.provideCustomConfiguration(document.uri, null);
-                me.notifyWhenReady(() => sendMessage(document));
+                me.notifyWhenReady(() => sendMessage(documentCopy));
             }
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
