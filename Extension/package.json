@@ -1363,7 +1363,7 @@
     "jsonValidation": [
       {
         "fileMatch": "c_cpp_properties.json",
-        "url": "./c_cpp_properties.schema.json"
+        "url": "cpptools-json-schema://c_cpp_properties.schema.json"
       }
     ],
     "menus": {
@@ -1433,13 +1433,14 @@
     }
   },
   "scripts": {
-    "compile": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && npm run localization-generate && webpack --mode production --vscode-nls",
+    "compile": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && npm run translations-generate && webpack --mode production --vscode-nls",
     "compileDev": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "generate-native-strings": "gulp generate-native-strings",
-    "localization-export": "npm run prepublishjs && npm run generate-native-strings && gulp localization-export",
-    "localization-generate": "gulp localization-generate",
-    "localization-import": "gulp localization-import",
+    "import-edge-strings": "node ./import_edge_strings.js",
+    "translations-export": "npm run prepublishjs && npm run generate-native-strings && gulp translations-export",
+    "translations-generate": "gulp translations-generate",
+    "translations-import": "gulp translations-import",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",

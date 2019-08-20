@@ -919,10 +919,10 @@ export function getLocaleId(): string {
 export function getLocalizedHtmlPath(originalPath: string): string {
     let locale: string = getLocaleId();
     let localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
-    if (fs.existsSync(localizedFilePath)) {
-        return localizedFilePath;
+    if (!fs.existsSync(localizedFilePath)) {
+        return getExtensionFilePath(originalPath);
     }
-    return getExtensionFilePath(originalPath);
+    return localizedFilePath;
 }
 
 export interface LocalizeStringParams {

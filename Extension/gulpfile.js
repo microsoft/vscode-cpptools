@@ -31,6 +31,10 @@ const htmlFilesPatterns = [
     "ui/**/*.html"
 ];
 
+const jsonSchemaFilesPatterns = [
+    "*.schema.json"
+];
+
 const languages = [
     { id: "zh-TW", folderName: "cht", transifexId: "zh-hant" },
     { id: "zh-CN", folderName: "chs", transifexId: "zh-hans" },
@@ -75,9 +79,9 @@ const allTypeScript = [
 
 const lintReporter = (output, file, options) => {
     //emits: src/helloWorld.c:5:3: warning: implicit declaration of function ‘prinft’
-    var relativeBase = file.base.substring(file.cwd.length + 1).replace('\\', '/');
+    let relativeBase = file.base.substring(file.cwd.length + 1).replace('\\', '/');
     output.forEach(e => {
-        var message = relativeBase + e.name + ':' + (e.startPosition.line + 1) + ':' + (e.startPosition.character + 1) + ': ' + e.failure;
+        let message = relativeBase + e.name + ':' + (e.startPosition.line + 1) + ':' + (e.startPosition.character + 1) + ': ' + e.failure;
         console.log('[tslint] ' + message);
     });
 };
@@ -112,28 +116,13 @@ gulp.task('generateOptionsSchema', (done) => {
 
 
 // ****************************
-// Command: localization-export
-// The following is used to export and XLF file containing english strings for localization.
-// The result will be written to: ../localization-export/ms-vscode/
+// Command: translations-export
+// The following is used to export and XLF file containing english strings for translations.
+// The result will be written to: ../vscode-extensions-localization-export/ms-vscode/
 // ****************************
 
-// If a loc-id exists on these types of nodes, it will apply to the content of the node
-const localizableNodes = [
-    "span",
-    "code",
-    "button",
-    "div"
-];
-
-// If a loc-id exists on the specified nodes, it will apply to each of the specified attributes
-const localizableAttributes = {
-    "a": [
-        "title"
-    ],
-    "input": [
-        "placeholder"
-    ]
-};
+const translationProjectName  = "vscode-extensions";
+const translationExtensionName  = "vscode-cpptools";
 
 function removePathPrefix(path, prefix) {
     if (!prefix) {
@@ -145,7 +134,7 @@ function removePathPrefix(path, prefix) {
     if (path === prefix) {
         return "";
     }
-    var ch = prefix.charAt(prefix.length - 1);
+    let ch = prefix.charAt(prefix.length - 1);
     if (ch === '/' || ch === '\\') {
         return path.substr(prefix.length);
     }
@@ -157,8 +146,8 @@ function removePathPrefix(path, prefix) {
 }
 
 // Helper to traverse HTML tree
-// nodeCallback(locId, node) is invoked for nodes in localizableNodes
-// attributeCallback(locId, attribute) is invoked for attribtues in localizableAttributes
+// nodeCallback(locId, node) is invoked for nodes
+// attributeCallback(locId, attribute) is invoked for attribtues
 const traverseHtml = (contents, nodeCallback, attributeCallback) => {
     const htmlTree = parse5.parse(contents);
     traverse(htmlTree, {
@@ -187,16 +176,12 @@ const traverseHtml = (contents, nodeCallback, attributeCallback) => {
     return htmlTree;
 };
 
-// Traverses the HTML document looking for localizableNodes and localizableAttributes containing data-loc-id, to localize
+// Traverses the HTML document looking for node and attributes containing data-loc-id, to localize
 // Outputs *.nls.json files containing strings to localize.
-const processHtmlFile = () => {
+const processHtmlFiles = () => {
     return es.through(function (file) {
-        let fileExtension = file.path.substr((file.path.lastIndexOf('.') + 1));
-        if (fileExtension != "html") {
-            return;
-        }
-        var localizationJsonContents = {};
-        var localizationMetadataContents = {
+        let localizationJsonContents = {};
+        let localizationMetadataContents = {
             messages: [],
             keys: [],
             filePath: removePathPrefix(file.path, file.cwd)
@@ -232,10 +217,54 @@ const processHtmlFile = () => {
     });
 };
 
-const translationProjectName  = "ms-vscode";
-const translationExtensionName  = "cpptools";
+// descriptionCallback(path, value, parent) is invoked for attribtues
+const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
+    for (let fieldName in jsonTree) {
+        if (jsonTree[fieldName] !== null) {
+            if (typeof(jsonTree[fieldName]) == "string" && fieldName === "description") {
+                descriptionCallback(prefixPath, jsonTree[fieldName], jsonTree);
+            } else if (typeof(jsonTree[fieldName]) == "object") {
+                let path = prefixPath;
+                if (path !== "")
+                    path = path + ".";
+                path = path + fieldName;
+                traverseJson(jsonTree[fieldName], descriptionCallback, path);
+            }
+        }
+    }
+};
 
-gulp.task("localization-export", (done) => {
+// Traverses schema json files looking for "description" fields to localized.
+// The path to the "description" field is used to create a localization key.
+const processJsonSchemaFiles = () => {
+    return es.through(function (file) {
+        let jsonTree = JSON.parse(file.contents.toString());
+        let localizationJsonContents = {};
+        let filePath = removePathPrefix(file.path, file.cwd);
+        let localizationMetadataContents = {
+            messages: [],
+            keys: [],
+            filePath: filePath
+        };
+        let descriptionCallback = (path, value, parent) => {
+            let locId = filePath + "." + path;
+            localizationJsonContents[locId] = value;
+            localizationMetadataContents.keys.push(locId);
+            localizationMetadataContents.messages.push(value);
+        };
+        traverseJson(jsonTree, descriptionCallback, "");
+        this.queue(new vinyl({
+            path: path.join(file.path + '.nls.json'),
+            contents: Buffer.from(JSON.stringify(localizationJsonContents, null, '\t'), 'utf8')
+        }));
+        this.queue(new vinyl({
+            path: path.join(file.path + '.nls.metadata.json'),
+            contents: Buffer.from(JSON.stringify(localizationMetadataContents, null, '\t'), 'utf8')
+        }));
+    });
+};
+
+gulp.task("translations-export", (done) => {
 
     // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
     let jsStream = tsProject.src()
@@ -245,16 +274,19 @@ gulp.task("localization-export", (done) => {
     
     // Scan html files for tags with the data-loc-id attribute
     let htmlStream = gulp.src(htmlFilesPatterns)
-        .pipe(processHtmlFile());
+        .pipe(processHtmlFiles());
 
-    // Merge files from both streams
-    es.merge(jsStream, htmlStream)
+    let jsonSchemaStream = gulp.src(jsonSchemaFilesPatterns)
+        .pipe(processJsonSchemaFiles());
+
+    // Merge files from all source streams
+    es.merge(jsStream, htmlStream, jsonSchemaStream)
 
     // Filter down to only the files we need
     .pipe(filter(['**/*.nls.json', '**/*.nls.metadata.json']))
 
     // Consoldate them into nls.metadata.json, which the xlf is built from.
-    .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', 'dist'))
+    .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', '.'))
 
     // filter down to just the resulting metadata files
     .pipe(filter(['**/nls.metadata.header.json', '**/nls.metadata.json']))
@@ -265,7 +297,7 @@ gulp.task("localization-export", (done) => {
     // package.nls.json and nls.metadata.json are used to generate the xlf file
     // Does not re-queue any files to the stream.  Outputs only the XLF file
     .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
-    .pipe(gulp.dest(path.join("..", 'localization-export')))
+    .pipe(gulp.dest(path.join("..", `${translationProjectName}-localization-export`)))
     .pipe(es.wait(() => {
         done();
     }));
@@ -273,21 +305,17 @@ gulp.task("localization-export", (done) => {
 
 
 // ****************************
-// Command: localization-import
+// Command: translations-import
 // The following is used to import an XLF file containing all language strings.
 // This results in a i18n directory, which should be checked in.
 // ****************************
 
-const importFilePath = '../vscode-cpptools.xlf';
-
-// TODO: Generate fully localized HTML files
-
-// Imports localization from raw localized MLCP strings to VS Code .i18n.json files
-gulp.task("localization-import", (done) => {
-    var options = minimist(process.argv.slice(2), {
+// Imports translations from raw localized MLCP strings to VS Code .i18n.json files
+gulp.task("translations-import", (done) => {
+    let options = minimist(process.argv.slice(2), {
         string: "location",
         default: {
-            location: "../vscode-cpptools-localization-import"
+            location: "../vscode-translations-import"
         }
     });
     es.merge(languages.map((language) => {
@@ -304,11 +332,9 @@ gulp.task("localization-import", (done) => {
 
 
 // ****************************
-// Command: localization-generate
+// Command: translations-generate
 // The following is used to import an i18n directory structure and generate files used at runtime.
 // ****************************
-
-// TODO: Make sure json files for HTML files are filtered out, as we've already create fully localized HTML files for those.
 
 // Generate package.nls.*.json files from: ./i18n/*/package.i18n.json
 // Outputs to root path, as these nls files need to be along side package.json
@@ -317,19 +343,6 @@ const generatedAdditionalLocFiles = () => {
         .pipe(nls.createAdditionalLanguageFiles(languages, 'i18n'))
         .pipe(gulp.dest('.'));
 };
-
-// // Generates ./dist/<src_path>/<filename>.nls.<language_id>.json, from files in ./i18n/**/<src_path>/<filename>.i18n.json
-// // Localized strings are read from these files at runtime.
-// const generatedSrcLocFiles = () => {
-//     return tsProject.src()
-//         .pipe(sourcemaps.init())
-//         .pipe(tsProject()).js
-//         .pipe(nls.createMetaDataFiles())
-//         .pipe(nls.createAdditionalLanguageFiles(languages, "i18n"))
-//         .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', 'dist'))
-//         .pipe(filter(['**/*.nls.*.json', '**/*.nls.json', '**/nls.metadata.header.json', '**/nls.metadata.json']))
-//         .pipe(gulp.dest('dist'));
-// };
 
 // Generates ./dist/nls.bundle.<language_id>.json from files in ./i18n/** *//<src_path>/<filename>.i18n.json
 // Localized strings are read from these files at runtime.
@@ -346,23 +359,19 @@ const generatedSrcLocBundle = () => {
         .pipe(gulp.dest('dist'));
 };
 
-const generateLocalizedHtmlFile = () => {
+const generateLocalizedHtmlFiles = () => {
     return es.through(function (file) {
-        let fileExtension = file.path.substr((file.path.lastIndexOf('.') + 1));
-        if (fileExtension != "html") {
-            return;
-        }
         let relativePath = removePathPrefix(file.path, file.cwd);
         languages.map((language) => {
             let stringTable = {};
-            // Try to open i18n file for this HTML file
+            // Try to open i18n file for this file
             let relativePath = removePathPrefix(file.path, file.cwd);
             let locFile = path.join("./i18n", language.folderName, relativePath + ".i18n.json");
             if (fs.existsSync(locFile)) {
                 stringTable = JSON.parse(fs.readFileSync(locFile).toString());
             }
             // Entire file is scanned and modified, then serialized for that language.
-            // Even if no localization is available, we still write new files to dist/html/...
+            // Even if no translations are available, we still write new files to dist/html/...
 
             // Rewrite child nodes to fill in {0}, {1}, etc., in localized string.
             let nodeCallback = (locId, node) => {
@@ -410,15 +419,52 @@ const generateLocalizedHtmlFile = () => {
 
 // Generate localized versions of HTML files
 // Check for cooresponding localized json file in i18n
-// Generate new version of the HTML file in dist/<language_id>/<path>
+// Generate new version of the HTML file in dist/html/<language_id>/<path>
 const generateHtmlLoc = () => {
     return gulp.src(htmlFilesPatterns)
-        .pipe(generateLocalizedHtmlFile())
+        .pipe(generateLocalizedHtmlFiles())
         .pipe(gulp.dest('dist'));
 };
 
-//gulp.task('localization-generate', gulp.series(generatedAdditionalLocFiles, generatedSrcLocFiles, generateHtmlLoc));
-gulp.task('localization-generate', gulp.series(generatedAdditionalLocFiles, generatedSrcLocBundle, generateHtmlLoc));
+const generateLocalizedJsonSchemaFiles = () => {
+    return es.through(function (file) {
+        let jsonTree = JSON.parse(file.contents.toString());
+        languages.map((language) => {
+            let stringTable = {};
+            // Try to open i18n file for this file
+            let relativePath = removePathPrefix(file.path, file.cwd);
+            let locFile = path.join("./i18n", language.folderName, relativePath + ".i18n.json");
+            if (fs.existsSync(locFile)) {
+                stringTable = JSON.parse(fs.readFileSync(locFile).toString());
+            }
+            // Entire file is scanned and modified, then serialized for that language.
+            // Even if no translations are available, we still write new files to dist/html/...
+            if (stringTable[keyPrefix + path]) {
+                let keyPrefix = relativePath + ".";
+                let descriptionCallback = (path, value, parent) => {
+                    parent.description = stringTable[keyPrefix + path];
+                };
+                traverseJson(jsonTree, descriptionCallback, "");
+            }
+            let newContent = JSON.stringify(jsonTree, null, '\t');
+            this.queue(new vinyl({
+                path: path.join("schema", language.id, relativePath),
+                contents: Buffer.from(newContent, 'utf8')
+            }));
+        });
+    });
+};
+
+// Generate localized versions of JSON schema files
+// Check for cooresponding localized json file in i18n
+// Generate new version of the JSON schema file in dist/schema/<language_id>/<path>
+const generateJsonSchemaLoc = () => {
+    return gulp.src(jsonSchemaFilesPatterns)
+        .pipe(generateLocalizedJsonSchemaFiles())
+        .pipe(gulp.dest('dist'));
+};
+
+gulp.task('translations-generate', gulp.series(generatedSrcLocBundle, generatedAdditionalLocFiles, generateHtmlLoc, generateJsonSchemaLoc));
 
 
 // ****************************
@@ -426,7 +472,6 @@ gulp.task('localization-generate', gulp.series(generatedAdditionalLocFiles, gene
 // The following is used to generate nativeStrings.ts and localized_string_ids.h from ./src/nativeStrings.json
 // If adding localized strings to the native side, start by adding it to nativeStrings.json and use this to generate the others.
 // ****************************
-
 
 // A gulp task to parse ./src/nativeStrings.json and generate nativeStrings.ts, and localized_string_ids.h
 gulp.task("generate-native-strings", (done) => {
