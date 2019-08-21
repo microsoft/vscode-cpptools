@@ -73,7 +73,7 @@
           ],
           "default": null,
           "description": "%c_cpp.configuration.clang_format_path.description%",
-          "scope": "machine"
+          "scope": "resource"
         },
         "C_Cpp.clang_format_style": {
           "type": "string",
