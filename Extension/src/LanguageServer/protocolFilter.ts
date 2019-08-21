@@ -5,6 +5,7 @@
 'use strict';
 
 import * as path from 'path';
+import { TextDocument } from 'vscode';
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
@@ -13,7 +14,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
     // Disabling lint for invoke handlers
     /* tslint:disable */
     let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data) => void) => { if (clients.ActiveClient === me) {me.notifyWhenReady(() => callback(data));}};
-    let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
+    // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
     let invoke2 = (a, b, callback: (a, b) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a, b)); } return null; };
     let invoke3 = (a, b, c, callback: (a, b, c) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(() => callback(a, b, c)); } return null; };
     let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(() => callback(a, b, c, d)); } return null; };
@@ -33,8 +34,14 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 }
 
                 me.onDidOpenTextDocument(document);
-                me.provideCustomConfiguration(document);
-                me.notifyWhenReady(() => sendMessage(document));
+
+                // 'document' is a reference to the live TextDocument. Because the document can change while we wait for
+                // custom configurations, we must clone the current state of the object before yielding the thread.
+                // Theoretically, we should do this everywhere, but there are no other callbacks that read the document
+                // state directly (just the Uri) so there doesn't appear to be a need to do it.
+                const documentCopy: TextDocument = {...document};
+                me.provideCustomConfiguration(document.uri, null);
+                me.notifyWhenReady(() => sendMessage(documentCopy));
             }
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
@@ -82,6 +89,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         provideRenameEdits: invoke4,
         provideDocumentLinks: invoke2,
         resolveDocumentLink: invoke2,
+        provideDeclaration: invoke3
 
         // I believe the default handler will do the same thing.
         // workspace: {

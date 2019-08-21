@@ -29,13 +29,14 @@ export class CppSettings extends Settings {
     constructor(resource?: vscode.Uri) {
         super("C_Cpp", resource);
     }
-  
+
     public get clangFormatPath(): string { return super.Section.get<string>("clang_format_path"); }
     public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string { return super.Section.get<string>("clang_format_sortIncludes"); }
     public get clangFormatOnSave(): string { return super.Section.get<string>("clang_format_formatOnSave"); }
     public get formatting(): string { return super.Section.get<string>("formatting"); }
+    public get experimentalFeatures(): string { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string { return super.Section.get<string>("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }
@@ -56,6 +57,7 @@ export class CppSettings extends Settings {
     public get configurationWarnings(): string { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string { return super.Section.get<string>("preferredPathSeparator"); }
     public get updateChannel(): string { return super.Section.get<string>("updateChannel"); }
+    public get vcpkgEnabled(): boolean { return super.Section.get<boolean>("vcpkg.enabled"); }
     public get defaultIncludePath(): string[] { return super.Section.get<string[]>("default.includePath"); }
     public get defaultDefines(): string[] { return super.Section.get<string[]>("default.defines"); }
     public get defaultMacFrameworkPath(): string[] { return super.Section.get<string[]>("default.macFrameworkPath"); }
@@ -64,6 +66,7 @@ export class CppSettings extends Settings {
     public get defaultForcedInclude(): string[] { return super.Section.get<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string { return super.Section.get<string>("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string { return super.Section.get<string>("default.compilerPath"); }
+    public get defaultCompilerArgs(): string[] { return super.Section.get<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string { return super.Section.get<string>("default.cppStandard"); }
     public get defaultConfigurationProvider(): string { return super.Section.get<string>("default.configurationProvider"); }
@@ -117,6 +120,9 @@ export class OtherSettings {
 
     public get editorTabSize(): number { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files", null).get("associations"); }
+    public set filesAssociations(value: any) {
+        vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
+    }
     public get filesExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get searchExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
@@ -128,8 +134,4 @@ export class OtherSettings {
 
     public get customTextMateRules(): TextMateRule[] { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<TextMateRule[]>("textMateRules"); }
     public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
-
-    public set filesAssociations(value: any) {
-         vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
-    }
 }

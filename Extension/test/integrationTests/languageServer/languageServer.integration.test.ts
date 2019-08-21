@@ -1,6 +1,6 @@
-/*--------------------------------------------------------------------------------------------- 
- *  Copyright (c) Microsoft Corporation. All rights reserved. 
- *  Licensed under the MIT License. See License.txt in the project root for license information. 
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
@@ -16,12 +16,12 @@ import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
 const defaultTimeout: number = 60000;
 
 suite("multiline comment setting tests", function(): void {
-    suiteSetup(async function(): Promise<void> { 
+    suiteSetup(async function(): Promise<void> {
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
         util.setExtensionPath(extension.extensionPath);
         initializeTemporaryCommandRegistrar();
-        if (!extension.isActive) { 
-            await extension.activate(); 
+        if (!extension.isActive) {
+            await extension.activate();
         }
     });
 
@@ -111,6 +111,109 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, disp
 
 /******************************************************************************/
 
+suite("extensibility tests v3", function(): void {
+    let cpptools: apit.CppToolsTestApi;
+    let lastResult: api.SourceFileConfigurationItem[];
+    let defaultConfig: api.SourceFileConfiguration = {
+        includePath: [ "${workspaceFolder}", "/v3/folder" ],
+        defines: [ "${workspaceFolder}" ],
+        intelliSenseMode: "msvc-x64",
+        standard: "c++17"
+    };
+    let lastBrowseResult: api.WorkspaceBrowseConfiguration;
+    let defaultBrowseConfig: api.WorkspaceBrowseConfiguration = {
+        browsePath: [ "/v3/folder" ],
+        compilerPath: "",
+        standard: "c++14",
+        windowsSdkVersion: "8.1"
+    };
+    let defaultFolderBrowseConfig: api.WorkspaceBrowseConfiguration = {
+        browsePath: [ "/v3/folder-1" ],
+        compilerPath: "",
+        standard: "c++14",
+        windowsSdkVersion: "8.1"
+    };
+
+    let provider: api.CustomConfigurationProvider = {
+        name: "cpptoolsTest-v3",
+        extensionId: "ms-vscode.cpptools-test3",
+        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+            return Promise.resolve(true);
+        },
+        provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
+            let result: api.SourceFileConfigurationItem[] = [];
+            uris.forEach(uri => {
+                result.push({
+                    uri: uri.toString(),
+                    configuration: defaultConfig
+                });
+            });
+            lastResult = result;
+            return Promise.resolve(result);
+        },
+        canProvideBrowseConfiguration(): Thenable<boolean> {
+            return Promise.resolve(true);
+        },
+        provideBrowseConfiguration(): Thenable<api.WorkspaceBrowseConfiguration> {
+            lastBrowseResult = defaultBrowseConfig;
+            return Promise.resolve(defaultBrowseConfig);
+        },
+        canProvideBrowseConfigurationsPerFolder(): Thenable<boolean> {
+            return Promise.resolve(true);
+        },
+        provideFolderBrowseConfiguration(uri: vscode.Uri): Thenable<api.WorkspaceBrowseConfiguration> {
+            lastBrowseResult = defaultFolderBrowseConfig;
+            return Promise.resolve(defaultFolderBrowseConfig);
+        },
+        dispose(): void {
+            console.log("    disposed");
+        }
+    };
+    let disposables: vscode.Disposable[] = [];
+
+    suiteSetup(async function(): Promise<void> {
+        cpptools = await apit.getCppToolsTestApi(api.Version.v3);
+        cpptools.registerCustomConfigurationProvider(provider);
+        cpptools.notifyReady(provider);
+        disposables.push(cpptools);
+
+        await changeCppProperties({
+                configurations: [ {name: "test3", configurationProvider: provider.extensionId} ],
+                version: 4
+            },
+            disposables);
+    });
+
+    suiteTeardown(function(): void {
+        disposables.forEach(d => d.dispose());
+    });
+
+    test("Check provider", async () => {
+        // Open a c++ file to start the language server.
+        let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main3.cpp";
+        let uri: vscode.Uri = vscode.Uri.file(path);
+
+        let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
+        let testResult: any = new Promise<void>((resolve, reject) => {
+            disposables.push(testHook.StatusChanged(status => {
+                if (status === apit.Status.IntelliSenseReady) {
+                    let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
+                    assert.deepEqual(lastResult, expected);
+                    assert.deepEqual(lastBrowseResult, defaultFolderBrowseConfig);
+                    resolve();
+                }
+            }));
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+        });
+        disposables.push(testHook);
+
+        await vscode.workspace.openTextDocument(path);
+        await testResult;
+    });
+});
+
+/******************************************************************************/
+
 suite("extensibility tests v2", function(): void {
     let cpptools: apit.CppToolsTestApi;
     let lastResult: api.SourceFileConfigurationItem[];
@@ -129,7 +232,7 @@ suite("extensibility tests v2", function(): void {
     };
 
     // Has to be 'any' instead of api.CustomConfigurationProvider because of missing interface members.
-    let provider: api.CustomConfigurationProvider = {
+    let provider: any = {
         name: "cpptoolsTest-v2",
         extensionId: "ms-vscode.cpptools-test2",
         canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
@@ -349,10 +452,10 @@ suite("extensibility tests v0", function(): void {
 
 /*
 suite("configuration tests", function() {
-    suiteSetup(async function() { 
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools"); 
-        if (!extension.isActive) { 
-            await extension.activate(); 
+    suiteSetup(async function() {
+        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        if (!extension.isActive) {
+            await extension.activate();
         }
         // Open a c++ file to start the language server.
         await vscode.workspace.openTextDocument({ language: "cpp", content: "int main() { return 0; }"});

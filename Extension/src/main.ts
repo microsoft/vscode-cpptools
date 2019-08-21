@@ -17,18 +17,27 @@ import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
 import { PackageManager, PackageManagerError, IPackage } from './packageManager';
-import { PersistentState } from './LanguageServer/persistentState';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
-import { CppTools1 } from './cppTools1';
+import { CppTools1, NullCppTools } from './cppTools1';
 
-const releaseNotesVersion: number = 5;
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    let errMsg: string = "";
+    if (process.arch !== 'ia32' && process.arch !== 'x64') {
+        errMsg = "Architecture " + String(process.arch) + " is not supported. ";
+    } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
+        errMsg = "Alpine containers are not supported. ";
+    }
+    if (errMsg) {
+        vscode.window.showErrorMessage(errMsg);
+        return new NullCppTools();
+    }
+
     util.setExtensionContext(context);
     initializeTemporaryCommandRegistrar();
     Telemetry.activate();
@@ -68,17 +77,17 @@ async function processRuntimeDependencies(): Promise<void> {
                 // Send the failure telemetry since postInstall will not be called.
                 sendTelemetry(await PlatformInformation.GetPlatformInformation());
             }
-        // The extension have been installed and activated before.
         } else {
+            // The extension has been installed and activated before.
             await finalizeExtensionActivation();
         }
-    // No lock file, need to download and install dependencies.
     } else {
+        // No lock file, need to download and install dependencies.
         try {
             await onlineInstallation();
         } catch (error) {
             handleError(error);
-            
+
             // Send the failure telemetry since postInstall will not be called.
             sendTelemetry(await PlatformInformation.GetPlatformInformation());
         }
@@ -245,13 +254,6 @@ function sendTelemetry(info: PlatformInformation): boolean {
 
     if (success) {
         util.setProgress(util.getProgressInstallSuccess());
-        let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
-        if (versionShown.Value < releaseNotesVersion) {
-            if (versionShown.Value !== versionShown.DefaultValue) {
-                util.showReleaseNotes();
-            }
-            versionShown.Value = releaseNotesVersion;
-        }
     }
 
     installBlob.telemetryProperties['osArchitecture'] = info.architecture;
@@ -273,7 +275,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
     if (!installSuccess) {
         return Promise.reject<void>("");
     } else {
-        // Notify user's if debugging may not be supported on their OS.
+        // Notify users if debugging may not be supported on their OS.
         util.checkDistro(info);
 
         return finalizeExtensionActivation();
@@ -302,7 +304,7 @@ async function finalizeExtensionActivation(): Promise<void> {
 
     // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
     // (this may result in rewriting the package.json file)
-    
+
     let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
     let packageJson: any = util.getRawPackageJson();
     let writePackageJson: boolean = false;
@@ -342,7 +344,7 @@ async function finalizeExtensionActivation(): Promise<void> {
 function rewriteManifest(): Promise<void> {
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
     let packageJson: any = util.getRawPackageJson();
-    
+
     packageJson.activationEvents = [
         "onLanguage:cpp",
         "onLanguage:c",
@@ -355,20 +357,16 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ConfigurationProviderSelect",
         "onCommand:C_Cpp.SwitchHeaderSource",
         "onCommand:C_Cpp.Navigate",
-        "onCommand:C_Cpp.GoToDeclaration",
-        "onCommand:C_Cpp.PeekDeclaration",
         "onCommand:C_Cpp.EnableErrorSquiggles",
         "onCommand:C_Cpp.DisableErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
-        "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
-        "onCommand:C_Cpp.PauseParsing",
-        "onCommand:C_Cpp.ResumeParsing",
-        "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
         "onCommand:C_Cpp.LogDiagnostics",
         "onCommand:C_Cpp.RescanWorkspace",
+        "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
+        "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
         "onDebug",
         "workspaceContains:/.vscode/c_cpp_properties.json"
     ];

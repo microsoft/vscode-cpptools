@@ -37,7 +37,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         const configs: vscode.DebugConfiguration[] = await this.underlyingProvider.provideDebugConfigurations(folder, token);
-        const defaultConfig: vscode.DebugConfiguration = configs.find(config => { return isDebugLaunchStr(config.name); });
+        const defaultConfig: vscode.DebugConfiguration = configs.find(config => isDebugLaunchStr(config.name));
         console.assert(defaultConfig);
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
@@ -96,7 +96,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await getBuildTasks(true); 
+        let buildTasks: vscode.Task[] = await getBuildTasks(true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
@@ -128,7 +128,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
             const compilerName: string = path.basename(definition.compilerPath);
 
-            let newConfig: vscode.DebugConfiguration = Object.assign({}, defaultConfig); // Copy enumerables and properties
+            let newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
@@ -153,11 +153,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     } else {
                         debuggerName = "gdb";
                     }
-        
+
                     if (platform === "win32") {
                         debuggerName += ".exe";
                     }
-        
+
                     const compilerDirname: string = path.dirname(definition.compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
                     fs.stat(debuggerPath, (err, stats: fs.Stats) => {
@@ -228,7 +228,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 }
             }
         }
-        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213 
+        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213
         return config && config.type ? config : null;
     }
 
@@ -251,11 +251,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 }
 
                 config.environment = parsedFile.Env;
-                
+
                 delete config.envFile;
             } catch (e) {
                 throw new Error(`Failed to use envFile. Reason: ${e.message}`);
-            }            
+            }
         }
     }
 
@@ -466,10 +466,10 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
             items = [];
 
             // Make a copy of each snippet since we are adding a comma to the end of the insertText.
-            this.snippets.forEach((item) => items.push(Object.assign({}, item)));
+            this.snippets.forEach((item) => items.push({...item}));
 
             items.map((item) => {
-                item.insertText = item.insertText + ','; // Add comma 
+                item.insertText = item.insertText + ','; // Add comma
             });
         }
 

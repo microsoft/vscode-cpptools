@@ -22,20 +22,16 @@ class TemporaryCommandRegistrar {
         "C_Cpp.ConfigurationProviderSelect",
         "C_Cpp.SwitchHeaderSource",
         "C_Cpp.Navigate",
-        "C_Cpp.GoToDeclaration",
-        "C_Cpp.PeekDeclaration",
         "C_Cpp.EnableErrorSquiggles",
         "C_Cpp.DisableErrorSquiggles",
         "C_Cpp.ToggleIncludeFallback",
         "C_Cpp.ToggleDimInactiveRegions",
-        "C_Cpp.ShowReleaseNotes",
         "C_Cpp.ResetDatabase",
-        "C_Cpp.PauseParsing",
-        "C_Cpp.ResumeParsing",
-        "C_Cpp.ShowParsingCommands",
         "C_Cpp.TakeSurvey",
         "C_Cpp.LogDiagnostics",
         "C_Cpp.RescanWorkspace",
+        "C_Cpp.VcpkgClipboardInstallSuggested",
+        "C_Cpp.VcpkgOnlineHelpSuggested"
     ];
 
     constructor() {
@@ -53,7 +49,7 @@ class TemporaryCommandRegistrar {
     public registerTempCommand(command: string): void {
         this.tempCommands.push(vscode.commands.registerCommand(command, () => {
             if (this.isLanguageServerDisabled) {
-                vscode.window.showInformationMessage("The command is disabled because \"C_Cpp.intelliSenseEngine\" is set to \"Disabled\".");
+                vscode.window.showInformationMessage("This command is disabled because \"C_Cpp.intelliSenseEngine\" is set to \"Disabled\".");
                 return;
             }
             this.delayedCommandsToExecute.add(command);
@@ -72,7 +68,7 @@ class TemporaryCommandRegistrar {
         LanguageServer.activate(this.delayedCommandsToExecute.size > 0);
         this.isActivationReady = true;
     }
-    
+
     public clearTempCommands(): void {
         this.tempCommands.forEach((command) => {
             command.dispose();
