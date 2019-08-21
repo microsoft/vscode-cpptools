@@ -1,5 +1,5 @@
 {
-    "searching_include_path": "Searching include path...",  // This is used by TestDriver.cs
+    "searching_include_path": "Searching include path...",
     "include_not_found_in_browse_path": "Include file not found in browse.path.",
     "update_browse_path": "Edit \"browse.path\" setting",
     "add_to_include_path": "Add to \"includePath\": {0}",
@@ -14,10 +14,6 @@
     "file_not_found_in_path": "\"{0}\" not found in \"{1}\". 'includePath' from c_cpp_properties.json will be used for this file instead.",
     "database_reset": "The IntelliSense database was successfully reset.",
     "global_scope": "(Global Scope)",
-
-    // String IDs above this line are referenced by tests.
-    // If any are removed or reordered, test code or test baselines may need to be updated to reflect those changes.
-
     "send_response_failed": "Failed to send response to client: {0}",
     "read_response_failed": "Failed to read response from server: {0}",
     "send_request_failed": "Failed to send request to server: {0}",
@@ -147,5 +143,6 @@
     "unable_to_start_child_process": "Unable to start child process!",
     "timed_out_attempting_to_communicate_with_process": "Timed out attempting to communicate with process!",
     "process_failed_to_run": "Process has failed to run",
-    "wsl_not_detected": "WSL not detected"
+    "wsl_not_detected": "WSL not detected",
+    "compiler_in_compilerpath_not_found": "Compiler in \"compilerPath\" property not found: {0}"
 }

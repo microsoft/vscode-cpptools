@@ -559,7 +559,7 @@ inline static const char* localizable_strings[] = {
 ${nativeStringTableContent}};
 `;
 
-    console.log("Writing file: localized_string_ids.h -- If changed, copy to VS repo: src/vc/designtime/vscode/Common/");
+    console.log("Writing file: localized_string_ids.h -- If changed, copy to VS repo: src/vc/designtime/vscode/Common/generated/");
     fs.writeFileSync("localized_string_ids.h", nativeContents, 'utf8');
     done();
 });
