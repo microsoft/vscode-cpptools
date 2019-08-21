@@ -439,13 +439,13 @@ const generateLocalizedJsonSchemaFiles = () => {
             }
             // Entire file is scanned and modified, then serialized for that language.
             // Even if no translations are available, we still write new files to dist/html/...
-            if (stringTable[keyPrefix + path]) {
-                let keyPrefix = relativePath + ".";
-                let descriptionCallback = (path, value, parent) => {
+            let keyPrefix = relativePath + ".";
+            let descriptionCallback = (path, value, parent) => {
+                if (stringTable[keyPrefix + path]) {
                     parent.description = stringTable[keyPrefix + path];
-                };
-                traverseJson(jsonTree, descriptionCallback, "");
-            }
+                }
+            };
+            traverseJson(jsonTree, descriptionCallback, "");
             let newContent = JSON.stringify(jsonTree, null, '\t');
             this.queue(new vinyl({
                 path: path.join("schema", language.id, relativePath),
