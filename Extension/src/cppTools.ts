@@ -75,7 +75,7 @@ export class CppTools implements CppToolsTestApi {
                 client.updateCustomBrowseConfiguration(p);
             });
         } else if (this.failedRegistrations.find(p => p === provider)) {
-            console.warn("provider not successfully registered, 'notifyReady' ignored");
+            console.warn("provider not successfully registered; 'notifyReady' ignored");
         } else {
             console.warn("provider should be registered before signaling it's ready to provide configurations");
         }

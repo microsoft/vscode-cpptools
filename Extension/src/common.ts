@@ -19,6 +19,10 @@ import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { getBuildTasks } from './LanguageServer/extension';
 import { OtherSettings } from './LanguageServer/settings';
 
+export type Mutable<T> = {
+    -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
+};
+
 export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -59,7 +63,7 @@ export function getRawTasksJson(): Promise<any> {
             fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
             let rawTasks: any = {};
             try {
-                rawTasks = JSON.parse(fileContents); 
+                rawTasks = JSON.parse(fileContents);
             } catch (error) {
                 return reject(new Error(failedToParseTasksJson));
             }
@@ -89,10 +93,10 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     rawTasksJson.version = "2.0.0";
 
-    if (!rawTasksJson.tasks.find(task => { return task.label === selectedTask.definition.label; })) {
+    if (!rawTasksJson.tasks.find(task => task.label === selectedTask.definition.label)) {
         rawTasksJson.tasks.push(selectedTask.definition);
     }
-    
+
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     let settings: OtherSettings = new OtherSettings();
     await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, settings.editorTabSize));
@@ -248,18 +252,6 @@ export function getProgressExecutableSuccess(): number { return progressExecutab
 export function getProgressParseRootSuccess(): number { return progressParseRootSuccess; } // Parse root was successful (i.e. not blocked by processing taking too long).
 export function getProgressIntelliSenseNoSquiggles(): number { return progressIntelliSenseNoSquiggles; } // IntelliSense was successful and the user got no squiggles.
 
-let releaseNotesPanel: vscode.WebviewPanel = undefined;
-
-export async function showReleaseNotes(): Promise<void> {
-    if (releaseNotesPanel) {
-        releaseNotesPanel.reveal();
-    } else {
-        releaseNotesPanel = vscode.window.createWebviewPanel('releaseNotes', "C/C++ Extension Release Notes", vscode.ViewColumn.One);
-        releaseNotesPanel.webview.html = await readFileText(getExtensionFilePath("ReleaseNotes.html"));
-        releaseNotesPanel.onDidDispose(() => releaseNotesPanel = undefined, null, extensionContext.subscriptions);
-    }
-}
-
 export function isUri(input: any): input is vscode.Uri {
     return input && input instanceof vscode.Uri;
 }
@@ -285,7 +277,7 @@ export function isOptionalString(input: any): input is string|undefined {
 }
 
 export function isArrayOfString(input: any): input is string[] {
-    return isArray(input) && input.every(item => isString(item));
+    return isArray(input) && input.every(isString);
 }
 
 export function isOptionalArrayOfString(input: any): input is string[]|undefined {
@@ -788,24 +780,24 @@ export interface CompilerPathAndArgs {
     additionalArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerPathAndArgs {
+export function extractCompilerPathAndArgs(inputCompilerPath: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string = inputCompilerPath;
     let compilerName: string = "";
-    let additionalArgs: string[];
+    let additionalArgs: string[] = [];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
         if (compilerPath === "cl.exe") {
             // Input is only compiler name, this is only for cl.exe
             compilerName = compilerPath;
-    
+
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
                 additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
-                additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
+                additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
                 compilerPath = compilerPath.substr(1, endQuote - 1);
-                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
+                compilerName = path.basename(compilerPath);
             }
         } else {
             // Input has no quotes but can have a compiler path with spaces and args.
@@ -825,15 +817,22 @@ export function extractCompilerPathAndArgs(inputCompilerPath: string): CompilerP
                 if (compilerPath !== potentialCompilerPath) {
                     // Found a valid compilerPath and args.
                     additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
-                    additionalArgs = additionalArgs.filter((arg: string) => { return arg.trim().length !== 0; }); // Remove empty args.
+                    additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
                     compilerPath = potentialCompilerPath;
                 }
             }
             // Get compiler name if there are no args but path is valid or a valid path was found with args.
             if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {
-                compilerName = compilerPath.replace(/^.*(\\|\/|\:)/, '');
+                compilerName = path.basename(compilerPath);
             }
         }
+    }
+    // Combine args from inputCompilerPath and inputCompilerArgs and remove duplicates
+    if (inputCompilerArgs && inputCompilerArgs.length) {
+        additionalArgs = inputCompilerArgs.concat(additionalArgs.filter(
+            function (item: string): boolean {
+                return inputCompilerArgs.indexOf(item) < 0;
+            }));
     }
     return { compilerPath, compilerName, additionalArgs };
 }

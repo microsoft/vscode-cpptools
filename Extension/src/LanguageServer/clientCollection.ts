@@ -99,7 +99,7 @@ export class ClientCollection {
      * creates a new client to replace one that crashed.
      */
     public replace(client: cpptools.Client, transferFileOwnership: boolean): cpptools.Client {
-        let key: string = undefined;
+        let key: string;
         for (let pair of this.languageClients) {
             if (pair[1] === client) {
                 key = pair[0];
