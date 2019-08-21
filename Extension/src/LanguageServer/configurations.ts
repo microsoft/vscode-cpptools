@@ -1056,7 +1056,7 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                let message: string = `Cannot find: ${resolvedPath}`;
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
                 errors.push(message);
                 continue;
             }
@@ -1261,7 +1261,7 @@ export class CppProperties {
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = `Cannot find "${resolvedPath}".`;
+                            message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                             newSquiggleMetrics.PathNonExistent++;
                         } else {
                             // Check for file versus path mismatches.
