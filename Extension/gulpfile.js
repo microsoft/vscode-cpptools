@@ -45,8 +45,8 @@ const languages = [
     { id: "ja", folderName: "jpn" },
     { id: "ko", folderName: "kor" },
     { id: "ru", folderName: "rus" },
-    { id: "bg", folderName: "bul" }, // VS Code supports Bulgarian, but VS is not currently localized for it
-    { id: "hu", folderName: "hun" }, // VS Code supports Hungarian, but VS is not currently localized for it
+    //{ id: "bg", folderName: "bul" }, // VS Code supports Bulgarian, but VS is not currently localized for it
+    //{ id: "hu", folderName: "hun" }, // VS Code supports Hungarian, but VS is not currently localized for it
     { id: "pt-br", folderName: "ptb", transifexId: "pt-BR" },
     { id: "tr", folderName: "trk" },
     { id: "cs", folderName: "csy" },
@@ -320,8 +320,7 @@ gulp.task("translations-import", (done) => {
     });
     es.merge(languages.map((language) => {
         let id = language.transifexId || language.id;
-        // This path needs to be revisited once we iron out the process for receiving this xlf and running this scripts.
-        return gulp.src(path.join(options.location, id, translationProjectName, `${translationExtensionName}.xlf`), { allowEmpty: true })
+        return gulp.src(path.join(options.location, id, translationProjectName, `${translationExtensionName}.xlf`))
             .pipe(nls.prepareJsonFiles())
             .pipe(gulp.dest(path.join("./i18n", language.folderName)));
     }))
@@ -368,7 +367,7 @@ const generateLocalizedHtmlFiles = () => {
             let relativePath = removePathPrefix(file.path, file.cwd);
             let locFile = path.join("./i18n", language.folderName, relativePath + ".i18n.json");
             if (fs.existsSync(locFile)) {
-                stringTable = JSON.parse(fs.readFileSync(locFile).toString());
+                stringTable = jsonc.parse(fs.readFileSync(locFile).toString());
             }
             // Entire file is scanned and modified, then serialized for that language.
             // Even if no translations are available, we still write new files to dist/html/...
@@ -379,7 +378,7 @@ const generateLocalizedHtmlFiles = () => {
                 if (locString) {
                     let nonTextChildNodes = node.childNodes.filter(childNode => childNode.nodeName != "#text");
                     let textParts = locString.split(/\{[0-9]+\}/);
-                    let matchParts = locString.match(/\{[0-9]+\}/);
+                    let matchParts = locString.match(/\{[0-9]+\}/g);
                     let newChildNodes = [];
                     let i = 0;
                     for (; i < textParts.length - 1; i ++) {
@@ -435,7 +434,7 @@ const generateLocalizedJsonSchemaFiles = () => {
             let relativePath = removePathPrefix(file.path, file.cwd);
             let locFile = path.join("./i18n", language.folderName, relativePath + ".i18n.json");
             if (fs.existsSync(locFile)) {
-                stringTable = JSON.parse(fs.readFileSync(locFile).toString());
+                stringTable = jsonc.parse(fs.readFileSync(locFile).toString());
             }
             // Entire file is scanned and modified, then serialized for that language.
             // Even if no translations are available, we still write new files to dist/html/...
