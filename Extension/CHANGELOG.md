@@ -4,7 +4,7 @@
 ### Bug Fixes
 * Fix `Switch Header/Source` for `.H` and `.C` targets. [#3048](https://github.com/microsoft/vscode-cpptools/issues/3048)
 * Fix links in `Log Diagnostics` output. [#4122](https://github.com/microsoft/vscode-cpptools/issues/4122)
-* Fix `NullReferenceException` when debugging when `"description"` is missing. [#4125}(https://github.com/microsoft/vscode-cpptools/issues/4125)
+* Fix `NullReferenceException` when debugging if `"description"` is missing. [#4125}(https://github.com/microsoft/vscode-cpptools/issues/4125)
 * Fix `files.exclude` processing when using `\\`. [#4127](https://github.com/microsoft/vscode-cpptools/issues/4127)
 
 ## Version 0.25.0: August 21, 2019
