@@ -1775,7 +1775,7 @@ class DefaultClient implements Client {
     private readonly referencesProgressDelayInterval: number = 2000;
 
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
-        const helpMessage: string = this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek ? "" : " Click the search icon in the status bar to preview results.";
+        const helpMessage: string = this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek ? "" : " To preview results, click the search icon in the status bar.";
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
@@ -1834,7 +1834,7 @@ class DefaultClient implements Client {
                 const currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
                 const currentParseProgress: number = (numConfirmingReferences * confirmingWeight + numFinishedConfirming) / numTotalToParse;
-                const averageLexingPercent: number = 22;
+                const averageLexingPercent: number = 25;
                 const currentIncrement: number = currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent);
                 if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
