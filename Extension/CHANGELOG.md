@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.25.1: August 26, 2019
+### Bug Fixes
+* Fix `Switch Header/Source` for `.H` and `.C` targets. [#3048](https://github.com/microsoft/vscode-cpptools/issues/3048)
+* Fix links in `Log Diagnostics` output. [#4122](https://github.com/microsoft/vscode-cpptools/issues/4122)
+* Fix `NullReferenceException` when debugging when `"description"` is missing. [#4125}(https://github.com/microsoft/vscode-cpptools/issues/4125)
+* Fix `files.exclude` processing when using `\\`. [#4127](https://github.com/microsoft/vscode-cpptools/issues/4127)
+
 ## Version 0.25.0: August 21, 2019
 ### New Features
 * Add `Find All References`. [#15](https://github.com/microsoft/vscode-cpptools/issues/15)
@@ -15,7 +22,7 @@
   * `-imsvc`. [#4032](https://github.com/microsoft/vscode-cpptools/issues/4032)
 * Switch to using VS Code's `Go to Declaration`. [#2959](https://github.com/microsoft/vscode-cpptools/issues/2959)
 * Added `compilerArgs` property setting. [PR #3950](https://github.com/microsoft/vscode-cpptools/pull/3950)
-* Added support for V3 API. [#3987](https://github.com/microsoft/vscode-cpptools/pull/3987)
+* Added support for V3 API. [PR #3987](https://github.com/microsoft/vscode-cpptools/pull/3987)
 * Add `not supported` messages for ARM and Alpine containers. [PR #4027](https://github.com/microsoft/vscode-cpptools/pull/4027)
 * Add validation for paths from `env` variables. [#3912](https://github.com/microsoft/vscode-cpptools/issues/3912)
 
