@@ -3172,7 +3172,7 @@
   "un opérateur de comparaison de membres par défaut doit être 'const'",
   "plusieurs opérateurs vaisseau spatial par défaut définis dans cette classe",
   "le type de promesse %t d'une coroutine ne peut pas avoir à la fois 'return_void' et 'return_value' définis",
-  "'return_value' déclaré %p",
+  "'return_value' déclaré dans %p",
   "'return_void' déclaré %p",
   "instruction co_return manquante alors que %t n'a aucun 'return_void' à la fin de %n",
   "variante nothrow de la fonction globale 'operator new' introuvable pour l'allocation d'état de la coroutine",

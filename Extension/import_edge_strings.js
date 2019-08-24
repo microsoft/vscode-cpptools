@@ -42,7 +42,8 @@ var locFolderNames = fs.readdirSync(localizeRepoPath).filter(f => fs.lstatSync(p
 locFolderNames.forEach((locFolderName) => {
     let lclPath = path.join(localizeRepoPath, locFolderName, "vc/vc/cpfeui.dll.lcl");
     let languageId = languages.find(l => l.folderName == locFolderName).id;
-    let outputPath = path.join(cpptoolsRepoPath, "Extension/bin", `edge_strings.${languageId}.json`);
+    let outputLanguageFolder = path.join(cpptoolsRepoPath, "Extension/bin/messages", languageId);
+    let outputPath = path.join(outputLanguageFolder, "messages.json");
     let sourceContent = fs.readFileSync(lclPath, 'utf-8');
 
     // Scan once, just to determine how many there are the size of the array we need
@@ -53,7 +54,6 @@ locFolderNames.forEach((locFolderName) => {
                 item.Item.forEach((subItem) => {
                     let itemId = parseInt(subItem.$.ItemId, 10);
                     if (subItem.Str[0].Tgt) {
-                        //console.log(subItem.Str[0].Tgt[0].Val[0]);
                         if (highestValue < itemId) {
                             highestValue = itemId;
                         }
@@ -80,5 +80,6 @@ locFolderNames.forEach((locFolderName) => {
         });
     });
 
+    fs.mkdirSync(outputLanguageFolder, { recursive: true });
     fs.writeFileSync(outputPath, JSON.stringify(resultArray, null, 2), 'utf8');
 });

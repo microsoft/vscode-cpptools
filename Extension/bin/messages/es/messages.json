@@ -3170,7 +3170,7 @@
   "tipo %t incorrecto para el parámetro del operador de comparación con valores predeterminados (debe ser una \"referencia a const X\", donde X es el tipo de clase envolvente)",
   "el tipo de valor devuelto del operador de comparación con valores predeterminados debe ser \"bool\"",
   "un operador de comparación de miembros con valores predeterminados debe ser \"const\"",
-  "se ha definido más de un operador spaceship con valores predeterminados en esta clase",
+  "Se ha definido más de un operador de nave espacial con valores predeterminados en esta clase",
   "un tipo de promesa %t de corrutina no puede tener \"return_void\" y \"return_value\" establecidos a la vez",
   "\"return_value\" ha declarado %p",
   "\"return_void\" ha declarado %p",

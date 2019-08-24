@@ -641,7 +641,7 @@ class DefaultClient implements Client {
                 vcpkg_root: util.getVcpkgRoot(),
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
                 experimentalFeatures: settings.experimentalFeatures,
-                localeId: util.getLocaleId()
+                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
             errorHandler: {

@@ -3161,7 +3161,7 @@
   "new veya delete işleci 'consteval' olarak bildirilemez",
   "consteval işlevinin adresi burada kullanılamaz",
   "işlev türünün (%t) hizalaması standart değil",
-  "belirtilmemiş sınıra sahip dizinin hizalaması C içinde standart değil",
+  "sınırı belirtilmemiş olan dizinin hizalaması C için standart değil",
   "bir değişken hem 'common' hem de 'internal_linkage' özniteliklerine sahip olamaz",
   "'internal_linkage' özniteliği önceki bir bildirimde görünmedi",
   "%n için uygun bir şablon bağımsız değişkeni indirme adayı bulunamadı",
