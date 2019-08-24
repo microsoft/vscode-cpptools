@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.25.0-master",
+  "version": "0.25.1-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -1454,10 +1454,10 @@
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.1",
+    "@types/node": "^12.7.2",
     "@types/plist": "^3.0.2",
     "@types/tmp": "^0.1.0",
-    "@types/webpack": "^4.32.1",
+    "@types/webpack": "^4.39.0",
     "@types/yauzl": "^2.9.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
@@ -1465,7 +1465,7 @@
     "gulp": "^4.0.2",
     "gulp-env": "^0.4.0",
     "gulp-filter": "^6.0.0",
-    "gulp-mocha": "^6.0.0",
+    "gulp-mocha": "^7.0.1",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-tslint": "^8.1.4",
     "gulp-typescript": "^5.0.1",
@@ -1473,25 +1473,25 @@
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
     "ts-loader": "^6.0.4",
-    "tslint": "^5.18.0",
+    "tslint": "^5.19.0",
     "tslint-microsoft-contrib": "^6.2.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
     "typescript": "^3.5.3",
     "vrsource-tslint-rules": "^6.0.0",
     "vscode": "^1.1.36",
     "vscode-nls-dev": "^3.2.6",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.7",
     "xml2js": "^0.4.19"
   },
   "dependencies": {
     "escape-string-regexp": "^2.0.0",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.2",
-    "jsonc-parser": "^2.1.0",
+    "jsonc-parser": "^2.1.1",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
-    "plist": "^2.0.1",
+    "plist": "^3.0.1",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^3.0.1",
     "vscode-debugadapter": "^1.35.0",
@@ -1504,7 +1504,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098277",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102112",
       "platforms": [
         "linux"
       ],
@@ -1518,7 +1518,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098276",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102307",
       "platforms": [
         "linux"
       ],
@@ -1534,7 +1534,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098195",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102306",
       "platforms": [
         "darwin"
       ],
@@ -1545,7 +1545,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098194",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102113",
       "platforms": [
         "win32"
       ],
