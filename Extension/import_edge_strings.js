@@ -13,7 +13,7 @@ if (!localizeRepoPath || !cpptoolsRepoPath) {
 }
 
 console.log("Importing EDGE strings from Localize repo: " + localizeRepoPath);
-console.log("Writing to cpptols repo: " + cpptoolsRepoPath);
+console.log("Writing to cpptools repo: " + cpptoolsRepoPath);
 
 if (!fs.existsSync(path.join(localizeRepoPath, ".git"))) {
     console.error("ERROR: Localize repo submodule is not initialized in Localize repo");
@@ -70,7 +70,7 @@ locFolderNames.forEach((locFolderName) => {
                 item.Item.forEach((subItem) => {
                     let itemId = parseInt(subItem.$.ItemId, 10);
                     if (subItem.Str[0].Tgt) {
-                        resultArray[itemId] = subItem.Str[0].Tgt[0].Val[0];
+                        resultArray[itemId] = subItem.Str[0].Tgt[0].Val[0].replace(/\]5D;/g, "]");
                         if (highestValue < itemId) {
                             highestValue = itemId;
                         }
