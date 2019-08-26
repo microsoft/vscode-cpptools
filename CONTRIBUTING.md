@@ -32,4 +32,4 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 ```typescript
 const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
 ```
-* The first parameter to localize should be a unique key for that string.  The second parameter is the string to localize.  Both of these parameters must be string literals.  Tokens such as {0} and {1} are supported in the localizable string, with replacement values passed as additional parameters to localize().
+* The first parameter to localize should be a unique key for that string, not used by any other call to localize() in the file unless representing the same string.  The second parameter is the string to localize.  Both of these parameters must be string literals.  Tokens such as {0} and {1} are supported in the localizable string, with replacement values passed as additional parameters to localize().
