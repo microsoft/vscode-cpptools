@@ -1,11 +1,16 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.25.1: August 26, 2019
+## Version 0.25.1: August 27, 2019
 ### Bug Fixes
 * Fix `Switch Header/Source` for `.H` and `.C` targets. [#3048](https://github.com/microsoft/vscode-cpptools/issues/3048)
+* Fix duplicate content appearing after formatting of a new file (2nd fix). [#4091](https://github.com/microsoft/vscode-cpptools/issues/4091)
 * Fix links in `Log Diagnostics` output. [#4122](https://github.com/microsoft/vscode-cpptools/issues/4122)
 * Fix `NullReferenceException` when debugging if `"description"` is missing. [#4125}(https://github.com/microsoft/vscode-cpptools/issues/4125)
 * Fix `files.exclude` processing when using `\\`. [#4127](https://github.com/microsoft/vscode-cpptools/issues/4127)
+* Fix bug when attaching to an elevated process using GDB. [#4133](https://github.com/microsoft/vscode-cpptools/issues/4133)
+* Fix IntelliSense-based `Go to Definition` failing for a nested class in a template class. [#4135](https://github.com/microsoft/vscode-cpptools/issues/4135)
+* Fix incorrect config squiggles with `compilerPath` when variables are used. [#4141](https://github.com/microsoft/vscode-cpptools/issues/4141)
+  * @mistersandman [PR #4142](https://github.com/microsoft/vscode-cpptools/pull/4142)
 
 ## Version 0.25.0: August 21, 2019
 ### New Features
