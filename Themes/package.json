@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "publisher": "ms-vscode",
   "preview": false,
-  "icon": "LanguageCCPP_color_128x.png",
+  "icon": "./assets/LanguageCCPP_color_128x.png",
   "readme": "README.md",
   "author": {
     "name": "Microsoft Corporation"
@@ -40,13 +40,13 @@
         "id": "Visual Studio Dark - C++",
         "label": "Dark (Visual Studio - C/C++)",
         "uiTheme": "vs-dark",
-        "path": "./cpptools_dark_vs.json"
+        "path": "./themes/cpptools_dark_vs.json"
       },
       {
         "id": "Visual Studio Light - C++",
         "label": "Light (Visual Studio - C/C++)",
         "uiTheme": "vs",
-        "path": "./cpptools_light_vs.json"
+        "path": "./themes/cpptools_light_vs.json"
       }
     ]
   }
