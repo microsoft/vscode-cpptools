@@ -8,11 +8,11 @@ We created C/C++ Extension UI Themes to closely match Visual Studio themes, and 
 
 Light Theme
 
-![Light Theme example](./assets/light.png)
+![Light Theme example](Themes/assets/light.png)
 
 Dark Theme
 
-![Dark Theme example](./assets/dark.png)
+![Dark Theme example](Themes/assets/dark.png)
 
 ## Contributing
 
