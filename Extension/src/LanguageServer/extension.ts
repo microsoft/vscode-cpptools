@@ -224,9 +224,11 @@ export function activate(activationEventOccurred: boolean): void {
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-            if (document.languageId === "cpp" || document.languageId === "c") {
-                onActivationEvent();
-                return;
+            if (document.uri.scheme === "file") {
+                if (document.languageId === "cpp" || document.languageId === "c") {
+                    onActivationEvent();
+                    return;
+                }
             }
         }
     }
@@ -538,7 +540,7 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     }
 
     let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-    if (!activeEditor || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
+    if (!activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();
@@ -551,6 +553,7 @@ function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
     /* need to notify the affected client(s) */
     if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
+        event.textEditor.document.uri.scheme !== "file" ||
         (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c")) {
         return;
     }

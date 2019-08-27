@@ -162,7 +162,7 @@ export class UI {
 
     public activeDocumentChanged(): void {
         let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-        let isCpp: boolean = (activeEditor && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
+        let isCpp: boolean = (activeEditor && activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
         // It's sometimes desirable to see the config and icons when making settings changes.
         let isSettingsJson: boolean = (activeEditor && (activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
