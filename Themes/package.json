@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "publisher": "ms-vscode",
   "preview": false,
-  "icon": "./assets/LanguageCCPP_color_128x.png",
+  "icon": "assets/LanguageCCPP_color_128x.png",
   "readme": "README.md",
   "author": {
     "name": "Microsoft Corporation"
