@@ -8,7 +8,7 @@
 * Fix links in `Log Diagnostics` output. [#4122](https://github.com/microsoft/vscode-cpptools/issues/4122)
 * Fix `NullReferenceException` when debugging if `"description"` is missing. [#4125](https://github.com/microsoft/vscode-cpptools/issues/4125)
 * Fix `files.exclude` processing when using `\\`. [#4127](https://github.com/microsoft/vscode-cpptools/issues/4127)
-* Fix bug when attaching to an elevated process using GDB. [#4133](https://github.com/microsoft/vscode-cpptools/issues/4133)
+* Fix bug when attaching to an elevated process on Linux. [#4133](https://github.com/microsoft/vscode-cpptools/issues/4133)
 * Fix IntelliSense-based `Go to Definition` failing for a nested class in a template class. [#4135](https://github.com/microsoft/vscode-cpptools/issues/4135)
 * Fix incorrect configuration squiggles with `compilerPath` when variables are used. [#4141](https://github.com/microsoft/vscode-cpptools/issues/4141)
   * @mistersandman [PR #4142](https://github.com/microsoft/vscode-cpptools/pull/4142)
