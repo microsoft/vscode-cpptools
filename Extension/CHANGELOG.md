@@ -12,6 +12,7 @@
 * Fix IntelliSense-based `Go to Definition` failing for a nested class in a template class. [#4135](https://github.com/microsoft/vscode-cpptools/issues/4135)
 * Fix incorrect configuration squiggles with `compilerPath` when variables are used. [#4141](https://github.com/microsoft/vscode-cpptools/issues/4141)
   * @mistersandman [PR #4142](https://github.com/microsoft/vscode-cpptools/pull/4142)
+* Fix `executeReferenceProvider` when code is selected. [#4147](https://github.com/microsoft/vscode-cpptools/issues/4147)
 * Fix code action for resolving missing includes via the `vcpkg` dependency manager. [PR #4156](https://github.com/microsoft/vscode-cpptools/pull/4156)
 
 ## Version 0.25.0: August 21, 2019
