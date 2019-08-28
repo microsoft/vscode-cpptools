@@ -296,6 +296,7 @@ export interface Client {
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string };
     onDidOpenTextDocument(document: vscode.TextDocument): void;
+    onDidCloseTextDocument(document: vscode.TextDocument): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void;
@@ -360,6 +361,7 @@ class DefaultClient implements Client {
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
     private colorizationState = new Map<string, ColorizationState>();
+    private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
     private configurationProvider: string;
@@ -659,14 +661,20 @@ class DefaultClient implements Client {
         this.editVersion++;
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
             if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
-                try {
-                    let colorizationState: ColorizationState = this.getColorizationState(textDocumentChangeEvent.document.uri.toString());
-
-                    // Adjust colorization ranges after this edit.  (i.e. if a line was added, push decorations after it down one line)
-                    colorizationState.addEdits(textDocumentChangeEvent.contentChanges, this.editVersion);
-                } catch (e) {
-                    // Ensure an exception does not prevent pass-through to native handler, or editVersion could become inconsistent
-                    console.log(e.toString());
+                let oldVersion: number = this.openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
+                let newVersion: number = textDocumentChangeEvent.document.version;
+                if (newVersion > oldVersion) {
+                    this.openFileVersions.set(textDocumentChangeEvent.document.uri.toString(), newVersion);
+                    try {
+                        let colorizationState: ColorizationState = this.colorizationState.get(textDocumentChangeEvent.document.uri.toString());
+                        if (colorizationState) {
+                            // Adjust colorization ranges after this edit.  (i.e. if a line was added, push decorations after it down one line)
+                            colorizationState.addEdits(textDocumentChangeEvent.contentChanges, this.editVersion);
+                        }
+                    } catch (e) {
+                        // Ensure an exception does not prevent pass-through to native handler, or editVersion could become inconsistent
+                        console.log(e.toString());
+                    }
                 }
             }
         }
@@ -674,8 +682,15 @@ class DefaultClient implements Client {
 
     public onDidOpenTextDocument(document: vscode.TextDocument): void {
         if (document.uri.scheme === "file") {
+            this.openFileVersions.set(document.uri.toString(), document.version);
+            this.colorizationState.set(document.uri.toString(), new ColorizationState(document.uri, this.colorizationSettings));
             this.sendVisibleRanges(document.uri);
         }
+    }
+
+    public onDidCloseTextDocument(document: vscode.TextDocument): void {
+        this.colorizationState.delete(document.uri.toString());
+        this.openFileVersions.delete(document.uri.toString());
     }
 
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
@@ -685,10 +700,10 @@ class DefaultClient implements Client {
                 let colorizationState: ColorizationState = this.colorizationState.get(editor.document.uri.toString());
                 if (colorizationState) {
                     colorizationState.refresh(editor);
-                }
-                if (!processedUris.find(uri => uri === editor.document.uri)) {
-                    processedUris.push(editor.document.uri);
-                    this.sendVisibleRanges(editor.document.uri);
+                    if (!processedUris.find(uri => uri === editor.document.uri)) {
+                        processedUris.push(editor.document.uri);
+                        this.sendVisibleRanges(editor.document.uri);
+                    }
                 }
             }
         });
@@ -1362,33 +1377,26 @@ class DefaultClient implements Client {
         this.model.tagParserStatus.Value = notificationBody.status;
     }
 
-    private getColorizationState(uri: string): ColorizationState {
-        let colorizationState: ColorizationState = this.colorizationState.get(uri);
-        if (!colorizationState) {
-            colorizationState = new ColorizationState(this.RootUri, this.colorizationSettings);
-            this.colorizationState.set(uri, colorizationState);
-        }
-        return colorizationState;
-    }
-
     private updateSemanticColorizationRegions(params: SemanticColorizationRegionsParams): void {
-        // Convert the params to vscode.Range's before passing to colorizationState.updateSemantic()
-        let semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
-        for (let i: number = 0; i < TokenKind.Count; i++) {
-            semanticRanges[i] = [];
+        let colorizationState: ColorizationState = this.colorizationState.get(params.uri);
+        if (colorizationState) {
+            // Convert the params to vscode.Range's before passing to colorizationState.updateSemantic()
+            let semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
+            for (let i: number = 0; i < TokenKind.Count; i++) {
+                semanticRanges[i] = [];
+            }
+            params.regions.forEach(element => {
+                let newRange : vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
+                semanticRanges[element.kind].push(newRange);
+            });
+            let inactiveRanges: vscode.Range[] = [];
+            params.inactiveRegions.forEach(element => {
+                let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+                inactiveRanges.push(newRange);
+            });
+            colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
+            this.languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri });
         }
-        params.regions.forEach(element => {
-            let newRange : vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
-            semanticRanges[element.kind].push(newRange);
-        });
-        let inactiveRanges: vscode.Range[] = [];
-        params.inactiveRegions.forEach(element => {
-            let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
-            inactiveRanges.push(newRange);
-        });
-        let colorizationState: ColorizationState = this.getColorizationState(params.uri);
-        colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
-        this.languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri });
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
@@ -1775,7 +1783,7 @@ class DefaultClient implements Client {
     private readonly referencesProgressDelayInterval: number = 2000;
 
     private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
-        const helpMessage: string = this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek ? "" : " Click the search icon to preview results.";
+        const helpMessage: string = this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek ? "" : " To preview results, click the search icon in the status bar.";
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
                 progress.report({ message: 'Started.', increment: 0 });
@@ -1834,7 +1842,7 @@ class DefaultClient implements Client {
                 const currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
                 const currentParseProgress: number = (numConfirmingReferences * confirmingWeight + numFinishedConfirming) / numTotalToParse;
-                const averageLexingPercent: number = 22;
+                const averageLexingPercent: number = 25;
                 const currentIncrement: number = currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent);
                 if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
                     progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
@@ -2007,6 +2015,7 @@ class NullClient implements Client {
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void {}
+    onDidCloseTextDocument(document: vscode.TextDocument): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {}
     onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {}

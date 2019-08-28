@@ -32,9 +32,11 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                     me.addFileAssociations(mappingString, false);
                 }
 
-                me.onDidOpenTextDocument(document);
                 me.provideCustomConfiguration(document.uri, null);
-                me.notifyWhenReady(() => sendMessage(document));
+                me.notifyWhenReady(() => {
+                    me.onDidOpenTextDocument(document);
+                    sendMessage(document);
+                });
             }
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
@@ -54,6 +56,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didClose: (document, sendMessage) => {
             if (clients.ActiveClient === me) {
                 console.assert(me.TrackedDocuments.has(document));
+                me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
                 me.notifyWhenReady(() => sendMessage(document));
             }
