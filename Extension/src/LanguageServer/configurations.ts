@@ -403,7 +403,8 @@ export class CppProperties {
             configuration.intelliSenseMode === "${default}") {
             return true;
         }
-        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(configuration.compilerPath);
+        let resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         return (compilerPathAndArgs.compilerName === "cl.exe") === (configuration.intelliSenseMode === "msvc-x64" || configuration.intelliSenseMode === "msvc-x86");
     }
 

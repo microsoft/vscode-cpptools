@@ -1,5 +1,20 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.25.1: August 28, 2019
+### Bug Fixes
+* Fix `Switch Header/Source` for `.H` and `.C` targets. [#3048](https://github.com/microsoft/vscode-cpptools/issues/3048)
+* Fix `C_Cpp.updateChannel` not respecting `extensions.autoUpdate`. [#3632](https://github.com/microsoft/vscode-cpptools/issues/3632)
+* Fix duplicate content appearing after formatting of a new file (2nd fix). [#4091](https://github.com/microsoft/vscode-cpptools/issues/4091)
+* Fix links in `Log Diagnostics` output. [#4122](https://github.com/microsoft/vscode-cpptools/issues/4122)
+* Fix `NullReferenceException` when debugging if `"description"` is missing. [#4125](https://github.com/microsoft/vscode-cpptools/issues/4125)
+* Fix `files.exclude` processing when using `\\`. [#4127](https://github.com/microsoft/vscode-cpptools/issues/4127)
+* Fix bug when attaching to an elevated process on Linux. [#4133](https://github.com/microsoft/vscode-cpptools/issues/4133)
+* Fix IntelliSense-based `Go to Definition` failing for a nested class in a template class. [#4135](https://github.com/microsoft/vscode-cpptools/issues/4135)
+* Fix incorrect configuration squiggles with `compilerPath` when variables are used. [#4141](https://github.com/microsoft/vscode-cpptools/issues/4141)
+  * @mistersandman [PR #4142](https://github.com/microsoft/vscode-cpptools/pull/4142)
+* Fix `executeReferenceProvider` when code is selected. [#4147](https://github.com/microsoft/vscode-cpptools/issues/4147)
+* Fix code action for resolving missing includes via the `vcpkg` dependency manager. [PR #4156](https://github.com/microsoft/vscode-cpptools/pull/4156)
+
 ## Version 0.25.0: August 21, 2019
 ### New Features
 * Add `Find All References`. [#15](https://github.com/microsoft/vscode-cpptools/issues/15)
@@ -15,7 +30,7 @@
   * `-imsvc`. [#4032](https://github.com/microsoft/vscode-cpptools/issues/4032)
 * Switch to using VS Code's `Go to Declaration`. [#2959](https://github.com/microsoft/vscode-cpptools/issues/2959)
 * Added `compilerArgs` property setting. [PR #3950](https://github.com/microsoft/vscode-cpptools/pull/3950)
-* Added support for V3 API. [#3987](https://github.com/microsoft/vscode-cpptools/pull/3987)
+* Added support for V3 API. [PR #3987](https://github.com/microsoft/vscode-cpptools/pull/3987)
 * Add `not supported` messages for ARM and Alpine containers. [PR #4027](https://github.com/microsoft/vscode-cpptools/pull/4027)
 * Add validation for paths from `env` variables. [#3912](https://github.com/microsoft/vscode-cpptools/issues/3912)
 
