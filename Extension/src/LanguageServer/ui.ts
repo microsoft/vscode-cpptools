@@ -5,7 +5,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Client, ReferencesCommandMode, referencesCommandModeToString } from './client';
+import { Client } from './client';
+import { ReferencesCommandMode, referencesCommandModeToString } from './references'
 import { getCustomConfigProviders, CustomConfigurationProviderCollection } from './customProviders';
 
 let ui: UI;
