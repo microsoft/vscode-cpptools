@@ -10,6 +10,10 @@ import { CustomConfigurationProvider1, getCustomConfigProviders, CustomConfigura
 import { getOutputChannel } from './logger';
 import * as LanguageServer from './LanguageServer/extension';
 import * as test from './testHook';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class CppTools implements CppToolsTestApi {
     private version: Version;
@@ -29,7 +33,7 @@ export class CppTools implements CppToolsTestApi {
     private addNotifyReadyTimer(provider: CustomConfigurationProvider1): void {
         if (this.version >= Version.v2) {
             const timeout: number = 30;
-            let timer: NodeJS.Timer = setTimeout(() => {
+            let timer: NodeJS.Timer = global.setTimeout(() => {
                 console.warn(`registered provider ${provider.extensionId} did not call 'notifyReady' within ${timeout} seconds`);
             }, timeout * 1000);
             this.timers.set(provider.extensionId, timer);
@@ -54,7 +58,7 @@ export class CppTools implements CppToolsTestApi {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.add(provider, this.version)) {
             let added: CustomConfigurationProvider1 = providers.get(provider);
-            getOutputChannel().appendLine(`Custom configuration provider '${added.name}' registered`);
+            getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
             this.providers.push(added);
             LanguageServer.getClients().forEach(client => client.onRegisterCustomConfigurationProvider(added));
             this.addNotifyReadyTimer(added);

@@ -338,16 +338,12 @@ class SettingsApp {
             }
 
             if (compilers.length === 0) {
-                const noCompilers: string = "(No compiler paths detected)";
-                let option: HTMLOptionElement = document.createElement("option");
-                option.text = noCompilers;
-                option.value = noCompilers;
-                list.append(option);
-
-                // Set the selection to this one item so that no selection change event will be fired
-                list.value = noCompilers;
+                this.showElement("noCompilerPathsDetected", true);
                 return;
             }
+
+            this.showElement("compilerPath", true);
+            this.showElement("knownCompilers", true);
 
             for (let path of compilers) {
                 let option: HTMLOptionElement = document.createElement("option");

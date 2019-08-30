@@ -18,6 +18,10 @@ import { PlatformInformation } from './platform';
 import * as Telemetry from './telemetry';
 import { IncomingMessage, ClientRequest } from 'http';
 import { Logger } from './logger';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface IPackage {
     // Description of the package
@@ -40,13 +44,17 @@ export interface IPackage {
 }
 
 export class PackageManagerError extends Error {
+    public localizedMessageText: string;
+
     constructor(
         public message: string,
+        public localizedMessage: string,
         public methodName: string,
         public pkg: IPackage = null,
         public innerError: any = null,
         public errorCode: string = '') {
         super(message);
+        this.localizedMessageText = localizedMessage;
     }
 }
 
@@ -54,11 +62,12 @@ export class PackageManagerWebResponseError extends PackageManagerError {
     constructor(
         public socket: net.Socket,
         public message: string,
+        public localizedMessage: string,
         public methodName: string,
         public pkg: IPackage = null,
         public innerError: any = null,
         public errorCode: string = '') {
-        super(message, methodName, pkg, innerError, errorCode);
+        super(message, localizedMessage, methodName, pkg, innerError, errorCode);
     }
 }
 
@@ -128,7 +137,7 @@ export class PackageManager {
 
                     resolve(this.allPackages);
                 } else {
-                    reject(new PackageManagerError('Package manifest does not exist', 'GetPackageList'));
+                    reject(new PackageManagerError("Package manifest does not exist", localize("package.manager.missing", 'Package manifest does not exist'), 'GetPackageList'));
                 }
             } else {
                 resolve(this.allPackages);
@@ -147,9 +156,9 @@ export class PackageManager {
     }
 
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
-        this.AppendChannel(`Downloading package '${pkg.description}' `);
+        this.AppendChannel(localize("downloading.package", "Downloading package '{0}' ", pkg.description));
 
-        progress.report({message: `Downloading ${progressCount}: ${pkg.description}`});
+        progress.report({message: localize("downloading.progress.description", "Downloading {0}: {1}", progressCount, pkg.description)});
 
         const tmpResult: tmp.FileResult = await this.CreateTempFile(pkg);
         await this.DownloadPackageWithRetries(pkg, tmpResult, progress);
@@ -159,7 +168,7 @@ export class PackageManager {
         return new Promise<tmp.FileResult>((resolve, reject) => {
             tmp.file({ prefix: "package-" }, (err, path, fd, cleanupCallback) => {
                 if (err) {
-                    return reject(new PackageManagerError('Error from temp.file', 'DownloadPackage', pkg, err));
+                    return reject(new PackageManagerError("Error from temp.file", localize("error.from", 'Error from {0}', "temp.file"), 'DownloadPackage', pkg, err));
                 }
 
                 return resolve(<tmp.FileResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
@@ -184,16 +193,16 @@ export class PackageManager {
                 retryCount += 1;
                 lastError = error;
                 if (retryCount > MAX_RETRIES) {
-                    this.AppendChannel(` Failed to download ` + pkg.url);
+                    this.AppendChannel(" " + localize("failed.download.url", "Failed to download {0}", pkg.url));
                     throw error;
                 } else {
-                    this.AppendChannel(` Failed. Retrying...`);
+                    this.AppendChannel(" " + localize("failed.retrying", "Failed. Retrying..."));
                     continue;
                 }
             }
         } while (!success && retryCount < MAX_RETRIES);
 
-        this.AppendLineChannel(" Done!");
+        this.AppendLineChannel(" " + localize("done", "Done!"));
         if (retryCount !== 0) {
             // Log telemetry to see if retrying helps.
             let telemetryProperties: { [key: string]: string } = {};
@@ -232,11 +241,11 @@ export class PackageManager {
                 secondsDelay = 0;
             }
             if (secondsDelay > 4) {
-                this.AppendChannel(`Waiting ${secondsDelay} seconds...`);
+                this.AppendChannel(localize("waiting.seconds", "Waiting {0} seconds...", secondsDelay));
             }
             setTimeout(() => {
                 if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
-                    return reject(new PackageManagerError('Temporary Package file unavailable', 'DownloadFile', pkg));
+                    return reject(new PackageManagerError('Temporary Package file unavailable', localize("temp.package.unavailable", 'Temporary Package file unavailable'), 'DownloadFile', pkg));
                 }
 
                 let handleHttpResponse: (response: IncomingMessage) => void = (response: IncomingMessage) => {
@@ -251,8 +260,8 @@ export class PackageManager {
                         return resolve(this.DownloadFile(redirectUrl, pkg, 0, progress));
                     } else if (response.statusCode !== 200) {
                         // Download failed - print error message
-                        let errorMessage: string = `failed (error code '${response.statusCode}')`;
-                        return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
+                        let errorMessage: string = localize("failed.web.error", "failed (error code '{0}')", response.statusCode);
+                        return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
                     } else {
                         // Downloading - hook up events
                         let contentLength: any = response.headers['content-length'];
@@ -282,7 +291,7 @@ export class PackageManager {
                         });
 
                         response.on('error', (error) => {
-                            return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response error', 'DownloadFile', pkg, error.stack, error.name));
+                            return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error.stack, error.name));
                         });
 
                         // Begin piping data from the response to the package file
@@ -293,7 +302,10 @@ export class PackageManager {
                 let request: ClientRequest = https.request(options, handleHttpResponse);
 
                 request.on('error', (error) => {
-                    return reject(new PackageManagerError('HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""), 'DownloadFile', pkg, error.stack, error.message));
+                    return reject(new PackageManagerError(
+                        'HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""),
+                        localize("web.request.error", 'HTTP/HTTPS Request error') + (urlString.includes("fwlink") ? ": fwlink" : ""),
+                        'DownloadFile', pkg, error.stack, error.message));
                 });
 
                 // Execute the request
@@ -303,18 +315,18 @@ export class PackageManager {
     }
 
     private InstallPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
-        this.AppendLineChannel(`Installing package '${pkg.description}'`);
+        this.AppendLineChannel(localize("installing.package", "Installing package '{0}'", pkg.description));
 
         progress.report({message: `Installing ${progressCount}: ${pkg.description}`});
 
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
-                return reject(new PackageManagerError('Downloaded file unavailable', 'InstallPackage', pkg));
+                return reject(new PackageManagerError('Downloaded file unavailable', localize("downloaded.unavailable", 'Downloaded file unavailable'), 'InstallPackage', pkg));
             }
 
             yauzl.fromFd(pkg.tmpFile.fd, { lazyEntries: true }, (err, zipfile) => {
                 if (err) {
-                    return reject(new PackageManagerError('Zip file error', 'InstallPackage', pkg, err));
+                    return reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err));
                 }
 
                 // setup zip file events
@@ -323,7 +335,7 @@ export class PackageManager {
                 });
 
                 zipfile.on('error', err => {
-                    return reject(new PackageManagerError('Zip File Error', 'InstallPackage', pkg, err, err.code));
+                    return reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err, err.code));
                 });
 
                 zipfile.readEntry();
@@ -335,7 +347,7 @@ export class PackageManager {
                         // Directory - create it
                         mkdirp(absoluteEntryPath, { mode: 0o775 }, (err) => {
                             if (err) {
-                                return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
+                                return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
                             }
 
                             zipfile.readEntry();
@@ -346,16 +358,16 @@ export class PackageManager {
                                 // File - extract it
                                 zipfile.openReadStream(entry, (err, readStream: fs.ReadStream) => {
                                     if (err) {
-                                        return reject(new PackageManagerError('Error reading zip stream', 'InstallPackage', pkg, err));
+                                        return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
                                     }
 
                                     readStream.on('error', (err) => {
-                                        return reject(new PackageManagerError('Error in readStream', 'InstallPackage', pkg, err));
+                                        return reject(new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err));
                                     });
 
                                     mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
                                         if (err) {
-                                            return reject(new PackageManagerError('Error creating directory', 'InstallPackage', pkg, err, err.code));
+                                            return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
                                         }
 
                                         // Create as a .tmp file to avoid partially unzipped files
@@ -365,7 +377,7 @@ export class PackageManager {
                                             try {
                                                 await util.unlinkPromise(absoluteEntryTempFile);
                                             } catch (err) {
-                                                return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
+                                                return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
                                         }
 
@@ -378,7 +390,7 @@ export class PackageManager {
                                                 // Remove .tmp extension from the file.
                                                 await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
                                             } catch (err) {
-                                                return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, 'InstallPackage', pkg, err));
+                                                return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
                                             // Wait till output is done writing before reading the next zip entry.
                                             // Otherwise, it's possible to try to launch the .exe before it is done being created.
@@ -386,7 +398,7 @@ export class PackageManager {
                                         });
 
                                         writeStream.on('error', (err) => {
-                                            return reject(new PackageManagerError('Error in writeStream', 'InstallPackage', pkg, err));
+                                            return reject(new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err));
                                         });
 
                                         readStream.pipe(writeStream);
@@ -395,7 +407,7 @@ export class PackageManager {
                             } else {
                                 // Skip the message for text files, because there is a duplicate text file unzipped.
                                 if (path.extname(absoluteEntryPath) !== ".txt") {
-                                    this.AppendLineChannel(`Warning: File '${absoluteEntryPath}' already exists and was not updated.`);
+                                    this.AppendLineChannel(localize("file.already.exists", "Warning: File '{0}' already exists and was not updated.", absoluteEntryPath));
                                 }
                                 zipfile.readEntry();
                             }
