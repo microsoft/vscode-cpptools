@@ -1363,7 +1363,7 @@
     "jsonValidation": [
       {
         "fileMatch": "c_cpp_properties.json",
-        "url": "cpptools-json-schema://c_cpp_properties.schema.json"
+        "url": "cpptools-schema://c_cpp_properties.schema.json"
       }
     ],
     "menus": {
@@ -1448,7 +1448,7 @@
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
     "vscode:prepublish": "npm run compile",
-    "watch": "webpack --watch --mode development"
+    "watch": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && webpack --watch --mode development"
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",

@@ -337,7 +337,7 @@ gulp.task("translations-import", (done) => {
 
 // Generate package.nls.*.json files from: ./i18n/*/package.i18n.json
 // Outputs to root path, as these nls files need to be along side package.json
-const generatedAdditionalLocFiles = () => {
+const generateAdditionalLocFiles = () => {
     return gulp.src(['package.nls.json'])
         .pipe(nls.createAdditionalLanguageFiles(languages, 'i18n'))
         .pipe(gulp.dest('.'));
@@ -345,7 +345,7 @@ const generatedAdditionalLocFiles = () => {
 
 // Generates ./dist/nls.bundle.<language_id>.json from files in ./i18n/** *//<src_path>/<filename>.i18n.json
 // Localized strings are read from these files at runtime.
-const generatedSrcLocBundle = () => {
+const generateSrcLocBundle = () => {
     // Transpile the TS to JS, and let vscode-nls-dev scan the files for calls to localize.
     return tsProject.src()
         .pipe(sourcemaps.init())
@@ -437,7 +437,7 @@ const generateLocalizedJsonSchemaFiles = () => {
                 stringTable = jsonc.parse(fs.readFileSync(locFile).toString());
             }
             // Entire file is scanned and modified, then serialized for that language.
-            // Even if no translations are available, we still write new files to dist/html/...
+            // Even if no translations are available, we still write new files to dist/schema/...
             let keyPrefix = relativePath + ".";
             let descriptionCallback = (path, value, parent) => {
                 if (stringTable[keyPrefix + path]) {
@@ -463,7 +463,7 @@ const generateJsonSchemaLoc = () => {
         .pipe(gulp.dest('dist'));
 };
 
-gulp.task('translations-generate', gulp.series(generatedSrcLocBundle, generatedAdditionalLocFiles, generateHtmlLoc, generateJsonSchemaLoc));
+gulp.task('translations-generate', gulp.series(generateSrcLocBundle, generateAdditionalLocFiles, generateHtmlLoc, generateJsonSchemaLoc));
 
 
 // ****************************

@@ -482,7 +482,7 @@ function realActivation(): void {
         }
     }
 
-    vscode.workspace.registerTextDocumentContentProvider('cpptools-json-schema', new SchemaProvider());
+    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
     intervalTimer = global.setInterval(onInterval, 2500);
 }
