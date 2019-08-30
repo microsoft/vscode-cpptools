@@ -126,7 +126,7 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
     if (!matches.length) {
         return [];
     }
-    const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
+    const missingHeader: string = matches.groups['includeFile'].replace(/\//g, '\\');
 
     let portsWithHeader: string[];
     const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
