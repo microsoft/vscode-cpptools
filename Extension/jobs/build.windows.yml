@@ -9,31 +9,31 @@ jobs:
 
   steps:
   - task: NodeTool@0
-    displayName: 'Use Node 8.x'
+    displayName: 'Use Node 10.16.x'
     inputs:
-      versionSpec: 8.x
+      versionSpec: 10.16.x
 
-  - script: npm install
+  - script: yarn install
     displayName: "Install Dependencies"
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: npm run compile
+  - script: yarn run compile
     displayName: "Compile Sources"
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: npm run pr-check
+  - script: yarn run pr-check
     displayName: 'Validate Extension/package.json'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: npm run tslint
+  - script: yarn run tslint
     displayName: 'Run Linter'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: npm run pretest
+  - script: yarn run pretest
     displayName: "Compile Test Sources"
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: 'npm run unitTests'
+  - script: 'yarn run unitTests'
     displayName: 'Run unit tests'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 

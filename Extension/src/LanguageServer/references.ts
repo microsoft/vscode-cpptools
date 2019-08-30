@@ -6,6 +6,10 @@
 import * as vscode from 'vscode';
 import { DefaultClient } from './client';
 import * as telemetry from '../telemetry';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export enum ReferenceType {
     Confirmed, // Only sent if VS Code sends a $/cancelRequest (e.g. Peek window is closed).
@@ -74,13 +78,13 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
 
 function convertReferenceTypeToString(referenceType: ReferenceType, isReferencesCanceled: boolean): string {
     switch (referenceType) {
-        case ReferenceType.Confirmed: return "Confirmed reference";
-        case ReferenceType.ConfirmationInProgress: return isReferencesCanceled ? "Confirmation canceled" : "Confirmation in progress";
-        case ReferenceType.Comment: return "Comment reference";
-        case ReferenceType.String: return "String reference";
-        case ReferenceType.Inactive: return "Inactive reference";
-        case ReferenceType.CannotConfirm: return "Cannot confirm reference";
-        case ReferenceType.NotAReference: return "Not a reference";
+        case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed reference");
+        case ReferenceType.ConfirmationInProgress: return isReferencesCanceled ? localize("confirmation.canceled", "Confirmation canceled") : localize("confirmation.in.progress", "Confirmation in progress");
+        case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
+        case ReferenceType.String: return localize("string.reference", "String reference");
+        case ReferenceType.Inactive: return localize("inactive.reference", "Inactive reference");
+        case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference", "Cannot confirm reference");
+        case ReferenceType.NotAReference: return localize("not.a.reference", "Not a reference");
     }
     return "";
 }
@@ -134,13 +138,13 @@ export class ProgressHandler {
     }
 
     public reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean, isPeek: boolean): void {
-        const helpMessage: string = isPeek ? "" : " To preview results, click the search icon in the status bar.";
+        const helpMessage: string = isPeek ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
-                progress.report({ message: 'Started.', increment: 0 });
+                progress.report({ message: localize("started", "Started."), increment: 0 });
                 break;
             case ReferencesProgress.ProcessingSource:
-                progress.report({ message: 'Processing source.', increment: 0 });
+                progress.report({ message: localize("processing.source", "Processing source."), increment: 0 });
                 break;
             case ReferencesProgress.ProcessingTargets:
                 let numWaitingToLex: number = 0;
@@ -183,12 +187,12 @@ export class ProgressHandler {
                 const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
                 if (numLexing >= numParsing && numFinishedConfirming === 0) {
                     if (numTotalToLex === 0) {
-                        currentMessage = "Searching files."; // TODO: Prevent this from happening.
+                        currentMessage = localize("searching.files", "Searching files."); // TODO: Prevent this from happening.
                     } else {
-                        currentMessage = `${numFinishedLexing}/${numTotalToLex} files searched.${helpMessage}`;
+                        currentMessage = localize("files.searched", "{0}/{1} files searched.{2}", numFinishedLexing, numTotalToLex, helpMessage);
                     }
                 } else {
-                    currentMessage = `${numFinishedConfirming}/${numTotalToParse} files confirmed.${helpMessage}`;
+                    currentMessage = localize("files.confirmed", "{0}/{1} files confirmed.{2}", numFinishedConfirming, numTotalToParse, helpMessage);
                 }
                 const currentLexProgress: number = numFinishedLexing / numTotalToLex;
                 const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
@@ -202,7 +206,7 @@ export class ProgressHandler {
                 }
                 break;
             case ReferencesProgress.FinalResultsAvailable:
-                progress.report({ message: 'Finished.', increment: 100 });
+                progress.report({ message: localize("finished", "Finished."), increment: 100 });
                 break;
         }
     }
@@ -224,7 +228,7 @@ export class ProgressHandler {
                 this.referencePreviousProgressUICounter = 0;
                 this.referencesCurrentProgressUICounter = 0;
                 if (!this.referencesChannel) {
-                    this.referencesChannel = vscode.window.createOutputChannel("C/C++ References");
+                    this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.references", "C/C++ References"));
                     this.disposables.push(this.referencesChannel);
                 } else {
                     this.referencesChannel.clear();
@@ -278,8 +282,8 @@ export class ProgressHandler {
         this.referencesChannel.clear();
 
         if (this.referencesStartedWhileTagParsing) {
-            this.referencesChannel.appendLine("[Warning] Some references may be missing, because workspace parsing was incomplete when " +
-                referencesCommandModeToString(this.client.ReferencesCommandMode) + " was started.");
+            this.referencesChannel.appendLine(localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
+            referencesCommandModeToString(this.client.ReferencesCommandMode)));
             this.referencesChannel.appendLine("");
         }
 

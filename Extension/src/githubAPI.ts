@@ -39,7 +39,7 @@ function getVsixDownloadUrl(build: Build, vsixName: string): string {
         return asset.name === vsixName;
     }).browser_download_url;
     if (!downloadUrl) {
-        throw new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + build.name);
+        throw new Error(`Failed to find VSIX: ${vsixName} in build: ${build.name}`);
     }
     return downloadUrl;
 }
@@ -112,7 +112,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
         }
     }(info);
     if (!vsixName) {
-        throw new Error('Failed to match VSIX name for: ' + info.platform + ':' + info.architecture);
+        throw new Error(`Failed to match VSIX name for: ${info.platform}: ${info.architecture}`);
     }
     return vsixName;
 }

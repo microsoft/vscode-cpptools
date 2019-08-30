@@ -28,6 +28,10 @@ import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -104,7 +108,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
         command: { title: 'vcpkgOnlineHelpSuggested', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
-        title: "Learn how to install a library for this header with vcpkg",
+        title: localize("learn.how.to.install.a.library", "Learn how to install a library for this header with vcpkg"),
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -112,7 +116,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
 function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
     return {
         command: { title: 'vcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
-        title: `Copy vcpkg command to install '${port}' to the clipboard`,
+        title: localize("copy.vcpkg.command", "Copy vcpkg command to install '{0}' to the clipboard", port),
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -122,7 +126,7 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
     if (!matches.length) {
         return [];
     }
-    const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
+    const missingHeader: string = matches.groups['includeFile'].replace(/\//g, '\\');
 
     let portsWithHeader: string[];
     const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
@@ -459,11 +463,28 @@ function realActivation(): void {
     if (settings.updateChannel === 'Default') {
         suggestInsidersChannel();
     } else if (settings.updateChannel === 'Insiders') {
-        insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+        insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
         checkAndApplyUpdate(settings.updateChannel);
     }
 
-    intervalTimer = setInterval(onInterval, 2500);
+    // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
+    class SchemaProvider implements vscode.TextDocumentContentProvider {
+        public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+            let fileName: string = uri.authority;
+            let locale: string = util.getLocaleId();
+            let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
+            return util.checkFileExists(localizedFilePath).then((fileExists) => {
+                if (!fileExists) {
+                    localizedFilePath = util.getExtensionFilePath(fileName);
+                }
+                return util.readFileText(localizedFilePath);
+            });
+        }
+    }
+
+    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
+
+    intervalTimer = global.setInterval(onInterval, 2500);
 }
 
 export function updateLanguageConfigurations(): void {
@@ -492,7 +513,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
         if (newUpdateChannel === 'Default') {
             clearInterval(insiderUpdateTimer);
         } else if (newUpdateChannel === 'Insiders') {
-            insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+            insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
 
         checkAndApplyUpdate(newUpdateChannel);
@@ -507,7 +528,7 @@ function onDidSaveTextDocument(doc: vscode.TextDocument): void {
 
     if (!saveMessageShown && new CppSettings(doc.uri).clangFormatOnSave) {
         saveMessageShown = true;
-        vscode.window.showInformationMessage("\"C_Cpp.clang_format_formatOnSave\" has been removed. Please use \"editor.formatOnSave\" instead.");
+        vscode.window.showInformationMessage(localize("removed.use.instead", '"{0}" has been removed. Please use "{1}" instead.', "C_Cpp.clang_format_formatOnSave", "editor.formatOnSave"));
     }
 }
 
@@ -633,7 +654,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
 
                     // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-                    const timer: NodeJS.Timer = setTimeout(() => {
+                    const timer: NodeJS.Timer = global.setTimeout(() => {
                         process.kill();
                         reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
                     }, 30000);
@@ -669,7 +690,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
             }
 
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-            const timer: NodeJS.Timer = setTimeout(() => {
+            const timer: NodeJS.Timer = global.setTimeout(() => {
                 process.kill();
                 reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
             }, 30000);
@@ -709,10 +730,10 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!buildInfo) {
         return; // No need to update.
     }
-    const message: string = `Insiders version ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
-    const yes: string = "Yes";
-    const askLater: string = "Ask Me Later";
-    const dontShowAgain: string = "Don't Show Again";
+    const message: string = localize('insiders.available', "Insiders version {0} is available. Would you like to switch to the Insiders channel and install this update?", buildInfo.name);
+    const yes: string = localize("yes.button", "Yes");
+    const askLater: string = localize("ask.me.later.button", "Ask Me Later");
+    const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
     let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
@@ -775,8 +796,9 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
                 return;
             }
             clearInterval(insiderUpdateTimer);
-            const message: string =
-                `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
+            const message: string = localize("extension.updated",
+                "The C/C++ Extension has been updated to version {0}. Please reload the window for the changes to take effect.",
+                buildInfo.name);
             util.promptReloadWindow(message);
             telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
             resolve();
@@ -922,7 +944,7 @@ function selectClient(): Thenable<Client> {
                     console.assert("client not found");
                 }
             }
-            return Promise.reject<Client>("client not found");
+            return Promise.reject<Client>(localize("client.not.found", "client not found"));
         });
     }
 }
@@ -936,7 +958,7 @@ function onResetDatabase(): void {
 function onSelectConfiguration(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to select a configuration');
+        vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
@@ -947,7 +969,7 @@ function onSelectConfiguration(): void {
 function onSelectConfigurationProvider(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to select a configuration provider');
+        vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider'));
     } else {
         selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
     }
@@ -957,7 +979,7 @@ function onEditConfigurationJSON(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, null);
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
     }
@@ -967,7 +989,7 @@ function onEditConfigurationUI(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, null);
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
     }
@@ -976,7 +998,7 @@ function onEditConfigurationUI(): void {
 function onEditConfiguration(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
     }
@@ -984,7 +1006,7 @@ function onEditConfiguration(): void {
 
 function onAddToIncludePath(path: string): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to add to includePath');
+        vscode.window.showInformationMessage(localize('add.includepath.open.first', 'Open a folder first to add to {0}', "includePath"));
     } else {
         // This only applies to the active client. It would not make sense to add the include path
         // suggestion to a different workspace.
