@@ -9,9 +9,9 @@ jobs:
 
   steps:
   - task: NodeTool@0
-    displayName: 'Use Node 8.x'
+    displayName: 'Use Node 10.16.x'
     inputs:
-      versionSpec: 8.x
+      versionSpec: 10.16.x
 
   - script: yarn install
     displayName: "Install Dependencies"
