@@ -17,7 +17,7 @@
                 "focus": false,
                 "panel": "shared"
             },
-            "command": "npm",
+            "command": "yarn",
             "args": [
                 "run",
                 "compile",
@@ -31,7 +31,7 @@
             "group": "build",
             "isBackground": false,
             "type": "shell",
-            "command": "npm",
+            "command": "yarn",
             "args": [
                 "run",
                 "tslint"
@@ -59,7 +59,7 @@
             "group": "build",
             "isBackground": false,
             "type": "shell",
-            "command": "npm",
+            "command": "yarn",
             "args": [
                 "run",
                 "compileDev"
@@ -71,7 +71,7 @@
             "group": "build",
             "isBackground": false,
             "type": "shell",
-            "command": "npm",
+            "command": "yarn",
             "args": [
                 "run",
                 "pretest"
