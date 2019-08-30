@@ -39,7 +39,29 @@
     "Snippets"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onCommand:extension.pickNativeProcess",
+    "onCommand:extension.pickRemoteNativeProcess",
+    "onCommand:C_Cpp.BuildAndDebugActiveFile",
+    "onCommand:C_Cpp.ConfigurationEditJSON",
+    "onCommand:C_Cpp.ConfigurationEditUI",
+    "onCommand:C_Cpp.ConfigurationSelect",
+    "onCommand:C_Cpp.ConfigurationProviderSelect",
+    "onCommand:C_Cpp.SwitchHeaderSource",
+    "onCommand:C_Cpp.Navigate",
+    "onCommand:C_Cpp.EnableErrorSquiggles",
+    "onCommand:C_Cpp.DisableErrorSquiggles",
+    "onCommand:C_Cpp.ToggleIncludeFallback",
+    "onCommand:C_Cpp.ToggleDimInactiveRegions",
+    "onCommand:C_Cpp.ResetDatabase",
+    "onCommand:C_Cpp.TakeSurvey",
+    "onCommand:C_Cpp.LogDiagnostics",
+    "onCommand:C_Cpp.RescanWorkspace",
+    "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
+    "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
+    "onDebug",
+    "workspaceContains:/.vscode/c_cpp_properties.json"
   ],
   "main": "./dist/main",
   "contributes": {
@@ -1433,12 +1455,12 @@
     }
   },
   "scripts": {
-    "compile": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && npm run translations-generate && webpack --mode production --vscode-nls",
-    "compileDev": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && webpack --mode development",
+    "compile": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && yarn run translations-generate && webpack --mode production --vscode-nls",
+    "compileDev": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "generate-native-strings": "gulp generate-native-strings",
     "import-edge-strings": "node ./import_edge_strings.js",
-    "translations-export": "npm run prepublishjs && npm run generate-native-strings && gulp translations-export",
+    "translations-export": "yarn run prepublishjs && yarn run generate-native-strings && gulp translations-export",
     "translations-generate": "gulp translations-generate",
     "translations-import": "gulp translations-import",
     "postinstall": "node ./node_modules/vscode/bin/install",
@@ -1447,8 +1469,8 @@
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "npm run compile",
-    "watch": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && webpack --watch --mode development"
+    "vscode:prepublish": "yarn run compile",
+    "watch": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --watch --mode development"
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
