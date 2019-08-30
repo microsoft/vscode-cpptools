@@ -1433,12 +1433,12 @@
     }
   },
   "scripts": {
-    "compile": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && npm run translations-generate && webpack --mode production --vscode-nls",
-    "compileDev": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && webpack --mode development",
+    "compile": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && yarn run translations-generate && webpack --mode production --vscode-nls",
+    "compileDev": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
     "generate-native-strings": "gulp generate-native-strings",
     "import-edge-strings": "node ./import_edge_strings.js",
-    "translations-export": "npm run prepublishjs && npm run generate-native-strings && gulp translations-export",
+    "translations-export": "yarn run prepublishjs && yarn run generate-native-strings && gulp translations-export",
     "translations-generate": "gulp translations-generate",
     "translations-import": "gulp translations-import",
     "postinstall": "node ./node_modules/vscode/bin/install",
@@ -1447,8 +1447,8 @@
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "npm run compile",
-    "watch": "npm run prepublishjs && npm run generateOptionsSchema && npm run generate-native-strings && webpack --watch --mode development"
+    "vscode:prepublish": "yarn run compile",
+    "watch": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --watch --mode development"
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
