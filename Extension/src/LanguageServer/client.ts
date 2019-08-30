@@ -31,6 +31,7 @@ import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
+import * as refs from './references';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -157,71 +158,6 @@ interface ColorThemeChangedParams {
     name: string;
 }
 
-export enum ReferencesCommandMode {
-    None,
-    Find,
-    Peek
-}
-
-export function referencesCommandModeToString(referencesCommandMode: ReferencesCommandMode): string {
-    switch (referencesCommandMode) {
-        case ReferencesCommandMode.Find:
-            return localize("find.all.references", "Find All References");
-        case ReferencesCommandMode.Peek:
-            return localize("peek.references", "Peek References");
-        default:
-            return "";
-    }
-}
-
-enum ReferenceType {
-    Confirmed, // Only sent if VS Code sends a $/cancelRequest (e.g. Peek window is closed).
-    ConfirmationInProgress,
-    Comment,
-    String,
-    Inactive,
-    CannotConfirm,
-    NotAReference
-}
-
-interface ReferenceInfo {
-    file: string;
-    position: vscode.Position;
-    text: string;
-    type: ReferenceType;
-}
-
-interface ReferencesResult {
-    referenceInfos: ReferenceInfo[];
-}
-
-interface ReferencesResultMessage {
-    referencesResult: ReferencesResult;
-}
-
-enum ReferencesProgress {
-    Started,
-    ProcessingSource,
-    ProcessingTargets,
-    FinalResultsAvailable,
-    Finished
-}
-
-enum TargetReferencesProgress {
-    WaitingToLex,
-    Lexing,
-    WaitingToParse,
-    Parsing,
-    ConfirmingReferences,
-    FinishedWithoutConfirming,
-    FinishedConfirming
-}
-
-interface ReportReferencesProgressNotification {
-    referencesProgress: ReferencesProgress;
-    targetReferencesProgress: TargetReferencesProgress[];
-}
-
 interface Diagnostic {
     range: Range;
     code?: number | string;
@@ -295,8 +231,8 @@ const SemanticColorizationRegionsNotification:  NotificationType<SemanticColoriz
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
 const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
-const ReferencesNotification: NotificationType<ReferencesResultMessage, void> = new NotificationType<ReferencesResultMessage, void>('cpptools/references');
-const ReportReferencesProgressNotification: NotificationType<ReportReferencesProgressNotification, void> = new NotificationType<ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
+const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, void> = new NotificationType<refs.ReferencesResultMessage, void>('cpptools/references');
+const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
@@ -306,7 +242,7 @@ let failureMessageShown: boolean = false;
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
     isUpdatingIntelliSense: DataBinding<boolean>;
-    referencesCommandMode: DataBinding<ReferencesCommandMode>;
+    referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
     navigationLocation: DataBinding<string>;
     tagParserStatus: DataBinding<string>;
     activeConfigName: DataBinding<string>;
@@ -315,7 +251,7 @@ interface ClientModel {
 export interface Client {
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
-    ReferencesCommandModeChanged: vscode.Event<ReferencesCommandMode>;
+    ReferencesCommandModeChanged: vscode.Event<refs.ReferencesCommandMode>;
     NavigationLocationChanged: vscode.Event<string>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
@@ -374,7 +310,7 @@ export function createNullClient(): Client {
     return new NullClient();
 }
 
-class DefaultClient implements Client {
+export class DefaultClient implements Client {
     private languageClient: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
     private configuration: configs.CppProperties;
@@ -385,10 +321,10 @@ class DefaultClient implements Client {
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
     private diagnosticsChannel: vscode.OutputChannel;
-    private referencesChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
+    private references: refs.ProgressHandler;
     private colorizationState = new Map<string, ColorizationState>();
     private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
@@ -399,7 +335,7 @@ class DefaultClient implements Client {
     private model: ClientModel = {
         isTagParsing: new DataBinding<boolean>(false),
         isUpdatingIntelliSense: new DataBinding<boolean>(false),
-        referencesCommandMode: new DataBinding<ReferencesCommandMode>(ReferencesCommandMode.None),
+        referencesCommandMode: new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None),
         navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
@@ -407,7 +343,7 @@ class DefaultClient implements Client {
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
-    public get ReferencesCommandModeChanged(): vscode.Event<ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
+    public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
@@ -426,6 +362,12 @@ class DefaultClient implements Client {
     }
     public get TrackedDocuments(): Set<vscode.TextDocument> {
         return this.trackedDocuments;
+    }
+    public get IsTagParsing(): boolean {
+        return this.model.isTagParsing.Value;
+    }
+    public get ReferencesCommandMode(): refs.ReferencesCommandMode {
+        return this.model.referencesCommandMode.Value;
     }
 
     private get AdditionalEnvironment(): { [key: string]: string | string[] } {
@@ -574,6 +516,7 @@ class DefaultClient implements Client {
         }
 
         this.colorizationSettings = new ColorizationSettings(this.RootUri);
+        this.references = new refs.ProgressHandler(this);
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
@@ -824,23 +767,12 @@ class DefaultClient implements Client {
         }
     }
 
-    // Used to determine if Find or Peek References is used.
-    // TODO: Investigate using onDidExecuteCommand instead.
-    private prevVisibleRangesLength: number = 0;
-    private visibleRangesDecreased: boolean = false;
-    private visibleRangesDecreasedTicks: number = 0;
-    private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
-
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
         if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
             if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
                 if (textEditorVisibleRangesChangeEvent.visibleRanges.length === 1) {
                     let visibleRangesLength: number = textEditorVisibleRangesChangeEvent.visibleRanges[0].end.line - textEditorVisibleRangesChangeEvent.visibleRanges[0].start.line;
-                    this.visibleRangesDecreased = visibleRangesLength < this.prevVisibleRangesLength;
-                    if (this.visibleRangesDecreased) {
-                        this.visibleRangesDecreasedTicks = Date.now();
-                    }
-                    this.prevVisibleRangesLength = visibleRangesLength;
+                    this.references.updateVisibleRange(visibleRangesLength);
                 }
             }
             this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
@@ -1422,7 +1354,7 @@ class DefaultClient implements Client {
             util.setProgress(util.getProgressParseRootSuccess());
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
-        } else if (message.endsWith("Unresolved Headers")) {
+        } else if (message.endsWith("Unresolved Headers") && this.configuration.CurrentConfiguration.configurationProvider === undefined) {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
                 ui.showConfigureIncludePathMessage(() => {
@@ -1531,7 +1463,7 @@ class DefaultClient implements Client {
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
-        if (this.configuration.CurrentConfiguration.compileCommands !== undefined) {
+        if (this.configuration.CurrentConfiguration.compileCommands !== undefined && this.configuration.CurrentConfiguration.configurationProvider !== undefined) {
             return;
         }
 
@@ -1896,222 +1828,48 @@ class DefaultClient implements Client {
         });
     }
 
-    // Find All References data.
-    private referencesCurrentProgress: ReportReferencesProgressNotification;
-    private referencesPrevProgressIncrement: number;
-    private referencesPrevProgressMessage: string;
-    private referencesRequestHasOccurred: boolean;
-    private referencesViewFindPending: boolean = false;
-    private referencesDelayProgress: NodeJS.Timeout;
-    private referencesProgressOptions: vscode.ProgressOptions;
-    private referencesCanceled: boolean;
-    private referencesStartedWhileTagParsing: boolean;
-    private referencesProgressMethod: (progress: vscode.Progress<{
-        message?: string;
-        increment?: number;
-    }>, token: vscode.CancellationToken) => Thenable<unknown>;
-    private referencePreviousProgressUICounter: number;
-    private referencesCurrentProgressUICounter: number;
-    private readonly referencesProgressUpdateInterval: number = 1000;
-    private readonly referencesProgressDelayInterval: number = 2000;
-
-    private reportReferencesProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
-        const helpMessage: string = this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
-        switch (this.referencesCurrentProgress.referencesProgress) {
-            case ReferencesProgress.Started:
-                progress.report({ message: localize("started", "Started."), increment: 0 });
-                break;
-            case ReferencesProgress.ProcessingSource:
-                progress.report({ message: localize("processing.source", "Processing source."), increment: 0 });
-                break;
-            case ReferencesProgress.ProcessingTargets:
-                let numWaitingToLex: number = 0;
-                let numLexing: number = 0;
-                let numParsing: number = 0;
-                let numConfirmingReferences: number = 0;
-                let numFinishedWithoutConfirming: number = 0;
-                let numFinishedConfirming: number = 0;
-                for (let targetLocationProgress of this.referencesCurrentProgress.targetReferencesProgress) {
-                    switch (targetLocationProgress) {
-                        case TargetReferencesProgress.WaitingToLex:
-                            ++numWaitingToLex;
-                            break;
-                        case TargetReferencesProgress.Lexing:
-                            ++numLexing;
-                            break;
-                        case TargetReferencesProgress.WaitingToParse:
-                            // The count is derived.
-                            break;
-                        case TargetReferencesProgress.Parsing:
-                            ++numParsing;
-                            break;
-                        case TargetReferencesProgress.ConfirmingReferences:
-                            ++numConfirmingReferences;
-                            break;
-                        case TargetReferencesProgress.FinishedWithoutConfirming:
-                            ++numFinishedWithoutConfirming;
-                            break;
-                        case TargetReferencesProgress.FinishedConfirming:
-                            ++numFinishedConfirming;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                let currentMessage: string;
-                const numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
-                const numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
-                const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
-                if (numLexing >= numParsing && numFinishedConfirming === 0) {
-                    if (numTotalToLex === 0) {
-                        currentMessage = localize("searching.files", "Searching files."); // TODO: Prevent this from happening.
-                    } else {
-                        currentMessage = localize("files.searched", "{0}/{1} files searched.{2}", numFinishedLexing, numTotalToLex, helpMessage);
-                    }
-                } else {
-                    currentMessage = localize("files.confirmed", "{0}/{1} files confirmed.{2}", numFinishedConfirming, numTotalToParse, helpMessage);
-                }
-                const currentLexProgress: number = numFinishedLexing / numTotalToLex;
-                const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
-                const currentParseProgress: number = (numConfirmingReferences * confirmingWeight + numFinishedConfirming) / numTotalToParse;
-                const averageLexingPercent: number = 25;
-                const currentIncrement: number = currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent);
-                if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
-                    progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
-                    this.referencesPrevProgressIncrement = currentIncrement;
-                    this.referencesPrevProgressMessage = currentMessage;
-                }
-                break;
-            case ReferencesProgress.FinalResultsAvailable:
-                progress.report({ message: localize("finished", "Finished."), increment: 100 });
-                break;
-        }
-    }
-
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            if (this.model.referencesCommandMode.Value !== ReferencesCommandMode.None) {
-                ++this.referencesCurrentProgressUICounter;
+            if (this.model.referencesCommandMode.Value !== refs.ReferencesCommandMode.None) {
+                ++this.references.referencesCurrentProgressUICounter;
             }
-            if (this.model.referencesCommandMode.Value !== ReferencesCommandMode.Peek) {
+            if (this.model.referencesCommandMode.Value !== refs.ReferencesCommandMode.Peek) {
                 this.sendRequestReferences();
             }
         });
     }
 
-    private sendRequestReferences(): void {
-        if (this.model.referencesCommandMode.Value !== ReferencesCommandMode.None) {
-            if (this.referencesRequestHasOccurred) {
+    public sendRequestReferences(): void {
+        if (this.model.referencesCommandMode.Value !== refs.ReferencesCommandMode.None) {
+            if (this.references.referencesRequestHasOccurred) {
                 // References are not usable if a references request is pending,
                 // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                if (!this.referencesViewFindPending) {
-                    this.referencesViewFindPending = true;
+                if (!this.references.referencesViewFindPending) {
+                    this.references.referencesViewFindPending = true;
                     vscode.commands.executeCommand("references-view.refresh");
                 }
             } else {
                 this.languageClient.sendNotification(RequestReferencesNotification);
-                this.referencesRequestHasOccurred = true;
+                this.references.referencesRequestHasOccurred = true;
             }
         }
     }
 
-    private handleReferencesProgress(notificationBody: ReportReferencesProgressNotification): void {
-        switch (notificationBody.referencesProgress) {
-            case ReferencesProgress.Started:
-                this.referencesStartedWhileTagParsing = this.model.isTagParsing.Value;
-                this.model.referencesCommandMode.Value = this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
-                    ReferencesCommandMode.Peek : ReferencesCommandMode.Find;
-                if (this.model.referencesCommandMode.Value === ReferencesCommandMode.Peek) {
-                    telemetry.logLanguageServerEvent("peekReferences");
-                }
-                this.referencesRequestHasOccurred = false;
-                this.referencesCanceled = false;
-                this.referencesPrevProgressIncrement = 0;
-                this.referencesPrevProgressMessage = "";
-                this.referencePreviousProgressUICounter = 0;
-                this.referencesCurrentProgressUICounter = 0;
-                if (!this.referencesChannel) {
-                    this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.references", "C/C++ References"));
-                    this.disposables.push(this.referencesChannel);
-                } else {
-                    this.referencesChannel.clear();
-                }
-                this.referencesDelayProgress = setInterval(() => {
-                    this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.model.referencesCommandMode.Value), cancellable: true };
-                    this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
-                    // tslint:disable-next-line: promise-must-complete
-                        new Promise((resolve) => {
-                            this.reportReferencesProgress(progress, true);
-                            let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
-                                if (token.isCancellationRequested && !this.referencesCanceled) {
-                                    this.languageClient.sendNotification(CancelReferencesNotification);
-                                    this.sendRequestReferences();
-                                    this.referencesCanceled = true;
-                                }
-                                if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
-                                    clearInterval(currentUpdateProgressTimer);
-                                    if (this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
-                                        this.referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
-                                        this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
-                                        vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                                    }
-                                    resolve();
-                                } else {
-                                    this.reportReferencesProgress(progress, false);
-                                }
-                            }, this.referencesProgressUpdateInterval);
-                        });
-                    vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                    clearInterval(this.referencesDelayProgress);
-                }, this.referencesProgressDelayInterval);
-                break;
-            case ReferencesProgress.FinalResultsAvailable:
-                this.referencesCurrentProgress = notificationBody;
-                this.sendRequestReferences();
-                break;
-            case ReferencesProgress.Finished:
-                this.referencesCurrentProgress = notificationBody;
-                this.model.referencesCommandMode.Value = ReferencesCommandMode.None;
-                clearInterval(this.referencesDelayProgress);
-                break;
-            default:
-                this.referencesCurrentProgress = notificationBody;
-                break;
-        }
+    public cancelReferences(): void {
+        this.languageClient.sendNotification(CancelReferencesNotification);
     }
 
-    private convertReferenceTypeToString(referenceType: ReferenceType): string {
-        switch (referenceType) {
-            case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed reference");
-            case ReferenceType.ConfirmationInProgress: return this.referencesCanceled ? localize("confirmation.canceled", "Confirmation canceled") : localize("confirmation.in.progress", "Confirmation in progress");
-            case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
-            case ReferenceType.String: return localize("string.reference", "String reference");
-            case ReferenceType.Inactive: return localize("inactive.reference", "Inactive reference");
-            case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference", "Cannot confirm reference");
-            case ReferenceType.NotAReference: return localize("not.a.reference", "Not a reference");
-        }
-        return "";
+    private handleReferencesProgress(notificationBody: refs.ReportReferencesProgressNotification): void {
+        let isPeek: boolean = this.model.referencesCommandMode.Value === refs.ReferencesCommandMode.Peek;
+        this.references.handleProgress(notificationBody, isPeek);
     }
 
-    private processReferencesResult(referencesResult: ReferencesResult): void {
-        this.referencesViewFindPending = false;
-        this.referencesChannel.clear();
+    private processReferencesResult(referencesResult: refs.ReferencesResult): void {
+        this.references.processResults(referencesResult);
+    }
 
-        if (this.referencesStartedWhileTagParsing) {
-            this.referencesChannel.appendLine(localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.", referencesCommandModeToString(this.model.referencesCommandMode.Value)));
-            this.referencesChannel.appendLine("");
-        }
-
-        for (let reference of referencesResult.referenceInfos) {
-            let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
-            this.referencesChannel.appendLine("[" + this.convertReferenceTypeToString(reference.type) + "] " +
-                reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
-        }
-
-        if (this.referencesStartedWhileTagParsing || referencesResult.referenceInfos.length !== 0) {
-            this.referencesChannel.show(true);
-        }
+    public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
+        this.model.referencesCommandMode.Value = mode;
     }
 }
 
@@ -2133,11 +1891,11 @@ function getLanguageServerFileName(): string {
 class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
     private stringEvent = new vscode.EventEmitter<string>();
-    private referencesCommandModeEvent = new vscode.EventEmitter<ReferencesCommandMode>();
+    private referencesCommandModeEvent = new vscode.EventEmitter<refs.ReferencesCommandMode>();
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
-    public get ReferencesCommandModeChanged(): vscode.Event<ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
+    public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
     public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
