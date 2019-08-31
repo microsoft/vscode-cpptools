@@ -215,7 +215,7 @@ const RescanFolderNotification: NotificationType<void, void> = new NotificationT
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
 const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, void> = new NotificationType<ColorThemeChangedParams, void>('cpptools/colorThemeChanged');
-const RequestReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/requestReferences');
+const RequestReferencesNotification: NotificationType<boolean, void> = new NotificationType<boolean, void>('cpptools/requestReferences');
 const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
 
@@ -1833,25 +1833,31 @@ export class DefaultClient implements Client {
             if (this.model.referencesCommandMode.Value !== refs.ReferencesCommandMode.None) {
                 ++this.references.referencesCurrentProgressUICounter;
             }
-            if (this.model.referencesCommandMode.Value !== refs.ReferencesCommandMode.Peek) {
-                this.sendRequestReferences();
-            }
+            this.sendRequestReferences();
         });
     }
 
     public sendRequestReferences(): void {
-        if (this.model.referencesCommandMode.Value !== refs.ReferencesCommandMode.None) {
-            if (this.references.referencesRequestHasOccurred) {
-                // References are not usable if a references request is pending,
-                // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                if (!this.references.referencesViewFindPending) {
-                    this.references.referencesViewFindPending = true;
-                    vscode.commands.executeCommand("references-view.refresh");
+        switch (this.model.referencesCommandMode.Value) {
+            case refs.ReferencesCommandMode.None:
+                break;
+            case refs.ReferencesCommandMode.Peek:
+            case refs.ReferencesCommandMode.Rename:
+                this.languageClient.sendNotification(RequestReferencesNotification, true);
+                break;
+            default:
+                if (this.references.referencesRequestHasOccurred) {
+                    // References are not usable if a references request is pending,
+                    // So after the initial request, we don't send a 2nd references request until the next request occurs.
+                    if (!this.references.referencesViewFindPending) {
+                        this.references.referencesViewFindPending = true;
+                        vscode.commands.executeCommand("references-view.refresh");
+                    }
+                } else {
+                    this.languageClient.sendNotification(RequestReferencesNotification, false);
+                    this.references.referencesRequestHasOccurred = true;
                 }
-            } else {
-                this.languageClient.sendNotification(RequestReferencesNotification);
-                this.references.referencesRequestHasOccurred = true;
-            }
+                break;
         }
     }
 
@@ -1860,8 +1866,7 @@ export class DefaultClient implements Client {
     }
 
     private handleReferencesProgress(notificationBody: refs.ReportReferencesProgressNotification): void {
-        let isPeek: boolean = this.model.referencesCommandMode.Value === refs.ReferencesCommandMode.Peek;
-        this.references.handleProgress(notificationBody, isPeek);
+        this.references.handleProgress(notificationBody);
     }
 
     private processReferencesResult(referencesResult: refs.ReferencesResult): void {
