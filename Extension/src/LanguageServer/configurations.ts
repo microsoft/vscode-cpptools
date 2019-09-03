@@ -16,6 +16,11 @@ import { getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
@@ -403,7 +408,8 @@ export class CppProperties {
             configuration.intelliSenseMode === "${default}") {
             return true;
         }
-        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(configuration.compilerPath);
+        let resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         return (compilerPathAndArgs.compilerName === "cl.exe") === (configuration.intelliSenseMode === "msvc-x64" || configuration.intelliSenseMode === "msvc-x86");
     }
 
@@ -799,7 +805,8 @@ export class CppProperties {
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
             } catch (err) {
-                vscode.window.showErrorMessage(`Failed to create "${this.configFolder}": ${err.message}`);
+                let failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', this.configFolder);
+                vscode.window.showErrorMessage(`${failedToCreate}: ${err.message}`);
             }
         }
         return;
@@ -816,7 +823,7 @@ export class CppProperties {
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
-                throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
+                throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
             }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
                 this.CurrentConfigurationIndex >= 0 && this.CurrentConfigurationIndex < this.configurationJson.configurations.length) {
@@ -867,7 +874,7 @@ export class CppProperties {
                     this.updateToVersion4();
                 } else {
                     this.configurationJson.version = configVersion;
-                    vscode.window.showErrorMessage('Unknown version number found in c_cpp_properties.json. Some features may not work as expected.');
+                    vscode.window.showErrorMessage(localize("unknown.properties.version", 'Unknown version number found in c_cpp_properties.json. Some features may not work as expected.'));
                 }
             }
 
@@ -876,13 +883,14 @@ export class CppProperties {
                     this.writeToJson();
                 } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
-                    vscode.window.showWarningMessage(`Attempt to update "${this.propertiesFile.fsPath}" failed (do you have write access?)`);
+                    vscode.window.showWarningMessage(localize('update.properties.failed', 'Attempt to update "{0}" failed (do you have write access?)', this.propertiesFile.fsPath));
                     success = false;
                 }
             }
 
         } catch (err) {
-            vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
+            let failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
+            vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
         }
 
@@ -952,7 +960,7 @@ export class CppProperties {
 
             let compilerPathErrors: string[] = [];
             if (compilerPathNeedsQuotes) {
-                compilerPathErrors.push(`Compiler path with spaces and arguments is missing double quotes " around the path.`);
+                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.'));
             }
 
             // Get compiler path without arguments before checking if it exists
@@ -981,13 +989,13 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                let message: string = `Cannot find: ${resolvedCompilerPath}`;
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
                 compilerPathErrors.push(message);
             } else if (compilerPathAndArgs.compilerPath === "") {
-                let message: string = `Invalid input, cannot resolve compiler path`;
+                let message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
                 compilerPathErrors.push(message);
             } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
-                let message: string = `Path is not a file: ${resolvedCompilerPath}`;
+                let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
                 compilerPathErrors.push(message);
             }
 
@@ -1008,7 +1016,7 @@ export class CppProperties {
 
         // Validate intelliSenseMode
         if (isWindows && !this.isCompilerIntelliSenseModeCompatible(config)) {
-            errors.intelliSenseMode = `IntelliSense mode ${config.intelliSenseMode} is incompatible with compiler path.`;
+            errors.intelliSenseMode = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", config.intelliSenseMode);
         }
 
         return errors;
@@ -1030,6 +1038,9 @@ export class CppProperties {
             paths = input;
         }
 
+        // Resolve and split any environment variables
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
+
         for (let p of paths) {
             let pathExists: boolean = true;
             let resolvedPath: string = this.resolvePath(p, isWindows);
@@ -1049,17 +1060,17 @@ export class CppProperties {
             }
 
             if (!pathExists) {
-                let message: string = `Cannot find: ${resolvedPath}`;
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
                 errors.push(message);
                 continue;
             }
 
             // Check if path is a directory or file
             if (isDirectory && !util.checkDirectoryExistsSync(resolvedPath)) {
-                let message: string = `Path is not a directory: ${resolvedPath}`;
+                let message: string = localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
                 errors.push(message);
             } else if (!isDirectory && !util.checkFileExistsSync(resolvedPath)) {
-                let message: string = `Path is not a file: ${resolvedPath}`;
+                let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
                 errors.push(message);
             }
         }
@@ -1103,6 +1114,15 @@ export class CppProperties {
             if (!currentConfiguration.name) {
                 return;
             }
+
+            // Get env text
+            let envText: string;
+            const envStart: number = curText.search(/\"env\"\s*:\s*\{/);
+            const envEnd: number = envStart === -1 ? -1 : curText.indexOf("},", envStart);
+            envText = curText.substr(envStart, envEnd);
+            const envTextStartOffSet: number = envStart + 1;
+
+            // Get current config text
             const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
@@ -1140,7 +1160,7 @@ export class CppProperties {
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
                     if (!this.isCompilerIntelliSenseModeCompatible(currentConfiguration)) {
-                        let message: string = `intelliSenseMode ${currentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
+                        let message: string = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", currentConfiguration.intelliSenseMode);
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
@@ -1152,23 +1172,26 @@ export class CppProperties {
             }
 
             // Check for path-related squiggles.
-            let paths: Set<string> = new Set<string>();
+            let paths: string[] = [];
             for (let pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
                 currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
-                        paths.add(`${curPath}`);
+                        paths.push(`${curPath}`);
                     }
                 }
             }
             if (currentConfiguration.compileCommands) {
-                paths.add(`${currentConfiguration.compileCommands}`);
+                paths.push(`${currentConfiguration.compileCommands}`);
             }
 
             if (currentConfiguration.compilerPath) {
                 // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
-                paths.add(`${currentConfiguration.compilerPath}`);
+                paths.push(`${currentConfiguration.compilerPath}`);
             }
+
+            // Resolve and split any environment variables
+            paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
 
             // Get the start/end for properties that are file-only.
             const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1178,6 +1201,7 @@ export class CppProperties {
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
+            // Validate paths
             for (let curPath of paths) {
                 const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
                 // Resolve special path cases.
@@ -1190,8 +1214,6 @@ export class CppProperties {
                 if (!resolvedPath) {
                     continue;
                 }
-
-                // TODO: Invalid paths created from environment variables are not detected.
 
                 let compilerPathNeedsQuotes: boolean = false;
                 if (isCompilerPath) {
@@ -1245,16 +1267,16 @@ export class CppProperties {
                 // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
                 // and extend that pattern to the next quote before and next quote after it.
                 let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
-                let matches: string[] = curText.match(pattern);
-                if (matches) {
+                let configMatches: string[] = curText.match(pattern);
+                if (configMatches) {
                     let curOffset: number = 0;
                     let endOffset: number = 0;
-                    for (let curMatch of matches) {
+                    for (let curMatch of configMatches) {
                         curOffset = curText.substr(endOffset).search(pattern) + endOffset;
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = `Cannot find "${resolvedPath}".`;
+                            message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                             newSquiggleMetrics.PathNonExistent++;
                         } else {
                             // Check for file versus path mismatches.
@@ -1262,31 +1284,58 @@ export class CppProperties {
                                 (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
                                 (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
                                 if (compilerPathNeedsQuotes) {
-                                    message = `Compiler path with spaces and arguments is missing \\" around the path.`;
+                                    message = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
                                     newSquiggleMetrics.CompilerPathMissingQuotes++;
                                 } else {
                                     if (util.checkFileExistsSync(resolvedPath)) {
                                         continue;
                                     }
-                                    message = `Path is not a file: "${resolvedPath}".`;
+                                    message = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
                                     newSquiggleMetrics.PathNotAFile++;
                                 }
                             } else {
                                 if (util.checkDirectoryExistsSync(resolvedPath)) {
                                     continue;
                                 }
-                                message = `Path is not a directory: "${resolvedPath}".`;
+                                message =  localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
                                 newSquiggleMetrics.PathNotADirectory++;
                             }
                         }
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                                document.positionAt(curTextStartOffset + endOffset)),
+                                            document.positionAt(curTextStartOffset + endOffset)),
                             message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
                     }
+                } else if (envText) {
+                    let envMatches: string[] = envText.match(pattern);
+                    if (envMatches) {
+                        let curOffset: number = 0;
+                        let endOffset: number = 0;
+                        for (let curMatch of envMatches) {
+                            curOffset = envText.substr(endOffset).search(pattern) + endOffset;
+                            endOffset = curOffset + curMatch.length;
+                            let message: string;
+                            if (!pathExists) {
+                                message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                                newSquiggleMetrics.PathNonExistent++;
+                            } else {
+                                if (util.checkDirectoryExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+                                message = localize("path.is.not.a.directory2", "Path is not a directory: \"{0}\"", resolvedPath);
+                                newSquiggleMetrics.PathNotADirectory++;
+                            }
+                            let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                                new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
+                                                document.positionAt(envTextStartOffSet + endOffset)),
+                                message, vscode.DiagnosticSeverity.Warning);
+                            diagnostics.push(diagnostic);
+                        }
+                    }
                 }
             }
+
             if (diagnostics.length !== 0) {
                 this.diagnosticCollection.set(document.uri, diagnostics);
             } else {

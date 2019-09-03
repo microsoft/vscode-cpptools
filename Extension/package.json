@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.25.0-master",
+  "version": "0.26.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -72,19 +72,19 @@
             "null"
           ],
           "default": null,
-          "description": "The full path of the clang-format executable.",
-          "scope": "machine"
+          "description": "%c_cpp.configuration.clang_format_path.description%",
+          "scope": "resource"
         },
         "C_Cpp.clang_format_style": {
           "type": "string",
           "default": "file",
-          "description": "Coding style, currently supports: Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit. Use \"file\" to load the style from a .clang-format file in the current or parent directory. Use {key: value, ...} to set specific parameters. For example, the \"Visual Studio\" style is similar to: { BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4 }",
+          "description": "c_cpp.configuration.clang_format_style.description",
           "scope": "resource"
         },
         "C_Cpp.clang_format_fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
-          "description": "Name of the predefined style used as a fallback in case clang-format is invoked with style \"file\" but the .clang-format file is not found. Possible values are Visual Studio, LLVM, Google, Chromium, Mozilla, WebKit, none, or use {key: value, ...} to set specific parameters. For example, the \"Visual Studio\" style is similar to: { BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4 }",
+          "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
           "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
@@ -98,7 +98,7 @@
             null
           ],
           "default": null,
-          "description": "If set, overrides the include sorting behavior determined by the SortIncludes parameter.",
+          "description": "%c_cpp.configuration.clang_format_sortIncludes.description%",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseEngine": {
@@ -109,7 +109,7 @@
             "Disabled"
           ],
           "default": "Default",
-          "description": "Controls the IntelliSense provider. \"Tag Parser\" provides \"fuzzy\" results that are not context-aware. \"Default\" provides context-aware results. \"Disabled\" turns off C/C++ language service features.",
+          "description": "%c_cpp.configuration.intelliSenseEngine.description%",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseEngineFallback": {
@@ -119,7 +119,7 @@
             "Disabled"
           ],
           "default": "Disabled",
-          "description": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing #include errors.",
+          "description": "%c_cpp.configuration.intelliSenseEngineFallback.description%",
           "scope": "resource"
         },
         "C_Cpp.autocomplete": {
@@ -129,7 +129,7 @@
             "Disabled"
           ],
           "default": "Default",
-          "description": "Controls the auto-completion provider. \"Default\" uses the active IntelliSense engine. \"Disabled\" uses the word-based completion provided by Visual Studio Code.",
+          "description": "%c_cpp.configuration.autocomplete.description%",
           "scope": "resource"
         },
         "C_Cpp.errorSquiggles": {
@@ -140,19 +140,19 @@
             "EnabledIfIncludesResolve"
           ],
           "default": "EnabledIfIncludesResolve",
-          "description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. This setting is ignored by the Tag Parser engine.",
+          "description": "%c_cpp.configuration.errorSquiggles.description%",
           "scope": "resource"
         },
         "C_Cpp.dimInactiveRegions": {
           "type": "boolean",
           "default": true,
-          "description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
+          "description": "%c_cpp.configuration.dimInactiveRegions.description%",
           "scope": "resource"
         },
         "C_Cpp.inactiveRegionOpacity": {
           "type:": "number",
           "default": 0.55,
-          "Description": "Controls the opacity of inactive preprocessor blocks. Scales between 0.1 and 1.0. This setting only applies when inactive region dimming is enabled.",
+          "description": "%c_cpp.configuration.inactiveRegionOpacity.description%",
           "scope": "resource",
           "minimum": 0.1,
           "maximum": 1
@@ -163,7 +163,7 @@
             "null"
           ],
           "default": null,
-          "description": "Controls the font coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to the syntax coloring scheme of the editor. This setting only applies when inactive region dimming is enabled.",
+          "description": "%c_cpp.configuration.inactiveRegionForegroundColor.description%",
           "scope": "resource"
         },
         "C_Cpp.inactiveRegionBackgroundColor": {
@@ -172,7 +172,7 @@
             "null"
           ],
           "default": null,
-          "description": "Controls the background coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to transparent. This setting only applies when inactive region dimming is enabled.",
+          "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
           "scope": "resource"
         },
         "C_Cpp.formatting": {
@@ -182,13 +182,13 @@
             "Disabled"
           ],
           "default": "Default",
-          "description": "\"Default\" enables code formatting. \"Disabled\" disables code formatting.",
+          "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
         "C_Cpp.navigation.length": {
           "type": "number",
           "default": 60,
-          "description": "Maximum character length of the scope/navigation UI in the status bar. The UI may not appear if this value is too large.",
+          "description": "%c_cpp.configuration.navigation.length.description%",
           "scope": "resource"
         },
         "C_Cpp.loggingLevel": {
@@ -201,13 +201,13 @@
             "Debug"
           ],
           "default": "Error",
-          "description": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: None < Error < Warning < Information < Debug.",
+          "description": "%c_cpp.configuration.loggingLevel.description%",
           "scope": "resource"
         },
         "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
           "default": true,
-          "description": "Controls whether files are automatically added to files.associations when they are the target of a navigation operation from a C/C++ file.",
+          "description": "%c_cpp.configuration.autoAddFileAssociations.description%",
           "scope": "resource"
         },
         "C_Cpp.workspaceParsingPriority": {
@@ -219,7 +219,7 @@
             "low"
           ],
           "default": "highest",
-          "description": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values highest/high/medium/low correspond to approximately 100/75/50/25% CPU usage.",
+          "description": "%c_cpp.configuration.workspaceParsingPriority.description%",
           "scope": "resource"
         },
         "C_Cpp.workspaceSymbols": {
@@ -229,7 +229,7 @@
             "Just My Code"
           ],
           "default": "Just My Code",
-          "description": "The symbols to include in the query results when 'Go to Symbol in Workspace' is invoked",
+          "description": "%c_cpp.configuration.workspaceSymbols.description%",
           "scope": "resource"
         },
         "C_Cpp.exclusionPolicy": {
@@ -239,7 +239,7 @@
             "checkFilesAndFolders"
           ],
           "default": "checkFolders",
-          "description": "Instructs the extension when to use the \"files.exclude\" setting when determining which files should be added to the code navigation database while traversing through the paths in the \"browse.path\" array. \"checkFolders\" means that the exclusion filters will only be evaluated once per folder (individual files are not checked). \"checkFilesAndFolders\" means that the exclusion filters will be evaluated against every file and folder encountered. If your \"files.exclude\" setting only contains folders, then \"checkFolders\" is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
+          "description": "%c_cpp.configuration.exclusionPolicy.description%",
           "scope": "resource"
         },
         "C_Cpp.preferredPathSeparator": {
@@ -249,7 +249,7 @@
             "Backslash"
           ],
           "default": "Forward Slash",
-          "description": "The character used as a path separator for #include auto-completion results.",
+          "description": "%c_cpp.configuration.preferredPathSeparator.description%",
           "scope": "resource"
         },
         "C_Cpp.commentContinuationPatterns": {
@@ -261,24 +261,24 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "The pattern that begins a multiline or single line comment block. The continuation pattern defaults to ' * ' for multiline comment blocks or this string for single line comment blocks."
+                "description": "%c_cpp.configuration.commentContinuationPatterns.items.anyof.string.description%"
               },
               {
                 "type": "object",
                 "properties": {
                   "begin": {
                     "type": "string",
-                    "description": "The pattern that begins a multiline or single line comment block."
+                    "description": "%c_cpp.configuration.commentContinuationPatterns.items.anyof.object.begin.description%"
                   },
                   "continue": {
                     "type": "string",
-                    "description": "The text that will be inserted on the next line when Enter is pressed inside a multiline or single line comment block."
+                    "description": "%c_cpp.configuration.commentContinuationPatterns.items.anyof.object.continue.description%"
                   }
                 }
               }
             ]
           },
-          "description": "Defines the editor behavior for when the Enter key is pressed inside a multiline or single line comment block.",
+          "description": "%c_cpp.configuration.commentContinuationPatterns.description%",
           "scope": "resource"
         },
         "C_Cpp.configurationWarnings": {
@@ -288,19 +288,19 @@
             "Disabled"
           ],
           "default": "Enabled",
-          "description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
+          "description": "%c_cpp.configuration.configurationWarnings.description%",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseCachePath": {
           "type": "string",
           "default": null,
-          "description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is \"%LocalAppData%/Microsoft/vscode-cpptools\" on Windows and \"~/.vscode-cpptools\" on Linux and Mac. The default path will be used if no path is specified or if a specified path is invalid.",
+          "description": "%c_cpp.configuration.intelliSenseCachePath.description%",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseCacheSize": {
           "type": "number",
           "default": 5120,
-          "description": "Maximum size of the per-workspace hard drive space in megabytes for cached precompiled headers; the actual usage may fluctuate around this value. The default size is 5120 MB. Precompiled header caching is disabled when the size is 0.",
+          "description": "%c_cpp.configuration.intelliSenseCacheSize.description%",
           "scope": "resource",
           "minimum": 0
         },
@@ -313,7 +313,7 @@
             "type": "string"
           },
           "default": null,
-          "description": "The value to use in a configuration if \"includePath\" is not specified, or the values to insert if \"${default}\" is present in \"includePath\".",
+          "description": "%c_cpp.configuration.default.includePath.description%",
           "scope": "resource"
         },
         "C_Cpp.default.defines": {
@@ -325,7 +325,7 @@
             "type": "string"
           },
           "default": null,
-          "description": "The value to use in a configuration if \"defines\" is not specified, or the values to insert if \"${default}\" is present in \"defines\".",
+          "description": "%c_cpp.configuration.default.defines.description%",
           "scope": "resource"
         },
         "C_Cpp.default.macFrameworkPath": {
@@ -337,7 +337,7 @@
             "type": "string"
           },
           "default": null,
-          "description": "The value to use in a configuration if \"macFrameworkPath\" is not specified, or the values to insert if \"${default}\" is present in \"macFrameworkPath\".",
+          "description": "%c_cpp.configuration.default.macFrameworkPath.description%",
           "scope": "resource"
         },
         "C_Cpp.default.windowsSdkVersion": {
@@ -346,7 +346,7 @@
             "null"
           ],
           "default": null,
-          "description": "Version of the Windows SDK include path to use on Windows, e.g. '10.0.17134.0'.",
+          "description": "%c_cpp.configuration.default.windowsSdkVersion.description%",
           "pattern": "^\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1$",
           "scope": "resource"
         },
@@ -356,7 +356,7 @@
             "null"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"compileCommands\" is either not specified, or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.compileCommands.description%",
           "scope": "resource"
         },
         "C_Cpp.default.forcedInclude": {
@@ -368,7 +368,7 @@
             "type": "string"
           },
           "default": null,
-          "description": "The value to use in a configuration if \"forcedInclude\" is not specified, or the values to insert if \"${default}\" is present in \"forcedInclude\".",
+          "description": "%c_cpp.configuration.default.forcedInclude.description%",
           "scope": "resource"
         },
         "C_Cpp.default.intelliSenseMode": {
@@ -385,7 +385,7 @@
             "clang-x86"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"intelliSenseMode\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.intelliSenseMode.description%",
           "scope": "resource"
         },
         "C_Cpp.default.compilerPath": {
@@ -394,7 +394,7 @@
             "null"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"compilerPath\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.compilerPath.description%",
           "scope": "resource"
         },
         "C_Cpp.default.compilerArgs": {
@@ -406,7 +406,7 @@
             "type": "string"
           },
           "default": null,
-          "description": "The value to use in configuration if \"compilerArgs\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.compilerArgs.description%",
           "scope": "resource"
         },
         "C_Cpp.default.cStandard": {
@@ -420,7 +420,7 @@
             "c11"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"cStandard\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.cStandard.description%",
           "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
@@ -437,7 +437,7 @@
             "c++20"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"cppStandard\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.cppStandard.description%",
           "scope": "resource"
         },
         "C_Cpp.default.configurationProvider": {
@@ -446,7 +446,7 @@
             "null"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"configurationProvider\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.configurationProvider.description%",
           "scope": "resource"
         },
         "C_Cpp.default.browse.path": {
@@ -458,7 +458,7 @@
             "type": "string"
           },
           "default": null,
-          "description": "The value to use in a configuration if \"browse.path\" is not specified, or the values to insert if \"${default}\" is present in \"browse.path\".",
+          "description": "%c_cpp.configuration.default.browse.path.description%",
           "scope": "resource"
         },
         "C_Cpp.default.browse.databaseFilename": {
@@ -467,13 +467,13 @@
             "null"
           ],
           "default": null,
-          "description": "The value to use in a configuration if \"browse.databaseFilename\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.browse.databaseFilename.description%",
           "scope": "resource"
         },
         "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": {
           "type": "boolean",
           "default": true,
-          "description": "The value to use in a configuration if \"browse.limitSymbolsToIncludedHeaders\" is either not specified or set to \"${default}\".",
+          "description": "%c_cpp.configuration.default.browse.limitSymbolsToIncludedHeaders.description%",
           "scope": "resource"
         },
         "C_Cpp.default.systemIncludePath": {
@@ -485,7 +485,7 @@
             "type": "string"
           },
           "default": null,
-          "description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
+          "description": "%c_cpp.configuration.default.systemIncludePath.description%",
           "scope": "resource"
         },
         "C_Cpp.default.enableConfigurationSquiggles": {
@@ -494,7 +494,7 @@
             "null"
           ],
           "default": null,
-          "description": "Controls whether the extension will report errors detected in c_cpp_properties.json.",
+          "description": "%c_cpp.configuration.default.enableConfigurationSquiggles.description%",
           "scope": "resource"
         },
         "C_Cpp.updateChannel": {
@@ -504,7 +504,7 @@
             "Insiders"
           ],
           "default": "Default",
-          "description": "Set to \"Insiders\" to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
+          "description": "%c_cpp.configuration.updateChannel.description%",
           "scope": "resource"
         },
         "C_Cpp.experimentalFeatures": {
@@ -514,13 +514,13 @@
             "Disabled"
           ],
           "default": "Disabled",
-          "description": "Controls whether \"experimental\" features are usable.",
+          "description": "%c_cpp.configuration.experimentalFeatures.description%",
           "scope": "resource"
         },
         "C_Cpp.suggestSnippets": {
           "type": "boolean",
           "default": true,
-          "description": "If true, snippets are provided by the language server.",
+          "description": "%c_cpp.configuration.suggestSnippets.description%",
           "scope": "resource"
         },
         "C_Cpp.enhancedColorization": {
@@ -530,13 +530,13 @@
             "Disabled"
           ],
           "default": "Enabled",
-          "description": "If enabled, code is colorized based on IntelliSense. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
+          "description": "%c_cpp.configuration.enhancedColorization.description%",
           "scope": "resource"
         },
         "C_Cpp.vcpkg.enabled": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
+          "markdownDescription": "%c_cpp.configuration.vcpkg.enabled.markdownDescription%",
           "scope": "resource"
         }
       }
@@ -675,12 +675,12 @@
             "properties": {
               "program": {
                 "type": "string",
-                "description": "Full path to program executable.",
+                "description": "%c_cpp.debuggers.program.description%",
                 "default": "${workspaceRoot}/a.out"
               },
               "args": {
                 "type": "array",
-                "description": "Command line arguments passed to the program.",
+                "description": "%c_cpp.debuggers.args.description%",
                 "items": {
                   "type": "string"
                 },
@@ -688,39 +688,39 @@
               },
               "type": {
                 "type": "string",
-                "description": "The type of the engine. Must be \"cppdbg\".",
+                "description": "%c_cpp.debuggers.cppdbg.type.description%",
                 "default": "cppdbg"
               },
               "targetArchitecture": {
                 "type": "string",
-                "description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
+                "description": "%c_cpp.debuggers.targetArchitecture.description%",
                 "default": "x64"
               },
               "cwd": {
                 "type": "string",
-                "description": "The working directory of the target",
+                "description": "%c_cpp.debuggers.cwd.description%",
                 "default": "."
               },
               "setupCommands": {
                 "type": "array",
-                "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
+                "description": "%c_cpp.debuggers.setupCommands.description%",
                 "items": {
                   "type": "object",
                   "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
-                      "description": "The debugger command to execute.",
+                      "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
-                      "description": "Optional description for the command.",
+                      "description": "%c_cpp.debuggers.description.description%",
                       "default": ""
                     },
                     "ignoreFailures": {
                       "type": "boolean",
-                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
                       "default": false
                     }
                   }
@@ -729,24 +729,24 @@
               },
               "customLaunchSetupCommands": {
                 "type": "array",
-                "description": "If provided, this replaces the default commands used to launch a target with some other commands. For example, this can be \"-target-attach\" in order to attach to a target process. An empty command list replaces the launch commands with nothing, which can be useful if the debugger is being provided launch options as command line options. Example: \"customLaunchSetupCommands\": [ { \"text\": \"target-run\", \"description\": \"run target\", \"ignoreFailures\": false }].",
+                "description": "%c_cpp.debuggers.customLaunchSetupCommands.description%",
                 "items": {
                   "type": "object",
                   "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
-                      "description": "The debugger command to execute.",
+                      "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
-                      "description": "Optional description for the command.",
+                      "description": "%c_cpp.debuggers.description.description%",
                       "default": ""
                     },
                     "ignoreFailures": {
                       "type": "boolean",
-                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
                       "default": false
                     }
                   }
@@ -759,22 +759,22 @@
                   "exec-continue",
                   "None"
                 ],
-                "description": "The command to execute after the debugger is fully setup in order to cause the target process to run. Allowed values are \"exec-run\", \"exec-continue\", \"None\". The default value is \"exec-run\".",
+                "description": "%c_cpp.debuggers.launchCompleteCommand.description%",
                 "default": "exec-run"
               },
               "visualizerFile": {
                 "type": "string",
-                "description": ".natvis file to be used when debugging this process. This option is not compatible with GDB pretty printing. Please also see \"showDisplayString\" if using this setting.",
+                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
                 "default": ""
               },
               "showDisplayString": {
                 "type": "boolean",
-                "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
+                "description": "%c_cpp.debuggers.showDisplayString.description%",
                 "default": true
               },
               "environment": {
                 "type": "array",
-                "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
+                "description": "%c_cpp.debuggers.environment.description%",
                 "items": {
                   "type": "object",
                   "default": {},
@@ -791,151 +791,151 @@
               },
               "envFile": {
                 "type": "string",
-                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
+                "description": "%c_cpp.debuggers.envFile.description%",
                 "default": "${workspaceFolder}/.env"
               },
               "additionalSOLibSearchPath": {
                 "type": "string",
-                "description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
+                "description": "%c_cpp.debuggers.additionalSOLibSearchPath.description%",
                 "default": ""
               },
               "MIMode": {
                 "type": "string",
-                "description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
+                "description": "%c_cpp.debuggers.MIMode.description%",
                 "default": "gdb"
               },
               "miDebuggerPath": {
                 "type": "string",
-                "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
+                "description": "%c_cpp.debuggers.miDebuggerPath.description%",
                 "default": "/usr/bin/gdb"
               },
               "miDebuggerArgs": {
                 "type": "string",
-                "description": "Arguments for the mi debugger (such as gdb) to use. When unspecified.",
+                "description": "%c_cpp.debuggers.miDebuggerArgs.description%",
                 "default": ""
               },
               "miDebuggerServerAddress": {
                 "type": "string",
-                "description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
+                "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
                 "default": "serveraddress:port"
               },
               "stopAtEntry": {
                 "type": "boolean",
-                "description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
+                "description": "%c_cpp.debuggers.stopAtEntry.description%",
                 "default": false
               },
               "debugServerPath": {
                 "type": "string",
-                "description": "Optional full path to debug server to launch. Defaults to null.",
+                "description": "%c_cpp.debuggers.debugServerPath.description%",
                 "default": ""
               },
               "debugServerArgs": {
                 "type": "string",
-                "description": "Optional debug server args. Defaults to null.",
+                "description": "%c_cpp.debuggers.debugServerArgs.description%",
                 "default": ""
               },
               "serverStarted": {
                 "type": "string",
-                "description": "Optional server-started pattern to look for in the debug server output. Defaults to null.",
+                "description": "%c_cpp.debuggers.serverStarted.description%",
                 "default": ""
               },
               "filterStdout": {
                 "type": "boolean",
-                "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
+                "description": "%c_cpp.debuggers.filterStdout.description%",
                 "default": true
               },
               "filterStderr": {
                 "type": "boolean",
-                "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
+                "description": "%c_cpp.debuggers.filterStderr.description%",
                 "default": false
               },
               "serverLaunchTimeout": {
                 "type": "integer",
-                "description": "Optional time, in milliseconds, for the debugger to wait for the debugServer to start up. Default is 10000.",
+                "description": "%c_cpp.debuggers.serverLaunchTimeout.description%",
                 "default": "10000"
               },
               "coreDumpPath": {
                 "type": "string",
-                "description": "Optional full path to a core dump file for the specified program. Defaults to null.",
+                "description": "%c_cpp.debuggers.coreDumpPath.description%",
                 "default": ""
               },
               "externalConsole": {
                 "type": "boolean",
-                "description": "If true, a console is launched for the debuggee. If false, on Linux and Windows, it will appear in the Integrated Console.",
+                "description": "%c_cpp.debuggers.cppdbg.externalConsole.description%",
                 "default": false
               },
               "avoidWindowsConsoleRedirection": {
                 "type": "boolean",
-                "description": "If true, disables debuggee console redirection that is required for Integrated Terminal support.",
+                "description": "%c_cpp.debuggers.avoidWindowsConsoleRedirection.description%",
                 "default": false
               },
               "sourceFileMap": {
                 "type": "object",
-                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "description": "%c_cpp.debuggers.sourceFileMap.description%",
                 "default": {
                   "<source-path>": "<target-path>"
                 }
               },
               "logging": {
-                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "description": "%c_cpp.debuggers.logging.description%",
                 "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
                     "default": true
                   },
                   "engineLogging": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic engine logs should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
                     "default": false
                   },
                   "trace": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.trace.description%",
                     "default": false
                   },
                   "traceResponse": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.traceResponse.description%",
                     "default": false
                   }
                 }
               },
               "pipeTransport": {
-                "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
+                "description": "%c_cpp.debuggers.pipeTransport.description%",
                 "type": "object",
                 "default": {
                   "pipeCwd": "/usr/bin",
-                  "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
+                  "pipeProgram": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%",
                   "pipeArgs": [],
-                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                  "debuggerPath": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
                 },
                 "properties": {
                   "pipeCwd": {
                     "type": "string",
-                    "description": "The fully qualified path to the working directory for the pipe program.",
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeCwd.description%",
                     "default": "/usr/bin"
                   },
                   "pipeProgram": {
                     "type": "string",
-                    "description": "The fully qualified pipe command to execute.",
-                    "default": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'"
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeProgram.description%",
+                    "default": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%"
                   },
                   "pipeArgs": {
                     "type": "array",
-                    "description": "Command line arguments passed to the pipe program to configure the connection.",
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeArgs.description%",
                     "items": {
                       "type": "string"
                     },
@@ -943,15 +943,15 @@
                   },
                   "debuggerPath": {
                     "type": "string",
-                    "description": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
-                    "default": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                    "description": "%c_cpp.debuggers.pipeTransport.debuggerPath.description%",
+                    "default": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
                   },
                   "pipeEnv": {
                     "type": "object",
                     "additionalProperties": {
                       "type": "string"
                     },
-                    "description": "Environment variables passed to the pipe program.",
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
                   }
                 }
@@ -968,140 +968,140 @@
             "properties": {
               "program": {
                 "type": "string",
-                "description": "Full path to program executable.",
+                "description": "%c_cpp.debuggers.program.description%",
                 "default": "${workspaceRoot}/a.out"
               },
               "type": {
                 "type": "string",
-                "description": "The type of the engine. Must be \"cppdbg\".",
+                "description": "%c_cpp.debuggers.cppdbg.type.description%",
                 "default": "cppdbg"
               },
               "targetArchitecture": {
                 "type": "string",
-                "description": "The architecture of the debuggee. This will automatically be detected unless this parameter is set. Allowed values are x86, arm, arm64, mips, x64, amd64, x86_64.",
+                "description": "%c_cpp.debuggers.targetArchitecture.description%",
                 "default": "x64"
               },
               "visualizerFile": {
                 "type": "string",
-                "description": ".natvis file to be used when debugging this process. This option is not compatible with GDB pretty printing. Please also see \"showDisplayString\" if using this setting.",
+                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
                 "default": ""
               },
               "showDisplayString": {
                 "type": "boolean",
-                "description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
+                "description": "%c_cpp.debuggers.showDisplayString.description%",
                 "default": true
               },
               "additionalSOLibSearchPath": {
                 "type": "string",
-                "description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
+                "description": "%c_cpp.debuggers.additionalSOLibSearchPath.description%",
                 "default": ""
               },
               "MIMode": {
                 "type": "string",
-                "description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
+                "description": "%c_cpp.debuggers.MIMode.description%",
                 "default": "gdb"
               },
               "miDebuggerPath": {
                 "type": "string",
-                "description": "The path to the mi debugger (such as gdb). When unspecified, it will search path first for the debugger.",
+                "description": "%c_cpp.debuggers.miDebuggerPath.description%",
                 "default": "/usr/bin/gdb"
               },
               "miDebuggerServerAddress": {
                 "type": "string",
-                "description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
+                "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
                 "default": "serveraddress:port"
               },
               "processId": {
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
                     "default": 0
                   }
                 ]
               },
               "filterStdout": {
                 "type": "boolean",
-                "description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
+                "description": "%c_cpp.debuggers.filterStdout.description%",
                 "default": true
               },
               "filterStderr": {
                 "type": "boolean",
-                "description": "Search stderr stream for server-started pattern and log stderr to debug output. Defaults to false.",
+                "description": "%c_cpp.debuggers.filterStderr.description%",
                 "default": false
               },
               "sourceFileMap": {
                 "type": "object",
-                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "description": "%c_cpp.debuggers.sourceFileMap.description%",
                 "default": {
                   "<source-path>": "<target-path>"
                 }
               },
               "logging": {
-                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "description": "%c_cpp.debuggers.logging.description%",
                 "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
                     "default": true
                   },
                   "engineLogging": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic engine logs should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
                     "default": false
                   },
                   "trace": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.trace.description%",
                     "default": false
                   },
                   "traceResponse": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.traceResponse.description%",
                     "default": false
                   }
                 }
               },
               "pipeTransport": {
-                "description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
+                "description": "%c_cpp.debuggers.pipeTransport.description%",
                 "type": "object",
                 "default": {
                   "pipeCwd": "/usr/bin",
-                  "pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
+                  "pipeProgram": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%",
                   "pipeArgs": [],
-                  "debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                  "debuggerPath": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
                 },
                 "properties": {
                   "pipeCwd": {
                     "type": "string",
-                    "description": "The fully qualified path to the working directory for the pipe program.",
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeCwd.description%",
                     "default": "/usr/bin"
                   },
                   "pipeProgram": {
                     "type": "string",
-                    "description": "The fully qualified pipe command to execute.",
-                    "default": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'"
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeProgram.description%",
+                    "default": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%"
                   },
                   "pipeArgs": {
                     "type": "array",
-                    "description": "Command line arguments passed to the pipe program to configure the connection.",
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeArgs.description%",
                     "items": {
                       "type": "string"
                     },
@@ -1109,39 +1109,39 @@
                   },
                   "debuggerPath": {
                     "type": "string",
-                    "description": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
-                    "default": "The full path to the debugger on the target machine, for example /usr/bin/gdb."
+                    "description": "%c_cpp.debuggers.pipeTransport.debuggerPath.description%",
+                    "default": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
                   },
                   "pipeEnv": {
                     "type": "object",
                     "additionalProperties": {
                       "type": "string"
                     },
-                    "description": "Environment variables passed to the pipe program.",
+                    "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
                   }
                 }
               },
               "setupCommands": {
                 "type": "array",
-                "description": "One or more GDB/LLDB commands to execute in order to setup the underlying debugger. Example: \"setupCommands\": [ { \"text\": \"-enable-pretty-printing\", \"description\": \"Enable GDB pretty printing\", \"ignoreFailures\": true }].",
+                "description": "%c_cpp.debuggers.setupCommands.description%",
                 "items": {
                   "type": "object",
                   "default": {},
                   "properties": {
                     "text": {
                       "type": "string",
-                      "description": "The debugger command to execute.",
+                      "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
-                      "description": "Optional description for the command.",
+                      "description": "%c_cpp.debuggers.description.description%",
                       "default": ""
                     },
                     "ignoreFailures": {
                       "type": "boolean",
-                      "description": "If true, failures from the command should be ignored. Default value is false.",
+                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
                       "default": false
                     }
                   }
@@ -1176,12 +1176,12 @@
             "properties": {
               "program": {
                 "type": "string",
-                "description": "Full path to program executable.",
+                "description": "%c_cpp.debuggers.program.description%",
                 "default": "${workspaceRoot}/program.exe"
               },
               "args": {
                 "type": "array",
-                "description": "Command line arguments passed to the program.",
+                "description": "%c_cpp.debuggers.args.description%",
                 "items": {
                   "type": "string"
                 },
@@ -1189,17 +1189,17 @@
               },
               "type": {
                 "type": "string",
-                "description": "The type of the engine. Must be \"cppvsdbg\".",
+                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
                 "default": "cppvsdbg"
               },
               "cwd": {
                 "type": "string",
-                "description": "The working directory of the target.",
+                "description": "%c_cpp.debuggers.cwd.description%",
                 "default": "${workspaceRoot}"
               },
               "environment": {
                 "type": "array",
-                "description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
+                "description": "%c_cpp.debuggers.environment.description%",
                 "items": {
                   "type": "object",
                   "default": {},
@@ -1216,69 +1216,69 @@
               },
               "envFile": {
                 "type": "string",
-                "description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
+                "description": "%c_cpp.debuggers.envFile.description%",
                 "default": "${workspaceFolder}/.env"
               },
               "symbolSearchPath": {
                 "type": "string",
-                "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
+                "description": "%c_cpp.debuggers.symbolSearchPath.description%",
                 "default": ""
               },
               "stopAtEntry": {
                 "type": "boolean",
-                "description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
+                "description": "%c_cpp.debuggers.stopAtEntry.description%",
                 "default": false
               },
               "dumpPath": {
                 "type": "string",
-                "description": "Optional full path to a dump file for the specified program. Example: \"c:\\temp\\app.dmp\". Defaults to null.",
+                "description": "%c_cpp.debuggers.dumpPath.description%",
                 "default": ""
               },
               "visualizerFile": {
                 "type": "string",
-                "description": ".natvis file to be used when debugging this process.",
+                "description": "%c_cpp.debuggers.cppvsdbg.visualizerFile.description%",
                 "default": ""
               },
               "externalConsole": {
                 "type": "boolean",
-                "description": "If true, a console is launched for the debuggee. If false, no console is launched.",
+                "description": "%c_cpp.debuggers.cppvsdbg.externalConsole.description%",
                 "default": false
               },
               "sourceFileMap": {
                 "type": "object",
-                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "description": "%c_cpp.debuggers.sourceFileMap.description%",
                 "default": {
                   "<source-path>": "<target-path>"
                 }
               },
               "enableDebugHeap": {
                 "type": "boolean",
-                "description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
+                "description": "%c_cpp.debuggers.enableDebugHeap.description%",
                 "default": false
               },
               "logging": {
                 "type": "object",
-                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "description": "%c_cpp.debuggers.logging.description%",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
                     "default": true
                   },
                   "engineLogging": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
                     "default": false
                   }
                 }
@@ -1294,63 +1294,63 @@
             "properties": {
               "type": {
                 "type": "string",
-                "description": "The type of the engine. Must be \"cppvsdbg\".",
+                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
                 "default": "cppvsdbg"
               },
               "symbolSearchPath": {
                 "type": "string",
-                "description": "Semicolon separated list of directories to use to search for symbol (that is, pdb) files. Example: \"c:\\dir1;c:\\dir2\".",
+                "description": "%c_cpp.debuggers.symbolSearchPath.description%",
                 "default": ""
               },
               "processId": {
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process.",
+                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
                     "default": 0
                   }
                 ]
               },
               "visualizerFile": {
                 "type": "string",
-                "description": ".natvis file to be used when debugging this process.",
+                "description": "%c_cpp.debuggers.cppvsdbg.visualizerFile.description%",
                 "default": ""
               },
               "sourceFileMap": {
                 "type": "object",
-                "description": "Optional source file mappings passed to the debug engine. Example: '{ \"/original/source/path\":\"/current/source/path\" }'",
+                "description": "%c_cpp.debuggers.sourceFileMap.description%",
                 "default": {
                   "<source-path>": "<target-path>"
                 }
               },
               "logging": {
                 "type": "object",
-                "description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
+                "description": "%c_cpp.debuggers.logging.description%",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether program output should be logged to the Debug Console. Defaults to true.",
+                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
                     "default": true
                   },
                   "trace": {
                     "type": "boolean",
-                    "description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
+                    "description": "%c_cpp.debuggers.logging.trace.description%",
                     "default": false
                   }
                 }
@@ -1363,7 +1363,7 @@
     "jsonValidation": [
       {
         "fileMatch": "c_cpp_properties.json",
-        "url": "./c_cpp_properties.schema.json"
+        "url": "cpptools-schema://c_cpp_properties.schema.json"
       }
     ],
     "menus": {
@@ -1433,63 +1433,78 @@
     }
   },
   "scripts": {
-    "compile": "npm run vscode:prepublish",
-    "compileDev": "npm run prepublishjs && webpack --mode development",
+    "compile": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && yarn run translations-generate && webpack --mode production --vscode-nls",
+    "compileDev": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --mode development",
     "generateOptionsSchema": "gulp generateOptionsSchema",
+    "generate-native-strings": "gulp generate-native-strings",
+    "import-edge-strings": "node ./import_edge_strings.js",
+    "translations-export": "yarn run prepublishjs && yarn run generate-native-strings && gulp translations-export",
+    "translations-generate": "gulp translations-generate",
+    "translations-import": "gulp translations-import",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
     "pr-check": "gulp pr-check",
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
-    "vscode:prepublish": "npm run prepublishjs && webpack --mode production",
-    "watch": "webpack --watch --mode development"
+    "vscode:prepublish": "yarn run compile",
+    "watch": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --watch --mode development"
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.1",
+    "@types/node": "^12.7.2",
     "@types/plist": "^3.0.2",
     "@types/tmp": "^0.1.0",
-    "@types/webpack": "^4.32.1",
+    "@types/webpack": "^4.39.0",
     "@types/yauzl": "^2.9.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
+    "event-stream": "^4.0.1",
     "gulp": "^4.0.2",
     "gulp-env": "^0.4.0",
-    "gulp-mocha": "^6.0.0",
+    "gulp-filter": "^6.0.0",
+    "gulp-mocha": "^7.0.1",
+    "gulp-sourcemaps": "^2.6.5",
     "gulp-tslint": "^8.1.4",
+    "gulp-typescript": "^5.0.1",
+    "minimist": "^1.2.0",
+    "parse5": "^5.1.0",
+    "parse5-traverse": "^1.0.3",
     "ts-loader": "^6.0.4",
-    "tslint": "^5.18.0",
+    "tslint": "^5.19.0",
     "tslint-microsoft-contrib": "^6.2.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
     "typescript": "^3.5.3",
     "vrsource-tslint-rules": "^6.0.0",
     "vscode": "^1.1.36",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "vscode-nls-dev": "^3.2.6",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.7",
+    "xml2js": "^0.4.19"
   },
   "dependencies": {
     "escape-string-regexp": "^2.0.0",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.2",
-    "jsonc-parser": "^2.1.0",
+    "jsonc-parser": "^2.1.1",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
-    "plist": "^2.0.1",
+    "plist": "^3.0.1",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^3.0.1",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
     "vscode-languageclient": "^5.2.1",
+    "vscode-nls": "^4.1.1",
     "yauzl": "^2.10.0"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098277",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102495",
       "platforms": [
         "linux"
       ],
@@ -1503,7 +1518,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098276",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102592",
       "platforms": [
         "linux"
       ],
@@ -1519,7 +1534,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098195",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102496",
       "platforms": [
         "darwin"
       ],
@@ -1530,7 +1545,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2098194",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2102494",
       "platforms": [
         "win32"
       ],

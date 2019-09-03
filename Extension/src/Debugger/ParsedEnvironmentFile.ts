@@ -4,6 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface Environment {
     name: string;
@@ -68,7 +72,7 @@ export class ParsedEnvironmentFile {
         // show error message if single lines cannot get parsed
         let warning: string = null;
         if (parseErrors.length !== 0) {
-            warning = "Ignoring non-parseable lines in envFile " + envFile + ": ";
+            warning = localize("ignoring.lines.in.envfile", "Ignoring non-parseable lines in {0} {1}: ", "envFile", envFile);
             parseErrors.forEach(function (value, idx, array): void {
                 warning += "\"" + value + "\"" + ((idx !== array.length - 1) ? ", " : ".");
             });
