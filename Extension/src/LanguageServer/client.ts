@@ -226,7 +226,6 @@ interface ReportReferencesProgressNotification {
 }
 
 // Requests
-const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
@@ -315,7 +314,6 @@ export interface Client {
     requestWhenReady(request: () => Thenable<any>): Thenable<any>;
     notifyWhenReady(notify: () => void): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
-    requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
     selectionChanged(selection: Range): void;
@@ -1446,12 +1444,6 @@ class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
-    public requestNavigationList(document: vscode.TextDocument): Thenable<string> {
-        return this.requestWhenReady(() => {
-            return this.languageClient.sendRequest(NavigationListRequest, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
-        });
-    }
-
     /*********************************************
      * notifications to the language server
      *********************************************/
@@ -2026,7 +2018,6 @@ class NullClient implements Client {
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
     activate(): void {}
     selectionChanged(selection: Range): void {}

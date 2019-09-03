@@ -823,7 +823,6 @@ export function registerCommands(): void {
 
     commandsRegistered = true;
     getTemporaryCommandRegistrarInstance().clearTempCommands();
-    disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
@@ -847,18 +846,6 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
-}
-
-function onNavigate(): void {
-    onActivationEvent();
-    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-    if (!activeEditor) {
-        return;
-    }
-
-    clients.ActiveClient.requestNavigationList(activeEditor.document).then((navigationList: string) => {
-        ui.showNavigationOptions(navigationList);
-    });
 }
 
 function onSwitchHeaderSource(): void {
