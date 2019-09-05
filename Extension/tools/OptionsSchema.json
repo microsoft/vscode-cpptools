@@ -121,12 +121,15 @@
     "SymbolLoadInfo": {
       "type": "object",
       "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
-      "default": {},
+      "default": {
+        "loadAll": true,
+        "exceptionList": ""
+      },
       "properties": {
         "loadAll": {
           "type": "boolean",
           "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
-          "default": "true"
+          "default": true
         },
         "exceptionList": {
           "type": "string",

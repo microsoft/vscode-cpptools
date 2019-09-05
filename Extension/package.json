@@ -713,7 +713,11 @@
                       "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
-                    "description": "%c_cpp.debuggers.setupcommandsconfiguration.description%",
+                    "description": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.description.description%",
+                      "default": ""
+                    },
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "%c_cpp.debuggers.ignoreFailures.description%",
@@ -735,7 +739,11 @@
                       "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
-                    "description": "%c_cpp.debuggers.setupcommandsconfiguration.description%",
+                    "description": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.description.description%",
+                      "default": ""
+                    },
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "%c_cpp.debuggers.ignoreFailures.description%",
@@ -949,14 +957,17 @@
                 }
               },
               "symbolLoadInfo": {
-                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
+                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
                 "type": "object",
-                "default": {},
+                "default": {
+                  "loadAll": true,
+                  "exceptionList": ""
+                },
                 "properties": {
                   "loadAll": {
                     "type": "boolean",
                     "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
-                    "default": "true"
+                    "default": true
                   },
                   "exceptionList": {
                     "type": "string",
@@ -1143,7 +1154,11 @@
                       "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
-                    "description": "%c_cpp.debuggers.setupcommandsconfiguration.description%",
+                    "description": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.description.description%",
+                      "default": ""
+                    },
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "%c_cpp.debuggers.ignoreFailures.description%",
@@ -1154,14 +1169,17 @@
                 "default": []
               },
               "symbolLoadInfo": {
-                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
+                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
                 "type": "object",
-                "default": {},
+                "default": {
+                  "loadAll": true,
+                  "exceptionList": ""
+                },
                 "properties": {
                   "loadAll": {
                     "type": "boolean",
                     "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
-                    "default": "true"
+                    "default": true
                   },
                   "exceptionList": {
                     "type": "string",
