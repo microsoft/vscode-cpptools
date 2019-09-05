@@ -118,6 +118,23 @@
         }
       }
     },
+    "SymbolLoadInfo": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
+      "default": {},
+      "properties": {
+        "loadAll": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
+          "default": "true"
+        },
+        "exceptionList": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.symbolLoadInfo.exceptionList.description%",
+          "default": ""
+        }
+      }
+    },
     "CppdbgLaunchOptions": {
       "type": "object",
       "default": {},
@@ -290,6 +307,10 @@
         "pipeTransport": {
           "$ref": "#/definitions/PipeTransport",
           "description": "%c_cpp.debuggers.pipeTransport.description%"
+        },
+        "symbolLoadInfo": {
+          "$ref": "#/definitions/SymbolLoadInfo",
+          "description": "%c_cpp.debuggers.symbolloadinfo.description%"
         }
       }
     },
@@ -392,6 +413,10 @@
             "$ref": "#/definitions/SetupCommandsConfiguration"
           },
           "default": []
+        },
+        "symbolLoadInfo": {
+          "$ref": "#/definitions/SymbolLoadInfo",
+          "description": "%c_cpp.debuggers.symbolloadinfo.description%"
         }
       }
     },

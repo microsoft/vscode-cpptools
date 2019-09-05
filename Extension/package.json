@@ -713,11 +713,7 @@
                       "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
-                    "description": {
-                      "type": "string",
-                      "description": "%c_cpp.debuggers.description.description%",
-                      "default": ""
-                    },
+                    "description": "%c_cpp.debuggers.setupcommandsconfiguration.description%",
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "%c_cpp.debuggers.ignoreFailures.description%",
@@ -739,11 +735,7 @@
                       "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
-                    "description": {
-                      "type": "string",
-                      "description": "%c_cpp.debuggers.description.description%",
-                      "default": ""
-                    },
+                    "description": "%c_cpp.debuggers.setupcommandsconfiguration.description%",
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "%c_cpp.debuggers.ignoreFailures.description%",
@@ -955,6 +947,23 @@
                     "default": {}
                   }
                 }
+              },
+              "symbolLoadInfo": {
+                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
+                "type": "object",
+                "default": {},
+                "properties": {
+                  "loadAll": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
+                    "default": "true"
+                  },
+                  "exceptionList": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.exceptionList.description%",
+                    "default": ""
+                  }
+                }
               }
             }
           },
@@ -1134,11 +1143,7 @@
                       "description": "%c_cpp.debuggers.text.description%",
                       "default": ""
                     },
-                    "description": {
-                      "type": "string",
-                      "description": "%c_cpp.debuggers.description.description%",
-                      "default": ""
-                    },
+                    "description": "%c_cpp.debuggers.setupcommandsconfiguration.description%",
                     "ignoreFailures": {
                       "type": "boolean",
                       "description": "%c_cpp.debuggers.ignoreFailures.description%",
@@ -1147,6 +1152,23 @@
                   }
                 },
                 "default": []
+              },
+              "symbolLoadInfo": {
+                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
+                "type": "object",
+                "default": {},
+                "properties": {
+                  "loadAll": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
+                    "default": "true"
+                  },
+                  "exceptionList": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.exceptionList.description%",
+                    "default": ""
+                  }
+                }
               }
             }
           }
