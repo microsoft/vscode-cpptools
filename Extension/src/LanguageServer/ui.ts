@@ -44,25 +44,25 @@ export class UI {
 
     constructor() {
 
-        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 3);
+        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
         this.configStatusBarItem.tooltip = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
         this.ShowConfiguration = true;
 
-        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
+        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.text = "";
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = true;
 
-        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
+        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.text = "";
         this.intelliSenseStatusBarItem.tooltip = localize("updating.intellisense.tooltip", "Updating IntelliSense...");
-        this.intelliSenseStatusBarItem.color = "Red";
+        this.intelliSenseStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.ShowFlameIcon = true;
 
-        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
+        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 902);
         this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files...");
         this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
