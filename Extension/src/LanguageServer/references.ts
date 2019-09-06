@@ -71,11 +71,11 @@ export enum ReferencesCommandMode {
 export function referencesCommandModeToString(referencesCommandMode: ReferencesCommandMode): string {
     switch (referencesCommandMode) {
         case ReferencesCommandMode.Find:
-            return "Find All References";
+            return localize("find.all.references", "Find All References");
         case ReferencesCommandMode.Peek:
-            return "Peek References";
+            return localize("peek.references", "Peek References");
         case ReferencesCommandMode.Rename:
-            return "Rename";
+            return localize("rename", "Rename");
         default:
             return "";
     }
