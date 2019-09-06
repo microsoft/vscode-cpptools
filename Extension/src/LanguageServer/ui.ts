@@ -97,7 +97,9 @@ export class UI {
 
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
-            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Peek) ? ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
+            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
+            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
+            ReferencesCommandMode.Peek));
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {
@@ -106,7 +108,7 @@ export class UI {
             this.ShowReferencesIcon = false;
         } else {
             this.referencesStatusBarItem.text = "$(search)";
-            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + (val === ReferencesCommandMode.Find ? this.referencesPreviewTooltip : "");
+            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + this.referencesPreviewTooltip;
             this.ShowReferencesIcon = true;
         }
     }
