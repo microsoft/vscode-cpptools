@@ -221,7 +221,6 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
 const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
-const ReportNavigationNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportNavigation');
 const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = new NotificationType<DebugProtocolParams, void>('cpptools/debugProtocol');
