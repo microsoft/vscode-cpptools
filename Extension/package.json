@@ -185,12 +185,6 @@
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
-        "C_Cpp.navigation.length": {
-          "type": "number",
-          "default": 60,
-          "description": "%c_cpp.configuration.navigation.length.description%",
-          "scope": "resource"
-        },
         "C_Cpp.loggingLevel": {
           "type": "string",
           "enum": [
@@ -568,11 +562,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.Navigate",
-        "title": "%c_cpp.command.navigate.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.EnableErrorSquiggles",
         "title": "%c_cpp.command.enableErrorSquiggles.title%",
         "category": "C/C++"
@@ -637,16 +626,6 @@
       {
         "command": "C_Cpp.SwitchHeaderSource",
         "key": "Alt+O",
-        "when": "editorTextFocus && editorLangId == 'c'"
-      },
-      {
-        "command": "C_Cpp.Navigate",
-        "key": "Alt+N",
-        "when": "editorTextFocus && editorLangId == 'cpp'"
-      },
-      {
-        "command": "C_Cpp.Navigate",
-        "key": "Alt+N",
         "when": "editorTextFocus && editorLangId == 'c'"
       }
     ],
@@ -1377,16 +1356,6 @@
           "when": "editorLangId == cpp",
           "command": "C_Cpp.SwitchHeaderSource",
           "group": "other1_navigation@1"
-        },
-        {
-          "when": "editorLangId == c",
-          "command": "C_Cpp.Navigate",
-          "group": "other1_navigation@2"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.Navigate",
-          "group": "other1_navigation@2"
         },
         {
           "when": "editorLangId == c",
