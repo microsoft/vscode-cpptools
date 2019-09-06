@@ -5,3 +5,6 @@ browse*.db*
 *.pdb
 *.exe
 *.ilk
+
+# ignore exported localization xlf directory
+localization-export

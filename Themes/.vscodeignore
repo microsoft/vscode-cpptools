@@ -1,0 +1,5 @@
+# ignore vscode settings for extension development
+.vscode/**
+
+# ignore package lock
+package-lock.json

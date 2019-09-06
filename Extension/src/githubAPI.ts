@@ -8,6 +8,7 @@ import { PackageVersion } from './packageVersion';
 import * as util from './common';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
+import * as vscode from 'vscode';
 
 const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
 
@@ -38,7 +39,7 @@ function getVsixDownloadUrl(build: Build, vsixName: string): string {
         return asset.name === vsixName;
     }).browser_download_url;
     if (!downloadUrl) {
-        throw new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + build.name);
+        throw new Error(`Failed to find VSIX: ${vsixName} in build: ${build.name}`);
     }
     return downloadUrl;
 }
@@ -111,7 +112,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
         }
     }(info);
     if (!vsixName) {
-        throw new Error('Failed to match VSIX name for: ' + info.platform + ':' + info.architecture);
+        throw new Error(`Failed to match VSIX name for: ${info.platform}: ${info.architecture}`);
     }
     return vsixName;
 }
@@ -170,6 +171,10 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
  * @return The Build if the user should update to it, otherwise undefined.
  */
 function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build {
+    if (!vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+        return undefined;
+    }
+
     // Get predicates to determine the build to install, if any
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
