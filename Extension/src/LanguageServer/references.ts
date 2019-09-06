@@ -142,7 +142,7 @@ export class ProgressHandler {
         this.prevVisibleRangesLength = visibleRangesLength;
     }
 
-    public reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
+    private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
         const helpMessage: string = ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
@@ -304,15 +304,22 @@ export class ProgressHandler {
             (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek && ((!this.referencesCanceled && this.referencesCurrentProgress.referencesProgress !== ReferencesProgress.FinalResultsAvailable)
                 || (this.referencesCanceled && this.referencesCurrentProgress.referencesProgress === ReferencesProgress.CanceledFinalResultsAvailable)));
         let refsFound: boolean = false;
-        for (let reference of referencesResult.referenceInfos) {
-            if (!showConfirmedReferences && reference.type === ReferenceType.Confirmed) {
-                continue;
-            } else if (!refsFound) {
-                refsFound = true;
+        // 1st pass is for confirmed references.
+        for (let pass: number = (showConfirmedReferences ? 0 : 1); pass < 2; ++pass) {
+            for (let reference of referencesResult.referenceInfos) {
+                if ((pass === 0 && reference.type !== ReferenceType.Confirmed) ||
+                    (pass === 1 && reference.type === ReferenceType.Confirmed)) {
+                    continue;
+                } else if (!refsFound) {
+                    refsFound = true;
+                }
+                let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
+                this.referencesChannel.appendLine("[" + convertReferenceTypeToString(reference.type, this.referencesCanceled, this.client.ReferencesCommandMode === ReferencesCommandMode.Rename)
+                    + "] " + reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
             }
-            let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
-            this.referencesChannel.appendLine("[" + convertReferenceTypeToString(reference.type, this.referencesCanceled, this.client.ReferencesCommandMode === ReferencesCommandMode.Rename)
-                + "] " + reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
+            if (pass === 0 && refsFound) {
+                this.referencesChannel.appendLine("");
+            }
         }
 
         if (this.referencesStartedWhileTagParsing || refsFound) {
