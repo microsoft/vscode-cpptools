@@ -188,7 +188,6 @@ interface ShowMessageWindowParams {
 }
 
 // Requests
-const NavigationListRequest: RequestType<TextDocumentIdentifier, string, void, void> = new RequestType<TextDocumentIdentifier, string, void, void>('cpptools/requestNavigationList');
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
@@ -222,7 +221,6 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
 const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
-const ReportNavigationNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportNavigation');
 const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = new NotificationType<DebugProtocolParams, void>('cpptools/debugProtocol');
@@ -243,7 +241,6 @@ interface ClientModel {
     isTagParsing: DataBinding<boolean>;
     isUpdatingIntelliSense: DataBinding<boolean>;
     referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
-    navigationLocation: DataBinding<string>;
     tagParserStatus: DataBinding<string>;
     activeConfigName: DataBinding<string>;
 }
@@ -252,7 +249,6 @@ export interface Client {
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
     ReferencesCommandModeChanged: vscode.Event<refs.ReferencesCommandMode>;
-    NavigationLocationChanged: vscode.Event<string>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
     RootPath: string;
@@ -281,7 +277,6 @@ export interface Client {
     requestWhenReady(request: () => Thenable<any>): Thenable<any>;
     notifyWhenReady(notify: () => void): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
-    requestNavigationList(document: vscode.TextDocument): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
     selectionChanged(selection: Range): void;
@@ -336,7 +331,6 @@ export class DefaultClient implements Client {
         isTagParsing: new DataBinding<boolean>(false),
         isUpdatingIntelliSense: new DataBinding<boolean>(false),
         referencesCommandMode: new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None),
-        navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
     };
@@ -344,7 +338,6 @@ export class DefaultClient implements Client {
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
-    public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
 
@@ -1180,7 +1173,6 @@ export class DefaultClient implements Client {
 
         this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
-        this.languageClient.onNotification(ReportNavigationNotification, (e) => this.navigate(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
@@ -1259,32 +1251,6 @@ export class DefaultClient implements Client {
 
     private logTelemetry(notificationBody: TelemetryPayload): void {
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
-    }
-
-    private navigate(payload: LocalizeStringParams): void {
-        let cppSettings: CppSettings = new CppSettings(this.RootUri);
-
-        // TODO: Move this code to a different place?
-        if (payload.text && payload.text !== "") {
-            if (cppSettings.autoAddFileAssociations && payload.text && payload.text.startsWith("<def")) {
-                let fileAssociations: string = payload.text.substr(4);
-                let is_c: boolean = fileAssociations.startsWith("c");
-                // Skip over rest of header: c>; or >;
-                fileAssociations = fileAssociations.substr(is_c ? 3 : 2);
-                this.addFileAssociations(fileAssociations, is_c);
-                return;
-            }
-        }
-
-        // If it's too big, it doesn't appear.
-        // The space available depends on the user's resolution and space taken up by other UI.
-
-        let currentNavigation: string = util.getLocalizedString(payload);
-        let maxLength: number = cppSettings.navigationLength;
-        if (currentNavigation && currentNavigation.length > maxLength) {
-            currentNavigation = currentNavigation.substring(0, maxLength - 3).concat("...");
-        }
-        this.model.navigationLocation.Value = currentNavigation;
     }
 
     public addFileAssociations(fileAssociations: string, is_c: boolean): void {
@@ -1517,12 +1483,6 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName
         };
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
-    }
-
-    public requestNavigationList(document: vscode.TextDocument): Thenable<string> {
-        return this.requestWhenReady(() => {
-            return this.languageClient.sendRequest(NavigationListRequest, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
-        });
     }
 
     /*********************************************
@@ -1896,7 +1856,6 @@ class NullClient implements Client {
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
-    public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
     RootPath: string = "/";
@@ -1925,7 +1884,6 @@ class NullClient implements Client {
     requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
     notifyWhenReady(notify: () => void): void {}
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    requestNavigationList(document: vscode.TextDocument): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
     activate(): void {}
     selectionChanged(selection: Range): void {}
