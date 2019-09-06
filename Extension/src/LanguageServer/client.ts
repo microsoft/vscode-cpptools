@@ -36,10 +36,6 @@ let ui: UI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
 
-interface NavigationPayload {
-    navigation: string;
-}
-
 interface TelemetryPayload {
     event: string;
     properties?: { [key: string]: string };
@@ -258,7 +254,6 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
 const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
-const ReportNavigationNotification: NotificationType<NavigationPayload, void> = new NotificationType<NavigationPayload, void>('cpptools/reportNavigation');
 const ReportTagParseStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<OutputNotificationBody, void> = new NotificationType<OutputNotificationBody, void>('cpptools/debugProtocol');
@@ -277,7 +272,6 @@ interface ClientModel {
     isTagParsing: DataBinding<boolean>;
     isUpdatingIntelliSense: DataBinding<boolean>;
     referencesCommandMode: DataBinding<ReferencesCommandMode>;
-    navigationLocation: DataBinding<string>;
     tagParserStatus: DataBinding<string>;
     activeConfigName: DataBinding<string>;
 }
@@ -286,7 +280,6 @@ export interface Client {
     TagParsingChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
     ReferencesCommandModeChanged: vscode.Event<ReferencesCommandMode>;
-    NavigationLocationChanged: vscode.Event<string>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
     RootPath: string;
@@ -367,7 +360,6 @@ class DefaultClient implements Client {
         isTagParsing: new DataBinding<boolean>(false),
         isUpdatingIntelliSense: new DataBinding<boolean>(false),
         referencesCommandMode: new DataBinding<ReferencesCommandMode>(ReferencesCommandMode.None),
-        navigationLocation: new DataBinding<string>(""),
         tagParserStatus: new DataBinding<string>(""),
         activeConfigName: new DataBinding<string>("")
     };
@@ -375,7 +367,6 @@ class DefaultClient implements Client {
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get ReferencesCommandModeChanged(): vscode.Event<ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
-    public get NavigationLocationChanged(): vscode.Event<string> { return this.model.navigationLocation.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
 
@@ -1148,7 +1139,6 @@ class DefaultClient implements Client {
 
         this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
-        this.languageClient.onNotification(ReportNavigationNotification, (e) => this.navigate(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
@@ -1222,29 +1212,6 @@ class DefaultClient implements Client {
 
     private logTelemetry(notificationBody: TelemetryPayload): void {
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
-    }
-
-    private navigate(payload: NavigationPayload): void {
-        let cppSettings: CppSettings = new CppSettings(this.RootUri);
-
-        // TODO: Move this code to a different place?
-        if (cppSettings.autoAddFileAssociations && payload.navigation.startsWith("<def")) {
-            let fileAssociations: string = payload.navigation.substr(4);
-            let is_c: boolean = fileAssociations.startsWith("c");
-            // Skip over rest of header: c>; or >;
-            fileAssociations = fileAssociations.substr(is_c ? 3 : 2);
-            this.addFileAssociations(fileAssociations, is_c);
-            return;
-        }
-
-        // If it's too big, it doesn't appear.
-        // The space available depends on the user's resolution and space taken up by other UI.
-        let currentNavigation: string = payload.navigation;
-        let maxLength: number = cppSettings.navigationLength;
-        if (currentNavigation.length > maxLength) {
-            currentNavigation = currentNavigation.substring(0, maxLength - 3).concat("...");
-        }
-        this.model.navigationLocation.Value = currentNavigation;
     }
 
     public addFileAssociations(fileAssociations: string, is_c: boolean): void {
@@ -1990,7 +1957,6 @@ class NullClient implements Client {
     public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ReferencesCommandModeChanged(): vscode.Event<ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
-    public get NavigationLocationChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
     RootPath: string = "/";
