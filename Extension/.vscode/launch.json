@@ -60,7 +60,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
 			],
-			"preLaunchTask": "TypeScript Compile"
+			"preLaunchTask": "Pretest"
 		},
 		{
 			"name": "Node Attach",

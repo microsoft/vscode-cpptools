@@ -51,7 +51,7 @@
                 ]
             },
             "dependsOn": [
-                "TypeScript Compile"
+                "Compile Dev"
             ]
         },
         {
@@ -77,7 +77,7 @@
                 "pretest"
             ],
             "dependsOn": [
-                "TypeScript Compile"
+                "Compile Dev"
             ],
             "problemMatcher": "$tsc-watch"
         }
