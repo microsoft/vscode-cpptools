@@ -45,7 +45,7 @@ export class UI {
 
     constructor() {
         // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
-        this.navigationStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 999);
+        this.navigationStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
         this.navigationStatusBarItem.tooltip = localize("c.cpp.navigation.tooltip", "C/C++ Navigation");
         this.navigationStatusBarItem.command = "C_Cpp.Navigate";
         this.ShowNavigation = true;
@@ -55,20 +55,20 @@ export class UI {
         this.configStatusBarItem.tooltip = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
         this.ShowConfiguration = true;
 
-        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
+        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.text = "";
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = true;
 
-        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1002);
+        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.text = "";
         this.intelliSenseStatusBarItem.tooltip = localize("updating.intellisense.tooltip", "Updating IntelliSense...");
         this.intelliSenseStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.ShowFlameIcon = true;
 
-        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1001);
+        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 902);
         this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files...");
         this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
