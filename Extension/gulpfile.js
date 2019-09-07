@@ -495,16 +495,16 @@ gulp.task("generate-native-strings", (done) => {
         // Skip empty strings, which can be used to prevent enum/index reordering
         if (stringTable[property] != "") {
             typeScriptSwitchContent += `        case ${stringIndex}:\n            message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
-        }
-        let argIndex = 0;
-        for (;;) {
-            if (!stringValue.includes(`{${argIndex}}`)) {
-                break;
+            let argIndex = 0;
+            for (;;) {
+                if (!stringValue.includes(`{${argIndex}}`)) {
+                    break;
+                }
+                typeScriptSwitchContent += `, stringArgs[${argIndex}]`;
+                ++argIndex;
             }
-            typeScriptSwitchContent += `, stringArgs[${argIndex}]`;
-            ++argIndex;
+            typeScriptSwitchContent += ");\n            break;\n";
         }
-        typeScriptSwitchContent += ");\n            break;\n";
         ++stringIndex;
     };
 
