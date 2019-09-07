@@ -197,6 +197,7 @@ const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeAction
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
+const FileChangedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileChanged');
 const FileDeletedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileDeleted');
 const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
 const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
@@ -1185,6 +1186,8 @@ export class DefaultClient implements Client {
         this.setupOutputHandlers();
     }
 
+    private associations_for_did_change: Set<string>;
+
     /**
      * listen for file created/deleted events under the ${workspaceFolder} folder
      */
@@ -1196,11 +1199,32 @@ export class DefaultClient implements Client {
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
                 "**/*",
                 false /*ignoreCreateEvents*/,
-                true /*ignoreChangeEvents*/,
+                false /*ignoreChangeEvents*/,
                 false /*ignoreDeleteEvents*/);
 
             this.rootPathFileWatcher.onDidCreate((uri) => {
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
+            });
+
+            // TODO: Handle new associations without a reload.
+            this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "hpp", "hh", "hxx", "h", "mm", "ino", "inl", "ii", "cp", "c++", "hp", "h++", "tcc"]);
+            let settings: OtherSettings = new OtherSettings(this.RootUri);
+            let assocs: any = settings.filesAssociations;
+            for (let assoc in assocs) {
+                let dotIndex: number = assoc.lastIndexOf('.');
+                if (dotIndex !== -1) {
+                    let ext: string = assoc.substr(dotIndex + 1);
+                    this.associations_for_did_change.add(ext);
+                }
+            }
+            this.rootPathFileWatcher.onDidChange((uri) => {
+                let dotIndex: number = uri.fsPath.lastIndexOf('.');
+                if (dotIndex !== -1) {
+                    let ext: string = uri.fsPath.substr(dotIndex + 1);
+                    if (ext in this.associations_for_did_change) {
+                        this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() });
+                    }
+                }
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
