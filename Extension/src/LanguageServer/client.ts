@@ -1221,7 +1221,7 @@ export class DefaultClient implements Client {
                 let dotIndex: number = uri.fsPath.lastIndexOf('.');
                 if (dotIndex !== -1) {
                     let ext: string = uri.fsPath.substr(dotIndex + 1);
-                    if (ext in this.associations_for_did_change) {
+                    if (this.associations_for_did_change.has(ext)) {
                         this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() });
                     }
                 }
