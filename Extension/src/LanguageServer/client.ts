@@ -235,6 +235,7 @@ const ReportReferencesProgressNotification: NotificationType<refs.ReportReferenc
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
+const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 
 let failureMessageShown: boolean = false;
 
@@ -1183,7 +1184,17 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
         this.languageClient.onNotification(PublishDiagnosticsNotification, (e) => this.publishDiagnostics(e));
         this.languageClient.onNotification(ShowMessageWindowNotification, (e) => this.showMessageWindow(e));
+        this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.setupOutputHandlers();
+    }
+
+    private setTextDocumentLanguage(languageStr: string): void {
+        let cppSettings: CppSettings = new CppSettings(this.RootUri);
+        if (cppSettings.autoAddFileAssociations) {
+            const is_c: boolean = languageStr.startsWith("c;");
+            languageStr = languageStr.substr(is_c ? 2 : 1);
+            this.addFileAssociations(languageStr, is_c);
+        }
     }
 
     private associations_for_did_change: Set<string>;
@@ -1207,7 +1218,7 @@ export class DefaultClient implements Client {
             });
 
             // TODO: Handle new associations without a reload.
-            this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "hpp", "hh", "hxx", "h", "mm", "ino", "inl", "ii", "cp", "c++", "hp", "h++", "tcc"]);
+            this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc"]);
             let settings: OtherSettings = new OtherSettings(this.RootUri);
             let assocs: any = settings.filesAssociations;
             for (let assoc in assocs) {
