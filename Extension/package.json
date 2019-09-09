@@ -667,7 +667,7 @@
               },
               "type": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppdbg.type.description%",
+                "description": "%c_cpp.debuggers.CppdbgLaunchOptions.type.description%",
                 "default": "cppdbg"
               },
               "targetArchitecture": {
@@ -689,17 +689,17 @@
                   "properties": {
                     "text": {
                       "type": "string",
-                      "description": "%c_cpp.debuggers.text.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.text.description%",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
-                      "description": "%c_cpp.debuggers.description.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.description.description%",
                       "default": ""
                     },
                     "ignoreFailures": {
                       "type": "boolean",
-                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.ignoreFailures.description%",
                       "default": false
                     }
                   }
@@ -715,17 +715,17 @@
                   "properties": {
                     "text": {
                       "type": "string",
-                      "description": "%c_cpp.debuggers.text.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.text.description%",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
-                      "description": "%c_cpp.debuggers.description.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.description.description%",
                       "default": ""
                     },
                     "ignoreFailures": {
                       "type": "boolean",
-                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.ignoreFailures.description%",
                       "default": false
                     }
                   }
@@ -743,7 +743,7 @@
               },
               "visualizerFile": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
+                "description": "%c_cpp.debuggers.CppdbgLaunchOptions.visualizerFile.description%",
                 "default": ""
               },
               "showDisplayString": {
@@ -840,7 +840,7 @@
               },
               "externalConsole": {
                 "type": "boolean",
-                "description": "%c_cpp.debuggers.cppdbg.externalConsole.description%",
+                "description": "%c_cpp.debuggers.CppdbgLaunchOptions.externalConsole.description%",
                 "default": false
               },
               "avoidWindowsConsoleRedirection": {
@@ -856,65 +856,65 @@
                 }
               },
               "logging": {
-                "description": "%c_cpp.debuggers.logging.description%",
+                "description": "%c_cpp.debuggers.Logging.description%",
                 "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
+                    "description": "%c_cpp.debuggers.Logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
+                    "description": "%c_cpp.debuggers.Logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
+                    "description": "%c_cpp.debuggers.Logging.programOutput.description%",
                     "default": true
                   },
                   "engineLogging": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                    "description": "%c_cpp.debuggers.Logging.engineLogging.description%",
                     "default": false
                   },
                   "trace": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.trace.description%",
+                    "description": "%c_cpp.debuggers.Logging.trace.description%",
                     "default": false
                   },
                   "traceResponse": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.traceResponse.description%",
+                    "description": "%c_cpp.debuggers.Logging.traceResponse.description%",
                     "default": false
                   }
                 }
               },
               "pipeTransport": {
-                "description": "%c_cpp.debuggers.pipeTransport.description%",
+                "description": "%c_cpp.debuggers.PipeTransport.description%",
                 "type": "object",
                 "default": {
                   "pipeCwd": "/usr/bin",
-                  "pipeProgram": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%",
+                  "pipeProgram": "%c_cpp.debuggers.PipeTransport.default.pipeProgram%",
                   "pipeArgs": [],
-                  "debuggerPath": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
+                  "debuggerPath": "%c_cpp.debuggers.PipeTransport.debuggerPath.description%"
                 },
                 "properties": {
                   "pipeCwd": {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeCwd.description%",
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeCwd.description%",
                     "default": "/usr/bin"
                   },
                   "pipeProgram": {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeProgram.description%",
-                    "default": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%"
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeProgram.description%",
+                    "default": "%c_cpp.debuggers.PipeTransport.default.pipeProgram%"
                   },
                   "pipeArgs": {
                     "type": "array",
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeArgs.description%",
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeArgs.description%",
                     "items": {
                       "type": "string"
                     },
@@ -922,15 +922,15 @@
                   },
                   "debuggerPath": {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.pipeTransport.debuggerPath.description%",
-                    "default": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
+                    "description": "%c_cpp.debuggers.PipeTransport.debuggerPath.description%",
+                    "default": "%c_cpp.debuggers.PipeTransport.debuggerPath.description%"
                   },
                   "pipeEnv": {
                     "type": "object",
                     "additionalProperties": {
                       "type": "string"
                     },
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeEnv.description%",
                     "default": {}
                   }
                 }
@@ -952,7 +952,7 @@
               },
               "type": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppdbg.type.description%",
+                "description": "%c_cpp.debuggers.CppdbgLaunchOptions.type.description%",
                 "default": "cppdbg"
               },
               "targetArchitecture": {
@@ -962,7 +962,7 @@
               },
               "visualizerFile": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
+                "description": "%c_cpp.debuggers.CppdbgLaunchOptions.visualizerFile.description%",
                 "default": ""
               },
               "showDisplayString": {
@@ -994,12 +994,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
+                    "description": "%c_cpp.debuggers.CppdbgAttachOptions.processId.description%",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
+                    "description": "%c_cpp.debuggers.CppdbgAttachOptions.processId.description%",
                     "default": 0
                   }
                 ]
@@ -1022,65 +1022,65 @@
                 }
               },
               "logging": {
-                "description": "%c_cpp.debuggers.logging.description%",
+                "description": "%c_cpp.debuggers.Logging.description%",
                 "type": "object",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
+                    "description": "%c_cpp.debuggers.Logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
+                    "description": "%c_cpp.debuggers.Logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
+                    "description": "%c_cpp.debuggers.Logging.programOutput.description%",
                     "default": true
                   },
                   "engineLogging": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                    "description": "%c_cpp.debuggers.Logging.engineLogging.description%",
                     "default": false
                   },
                   "trace": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.trace.description%",
+                    "description": "%c_cpp.debuggers.Logging.trace.description%",
                     "default": false
                   },
                   "traceResponse": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.traceResponse.description%",
+                    "description": "%c_cpp.debuggers.Logging.traceResponse.description%",
                     "default": false
                   }
                 }
               },
               "pipeTransport": {
-                "description": "%c_cpp.debuggers.pipeTransport.description%",
+                "description": "%c_cpp.debuggers.PipeTransport.description%",
                 "type": "object",
                 "default": {
                   "pipeCwd": "/usr/bin",
-                  "pipeProgram": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%",
+                  "pipeProgram": "%c_cpp.debuggers.PipeTransport.default.pipeProgram%",
                   "pipeArgs": [],
-                  "debuggerPath": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
+                  "debuggerPath": "%c_cpp.debuggers.PipeTransport.debuggerPath.description%"
                 },
                 "properties": {
                   "pipeCwd": {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeCwd.description%",
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeCwd.description%",
                     "default": "/usr/bin"
                   },
                   "pipeProgram": {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeProgram.description%",
-                    "default": "%c_cpp.debuggers.pipeTransport.default.pipeProgram%"
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeProgram.description%",
+                    "default": "%c_cpp.debuggers.PipeTransport.default.pipeProgram%"
                   },
                   "pipeArgs": {
                     "type": "array",
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeArgs.description%",
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeArgs.description%",
                     "items": {
                       "type": "string"
                     },
@@ -1088,15 +1088,15 @@
                   },
                   "debuggerPath": {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.pipeTransport.debuggerPath.description%",
-                    "default": "%c_cpp.debuggers.pipeTransport.default.debuggerPath%"
+                    "description": "%c_cpp.debuggers.PipeTransport.debuggerPath.description%",
+                    "default": "%c_cpp.debuggers.PipeTransport.debuggerPath.description%"
                   },
                   "pipeEnv": {
                     "type": "object",
                     "additionalProperties": {
                       "type": "string"
                     },
-                    "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
+                    "description": "%c_cpp.debuggers.PipeTransport.pipeEnv.description%",
                     "default": {}
                   }
                 }
@@ -1110,17 +1110,17 @@
                   "properties": {
                     "text": {
                       "type": "string",
-                      "description": "%c_cpp.debuggers.text.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.text.description%",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
-                      "description": "%c_cpp.debuggers.description.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.description.description%",
                       "default": ""
                     },
                     "ignoreFailures": {
                       "type": "boolean",
-                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
+                      "description": "%c_cpp.debuggers.SetupCommandsConfiguration.ignoreFailures.description%",
                       "default": false
                     }
                   }
@@ -1168,7 +1168,7 @@
               },
               "type": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
+                "description": "%c_cpp.debuggers.CppvsdbgLaunchOptions.type.description%",
                 "default": "cppvsdbg"
               },
               "cwd": {
@@ -1215,12 +1215,12 @@
               },
               "visualizerFile": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppvsdbg.visualizerFile.description%",
+                "description": "%c_cpp.debuggers.CppvsdbgLaunchOptions.visualizerFile.description%",
                 "default": ""
               },
               "externalConsole": {
                 "type": "boolean",
-                "description": "%c_cpp.debuggers.cppvsdbg.externalConsole.description%",
+                "description": "%c_cpp.debuggers.CppvsdbgLaunchOptions.externalConsole.description%",
                 "default": false
               },
               "sourceFileMap": {
@@ -1237,22 +1237,22 @@
               },
               "logging": {
                 "type": "object",
-                "description": "%c_cpp.debuggers.logging.description%",
+                "description": "%c_cpp.debuggers.Logging.description%",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
+                    "description": "%c_cpp.debuggers.Logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
+                    "description": "%c_cpp.debuggers.Logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
+                    "description": "%c_cpp.debuggers.Logging.programOutput.description%",
                     "default": true
                   },
                   "engineLogging": {
@@ -1273,7 +1273,7 @@
             "properties": {
               "type": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppvsdbg.type.description%",
+                "description": "%c_cpp.debuggers.CppvsdbgLaunchOptions.type.description%",
                 "default": "cppvsdbg"
               },
               "symbolSearchPath": {
@@ -1285,19 +1285,19 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
+                    "description": "%c_cpp.debuggers.CppdbgAttachOptions.processId.description%",
                     "default": "${command:pickProcess}"
                   },
                   {
                     "type": "integer",
-                    "description": "%c_cpp.debuggers.processId.anyOf.description%",
+                    "description": "%c_cpp.debuggers.CppdbgAttachOptions.processId.description%",
                     "default": 0
                   }
                 ]
               },
               "visualizerFile": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.cppvsdbg.visualizerFile.description%",
+                "description": "%c_cpp.debuggers.CppvsdbgLaunchOptions.visualizerFile.description%",
                 "default": ""
               },
               "sourceFileMap": {
@@ -1309,27 +1309,27 @@
               },
               "logging": {
                 "type": "object",
-                "description": "%c_cpp.debuggers.logging.description%",
+                "description": "%c_cpp.debuggers.Logging.description%",
                 "default": {},
                 "properties": {
                   "exceptions": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.exceptions.description%",
+                    "description": "%c_cpp.debuggers.Logging.exceptions.description%",
                     "default": true
                   },
                   "moduleLoad": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.moduleLoad.description%",
+                    "description": "%c_cpp.debuggers.Logging.moduleLoad.description%",
                     "default": true
                   },
                   "programOutput": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.programOutput.description%",
+                    "description": "%c_cpp.debuggers.Logging.programOutput.description%",
                     "default": true
                   },
                   "trace": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.trace.description%",
+                    "description": "%c_cpp.debuggers.Logging.trace.description%",
                     "default": false
                   }
                 }

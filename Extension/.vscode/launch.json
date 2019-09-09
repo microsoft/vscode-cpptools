@@ -3,6 +3,12 @@
 	"version": "0.1.0",
 	"configurations": [
 		{
+			"type": "node",
+			"request": "launch",
+			"name": "Launch Program",
+			"program": "${workspaceFolder}\\out\\tools\\GenerateOptionsSchema.js"
+		},
+		{
 			"name": "Launch Extension (development)",
 			"type": "extensionHost",
 			"request": "launch",
