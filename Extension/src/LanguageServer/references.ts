@@ -114,7 +114,7 @@ export class ProgressHandler {
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
     private referencePreviousProgressUICounter: number;
-    public referencesCurrentProgressUICounter: number;
+    private referencesCurrentProgressUICounter: number;
     private readonly referencesProgressUpdateInterval: number = 1000;
     private readonly referencesProgressDelayInterval: number = 2000;
 
@@ -132,6 +132,12 @@ export class ProgressHandler {
     public dispose(): void {
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
+    }
+
+    public UpdateProgressUICounter(mode: ReferencesCommandMode): void {
+        if (mode !== ReferencesCommandMode.None) {
+            ++this.referencesCurrentProgressUICounter;
+        }
     }
 
     public updateVisibleRange(visibleRangesLength: number): void {
