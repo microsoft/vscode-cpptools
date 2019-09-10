@@ -1257,7 +1257,7 @@
                   },
                   "engineLogging": {
                     "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                    "description": "%c_cpp.debuggers.Logging.engineLogging.description%",
                     "default": false
                   }
                 }

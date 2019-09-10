@@ -9,6 +9,7 @@ import * as os from 'os';
 let nlsJSON: any = null;
 let reverseNlsJSON: any = {};
 
+// properties that overlap but have different values for for cppvsdbg and cppdbg.
 const collisionList = [
     'type', 
     'externalConsole', 
@@ -190,5 +191,3 @@ export function generateOptionsSchema(): void {
     fs.writeFileSync('package.json', content);
     fs.writeFileSync('package.nls.json', JSON.stringify(nlsJSON, null, 4));
 }
-
-generateOptionsSchema();

@@ -498,7 +498,7 @@
             },
             "engineLogging": {
               "type": "boolean",
-              "description": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
+              "description": "Optional flag to determine whether diagnostic engine logs should be logged to the Debug Console. Defaults to false.",
               "default": false
             }
           }

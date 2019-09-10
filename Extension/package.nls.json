@@ -114,6 +114,5 @@
     "c_cpp.debuggers.CppvsdbgLaunchOptions.visualizerFile.description": ".natvis file to be used when debugging this process.",
     "c_cpp.debuggers.CppvsdbgLaunchOptions.externalConsole.description": "If true, a console is launched for the debuggee. If false, no console is launched.",
     "c_cpp.debuggers.enableDebugHeap.description": "If false, the process will be launched with debug heap disabled. This sets the environment variable '_NO_DEBUG_HEAP' to '1'.",
-    "c_cpp.debuggers.logging.engineLogging.description": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
     "c_cpp.debuggers.CppdbgAttachOptions.processId.description": "Optional process id to attach the debugger to. Use \"${command:pickProcess}\" to get a list of local running processes to attach to. Note that some platforms require administrator privileges in order to attach to a process."
 }
