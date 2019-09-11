@@ -13,8 +13,6 @@ const branchName = 'localization';
 const commitComment = 'Localization - Translated Strings';
 const projectName = 'cpptools';
 
-
-// TODO: Replace with env var defined only on build server
 if (!process.env.RunningOnAzureDevOps) {
     console.log("");
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -38,8 +36,7 @@ let directories = fs.readdirSync(rootSourcePath);
 directories.forEach(folderName => {
     let sourcePath = `${rootSourcePath}\\${folderName}\\Projects\\Src\\vscode-extensions\\vscode-${projectName}.${folderName}.xlf`;
     let destinationPath = `../vscode-translations-import/${folderName}/vscode-extensions/vscode-${projectName}.xlf`;
-    console.log(sourcePath);
-    console.log(destinationPath);
+    console.log(`Copying "${sourcePath}$" to "${destinationPath}"`);
     fs.copySync(sourcePath, destinationPath);
 });
 
@@ -57,6 +54,9 @@ lines.forEach(line => {
 // If no files have been added or modified, we are done.
 if (!anyAddedOrModified)
     return;
+
+// Check out local branch
+cp.execSync('git checkout -b localization');
 
 // Add changed files.
 cp.execSync('git add .');
