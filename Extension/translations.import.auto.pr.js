@@ -4,8 +4,16 @@ const fs = require("fs-extra");
 const cp = require("child_process");
 const Octokit = require('@octokit/rest')
 
-const authUser = 'Colenmgc';    // TODO: Change to service account
-const authPersonalAccessToken = "b63f2b4def8fbc951fa119bb800619e656350b03";
+if (!process.env.RunningOnAzureDevOps) {
+    console.log("");
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    console.log("!!!! WARNING: This script is not intended to be run locally. !!!!");
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    return;
+}
+
+const authUser = process.env.authUser;    // TODO: Change to service account
+const authToken = process.env.authToken;
 const repoOwner = 'microsoft';
 const repoName = 'vscode-cpptools';
 const title = '[Auto] Localization - Translated Strings';
@@ -13,14 +21,6 @@ const branchName = 'localization';
 const commitComment = 'Localization - Translated Strings';
 const projectName = 'cpptools';
 
-if (!process.env.RunningOnAzureDevOps) {
-    console.log("");
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    console.log("!!!! WARNING: This script is intended to be run only by a dedicated build config. !!!!");
-    console.log("!!!! Running this script locally WILL result in local changes being overwritten.  !!!!");
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    return;
-}
 
 // When invoked on build service, we should already be in a repo freshly synced to master
 
@@ -64,6 +64,13 @@ cp.execSync('git add .');
 // Commit changes files.
 cp.execSync(`git commit -m "${commitComment}"`);
 
+// TEMP- Log all env.
+console.log(process.env);
+
+// Configure git to push using our account
+cp.execSync('git remote remove origin');
+cp.execSync(`git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
+
 // Force push our changes to our own (permanent) remote branch.
 cp.execSync(`git push -f origin localization`);
 
@@ -71,7 +78,7 @@ cp.execSync(`git push -f origin localization`);
 
 const octokit = new Octokit({auth: {
     username: authUser,
-    password: authPersonalAccessToken}
+    password: authToken}
 })
 
 octokit.pulls.list({ owner, repo }).then(({data}) => {
