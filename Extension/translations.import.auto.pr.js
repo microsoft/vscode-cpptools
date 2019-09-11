@@ -6,8 +6,8 @@ const Octokit = require('@octokit/rest')
 
 const authUser = 'Colenmgc';    // TODO: Change to service account
 const authPersonalAccessToken = "b63f2b4def8fbc951fa119bb800619e656350b03";
-const repoOwner = 'Colengms';// 'microsoft';
-const repoName = 'scratch';// 'vscode-cpptools';
+const repoOwner = 'microsoft';
+const repoName = 'vscode-cpptools';
 const title = '[Auto] Localization - Translated Strings';
 const branchName = 'localization';
 const commitComment = 'Localization - Translated Strings';
