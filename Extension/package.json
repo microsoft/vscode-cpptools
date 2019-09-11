@@ -1402,9 +1402,9 @@
     }
   },
   "scripts": {
-    "compile": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && yarn run translations-generate && webpack --mode production --vscode-nls",
-    "compileDev": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --mode development",
-    "generateOptionsSchema": "gulp generateOptionsSchema",
+    "compile": "yarn run prepublishjs && yarn run generate-native-strings && yarn run translations-generate && webpack --mode production --vscode-nls",
+    "compileDev": "yarn run prepublishjs && yarn run generate-native-strings && webpack --mode development",
+    "generateOptionsSchema": "yarn run prepublishjs && node ./out/tools/generateOptionsSchema.js",
     "generate-native-strings": "gulp generate-native-strings",
     "import-edge-strings": "node ./import_edge_strings.js",
     "translations-export": "yarn run prepublishjs && yarn run generate-native-strings && gulp translations-export",
@@ -1417,7 +1417,7 @@
     "tslint": "gulp tslint",
     "unitTests": "gulp unitTests",
     "vscode:prepublish": "yarn run compile",
-    "watch": "yarn run prepublishjs && yarn run generateOptionsSchema && yarn run generate-native-strings && webpack --watch --mode development"
+    "watch": "yarn run prepublishjs && yarn run generate-native-strings && webpack --watch --mode development"
   },
   "devDependencies": {
     "@octokit/rest": "^16.28.9",
