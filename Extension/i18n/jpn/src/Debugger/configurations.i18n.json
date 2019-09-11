@@ -7,7 +7,7 @@
 	"enter.program.name": "プログラム名を入力してください (例: {0})",
 	"launch.string": "起動",
 	"launch.with": "{0} で起動します。",
-	"attach.string": "添付",
+	"attach.string": "接続",
 	"attach.with": "{0} でアタッチします。",
 	"pipe.launch": "パイプの起動",
 	"pipe.launch.with": "{0} によるパイプの起動。",

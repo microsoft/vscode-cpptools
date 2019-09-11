@@ -14,5 +14,7 @@
 	"cannot.resolve.compiler.path": "Neplatný vstup, nedá se přeložit cesta ke kompilátoru.",
 	"path.is.not.a.file": "Cesta není soubor: {0}",
 	"incompatible.intellisense.mode": "Režim IntelliSense {0} není kompatibilní s cestou ke kompilátoru.",
-	"path.is.not.a.directory": "Cesta není adresář: {0}"
+	"path.is.not.a.directory": "Cesta není adresář: {0}",
+	"cannot.find2": "Cannot find \"{0}\".",
+	"path.is.not.a.directory2": "Path is not a directory: \"{0}\""
 }

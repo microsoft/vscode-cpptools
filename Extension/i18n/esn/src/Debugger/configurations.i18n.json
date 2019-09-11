@@ -7,7 +7,7 @@
 	"enter.program.name": "Escriba el nombre del programa; por ejemplo, {0}.",
 	"launch.string": "Iniciar",
 	"launch.with": "Iniciar con {0}.",
-	"attach.string": "Asociar",
+	"attach.string": "Adjuntar",
 	"attach.with": "Asociar con {0}.",
 	"pipe.launch": "Inicio de canalización",
 	"pipe.launch.with": "Inicio de canalización con {0}.",
