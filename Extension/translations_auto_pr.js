@@ -115,11 +115,7 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     // If not already present, create a PR against our remote branch.
     if (!alreadyHasPullRequest) {
         console.log("There is not already a pull request.  Creating one.");
-        octokit.pulls.create({ body:"", owner: repoOwner, repo: repoName, title: pullRequestTitle, head: branchName, base: mergeTo }).then(res => {
-            console.log(res);
-        }, res => {
-            console.log(res);
-        });
+        octokit.pulls.create({ body:"", owner: repoOwner, repo: repoName, title: pullRequestTitle, head: branchName, base: mergeTo });
     } else {
         console.log("There is already a pull request.");
     }
