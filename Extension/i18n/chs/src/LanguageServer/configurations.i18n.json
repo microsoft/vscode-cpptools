@@ -14,5 +14,7 @@
 	"cannot.resolve.compiler.path": "输入无效，无法解析编译器路径",
 	"path.is.not.a.file": "路径不是文件: {0}",
 	"incompatible.intellisense.mode": "IntelliSense 模式 {0} 与编译器路径不兼容。",
-	"path.is.not.a.directory": "路径不是目录: {0}"
+	"path.is.not.a.directory": "路径不是目录: {0}",
+	"cannot.find2": "Cannot find \"{0}\".",
+	"path.is.not.a.directory2": "Path is not a directory: \"{0}\""
 }

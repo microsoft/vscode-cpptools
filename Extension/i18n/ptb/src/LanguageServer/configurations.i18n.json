@@ -14,5 +14,7 @@
 	"cannot.resolve.compiler.path": "Entrada inválida. Não é possível resolver o caminho do compilador",
 	"path.is.not.a.file": "O caminho não é um arquivo: {0}",
 	"incompatible.intellisense.mode": "O modo do IntelliSense {0} é incompatível com o caminho do compilador.",
-	"path.is.not.a.directory": "O caminho não é um diretório: {0}"
+	"path.is.not.a.directory": "O caminho não é um diretório: {0}",
+	"cannot.find2": "Cannot find \"{0}\".",
+	"path.is.not.a.directory2": "Path is not a directory: \"{0}\""
 }
