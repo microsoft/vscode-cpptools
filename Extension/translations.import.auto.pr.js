@@ -64,9 +64,6 @@ cp.execSync('git add .');
 // Commit changes files.
 cp.execSync(`git commit -m "${commitComment}"`);
 
-// TEMP- Log all env.
-console.log(process.env);
-
 // Configure git to push using our account
 cp.execSync('git remote remove origin');
 cp.execSync(`git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
@@ -81,7 +78,7 @@ const octokit = new Octokit({auth: {
     password: authToken}
 })
 
-octokit.pulls.list({ owner, repo }).then(({data}) => {
+octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     let alreadyHasPullRequest = false;
     if (data) {
         data.forEach((pr) => {
