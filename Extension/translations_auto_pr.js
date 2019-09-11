@@ -73,7 +73,7 @@ directories.forEach(folderName => {
 console.log("Import translations into i18n directory");
 cp.execSync("npm run translations-import");
 
-if (hasAnyChanges()) {
+if (!hasAnyChanges()) {
     console.log("No changes detected");
     return;
 }
