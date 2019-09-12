@@ -33,13 +33,13 @@ function hasAnyChanges() {
     let lines = output.toString().split("\n");
     let anyChanges = false;
     lines.forEach(line => {
-        anyChanges |= line != '';
+        anyChanges = anyChanges || (line != '');
     });
     
     return anyChanges;
 }
 
-// When invoked on build server, we should already be in a repo freshly synced to margeTo branch
+// When invoked on build server, we should already be in a repo freshly synced to the mergeTo branch
 
 if (hasAnyChanges()) {
     console.log(`Changes already present in this repo!  This script is intended to be run against a freshly synced ${mergeTo} branch!`);
@@ -108,7 +108,7 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     let alreadyHasPullRequest = false;
     if (data) {
         data.forEach((pr) => {
-            alreadyHasPullRequest |= pr.title === pullRequestTitle;
+            alreadyHasPullRequest = alreadyHasPullRequest || (pr.title === pullRequestTitle);
         });
     }
 
@@ -123,4 +123,4 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
 
 console.log(`Restoring default git permissions`);
 cp.execSync('git remote remove origin');
-cp.execSync(`git remote add origin https:github.com/${repoOwner}/${repoName}.git`);
+cp.execSync(`git remote add origin https://github.com/${repoOwner}/${repoName}.git`);
