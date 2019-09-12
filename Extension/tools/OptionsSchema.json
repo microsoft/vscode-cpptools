@@ -530,6 +530,11 @@
               "default": false
             }
           }
+        },
+        "requireExactSource": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.requireExactSource.description%",
+          "default": true
         }
       }
     },
@@ -602,6 +607,11 @@
               "default": false
             }
           }
+        },
+        "requireExactSource": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.requireExactSource.description%",
+          "default": true
         }
       }
     }
