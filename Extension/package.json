@@ -934,6 +934,26 @@
                     "default": {}
                   }
                 }
+              },
+              "symbolLoadInfo": {
+                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
+                "type": "object",
+                "default": {
+                  "loadAll": true,
+                  "exceptionList": ""
+                },
+                "properties": {
+                  "loadAll": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
+                    "default": true
+                  },
+                  "exceptionList": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.exceptionList.description%",
+                    "default": ""
+                  }
+                }
               }
             }
           },
@@ -1126,6 +1146,26 @@
                   }
                 },
                 "default": []
+              },
+              "symbolLoadInfo": {
+                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
+                "type": "object",
+                "default": {
+                  "loadAll": true,
+                  "exceptionList": ""
+                },
+                "properties": {
+                  "loadAll": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.loadAll.description%",
+                    "default": true
+                  },
+                  "exceptionList": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.symbolLoadInfo.exceptionList.description%",
+                    "default": ""
+                  }
+                }
               }
             }
           }
