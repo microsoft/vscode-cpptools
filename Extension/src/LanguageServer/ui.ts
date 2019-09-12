@@ -35,7 +35,6 @@ interface ConfigurationResult {
 }
 
 export class UI {
-    private navigationStatusBarItem: vscode.StatusBarItem;
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
@@ -44,40 +43,31 @@ export class UI {
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
 
     constructor() {
-        // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
-        this.navigationStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
-        this.navigationStatusBarItem.tooltip = localize("c.cpp.navigation.tooltip", "C/C++ Navigation");
-        this.navigationStatusBarItem.command = "C_Cpp.Navigate";
-        this.ShowNavigation = true;
 
-        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 3);
+        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
         this.configStatusBarItem.tooltip = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
         this.ShowConfiguration = true;
 
-        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
+        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.text = "";
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = true;
 
-        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
+        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.text = "";
         this.intelliSenseStatusBarItem.tooltip = localize("updating.intellisense.tooltip", "Updating IntelliSense...");
-        this.intelliSenseStatusBarItem.color = "Red";
+        this.intelliSenseStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.ShowFlameIcon = true;
 
-        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
+        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 902);
         this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files...");
         this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
-    }
-
-    private set NavigationLocation(location: string) {
-        this.navigationStatusBarItem.text = location;
     }
 
     private set ActiveConfig(label: string) {
@@ -107,7 +97,9 @@ export class UI {
 
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
-            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Peek) ? ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
+            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
+            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
+            ReferencesCommandMode.Peek));
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {
@@ -116,16 +108,8 @@ export class UI {
             this.ShowReferencesIcon = false;
         } else {
             this.referencesStatusBarItem.text = "$(search)";
-            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + (val === ReferencesCommandMode.Find ? this.referencesPreviewTooltip : "");
+            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + this.referencesPreviewTooltip;
             this.ShowReferencesIcon = true;
-        }
-    }
-
-    private set ShowNavigation(show: boolean) {
-        if (show) {
-            this.navigationStatusBarItem.show();
-        } else {
-            this.navigationStatusBarItem.hide();
         }
     }
 
@@ -169,36 +153,14 @@ export class UI {
         let isSettingsJson: boolean = (activeEditor && (activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
 
         this.ShowConfiguration = isCpp || isSettingsJson;
-        this.ShowNavigation = isCpp;
     }
 
     public bind(client: Client): void {
         client.TagParsingChanged(value => { this.IsTagParsing = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
-        client.NavigationLocationChanged(value => { this.NavigationLocation = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
-    }
-
-    public showNavigationOptions(navigationList: string): void {
-        let options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.where.to.nagivate.to", "Select where to navigate to");
-
-        let items: IndexableQuickPickItem[] = [];
-        let navlist: string[] = navigationList.split(";");
-        for (let i: number = 0; i < navlist.length - 1; i += 2) {
-            items.push({ label: navlist[i], description: "", index: Number(navlist[i + 1]) });
-        }
-
-        vscode.window.showQuickPick(items, options)
-            .then(selection => {
-                if (!selection) {
-                    return;
-                }
-                vscode.window.activeTextEditor.revealRange(new vscode.Range(selection.index, 0, selection.index, 0), vscode.TextEditorRevealType.InCenter);
-                vscode.window.activeTextEditor.selection = new vscode.Selection(new vscode.Position(selection.index, 0), new vscode.Position(selection.index, 0));
-            });
     }
 
     public showConfigurations(configurationNames: string[]): Thenable<number> {
@@ -323,7 +285,6 @@ export class UI {
         this.browseEngineStatusBarItem.dispose();
         this.intelliSenseStatusBarItem.dispose();
         this.referencesStatusBarItem.dispose();
-        this.navigationStatusBarItem.dispose();
     }
 }
 
