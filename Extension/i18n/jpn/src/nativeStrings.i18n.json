@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "\"{0}\" が見つかりませんでした。c_cpp_properties.json からの 'includePath' が代わりに使用されます。",
 	"file_not_found_in_path": "\"{1}\" で \"{0}\" が見つかりませんでした。c_cpp_properties.json からの 'includePath' が、このファイルで代わりに使用されます。",
 	"database_reset": "IntelliSense データベースが正常にリセットされました。",
-	"global_scope": "(グローバル スコープ)",
 	"send_response_failed": "クライアントに応答を送信できませんでした: {0}",
 	"read_response_failed": "サーバーからの応答を読み取れませんでした: {0}",
 	"send_request_failed": "サーバーに要求を送信できませんでした: {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "{0} の呼び出しに失敗しました",
 	"quick_info_failed": "クイック ヒントの操作が失敗しました: {0}",
 	"create_intellisense_client_failed": "IntelliSense クライアントを作成できませんでした。{0}",
-	"cant_find_intellisense_client": "IntelliSense クライアントが見つかりません。ファイルのパス {0} が無効です",
 	"intellisense_spawn_failed": "IntelliSense プロセスを生成できませんでした。",
 	"browse_engine_update_thread_join_failed": "browse_engine_update_thread.join() の呼び出し中にエラーが発生しました: {0}",
 	"already_open_different_casing": "このファイル ({0}) は既にエディターで開かれていますが、大文字と小文字が異なります。このコピーのファイルでは、IntelliSense 機能が無効にされます。",
@@ -148,5 +146,11 @@
 	"unable_to_start_child_process": "子プロセスを開始できません。",
 	"timed_out_attempting_to_communicate_with_process": "プロセスと通信しようとしてタイムアウトになりました。",
 	"process_failed_to_run": "プロセスを実行できませんでした",
-	"wsl_not_detected": "WSL が検出されませんでした"
+	"wsl_not_detected": "WSL が検出されませんでした",
+	"compiler_in_compilerpath_not_found": "Compiler in \"compilerPath\" property not found: {0}",
+	"config_data_invalid": "Config data invalid, {0}",
+	"cmake_executable_not_found": "CMake executable not found at {0}",
+	"no_args_provider": "No args provider",
+	"invalid_file_path": "Invalid file path {0}",
+	"cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}"
 }

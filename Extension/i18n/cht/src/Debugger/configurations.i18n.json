@@ -7,7 +7,7 @@
 	"enter.program.name": "輸入程式名稱，例如 {0}",
 	"launch.string": "Launch",
 	"launch.with": "使用 {0} 啟動。",
-	"attach.string": "連結",
+	"attach.string": "連接",
 	"attach.with": "附加 {0}。",
 	"pipe.launch": "管道啟動",
 	"pipe.launch.with": "使用 {0} 的管道啟動。",

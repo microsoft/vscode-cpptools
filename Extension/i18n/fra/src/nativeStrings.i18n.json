@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "\"{0}\" est introuvable. 'includePath' dans c_cpp_properties.json est utilisé à la place.",
 	"file_not_found_in_path": "\"{0}\" introuvable dans \"{1}\". 'includePath' dans c_cpp_properties.json est utilisé à la place pour ce fichier.",
 	"database_reset": "La base de données IntelliSense a été réinitialisée.",
-	"global_scope": "(Portée globale)",
 	"send_response_failed": "L'envoi de la réponse au client a échoué : {0}",
 	"read_response_failed": "La lecture de la réponse du serveur a échoué : {0}",
 	"send_request_failed": "L'envoi de la demande au serveur a échoué : {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "Échec de l'appel de {0}",
 	"quick_info_failed": "L'opération Info express a échoué : {0}",
 	"create_intellisense_client_failed": "La création du client IntelliSense a échoué. {0}",
-	"cant_find_intellisense_client": "Client IntelliSense introuvable : chemin du fichier non valide {0}",
 	"intellisense_spawn_failed": "La génération du processus IntelliSense a échoué :",
 	"browse_engine_update_thread_join_failed": "Erreur de l'appel de browse_engine_update_thread.join() : {0}",
 	"already_open_different_casing": "Ce fichier ({0}) est déjà ouvert dans l'éditeur, mais avec une casse différente. Les fonctionnalités IntelliSense sont désactivées sur cette copie du fichier.",
@@ -148,5 +146,11 @@
 	"unable_to_start_child_process": "Impossible de démarrer le processus enfant !",
 	"timed_out_attempting_to_communicate_with_process": "Expiration du délai d'attente pendant la tentative de communication avec le processus !",
 	"process_failed_to_run": "L'exécution du processus a échoué",
-	"wsl_not_detected": "WSL non détecté"
+	"wsl_not_detected": "WSL non détecté",
+	"compiler_in_compilerpath_not_found": "Compiler in \"compilerPath\" property not found: {0}",
+	"config_data_invalid": "Config data invalid, {0}",
+	"cmake_executable_not_found": "CMake executable not found at {0}",
+	"no_args_provider": "No args provider",
+	"invalid_file_path": "Invalid file path {0}",
+	"cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}"
 }

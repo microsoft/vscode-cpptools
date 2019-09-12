@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "找不到 \"{0}\"。將改為使用來自 c_cpp_properties.json 的 'includePath'。",
 	"file_not_found_in_path": "在 \"{1}\" 中找不到 \"{0}\"。將針對此檔案改為使用來自 c_cpp_properties.json 的 'includePath'。",
 	"database_reset": "已成功重設 IntelliSense 資料庫。",
-	"global_scope": "(全域範圍)",
 	"send_response_failed": "無法傳送回應至用戶端: {0}",
 	"read_response_failed": "無法從伺服器讀取回應: {0}",
 	"send_request_failed": "無法傳送要求至伺服器: {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "無法呼叫 {0}",
 	"quick_info_failed": "快速資訊作業失敗: {0}",
 	"create_intellisense_client_failed": "無法建立 IntelliSense 用戶端。{0}",
-	"cant_find_intellisense_client": "找不到 IntelliSense 用戶端: 檔案路徑 {0} 無效",
 	"intellisense_spawn_failed": "無法繁衍 IntelliSense 處理序:",
 	"browse_engine_update_thread_join_failed": "呼叫 browse_engine_update_thread.join() 時發生錯誤: {0}",
 	"already_open_different_casing": "這個檔案 ({0}) 已經在編輯器中開啟，但大小寫不同。此檔案複本上的 IntelliSense 功能將會停用。",
@@ -148,5 +146,11 @@
 	"unable_to_start_child_process": "無法啟動子處理序!",
 	"timed_out_attempting_to_communicate_with_process": "嘗試與處理序通訊時發生逾時!",
 	"process_failed_to_run": "處理序無法執行",
-	"wsl_not_detected": "未偵測到 WSL"
+	"wsl_not_detected": "未偵測到 WSL",
+	"compiler_in_compilerpath_not_found": "Compiler in \"compilerPath\" property not found: {0}",
+	"config_data_invalid": "Config data invalid, {0}",
+	"cmake_executable_not_found": "CMake executable not found at {0}",
+	"no_args_provider": "No args provider",
+	"invalid_file_path": "Invalid file path {0}",
+	"cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}"
 }
