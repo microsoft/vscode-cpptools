@@ -47,7 +47,7 @@
       "references-view": [
         {
           "id": "CppReferencesView",
-          "name": "C/C++: Other references results",
+          "name": "%c_cpp.contributes.views.cppReferencesView.title%",
           "when": "cppReferenceTypes:hasResults && reference-list.hasResult"
         }
       ]
