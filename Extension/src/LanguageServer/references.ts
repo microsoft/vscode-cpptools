@@ -5,6 +5,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { DefaultClient } from './client';
+import { FindAllRefsView } from './referencesView';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
 
@@ -21,7 +22,7 @@ export enum ReferenceType {
     NotAReference
 }
 
-interface ReferenceInfo {
+export interface ReferenceInfo {
     file: string;
     position: vscode.Position;
     text: string;
@@ -81,7 +82,7 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
     }
 }
 
-function convertReferenceTypeToString(referenceType: ReferenceType, isReferencesCanceled: boolean, isRename: boolean): string {
+export function convertReferenceTypeToString(referenceType: ReferenceType, isReferencesCanceled: boolean, isRename: boolean): string {
     switch (referenceType) {
         case ReferenceType.Confirmed: return isRename ? localize("renamed.reference", "Renamed reference") : localize("confirmed.reference", "Confirmed reference");
         case ReferenceType.ConfirmationInProgress: return isReferencesCanceled ? localize("confirmation.canceled", "Confirmation canceled") : localize("confirmation.in.progress", "Confirmation in progress");
@@ -93,12 +94,14 @@ function convertReferenceTypeToString(referenceType: ReferenceType, isReferences
     }
     return "";
 }
-
 export class ProgressHandler {
     private client: DefaultClient;
     private disposables: vscode.Disposable[] = [];
 
+    // TODO: move views to class that manages view
     private referencesChannel: vscode.OutputChannel;
+    private findAllRefsView: FindAllRefsView;
+    private viewsInitialized: boolean = false;
 
     private referencesCurrentProgress: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number;
@@ -113,8 +116,7 @@ export class ProgressHandler {
         message?: string;
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
-    private referencePreviousProgressUICounter: number;
-    public referencesCurrentProgressUICounter: number;
+    private referencesCurrentProgressUICounter: number;
     private readonly referencesProgressUpdateInterval: number = 1000;
     private readonly referencesProgressDelayInterval: number = 2000;
 
@@ -129,9 +131,24 @@ export class ProgressHandler {
         this.client = client;
     }
 
+    initializeViews(): void {
+        if (!this.viewsInitialized) {
+            this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.references", "C/C++ References"));
+            this.disposables.push(this.referencesChannel);
+            this.findAllRefsView = new FindAllRefsView();
+            this.viewsInitialized = true;
+        }
+    }
+
     public dispose(): void {
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
+    }
+
+    public UpdateProgressUICounter(mode: ReferencesCommandMode): void {
+        if (mode !== ReferencesCommandMode.None) {
+            ++this.referencesCurrentProgressUICounter;
+        }
     }
 
     public updateVisibleRange(visibleRangesLength: number): void {
@@ -218,58 +235,65 @@ export class ProgressHandler {
         }
     }
 
+    private handleProgressStarted(referencesProgress: ReferencesProgress): void {
+        this.referencesStartedWhileTagParsing = this.client.IsTagParsing;
+
+        let mode: ReferencesCommandMode =
+            (referencesProgress === ReferencesProgress.StartedRename) ? ReferencesCommandMode.Rename :
+            (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
+            ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
+        this.client.setReferencesCommandMode(mode);
+
+        this.referencesRequestHasOccurred = false;
+        this.referencesCanceled = false;
+        this.referencesPrevProgressIncrement = 0;
+        this.referencesPrevProgressMessage = "";
+        this.referencesCurrentProgressUICounter = 0;
+        let referencePreviousProgressUICounter: number = 0;
+
+        this.referencesChannel.clear();
+        this.findAllRefsView.show(false);
+
+        this.referencesDelayProgress = setInterval(() => {
+            this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
+            this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
+            // tslint:disable-next-line: promise-must-complete
+                new Promise((resolve) => {
+                    this.reportProgress(progress, true);
+                    let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
+                        if (token.isCancellationRequested && !this.referencesCanceled) {
+                            this.client.cancelReferences();
+                            this.client.sendRequestReferences();
+                            this.referencesCanceled = true;
+                        }
+                        if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
+                            clearInterval(currentUpdateProgressTimer);
+                            if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
+                                referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
+                                this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
+                                vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+                            }
+                            resolve();
+                        } else {
+                            this.reportProgress(progress, false);
+                        }
+                    }, this.referencesProgressUpdateInterval);
+                });
+            vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+            clearInterval(this.referencesDelayProgress);
+        }, this.referencesProgressDelayInterval);
+    }
+
     public handleProgress(notificationBody: ReportReferencesProgressNotification): void {
+        this.initializeViews();
+
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.StartedRename:
             case ReferencesProgress.Started:
-                this.referencesStartedWhileTagParsing = this.client.IsTagParsing;
-                let mode: ReferencesCommandMode = notificationBody.referencesProgress === ReferencesProgress.StartedRename ? ReferencesCommandMode.Rename :
-                    (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
-                    ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
-                this.client.setReferencesCommandMode(mode);
                 if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
                     telemetry.logLanguageServerEvent("peekReferences");
                 }
-                this.referencesRequestHasOccurred = false;
-                this.referencesCanceled = false;
-                this.referencesPrevProgressIncrement = 0;
-                this.referencesPrevProgressMessage = "";
-                this.referencePreviousProgressUICounter = 0;
-                this.referencesCurrentProgressUICounter = 0;
-                if (!this.referencesChannel) {
-                    this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.references", "C/C++ References"));
-                    this.disposables.push(this.referencesChannel);
-                } else {
-                    this.referencesChannel.clear();
-                }
-                this.referencesDelayProgress = setInterval(() => {
-                    this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
-                    this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
-                    // tslint:disable-next-line: promise-must-complete
-                        new Promise((resolve) => {
-                            this.reportProgress(progress, true);
-                            let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
-                                if (token.isCancellationRequested && !this.referencesCanceled) {
-                                    this.client.cancelReferences();
-                                    this.client.sendRequestReferences();
-                                    this.referencesCanceled = true;
-                                }
-                                if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
-                                    clearInterval(currentUpdateProgressTimer);
-                                    if (this.referencesCurrentProgressUICounter !== this.referencePreviousProgressUICounter) {
-                                        this.referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
-                                        this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
-                                        vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                                    }
-                                    resolve();
-                                } else {
-                                    this.reportProgress(progress, false);
-                                }
-                            }, this.referencesProgressUpdateInterval);
-                        });
-                    vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-                    clearInterval(this.referencesDelayProgress);
-                }, this.referencesProgressDelayInterval);
+                this.handleProgressStarted(notificationBody.referencesProgress);
                 break;
             case ReferencesProgress.CanceledFinalResultsAvailable:
             case ReferencesProgress.FinalResultsAvailable:
@@ -291,8 +315,10 @@ export class ProgressHandler {
     }
 
     public processResults(referencesResult: ReferencesResult): void {
+        this.initializeViews();
         this.referencesViewFindPending = false;
         this.referencesChannel.clear();
+        this.findAllRefsView.show(false);
 
         if (this.referencesStartedWhileTagParsing) {
             this.referencesChannel.appendLine(localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
@@ -324,6 +350,8 @@ export class ProgressHandler {
 
         if (this.referencesStartedWhileTagParsing || refsFound) {
             this.referencesChannel.show(true);
+            this.findAllRefsView.setData(referencesResult.referenceInfos);
+            this.findAllRefsView.show(true);
         }
     }
 }

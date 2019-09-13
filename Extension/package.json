@@ -43,6 +43,15 @@
   ],
   "main": "./dist/main",
   "contributes": {
+    "views": {
+      "references-view": [
+        {
+          "id": "CppReferencesView",
+          "name": "%c_cpp.contributes.views.cppReferencesView.title%",
+          "when": "cppReferenceTypes:hasResults && reference-list.hasResult"
+        }
+      ]
+    },
     "problemMatchers": [
       {
         "name": "gcc",

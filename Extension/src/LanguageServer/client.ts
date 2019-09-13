@@ -1924,9 +1924,7 @@ export class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            if (this.model.referencesCommandMode.Value !== refs.ReferencesCommandMode.None) {
-                ++this.references.referencesCurrentProgressUICounter;
-            }
+            this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
             this.sendRequestReferences();
         });
     }
