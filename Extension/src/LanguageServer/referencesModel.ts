@@ -40,9 +40,8 @@ export class Model {
 export class ReferenceTypeItem {
     private files: FileItem[] = [];
 
-    constructor(
-        readonly type: ReferenceType,
-    ) { }
+    constructor(readonly type: ReferenceType) {
+    }
 
     getFiles(): FileItem[] {
         return this.files;
@@ -64,7 +63,7 @@ export class ReferenceTypeItem {
     private indexOfFile(fileName: string): number {
         return this.files.findIndex(function(item): boolean {
             return item.name === fileName;
-         });
+        });
     }
 }
 

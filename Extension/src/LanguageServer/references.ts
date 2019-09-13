@@ -101,7 +101,7 @@ export class ProgressHandler {
     // TODO: move views to class that manages view
     private referencesChannel: vscode.OutputChannel;
     private findAllRefsView: FindAllRefsView;
-    private viewsInitilized: boolean = false;
+    private viewsInitialized: boolean = false;
 
     private referencesCurrentProgress: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number;
@@ -131,12 +131,12 @@ export class ProgressHandler {
         this.client = client;
     }
 
-    initilizeViews(): void {
-        if (!this.viewsInitilized) {
+    initializeViews(): void {
+        if (!this.viewsInitialized) {
             this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.references", "C/C++ References"));
             this.disposables.push(this.referencesChannel);
             this.findAllRefsView = new FindAllRefsView();
-            this.viewsInitilized = true;
+            this.viewsInitialized = true;
         }
     }
 
@@ -285,7 +285,7 @@ export class ProgressHandler {
     }
 
     public handleProgress(notificationBody: ReportReferencesProgressNotification): void {
-        this.initilizeViews();
+        this.initializeViews();
 
         switch (notificationBody.referencesProgress) {
             case ReferencesProgress.StartedRename:
@@ -315,7 +315,7 @@ export class ProgressHandler {
     }
 
     public processResults(referencesResult: ReferencesResult): void {
-        this.initilizeViews();
+        this.initializeViews();
         this.referencesViewFindPending = false;
         this.referencesChannel.clear();
         this.findAllRefsView.show(false);

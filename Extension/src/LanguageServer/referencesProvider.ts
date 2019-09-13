@@ -8,7 +8,7 @@ import * as util from '../common';
 import { Model, FileItem, ReferenceItem, ReferenceTypeItem } from './referencesModel';
 import { ReferenceInfo, ReferenceType, convertReferenceTypeToString } from './references';
 
-function getReferneceTypeIconPath(referenceType: ReferenceType): vscode.ThemeIcon {
+function getReferenceTypeIconPath(referenceType: ReferenceType): vscode.ThemeIcon {
     // TODO: return icon path for light and dark themes based on reference type
     switch (referenceType) {
         case ReferenceType.Confirmed:
@@ -49,7 +49,7 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         if (element instanceof ReferenceItem) {
             const result: vscode.TreeItem = new vscode.TreeItem(element.text);
             result.collapsibleState = vscode.TreeItemCollapsibleState.None;
-            result.iconPath = getReferneceTypeIconPath(element.type);
+            result.iconPath = getReferenceTypeIconPath(element.type);
             result.command = {
                 title: 'Open Reference',
                 command: 'C_Cpp.ShowReferencesItem',
@@ -70,7 +70,7 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
             const label: string = convertReferenceTypeToString(element.type, false, false);
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-            result.iconPath = getReferneceTypeIconPath(element.type);
+            result.iconPath = getReferenceTypeIconPath(element.type);
             return result;
         }
     }

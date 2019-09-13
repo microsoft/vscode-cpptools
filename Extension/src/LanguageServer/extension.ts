@@ -1134,10 +1134,12 @@ function onRescanWorkspace(): void {
 }
 
 function onShowRefCommand(arg?: ReferenceItem): void {
-    const { location } = arg;
-    vscode.window.showTextDocument(location.uri, {
-        selection: location.range.with({ end: location.range.start })
-    });
+    if (arg) {
+        const { location } = arg;
+        vscode.window.showTextDocument(location.uri, {
+            selection: location.range.with({ end: location.range.start })
+        });
+    }
 }
 
 function reportMacCrashes(): void {
