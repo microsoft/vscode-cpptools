@@ -1,0 +1,12 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden">
+  <defs>
+    <clipPath id="clip0">
+      <path d="M432 81 659 81 659 352 432 352Z" fill-rule="evenodd" clip-rule="evenodd">
+      </path>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip0)" transform="translate(-300 -81)">
+  </g>
+  <text x="57" y="200" fill="black" stroke="#aaa" font-family="sans-serif" font-size="200">?
+  </text>
+</svg>

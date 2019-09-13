@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "找不到“{0}”。将改为使用 c_cpp_properties.json 中的 \"includePath\"。",
 	"file_not_found_in_path": "在“{1}”中未找到“{0}”。此文件将改为使用 c_cpp_properties.json 中的 \"includePath\"。",
 	"database_reset": "已成功重置 IntelliSense 数据库。",
-	"global_scope": "(全局范围)",
 	"send_response_failed": "未能将响应发送到客户端: {0}",
 	"read_response_failed": "未能从服务器读取响应: {0}",
 	"send_request_failed": "未能将请求发送到服务器: {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "未能调用 {0}",
 	"quick_info_failed": "快速信息操作失败: {0}",
 	"create_intellisense_client_failed": "未能创建 IntelliSense 客户端。{0}",
-	"cant_find_intellisense_client": "找不到 IntelliSense 客户端: 无效的文件路径 {0}",
 	"intellisense_spawn_failed": "未能生成 IntelliSense 进程:",
 	"browse_engine_update_thread_join_failed": "调用 browse_engine_update_thread.join() 时出错: {0}",
 	"already_open_different_casing": "此文件({0})已在编辑器中打开，但大小写不同。将对此文件的副本禁用 IntelliSense 功能。",
@@ -148,5 +146,11 @@
 	"unable_to_start_child_process": "无法启动子进程!",
 	"timed_out_attempting_to_communicate_with_process": "尝试与进程通信时超时!",
 	"process_failed_to_run": "进程未能运行",
-	"wsl_not_detected": "未检测到 WSL"
+	"wsl_not_detected": "未检测到 WSL",
+	"compiler_in_compilerpath_not_found": "找不到 \"compilerPath\" 属性中的编译器: {0}",
+	"config_data_invalid": "配置数据无效，{0}",
+	"cmake_executable_not_found": "CMake executable not found at {0}",
+	"no_args_provider": "无参数提供程序",
+	"invalid_file_path": "文件路径 {0} 无效",
+	"cant_create_intellisense_client_for": "无法为 {0} 创建 IntelliSense 客户端"
 }

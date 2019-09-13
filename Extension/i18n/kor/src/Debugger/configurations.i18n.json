@@ -7,7 +7,7 @@
 	"enter.program.name": "프로그램 이름 입력(예: {0})",
 	"launch.string": "시작",
 	"launch.with": "{0}을(를) 사용하여 시작합니다.",
-	"attach.string": "첨부",
+	"attach.string": "연결",
 	"attach.with": "{0}과(와) 연결합니다.",
 	"pipe.launch": "파이프 시작",
 	"pipe.launch.with": "{0}을(를) 사용한 파이프 시작입니다.",

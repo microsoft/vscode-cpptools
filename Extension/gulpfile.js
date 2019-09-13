@@ -10,7 +10,6 @@ const env = require('gulp-env')
 const tslint = require('gulp-tslint');
 const mocha = require('gulp-mocha');
 const fs = require('fs');
-const optionsSchemaGenerator = require('./out/tools/GenerateOptionsSchema');
 const nls = require('vscode-nls-dev');
 const path = require('path');
 const minimist = require('minimist');
@@ -106,11 +105,6 @@ gulp.task('pr-check', (done) => {
         process.exit(1);
     }
 
-    done();
-});
-
-gulp.task('generateOptionsSchema', (done) => {
-    optionsSchemaGenerator.generateOptionsSchema();
     done();
 });
 
