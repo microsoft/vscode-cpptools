@@ -14,5 +14,7 @@
 	"cannot.resolve.compiler.path": "Ungültige Eingabe, Compilerpfad kann nicht aufgelöst werden.",
 	"path.is.not.a.file": "Der Pfad ist keine Datei: {0}",
 	"incompatible.intellisense.mode": "Der IntelliSense-Modus \"{0}\" ist inkompatibel mit dem Compilerpfad.",
-	"path.is.not.a.directory": "Der Pfad ist kein Verzeichnis: {0}"
+	"path.is.not.a.directory": "Der Pfad ist kein Verzeichnis: {0}",
+	"cannot.find2": "\"{0}\" wurde nicht gefunden.",
+	"path.is.not.a.directory2": "Der Pfad ist kein Verzeichnis: {0}"
 }

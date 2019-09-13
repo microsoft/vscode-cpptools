@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "\"{0}\" wurde nicht gefunden. Stattdessen wird \"includePath\" aus \"c_cpp_properties.json\" verwendet.",
 	"file_not_found_in_path": "\"{0}\" wurde in \"{1}\" nicht gefunden. Stattdessen wird \"includePath\" aus \"c_cpp_properties.json\" für diese Datei verwendet.",
 	"database_reset": "Die IntelliSense-Datenbank wurde erfolgreich zurückgesetzt.",
-	"global_scope": "(Globaler Gültigkeitsbereich)",
 	"send_response_failed": "Fehler beim Senden der Antwort an den Client: {0}",
 	"read_response_failed": "Fehler beim Lesen der Antwort vom Server: {0}",
 	"send_request_failed": "Fehler beim Senden der Anforderung an den Server: {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "Fehler beim Aufrufen von \"{0}\".",
 	"quick_info_failed": "Fehler beim QuickInfo-Vorgang: {0}",
 	"create_intellisense_client_failed": "Fehler beim Erstellen des IntelliSense-Clients. {0}",
-	"cant_find_intellisense_client": "Der IntelliSense-Client wurde nicht gefunden. Ungültiger Dateipfad: {0}.",
 	"intellisense_spawn_failed": "Fehler beim Erzeugen von IntelliSense-Prozess:",
 	"browse_engine_update_thread_join_failed": "Fehler beim Aufrufen von \"browse_engine_update_thread.join()\": {0}",
 	"already_open_different_casing": "Diese Datei ({0}) ist bereits im Editor geöffnet, jedoch mit einer anderen Groß-/Kleinschreibung. IntelliSense-Features werden für diese Kopie der Datei deaktiviert.",
@@ -148,5 +146,11 @@
 	"unable_to_start_child_process": "Der untergeordnete Prozess kann nicht gestartet werden.",
 	"timed_out_attempting_to_communicate_with_process": "Timeout beim Versuch, mit dem Prozess zu kommunizieren.",
 	"process_failed_to_run": "Fehler beim Ausführen des Prozesses.",
-	"wsl_not_detected": "WSL nicht erkannt."
+	"wsl_not_detected": "WSL nicht erkannt.",
+	"compiler_in_compilerpath_not_found": "Der Compiler in der compilerPath-Eigenschaft wurde nicht gefunden: {0}",
+	"config_data_invalid": "Konfigurationsdaten ungültig, {0}",
+	"cmake_executable_not_found": "Ausführbare CMake-Datei wurde unter \"{0}\" nicht gefunden.",
+	"no_args_provider": "Kein Anbieter für Argumente",
+	"invalid_file_path": "Ungültiger Dateipfad \"{0}\".",
+	"cant_create_intellisense_client_for": "Der IntelliSense-Client für \"{0}\" kann nicht erstellt werden."
 }
