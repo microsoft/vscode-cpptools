@@ -187,12 +187,39 @@ interface ShowMessageWindowParams {
     localizeStringParams: LocalizeStringParams;
 }
 
+interface GetDocumentSymbolRequestParams {
+    uri: string;
+}
+
+interface WorkspaceSymbolParams {
+    query: string;
+}
+
+interface LocalizeDocumentSymbol {
+    name: string;
+    detail: LocalizeStringParams;
+    kind: vscode.SymbolKind;
+    range: Range;
+    selectionRange: Range;
+    children: LocalizeDocumentSymbol[];
+}
+
+interface LocalizeSymbolInformation {
+    name: string;
+    kind: vscode.SymbolKind;
+    location: vscode.Location;
+    containerName: string;
+    suffix: LocalizeStringParams;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void> = new RequestType<void, GetDiagnosticsResult, void, void>('cpptools/getDiagnostics');
 const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void> = new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void>('cpptools/getCodeActions');
+const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void>('cpptools/getDocumentSymbols');
+const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -424,7 +451,6 @@ export class DefaultClient implements Client {
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
 
-                    // Set up code action provider
                     let documentSelector: DocumentFilter[] = [
                         { scheme: 'file', language: 'cpp' },
                         { scheme: 'file', language: 'c' }
@@ -437,44 +463,117 @@ export class DefaultClient implements Client {
                         }
 
                         public provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
-                            let r: Range;
-                            if (range instanceof vscode.Selection) {
-                                if (range.active.isBefore(range.anchor)) {
-                                    r = Range.create(Position.create(range.active.line, range.active.character), Position.create(range.anchor.line, range.anchor.character));
+                            return this.client.requestWhenReady(() => {
+                                let r: Range;
+                                if (range instanceof vscode.Selection) {
+                                    if (range.active.isBefore(range.anchor)) {
+                                        r = Range.create(Position.create(range.active.line, range.active.character), Position.create(range.anchor.line, range.anchor.character));
+                                    } else {
+                                        r = Range.create(Position.create(range.anchor.line, range.anchor.character), Position.create(range.active.line, range.active.character));
+                                    }
                                 } else {
-                                    r = Range.create(Position.create(range.anchor.line, range.anchor.character), Position.create(range.active.line, range.active.character));
+                                    r = Range.create(Position.create(range.start.line, range.start.character), Position.create(range.end.line, range.end.character));
                                 }
-                            } else {
-                                r = Range.create(Position.create(range.start.line, range.start.character), Position.create(range.end.line, range.end.character));
-                            }
 
-                            let params: GetCodeActionsRequestParams = {
-                                range: r,
-                                uri: document.uri.toString()
-                            };
+                                let params: GetCodeActionsRequestParams = {
+                                    range: r,
+                                    uri: document.uri.toString()
+                                };
 
-                            return this.client.languageClient.sendRequest(GetCodeActionsRequest, params)
-                                .then((commands) => {
-                                    let resultCommands: vscode.Command[] = [];
+                                return this.client.languageClient.sendRequest(GetCodeActionsRequest, params)
+                                    .then((commands) => {
+                                        let resultCommands: vscode.Command[] = [];
 
-                                    // Convert to vscode.Command array
-                                    commands.forEach((command) => {
-                                        let title: string = util.getLocalizedString(command.localizeStringParams);
-                                        let vscodeCommand: vscode.Command = {
-                                            title: title,
-                                            command: command.command,
-                                            arguments: command.arguments
-                                        };
-                                        resultCommands.push(vscodeCommand);
+                                        // Convert to vscode.Command array
+                                        commands.forEach((command) => {
+                                            let title: string = util.getLocalizedString(command.localizeStringParams);
+                                            let vscodeCommand: vscode.Command = {
+                                                title: title,
+                                                command: command.command,
+                                                arguments: command.arguments
+                                            };
+                                            resultCommands.push(vscodeCommand);
+                                        });
+
+                                        return resultCommands;
                                     });
-
-                                    return resultCommands;
-                                });
+                            });
                         }
                     }
 
                     this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
+                    class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+                        private getChildrenSymbols(symbols: LocalizeDocumentSymbol[]): vscode.DocumentSymbol[] {
+                            let documentSymbols: vscode.DocumentSymbol[] = [];
+                            if (symbols) {
+                                symbols.forEach((symbol) => {
+                                    let detail: string = util.getLocalizedString(symbol.detail);
+                                    let r: vscode.Range= new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
+                                    let sr: vscode.Range= new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
+                                    let vscodeSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol (symbol.name, detail, symbol.kind, r, sr);
+                                    vscodeSymbol.children = this.getChildrenSymbols(symbol.children);
+                                    documentSymbols.push(vscodeSymbol);
+                                });
+                            }
+                            return documentSymbols;
+                        }
+                        public provideDocumentSymbols(document: vscode.TextDocument): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+                            return this.client.requestWhenReady(() => {
+                                let params: GetDocumentSymbolRequestParams = {
+                                    uri: document.uri.toString()
+                                };
+                                return this.client.languageClient.sendRequest(GetDocumentSymbolRequest, params)
+                                    .then((symbols) => {
+                                        let resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
+                                        return resultSymbols;
+                                    });
+                            });
+                        }
+                    }
+                    this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), null));
 
+                    class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+
+                        provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
+                            let params: WorkspaceSymbolParams = {
+                            query: query
+                            };
+
+                            return this.client.languageClient.sendRequest(GetSymbolInfoRequest, params)
+                                .then((symbols) => {
+                                    let resultSymbols: vscode.SymbolInformation[] = [];
+
+                                    // Convert to vscode.Command array
+                                    symbols.forEach((symbol) => {
+                                        let suffix: string = util.getLocalizedString(symbol.suffix);
+                                        let name: string = symbol.name;
+                                        let range: vscode.Range = new vscode.Range(symbol.location.range.start.line, symbol.location.range.start.character, symbol.location.range.end.line, symbol.location.range.end.character);
+                                        let uri: vscode.Uri = vscode.Uri.parse(symbol.location.uri.toString());
+                                        if (suffix.length) {
+                                            name = name + ' (' + suffix + ')';
+                                        }
+                                        let vscodeSymbol: vscode.SymbolInformation = new vscode.SymbolInformation(
+                                            name,
+                                            symbol.kind,
+                                            range,
+                                            uri,
+                                            symbol.containerName
+                                        );
+                                        resultSymbols.push(vscodeSymbol);
+                                    });
+                                    return resultSymbols;
+                                });
+                        }
+                    }
+                    this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                     // Listen for messages from the language server.
                     this.registerNotifications();
                     this.registerFileWatcher();
