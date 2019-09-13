@@ -197,6 +197,7 @@ const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeAction
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
+const FileChangedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileChanged');
 const FileDeletedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileDeleted');
 const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
 const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
@@ -234,6 +235,7 @@ const ReportReferencesProgressNotification: NotificationType<refs.ReportReferenc
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
+const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 
 let failureMessageShown: boolean = false;
 
@@ -1182,8 +1184,20 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
         this.languageClient.onNotification(PublishDiagnosticsNotification, (e) => this.publishDiagnostics(e));
         this.languageClient.onNotification(ShowMessageWindowNotification, (e) => this.showMessageWindow(e));
+        this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.setupOutputHandlers();
     }
+
+    private setTextDocumentLanguage(languageStr: string): void {
+        let cppSettings: CppSettings = new CppSettings(this.RootUri);
+        if (cppSettings.autoAddFileAssociations) {
+            const is_c: boolean = languageStr.startsWith("c;");
+            languageStr = languageStr.substr(is_c ? 2 : 1);
+            this.addFileAssociations(languageStr, is_c);
+        }
+    }
+
+    private associations_for_did_change: Set<string>;
 
     /**
      * listen for file created/deleted events under the ${workspaceFolder} folder
@@ -1196,11 +1210,32 @@ export class DefaultClient implements Client {
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
                 "**/*",
                 false /*ignoreCreateEvents*/,
-                true /*ignoreChangeEvents*/,
+                false /*ignoreChangeEvents*/,
                 false /*ignoreDeleteEvents*/);
 
             this.rootPathFileWatcher.onDidCreate((uri) => {
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
+            });
+
+            // TODO: Handle new associations without a reload.
+            this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
+            let settings: OtherSettings = new OtherSettings(this.RootUri);
+            let assocs: any = settings.filesAssociations;
+            for (let assoc in assocs) {
+                let dotIndex: number = assoc.lastIndexOf('.');
+                if (dotIndex !== -1) {
+                    let ext: string = assoc.substr(dotIndex + 1);
+                    this.associations_for_did_change.add(ext);
+                }
+            }
+            this.rootPathFileWatcher.onDidChange((uri) => {
+                let dotIndex: number = uri.fsPath.lastIndexOf('.');
+                if (dotIndex !== -1) {
+                    let ext: string = uri.fsPath.substr(dotIndex + 1);
+                    if (this.associations_for_did_change.has(ext)) {
+                        this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() });
+                    }
+                }
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
