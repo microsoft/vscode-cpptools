@@ -10,6 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
+import { ReferenceItem } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -867,6 +868,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesItem', onShowRefCommand));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -1129,6 +1131,15 @@ function onLogDiagnostics(): void {
 function onRescanWorkspace(): void {
     onActivationEvent();
     clients.forEach(client => client.rescanFolder());
+}
+
+function onShowRefCommand(arg?: ReferenceItem): void {
+    if (arg) {
+        const { location } = arg;
+        vscode.window.showTextDocument(location.uri, {
+            selection: location.range.with({ end: location.range.start })
+        });
+    }
 }
 
 function reportMacCrashes(): void {
