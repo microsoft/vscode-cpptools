@@ -4,8 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceInfo } from './references';
+import { ReferenceInfo, ReferenceType, convertReferenceTypeToString } from './references';
 import { ReferenceDataProvider } from './referencesProvider';
+import { FileItem, ReferenceItem } from './referencesModel';
 
 export class FindAllRefsView {
     private referenceViewProvider: ReferenceDataProvider;
@@ -18,18 +19,49 @@ export class FindAllRefsView {
     }
 
     show(showView: boolean): void {
-        vscode.commands.executeCommand(`setContext`, 'cppReferenceTypes:hasResults', showView);
+        vscode.commands.executeCommand(`setContext`, 'cppReferenceTypes:hasResults', this.referenceViewProvider.hasResults());
         if (!showView) {
             this.clearData();
         }
     }
 
-    setData(results: ReferenceInfo[]): void {
-        this.referenceViewProvider.setModel(results);
+    setData(results: ReferenceInfo[], isCanceled: boolean): void {
+        this.referenceViewProvider.setModel(results, isCanceled);
     }
 
     clearData(): void {
         this.referenceViewProvider.clear();
+    }
+
+    getResultsAsText(includeConfirmedReferences: boolean): string {
+        let results: string[] = [];
+        let confirmedRefs: string[] = [];
+        let otherRefs: string[] = [];
+        let fileRefs: string[] = [];
+
+        let referenceItems: ReferenceItem[] = this.referenceViewProvider.getReferenceItems();
+        for (let ref of referenceItems) {
+            let line: string =
+                ("[" + convertReferenceTypeToString(ref.type, this.referenceViewProvider.isCanceled()) + "] "
+                + ref.parent.name
+                + ":" + (ref.position.line + 1) + ":" + (ref.position.character + 1)
+                + " " + ref.text);
+            if (ref.type === ReferenceType.Confirmed && includeConfirmedReferences) {
+                confirmedRefs.push(line);
+            } else {
+                otherRefs.push(line);
+            }
+        }
+
+        // Get file references
+        let fileReferences: FileItem[] = this.referenceViewProvider.getFileReferences();
+        for (let fileRef of fileReferences) {
+            let line: string = ("[" + convertReferenceTypeToString(ReferenceType.ConfirmationInProgress, this.referenceViewProvider.isCanceled()) + "] " + fileRef.name);
+            fileRefs.push(line);
+        }
+
+        results = results.concat(confirmedRefs, otherRefs, fileRefs);
+        return results.join('\n');
     }
 }
 

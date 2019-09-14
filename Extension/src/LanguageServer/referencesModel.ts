@@ -7,31 +7,34 @@ import * as vscode from 'vscode';
 import { ReferenceType, ReferenceInfo } from './references';
 
 export class Model {
-    readonly items: FileItem[] = [];
+    readonly FileItems: FileItem[] = [];
+    readonly ReferenceItems: ReferenceItem[] = [];
 
     constructor(resultsInput: ReferenceInfo[]) {
         let results: ReferenceInfo[] = resultsInput.filter(r => r.type !== ReferenceType.Confirmed);
         for (let r of results) {
             // Add file if it doesn't exist
             let fileItem: FileItem;
-            let index: number = this.items.findIndex(function(item): boolean {
+            let index: number = this.FileItems.findIndex(function(item): boolean {
                 return item.name === r.file;
              });
             if (index < 0) {
                 const uri: vscode.Uri = vscode.Uri.file(r.file);
                 fileItem = new FileItem(uri, r.file);
-                this.items.push(fileItem);
+                this.FileItems.push(fileItem);
             } else {
-                fileItem = this.items[index];
+                fileItem = this.FileItems[index];
             }
 
             // Add reference to file
             let isFileReference: boolean = (r.position.line === 0 && r.position.character === 0);
+            fileItem.isFileReference = isFileReference;
             if (!isFileReference) {
                 const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + 1);
                 const location: vscode.Location = new vscode.Location(fileItem.uri, range);
-                const reference: ReferenceItem = new ReferenceItem(location, r.text, fileItem, r.type);
+                const reference: ReferenceItem = new ReferenceItem(r.position, location, r.text, fileItem, r.type);
                 fileItem.addReference(reference);
+                this.ReferenceItems.push(reference);
             }
         }
     }
@@ -69,6 +72,8 @@ export class ReferenceTypeItem {
 
 export class FileItem {
     private references: ReferenceItem[] = [];
+    public isFileReference: boolean = false;
+
     constructor(
         readonly uri: vscode.Uri,
         readonly name: string
@@ -85,6 +90,7 @@ export class FileItem {
 
 export class ReferenceItem {
     constructor(
+        readonly position: vscode.Position,
         readonly location: vscode.Location,
         readonly text: string,
         readonly parent: FileItem | undefined,

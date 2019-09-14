@@ -82,9 +82,9 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
     }
 }
 
-export function convertReferenceTypeToString(referenceType: ReferenceType, isReferencesCanceled: boolean, isRename: boolean): string {
+export function convertReferenceTypeToString(referenceType: ReferenceType, isReferencesCanceled: boolean): string {
     switch (referenceType) {
-        case ReferenceType.Confirmed: return isRename ? localize("renamed.reference", "Renamed reference") : localize("confirmed.reference", "Confirmed reference");
+        case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed reference");
         case ReferenceType.ConfirmationInProgress: return isReferencesCanceled ? localize("confirmation.canceled", "Confirmation canceled") : localize("confirmation.in.progress", "Confirmation in progress");
         case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
         case ReferenceType.String: return localize("string.reference", "String reference");
@@ -94,11 +94,11 @@ export function convertReferenceTypeToString(referenceType: ReferenceType, isRef
     }
     return "";
 }
+
 export class ProgressHandler {
     private client: DefaultClient;
     private disposables: vscode.Disposable[] = [];
 
-    // TODO: move views to class that manages view
     private referencesChannel: vscode.OutputChannel;
     private findAllRefsView: FindAllRefsView;
     private viewsInitialized: boolean = false;
@@ -120,8 +120,6 @@ export class ProgressHandler {
     private readonly referencesProgressUpdateInterval: number = 1000;
     private readonly referencesProgressDelayInterval: number = 2000;
 
-    // Used to determine if Find or Peek References is used.
-    // TODO: Investigate using onDidExecuteCommand instead.
     private prevVisibleRangesLength: number = 0;
     private visibleRangesDecreased: boolean = false;
     private visibleRangesDecreasedTicks: number = 0;
@@ -321,36 +319,28 @@ export class ProgressHandler {
         this.findAllRefsView.show(false);
 
         if (this.referencesStartedWhileTagParsing) {
-            this.referencesChannel.appendLine(localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
-            referencesCommandModeToString(this.client.ReferencesCommandMode)));
+            let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
+                referencesCommandModeToString(this.client.ReferencesCommandMode));
+            this.referencesChannel.appendLine(msg);
             this.referencesChannel.appendLine("");
-        }
-
-        let showConfirmedReferences: boolean = this.client.ReferencesCommandMode === ReferencesCommandMode.Rename ||
-            (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek && ((!this.referencesCanceled && this.referencesCurrentProgress.referencesProgress !== ReferencesProgress.FinalResultsAvailable)
-                || (this.referencesCanceled && this.referencesCurrentProgress.referencesProgress === ReferencesProgress.CanceledFinalResultsAvailable)));
-        let refsFound: boolean = false;
-        // 1st pass is for confirmed references.
-        for (let pass: number = (showConfirmedReferences ? 0 : 1); pass < 2; ++pass) {
-            for (let reference of referencesResult.referenceInfos) {
-                if ((pass === 0 && reference.type !== ReferenceType.Confirmed) ||
-                    (pass === 1 && reference.type === ReferenceType.Confirmed)) {
-                    continue;
-                } else if (!refsFound) {
-                    refsFound = true;
-                }
-                let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
-                this.referencesChannel.appendLine("[" + convertReferenceTypeToString(reference.type, this.referencesCanceled, this.client.ReferencesCommandMode === ReferencesCommandMode.Rename)
-                    + "] " + reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
-            }
-            if (pass === 0 && refsFound) {
-                this.referencesChannel.appendLine("");
-            }
-        }
-
-        if (this.referencesStartedWhileTagParsing || refsFound) {
             this.referencesChannel.show(true);
-            this.findAllRefsView.setData(referencesResult.referenceInfos);
+        }
+
+        // Put results in data model
+        this.findAllRefsView.setData(referencesResult.referenceInfos, this.referencesCanceled);
+
+        // Display data based on command mode: peek references OR find all references
+        if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
+            // Show confirmed references if: user previews results OR peek references is canceled
+            let showConfirmedReferences: boolean =
+                (!this.referencesCanceled && this.referencesCurrentProgress.referencesProgress !== ReferencesProgress.FinalResultsAvailable)
+                || (this.referencesCanceled && this.referencesCurrentProgress.referencesProgress === ReferencesProgress.CanceledFinalResultsAvailable);
+            let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
+            if (peekReferencesResults) {
+                this.referencesChannel.appendLine(peekReferencesResults);
+                this.referencesChannel.show(true);
+            }
+        } else {
             this.findAllRefsView.show(true);
         }
     }
