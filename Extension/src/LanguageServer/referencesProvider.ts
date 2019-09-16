@@ -36,7 +36,6 @@ function getReferenceTypeIconPath(referenceType: ReferenceType): { light: string
     };
 }
 
-
 type TreeObject = FileItem | ReferenceItem | ReferenceTypeItem;
 
 export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject> {
