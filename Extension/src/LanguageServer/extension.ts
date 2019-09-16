@@ -10,7 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { ReferenceItem } from './referencesModel';
+import { ReferenceItem, FileItem } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -1133,12 +1133,18 @@ function onRescanWorkspace(): void {
     clients.forEach(client => client.rescanFolder());
 }
 
-function onShowRefCommand(arg?: ReferenceItem): void {
-    if (arg) {
+function onShowRefCommand(arg?: ReferenceItem | FileItem): void {
+    if (!arg) {
+        return;
+    }
+    if (arg instanceof ReferenceItem) {
         const { location } = arg;
         vscode.window.showTextDocument(location.uri, {
             selection: location.range.with({ end: location.range.start })
         });
+    } else if (arg instanceof FileItem) {
+        const { uri } = arg;
+        vscode.window.showTextDocument(uri);
     }
 }
 

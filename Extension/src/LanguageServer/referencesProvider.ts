@@ -12,18 +12,30 @@ import * as nls from 'vscode-nls';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-function getReferenceTypeIconPath(referenceType: ReferenceType): vscode.ThemeIcon {
-    // TODO: return icon path for light and dark themes based on reference type
+function getReferenceTypeIconPath(referenceType: ReferenceType): { light: string; dark: string } {
+    const assetsFolder: string = "assets/";
+    const postFixLight: string = "-light.svg";
+    const postFixDark: string = "-dark.svg";
+    let basePath: string = "ref-cannot-confirm";
+
     switch (referenceType) {
-        case ReferenceType.Confirmed:
-        case ReferenceType.Comment: return util.getExtensionFilePath("assets/comment.svg");
-        case ReferenceType.String: return util.getExtensionFilePath("assets/string.svg");
-        case ReferenceType.Inactive: return util.getExtensionFilePath("assets/cannotconfirm.svg");
-        case ReferenceType.CannotConfirm: return util.getExtensionFilePath("assets/cannotconfirm.svg");
-        case ReferenceType.NotAReference: return util.getExtensionFilePath("assets/not-a-reference.svg");
+        case ReferenceType.Confirmed: basePath = "ref-confirmed"; break;
+        case ReferenceType.Comment: basePath = "ref-comment"; break;
+        case ReferenceType.String: basePath = "ref-string"; break;
+        case ReferenceType.Inactive: basePath = "ref-inactive"; break;
+        case ReferenceType.CannotConfirm: basePath = "ref-cannot-confirm"; break;
+        case ReferenceType.NotAReference: basePath = "ref-not-a-reference"; break;
+        case ReferenceType.ConfirmationInProgress: basePath = "ref-confirmation-in-progress"; break;
     }
-    return util.getExtensionFilePath("assets/cannotconfirm.svg");
+
+    let lightPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixLight);
+    let darkPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixDark);
+    return {
+        light: lightPath,
+        dark: darkPath
+    };
 }
+
 
 type TreeObject = FileItem | ReferenceItem | ReferenceTypeItem;
 
@@ -60,8 +72,8 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         return this.references.ReferenceItems as ReferenceItem[];
     }
 
-    getFileReferences(): FileItem[] {
-        return this.references.FileItems.filter(i => i.isFileReference) as FileItem[];
+    getFilesWithPendingReferences(): FileItem[] {
+        return this.references.FileItems.filter(i => i.ReferenceItemsPending) as FileItem[];
     }
 
     getTreeItem(element: TreeObject): vscode.TreeItem {
@@ -75,19 +87,31 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
             result.iconPath = getReferenceTypeIconPath(element.type);
             let type: string = convertReferenceTypeToString(element.type, this.referencesCanceled);
             result.tooltip = `[${type}]\n${element.text}`;
+
             result.command = {
                 title: localize("goto.reference", "Go to reference"),
                 command: 'C_Cpp.ShowReferenceItem',
                 arguments: [element]
             };
+
             return result;
         }
 
         if (element instanceof FileItem) {
             const result: vscode.TreeItem = new vscode.TreeItem(element.uri);
-            result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+            result.collapsibleState = element.ReferenceItemsPending ?
+                vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
             result.iconPath = vscode.ThemeIcon.File;
             result.description = true;
+
+            if (element.ReferenceItemsPending) {
+                result.command = {
+                    title: localize("goto.reference", "Go to reference"),
+                    command: 'C_Cpp.ShowReferenceItem',
+                    arguments: [element]
+                };
+            }
+
             return result;
         }
 
@@ -116,7 +140,3 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         return this.references.FileItems;
     }
 }
-
-// TODO: add provider for rename
-// export class RenameDataProvider implements vscode.TreeDataProvider<T> {
-// }

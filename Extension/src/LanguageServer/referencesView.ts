@@ -53,8 +53,8 @@ export class FindAllRefsView {
             }
         }
 
-        // Get file references
-        let fileReferences: FileItem[] = this.referenceViewProvider.getFileReferences();
+        // Get files with pending references items (location of reference is pending)
+        let fileReferences: FileItem[] = this.referenceViewProvider.getFilesWithPendingReferences();
         for (let fileRef of fileReferences) {
             let line: string = ("[" + convertReferenceTypeToString(ReferenceType.ConfirmationInProgress, this.referenceViewProvider.isCanceled()) + "] " + fileRef.name);
             fileRefs.push(line);
@@ -64,7 +64,3 @@ export class FindAllRefsView {
         return results.join('\n');
     }
 }
-
-// TODO: create class to manage displaying data to rename view
-// export class RenameView {
-// }

@@ -27,9 +27,9 @@ export class Model {
             }
 
             // Add reference to file
-            let isFileReference: boolean = (r.position.line === 0 && r.position.character === 0);
-            fileItem.isFileReference = isFileReference;
-            if (!isFileReference) {
+            let noReferenceLocation: boolean = (r.position.line === 0 && r.position.character === 0);
+            fileItem.ReferenceItemsPending = noReferenceLocation;
+            if (!noReferenceLocation) {
                 const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + 1);
                 const location: vscode.Location = new vscode.Location(fileItem.uri, range);
                 const reference: ReferenceItem = new ReferenceItem(r.position, location, r.text, fileItem, r.type);
@@ -72,7 +72,7 @@ export class ReferenceTypeItem {
 
 export class FileItem {
     private references: ReferenceItem[] = [];
-    public isFileReference: boolean = false;
+    public ReferenceItemsPending: boolean = false;
 
     constructor(
         readonly uri: vscode.Uri,
