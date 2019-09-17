@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import * as util from '../common';
 import { Model, FileItem, ReferenceItem, ReferenceTypeItem } from './referencesModel';
-import { ReferenceInfo, ReferenceType, convertReferenceTypeToString } from './references';
+import { ReferenceInfo, ReferenceType, getReferenceTagString } from './references';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -34,6 +34,17 @@ function getReferenceTypeIconPath(referenceType: ReferenceType): { light: string
         light: lightPath,
         dark: darkPath
     };
+}
+
+function getReferenceCanceledIconPath(): { light: string; dark: string } {
+    return {
+        light: util.getExtensionFilePath("assets/ref-canceled-light.svg"),
+        dark: util.getExtensionFilePath("assets/ref-canceled-dark.svg")
+    };
+}
+
+function getReferenceItemIconPath(type: ReferenceType, isCanceled: boolean): { light: string; dark: string } {
+    return isCanceled ? getReferenceCanceledIconPath() : getReferenceTypeIconPath(type);
 }
 
 type TreeObject = FileItem | ReferenceItem | ReferenceTypeItem;
@@ -83,8 +94,8 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         if (element instanceof ReferenceItem) {
             const result: vscode.TreeItem = new vscode.TreeItem(element.text);
             result.collapsibleState = vscode.TreeItemCollapsibleState.None;
-            result.iconPath = getReferenceTypeIconPath(element.type);
-            let type: string = convertReferenceTypeToString(element.type, this.referencesCanceled);
+            result.iconPath = getReferenceItemIconPath(element.type, this.referencesCanceled);
+            let type: string = getReferenceTagString(element.type, this.referencesCanceled);
             result.tooltip = `[${type}]\n${element.text}`;
 
             result.command = {
@@ -109,16 +120,18 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
                     command: 'C_Cpp.ShowReferenceItem',
                     arguments: [element]
                 };
+                let type: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesCanceled);
+                result.tooltip = `[${type}]\n${element.name}`;
             }
 
             return result;
         }
 
         if (element instanceof ReferenceTypeItem) {
-            const label: string = convertReferenceTypeToString(element.type, false);
+            const label: string = getReferenceTagString(element.type, this.referencesCanceled);
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-            result.iconPath = getReferenceTypeIconPath(element.type);
+            result.iconPath = getReferenceItemIconPath(element.type, this.referencesCanceled);
             return result;
         }
     }

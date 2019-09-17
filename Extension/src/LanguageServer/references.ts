@@ -82,10 +82,10 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
     }
 }
 
-export function convertReferenceTypeToString(referenceType: ReferenceType, isReferencesCanceled: boolean): string {
+export function convertReferenceTypeToString(referenceType: ReferenceType): string {
     switch (referenceType) {
         case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed reference");
-        case ReferenceType.ConfirmationInProgress: return isReferencesCanceled ? localize("confirmation.canceled", "Confirmation canceled") : localize("confirmation.in.progress", "Confirmation in progress");
+        case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress", "Confirmation in progress");
         case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
         case ReferenceType.String: return localize("string.reference", "String reference");
         case ReferenceType.Inactive: return localize("inactive.reference", "Inactive reference");
@@ -93,6 +93,14 @@ export function convertReferenceTypeToString(referenceType: ReferenceType, isRef
         case ReferenceType.NotAReference: return localize("not.a.reference", "Not a reference");
     }
     return "";
+}
+
+function getReferenceCanceledString(): string {
+    return localize("confirmation.canceled", "Confirmation canceled");
+}
+
+export function getReferenceTagString(referenceType: ReferenceType, referenceCanceled: boolean): string {
+    return referenceCanceled ? getReferenceCanceledString() : convertReferenceTypeToString(referenceType);
 }
 
 export class ProgressHandler {
@@ -340,7 +348,7 @@ export class ProgressHandler {
                 this.referencesChannel.appendLine(peekReferencesResults);
                 this.referencesChannel.show(true);
             }
-        } else {
+        } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
             this.findAllRefsView.show(true);
         }
     }

@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceInfo, ReferenceType, convertReferenceTypeToString } from './references';
+import { ReferenceInfo, ReferenceType, getReferenceTagString } from './references';
 import { ReferenceDataProvider } from './referencesProvider';
 import { FileItem, ReferenceItem } from './referencesModel';
 
@@ -42,11 +42,11 @@ export class FindAllRefsView {
         let referenceItems: ReferenceItem[] = this.referenceViewProvider.getReferenceItems();
         for (let ref of referenceItems) {
             let line: string =
-                ("[" + convertReferenceTypeToString(ref.type, this.referenceViewProvider.isCanceled()) + "] "
+                ("[" + getReferenceTagString(ref.type, this.referenceViewProvider.isCanceled()) + "] "
                 + ref.parent.name
                 + ":" + (ref.position.line + 1) + ":" + (ref.position.character + 1)
                 + " " + ref.text);
-            if (ref.type === ReferenceType.Confirmed && includeConfirmedReferences) {
+            if (includeConfirmedReferences && ref.type === ReferenceType.Confirmed) {
                 confirmedRefs.push(line);
             } else {
                 otherRefs.push(line);
@@ -56,7 +56,9 @@ export class FindAllRefsView {
         // Get files with pending references items (location of reference is pending)
         let fileReferences: FileItem[] = this.referenceViewProvider.getFilesWithPendingReferences();
         for (let fileRef of fileReferences) {
-            let line: string = ("[" + convertReferenceTypeToString(ReferenceType.ConfirmationInProgress, this.referenceViewProvider.isCanceled()) + "] " + fileRef.name);
+            let line: string =
+                ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referenceViewProvider.isCanceled()) + "] "
+                + fileRef.name);
             fileRefs.push(line);
         }
 
