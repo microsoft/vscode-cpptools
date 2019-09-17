@@ -313,7 +313,7 @@
         },
         "symbolLoadInfo": {
           "$ref": "#/definitions/SymbolLoadInfo",
-          "description": "%c_cpp.debuggers.symbolloadinfo.description%"
+          "description": "%c_cpp.debuggers.symbolLoadInfo.description%"
         }
       }
     },
@@ -419,7 +419,7 @@
         },
         "symbolLoadInfo": {
           "$ref": "#/definitions/SymbolLoadInfo",
-          "description": "%c_cpp.debuggers.symbolloadinfo.description%"
+          "description": "%c_cpp.debuggers.symbolLoadInfo.description%"
         }
       }
     },

@@ -945,7 +945,7 @@
                 }
               },
               "symbolLoadInfo": {
-                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
+                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
                 "type": "object",
                 "default": {
                   "loadAll": true,
@@ -1157,7 +1157,7 @@
                 "default": []
               },
               "symbolLoadInfo": {
-                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
+                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
                 "type": "object",
                 "default": {
                   "loadAll": true,

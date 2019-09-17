@@ -113,19 +113,28 @@ export class UI {
         }
     }
 
+    // Prevent icons from appearing too often and for too short of a time.
+    private readonly iconDelayTime: number = 1000;
+
+    private dbTimeout: NodeJS.Timeout;
     private set ShowDBIcon(show: boolean) {
         if (show && this.IsTagParsing) {
-            this.browseEngineStatusBarItem.show();
+            clearTimeout(this.dbTimeout);
+            this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            this.browseEngineStatusBarItem.hide();
+            clearTimeout(this.dbTimeout);
+            this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }
 
+    private flameTimeout: NodeJS.Timeout;
     private set ShowFlameIcon(show: boolean) {
         if (show && this.IsUpdatingIntelliSense) {
-            this.intelliSenseStatusBarItem.show();
+            clearTimeout(this.flameTimeout);
+            this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            this.intelliSenseStatusBarItem.hide();
+            clearTimeout(this.flameTimeout);
+            this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }
 
