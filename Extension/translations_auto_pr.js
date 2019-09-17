@@ -51,7 +51,7 @@ function sleep(ms) {
     while(new Date().getTime() < unixtime_ms + ms) {}
 }
 
-console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceeed in 10 seconds.");
+console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceed in 10 seconds.");
 sleep(10000);
 
 console.log("Looking for latest localization drop");

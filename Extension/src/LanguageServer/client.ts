@@ -212,6 +212,12 @@ interface LocalizeSymbolInformation {
     suffix: LocalizeStringParams;
 }
 
+interface RenameParams {
+    newName: string;
+    position: Position;
+    textDocument: TextDocumentIdentifier;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -245,6 +251,7 @@ const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, v
 const RequestReferencesNotification: NotificationType<boolean, void> = new NotificationType<boolean, void>('cpptools/requestReferences');
 const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
+const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -265,6 +272,15 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 
 let failureMessageShown: boolean = false;
+
+enum RenameState {
+    Initial = 0,
+    WaitingForResults = 1,
+    WaitingForUI = 2
+}
+let renameState: RenameState = RenameState.Initial;
+let renameParams: RenameParams;
+let renamePromiseReject: any;
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -544,7 +560,7 @@ export class DefaultClient implements Client {
 
                         provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
                             let params: WorkspaceSymbolParams = {
-                            query: query
+                                query: query
                             };
 
                             return this.client.languageClient.sendRequest(GetSymbolInfoRequest, params)
@@ -574,6 +590,85 @@ export class DefaultClient implements Client {
                         }
                     }
                     this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+
+                    class RenameProvider implements vscode.RenameProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+                        provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.WorkspaceEdit> {
+                            let params: RenameParams = {
+                                newName: newName,
+                                position: Position.create(position.line, position.character),
+                                textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
+                            };
+
+                            // Normally, VS Code considers rename to be an atomic operation.
+                            // If the user clicks anywhere in the document, it attempts to cancel it.
+                            // Because that prevents our rename UI, we ignore cancellation requests.
+                            // VS Code will attempt to issue new rename requests while another is still active.
+                            // When we receive another rename require, cancel the one that is in progress.
+                            // The current rename request is presented by renameParams.  If a request detects that
+                            // renameParams does not match the object used when creating the request, abort it.
+
+                            renameParams = params;
+                            switch (renameState) {
+                                case RenameState.WaitingForResults:
+                                    renamePromiseReject();
+                                    this.client.cancelReferences();
+                                    break;
+                                case RenameState.WaitingForUI:
+                                    // If there is currently UI displayed for a rename operation, dismiss it.  This new rename operation preempts it.
+                                    this.client.references.closeRenameUI();
+                                    renamePromiseReject();
+                                    break;
+                                case RenameState.Initial:
+                                default:
+                                    break;
+                            }
+
+                            renameState = RenameState.Initial;
+                            return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+
+                                    // if renameParams have changed, a newer request arrived.  Abort this one.
+                                    if (params !== renameParams) {
+                                        reject();
+                                    }
+
+                                    renamePromiseReject = reject;
+                                    renameState = RenameState.WaitingForResults;
+                                    this.client.languageClient.sendNotification(RenameNotification, renameParams);
+                                    this.client.references.getResultsEvent((referencesResult: refs.ReferencesResult) => {
+
+                                        // if renameParams have changed, a newer request arrived.
+                                        // Our promise would already have been cancelled.
+                                        if (params !== renameParams) {
+                                            return;
+                                        }
+
+                                        //renameState = RenameState.WaitingForUI;   // TODO
+                                        renameState = RenameState.Initial;
+
+                                        // Set up Rename UI here
+                                        // TEMP: For now, just finish the operation with the confirmed references.
+                                        let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                        for (let reference of referencesResult.referenceInfos) {
+                                            if (reference.type === refs.ReferenceType.Confirmed) {
+                                                let uri: vscode.Uri = vscode.Uri.file(reference.file);
+                                                let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
+                                                workspaceEdit.replace(uri, range, newName);
+                                            }
+                                        }
+                                        resolve(workspaceEdit);
+                                    });
+                                });
+                            });
+                        }
+                    }
+
+                    this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
+
                     // Listen for messages from the language server.
                     this.registerNotifications();
                     this.registerFileWatcher();
@@ -1925,7 +2020,9 @@ export class DefaultClient implements Client {
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
             this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
-            this.sendRequestReferences();
+            if (this.ReferencesCommandMode !== refs.ReferencesCommandMode.Rename) {
+                this.sendRequestReferences();
+            }
         });
     }
 

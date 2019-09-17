@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { ReferenceItem } from './referencesModel';
+import { RenameItem, RenameFileItem, getCurrentRenameModel, RenameModel } from './renameModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -869,6 +870,15 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesItem', onShowRefCommand));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowRenameItem', onShowRenameCommand));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.cancel', onRenameViewCancel));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.done', onRenameViewDone));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.remove', onRenameViewRemove));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.add', onRenameViewAdd));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.removeAll', onRenameViewRemoveAll));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.addAll', onRenameViewAddAll));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.removeFile', onRenameViewRemoveFile));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.addFile', onRenameViewAddFile));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -1139,6 +1149,65 @@ function onShowRefCommand(arg?: ReferenceItem): void {
         vscode.window.showTextDocument(location.uri, {
             selection: location.range.with({ end: location.range.start })
         });
+    }
+}
+
+function onShowRenameCommand(arg?: RenameItem): void {
+    if (arg) {
+        const location: vscode.Location = arg.location;
+        vscode.window.showTextDocument(location.uri, {
+            selection: location.range.with({ end: location.range.start })
+        });
+    }
+}
+
+function onRenameViewCancel(arg?: any): void {
+}
+
+function onRenameViewDone(arg?: any): void {
+}
+
+function onRenameViewRemove(arg?: RenameItem): void {
+    if (arg) {
+        arg.changeGroup();
+        arg.getModel().updateProviders();
+    }
+}
+
+function onRenameViewAdd(arg?: RenameItem): void {
+    if (arg) {
+        arg.changeGroup();
+        arg.getModel().updateProviders();
+    }
+}
+
+function onRenameViewRemoveAll(arg?: any): void {
+    let currentRenameModel: RenameModel = getCurrentRenameModel();
+    if (currentRenameModel) {
+        currentRenameModel.getGroup(true).changeGroup();
+        currentRenameModel.updateProviders();
+    }
+}
+
+function onRenameViewAddAll(arg?: any): void {
+    let currentRenameModel: RenameModel = getCurrentRenameModel();
+    if (currentRenameModel) {
+        currentRenameModel.getGroup(false).changeGroup();
+        currentRenameModel.updateProviders();
+    }
+}
+
+function onRenameViewRemoveFile(arg?: RenameFileItem): void {
+    if (arg) {
+        arg.changeGroup();
+        arg.getModel().updateProviders();
+    }
+}
+
+function onRenameViewAddFile(arg?: RenameFileItem): void {
+    if (arg) {
+        arg.changeGroup();
+        arg.getModel().updateProviders();
     }
 }
 

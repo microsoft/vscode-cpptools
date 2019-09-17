@@ -8,6 +8,7 @@ import { DefaultClient } from './client';
 import { FindAllRefsView } from './referencesView';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
+import { RenameView } from './renameView';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -30,6 +31,7 @@ export interface ReferenceInfo {
 }
 
 export interface ReferencesResult {
+    text: string;
     referenceInfos: ReferenceInfo[];
 }
 
@@ -101,6 +103,7 @@ export class ProgressHandler {
     // TODO: move views to class that manages view
     private referencesChannel: vscode.OutputChannel;
     private findAllRefsView: FindAllRefsView;
+    private renameView: RenameView;
     private viewsInitialized: boolean = false;
 
     private referencesCurrentProgress: ReportReferencesProgressNotification;
@@ -136,6 +139,7 @@ export class ProgressHandler {
             this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.references", "C/C++ References"));
             this.disposables.push(this.referencesChannel);
             this.findAllRefsView = new FindAllRefsView();
+            this.renameView = new RenameView();
             this.viewsInitialized = true;
         }
     }
@@ -253,6 +257,7 @@ export class ProgressHandler {
 
         this.referencesChannel.clear();
         this.findAllRefsView.show(false);
+        this.renameView.show(false);
 
         this.referencesDelayProgress = setInterval(() => {
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
@@ -263,7 +268,9 @@ export class ProgressHandler {
                     let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
                         if (token.isCancellationRequested && !this.referencesCanceled) {
                             this.client.cancelReferences();
-                            this.client.sendRequestReferences();
+                            if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
+                                this.client.sendRequestReferences();
+                            }
                             this.referencesCanceled = true;
                         }
                         if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
@@ -314,11 +321,14 @@ export class ProgressHandler {
         }
     }
 
+    private resultsEvents: vscode.EventEmitter<ReferencesResult>[] = [];
+
     public processResults(referencesResult: ReferencesResult): void {
         this.initializeViews();
         this.referencesViewFindPending = false;
         this.referencesChannel.clear();
         this.findAllRefsView.show(false);
+        this.renameView.show(false);
 
         if (this.referencesStartedWhileTagParsing) {
             this.referencesChannel.appendLine(localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
@@ -326,32 +336,56 @@ export class ProgressHandler {
             this.referencesChannel.appendLine("");
         }
 
-        let showConfirmedReferences: boolean = this.client.ReferencesCommandMode === ReferencesCommandMode.Rename ||
-            (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek && ((!this.referencesCanceled && this.referencesCurrentProgress.referencesProgress !== ReferencesProgress.FinalResultsAvailable)
-                || (this.referencesCanceled && this.referencesCurrentProgress.referencesProgress === ReferencesProgress.CanceledFinalResultsAvailable)));
-        let refsFound: boolean = false;
-        // 1st pass is for confirmed references.
-        for (let pass: number = (showConfirmedReferences ? 0 : 1); pass < 2; ++pass) {
-            for (let reference of referencesResult.referenceInfos) {
-                if ((pass === 0 && reference.type !== ReferenceType.Confirmed) ||
-                    (pass === 1 && reference.type === ReferenceType.Confirmed)) {
-                    continue;
-                } else if (!refsFound) {
-                    refsFound = true;
-                }
-                let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
-                this.referencesChannel.appendLine("[" + convertReferenceTypeToString(reference.type, this.referencesCanceled, this.client.ReferencesCommandMode === ReferencesCommandMode.Rename)
-                    + "] " + reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
-            }
-            if (pass === 0 && refsFound) {
-                this.referencesChannel.appendLine("");
-            }
-        }
+        if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
+            let currentResultEvent: vscode.EventEmitter<ReferencesResult> = this.resultsEvents.shift();
+            if (!this.referencesCanceled) {
+                // Rename provider listens for this event
+                this.referencesChannel.show(true);
+                this.renameView.setData(referencesResult.referenceInfos);
+                this.renameView.show(true);
 
-        if (this.referencesStartedWhileTagParsing || refsFound) {
-            this.referencesChannel.show(true);
-            this.findAllRefsView.setData(referencesResult.referenceInfos);
-            this.findAllRefsView.show(true);
+                // Maybe delay this until the rename UI is completed?
+                // TEMP: Wait 10 seconds to complete it.
+                //setTimeout(() => { currentResultEvent.fire(referencesResult); }, 10000);
+                currentResultEvent.fire(referencesResult);
+            }
+        } else {
+            let showConfirmedReferences: boolean = (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek && ((!this.referencesCanceled && this.referencesCurrentProgress.referencesProgress !== ReferencesProgress.FinalResultsAvailable)
+                    || (this.referencesCanceled && this.referencesCurrentProgress.referencesProgress === ReferencesProgress.CanceledFinalResultsAvailable)));
+            let refsFound: boolean = false;
+            // 1st pass is for confirmed references.
+            for (let pass: number = (showConfirmedReferences ? 0 : 1); pass < 2; ++pass) {
+                for (let reference of referencesResult.referenceInfos) {
+                    if ((pass === 0 && reference.type !== ReferenceType.Confirmed) ||
+                        (pass === 1 && reference.type === ReferenceType.Confirmed)) {
+                        continue;
+                    } else if (!refsFound) {
+                        refsFound = true;
+                    }
+                    let isFileReference: boolean = reference.position.line === 0 && reference.position.character === 0;
+                    this.referencesChannel.appendLine("[" + convertReferenceTypeToString(reference.type, this.referencesCanceled, false)
+                        + "] " + reference.file + (!isFileReference ? ":" + (reference.position.line + 1) + ":" + (reference.position.character + 1) : "") + " " + reference.text);
+                }
+                if (pass === 0 && refsFound) {
+                    this.referencesChannel.appendLine("");
+                }
+            }
+
+            if (this.referencesStartedWhileTagParsing || refsFound) {
+                this.referencesChannel.show(true);
+                this.findAllRefsView.setData(referencesResult.referenceInfos);
+                this.findAllRefsView.show(true);
+            }
         }
+    }
+
+    public get getResultsEvent(): vscode.Event<ReferencesResult> {
+        let resultsEvent: vscode.EventEmitter<ReferencesResult> = new vscode.EventEmitter<ReferencesResult>();
+        this.resultsEvents.push(resultsEvent);
+        return resultsEvent.event;
+    }
+
+    public closeRenameUI(): void {
+        this.renameView.show(false);
     }
 }
