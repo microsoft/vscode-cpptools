@@ -95,8 +95,8 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
             const result: vscode.TreeItem = new vscode.TreeItem(element.text);
             result.collapsibleState = vscode.TreeItemCollapsibleState.None;
             result.iconPath = getReferenceItemIconPath(element.type, this.referencesCanceled);
-            let type: string = getReferenceTagString(element.type, this.referencesCanceled);
-            result.tooltip = `[${type}]\n${element.text}`;
+            let tag: string = getReferenceTagString(element.type, this.referencesCanceled);
+            result.tooltip = `[${tag}]\n${element.text}`;
 
             result.command = {
                 title: localize("goto.reference", "Go to reference"),
@@ -120,8 +120,8 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
                     command: 'C_Cpp.ShowReferenceItem',
                     arguments: [element]
                 };
-                let type: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesCanceled);
-                result.tooltip = `[${type}]\n${element.name}`;
+                let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesCanceled);
+                result.tooltip = `[${tag}]\n${element.name}`;
             }
 
             return result;
