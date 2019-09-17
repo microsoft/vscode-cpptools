@@ -19,10 +19,10 @@ export class FindAllRefsView {
     }
 
     show(showView: boolean): void {
-        vscode.commands.executeCommand(`setContext`, 'cppReferenceTypes:hasResults', this.referenceViewProvider.hasResults());
         if (!showView) {
             this.clearData();
         }
+        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', this.referenceViewProvider.hasResults());
     }
 
     setData(results: ReferenceInfo[], isCanceled: boolean): void {
