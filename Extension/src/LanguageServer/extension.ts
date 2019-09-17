@@ -10,8 +10,8 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { ReferenceItem } from './referencesModel';
 import { RenameItem, RenameFileItem, getCurrentRenameModel, RenameModel } from './renameModel';
+import { ReferenceItem, FileItem } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -879,6 +879,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('CppRenameView.addAll', onRenameViewAddAll));
     disposables.push(vscode.commands.registerCommand('CppRenameView.removeFile', onRenameViewRemoveFile));
     disposables.push(vscode.commands.registerCommand('CppRenameView.addFile', onRenameViewAddFile));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -1143,12 +1144,18 @@ function onRescanWorkspace(): void {
     clients.forEach(client => client.rescanFolder());
 }
 
-function onShowRefCommand(arg?: ReferenceItem): void {
-    if (arg) {
+function onShowRefCommand(arg?: ReferenceItem | FileItem): void {
+    if (!arg) {
+        return;
+    }
+    if (arg instanceof ReferenceItem) {
         const { location } = arg;
         vscode.window.showTextDocument(location.uri, {
             selection: location.range.with({ end: location.range.start })
         });
+    } else if (arg instanceof FileItem) {
+        const { uri } = arg;
+        vscode.window.showTextDocument(uri);
     }
 }
 

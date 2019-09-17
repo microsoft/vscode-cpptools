@@ -201,3 +201,9 @@ export class RenameItem {
 export function getCurrentRenameModel(): RenameModel {
     return currentRename;
 }
+
+export class RenameReferenceTypeItem {
+    constructor(readonly type: ReferenceType, readonly text: string, readonly parent: RenameGroupItem) {
+    }
+}
+

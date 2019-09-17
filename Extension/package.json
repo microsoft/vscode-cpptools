@@ -1497,12 +1497,12 @@
           "group": "navigation@1"
         },
         {
-          "command": "CppRenameView.cancel",
+          "command": "CppRenameView.done",
           "when": "view == CppRenamePendingView && cppRename:hasResults",
           "group": "navigation@2"
         },
         {
-          "command": "CppRenameView.done",
+          "command": "CppRenameView.cancel",
           "when": "view == CppRenamePendingView && cppRename:hasResults",
           "group": "navigation@3"
         },
