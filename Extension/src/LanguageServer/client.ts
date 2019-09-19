@@ -228,10 +228,6 @@ interface FindAllReferencesParams {
     textDocument: TextDocumentIdentifier;
 }
 
-interface FindAllReferencesResult {
-    referencesResult: Location[];
-}
-
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -285,7 +281,6 @@ const RequestCustomConfig: NotificationType<string, void> = new NotificationType
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
-const FindAllReferencesResultsNotification: NotificationType<FindAllReferencesResult, void> = new NotificationType<FindAllReferencesResult, void>('cpptools/findAllReferencesResult');
 
 let failureMessageShown: boolean = false;
 
@@ -382,7 +377,6 @@ export class DefaultClient implements Client {
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
     private configurationProvider: string;
-    private findAllReferencesResultCallback: (name: FindAllReferencesResult) => void;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -635,17 +629,20 @@ export class DefaultClient implements Client {
                                     this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
 
                                     // Register a single-fire handler for the reply.
-                                    this.client.findAllReferencesResultCallback = result => {
+                                    this.client.references.setResultsCallback(result => {
                                         if (referencesRequestPending) {
                                             referencesRequestPending = false;
                                             let locations: vscode.Location[] = [];
-                                            result.referencesResult.forEach(location => {
-                                                let range: vscode.Range = new vscode.Range(location.range.start.line, location.range.start.character, location.range.end.line, location.range.end.character);
-                                                locations.push(new vscode.Location(vscode.Uri.parse(location.uri), range));
+                                            result.referenceInfos.forEach(referenceInfo => {
+                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
+                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
+                                                    let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
+                                                    locations.push(new vscode.Location(uri, range));
+                                                }
                                             });
                                             resolve(locations);
                                         }
-                                    };
+                                    });
                                 });
                                 token.onCancellationRequested(e => {
                                     if (params === referencesParams) {
@@ -700,7 +697,7 @@ export class DefaultClient implements Client {
                                     referencesRequestPending = true;
                                     this.client.languageClient.sendNotification(RenameNotification, params);
 
-                                    this.client.references.setRenameResultCallback(referencesResult => {
+                                    this.client.references.setResultsCallback(referencesResult => {
                                         referencesRequestPending = false;
                                         renamePending = false;
                                         let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -1446,12 +1443,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(PublishDiagnosticsNotification, (e) => this.publishDiagnostics(e));
         this.languageClient.onNotification(ShowMessageWindowNotification, (e) => this.showMessageWindow(e));
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
-        this.languageClient.onNotification(FindAllReferencesResultsNotification, (e) => this.receiveFindAllReferencesResults(e));
         this.setupOutputHandlers();
-    }
-
-    private receiveFindAllReferencesResults(params: FindAllReferencesResult): void {
-        this.findAllReferencesResultCallback(params);
     }
 
     private setTextDocumentLanguage(languageStr: string): void {

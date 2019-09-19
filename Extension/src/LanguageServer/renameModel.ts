@@ -237,10 +237,10 @@ let currentRenameModel: RenameModel;
 export class RenameModel {
     private pendingGroup: RenamePendingFilesGroupItem;
     private candidatesGroup: RenameCandidateReferenceTypeGroupItem;
-    private renameResultsCallback: (name: ReferencesResult) => void;
+    private renameResultsCallback: (results: ReferencesResult) => void;
     private originalText: string;
 
-    constructor(resultsInput: ReferencesResult, readonly pendingProvider: RenameDataProvider, readonly candidateProvider: RenameDataProvider, resultsCallback: (name: ReferencesResult) => void) {
+    constructor(resultsInput: ReferencesResult, readonly pendingProvider: RenameDataProvider, readonly candidateProvider: RenameDataProvider, resultsCallback: (results: ReferencesResult) => void) {
         currentRenameModel = this;
         this.originalText = resultsInput.text;
         this.renameResultsCallback = resultsCallback;

@@ -136,7 +136,8 @@ export class ProgressHandler {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
-    private renameResultCallback: (name: ReferencesResult) => void;
+    private resultsCallback: (results: ReferencesResult) => void;
+    private lastResults: ReferencesResult;
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -320,6 +321,9 @@ export class ProgressHandler {
                 break;
             case ReferencesProgress.Finished:
                 this.referencesCurrentProgress = notificationBody;
+                if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find || this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
+                    this.resultsCallback(this.lastResults);
+                }
                 this.client.setReferencesCommandMode(ReferencesCommandMode.None);
                 clearInterval(this.referencesDelayProgress);
                 break;
@@ -335,6 +339,7 @@ export class ProgressHandler {
         this.referencesChannel.clear();
         this.findAllRefsView.show(false);
         this.renameView.show(false);
+        this.lastResults = referencesResult;
 
         if (this.referencesStartedWhileTagParsing) {
             let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
@@ -348,7 +353,7 @@ export class ProgressHandler {
             if (!this.referencesCanceled) {
                 this.referencesChannel.show(true);
                 this.renameView.show(true);
-                this.renameView.setData(referencesResult, this.renameResultCallback);
+                this.renameView.setData(referencesResult, this.resultsCallback);
             }
         } else {
             // Put results in data model
@@ -371,8 +376,8 @@ export class ProgressHandler {
         }
     }
 
-    public setRenameResultCallback(callback: (name: ReferencesResult) => void): void {
-        this.renameResultCallback = callback;
+    public setResultsCallback(callback: (results: ReferencesResult) => void): void {
+        this.resultsCallback = callback;
     }
 
     public closeRenameUI(): void {

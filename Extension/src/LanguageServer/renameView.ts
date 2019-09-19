@@ -33,7 +33,7 @@ export class RenameView {
         }
     }
 
-    setData(results: ReferencesResult, resultsCallback: (name: ReferencesResult) => void): void {
+    setData(results: ReferencesResult, resultsCallback: (results: ReferencesResult) => void): void {
         let renameModel: RenameModel = new RenameModel(results, this.renamePendingDataProvider, this.renameCandidatesDataProvider, resultsCallback);
         this.renamePendingDataProvider.setModel(renameModel);
         this.renameCandidatesDataProvider.setModel(renameModel);
