@@ -86,13 +86,13 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
 
 export function convertReferenceTypeToString(referenceType: ReferenceType): string {
     switch (referenceType) {
-        case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed reference");
-        case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress", "Confirmation in progress");
-        case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
-        case ReferenceType.String: return localize("string.reference", "String reference");
-        case ReferenceType.Inactive: return localize("inactive.reference", "Inactive reference");
-        case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference", "Cannot confirm reference");
-        case ReferenceType.NotAReference: return localize("not.a.reference", "Not a reference");
+        case ReferenceType.Confirmed: return localize("confirmed.reference", "CONFIRMED REFERENCE");
+        case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress", "CONFIRMATION IN PROGRESS");
+        case ReferenceType.Comment: return localize("comment.reference", "COMMENT REFERENCE");
+        case ReferenceType.String: return localize("string.reference", "STRING REFERENCE");
+        case ReferenceType.Inactive: return localize("inactive.reference", "INACTIVE REFERENCE");
+        case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference", "CANNOT CONFIRM REFERENCE");
+        case ReferenceType.NotAReference: return localize("not.a.reference", "NOT A REFERENCE");
     }
     return "";
 }
