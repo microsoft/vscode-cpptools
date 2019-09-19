@@ -371,7 +371,7 @@ export class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
-    private references: refs.ProgressHandler;
+    private references: refs.ReferencesManager;
     private colorizationState = new Map<string, ColorizationState>();
     private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
@@ -756,7 +756,7 @@ export class DefaultClient implements Client {
         }
 
         this.colorizationSettings = new ColorizationSettings(this.RootUri);
-        this.references = new refs.ProgressHandler(this);
+        this.references = new refs.ReferencesManager(this);
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {

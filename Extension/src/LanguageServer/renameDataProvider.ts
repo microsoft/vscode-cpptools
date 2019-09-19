@@ -64,8 +64,6 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
             result.iconPath = vscode.ThemeIcon.File;
             result.description = true;
             result.contextValue = "pendingFile";
-            let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, false);
-            result.tooltip = `[${tag}]\n${element.name}`;
             return result;
         }
 
@@ -73,7 +71,6 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
             let label: string = localize("pending.rename", "Pending Rename");
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-            result.iconPath = null;
             result.contextValue = "pendingGroup";
             return result;
         }
@@ -106,7 +103,6 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
             let label: string = localize("candidates.for.rename", "Candidates for Rename");
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-            result.iconPath = null;
             result.contextValue = "candidateGroup";
             return result;
         }
@@ -115,7 +111,6 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
             let label: string = getReferenceTagString(element.type, false);
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-            result.iconPath = null;
             result.contextValue = "candidateReferenceType";
             return result;
         }

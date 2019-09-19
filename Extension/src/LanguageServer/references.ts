@@ -105,7 +105,7 @@ export function getReferenceTagString(referenceType: ReferenceType, referenceCan
     return referenceCanceled ? getReferenceCanceledString() : convertReferenceTypeToString(referenceType);
 }
 
-export class ProgressHandler {
+export class ReferencesManager {
     private client: DefaultClient;
     private disposables: vscode.Disposable[] = [];
 
@@ -263,9 +263,7 @@ export class ProgressHandler {
         this.referencesCurrentProgressUICounter = 0;
         let referencePreviousProgressUICounter: number = 0;
 
-        this.referencesChannel.clear();
-        this.findAllRefsView.show(false);
-        this.renameView.show(false);
+        this.clearViews();
 
         this.referencesDelayProgress = setInterval(() => {
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
@@ -332,17 +330,7 @@ export class ProgressHandler {
     public processResults(referencesResult: ReferencesResult): void {
         this.initializeViews();
         this.referencesViewFindPending = false;
-        this.referencesChannel.clear();
-        this.findAllRefsView.show(false);
-        this.renameView.show(false);
-
-        if (this.referencesStartedWhileTagParsing) {
-            let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
-                referencesCommandModeToString(this.client.ReferencesCommandMode));
-            this.referencesChannel.appendLine(msg);
-            this.referencesChannel.appendLine("");
-            this.referencesChannel.show(true);
-        }
+        this.clearViews();
 
         if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
             if (!this.referencesCanceled) {
@@ -351,6 +339,14 @@ export class ProgressHandler {
                 this.renameView.setData(referencesResult, this.resultsCallback);
             }
         } else {
+            if (this.referencesStartedWhileTagParsing) {
+                let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
+                    referencesCommandModeToString(this.client.ReferencesCommandMode));
+                this.referencesChannel.appendLine(msg);
+                this.referencesChannel.appendLine("");
+                this.referencesChannel.show(true);
+            }
+
             // Put results in data model
             this.findAllRefsView.setData(referencesResult.referenceInfos, this.referencesCanceled);
 
@@ -377,6 +373,12 @@ export class ProgressHandler {
     }
 
     public closeRenameUI(): void {
+        this.renameView.show(false);
+    }
+
+    public clearViews(): void {
+        this.referencesChannel.clear();
+        this.findAllRefsView.show(false);
         this.renameView.show(false);
     }
 }
