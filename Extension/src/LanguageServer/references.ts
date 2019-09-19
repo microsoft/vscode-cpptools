@@ -137,7 +137,6 @@ export class ProgressHandler {
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
     private resultsCallback: (results: ReferencesResult) => void;
-    private lastResults: ReferencesResult;
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -321,9 +320,6 @@ export class ProgressHandler {
                 break;
             case ReferencesProgress.Finished:
                 this.referencesCurrentProgress = notificationBody;
-                if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find || this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
-                    this.resultsCallback(this.lastResults);
-                }
                 this.client.setReferencesCommandMode(ReferencesCommandMode.None);
                 clearInterval(this.referencesDelayProgress);
                 break;
@@ -339,7 +335,6 @@ export class ProgressHandler {
         this.referencesChannel.clear();
         this.findAllRefsView.show(false);
         this.renameView.show(false);
-        this.lastResults = referencesResult;
 
         if (this.referencesStartedWhileTagParsing) {
             let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
@@ -373,6 +368,7 @@ export class ProgressHandler {
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
+            this.resultsCallback(referencesResult);
         }
     }
 
