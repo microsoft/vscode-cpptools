@@ -152,5 +152,7 @@
 	"cmake_executable_not_found": "Ausführbare CMake-Datei wurde unter \"{0}\" nicht gefunden.",
 	"no_args_provider": "Kein Anbieter für Argumente",
 	"invalid_file_path": "Ungültiger Dateipfad \"{0}\".",
-	"cant_create_intellisense_client_for": "Der IntelliSense-Client für \"{0}\" kann nicht erstellt werden."
+	"cant_create_intellisense_client_for": "Der IntelliSense-Client für \"{0}\" kann nicht erstellt werden.",
+	"suffix_declaration": "Deklaration",
+	"suffix_type_alias": "Alias eingeben"
 }
