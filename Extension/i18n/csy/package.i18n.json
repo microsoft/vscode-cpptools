@@ -68,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Pokud se nastaví na true, jazykový server poskytne fragmenty kódu.",
 	"c_cpp.configuration.enhancedColorization.description": "Pokud se tato možnost povolí, kód se bude barvit podle IntelliSense. Toto nastavení nemá žádný vliv, pokud se zakáže IntelliSense nebo pokud se použije výchozí motiv Vysoký kontrast.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Povolte integrační služby pro [správce závislostí vcpkg](https://aka.ms/vcpkg/).",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: výsledky jiných odkazů",
 	"c_cpp.debuggers.pipeTransport.description": "Pokud je k dispozici, předá ladicímu programu informaci, aby se připojil ke vzdálenému počítači pomocí dalšího spustitelného souboru jako kanál, který bude přenášet standardní vstup a výstup mezi nástrojem VS Code a spustitelným souborem back-endu ladicího programu s podporou MI (třeba gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "zadejte plně kvalifikovanou cestu názvu programu kanálu, třeba /usr/bin/ssh",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Úplná cesta k ladicímu programu na cílovém počítači, například /usr/bin/gdb",
@@ -120,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "Nepovinné ID procesu, ke kterému se má ladicí program připojit. Pokud chcete získat seznam místních spuštěných procesů, ke kterým se dá připojit, použijte ${command:pickProcess}. Poznámka: Některé platformy vyžadují pro připojení k procesu oprávnění správce.",
 	"c_cpp.debuggers.symbolSearchPath.description": "Seznam středníkem oddělených adresářů, ve kterých se budou hledat soubory symbolů (tj. soubory pdb). Příklad: c:\\dir1;c:\\dir2",
 	"c_cpp.debuggers.dumpPath.description": "Volitelná úplná cesta k souboru výpisu pro zadaný program. Příklad: c:\\temp\\app.dmp. Výchozí hodnota je null.",
-	"c_cpp.debuggers.enableDebugHeap.description": "Když se nastaví na false, proces se spustí se zakázanou haldou ladění. Tato možnost nastaví proměnnou prostředí _NO_DEBUG_HEAP na 1."
+	"c_cpp.debuggers.enableDebugHeap.description": "Když se nastaví na false, proces se spustí se zakázanou haldou ladění. Tato možnost nastaví proměnnou prostředí _NO_DEBUG_HEAP na 1.",
+	"c_cpp.debuggers.symbolLoadInfo.description": "Explicitní řízení načítání symbolů",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "V případě hodnoty true se načtou symboly pro všechny knihovny (lib), jinak se nenačtou žádné symboly solib. Výchozí hodnota je true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Seznam názvů souborů (s povolenými zástupnými znaky) oddělených středníky (;). Upraví chování pro LoadAll. Hodnota true pro LoadAll znamená, že se nemají načítat symboly pro knihovny (lib), které odpovídají libovolnému názvu v seznamu. V opačném případě se mají načíst symboly pro všechny odpovídající knihovny. Příklad: foo.so;bar.so",
+	"c_cpp.debuggers.requireExactSource.description": "Volitelný příznak, který vyžaduje, aby aktuální zdrojový kód odpovídal souboru pdb"
 }
