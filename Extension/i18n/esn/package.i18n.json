@@ -68,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Si se establece en true, el servidor de lenguaje proporciona los fragmentos de código.",
 	"c_cpp.configuration.enhancedColorization.description": "Si se habilita esta opción, el código se colorea de acuerdo con IntelliSense. Esta configuración no tiene efecto si IntelliSense está deshabilitado o si se utiliza el tema de contraste alto predeterminado.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Habilita los servicios de integración para el [administrador de dependencias de vcpkg] (https://aka.ms/vcpkg/).",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: resultados de otras referencias",
 	"c_cpp.debuggers.pipeTransport.description": "Cuando se especifica, indica al depurador que se conecte a un equipo remoto usando otro archivo ejecutable como canalización que retransmitirá la entrada o la salida estándar entre VS Code y el archivo ejecutable del back-end del depurador habilitado para MI (por ejemplo, gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "Escriba la ruta de acceso completa para el nombre del programa de canalización; por ejemplo, \"/usr/bin/ssh\".",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Ruta de acceso completa al depurador en la máquina de destino. Por ejemplo, /usr/bin/gdb.",
@@ -120,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "Id. de proceso opcional al que debe asociarse el depurador. Use \"${command:pickProcess}\" para obtener una lista de los procesos locales en ejecución a los que se puede asociar. Tenga en cuenta que algunas plataformas requieren privilegios de administrador para poder asociar el depurador a un proceso.",
 	"c_cpp.debuggers.symbolSearchPath.description": "Lista de directorios separados por punto y coma que debe usarse para buscar archivos de símbolos (es decir, pdb). Ejemplo: \"c:\\dir1;c:\\dir2\".",
 	"c_cpp.debuggers.dumpPath.description": "Ruta de acceso completa opcional a un archivo de volcado de memoria para el programa especificado. Ejemplo: \"c:\\temp\\app.dmp\". El valor predeterminado es null.",
-	"c_cpp.debuggers.enableDebugHeap.description": "Si se establece en false, el proceso se iniciará con el montón de depuración deshabilitado. Esta opción establece la variable de entorno \"_NO_DEBUG_HEAP\" en \"1\"."
+	"c_cpp.debuggers.enableDebugHeap.description": "Si se establece en false, el proceso se iniciará con el montón de depuración deshabilitado. Esta opción establece la variable de entorno \"_NO_DEBUG_HEAP\" en \"1\".",
+	"c_cpp.debuggers.symbolLoadInfo.description": "Control explícito de la carga de símbolos.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si es true, se cargan los símbolos de todas las bibliotecas; de lo contrario, no se cargará ningún símbolo de solib. El valor predeterminado es true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nombres de archivo (se permiten comodines) separados por punto y coma \";\". Modifica el comportamiento de LoadAll. Si LoadAll es true, no se cargan los símbolos para las bibliotecas que coincidan con cualquier nombre de la lista. De lo contrario, solo se cargan los símbolos para las bibliotecas que coincidan. Ejemplo: \"foo.so;bar.so\"",
+	"c_cpp.debuggers.requireExactSource.description": "Marca opcional que requiere que el código fuente actual coincida con el archivo PDB."
 }

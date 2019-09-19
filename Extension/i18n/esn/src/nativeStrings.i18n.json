@@ -147,10 +147,12 @@
 	"timed_out_attempting_to_communicate_with_process": "Se ha agotado el tiempo de espera al intentar establecer la comunicación con el proceso.",
 	"process_failed_to_run": "No se puede ejecutar el proceso.",
 	"wsl_not_detected": "WSL no detectado",
-	"compiler_in_compilerpath_not_found": "Compiler in \"compilerPath\" property not found: {0}",
-	"config_data_invalid": "Config data invalid, {0}",
-	"cmake_executable_not_found": "CMake executable not found at {0}",
-	"no_args_provider": "No args provider",
-	"invalid_file_path": "Invalid file path {0}",
-	"cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}"
+	"compiler_in_compilerpath_not_found": "No se encontró el compilador en la propiedad \"compilerPath\": {0}",
+	"config_data_invalid": "Datos de configuración no válidos, {0}",
+	"cmake_executable_not_found": "No se encontró el ejecutable de CMake en {0}.",
+	"no_args_provider": "No hay ningún proveedor de argumentos.",
+	"invalid_file_path": "Ruta de acceso al archivo {0} no válida",
+	"cant_create_intellisense_client_for": "No se puede crear el cliente de IntelliSense para {0}",
+	"suffix_declaration": "declaración",
+	"suffix_type_alias": "alias de tipo"
 }

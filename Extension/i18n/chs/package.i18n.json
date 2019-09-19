@@ -68,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "如果为 true，则由语言服务器提供片段。",
 	"c_cpp.configuration.enhancedColorization.description": "如果启用了 IntelliSense，则基于 IntelliSense 对代码进行着色。如果禁用了 IntelliSense 或使用默认高对比度主题，则此设置不起任何作用。",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "为 [vcpkg 依赖关系管理器] 启用集成服务(https://aka.ms/vcpkg/)。",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 其他引用结果",
 	"c_cpp.debuggers.pipeTransport.description": "如果存在，这会指示调试程序使用其他可执行文件作为管道来连接到远程计算机，此管道将在 VS Code 和已启用 MI 的调试程序后端可执行文件(如 gdb)之间中继标准输入/输入。",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "输入管道程序名称的完全限定路径，例如 \"/usr/bin/ssh\"",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "目标计算机上调试程序的完整路径，例如 /usr/bin/gdb。",
@@ -120,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "要将调试程序附加到的可选进程 ID。使用 \"${command:pickProcess}\" 获取要附加到的本地运行进程的列表。请注意，一些平台需要管理员权限才能附加到进程。",
 	"c_cpp.debuggers.symbolSearchPath.description": "用于搜索符号(即 pdb)文件的目录列表(以分号分隔)。示例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.dumpPath.description": "指定程序的转储文件的可选完整路径。例如: \"c:\\temp\\app.dmp\"。默认为 null。",
-	"c_cpp.debuggers.enableDebugHeap.description": "如果为 false，将在禁用调试堆的情况下启动该进程。这会将环境变量 \"_NO_DEBUG_HEAP\" 设置为 \"1\"。"
+	"c_cpp.debuggers.enableDebugHeap.description": "如果为 false，将在禁用调试堆的情况下启动该进程。这会将环境变量 \"_NO_DEBUG_HEAP\" 设置为 \"1\"。",
+	"c_cpp.debuggers.symbolLoadInfo.description": "对符号加载的显式控制。",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "如果为 true，则将加载所有库的符号，否则不会加载任何 solib 符号。默认值为 true。",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "以分号 \";\" 分隔的文件名列表(允许使用通配符)。修改 LoadAll 的行为。如果 LoadAll 为 true，则不加载与列表中任何名称匹配的库的符号。否则，仅为匹配的库加载符号。示例: \"foo.so;bar.so\"",
+	"c_cpp.debuggers.requireExactSource.description": "可选标志，用于要求当前源代码与 pdb 匹配。"
 }
