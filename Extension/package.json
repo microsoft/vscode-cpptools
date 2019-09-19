@@ -712,7 +712,7 @@
       },
       {
         "command": "CppRenameView.done",
-        "title": "%c_cpp.command.CppRenameView.cancel.title%",
+        "title": "%c_cpp.command.CppRenameView.done.title%",
         "icon": {
           "light": "assets/check-light.svg",
           "dark": "assets/check-dark.svg"
