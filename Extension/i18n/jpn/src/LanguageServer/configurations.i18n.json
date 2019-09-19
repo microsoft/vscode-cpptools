@@ -15,6 +15,6 @@
 	"path.is.not.a.file": "パスがファイルではありません: {0}",
 	"incompatible.intellisense.mode": "IntelliSense モード {0} は、コンパイラ パスと互換性がありません。",
 	"path.is.not.a.directory": "パスがディレクトリではありません: {0}",
-	"cannot.find2": "Cannot find \"{0}\".",
-	"path.is.not.a.directory2": "Path is not a directory: \"{0}\""
+	"cannot.find2": "\"{0}\" が見つかりません。",
+	"path.is.not.a.directory2": "パスがディレクトリではありません: \"{0}\""
 }

@@ -147,10 +147,12 @@
 	"timed_out_attempting_to_communicate_with_process": "İşlemle iletişim kurmaya çalışırken zaman aşımına uğradı!",
 	"process_failed_to_run": "İşlem çalıştırılamadı",
 	"wsl_not_detected": "WSL algılanmadı",
-	"compiler_in_compilerpath_not_found": "Compiler in \"compilerPath\" property not found: {0}",
-	"config_data_invalid": "Config data invalid, {0}",
-	"cmake_executable_not_found": "CMake executable not found at {0}",
-	"no_args_provider": "No args provider",
-	"invalid_file_path": "Invalid file path {0}",
-	"cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}"
+	"compiler_in_compilerpath_not_found": "\"compilerPath\" özelliğindeki derleyici bulunamadı: {0}",
+	"config_data_invalid": "Yapılandırma verileri geçersiz, {0}",
+	"cmake_executable_not_found": "CMake yürütülebilir dosyası {0} konumunda bulunamadı",
+	"no_args_provider": "Bağımsız değişken sağlayıcısı yok",
+	"invalid_file_path": "Geçersiz dosya yolu {0}",
+	"cant_create_intellisense_client_for": "{0} için IntelliSense istemcisi oluşturulamıyor",
+	"suffix_declaration": "bildirim",
+	"suffix_type_alias": "tür diğer adı"
 }

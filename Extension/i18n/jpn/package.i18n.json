@@ -68,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "true の場合、スニペットは言語サーバーによって提供されます。",
 	"c_cpp.configuration.enhancedColorization.description": "有効にすると、IntelliSense に基づいてコードが色分けされます。この設定は、IntelliSense が無効になっている場合、または既定のハイ コントラスト テーマを使用している場合は効果がありません。",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg 依存関係マネージャー](https://aka.ms/vcpkg/) の統合サービスを有効にします。",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: その他の参照結果",
 	"c_cpp.debuggers.pipeTransport.description": "これを指定すると、デバッガーにより、別の実行可能ファイルをパイプとして使用してリモート コンピューターに接続され、VS Code と MI 対応のデバッガー バックエンド実行可能ファイル (gdb など) との間で標準入出力が中継されます。",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "パイプ プログラム名の完全修飾パスを入力してください (例: '/usr/bin/ssh')",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "対象マシン上のデバッガーへの完全なパス。例: /usr/bin/gdb。",
@@ -120,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "デバッガーをアタッチするためのオプションのプロセス ID です。\"${command:pickProcess}\" を使用すれば、アタッチ先のローカルで実行されているプロセスの一覧を取得できます。一部のプラットフォームでは、プロセスにアタッチするには管理者特権が必要です。",
 	"c_cpp.debuggers.symbolSearchPath.description": "シンボル (つまり、pdb) ファイルの検索に使用する、セミコロンで区切られたディレクトリの一覧です。例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.dumpPath.description": "指定したプログラムのダンプ ファイルへの完全なパスです (オプション)。例: \"c:\\temp\\app.dmp\"。既定値は null です。",
-	"c_cpp.debuggers.enableDebugHeap.description": "false の場合、プロセスはデバッグ ヒープを無効にして起動します。これにより、環境変数 '_NO_DEBUG_HEAP' は '1' に設定されます。"
+	"c_cpp.debuggers.enableDebugHeap.description": "false の場合、プロセスはデバッグ ヒープを無効にして起動します。これにより、環境変数 '_NO_DEBUG_HEAP' は '1' に設定されます。",
+	"c_cpp.debuggers.symbolLoadInfo.description": "シンボルの読み込みを明示的に制御します。",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "True の場合、すべてのライブラリのシンボルが読み込まれます。それ以外の場合は、すべてのライブラリのシンボルは読み込まれません。既定値は true です。",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "セミコロン '; ' で区切られたファイル名の一覧 (ワイルドカードも使用可能) は、LoadAll の動作を変更します。LoadAll が true の場合は、一覧内の名前に一致するライブラリのシンボルを読み込まないでください。それ以外の場合は、一致するライブラリのシンボルのみを読み込んでください。例: \"foo. so; bar. so\"",
+	"c_cpp.debuggers.requireExactSource.description": "PDB に一致する現在のソース コードを必要とする省略可能なフラグです。"
 }

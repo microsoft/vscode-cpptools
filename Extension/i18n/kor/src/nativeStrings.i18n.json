@@ -147,10 +147,12 @@
 	"timed_out_attempting_to_communicate_with_process": "프로세스와 통신을 시도하는 동안 시간이 초과되었습니다.",
 	"process_failed_to_run": "프로세스를 실행하지 못했습니다.",
 	"wsl_not_detected": "WSL이 검색되지 않음",
-	"compiler_in_compilerpath_not_found": "Compiler in \"compilerPath\" property not found: {0}",
-	"config_data_invalid": "Config data invalid, {0}",
-	"cmake_executable_not_found": "CMake executable not found at {0}",
-	"no_args_provider": "No args provider",
-	"invalid_file_path": "Invalid file path {0}",
-	"cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}"
+	"compiler_in_compilerpath_not_found": "\"compilerPath\" 속성의 컴파일러를 찾을 수 없음: {0}",
+	"config_data_invalid": "구성 데이터가 잘못됨, {0}",
+	"cmake_executable_not_found": "{0}에서 CMake 실행 파일을 찾을 수 없음",
+	"no_args_provider": "인수 공급자가 없음",
+	"invalid_file_path": "잘못된 파일 경로 {0}",
+	"cant_create_intellisense_client_for": "{0}에 대한 IntelliSense 클라이언트를 만들 수 없음",
+	"suffix_declaration": "선언",
+	"suffix_type_alias": "형식 별칭"
 }
