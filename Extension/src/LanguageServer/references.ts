@@ -332,21 +332,20 @@ export class ReferencesManager {
         this.referencesViewFindPending = false;
         this.clearViews();
 
+        if (this.referencesStartedWhileTagParsing) {
+            let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
+                referencesCommandModeToString(this.client.ReferencesCommandMode));
+            this.referencesChannel.appendLine(msg);
+            this.referencesChannel.appendLine("");
+            this.referencesChannel.show(true);
+        }
+
         if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
             if (!this.referencesCanceled) {
-                this.referencesChannel.show(true);
                 this.renameView.show(true);
                 this.renameView.setData(referencesResult, this.resultsCallback);
             }
         } else {
-            if (this.referencesStartedWhileTagParsing) {
-                let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
-                    referencesCommandModeToString(this.client.ReferencesCommandMode));
-                this.referencesChannel.appendLine(msg);
-                this.referencesChannel.appendLine("");
-                this.referencesChannel.show(true);
-            }
-
             // Put results in data model
             this.findAllRefsView.setData(referencesResult.referenceInfos, this.referencesCanceled);
 
