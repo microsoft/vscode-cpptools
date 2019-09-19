@@ -204,10 +204,15 @@ interface LocalizeDocumentSymbol {
     children: LocalizeDocumentSymbol[];
 }
 
+interface Location {
+    uri: string;
+    range: Range;
+}
+
 interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
-    location: vscode.Location;
+    location: Location;
     containerName: string;
     suffix: LocalizeStringParams;
 }
@@ -216,6 +221,15 @@ interface RenameParams {
     newName: string;
     position: Position;
     textDocument: TextDocumentIdentifier;
+}
+
+interface FindAllReferencesParams {
+    position: Position;
+    textDocument: TextDocumentIdentifier;
+}
+
+interface FindAllReferencesResult {
+    referencesResult: Location[];
 }
 
 // Requests
@@ -251,6 +265,7 @@ const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, v
 const RequestReferencesNotification: NotificationType<boolean, void> = new NotificationType<boolean, void>('cpptools/requestReferences');
 const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
+const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 
 // Notifications from the server
@@ -270,17 +285,14 @@ const RequestCustomConfig: NotificationType<string, void> = new NotificationType
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
+const FindAllReferencesResultsNotification: NotificationType<FindAllReferencesResult, void> = new NotificationType<FindAllReferencesResult, void>('cpptools/findAllReferencesResult');
 
 let failureMessageShown: boolean = false;
 
-enum RenameState {
-    Initial = 0,
-    WaitingForResults = 1,
-    WaitingForUI = 2
-}
-let renameState: RenameState = RenameState.Initial;
-let renameParams: RenameParams;
-let renamePromiseReject: any;
+let referencesRequestPending: boolean = false;
+let renamePending: boolean = false;
+let referencesParams: any;
+let referencesPromiseReject: any;
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -370,6 +382,7 @@ export class DefaultClient implements Client {
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
     private configurationProvider: string;
+    private findAllReferencesResultCallback: (name: FindAllReferencesResult) => void;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = {
@@ -478,7 +491,7 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
 
-                        public provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
+                        public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
                             return this.client.requestWhenReady(() => {
                                 let r: Range;
                                 if (range instanceof vscode.Selection) {
@@ -518,6 +531,7 @@ export class DefaultClient implements Client {
                     }
 
                     this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
+
                     class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -537,7 +551,7 @@ export class DefaultClient implements Client {
                             }
                             return documentSymbols;
                         }
-                        public provideDocumentSymbols(document: vscode.TextDocument): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+                        public async provideDocumentSymbols(document: vscode.TextDocument): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
                             return this.client.requestWhenReady(() => {
                                 let params: GetDocumentSymbolRequestParams = {
                                     uri: document.uri.toString()
@@ -558,7 +572,7 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
 
-                        provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
+                        public async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
                             let params: WorkspaceSymbolParams = {
                                 query: query
                             };
@@ -591,75 +605,115 @@ export class DefaultClient implements Client {
                     }
                     this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
 
+                    class FindAllReferencesProvider implements vscode.ReferenceProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+                        public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+                            if (referencesRequestPending) {
+                                referencesRequestPending = false;
+                                this.client.references.closeRenameUI();
+                                this.client.cancelReferences();
+                                referencesPromiseReject();
+                            }
+                            renamePending = false;
+                            let params: FindAllReferencesParams = {
+                                position: Position.create(position.line, position.character),
+                                textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
+                            };
+                            referencesParams = params;
+                            return new Promise<vscode.Location[]>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    // The current request is represented by referencesParams.  If a request detects
+                                    // referencesParams does not match the object used when creating the request, abort it.
+                                    if (params !== referencesParams) {
+                                        reject();
+                                    }
+                                    referencesPromiseReject = reject;
+                                    referencesRequestPending = true;
+                                    this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
+
+                                    // Register a single-fire handler for the reply.
+                                    this.client.findAllReferencesResultCallback = result => {
+                                        if (referencesRequestPending) {
+                                            referencesRequestPending = false;
+                                            let locations: vscode.Location[] = [];
+                                            result.referencesResult.forEach(location => {
+                                                let range: vscode.Range = new vscode.Range(location.range.start.line, location.range.start.character, location.range.end.line, location.range.end.character);
+                                                locations.push(new vscode.Location(vscode.Uri.parse(location.uri), range));
+                                            });
+                                            resolve(locations);
+                                        }
+                                    };
+                                });
+                                token.onCancellationRequested(e => {
+                                    if (params === referencesParams) {
+                                        if (referencesRequestPending) {
+                                            referencesRequestPending = false;
+                                            this.client.cancelReferences();
+                                            this.client.sendRequestReferences();
+                                            reject();
+                                        } else {
+                                            referencesParams = null;
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    }
+
+                    this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
+
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
                             this.client = client;
                         }
-                        provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.WorkspaceEdit> {
+                        public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit> {
+                            // Normally, VS Code considers rename to be an atomic operation.
+                            // If the user clicks anywhere in the document, it attempts to cancel it.
+                            // Because that prevents our rename UI, we ignore cancellation requests.
+                            // VS Code will attempt to issue new rename requests while another is still active.
+                            // When we receive another rename request, cancel the one that is in progress.
+                            if (referencesRequestPending) {
+                                this.client.references.closeRenameUI();
+                                this.client.cancelReferences();
+                                referencesPromiseReject();
+                            }
+                            renamePending = true;
                             let params: RenameParams = {
                                 newName: newName,
                                 position: Position.create(position.line, position.character),
                                 textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                             };
-
-                            // Normally, VS Code considers rename to be an atomic operation.
-                            // If the user clicks anywhere in the document, it attempts to cancel it.
-                            // Because that prevents our rename UI, we ignore cancellation requests.
-                            // VS Code will attempt to issue new rename requests while another is still active.
-                            // When we receive another rename require, cancel the one that is in progress.
-                            // The current rename request is presented by renameParams.  If a request detects that
-                            // renameParams does not match the object used when creating the request, abort it.
-
-                            renameParams = params;
-                            switch (renameState) {
-                                case RenameState.WaitingForResults:
-                                    renamePromiseReject();
-                                    this.client.cancelReferences();
-                                    break;
-                                case RenameState.WaitingForUI:
-                                    // If there is currently UI displayed for a rename operation, dismiss it.  This new rename operation preempts it.
-                                    this.client.references.closeRenameUI();
-                                    renamePromiseReject();
-                                    break;
-                                case RenameState.Initial:
-                                default:
-                                    break;
-                            }
-
-                            renameState = RenameState.Initial;
+                            referencesParams = params;
+                            referencesRequestPending = false;
                             return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
-
-                                    // if renameParams have changed, a newer request arrived.  Abort this one.
-                                    if (params !== renameParams) {
+                                    // The current request is represented by referencesParams.  If a request detects
+                                    // referencesParams does not match the object used when creating the request, abort it.
+                                    if (params !== referencesParams) {
                                         reject();
                                     }
+                                    referencesPromiseReject = reject;
+                                    referencesRequestPending = true;
+                                    this.client.languageClient.sendNotification(RenameNotification, params);
 
-                                    renamePromiseReject = reject;
-                                    renameState = RenameState.WaitingForResults;
-                                    this.client.languageClient.sendNotification(RenameNotification, renameParams);
-                                    this.client.references.getResultsEvent((referencesResult: refs.ReferencesResult) => {
-
-                                        // if renameParams have changed, a newer request arrived.
-                                        // Our promise would already have been cancelled.
-                                        if (params !== renameParams) {
-                                            return;
-                                        }
-
-                                        //renameState = RenameState.WaitingForUI;   // TODO
-                                        renameState = RenameState.Initial;
-
-                                        // Set up Rename UI here
-                                        // TEMP: For now, just finish the operation with the confirmed references.
+                                    this.client.references.setRenameResultCallback(referencesResult => {
+                                        referencesRequestPending = false;
+                                        renamePending = false;
                                         let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                        for (let reference of referencesResult.referenceInfos) {
-                                            if (reference.type === refs.ReferenceType.Confirmed) {
+                                        // If rename UI Was cancelled, we will get a null result
+                                        // If null, return an empty list to avoid Rename failure dialog
+                                        if (referencesResult !== null) {
+                                            for (let reference of referencesResult.referenceInfos) {
                                                 let uri: vscode.Uri = vscode.Uri.file(reference.file);
                                                 let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
                                                 workspaceEdit.replace(uri, range, newName);
                                             }
                                         }
+                                        this.client.references.closeRenameUI();
                                         resolve(workspaceEdit);
                                     });
                                 });
@@ -874,6 +928,19 @@ export class DefaultClient implements Client {
         this.editVersion++;
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
             if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
+
+                // If any file has changed, we need to abort the current rename operation
+                if (renamePending) {
+                    renamePending = false;
+                    referencesParams = null;
+                    if (referencesRequestPending) {
+                        referencesRequestPending = false;
+                        this.references.closeRenameUI();
+                        this.cancelReferences();
+                        referencesPromiseReject();
+                    }
+                }
+
                 let oldVersion: number = this.openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
                 let newVersion: number = textDocumentChangeEvent.document.version;
                 if (newVersion > oldVersion) {
@@ -1379,7 +1446,12 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(PublishDiagnosticsNotification, (e) => this.publishDiagnostics(e));
         this.languageClient.onNotification(ShowMessageWindowNotification, (e) => this.showMessageWindow(e));
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
+        this.languageClient.onNotification(FindAllReferencesResultsNotification, (e) => this.receiveFindAllReferencesResults(e));
         this.setupOutputHandlers();
+    }
+
+    private receiveFindAllReferencesResults(params: FindAllReferencesResult): void {
+        this.findAllReferencesResultCallback(params);
     }
 
     private setTextDocumentLanguage(languageStr: string): void {

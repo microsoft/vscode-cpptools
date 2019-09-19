@@ -136,6 +136,8 @@ export class ProgressHandler {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
+    private renameResultCallback: (name: ReferencesResult) => void;
+
     constructor(client: DefaultClient) {
         this.client = client;
     }
@@ -327,8 +329,6 @@ export class ProgressHandler {
         }
     }
 
-    private resultsEvents: vscode.EventEmitter<ReferencesResult>[] = [];
-
     public processResults(referencesResult: ReferencesResult): void {
         this.initializeViews();
         this.referencesViewFindPending = false;
@@ -345,17 +345,10 @@ export class ProgressHandler {
         }
 
         if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
-            let currentResultEvent: vscode.EventEmitter<ReferencesResult> = this.resultsEvents.shift();
             if (!this.referencesCanceled) {
-                // Rename provider listens for this event
                 this.referencesChannel.show(true);
-                this.renameView.setData(referencesResult.referenceInfos);
                 this.renameView.show(true);
-
-                // Maybe delay this until the rename UI is completed?
-                // TEMP: Wait 10 seconds to complete it.
-                //setTimeout(() => { currentResultEvent.fire(referencesResult); }, 10000);
-                currentResultEvent.fire(referencesResult);
+                this.renameView.setData(referencesResult, this.renameResultCallback);
             }
         } else {
             // Put results in data model
@@ -378,10 +371,8 @@ export class ProgressHandler {
         }
     }
 
-    public get getResultsEvent(): vscode.Event<ReferencesResult> {
-        let resultsEvent: vscode.EventEmitter<ReferencesResult> = new vscode.EventEmitter<ReferencesResult>();
-        this.resultsEvents.push(resultsEvent);
-        return resultsEvent.event;
+    public setRenameResultCallback(callback: (name: ReferencesResult) => void): void {
+        this.renameResultCallback = callback;
     }
 
     public closeRenameUI(): void {

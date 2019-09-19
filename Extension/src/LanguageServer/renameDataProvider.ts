@@ -4,24 +4,17 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import * as util from '../common';
-import { RenameModel, RenameFileItem, RenameItem, RenameGroupItem } from './renameModel';
-import { ReferenceType } from './references';
+import { RenameModel, RenamePendingFileItem, RenamePendingFilesGroupItem, RenamePendingItem,
+    RenameCandidateFileItem, RenameCandidateReferenceTypeGroupItem, RenameCandidateReferenceTypeItem,
+    RenameCandidateItem } from './renameModel';
+import { getReferenceTypeIconPath } from './referencesProvider';
+import { getReferenceTagString, ReferenceType } from './references';
+import * as nls from 'vscode-nls';
 
-function getReferenceTypeIconPath(referenceType: ReferenceType): vscode.ThemeIcon {
-    // TODO: return icon path for light and dark themes based on reference type
-    switch (referenceType) {
-        case ReferenceType.Confirmed:
-        case ReferenceType.Comment: return util.getExtensionFilePath("assets/comment.svg");
-        case ReferenceType.String: return util.getExtensionFilePath("assets/string.svg");
-        case ReferenceType.Inactive: return util.getExtensionFilePath("assets/cannotconfirm.svg");
-        case ReferenceType.CannotConfirm: return util.getExtensionFilePath("assets/cannotconfirm.svg");
-        case ReferenceType.NotAReference: return util.getExtensionFilePath("assets/not-a-reference.svg");
-    }
-    return util.getExtensionFilePath("assets/cannotconfirm.svg");
-}
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-type TreeObject = RenameFileItem | RenameItem | RenameGroupItem;
+type TreeObject = RenamePendingFileItem | RenamePendingItem | RenameCandidateFileItem | RenameCandidateItem | RenameCandidateReferenceTypeGroupItem | RenameCandidateReferenceTypeItem;
 
 export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
     private references: RenameModel;
@@ -50,51 +43,80 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
             return;
         }
 
-        if (element instanceof RenameItem) {
+        if (element instanceof RenamePendingItem) {
             const result: vscode.TreeItem = new vscode.TreeItem(element.text);
             result.collapsibleState = vscode.TreeItemCollapsibleState.None;
             result.iconPath = getReferenceTypeIconPath(element.type);
+            let tag: string = getReferenceTagString(element.type, false);
+            result.tooltip = `[${tag}]\n${element.text}`;
             result.command = {
-                title: 'Open Reference',
-                command: 'C_Cpp.ShowRenameItem',
+                title: localize("goto.reference", "Go to reference"),
+                command: 'C_Cpp.ShowReferenceItem',
                 arguments: [element]
             };
-            if (element.getIsPending()) {
-                result.contextValue = "pendingItem";
-            } else {
-                result.contextValue = "candidateItem";
-            }
+            result.contextValue = "pendingItem";
             return result;
         }
 
-        if (element instanceof RenameFileItem) {
+        if (element instanceof RenamePendingFileItem) {
             const result: vscode.TreeItem = new vscode.TreeItem(element.uri);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
             result.iconPath = vscode.ThemeIcon.File;
             result.description = true;
-            if (element.pending) {
-                result.contextValue = "pendingFile";
-            } else {
-                result.contextValue = "candidateFile";
-            }
+            result.contextValue = "pendingFile";
+            let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, false);
+            result.tooltip = `[${tag}]\n${element.name}`;
             return result;
         }
 
-        if (element instanceof RenameGroupItem) {
-            let label: string;
-            if (element.pending) {
-                label = "Pending Rename";
-            } else {
-                label = "Candidates for Rename";
-            }
+        if (element instanceof RenamePendingFilesGroupItem) {
+            let label: string = localize("pending.rename", "Pending Rename");
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-            result.iconPath = null; // TBD
-            if (element.pending) {
-                result.contextValue = "pendingGroup";
-            } else {
-                result.contextValue = "candidateGroup";
-            }
+            result.iconPath = null;
+            result.contextValue = "pendingGroup";
+            return result;
+        }
+
+        if (element instanceof RenameCandidateItem) {
+            const result: vscode.TreeItem = new vscode.TreeItem(element.text);
+            result.collapsibleState = vscode.TreeItemCollapsibleState.None;
+            result.iconPath = getReferenceTypeIconPath(element.type);
+            let tag: string = getReferenceTagString(element.type, false);
+            result.tooltip = `[${tag}]\n${element.text}`;
+            result.command = {
+                title: localize("goto.reference", "Go to reference"),
+                command: 'C_Cpp.ShowReferenceItem',
+                arguments: [element]
+            };
+            result.contextValue = "candidateItem";
+            return result;
+        }
+
+        if (element instanceof RenameCandidateFileItem) {
+            const result: vscode.TreeItem = new vscode.TreeItem(element.uri);
+            result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+            result.iconPath = vscode.ThemeIcon.File;
+            result.description = true;
+            result.contextValue = "candidateFile";
+            return result;
+        }
+
+        if (element instanceof RenameCandidateReferenceTypeGroupItem) {
+            let label: string = localize("candidates.for.rename", "Candidates for Rename");
+            const result: vscode.TreeItem = new vscode.TreeItem(label);
+            result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+            result.iconPath = null;
+            result.contextValue = "candidateGroup";
+            return result;
+        }
+
+        if (element instanceof RenameCandidateReferenceTypeItem) {
+            let label: string = getReferenceTagString(element.type, false);
+            const result: vscode.TreeItem = new vscode.TreeItem(label);
+            result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+            result.iconPath = null;
+            result.contextValue = "candidateReferenceType";
             return result;
         }
     }
@@ -103,15 +125,30 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
         if (!this.references) {
             return;
         }
-
-        if (element instanceof RenameFileItem) {
+        if (element instanceof RenamePendingFileItem) {
             return element.getReferences();
         }
 
-        if (element instanceof RenameGroupItem) {
+        if (element instanceof RenamePendingFilesGroupItem) {
             return element.getFiles();
         }
 
-        return this.references.getGroup(this.pending).getFiles();
+        if (element instanceof RenameCandidateFileItem) {
+            return element.getReferences();
+        }
+
+        if (element instanceof RenameCandidateReferenceTypeGroupItem) {
+            return element.getReferenceTypes();
+        }
+
+        if (element instanceof RenameCandidateReferenceTypeItem) {
+            return element.getFiles();
+        }
+
+        if (this.pending) {
+            return this.references.getPendingGroup().getFiles();
+        }
+
+        return this.references.getCandidatesGroup().getReferenceTypes();
     }
 }

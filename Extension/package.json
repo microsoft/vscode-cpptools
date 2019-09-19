@@ -48,7 +48,7 @@
         {
           "id": "CppRenameActivityBar",
           "title": "C/C++ Rename",
-          "icon": "assets/cpprename-icon.svg"
+          "icon": "assets/cpp-rename-icon.svg"
         }
       ]
     },
@@ -689,6 +689,14 @@
       {
         "command": "CppRenameView.addFile",
         "title": "Add File",
+        "icon": {
+          "light": "assets/plus-light.svg",
+          "dark": "assets/plus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.addReferenceType",
+        "title": "Add Reference Type",
         "icon": {
           "light": "assets/plus-light.svg",
           "dark": "assets/plus-dark.svg"
@@ -1531,6 +1539,11 @@
         {
           "command": "CppRenameView.addFile",
           "when": "view == CppRenameCandidatesView && viewItem == candidateFile",
+          "group": "inline"
+        },
+        {
+          "command": "CppRenameView.addReferenceType",
+          "when": "view == CppRenameCandidatesView && viewItem == candidateReferenceType",
           "group": "inline"
         }
       ],

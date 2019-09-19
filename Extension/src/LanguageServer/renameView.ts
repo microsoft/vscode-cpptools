@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceInfo } from './references';
+import { ReferencesResult } from './references';
 import { RenameDataProvider } from './renameDataProvider';
 import { RenameModel } from './renameModel';
 
@@ -18,6 +18,7 @@ export class RenameView {
         vscode.window.createTreeView(
             'CppRenamePendingView',
             { treeDataProvider: this.renamePendingDataProvider, showCollapseAll: false });
+
         vscode.window.createTreeView(
             'CppRenameCandidatesView',
             { treeDataProvider: this.renameCandidatesDataProvider, showCollapseAll: false });
@@ -25,13 +26,15 @@ export class RenameView {
 
     show(showView: boolean): void {
         vscode.commands.executeCommand(`setContext`, 'cppRename:hasResults', showView);
-        if (!showView) {
+        if (showView) {
+            vscode.commands.executeCommand(`CppRenamePendingView.focus`);
+        } else {
             this.clearData();
         }
     }
 
-    setData(results: ReferenceInfo[]): void {
-        let renameModel: RenameModel = new RenameModel(results, this.renamePendingDataProvider, this.renameCandidatesDataProvider);
+    setData(results: ReferencesResult, resultsCallback: (name: ReferencesResult) => void): void {
+        let renameModel: RenameModel = new RenameModel(results, this.renamePendingDataProvider, this.renameCandidatesDataProvider, resultsCallback);
         this.renamePendingDataProvider.setModel(renameModel);
         this.renameCandidatesDataProvider.setModel(renameModel);
     }

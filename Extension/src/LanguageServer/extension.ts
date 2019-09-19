@@ -10,7 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { RenameItem, RenameFileItem, getCurrentRenameModel, RenameModel } from './renameModel';
+import { RenamePendingItem, RenameCandidateItem, RenamePendingFileItem, RenameCandidateFileItem, getCurrentRenameModel, RenameModel, RenameCandidateReferenceTypeItem } from './renameModel';
 import { ReferenceItem, FileItem } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
@@ -869,8 +869,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesItem', onShowRefCommand));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowRenameItem', onShowRenameCommand));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
     disposables.push(vscode.commands.registerCommand('CppRenameView.cancel', onRenameViewCancel));
     disposables.push(vscode.commands.registerCommand('CppRenameView.done', onRenameViewDone));
     disposables.push(vscode.commands.registerCommand('CppRenameView.remove', onRenameViewRemove));
@@ -879,7 +878,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('CppRenameView.addAll', onRenameViewAddAll));
     disposables.push(vscode.commands.registerCommand('CppRenameView.removeFile', onRenameViewRemoveFile));
     disposables.push(vscode.commands.registerCommand('CppRenameView.addFile', onRenameViewAddFile));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.addReferenceType', onRenameViewAddReferenceType));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -1144,54 +1143,53 @@ function onRescanWorkspace(): void {
     clients.forEach(client => client.rescanFolder());
 }
 
-function onShowRefCommand(arg?: ReferenceItem | FileItem): void {
+function onShowRefCommand(arg?: ReferenceItem | FileItem | RenamePendingItem | RenameCandidateItem | RenamePendingFileItem | RenameCandidateFileItem): void {
     if (!arg) {
         return;
     }
-    if (arg instanceof ReferenceItem) {
+    if (arg instanceof ReferenceItem || arg instanceof RenamePendingItem || arg instanceof RenameCandidateItem) {
         const { location } = arg;
         vscode.window.showTextDocument(location.uri, {
-            selection: location.range.with({ end: location.range.start })
+            selection: location.range.with({ start: location.range.start, end: location.range.end })
         });
-    } else if (arg instanceof FileItem) {
+    } else if (arg instanceof FileItem || arg instanceof RenamePendingFileItem || arg instanceof RenameCandidateFileItem) {
         const { uri } = arg;
         vscode.window.showTextDocument(uri);
     }
 }
 
-function onShowRenameCommand(arg?: RenameItem): void {
-    if (arg) {
-        const location: vscode.Location = arg.location;
-        vscode.window.showTextDocument(location.uri, {
-            selection: location.range.with({ end: location.range.start })
-        });
-    }
-}
-
 function onRenameViewCancel(arg?: any): void {
+    let currentRenameModel: RenameModel = getCurrentRenameModel();
+    if (currentRenameModel) {
+        currentRenameModel.cancel();
+    }
 }
 
 function onRenameViewDone(arg?: any): void {
-}
-
-function onRenameViewRemove(arg?: RenameItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.getModel().updateProviders();
+    let currentRenameModel: RenameModel = getCurrentRenameModel();
+    if (currentRenameModel) {
+        currentRenameModel.complete();
     }
 }
 
-function onRenameViewAdd(arg?: RenameItem): void {
+function onRenameViewRemove(arg?: RenamePendingItem): void {
     if (arg) {
         arg.changeGroup();
-        arg.getModel().updateProviders();
+        arg.model.updateProviders();
+    }
+}
+
+function onRenameViewAdd(arg?: RenameCandidateItem): void {
+    if (arg) {
+        arg.changeGroup();
+        arg.model.updateProviders();
     }
 }
 
 function onRenameViewRemoveAll(arg?: any): void {
     let currentRenameModel: RenameModel = getCurrentRenameModel();
     if (currentRenameModel) {
-        currentRenameModel.getGroup(true).changeGroup();
+        currentRenameModel.getPendingGroup().changeGroup();
         currentRenameModel.updateProviders();
     }
 }
@@ -1199,22 +1197,29 @@ function onRenameViewRemoveAll(arg?: any): void {
 function onRenameViewAddAll(arg?: any): void {
     let currentRenameModel: RenameModel = getCurrentRenameModel();
     if (currentRenameModel) {
-        currentRenameModel.getGroup(false).changeGroup();
+        currentRenameModel.getCandidatesGroup().changeGroup();
         currentRenameModel.updateProviders();
     }
 }
 
-function onRenameViewRemoveFile(arg?: RenameFileItem): void {
+function onRenameViewRemoveFile(arg?: RenamePendingFileItem): void {
     if (arg) {
         arg.changeGroup();
-        arg.getModel().updateProviders();
+        arg.model.updateProviders();
     }
 }
 
-function onRenameViewAddFile(arg?: RenameFileItem): void {
+function onRenameViewAddFile(arg?: RenameCandidateFileItem): void {
     if (arg) {
         arg.changeGroup();
-        arg.getModel().updateProviders();
+        arg.model.updateProviders();
+    }
+}
+
+function onRenameViewAddReferenceType(arg?: RenameCandidateReferenceTypeItem): void {
+    if (arg) {
+        arg.changeGroup();
+        arg.model.updateProviders();
     }
 }
 
