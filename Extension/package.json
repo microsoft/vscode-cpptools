@@ -47,7 +47,7 @@
       "activitybar": [
         {
           "id": "CppRenameActivityBar",
-          "title": "C/C++ Rename",
+          "title": "%c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title%",
           "icon": "assets/cpp-rename-icon.svg"
         }
       ]
@@ -648,7 +648,7 @@
       },
       {
         "command": "CppRenameView.remove",
-        "title": "Remove",
+        "title": "%c_cpp.command.CppRenameView.remove.title%",
         "icon": {
           "light": "assets/minus-light.svg",
           "dark": "assets/minus-dark.svg"
@@ -656,7 +656,7 @@
       },
       {
         "command": "CppRenameView.add",
-        "title": "Add",
+        "title": "%c_cpp.command.CppRenameView.add.title%",
         "icon": {
           "light": "assets/plus-light.svg",
           "dark": "assets/plus-dark.svg"
@@ -664,7 +664,7 @@
       },
       {
         "command": "CppRenameView.removeAll",
-        "title": "Remove All",
+        "title": "%c_cpp.command.CppRenameView.removeAll.title%",
         "icon": {
           "light": "assets/minus-light.svg",
           "dark": "assets/minus-dark.svg"
@@ -672,7 +672,7 @@
       },
       {
         "command": "CppRenameView.addAll",
-        "title": "Add All",
+        "title": "%c_cpp.command.CppRenameView.addAll.title%",
         "icon": {
           "light": "assets/plus-light.svg",
           "dark": "assets/plus-dark.svg"
@@ -680,7 +680,7 @@
       },
       {
         "command": "CppRenameView.removeFile",
-        "title": "Remove File",
+        "title": "%c_cpp.command.CppRenameView.removeFile.title%",
         "icon": {
           "light": "assets/minus-light.svg",
           "dark": "assets/minus-dark.svg"
@@ -688,7 +688,7 @@
       },
       {
         "command": "CppRenameView.addFile",
-        "title": "Add File",
+        "title": "%c_cpp.command.CppRenameView.addFile.title%",
         "icon": {
           "light": "assets/plus-light.svg",
           "dark": "assets/plus-dark.svg"
@@ -696,7 +696,7 @@
       },
       {
         "command": "CppRenameView.addReferenceType",
-        "title": "Add Reference Type",
+        "title": "%c_cpp.command.CppRenameView.addReferenceType.title%",
         "icon": {
           "light": "assets/plus-light.svg",
           "dark": "assets/plus-dark.svg"
@@ -704,7 +704,7 @@
       },
       {
         "command": "CppRenameView.cancel",
-        "title": "Cancel",
+        "title": "%c_cpp.command.CppRenameView.cancel.title%",
         "icon": {
           "light": "assets/cancel-light.svg",
           "dark": "assets/cancel-dark.svg"
@@ -712,7 +712,7 @@
       },
       {
         "command": "CppRenameView.done",
-        "title": "Done",
+        "title": "%c_cpp.command.CppRenameView.cancel.title%",
         "icon": {
           "light": "assets/check-light.svg",
           "dark": "assets/check-dark.svg"
