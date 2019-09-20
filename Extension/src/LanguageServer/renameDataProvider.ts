@@ -8,7 +8,7 @@ import { RenameModel, RenamePendingFileItem, RenamePendingFilesGroupItem, Rename
     RenameCandidateFileItem, RenameCandidateReferenceTypeGroupItem, RenameCandidateReferenceTypeItem,
     RenameCandidateItem } from './renameModel';
 import { getReferenceTypeIconPath } from './referencesProvider';
-import { getReferenceTagString } from './references';
+import { convertReferenceTypeToString } from './references';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -47,7 +47,7 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
             const result: vscode.TreeItem = new vscode.TreeItem(element.text);
             result.collapsibleState = vscode.TreeItemCollapsibleState.None;
             result.iconPath = getReferenceTypeIconPath(element.type);
-            let tag: string = getReferenceTagString(element.type, false);
+            let tag: string = convertReferenceTypeToString(element.type);
             result.tooltip = `[${tag}]\n${element.text}`;
             result.command = {
                 title: localize("goto.reference", "Go to reference"),
@@ -79,7 +79,7 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
             const result: vscode.TreeItem = new vscode.TreeItem(element.text);
             result.collapsibleState = vscode.TreeItemCollapsibleState.None;
             result.iconPath = getReferenceTypeIconPath(element.type);
-            let tag: string = getReferenceTagString(element.type, false);
+            let tag: string = convertReferenceTypeToString(element.type);
             result.tooltip = `[${tag}]\n${element.text}`;
             result.command = {
                 title: localize("goto.reference", "Go to reference"),
@@ -108,7 +108,7 @@ export class RenameDataProvider implements vscode.TreeDataProvider<TreeObject> {
         }
 
         if (element instanceof RenameCandidateReferenceTypeItem) {
-            let label: string = getReferenceTagString(element.type, false);
+            let label: string = convertReferenceTypeToString(element.type, true);
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
             result.contextValue = "candidateReferenceType";

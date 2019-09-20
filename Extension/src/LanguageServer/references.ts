@@ -84,15 +84,27 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
     }
 }
 
-export function convertReferenceTypeToString(referenceType: ReferenceType): string {
-    switch (referenceType) {
-        case ReferenceType.Confirmed: return localize("confirmed.reference", "CONFIRMED REFERENCE");
-        case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress", "CONFIRMATION IN PROGRESS");
-        case ReferenceType.Comment: return localize("comment.reference", "COMMENT REFERENCE");
-        case ReferenceType.String: return localize("string.reference", "STRING REFERENCE");
-        case ReferenceType.Inactive: return localize("inactive.reference", "INACTIVE REFERENCE");
-        case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference", "CANNOT CONFIRM REFERENCE");
-        case ReferenceType.NotAReference: return localize("not.a.reference", "NOT A REFERENCE");
+export function convertReferenceTypeToString(referenceType: ReferenceType, upperCase?: boolean): string {
+    if (upperCase) {
+        switch (referenceType) {
+            case ReferenceType.Confirmed: return localize("confirmed.reference.upper", "CONFIRMED REFERENCE");
+            case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress.upper", "CONFIRMATION IN PROGRESS");
+            case ReferenceType.Comment: return localize("comment.reference.upper", "COMMENT REFERENCE");
+            case ReferenceType.String: return localize("string.reference.upper", "STRING REFERENCE");
+            case ReferenceType.Inactive: return localize("inactive.reference.upper", "INACTIVE REFERENCE");
+            case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference.upper", "CANNOT CONFIRM REFERENCE");
+            case ReferenceType.NotAReference: return localize("not.a.reference.upper", "NOT A REFERENCE");
+        }
+    } else {
+        switch (referenceType) {
+            case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed references");
+            case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress", "Confirmation in progress");
+            case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
+            case ReferenceType.String: return localize("string.reference", "String reference");
+            case ReferenceType.Inactive: return localize("inactive.reference", "Inactive reference");
+            case ReferenceType.CannotConfirm: return localize("cannot.confirm.reference", "Cannot confirm reference");
+            case ReferenceType.NotAReference: return localize("not.a.reference", "Not a reference");
+        }
     }
     return "";
 }
