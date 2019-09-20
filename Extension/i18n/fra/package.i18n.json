@@ -68,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Si la valeur est true, des extraits de code sont fournis par le serveur de langage.",
 	"c_cpp.configuration.enhancedColorization.description": "Si cette option est activée, la couleur du code est déterminée par IntelliSense. Ce paramètre n'a pas d'effet si IntelliSense est désactivé ou utilise le thème Contraste élevé par défaut.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Activez les services d'intégration pour le [gestionnaire de dépendances vcpkg] (https://aka.ms/vcpkg/).",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++ : Autres résultats des références",
 	"c_cpp.debuggers.pipeTransport.description": "Quand ce paramètre est présent, indique au débogueur de se connecter à un ordinateur distant en se servant d'un autre exécutable comme canal de relais d'entrée/de sortie standard entre VS Code et l'exécutable du back-end du débogueur MI (par exemple, gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "entrer le chemin complet pour le nom du programme de canal, par exemple, '/usr/bin/ssh'",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Chemin complet du débogueur sur la machine cible, par exemple /usr/bin/gdb.",
@@ -120,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "ID de processus facultatif auquel attacher le débogueur. Utilisez \"${command:pickProcess}\" pour obtenir la liste des processus locaux en cours d'exécution à attacher. Notez que certaines plateformes nécessitent des privilèges d'administrateur pour attacher un processus.",
 	"c_cpp.debuggers.symbolSearchPath.description": "Liste de répertoires séparés par des points-virgules à utiliser pour rechercher les fichiers de symboles (c'est-à-dire, pdb). Exemple : \"c:\\dir1;c:\\dir2\".",
 	"c_cpp.debuggers.dumpPath.description": "Chemin complet facultatif d'un fichier d'image mémoire pour le programme spécifié. Exemple : \"c:\\temp\\app.dmp\". La valeur par défaut est null.",
-	"c_cpp.debuggers.enableDebugHeap.description": "Si la valeur est false, le processus est lancé avec le tas de débogage désactivé. Cette valeur définit la variable d'environnement '_NO_DEBUG_HEAP' sur '1'."
+	"c_cpp.debuggers.enableDebugHeap.description": "Si la valeur est false, le processus est lancé avec le tas de débogage désactivé. Cette valeur définit la variable d'environnement '_NO_DEBUG_HEAP' sur '1'.",
+	"c_cpp.debuggers.symbolLoadInfo.description": "Contrôle explicite du chargement des symboles.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si true, les symboles de toutes les bibliothèques seront chargés, sinon aucun symbole solib ne sera chargé. La valeur par défaut est true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Liste des noms de fichiers (caractères génériques autorisés) séparés par des points-virgules ';'. Modifie le comportement de LoadAll. Si LoadAll a la valeur true, ne chargez pas les symboles des bibliothèques correspondant à un nom de la liste. Sinon, chargez uniquement les symboles des bibliothèques qui correspondent. Exemple : \"foo.so;bar.so\"",
+	"c_cpp.debuggers.requireExactSource.description": "Indicateur facultatif pour exiger que le code source actuel corresponde au fichier pdb."
 }

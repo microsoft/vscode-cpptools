@@ -152,5 +152,7 @@
 	"cmake_executable_not_found": "Executável do CMake não localizado em {0}",
 	"no_args_provider": "Nenhum provedor de argumentos",
 	"invalid_file_path": "Caminho de arquivo inválido {0}",
-	"cant_create_intellisense_client_for": "Não é possível criar o cliente IntelliSense para {0}"
+	"cant_create_intellisense_client_for": "Não é possível criar o cliente IntelliSense para {0}",
+	"suffix_declaration": "declaração",
+	"suffix_type_alias": "alias de tipo"
 }

@@ -27,6 +27,18 @@ console.log(`locProjectName=${locProjectName}`);
 console.log(`authUser=${authUser}`);
 console.log(`authToken=${authToken}`);
 
+function hasBranch(branchName) {
+    console.log(`Checking for existance of branch "${branchName}" (git branch --list ${branchName})`);
+    let output = cp.execSync(`git branch --list ${branchName}`);
+    let lines = output.toString().split("\n");
+    let found = false;
+    lines.forEach(line => {
+        found = found || (line === `  ${branchName}`);
+    });
+
+    return found;
+}
+
 function hasAnyChanges() {
     console.log("Checking if any files have changed (git status --porcelain)");
     let output = cp.execSync('git status --porcelain');
@@ -51,7 +63,7 @@ function sleep(ms) {
     while(new Date().getTime() < unixtime_ms + ms) {}
 }
 
-console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceeed in 10 seconds.");
+console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceed in 10 seconds.");
 sleep(10000);
 
 console.log("Looking for latest localization drop");
@@ -80,6 +92,12 @@ if (!hasAnyChanges()) {
 
 console.log("Changes detected");
 
+// Remove old localization branch, if any
+if (hasBranch("localization")) {
+	console.log(`Remove old localization branch, if any (git branch -D localization)`);
+	cp.execSync('git branch -D localization');
+}
+
 // Check out local branch
 console.log(`Creating local branch for changes (git checkout -b ${branchName})`);
 cp.execSync('git checkout -b localization');
@@ -87,6 +105,12 @@ cp.execSync('git checkout -b localization');
 // Add changed files.
 console.log("Adding changed file (git add .)");
 cp.execSync('git add .');
+
+// git add may have resolves CR/LF's and there may not be anything to commit
+if (!hasAnyChanges()) {
+    console.log("No changes detected.  The only changes must have been due to CR/LF's, and have been corrected.");
+    return;
+}
 
 // Commit changes files.
 console.log(`Commiting changes (git commit -m "${commitComment}")`);
@@ -124,3 +148,9 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
 console.log(`Restoring default git permissions`);
 cp.execSync('git remote remove origin');
 cp.execSync(`git remote add origin https://github.com/${repoOwner}/${repoName}.git`);
+
+console.log(`Switching back to master (git checkout master)`);
+cp.execSync('git checkout master');
+
+console.log(`Remove localization branch (git branch -D localization)`);
+cp.execSync('git branch -D localization');
