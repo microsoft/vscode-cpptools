@@ -43,12 +43,33 @@
   ],
   "main": "./dist/main",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "CppRenameActivityBar",
+          "title": "%c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title%",
+          "icon": "assets/cpp-rename-icon.svg"
+        }
+      ]
+    },
     "views": {
       "references-view": [
         {
           "id": "CppReferencesView",
           "name": "%c_cpp.contributes.views.cppReferencesView.title%",
           "when": "cppReferenceTypes:hasResults && reference-list.hasResult"
+        }
+      ],
+      "CppRenameActivityBar": [
+        {
+          "id": "CppRenamePendingView",
+          "name": "%c_cpp.contributes.views.cppRenamePendingView.title%",
+          "when": "cppRename:hasResults"
+        },
+        {
+          "id": "CppRenameCandidatesView",
+          "name": "%c_cpp.contributes.views.cppRenameCandidatesView.title%",
+          "when": "cppRename:hasResults"
         }
       ]
     },
@@ -624,6 +645,78 @@
         "command": "C_Cpp.VcpkgOnlineHelpSuggested",
         "title": "%c_cpp.command.vcpkgOnlineHelpSuggested.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "CppRenameView.remove",
+        "title": "%c_cpp.command.CppRenameView.remove.title%",
+        "icon": {
+          "light": "assets/minus-light.svg",
+          "dark": "assets/minus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.add",
+        "title": "%c_cpp.command.CppRenameView.add.title%",
+        "icon": {
+          "light": "assets/plus-light.svg",
+          "dark": "assets/plus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.removeAll",
+        "title": "%c_cpp.command.CppRenameView.removeAll.title%",
+        "icon": {
+          "light": "assets/minus-light.svg",
+          "dark": "assets/minus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.addAll",
+        "title": "%c_cpp.command.CppRenameView.addAll.title%",
+        "icon": {
+          "light": "assets/plus-light.svg",
+          "dark": "assets/plus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.removeFile",
+        "title": "%c_cpp.command.CppRenameView.removeFile.title%",
+        "icon": {
+          "light": "assets/minus-light.svg",
+          "dark": "assets/minus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.addFile",
+        "title": "%c_cpp.command.CppRenameView.addFile.title%",
+        "icon": {
+          "light": "assets/plus-light.svg",
+          "dark": "assets/plus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.addReferenceType",
+        "title": "%c_cpp.command.CppRenameView.addReferenceType.title%",
+        "icon": {
+          "light": "assets/plus-light.svg",
+          "dark": "assets/plus-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.cancel",
+        "title": "%c_cpp.command.CppRenameView.cancel.title%",
+        "icon": {
+          "light": "assets/cancel-light.svg",
+          "dark": "assets/cancel-dark.svg"
+        }
+      },
+      {
+        "command": "CppRenameView.done",
+        "title": "%c_cpp.command.CppRenameView.done.title%",
+        "icon": {
+          "light": "assets/check-light.svg",
+          "dark": "assets/check-dark.svg"
+        }
       }
     ],
     "keybindings": [
@@ -945,7 +1038,7 @@
                 }
               },
               "symbolLoadInfo": {
-                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
+                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
                 "type": "object",
                 "default": {
                   "loadAll": true,
@@ -1157,7 +1250,7 @@
                 "default": []
               },
               "symbolLoadInfo": {
-                "description": "%c_cpp.debuggers.symbolloadinfo.description%",
+                "description": "%c_cpp.debuggers.symbolLoadInfo.description%",
                 "type": "object",
                 "default": {
                   "loadAll": true,
@@ -1405,6 +1498,55 @@
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "CppRenameView.removeAll",
+          "when": "view == CppRenamePendingView && cppRename:hasResults",
+          "group": "navigation@1"
+        },
+        {
+          "command": "CppRenameView.done",
+          "when": "view == CppRenamePendingView && cppRename:hasResults",
+          "group": "navigation@2"
+        },
+        {
+          "command": "CppRenameView.cancel",
+          "when": "view == CppRenamePendingView && cppRename:hasResults",
+          "group": "navigation@3"
+        },
+        {
+          "command": "CppRenameView.addAll",
+          "when": "view == CppRenameCandidatesView && cppRename:hasResults",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "CppRenameView.remove",
+          "when": "view == CppRenamePendingView && viewItem == pendingItem",
+          "group": "inline"
+        },
+        {
+          "command": "CppRenameView.add",
+          "when": "view == CppRenameCandidatesView && viewItem == candidateItem",
+          "group": "inline"
+        },
+        {
+          "command": "CppRenameView.removeFile",
+          "when": "view == CppRenamePendingView && viewItem == pendingFile",
+          "group": "inline"
+        },
+        {
+          "command": "CppRenameView.addFile",
+          "when": "view == CppRenameCandidatesView && viewItem == candidateFile",
+          "group": "inline"
+        },
+        {
+          "command": "CppRenameView.addReferenceType",
+          "when": "view == CppRenameCandidatesView && viewItem == candidateReferenceType",
+          "group": "inline"
+        }
+      ],
       "editor/context": [
         {
           "when": "editorLangId == c",
