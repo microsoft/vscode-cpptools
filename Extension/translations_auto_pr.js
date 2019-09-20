@@ -27,6 +27,18 @@ console.log(`locProjectName=${locProjectName}`);
 console.log(`authUser=${authUser}`);
 console.log(`authToken=${authToken}`);
 
+function hasBranch(branchName) {
+    console.log(`Checking for existance of branch "${branchName}" (git branch --list ${branchName})`);
+    let output = cp.execSync(`git branch --list ${branchName}`);
+    let lines = output.toString().split("\n");
+    let found = false;
+    lines.forEach(line => {
+        found = found || (line === `  ${branchName}`);
+    });
+
+    return found;
+}
+
 function hasAnyChanges() {
     console.log("Checking if any files have changed (git status --porcelain)");
     let output = cp.execSync('git status --porcelain');
@@ -81,8 +93,10 @@ if (!hasAnyChanges()) {
 console.log("Changes detected");
 
 // Remove old localization branch, if any
-console.log(`Remove old localization branch, if any (git branch -D localization)`);
-cp.execSync('git branch -D localization');
+if (hasBranch("localization") {
+	console.log(`Remove old localization branch, if any (git branch -D localization)`);
+	cp.execSync('git branch -D localization');
+}
 
 // Check out local branch
 console.log(`Creating local branch for changes (git checkout -b ${branchName})`);
