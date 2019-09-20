@@ -8,7 +8,7 @@ import { RenameModel, RenamePendingFileItem, RenamePendingFilesGroupItem, Rename
     RenameCandidateFileItem, RenameCandidateReferenceTypeGroupItem, RenameCandidateReferenceTypeItem,
     RenameCandidateItem } from './renameModel';
 import { getReferenceTypeIconPath } from './referencesProvider';
-import { getReferenceTagString, ReferenceType } from './references';
+import { getReferenceTagString } from './references';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
