@@ -54,8 +54,16 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
     private referencesCanceled: boolean = false;
     private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeObject>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+    private groupByFile: boolean = true;
 
     constructor() {
+        vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', true);
+    }
+
+    toggleGroupView(): void {
+        this.groupByFile = !this.groupByFile;
+        vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.groupByFile);
+        this._onDidChangeTreeData.fire();
     }
 
     setModel(results: ReferenceInfo[], isCanceled: boolean): void {
@@ -110,7 +118,7 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         if (element instanceof FileItem) {
             const result: vscode.TreeItem = new vscode.TreeItem(element.uri);
             result.collapsibleState = element.ReferenceItemsPending ?
-                vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
+                vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded;
             result.iconPath = vscode.ThemeIcon.File;
             result.description = true;
 
@@ -130,8 +138,7 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         if (element instanceof ReferenceTypeItem) {
             const label: string = getReferenceTagString(element.type, this.referencesCanceled);
             const result: vscode.TreeItem = new vscode.TreeItem(label);
-            result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-            result.iconPath = getReferenceItemIconPath(element.type, this.referencesCanceled);
+            result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
             return result;
         }
     }
@@ -149,6 +156,6 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
             return element.getFiles();
         }
 
-        return this.references.FileItems;
+        return this.groupByFile ? this.references.FileItems : this.references.ReferenceTypeItems;
     }
 }

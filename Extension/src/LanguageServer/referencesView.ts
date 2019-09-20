@@ -25,6 +25,10 @@ export class FindAllRefsView {
         vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', this.referenceViewProvider.hasResults());
     }
 
+    toggleGroupView(): void {
+        this.referenceViewProvider.toggleGroupView();
+    }
+
     setData(results: ReferenceInfo[], isCanceled: boolean): void {
         this.referenceViewProvider.setModel(results, isCanceled);
     }

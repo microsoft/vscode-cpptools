@@ -169,6 +169,10 @@ export class ReferencesManager {
         this.disposables = [];
     }
 
+    public toggleGroupView(): void {
+        this.findAllRefsView.toggleGroupView();
+    }
+
     public UpdateProgressUICounter(mode: ReferencesCommandMode): void {
         if (mode !== ReferencesCommandMode.None) {
             ++this.referencesCurrentProgressUICounter;

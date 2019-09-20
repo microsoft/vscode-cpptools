@@ -717,6 +717,22 @@
           "light": "assets/check-light.svg",
           "dark": "assets/check-dark.svg"
         }
+      },
+      {
+        "command" : "C_Cpp.referencesViewGroupByType",
+        "title": "%c_cpp.command.referencesViewGroupByType.title%",
+        "icon" : {
+            "light": "assets/ref-group-by-type-light.svg",
+            "dark": "assets/ref-group-by-type-dark.svg"
+        }
+      },
+      {
+        "command" : "C_Cpp.referencesViewGroupByFile",
+        "title": "%c_cpp.command.referencesViewGroupByFile.title%",
+        "icon" : {
+            "light": "assets/ref-group-by-file-light.svg",
+            "dark": "assets/ref-group-by-file-dark.svg"
+        }
       }
     ],
     "keybindings": [
@@ -1499,6 +1515,16 @@
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "C_Cpp.referencesViewGroupByType",
+          "when": "view == CppReferencesView && refView.isGroupedByFile",
+          "group": "navigation"
+        },
+        {
+          "command": "C_Cpp.referencesViewGroupByFile",
+          "when": "view == CppReferencesView && !refView.isGroupedByFile",
+          "group": "navigation"
+        },
         {
           "command": "CppRenameView.removeAll",
           "when": "view == CppRenamePendingView && cppRename:hasResults",

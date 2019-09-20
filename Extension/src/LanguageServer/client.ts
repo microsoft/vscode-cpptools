@@ -319,6 +319,7 @@ export interface Client {
     provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
+    toggleReferenceResultsView(): void;
     getCurrentConfigName(): Thenable<string>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
@@ -1143,6 +1144,10 @@ export class DefaultClient implements Client {
                 },
                 () => {});
         });
+    }
+
+    public toggleReferenceResultsView(): void {
+        this.references.toggleGroupView();
     }
 
     public async logDiagnostics(): Promise<void> {
@@ -2172,6 +2177,7 @@ class NullClient implements Client {
     provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
+    toggleReferenceResultsView(): void {}
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
