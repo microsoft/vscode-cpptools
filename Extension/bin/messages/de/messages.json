@@ -2340,7 +2340,7 @@
   "eine durch geschweifte Klammern begrenzte Liste ist hier nicht zulässig",
   "ein operator->*-Member\" ist in einer verwalteten Klasse nicht zulässig",
   "die Assemblymetadaten beziehen sich auf eine Assembly, die nicht existiert",
-  "Das Attribute \"%sq2\" steht in Konflikt zum früheren Attribut \"%sq1\".",
+  "das Attribute \"%sq2\" steht im Widerspruch zum früheren Attribut \"%sq1\"",
   "\"%nd\" wurde zuvor mit einem unterschiedlichen Basistyp deklariert",
   "'enum class' und 'enum struct' können hier nicht verwendet werden (verwenden Sie stattdessen eine einfache 'enum')",
   "bei Initialisierern für Objekte des Typs \"%t\" ist nur eine Ebene geschweifter Klammern zulässig",
