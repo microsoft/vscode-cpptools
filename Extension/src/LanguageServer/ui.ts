@@ -108,7 +108,7 @@ export class UI {
             this.ShowReferencesIcon = false;
         } else {
             this.referencesStatusBarItem.text = "$(search)";
-            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + this.referencesPreviewTooltip;
+            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + (val === ReferencesCommandMode.Peek ? "" : this.referencesPreviewTooltip);
             this.ShowReferencesIcon = true;
         }
     }
