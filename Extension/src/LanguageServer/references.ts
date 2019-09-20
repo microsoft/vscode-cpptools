@@ -354,8 +354,14 @@ export class ReferencesManager {
 
         if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
             if (!this.referencesCanceled) {
-                this.renameView.show(true);
-                this.renameView.setData(referencesResult, this.resultsCallback);
+                // If there are only Confirmed results, complete the rename immediately.
+                let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
+                if (!foundUnconfirmed) {
+                    this.resultsCallback(referencesResult);
+                } else {
+                    this.renameView.show(true);
+                    this.renameView.setData(referencesResult, this.resultsCallback);
+                }
             }
         } else {
             // Put results in data model
