@@ -12,6 +12,8 @@
     "c_cpp.command.takeSurvey.title": "Take Survey",
     "c_cpp.command.buildAndDebugActiveFile.title": "Build and Debug Active File",
     "c_cpp.command.logDiagnostics.title": "Log Diagnostics",
+    "c_cpp.command.referencesViewGroupByType.title": "Group by reference type",
+    "c_cpp.command.referencesViewGroupByFile.title": "Group by file",
     "c_cpp.command.rescanWorkspace.title": "Rescan Workspace",
     "c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copy vcpkg install command to clipboard",
     "c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visit the vcpkg help page",

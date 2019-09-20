@@ -870,6 +870,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByType', onToggleRefGroupView));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByFile', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('CppRenameView.cancel', onRenameViewCancel));
     disposables.push(vscode.commands.registerCommand('CppRenameView.done', onRenameViewDone));
     disposables.push(vscode.commands.registerCommand('CppRenameView.remove', onRenameViewRemove));
@@ -1059,6 +1061,12 @@ function onShowParsingCommands(): void {
 function onShowReferencesProgress(): void {
     onActivationEvent();
     selectClient().then(client => client.handleReferencesIcon(), rejected => {});
+}
+
+function onToggleRefGroupView(): void {
+    // Set context to switch icons
+    let client: Client = getActiveClient();
+    client.toggleReferenceResultsView();
 }
 
 function onTakeSurvey(): void {
