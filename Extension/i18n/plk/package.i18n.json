@@ -9,7 +9,6 @@
 	"c_cpp.command.configurationEditJSON.title": "Edytowanie konfiguracji (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Edytowanie konfiguracji (interfejs użytkownika)",
 	"c_cpp.command.switchHeaderSource.title": "Przełączanie nagłówka/źródła",
-	"c_cpp.command.navigate.title": "Nawiguj...",
 	"c_cpp.command.enableErrorSquiggles.title": "Włączanie zygzaków sygnalizujących błędy",
 	"c_cpp.command.disableErrorSquiggles.title": "Wyłączanie zygzaków sygnalizujących błędy",
 	"c_cpp.command.toggleIncludeFallback.title": "Przełączanie powrotu aparatu funkcji IntelliSense w przypadku błędów dyrektywy include",
@@ -34,7 +33,6 @@
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "Określa kolor czcionki nieaktywnych bloków preprocesora. Dane wejściowe są w postaci szesnastkowego kodu koloru lub prawidłowego koloru motywu. Jeśli nie zostanie ustawione, to wartością domyślną będzie schemat kolorowania składni edytora. To ustawienie ma zastosowanie tylko wtedy, gdy włączono funkcję przygaszania nieaktywnego regionu.",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "Określa kolor tła nieaktywnych bloków preprocesora. Dane wejściowe są w postaci szesnastkowego kodu koloru lub prawidłowego koloru motywu. Jeśli nie zostanie ustawione, to domyślny kolor tła będzie przezroczysty. To ustawienie ma zastosowanie tylko wtedy, gdy włączono funkcję przygaszania nieaktywnego regionu.",
 	"c_cpp.configuration.formatting.description": "Wartość „domyślne” włącza formatowanie kodu. Wartość „wyłączone” wyłącza formatowanie kodu.",
-	"c_cpp.configuration.navigation.length.description": "Maksymalna liczba znaków interfejsu użytkownika zakresu/nawigacji na pasku stanu. Interfejs użytkownika może nie zostać wyświetlony, jeśli ta wartość jest zbyt duża.",
 	"c_cpp.configuration.loggingLevel.description": "Szczegółowość rejestrowania w panelu danych wyjściowych. Kolejność poziomów od najmniej szczegółowego do najbardziej szczegółowego jest następująca: Brak < Błąd < Ostrzeżenie < Informacje < Debugowanie.",
 	"c_cpp.configuration.autoAddFileAssociations.description": "Określa, czy pliki są automatycznie dodawane do elementu files.associations, gdy są one elementem docelowym operacji nawigacji z pliku C/C++.",
 	"c_cpp.configuration.workspaceParsingPriority.description": "Określa, czy analizowanie nieaktywnych plików obszaru roboczego używa trybu uśpienia, aby uniknąć używania 100% procesora CPU. Wartości najwyższe/wysokie/średnie/niskie odpowiadają odpowiednio około 100/75/50/25% użycia procesora CPU.",
@@ -70,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Jeśli wartość to true, fragmenty kodu są udostępniane przez serwer języka.",
 	"c_cpp.configuration.enhancedColorization.description": "Jeśli to ustawienie jest włączone, kod jest kolorowany na podstawie funkcji IntelliSense. To ustawienie nie ma żadnego efektu, jeśli funkcja IntelliSense jest wyłączona lub jest używana domyślna kompozycja z dużym kontrastem.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Włącz usługi integracji dla elementu [vcpkg dependency manager](https://aka.ms/vcpkg/).",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: inne wyniki odwołań",
 	"c_cpp.debuggers.pipeTransport.description": "Jeśli jest obecny, zawiera instrukcje dla debugera, aby połączył się z komputerem zdalnym przy użyciu innego pliku wykonywalnego jako potoku, który będzie przekazywał standardowe wejście/wyjście między programem VS Code a plikiem wykonywalnym zaplecza debugera z włączoną obsługą indeksu MI (takim jak gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "wprowadź w pełni kwalifikowaną ścieżkę na potrzeby nazwy programu potoku, na przykład „/usr/bin/ssh”",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Pełna ścieżka do debugera na komputerze docelowym, na przykład /usr/bin/gdb.",
@@ -122,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "Opcjonalny identyfikator procesu, do którego ma zostać dołączony debuger. Użyj polecenia „${command:pickProcess}”, aby uzyskać listę uruchomionych lokalnie procesów, do których można dołączyć. Pamiętaj, że niektóre platformy wymagają uprawnień administratora, aby dołączyć je do procesu.",
 	"c_cpp.debuggers.symbolSearchPath.description": "Rozdzielana średnikami lista katalogów, w których mają być wyszukiwanie pliki symboli (PDB). Przykład: „c:\\dir1;c:\\dir2”.",
 	"c_cpp.debuggers.dumpPath.description": "Opcjonalna pełna ścieżka do pliku zrzutu dla określonego programu. Przykład: „c:\\temp\\app.dmp”. Wartość domyślna to null.",
-	"c_cpp.debuggers.enableDebugHeap.description": "W przypadku wartości false proces zostanie uruchomiony z wyłączoną stertą debugowania. Spowoduje to ustawienie zmiennej środowiskowej „_NO_DEBUG_HEAP” na wartość „1”."
+	"c_cpp.debuggers.enableDebugHeap.description": "W przypadku wartości false proces zostanie uruchomiony z wyłączoną stertą debugowania. Spowoduje to ustawienie zmiennej środowiskowej „_NO_DEBUG_HEAP” na wartość „1”.",
+	"c_cpp.debuggers.symbolLoadInfo.description": "Jawna kontrola ładowania symboli.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Jeśli wartość jest równa true, zostaną załadowane symbole dla wszystkich bibliotekami, w przeciwnym razie nie zostaną załadowane symbole solib. Wartość domyślna to true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista nazw plików (dozwolone symbole wieloznaczne) oddzielonych średnikami \";\". Modyfikuje zachowanie elementu LoadAll. Jeśli LoadAll ma wartość true, nie Ładuj symboli dla bibliotekami, które pasują do nazw na liście. W przeciwnym razie Załaduj tylko symbole dla bibliotekami, które pasują do siebie. Przykład: \"foo. so; bar;\"",
+	"c_cpp.debuggers.requireExactSource.description": "Opcjonalna flaga, która wymaga bieżącego kodu źródłowego, aby pasowała do pliku PDB."
 }

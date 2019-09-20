@@ -14,5 +14,7 @@
 	"cannot.resolve.compiler.path": "Nieprawidłowe dane wejściowe, nie można rozpoznać ścieżki kompilatora",
 	"path.is.not.a.file": "Ścieżka nie jest plikiem: {0}",
 	"incompatible.intellisense.mode": "Tryb funkcji IntelliSense {0} jest niezgodny z ścieżką kompilatora.",
-	"path.is.not.a.directory": "Ścieżka nie jest katalogiem: {0}"
+	"path.is.not.a.directory": "Ścieżka nie jest katalogiem: {0}",
+	"cannot.find2": "Nie można znaleźć elementu „{0}”.",
+	"path.is.not.a.directory2": "Ścieżka nie jest katalogiem: „{0}”"
 }

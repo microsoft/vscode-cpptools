@@ -9,7 +9,6 @@
 	"c_cpp.command.configurationEditJSON.title": "Konfigurationen bearbeiten (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Konfigurationen bearbeiten (Benutzeroberfläche)",
 	"c_cpp.command.switchHeaderSource.title": "Header/Quelle umschalten",
-	"c_cpp.command.navigate.title": "Navigieren...",
 	"c_cpp.command.enableErrorSquiggles.title": "Fehlerwellenlinien aktivieren",
 	"c_cpp.command.disableErrorSquiggles.title": "Fehlerwellenlinien deaktivieren",
 	"c_cpp.command.toggleIncludeFallback.title": "Fallback der IntelliSense-Engine bei Includefehlern umschalten",
@@ -34,7 +33,6 @@
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "Hiermit wird die Schriftfarbe von inaktiven Präprozessorblöcken gesteuert. Die Eingabe erfolgt in Form eines hexadezimalen Farbcodes oder einer gültigen Designfarbe. Wenn diese Option nicht festgelegt ist, wird standardmäßig das Syntaxfarbschema des Editors verwendet. Diese Einstellung gilt nur, wenn das Abblenden inaktiver Regionen aktiviert ist.",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "Hiermit wird die Hintergrundfarbe von inaktiven Präprozessorblöcken gesteuert. Die Eingabe erfolgt in Form eines hexadezimalen Farbcodes oder einer gültigen Designfarbe. Wenn diese Option nicht festgelegt ist, ist die Anzeige standardmäßig transparent. Diese Einstellung gilt nur, wenn das Abblenden inaktiver Regionen aktiviert ist.",
 	"c_cpp.configuration.formatting.description": "\"Standard\" aktiviert die Codeformatierung. \"Deaktiviert\" deaktiviert die Codeformatierung.",
-	"c_cpp.configuration.navigation.length.description": "Maximale Zeichenlänge in der Benutzeroberfläche für Bereich/Navigation in der Statusleiste. Die Benutzeroberfläche wird möglicherweise nicht angezeigt, wenn dieser Wert zu groß ist.",
 	"c_cpp.configuration.loggingLevel.description": "Die Ausführlichkeit der Protokollierung im Ausgabebereich. Die Reihenfolge der Stufen von \"am wenigsten ausführlich\" bis \"am ausführlichsten\" lautet: \"Keine\" < \"Fehler\" < \"Warnung\" < \"Information\" < \"Debuggen\".",
 	"c_cpp.configuration.autoAddFileAssociations.description": "Hiermit wird gesteuert, ob Dateien automatisch zu \"files.associations\" hinzugefügt werden, wenn sie das Ziel eines Navigationsvorgangs aus einer C/C++-Datei sind.",
 	"c_cpp.configuration.workspaceParsingPriority.description": "Hiermit wird gesteuert, ob beim Analysieren der nicht aktiven Arbeitsbereichsdateien Standbyfunktionen verwendet werden, um eine 100-prozentige Auslastung der CPU zu vermeiden. Die Werte \"Am höchsten\", \"Hoch\", \"Mittel\", \"Niedrig\" entsprechen jeweils etwa 100, 75, 50 und 25 % CPU-Auslastung.",
@@ -70,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Wenn dieser Wert auf TRUE festgelegt ist, werden Codeausschnitte vom Sprachserver bereitgestellt.",
 	"c_cpp.configuration.enhancedColorization.description": "Wenn diese Option aktiviert ist, wird der Code basierend auf IntelliSense eingefärbt. Diese Einstellung hat keine Auswirkungen, wenn IntelliSense deaktiviert ist oder wenn das standardmäßige Design mit hohem Kontrast verwendet wird.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Hiermit aktivieren Sie Integrationsdienste für den [vcpkg-Abhängigkeits-Manager](https://aka.ms/vcpkg/).",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: andere Verweisergebnisse",
 	"c_cpp.debuggers.pipeTransport.description": "Falls angegeben, weist diese Option den Debugger an, eine Verbindung mit einem Remotecomputer mithilfe einer anderen ausführbaren Datei als Pipe herzustellen, die Standardeingaben/-ausgaben zwischen VS Code und der ausführbaren Back-End-Datei für den MI-fähigen Debugger weiterleitet (z. B. gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "Vollqualifizierten Pfad für den Pipeprogrammnamen eingeben, z. B. \"/usr/bin/ssh\"",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Der vollständige Pfad zum Debugger auf dem Zielcomputer, z. B. \"/usr/bin/gdb\".",
@@ -122,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "Optionale Prozess-ID, an die der Debugger angefügt werden soll. Verwenden Sie \"${command:pickProcess}\", um eine Liste der lokalen ausgeführten Prozesse abzurufen, an die angefügt werden kann. Beachten Sie, dass einige Plattformen Administratorrechte erfordern, damit an einen Prozess angefügt werden kann.",
 	"c_cpp.debuggers.symbolSearchPath.description": "Durch Semikolons getrennte Liste von Verzeichnissen, die für die Suche nach Symboldateien (PDB-Dateien) verwendet werden sollen. Beispiel: \"c:\\dir1;c:\\dir2\".",
 	"c_cpp.debuggers.dumpPath.description": "Optionaler vollständiger Pfad zu einer Dumpdatei für das angegebene Programm. Beispiel: \"c:\\temp\\app.dmp\". Standardwert ist NULL.",
-	"c_cpp.debuggers.enableDebugHeap.description": "Wenn dieser Wert auf FALSE festgelegt ist, wird der Prozess mit deaktiviertem Debug-Heap gestartet. Hiermit wird die Umgebungsvariable \"_NO_DEBUG_HEAP\" auf \"1\" festgelegt."
+	"c_cpp.debuggers.enableDebugHeap.description": "Wenn dieser Wert auf FALSE festgelegt ist, wird der Prozess mit deaktiviertem Debug-Heap gestartet. Hiermit wird die Umgebungsvariable \"_NO_DEBUG_HEAP\" auf \"1\" festgelegt.",
+	"c_cpp.debuggers.symbolLoadInfo.description": "Explizite Steuerung des Symbolladevorgangs.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Bei TRUE werden Symbole für alle Bibliotheken geladen, andernfalls werden keine solib-Symbole geladen. Der Standardwert ist TRUE.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Liste der Dateinamen (Platzhalter zulässig), durch Semikolons \";\" getrennt. Ändert das Verhalten von LoadAll. Wenn LoadAll auf TRUE festgelegt ist, werden keine Symbole für Bibliotheken geladen, die einem beliebigen Namen in der Liste entsprechen. Andernfalls werden nur Symbole für übereinstimmende Bibliotheken geladen. Beispiel: \"foo.so;bar.so\"",
+	"c_cpp.debuggers.requireExactSource.description": "Optionales Flag, um anzufordern, dass der aktuelle Quellcode mit der PDB-Datei übereinstimmt."
 }

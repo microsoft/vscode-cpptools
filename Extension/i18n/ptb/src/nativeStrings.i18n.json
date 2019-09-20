@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "\"{0}\" não pôde ser encontrado. Em seu lugar, será usado o 'includePath' de c_cpp_properties.json.",
 	"file_not_found_in_path": "\"{0}\" não encontrado em \"{1}\". Em seu lugar, será usado o 'includePath' de c_cpp_properties.json para esse arquivo.",
 	"database_reset": "O banco de dados do IntelliSense foi redefinido com êxito.",
-	"global_scope": "(Escopo Global)",
 	"send_response_failed": "Falha ao enviar a resposta ao cliente: {0}",
 	"read_response_failed": "Falha ao ler a resposta do servidor: {0}",
 	"send_request_failed": "Falha ao enviar a solicitação ao servidor: {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "Falha ao chamar {0}",
 	"quick_info_failed": "Falha na operação de informações rápidas: {0}",
 	"create_intellisense_client_failed": "Falha ao criar o cliente IntelliSense. {0}",
-	"cant_find_intellisense_client": "Não é possível localizar o cliente IntelliSense: caminho de arquivo inválido {0}",
 	"intellisense_spawn_failed": "Falha ao gerar o processo IntelliSense:",
 	"browse_engine_update_thread_join_failed": "Erro ao chamar browse_engine_update_thread.join(): {0}",
 	"already_open_different_casing": "Este arquivo ({0}) já está aberto no editor, mas com um uso de maiúsculas diferente. Os recursos do IntelliSense serão desabilitados nesta cópia do arquivo.",
@@ -148,5 +146,13 @@
 	"unable_to_start_child_process": "Não é possível iniciar o processo filho!",
 	"timed_out_attempting_to_communicate_with_process": "Tempo limite atingido ao tentar se comunicar com o processo!",
 	"process_failed_to_run": "Falha na execução do processo",
-	"wsl_not_detected": "WSL não detectado"
+	"wsl_not_detected": "WSL não detectado",
+	"compiler_in_compilerpath_not_found": "Compilador na propriedade \"compilerPath\" não localizado: {0}",
+	"config_data_invalid": "Dados de configuração inválidos, {0}",
+	"cmake_executable_not_found": "Executável do CMake não localizado em {0}",
+	"no_args_provider": "Nenhum provedor de argumentos",
+	"invalid_file_path": "Caminho de arquivo inválido {0}",
+	"cant_create_intellisense_client_for": "Não é possível criar o cliente IntelliSense para {0}",
+	"suffix_declaration": "declaração",
+	"suffix_type_alias": "alias de tipo"
 }

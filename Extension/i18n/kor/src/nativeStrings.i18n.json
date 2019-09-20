@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "\"{0}\"을(를) 찾을 수 없습니다. c_cpp_properties.json의 'includePath'가 대신 사용됩니다.",
 	"file_not_found_in_path": "\"{1}\"에서 \"{0}\"을(를) 찾을 수 없습니다. c_cpp_properties.json의 'includePath'가 이 파일에 대신 사용됩니다.",
 	"database_reset": "IntelliSense 데이터베이스를 다시 설정했습니다.",
-	"global_scope": "(전역 범위)",
 	"send_response_failed": "클라이언트에 응답을 보내지 못했습니다. {0}",
 	"read_response_failed": "서버에서 응답을 읽지 못했습니다. {0}",
 	"send_request_failed": "서버에 요청을 보내지 못했습니다. {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "{0}을(를) 호출하지 못했습니다.",
 	"quick_info_failed": "요약 정보 작업 실패: {0}",
 	"create_intellisense_client_failed": "IntelliSense 클라이언트를 만들지 못했습니다. {0}",
-	"cant_find_intellisense_client": "IntelliSense 클라이언트를 찾을 수 없음: 잘못된 파일 경로 {0}",
 	"intellisense_spawn_failed": "IntelliSense 프로세스를 생성하지 못했습니다.",
 	"browse_engine_update_thread_join_failed": "browse_engine_update_thread.join()을 호출하는 동안 오류가 발생했습니다. {0}",
 	"already_open_different_casing": "이 파일({0})은 편집기에서 이미 열려 있지만 대/소문자가 다릅니다. 이 파일 복사본에서 IntelliSense 기능을 사용할 수 없습니다.",
@@ -148,5 +146,13 @@
 	"unable_to_start_child_process": "자식 프로세스를 시작할 수 없습니다.",
 	"timed_out_attempting_to_communicate_with_process": "프로세스와 통신을 시도하는 동안 시간이 초과되었습니다.",
 	"process_failed_to_run": "프로세스를 실행하지 못했습니다.",
-	"wsl_not_detected": "WSL이 검색되지 않음"
+	"wsl_not_detected": "WSL이 검색되지 않음",
+	"compiler_in_compilerpath_not_found": "\"compilerPath\" 속성의 컴파일러를 찾을 수 없음: {0}",
+	"config_data_invalid": "구성 데이터가 잘못됨, {0}",
+	"cmake_executable_not_found": "{0}에서 CMake 실행 파일을 찾을 수 없음",
+	"no_args_provider": "인수 공급자가 없음",
+	"invalid_file_path": "잘못된 파일 경로 {0}",
+	"cant_create_intellisense_client_for": "{0}에 대한 IntelliSense 클라이언트를 만들 수 없음",
+	"suffix_declaration": "선언",
+	"suffix_type_alias": "형식 별칭"
 }

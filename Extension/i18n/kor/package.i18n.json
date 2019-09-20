@@ -9,7 +9,6 @@
 	"c_cpp.command.configurationEditJSON.title": "구성 편집(JSON)",
 	"c_cpp.command.configurationEditUI.title": "구성 편집(UI)",
 	"c_cpp.command.switchHeaderSource.title": "헤더/소스 전환",
-	"c_cpp.command.navigate.title": "탐색...",
 	"c_cpp.command.enableErrorSquiggles.title": "오류 표시선 사용",
 	"c_cpp.command.disableErrorSquiggles.title": "오류 표시선 사용 안 함",
 	"c_cpp.command.toggleIncludeFallback.title": "포함 오류 발생 시 IntelliSense 엔진 대체 설정/해제",
@@ -34,7 +33,6 @@
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "비활성 전처리기 블록의 글꼴 색 지정을 제어합니다. 입력은 16진수 색 코드 또는 유효한 테마 색의 형식입니다. 설정하지 않으면 기본적으로 편집기의 구문 색 구성표로 설정됩니다. 이 설정은 비활성 영역 흐리게 표시가 사용하도록 설정된 경우에만 적용됩니다.",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "비활성 전처리기 블록의 배경색 지정을 제어합니다. 입력은 16진수 색 코드 또는 유효한 테마 색의 형식입니다. 설정하지 않으면 기본적으로 투명으로 설정됩니다. 이 설정은 비활성 영역 흐리게 표시가 사용하도록 설정된 경우에만 적용됩니다.",
 	"c_cpp.configuration.formatting.description": "\"기본값\"을 선택하면 코드 서식을 지정할 수 있습니다. \"사용 안 함\"을 선택하면 코드 서식을 지정할 수 없습니다.",
-	"c_cpp.configuration.navigation.length.description": "상태 표시줄에서 범위/탐색 UI의 최대 문자 길이입니다. 이 값이 너무 크면 UI가 표시되지 않을 수 있습니다.",
 	"c_cpp.configuration.loggingLevel.description": "출력 패널에서 로깅의 세부 정보 표시 수준입니다. 가장 낮은 표시 수준에서 가장 높은 표시 수준의 순서는 None < Error < Warning < Information < Debug입니다.",
 	"c_cpp.configuration.autoAddFileAssociations.description": "파일이 C/C++ 파일의 탐색 작업에 대한 대상인 경우 files.associations에 자동으로 추가되는지 여부를 제어합니다.",
 	"c_cpp.configuration.workspaceParsingPriority.description": "비활성 작업 영역 파일의 구문 분석에서 100%의 CPU 사용률을 피하기 위해 일시 정지 모드를 사용하는지 여부를 제어합니다. 최고/높음/중간/낮음 값은 대략 100/75/50/25%의 CPU 사용률에 해당합니다.",
@@ -70,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "True이면 언어 서버에서 코드 조각을 제공합니다.",
 	"c_cpp.configuration.enhancedColorization.description": "사용하도록 설정된 경우 IntelliSense를 기반으로 코드 색이 지정됩니다. 이 설정은 기본 고대비 테마를 사용하거나 IntelliSense가 사용하지 않도록 설정된 경우 아무런 영향을 주지 않습니다.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg 종속성 관리자](https://aka.ms/vcpkg/)에 통합 서비스를 사용하도록 설정합니다.",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 기타 참조 결과",
 	"c_cpp.debuggers.pipeTransport.description": "있을 경우 VS Code와 MI 지원 디버거 백 엔드 실행 파일(예: gdb) 사이에 표준 입출력을 릴레이하는 파이프로 다른 실행 파일을 사용하여 원격 컴퓨터에 연결되도록 디버거를 지정합니다.",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "파이프 프로그램 이름의 정규화된 경로 입력(예: '/usr/bin/ssh')",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "대상 컴퓨터에서 디버거의 전체 경로(예: /usr/bin/gdb)입니다.",
@@ -122,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "디버거를 연결할 선택적 프로세스 ID입니다. \"${command:pickProcess}\"를 사용하여 연결할 로컬 실행 프로세스 목록을 가져옵니다. 일부 플랫폼에서는 프로세스에 연결하기 위해 관리자 권한이 필요합니다.",
 	"c_cpp.debuggers.symbolSearchPath.description": "기호(pdb) 파일 검색에 사용할 디렉터리의 세미콜론으로 구분된 목록입니다(예: \"c:\\dir1;c:\\dir2\").",
 	"c_cpp.debuggers.dumpPath.description": "지정된 프로그램에 대한 코어 덤프 파일의 선택적 전체 경로입니다(예: \"c:\\temp\\app.dmp\"). 기본값은 null입니다.",
-	"c_cpp.debuggers.enableDebugHeap.description": "False이면 디버그 힙이 사용하지 않도록 설정된 상태로 프로세스가 시작됩니다. 이렇게 하면 환경 변수 '_NO_DEBUG_HEAP'이 '1'로 설정됩니다."
+	"c_cpp.debuggers.enableDebugHeap.description": "False이면 디버그 힙이 사용하지 않도록 설정된 상태로 프로세스가 시작됩니다. 이렇게 하면 환경 변수 '_NO_DEBUG_HEAP'이 '1'로 설정됩니다.",
+	"c_cpp.debuggers.symbolLoadInfo.description": "기호 로드를 명시적으로 제어합니다.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "true이면 모든 라이브러리의 기호가 로드됩니다. true가 아니면 solib 기호가 로드되지 않습니다. 기본값은 true입니다.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "세미콜론 ';'으로 구분된 파일 이름(와일드카드 허용) 목록이며, LoadAll의 동작을 수정합니다. LoadAll이 true이면 목록에 있는 이름과 일치하는 라이브러리의 기호를 로드하지 않습니다. true가 아니면 일치하는 라이브러리의 기호만 로드합니다. 예: \"foo.so;bar.so\"",
+	"c_cpp.debuggers.requireExactSource.description": "현재 소스 코드가 PDB와 일치하도록 하는 선택적 플래그입니다."
 }

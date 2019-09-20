@@ -14,5 +14,7 @@
 	"cannot.resolve.compiler.path": "Недопустимые входные данные; не удается разрешить путь компилятора",
 	"path.is.not.a.file": "Путь не является файлом: {0}",
 	"incompatible.intellisense.mode": "Режим IntelliSense {0} несовместим с путем компилятора.",
-	"path.is.not.a.directory": "Путь не является каталогом: {0}"
+	"path.is.not.a.directory": "Путь не является каталогом: {0}",
+	"cannot.find2": "Не удается найти \"{0}\".",
+	"path.is.not.a.directory2": "Путь не является каталогом: \"{0}\""
 }

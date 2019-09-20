@@ -9,7 +9,6 @@
 	"c_cpp.command.configurationEditJSON.title": "Yapılandırmaları Düzenle (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Yapılandırmaları Düzenle (UI)",
 	"c_cpp.command.switchHeaderSource.title": "Üst Bilgiyi/Kaynağı Değiştir",
-	"c_cpp.command.navigate.title": "Git...",
 	"c_cpp.command.enableErrorSquiggles.title": "Hata İlişkilendirmelerini Etkinleştir",
 	"c_cpp.command.disableErrorSquiggles.title": "Hata İlişkilendirmelerini Devre Dışı Bırak",
 	"c_cpp.command.toggleIncludeFallback.title": "Ekleme Hatalarında IntelliSense Altyapısı Geri Dönüşünü Aç/Kapat",
@@ -34,7 +33,6 @@
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "Etkin olmayan ön işlemci bloklarının yazı tipi renklendirmesini denetler. Giriş, onaltılık bir renk kodu şeklinde veya geçerli bir Tema Rengidir. Ayarlanmamışsa, bu ayar varsayılan olarak düzenleyicinin söz dizimi renklendirme düzeninde olur. Bu ayar yalnızca etkin olmayan bölge karartma etkinleştirildiğinde uygulanır.",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "Etkin olmayan ön işlemci bloklarının arka plan renklendirmesini denetler. Giriş, onaltılık bir renk kodu şeklinde veya geçerli bir Tema Rengidir. Ayarlanmamışsa, bu ayar varsayılan olarak saydamdır. Bu ayar yalnızca etkin olmayan bölge karartma etkinleştirildiğinde uygulanır.",
 	"c_cpp.configuration.formatting.description": "\"Varsayılan\", kod biçimlendirmesini etkinleştirir. \"Devre dışı\", kod biçimlendirmesini devre dışı bırakır.",
-	"c_cpp.configuration.navigation.length.description": "Durum çubuğundaki kapsam/gezinti kullanıcı arabiriminin karakter uzunluğu üst sınırı. Bu değer çok büyükse kullanıcı arabirimi görünmeyebilir.",
 	"c_cpp.configuration.loggingLevel.description": "Çıkış Panelinde günlük kaydı ayrıntı düzeyi. En az ayrıntılıdan en çok ayrıntılıya düzey sırası: Yok < Hata < Uyarı < Bilgi < Hata Ayıklama.",
 	"c_cpp.configuration.autoAddFileAssociations.description": "Dosyaların, bir C/C++ dosyasındaki gezinme işleminin hedefi olduklarında otomatik olarak files.associations öğesine eklenip eklenmeyeceğini denetler.",
 	"c_cpp.configuration.workspaceParsingPriority.description": "Etkin olmayan çalışma alanı dosyalarını ayrıştırma işleminin, CPU'nun %100'ünü kullanmaktan kaçınmak için uyku modunu kullanıp kullanmadığını denetler. En yüksek/yüksek/orta/düşük değerleri, yaklaşık olarak %100/75/50/25 CPU kullanımına karşılık gelir.",
@@ -70,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Değer true ise, kod parçacıkları dil sunucusu tarafından sağlanır.",
 	"c_cpp.configuration.enhancedColorization.description": "Etkinleştirilirse, kod IntelliSense'e göre renklendirilir. IntelliSense devre dışı bırakılmışsa veya Varsayılan Yüksek Karşıtlık teması kullanılıyorsa bu ayarın bir etkisi olmaz.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg bağımlılık yöneticisi](https://aka.ms/vcpkg/) için tümleştirme hizmetlerini etkinleştirin.",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: Diğer başvuru sonuçları",
 	"c_cpp.debuggers.pipeTransport.description": "Mevcut olduğunda, hata ayıklayıcısına, VS Code ile MI özellikli hata ayıklayıcısı arka uç yürütülebilir dosyası (gdb gibi) arasında standart giriş/çıkış geçişi sağlayan bir kanal olarak görev yapacak başka bir yürütülebilir dosya aracılığıyla uzak bilgisayara bağlanmasını söyler.",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "Kanal programı adı için tam yolu girin. Örneğin, '/usr/bin/ssh'",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Hedef makinedeki hata ayıklayıcısının tam yolu. Örneğin: /usr/bin/gdb.",
@@ -122,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "Hata ayıklayıcının ekleneceği isteğe bağlı işlem kimliği. Eklenilecek yerel çalışan işlemlerin bir listesini almak için \"${command:pickProcess}\" kullanın. Bazı platformların bir işleme ekleme yapmak için yönetici ayrıcalıkları gerektirdiğini unutmayın.",
 	"c_cpp.debuggers.symbolSearchPath.description": "Sembol (yani pdb) dosyalarını aramak için kullanılacak, noktalı virgülle ayrılmış dizinlerin listesi. Örnek: \"c:\\dizin1;c:\\dizin2\".",
 	"c_cpp.debuggers.dumpPath.description": "Belirtilen program için döküm dosyasının isteğe bağlı tam yolu. Örnek: \"c:\\temp\\app.dmp\". Varsayılan olarak null değerini alır.",
-	"c_cpp.debuggers.enableDebugHeap.description": "Değer false ise, işlem hata ayıklama yığını devre dışı bırakılarak başlatılır. Bu işlem '_NO_DEBUG_HEAP' ortam değişkenini '1' olarak ayarlar."
+	"c_cpp.debuggers.enableDebugHeap.description": "Değer false ise, işlem hata ayıklama yığını devre dışı bırakılarak başlatılır. Bu işlem '_NO_DEBUG_HEAP' ortam değişkenini '1' olarak ayarlar.",
+	"c_cpp.debuggers.symbolLoadInfo.description": "Sembol yüklemesinin açık denetimi.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "True ise tüm kitaplıklar için simgeler yüklenir, aksi halde hiçbir solib simgesi yüklenmez. Varsayılan değer true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Noktalı virgülle ';' ayrılmış dosya adları listesi (joker karakterlere izin verilir). LoadAll davranışını değiştirir. LoadAll değeri true ise, listedeki herhangi bir adla eşleşen kitaplıklar için sembolleri yüklemeyin. Aksi takdirde yalnızca eşleşen kitaplıklar için sembolleri yükleyin. Örnek: \"foo.so;bar.so\"",
+	"c_cpp.debuggers.requireExactSource.description": "Geçerli kaynak kodunun pdb ile eşleşmesini gerektiren isteğe bağlı bayrak."
 }

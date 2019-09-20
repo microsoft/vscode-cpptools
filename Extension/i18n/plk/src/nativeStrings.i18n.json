@@ -18,7 +18,6 @@
 	"could_not_find_compile_commands": "Nie można odnaleźć elementu „{0}”. W zamian zostanie użyty element „includePath” z pliku c_cpp_properties.json.",
 	"file_not_found_in_path": "Nie znaleziono elementu „{0}” w „{1}”. Dla tego pliku zostanie w zamian użyty element „includePath” z pliku c_cpp_properties.json.",
 	"database_reset": "Pomyślnie zresetowano bazę danych funkcji IntelliSense.",
-	"global_scope": "(Globalny zasięg)",
 	"send_response_failed": "Nie można wysłać odpowiedzi do klienta: {0}",
 	"read_response_failed": "Nie można odczytać odpowiedzi z serwera: {0}",
 	"send_request_failed": "Nie można wysłać żądania do serwera: {0}",
@@ -29,7 +28,6 @@
 	"failed_call": "Nieudane wywołanie {0}",
 	"quick_info_failed": "Nie można wykonać operacji szybkich informacji: {0}",
 	"create_intellisense_client_failed": "Nie można utworzyć klienta funkcji IntelliSense. {0}",
-	"cant_find_intellisense_client": "Nie można znaleźć klienta funkcji IntelliSense: nieprawidłowa ścieżka pliku {0}",
 	"intellisense_spawn_failed": "Nie można utworzyć procesu funkcji IntelliSense:",
 	"browse_engine_update_thread_join_failed": "Błąd podczas wywoływania metody browse_engine_update_thread.join(): {0}",
 	"already_open_different_casing": "Ten plik ({0}) jest już otwarty w edytorze, ale z inną wielkością liter. Funkcje IntelliSense zostaną wyłączone w tej kopii pliku.",
@@ -148,5 +146,13 @@
 	"unable_to_start_child_process": "Nie można uruchomić procesu podrzędnego.",
 	"timed_out_attempting_to_communicate_with_process": "Przekroczono limit czasu przy próbie komunikowania się z procesem.",
 	"process_failed_to_run": "Nie można uruchomić procesu",
-	"wsl_not_detected": "Nie wykryto podsystemu WSL"
+	"wsl_not_detected": "Nie wykryto podsystemu WSL",
+	"compiler_in_compilerpath_not_found": "Nie znaleziono kompilatora określonego za pomocą właściwości „compilerPath”: {0}",
+	"config_data_invalid": "Dane konfiguracji są nieprawidłowe, {0}",
+	"cmake_executable_not_found": "Nie znaleziono pliku wykonywalnego narzędzia CMake w lokalizacji {0}",
+	"no_args_provider": "Nie ma dostawcy argumentów",
+	"invalid_file_path": "Nieprawidłowa ścieżka pliku {0}",
+	"cant_create_intellisense_client_for": "Nie można utworzyć klienta IntelliSense dla elementu {0}",
+	"suffix_declaration": "deklaracja",
+	"suffix_type_alias": "alias typu"
 }

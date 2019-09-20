@@ -9,7 +9,6 @@
 	"c_cpp.command.configurationEditJSON.title": "Editar configuraciones (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Editar configuraciones (interfaz de usuario)",
 	"c_cpp.command.switchHeaderSource.title": "Cambiar el encabezado o el origen",
-	"c_cpp.command.navigate.title": "Navegar...",
 	"c_cpp.command.enableErrorSquiggles.title": "Habilitar el subrayado ondulado de errores",
 	"c_cpp.command.disableErrorSquiggles.title": "Deshabilitar el subrayado ondulado de errores",
 	"c_cpp.command.toggleIncludeFallback.title": "Alternar el elemento Fallback del motor de IntelliSense cuando se producen errores de include",
@@ -34,7 +33,6 @@
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "Controla el color de la fuente en los bloques de preprocesador inactivos. La entrada se realiza en forma de código de color hexadecimal o de un color para temas válido. Si no se establece, se usa como valor predeterminado la combinación de colores de la sintaxis del editor. Esta configuración solo se aplica cuando está habilitada la atenuación de regiones inactivas.",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "Controla el color de fondo de los bloques de preprocesador inactivos. La entrada se realiza en forma de código de color hexadecimal o de un color para temas válido. Si no se establece, el valor predeterminado es transparente. Esta configuración solo se aplica cuando está habilitada la atenuación de regiones inactivas.",
 	"c_cpp.configuration.formatting.description": "\"Predeterminado\" permite dar formato al código. \"Deshabilitado\" no permite dar formato al código.",
-	"c_cpp.configuration.navigation.length.description": "Longitud máxima de caracteres de la interfaz de usuario de ámbito o navegación en la barra de estado. Es posible que la interfaz de usuario no aparezca si este valor es demasiado grande.",
 	"c_cpp.configuration.loggingLevel.description": "Nivel de detalle del registro en el panel de salida. El orden de los niveles de menos detallado a más detallado es: Ninguno < Error < Advertencia < Información < Depuración.",
 	"c_cpp.configuration.autoAddFileAssociations.description": "Controla si los archivos se agregan automáticamente a files.associations cuando son el destino de una operación de navegación desde un archivo de C/C++.",
 	"c_cpp.configuration.workspaceParsingPriority.description": "Controla si el análisis de los archivos de área de trabajo no activos los pone en suspensión para evitar el uso del 100 % de la CPU. Los valores máximo, alto, medio y bajo corresponden a un uso de la CPU aproximado del 100 %, 75 %, 50 % y 25 % respectivamente.",
@@ -70,6 +68,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Si se establece en true, el servidor de lenguaje proporciona los fragmentos de código.",
 	"c_cpp.configuration.enhancedColorization.description": "Si se habilita esta opción, el código se colorea de acuerdo con IntelliSense. Esta configuración no tiene efecto si IntelliSense está deshabilitado o si se utiliza el tema de contraste alto predeterminado.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Habilita los servicios de integración para el [administrador de dependencias de vcpkg] (https://aka.ms/vcpkg/).",
+	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: resultados de otras referencias",
 	"c_cpp.debuggers.pipeTransport.description": "Cuando se especifica, indica al depurador que se conecte a un equipo remoto usando otro archivo ejecutable como canalización que retransmitirá la entrada o la salida estándar entre VS Code y el archivo ejecutable del back-end del depurador habilitado para MI (por ejemplo, gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "Escriba la ruta de acceso completa para el nombre del programa de canalización; por ejemplo, \"/usr/bin/ssh\".",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Ruta de acceso completa al depurador en la máquina de destino. Por ejemplo, /usr/bin/gdb.",
@@ -122,5 +121,9 @@
 	"c_cpp.debuggers.processId.anyOf.description": "Id. de proceso opcional al que debe asociarse el depurador. Use \"${command:pickProcess}\" para obtener una lista de los procesos locales en ejecución a los que se puede asociar. Tenga en cuenta que algunas plataformas requieren privilegios de administrador para poder asociar el depurador a un proceso.",
 	"c_cpp.debuggers.symbolSearchPath.description": "Lista de directorios separados por punto y coma que debe usarse para buscar archivos de símbolos (es decir, pdb). Ejemplo: \"c:\\dir1;c:\\dir2\".",
 	"c_cpp.debuggers.dumpPath.description": "Ruta de acceso completa opcional a un archivo de volcado de memoria para el programa especificado. Ejemplo: \"c:\\temp\\app.dmp\". El valor predeterminado es null.",
-	"c_cpp.debuggers.enableDebugHeap.description": "Si se establece en false, el proceso se iniciará con el montón de depuración deshabilitado. Esta opción establece la variable de entorno \"_NO_DEBUG_HEAP\" en \"1\"."
+	"c_cpp.debuggers.enableDebugHeap.description": "Si se establece en false, el proceso se iniciará con el montón de depuración deshabilitado. Esta opción establece la variable de entorno \"_NO_DEBUG_HEAP\" en \"1\".",
+	"c_cpp.debuggers.symbolLoadInfo.description": "Control explícito de la carga de símbolos.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si es true, se cargan los símbolos de todas las bibliotecas; de lo contrario, no se cargará ningún símbolo de solib. El valor predeterminado es true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nombres de archivo (se permiten comodines) separados por punto y coma \";\". Modifica el comportamiento de LoadAll. Si LoadAll es true, no se cargan los símbolos para las bibliotecas que coincidan con cualquier nombre de la lista. De lo contrario, solo se cargan los símbolos para las bibliotecas que coincidan. Ejemplo: \"foo.so;bar.so\"",
+	"c_cpp.debuggers.requireExactSource.description": "Marca opcional que requiere que el código fuente actual coincida con el archivo PDB."
 }

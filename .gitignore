@@ -7,4 +7,7 @@ browse*.db*
 *.ilk
 
 # ignore exported localization xlf directory
-localization-export
+vscode-extensions-localization-export
+
+# ignore imported localization xlf directory
+vscode-translations-import
