@@ -190,7 +190,7 @@ export class ReferencesManager {
     }
 
     private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean, mode: ReferencesCommandMode): void {
-        const helpMessage: string = mode === ReferencesCommandMode.Peek ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
+        const helpMessage: string = (mode !== ReferencesCommandMode.Find) ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
             case ReferencesProgress.StartedRename:
