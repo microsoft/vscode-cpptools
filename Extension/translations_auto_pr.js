@@ -93,7 +93,7 @@ if (!hasAnyChanges()) {
 console.log("Changes detected");
 
 // Remove old localization branch, if any
-if (hasBranch("localization") {
+if (hasBranch("localization")) {
 	console.log(`Remove old localization branch, if any (git branch -D localization)`);
 	cp.execSync('git branch -D localization');
 }
