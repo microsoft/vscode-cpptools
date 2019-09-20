@@ -106,6 +106,12 @@ cp.execSync('git checkout -b localization');
 console.log("Adding changed file (git add .)");
 cp.execSync('git add .');
 
+// git add may have resolves CR/LF's and there may not be anything to commit
+if (!hasAnyChanges()) {
+    console.log("No changes detected.  The only changes must have been due to CR/LF's, and have been corrected.");
+    return;
+}
+
 // Commit changes files.
 console.log(`Commiting changes (git commit -m "${commitComment}")`);
 cp.execSync(`git commit -m "${commitComment}"`);
