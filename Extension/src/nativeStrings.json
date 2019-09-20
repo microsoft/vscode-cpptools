@@ -85,7 +85,7 @@
     "terminating_child_process": "terminating child process: {0}",
     "still_alive_killing": "still alive, killing...",
     "giving_up": "giving up",
-    "not_exited_yet": "not exited yet. Will sleep for {0} seconds and try again",
+    "not_exited_yet": "not exited yet. Will sleep for {0} milliseconds and try again",
     "failed_to_spawn_process": "Failed to spawn process. Error: {0} ({1})",
     "offering_completion": "Offering completion",
     "compiler_from_compiler_path": "Attempting to get defaults from compiler in \"compilerPath\" property: '{0}'",
