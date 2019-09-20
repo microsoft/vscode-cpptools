@@ -12,7 +12,7 @@ import * as nls from 'vscode-nls';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-function getReferenceTypeIconPath(referenceType: ReferenceType): { light: string; dark: string } {
+export function getReferenceTypeIconPath(referenceType: ReferenceType): { light: string; dark: string } {
     const assetsFolder: string = "assets/";
     const postFixLight: string = "-light.svg";
     const postFixDark: string = "-dark.svg";

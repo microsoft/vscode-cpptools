@@ -204,12 +204,28 @@ interface LocalizeDocumentSymbol {
     children: LocalizeDocumentSymbol[];
 }
 
+interface Location {
+    uri: string;
+    range: Range;
+}
+
 interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
-    location: vscode.Location;
+    location: Location;
     containerName: string;
     suffix: LocalizeStringParams;
+}
+
+interface RenameParams {
+    newName: string;
+    position: Position;
+    textDocument: TextDocumentIdentifier;
+}
+
+interface FindAllReferencesParams {
+    position: Position;
+    textDocument: TextDocumentIdentifier;
 }
 
 // Requests
@@ -245,6 +261,8 @@ const ColorThemeChangedNotification: NotificationType<ColorThemeChangedParams, v
 const RequestReferencesNotification: NotificationType<boolean, void> = new NotificationType<boolean, void>('cpptools/requestReferences');
 const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
+const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
+const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -265,6 +283,11 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 
 let failureMessageShown: boolean = false;
+
+let referencesRequestPending: boolean = false;
+let renamePending: boolean = false;
+let referencesParams: any;
+let referencesPromiseReject: any;
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -348,7 +371,7 @@ export class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
-    private references: refs.ProgressHandler;
+    private references: refs.ReferencesManager;
     private colorizationState = new Map<string, ColorizationState>();
     private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
@@ -462,7 +485,7 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
 
-                        public provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
+                        public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
                             return this.client.requestWhenReady(() => {
                                 let r: Range;
                                 if (range instanceof vscode.Selection) {
@@ -502,6 +525,7 @@ export class DefaultClient implements Client {
                     }
 
                     this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
+
                     class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -521,7 +545,7 @@ export class DefaultClient implements Client {
                             }
                             return documentSymbols;
                         }
-                        public provideDocumentSymbols(document: vscode.TextDocument): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+                        public async provideDocumentSymbols(document: vscode.TextDocument): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
                             return this.client.requestWhenReady(() => {
                                 let params: GetDocumentSymbolRequestParams = {
                                     uri: document.uri.toString()
@@ -542,9 +566,9 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
 
-                        provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[]> {
+                        public async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
                             let params: WorkspaceSymbolParams = {
-                            query: query
+                                query: query
                             };
 
                             return this.client.languageClient.sendRequest(GetSymbolInfoRequest, params)
@@ -574,6 +598,128 @@ export class DefaultClient implements Client {
                         }
                     }
                     this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+
+                    class FindAllReferencesProvider implements vscode.ReferenceProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+                        public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+                            if (referencesRequestPending) {
+                                referencesRequestPending = false;
+                                this.client.references.closeRenameUI();
+                                this.client.cancelReferences();
+                                referencesPromiseReject();
+                            }
+                            renamePending = false;
+                            let params: FindAllReferencesParams = {
+                                position: Position.create(position.line, position.character),
+                                textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
+                            };
+                            referencesParams = params;
+                            return new Promise<vscode.Location[]>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    // The current request is represented by referencesParams.  If a request detects
+                                    // referencesParams does not match the object used when creating the request, abort it.
+                                    if (params !== referencesParams) {
+                                        reject();
+                                    }
+                                    referencesPromiseReject = reject;
+                                    referencesRequestPending = true;
+                                    this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
+
+                                    // Register a single-fire handler for the reply.
+                                    this.client.references.setResultsCallback(result => {
+                                        if (referencesRequestPending) {
+                                            referencesRequestPending = false;
+                                            let locations: vscode.Location[] = [];
+                                            result.referenceInfos.forEach(referenceInfo => {
+                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
+                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
+                                                    let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
+                                                    locations.push(new vscode.Location(uri, range));
+                                                }
+                                            });
+                                            resolve(locations);
+                                        }
+                                    });
+                                });
+                                token.onCancellationRequested(e => {
+                                    if (params === referencesParams) {
+                                        if (referencesRequestPending) {
+                                            referencesRequestPending = false;
+                                            this.client.cancelReferences();
+                                            this.client.sendRequestReferences();
+                                            reject();
+                                        } else {
+                                            referencesParams = null;
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    }
+
+                    this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
+
+                    class RenameProvider implements vscode.RenameProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+                        public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit> {
+                            // Normally, VS Code considers rename to be an atomic operation.
+                            // If the user clicks anywhere in the document, it attempts to cancel it.
+                            // Because that prevents our rename UI, we ignore cancellation requests.
+                            // VS Code will attempt to issue new rename requests while another is still active.
+                            // When we receive another rename request, cancel the one that is in progress.
+                            if (referencesRequestPending) {
+                                this.client.references.closeRenameUI();
+                                this.client.cancelReferences();
+                                referencesPromiseReject();
+                            }
+                            renamePending = true;
+                            let params: RenameParams = {
+                                newName: newName,
+                                position: Position.create(position.line, position.character),
+                                textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
+                            };
+                            referencesParams = params;
+                            referencesRequestPending = false;
+                            return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    // The current request is represented by referencesParams.  If a request detects
+                                    // referencesParams does not match the object used when creating the request, abort it.
+                                    if (params !== referencesParams) {
+                                        reject();
+                                    }
+                                    referencesPromiseReject = reject;
+                                    referencesRequestPending = true;
+                                    this.client.languageClient.sendNotification(RenameNotification, params);
+
+                                    this.client.references.setResultsCallback(referencesResult => {
+                                        referencesRequestPending = false;
+                                        renamePending = false;
+                                        let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                        // If rename UI Was cancelled, we will get a null result
+                                        // If null, return an empty list to avoid Rename failure dialog
+                                        if (referencesResult !== null) {
+                                            for (let reference of referencesResult.referenceInfos) {
+                                                let uri: vscode.Uri = vscode.Uri.file(reference.file);
+                                                let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
+                                                workspaceEdit.replace(uri, range, newName);
+                                            }
+                                        }
+                                        this.client.references.closeRenameUI();
+                                        resolve(workspaceEdit);
+                                    });
+                                });
+                            });
+                        }
+                    }
+
+                    this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
+
                     // Listen for messages from the language server.
                     this.registerNotifications();
                     this.registerFileWatcher();
@@ -610,7 +756,7 @@ export class DefaultClient implements Client {
         }
 
         this.colorizationSettings = new ColorizationSettings(this.RootUri);
-        this.references = new refs.ProgressHandler(this);
+        this.references = new refs.ReferencesManager(this);
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
@@ -779,6 +925,19 @@ export class DefaultClient implements Client {
         this.editVersion++;
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
             if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
+
+                // If any file has changed, we need to abort the current rename operation
+                if (renamePending) {
+                    renamePending = false;
+                    referencesParams = null;
+                    if (referencesRequestPending) {
+                        referencesRequestPending = false;
+                        this.references.closeRenameUI();
+                        this.cancelReferences();
+                        referencesPromiseReject();
+                    }
+                }
+
                 let oldVersion: number = this.openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
                 let newVersion: number = textDocumentChangeEvent.document.version;
                 if (newVersion > oldVersion) {
@@ -1925,7 +2084,9 @@ export class DefaultClient implements Client {
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
             this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
-            this.sendRequestReferences();
+            if (this.ReferencesCommandMode !== refs.ReferencesCommandMode.Rename) {
+                this.sendRequestReferences();
+            }
         });
     }
 
