@@ -9,7 +9,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "isBackground": true,
+            "isBackground": false,
             "type": "shell",
             "presentation": {
                 "echo": true,
@@ -23,8 +23,7 @@
                 "compile",
                 "--loglevel",
                 "silent"
-            ],
-            "problemMatcher": "$tsc-watch"
+            ]
         },
         {
             "label": "TypeScript Lint",
@@ -62,9 +61,8 @@
             "command": "yarn",
             "args": [
                 "run",
-                "compileDev"
-            ],
-            "problemMatcher": "$tsc-watch"
+                "compile-dev"
+            ]
         },
         {
             "label": "Pretest",
@@ -78,8 +76,100 @@
             ],
             "dependsOn": [
                 "Compile Dev"
+            ]
+        },
+        {
+            "label": "TypeScript Compile Watch",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "isBackground": true,
+            "type": "shell",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            },
+            "command": "yarn",
+            "args": [
+                "run",
+                "compile-watch",
+                "--loglevel",
+                "silent"
             ],
-            "problemMatcher": "$tsc-watch"
+            "problemMatcher": [
+                {
+                    "owner": "typescript",
+                    "source": "ts",
+                    "applyTo": "closedDocuments",
+                    "fileLocation": "absolute",
+                    "severity": "error",
+                    "pattern": [
+                        {
+                            "regexp": "\\[tsl\\] ERROR in (.*)?\\((\\d+),(\\d+)\\)",
+                            "file": 1,
+                            "line": 2,
+                            "column": 3
+                        },
+                        {
+                            "regexp": "\\s*TS\\d+:\\s*(.*)",
+                            "message": 1
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": {
+                            "regexp": "Compilation (.*?)starting…"
+                        },
+                        "endsPattern": {
+                            "regexp": "Compilation (.*?)finished"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "label": "Compile Dev Watch",
+            "group": "build",
+            "isBackground": true,
+            "type": "shell",
+            "command": "yarn",
+            "args": [
+                "run",
+                "compile-dev-watch"
+            ],
+            "problemMatcher": [
+                {
+                    "owner": "typescript",
+                    "source": "ts",
+                    "applyTo": "closedDocuments",
+                    "fileLocation": "absolute",
+                    "severity": "error",
+                    "pattern": [
+                        {
+                            "regexp": "\\[tsl\\] ERROR in (.*)?\\((\\d+),(\\d+)\\)",
+                            "file": 1,
+                            "line": 2,
+                            "column": 3
+                        },
+                        {
+                            "regexp": "\\s*TS\\d+:\\s*(.*)",
+                            "message": 1
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": {
+                            "regexp": "Compilation (.*?)starting…"
+                        },
+                        "endsPattern": {
+                            "regexp": "Compilation (.*?)finished"
+                        }
+                    }
+                }
+            ]
         }
     ]
 }
