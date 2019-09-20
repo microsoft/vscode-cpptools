@@ -136,7 +136,7 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         }
 
         if (element instanceof ReferenceTypeItem) {
-            const label: string = getReferenceTagString(element.type, this.referencesCanceled);
+            const label: string = getReferenceTagString(element.type, this.referencesCanceled, true);
             const result: vscode.TreeItem = new vscode.TreeItem(label);
             result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
             return result;
@@ -156,6 +156,10 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
             return element.getFiles();
         }
 
-        return this.groupByFile ? this.references.FileItems : this.references.ReferenceTypeItems;
+        if (this.groupByFile) {
+            return this.references.FileItems;
+        } else {
+            return this.referencesCanceled ? this.references.getReferenceCanceledGroup() : this.references.ReferenceTypeItems;
+        }
     }
 }

@@ -56,12 +56,24 @@ export class Model {
             }
         }
     }
+
+    getReferenceCanceledGroup(): ReferenceTypeItem[] {
+        let group: ReferenceTypeItem[] = [];
+        let refType: ReferenceTypeItem = new ReferenceTypeItem(ReferenceType.ConfirmationInProgress);
+        refType.addFiles(this.FileItems);
+        group.push(refType);
+        return group;
+    }
 }
 
 export class ReferenceTypeItem {
     private files: FileItem[] = [];
 
     constructor(readonly type: ReferenceType) {
+    }
+
+    addFiles(files: FileItem[]): void {
+        this.files = files;
     }
 
     getFiles(): FileItem[] {
