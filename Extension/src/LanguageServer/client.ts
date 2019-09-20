@@ -2089,7 +2089,7 @@ export class DefaultClient implements Client {
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
             this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
-            if (this.ReferencesCommandMode !== refs.ReferencesCommandMode.Rename) {
+            if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
                 this.sendRequestReferences();
             }
         });

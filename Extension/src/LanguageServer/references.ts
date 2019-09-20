@@ -189,8 +189,8 @@ export class ReferencesManager {
         this.prevVisibleRangesLength = visibleRangesLength;
     }
 
-    private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
-        const helpMessage: string = ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
+    private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean, mode: ReferencesCommandMode): void {
+        const helpMessage: string = (mode !== ReferencesCommandMode.Find) ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
             case ReferencesProgress.StartedRename:
@@ -288,7 +288,7 @@ export class ReferencesManager {
             this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
             // tslint:disable-next-line: promise-must-complete
                 new Promise((resolve) => {
-                    this.reportProgress(progress, true);
+                    this.reportProgress(progress, true, mode);
                     let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
                         if (token.isCancellationRequested && !this.referencesCanceled) {
                             this.client.cancelReferences();
@@ -306,7 +306,7 @@ export class ReferencesManager {
                             }
                             resolve();
                         } else {
-                            this.reportProgress(progress, false);
+                            this.reportProgress(progress, false, mode);
                         }
                     }, this.referencesProgressUpdateInterval);
                 });

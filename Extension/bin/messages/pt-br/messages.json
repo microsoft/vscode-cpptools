@@ -2095,7 +2095,7 @@
   "lambda local não é permitido em uma função membro de uma classe %[managed]",
   "uma função membro de um tipo de interface %[C++/CLI] não pode ter uma definição",
   "uma definição de propriedade deve incluir pelo menos um acessador (\"get\" ou \"set\")",
-  "propriedade indexada por padrão conflita com %nd",
+  "propriedade indexada por padrão conflit com %nd",
   "%n1 não pode ser usado porque segue um pacote de parâmetros e não pode ser deduzido dos parâmetros %n2",
   "Este pacote de expansão produziu mais de uma expressão e uma única expressão necessária aqui",
   "tipo deve corresponder a System::Boolean, System::Byte, System::SByte, System::Int16, System::UInt16, System::Int32, System::UInt32, System::Int64, or System::UInt64",

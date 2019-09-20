@@ -3172,7 +3172,7 @@
   "Výchozí operátor porovnání členů musí být const.",
   "V této třídě je více než jeden definovaný výchozí třícestný operátor.",
   "Typ příslibu korutiny %t nemůže mít nastavené return_void a return_value zároveň.",
-  "return_value deklarované v %p",
+  "return_value deklarovalo %p.",
   "return_void deklarovalo %p.",
   "Chybí příkaz co_return, přestože %t nemá na konci %n žádné return_void.",
   "Pro přidělení stavu korutiny se nenašla žádná varianta nothrow globálního operator new.",
