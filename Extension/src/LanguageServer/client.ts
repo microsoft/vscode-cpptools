@@ -286,8 +286,14 @@ let failureMessageShown: boolean = false;
 
 let referencesRequestPending: boolean = false;
 let renamePending: boolean = false;
-let referencesParams: any;
-let referencesPromiseReject: any;
+let referencesParams: RenameParams | FindAllReferencesParams;
+
+interface ReferencesCancellationState {
+    reject(): void;
+    callback(): void;
+}
+
+let referencesPendingCancellations: ReferencesCancellationState[] = [];
 
 interface ClientModel {
     isTagParsing: DataBinding<boolean>;
@@ -605,57 +611,74 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
                         public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
-                            if (referencesRequestPending) {
-                                referencesRequestPending = false;
-                                this.client.references.closeRenameUI();
-                                this.client.cancelReferences();
-                                referencesPromiseReject();
-                            }
-                            renamePending = false;
-                            let params: FindAllReferencesParams = {
-                                position: Position.create(position.line, position.character),
-                                textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
-                            };
-                            referencesParams = params;
                             return new Promise<vscode.Location[]>((resolve, reject) => {
-                                this.client.notifyWhenReady(() => {
-                                    // The current request is represented by referencesParams.  If a request detects
-                                    // referencesParams does not match the object used when creating the request, abort it.
-                                    if (params !== referencesParams) {
-                                        reject();
-                                    }
-                                    referencesPromiseReject = reject;
-                                    referencesRequestPending = true;
-                                    this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
-
-                                    // Register a single-fire handler for the reply.
-                                    this.client.references.setResultsCallback(result => {
-                                        if (referencesRequestPending) {
+                                let callback: () => void = () => {
+                                    renamePending = false;
+                                    let params: FindAllReferencesParams = {
+                                        position: Position.create(position.line, position.character),
+                                        textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
+                                    };
+                                    referencesParams = params;
+                                    this.client.notifyWhenReady(() => {
+                                        // The current request is represented by referencesParams.  If a request detects
+                                        // referencesParams does not match the object used when creating the request, abort it.
+                                        if (params !== referencesParams) {
+                                            reject();
+                                        }
+                                        referencesRequestPending = true;
+                                        this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
+                                        // Register a single-fire handler for the reply.
+                                        this.client.references.setResultsCallback(result => {
                                             referencesRequestPending = false;
-                                            let locations: vscode.Location[] = [];
-                                            result.referenceInfos.forEach(referenceInfo => {
-                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
-                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
-                                                    let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
-                                                    locations.push(new vscode.Location(uri, range));
+                                            let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                            if (cancelling) {
+                                                reject();
+                                                while (referencesPendingCancellations.length > 1) {
+                                                    let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                    referencesPendingCancellations.pop();
+                                                    pendingCancel.reject();
                                                 }
-                                            });
-                                            resolve(locations);
+                                                let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                referencesPendingCancellations.pop();
+                                                pendingCancel.callback();
+                                            } else {
+                                                let locations: vscode.Location[] = [];
+                                                result.referenceInfos.forEach(referenceInfo => {
+                                                    if (referenceInfo.type === refs.ReferenceType.Confirmed) {
+                                                        let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
+                                                        let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
+                                                        locations.push(new vscode.Location(uri, range));
+                                                    }
+                                                });
+                                                resolve(locations);
+                                            }
+                                        });
+                                    });
+                                    token.onCancellationRequested(e => {
+                                        if (params === referencesParams) {
+                                            if (referencesRequestPending) {
+                                                let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                                if (!cancelling) {
+                                                    referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+                                                    this.client.cancelReferences();
+                                                }
+                                            } else {
+                                                referencesParams = null;
+                                            }
                                         }
                                     });
-                                });
-                                token.onCancellationRequested(e => {
-                                    if (params === referencesParams) {
-                                        if (referencesRequestPending) {
-                                            referencesRequestPending = false;
-                                            this.client.cancelReferences();
-                                            this.client.sendRequestReferences();
-                                            reject();
-                                        } else {
-                                            referencesParams = null;
-                                        }
+                                };
+
+                                if (referencesRequestPending) {
+                                    let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                    if (!cancelling) {
+                                        this.client.references.closeRenameUI();
+                                        this.client.cancelReferences();
                                     }
-                                });
+                                    referencesPendingCancellations.push({ reject, callback });
+                                } else {
+                                    callback();
+                                }
                             });
                         }
                     }
@@ -673,47 +696,65 @@ export class DefaultClient implements Client {
                             // Because that prevents our rename UI, we ignore cancellation requests.
                             // VS Code will attempt to issue new rename requests while another is still active.
                             // When we receive another rename request, cancel the one that is in progress.
-                            if (referencesRequestPending) {
-                                this.client.references.closeRenameUI();
-                                this.client.cancelReferences();
-                                referencesPromiseReject();
-                            }
                             renamePending = true;
-                            let params: RenameParams = {
-                                newName: newName,
-                                position: Position.create(position.line, position.character),
-                                textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
-                            };
-                            referencesParams = params;
-                            referencesRequestPending = false;
                             return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
-                                this.client.notifyWhenReady(() => {
-                                    // The current request is represented by referencesParams.  If a request detects
-                                    // referencesParams does not match the object used when creating the request, abort it.
-                                    if (params !== referencesParams) {
-                                        reject();
-                                    }
-                                    referencesPromiseReject = reject;
-                                    referencesRequestPending = true;
-                                    this.client.languageClient.sendNotification(RenameNotification, params);
-
-                                    this.client.references.setResultsCallback(referencesResult => {
-                                        referencesRequestPending = false;
-                                        renamePending = false;
-                                        let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                        // If rename UI Was cancelled, we will get a null result
-                                        // If null, return an empty list to avoid Rename failure dialog
-                                        if (referencesResult !== null) {
-                                            for (let reference of referencesResult.referenceInfos) {
-                                                let uri: vscode.Uri = vscode.Uri.file(reference.file);
-                                                let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
-                                                workspaceEdit.replace(uri, range, newName);
-                                            }
+                                let callback: () => void = () => {
+                                    let params: RenameParams = {
+                                        newName: newName,
+                                        position: Position.create(position.line, position.character),
+                                        textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
+                                    };
+                                    referencesParams = params;
+                                    this.client.notifyWhenReady(() => {
+                                        // The current request is represented by referencesParams.  If a request detects
+                                        // referencesParams does not match the object used when creating the request, abort it.
+                                        if (params !== referencesParams) {
+                                            reject();
                                         }
-                                        this.client.references.closeRenameUI();
-                                        resolve(workspaceEdit);
+                                        referencesRequestPending = true;
+                                        this.client.languageClient.sendNotification(RenameNotification, params);
+                                        this.client.references.setResultsCallback(referencesResult => {
+                                            referencesRequestPending = false;
+                                            let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                            if (cancelling) {
+                                                reject();
+                                                while (referencesPendingCancellations.length > 1) {
+                                                    let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                    referencesPendingCancellations.pop();
+                                                    pendingCancel.reject();
+                                                }
+                                                let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                referencesPendingCancellations.pop();
+                                                pendingCancel.callback();
+                                            } else {
+                                                renamePending = false;
+                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                                // If rename UI Was cancelled, we will get a null result
+                                                // If null, return an empty list to avoid Rename failure dialog
+                                                if (referencesResult !== null) {
+                                                    for (let reference of referencesResult.referenceInfos) {
+                                                        let uri: vscode.Uri = vscode.Uri.file(reference.file);
+                                                        let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
+                                                        workspaceEdit.replace(uri, range, newName);
+                                                    }
+                                                }
+                                                this.client.references.closeRenameUI();
+                                                resolve(workspaceEdit);
+                                            }
+                                        });
                                     });
-                                });
+                                };
+
+                                if (referencesRequestPending) {
+                                    let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                    if (!cancelling) {
+                                        this.client.references.closeRenameUI();
+                                        this.client.cancelReferences();
+                                    }
+                                    referencesPendingCancellations.push({ reject, callback });
+                                } else {
+                                    callback();
+                                }
                             });
                         }
                     }
@@ -931,10 +972,12 @@ export class DefaultClient implements Client {
                     renamePending = false;
                     referencesParams = null;
                     if (referencesRequestPending) {
-                        referencesRequestPending = false;
-                        this.references.closeRenameUI();
-                        this.cancelReferences();
-                        referencesPromiseReject();
+                        let cancelling: boolean = referencesPendingCancellations.length > 0;
+                        if (!cancelling) {
+                            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+                            this.references.closeRenameUI();
+                            this.cancelReferences();
+                        }
                     }
                 }
 
