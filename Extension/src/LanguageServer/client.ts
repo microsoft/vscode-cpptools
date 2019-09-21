@@ -662,6 +662,7 @@ export class DefaultClient implements Client {
                                                 if (!cancelling) {
                                                     referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
                                                     this.client.cancelReferences();
+                                                    this.client.sendRequestReferences();
                                                 }
                                             } else {
                                                 referencesParams = null;
@@ -675,6 +676,7 @@ export class DefaultClient implements Client {
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
                                         this.client.cancelReferences();
+                                        this.client.sendRequestReferences();
                                         this.client.references.closeRenameUI();
                                     }
                                 } else {
@@ -750,6 +752,7 @@ export class DefaultClient implements Client {
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
                                         this.client.cancelReferences();
+                                        this.client.sendRequestReferences();
                                         this.client.references.closeRenameUI();
                                     }
                                 } else {
@@ -976,6 +979,7 @@ export class DefaultClient implements Client {
                         if (!cancelling) {
                             referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
                             this.cancelReferences();
+                            this.sendRequestReferences();
                             this.references.closeRenameUI();
                         }
                     }
