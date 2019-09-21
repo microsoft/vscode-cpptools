@@ -97,7 +97,7 @@ export function convertReferenceTypeToString(referenceType: ReferenceType, upper
         }
     } else {
         switch (referenceType) {
-            case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed references");
+            case ReferenceType.Confirmed: return localize("confirmed.reference", "Confirmed reference");
             case ReferenceType.ConfirmationInProgress: return localize("confirmation.in.progress", "Confirmation in progress");
             case ReferenceType.Comment: return localize("comment.reference", "Comment reference");
             case ReferenceType.String: return localize("string.reference", "String reference");
@@ -109,12 +109,14 @@ export function convertReferenceTypeToString(referenceType: ReferenceType, upper
     return "";
 }
 
-function getReferenceCanceledString(): string {
-    return localize("confirmation.canceled", "Confirmation canceled");
+function getReferenceCanceledString(upperCase?: boolean): string {
+    return upperCase ?
+        localize("confirmation.canceled", "CONFIRMATION CANCELED") :
+        localize("confirmation.canceled", "Confirmation canceled");
 }
 
-export function getReferenceTagString(referenceType: ReferenceType, referenceCanceled: boolean): string {
-    return referenceCanceled ? getReferenceCanceledString() : convertReferenceTypeToString(referenceType);
+export function getReferenceTagString(referenceType: ReferenceType, referenceCanceled: boolean, upperCase?: boolean): string {
+    return referenceCanceled ? getReferenceCanceledString(upperCase) : convertReferenceTypeToString(referenceType, upperCase);
 }
 
 export class ReferencesManager {
@@ -169,6 +171,10 @@ export class ReferencesManager {
         this.disposables = [];
     }
 
+    public toggleGroupView(): void {
+        this.findAllRefsView.toggleGroupView();
+    }
+
     public UpdateProgressUICounter(mode: ReferencesCommandMode): void {
         if (mode !== ReferencesCommandMode.None) {
             ++this.referencesCurrentProgressUICounter;
@@ -183,8 +189,8 @@ export class ReferencesManager {
         this.prevVisibleRangesLength = visibleRangesLength;
     }
 
-    private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean): void {
-        const helpMessage: string = ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
+    private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean, mode: ReferencesCommandMode): void {
+        const helpMessage: string = (mode !== ReferencesCommandMode.Find) ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
         switch (this.referencesCurrentProgress.referencesProgress) {
             case ReferencesProgress.Started:
             case ReferencesProgress.StartedRename:
@@ -282,7 +288,7 @@ export class ReferencesManager {
             this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
             // tslint:disable-next-line: promise-must-complete
                 new Promise((resolve) => {
-                    this.reportProgress(progress, true);
+                    this.reportProgress(progress, true, mode);
                     let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
                         if (token.isCancellationRequested && !this.referencesCanceled) {
                             this.client.cancelReferences();
@@ -300,7 +306,7 @@ export class ReferencesManager {
                             }
                             resolve();
                         } else {
-                            this.reportProgress(progress, false);
+                            this.reportProgress(progress, false, mode);
                         }
                     }, this.referencesProgressUpdateInterval);
                 });
@@ -354,8 +360,14 @@ export class ReferencesManager {
 
         if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
             if (!this.referencesCanceled) {
-                this.renameView.show(true);
-                this.renameView.setData(referencesResult, this.resultsCallback);
+                // If there are only Confirmed results, complete the rename immediately.
+                let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
+                if (!foundUnconfirmed) {
+                    this.resultsCallback(referencesResult);
+                } else {
+                    this.renameView.show(true);
+                    this.renameView.setData(referencesResult, this.resultsCallback);
+                }
             }
         } else {
             // Put results in data model
