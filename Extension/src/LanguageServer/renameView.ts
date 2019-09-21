@@ -11,6 +11,8 @@ import { RenameModel } from './renameModel';
 export class RenameView {
     private renamePendingDataProvider: RenameDataProvider;
     private renameCandidatesDataProvider: RenameDataProvider;
+    private model: RenameModel;
+    private visible: boolean = false;
 
     constructor() {
         this.renamePendingDataProvider = new RenameDataProvider(true);
@@ -27,16 +29,20 @@ export class RenameView {
     show(showView: boolean): void {
         vscode.commands.executeCommand(`setContext`, 'cppRename:hasResults', showView);
         if (showView) {
+            this.visible = true;
             vscode.commands.executeCommand(`CppRenamePendingView.focus`);
-        } else {
+        } else if (this.visible) {
+            this.visible = false;
+            this.model.cancel();
+            this.model = null;
             this.clearData();
         }
     }
 
     setData(results: ReferencesResult, resultsCallback: (results: ReferencesResult) => void): void {
-        let renameModel: RenameModel = new RenameModel(results, this.renamePendingDataProvider, this.renameCandidatesDataProvider, resultsCallback);
-        this.renamePendingDataProvider.setModel(renameModel);
-        this.renameCandidatesDataProvider.setModel(renameModel);
+        this.model = new RenameModel(results, this.renamePendingDataProvider, this.renameCandidatesDataProvider, resultsCallback);
+        this.renamePendingDataProvider.setModel(this.model);
+        this.renameCandidatesDataProvider.setModel(this.model);
     }
 
     clearData(): void {

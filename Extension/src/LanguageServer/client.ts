@@ -672,11 +672,11 @@ export class DefaultClient implements Client {
 
                                 if (referencesRequestPending) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                    if (!cancelling) {
-                                        this.client.references.closeRenameUI();
-                                        this.client.cancelReferences();
-                                    }
                                     referencesPendingCancellations.push({ reject, callback });
+                                    if (!cancelling) {
+                                        this.client.cancelReferences();
+                                        this.client.references.closeRenameUI();
+                                    }
                                 } else {
                                     callback();
                                 }
@@ -716,9 +716,9 @@ export class DefaultClient implements Client {
                                         this.client.languageClient.sendNotification(RenameNotification, params);
                                         this.client.references.setResultsCallback(referencesResult => {
                                             referencesRequestPending = false;
+                                            let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                                             let cancelling: boolean = referencesPendingCancellations.length > 0;
                                             if (cancelling) {
-                                                reject();
                                                 while (referencesPendingCancellations.length > 1) {
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
                                                     referencesPendingCancellations.pop();
@@ -729,7 +729,6 @@ export class DefaultClient implements Client {
                                                 pendingCancel.callback();
                                             } else {
                                                 renamePending = false;
-                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                                                 // If rename UI Was cancelled, we will get a null result
                                                 // If null, return an empty list to avoid Rename failure dialog
                                                 if (referencesResult !== null) {
@@ -740,19 +739,19 @@ export class DefaultClient implements Client {
                                                     }
                                                 }
                                                 this.client.references.closeRenameUI();
-                                                resolve(workspaceEdit);
                                             }
+                                            resolve(workspaceEdit);
                                         });
                                     });
                                 };
 
                                 if (referencesRequestPending) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                    if (!cancelling) {
-                                        this.client.references.closeRenameUI();
-                                        this.client.cancelReferences();
-                                    }
                                     referencesPendingCancellations.push({ reject, callback });
+                                    if (!cancelling) {
+                                        this.client.cancelReferences();
+                                        this.client.references.closeRenameUI();
+                                    }
                                 } else {
                                     callback();
                                 }
@@ -976,8 +975,8 @@ export class DefaultClient implements Client {
                         let cancelling: boolean = referencesPendingCancellations.length > 0;
                         if (!cancelling) {
                             referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
-                            this.references.closeRenameUI();
                             this.cancelReferences();
+                            this.references.closeRenameUI();
                         }
                     }
                 }
