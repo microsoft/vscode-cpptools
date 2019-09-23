@@ -377,8 +377,7 @@ export class ReferencesManager {
 
             // Display data based on command mode: peek references OR find all references
             if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
-                // Show confirmed references if: user previews results OR peek references is canceled
-                let showConfirmedReferences: boolean = !this.referencesCanceled;
+                let showConfirmedReferences: boolean = this.referencesCanceled;
                 let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
                 if (peekReferencesResults) {
                     this.referencesChannel.appendLine(peekReferencesResults);
