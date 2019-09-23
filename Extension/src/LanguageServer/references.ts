@@ -397,7 +397,7 @@ export class ReferencesManager {
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            this.resultsCallback(referencesResult)
+            this.resultsCallback(referencesResult);
         }
     }
 
