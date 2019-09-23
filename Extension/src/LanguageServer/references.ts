@@ -153,6 +153,7 @@ export class ReferencesManager {
     private resultsCallback: (results: ReferencesResult) => void;
     private currentUpdateProgressTimer: NodeJS.Timeout;
     private currentUpdateProgressResolve: () => void;
+    private lastResult: ReferencesResult;
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -340,14 +341,19 @@ export class ReferencesManager {
                 break;
             case ReferencesProgress.Finished:
                 this.referencesCurrentProgress = notificationBody;
-                this.client.setReferencesCommandMode(ReferencesCommandMode.None);
                 clearInterval(this.referencesDelayProgress);
                 if (this.currentUpdateProgressTimer) {
                     clearInterval(this.currentUpdateProgressTimer);
                     this.currentUpdateProgressResolve();
                     this.currentUpdateProgressResolve = null;
                 }
-                this.resultsCallback = null;
+                if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
+                    let callback: (result: ReferencesResult) => void = this.resultsCallback;
+                    this.resultsCallback = null;
+                    callback(this.lastResult);
+                    this.lastResult = null;
+                }
+                this.client.setReferencesCommandMode(ReferencesCommandMode.None);
                 break;
             default:
                 this.referencesCurrentProgress = notificationBody;
@@ -397,7 +403,7 @@ export class ReferencesManager {
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            this.resultsCallback(referencesResult);
+            this.lastResult = referencesResult;
         }
     }
 
