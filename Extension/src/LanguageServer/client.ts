@@ -628,19 +628,21 @@ export class DefaultClient implements Client {
                                         referencesRequestPending = true;
                                         this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
                                         // Register a single-fire handler for the reply.
-                                        this.client.references.setResultsCallback(result => {
+                                        this.client.references.setResultsCallback((final, result) => {
                                             referencesRequestPending = false;
                                             let cancelling: boolean = referencesPendingCancellations.length > 0;
                                             if (cancelling) {
-                                                reject();
-                                                while (referencesPendingCancellations.length > 1) {
+                                                if (final) {
+                                                    reject();
+                                                    while (referencesPendingCancellations.length > 1) {
+                                                        let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                        referencesPendingCancellations.pop();
+                                                        pendingCancel.reject();
+                                                    }
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
                                                     referencesPendingCancellations.pop();
-                                                    pendingCancel.reject();
+                                                    pendingCancel.callback();
                                                 }
-                                                let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
-                                                referencesPendingCancellations.pop();
-                                                pendingCancel.callback();
                                             } else {
                                                 let locations: vscode.Location[] = [];
                                                 result.referenceInfos.forEach(referenceInfo => {
@@ -706,7 +708,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         this.client.languageClient.sendNotification(RenameNotification, params);
-                                        this.client.references.setResultsCallback(referencesResult => {
+                                        this.client.references.setResultsCallback((final, referencesResult) => {
                                             referencesRequestPending = false;
                                             let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                                             let cancelling: boolean = referencesPendingCancellations.length > 0;
@@ -2112,9 +2114,12 @@ export class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
-            if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
-                this.sendRequestReferences();
+            let cancelling: boolean = referencesPendingCancellations.length > 0;
+            if (!cancelling) {
+                this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
+                if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
+                    this.sendRequestReferences();
+                }
             }
         });
     }
