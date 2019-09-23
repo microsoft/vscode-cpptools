@@ -151,6 +151,8 @@ export class ReferencesManager {
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
     private resultsCallback: (results: ReferencesResult) => void;
+    private currentUpdateProgressTimer: NodeJS.Timeout;
+    private currentUpdateProgressResolve: () => void;
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -279,23 +281,28 @@ export class ReferencesManager {
         this.referencesPrevProgressIncrement = 0;
         this.referencesPrevProgressMessage = "";
         this.referencesCurrentProgressUICounter = 0;
+        this.currentUpdateProgressTimer = null;
+        this.currentUpdateProgressResolve = null;
         let referencePreviousProgressUICounter: number = 0;
 
         this.clearViews();
 
         this.referencesDelayProgress = setInterval(() => {
+
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
             this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
             // tslint:disable-next-line: promise-must-complete
                 new Promise((resolve) => {
+                    this.currentUpdateProgressResolve = resolve;
                     this.reportProgress(progress, true, mode);
-                    let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
+                    this.currentUpdateProgressTimer = setInterval(() => {
                         if (token.isCancellationRequested && !this.referencesCanceled) {
                             this.client.cancelReferences();
                             this.referencesCanceled = true;
                         }
                         if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
-                            clearInterval(currentUpdateProgressTimer);
+                            clearInterval(this.currentUpdateProgressTimer);
+                            this.currentUpdateProgressTimer = null;
                             if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
                                 referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
                                 this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
@@ -335,6 +342,12 @@ export class ReferencesManager {
                 this.referencesCurrentProgress = notificationBody;
                 this.client.setReferencesCommandMode(ReferencesCommandMode.None);
                 clearInterval(this.referencesDelayProgress);
+                if (this.currentUpdateProgressTimer) {
+                    clearInterval(this.currentUpdateProgressTimer);
+                    this.currentUpdateProgressResolve();
+                    this.currentUpdateProgressResolve = null;
+                }
+                this.resultsCallback = null;
                 break;
             default:
                 this.referencesCurrentProgress = notificationBody;
@@ -360,13 +373,10 @@ export class ReferencesManager {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
-                    let callback: (results: ReferencesResult) => void = this.resultsCallback;
-                    this.resultsCallback = null;
-                    callback(referencesResult);
+                    this.resultsCallback(referencesResult);
                 } else {
                     this.renameView.show(true);
                     this.renameView.setData(referencesResult, this.resultsCallback);
-                    this.resultsCallback = null;
                 }
             }
         } else {
@@ -387,9 +397,7 @@ export class ReferencesManager {
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            let callback: (results: ReferencesResult) => void = this.resultsCallback;
-            this.resultsCallback = null;
-            callback(referencesResult);
+            this.resultsCallback(referencesResult)
         }
     }
 
