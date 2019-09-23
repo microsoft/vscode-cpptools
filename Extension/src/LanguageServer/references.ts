@@ -292,9 +292,6 @@ export class ReferencesManager {
                     let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
                         if (token.isCancellationRequested && !this.referencesCanceled) {
                             this.client.cancelReferences();
-                            if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
-                                this.client.sendRequestReferences();
-                            }
                             this.referencesCanceled = true;
                         }
                         if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
@@ -363,10 +360,13 @@ export class ReferencesManager {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
-                    this.resultsCallback(referencesResult);
+                    let callback: (results: ReferencesResult) => void = this.resultsCallback;
+                    this.resultsCallback = null;
+                    callback(referencesResult);
                 } else {
                     this.renameView.show(true);
                     this.renameView.setData(referencesResult, this.resultsCallback);
+                    this.resultsCallback = null;
                 }
             }
         } else {
@@ -387,7 +387,9 @@ export class ReferencesManager {
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            this.resultsCallback(referencesResult);
+            let callback: (results: ReferencesResult) => void = this.resultsCallback;
+            this.resultsCallback = null;
+            callback(referencesResult);
         }
     }
 

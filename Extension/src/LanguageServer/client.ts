@@ -614,7 +614,6 @@ export class DefaultClient implements Client {
                         public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
                             return new Promise<vscode.Location[]>((resolve, reject) => {
                                 let callback: () => void = () => {
-                                    renamePending = false;
                                     let params: FindAllReferencesParams = {
                                         position: Position.create(position.line, position.character),
                                         textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
@@ -657,16 +656,7 @@ export class DefaultClient implements Client {
                                     });
                                     token.onCancellationRequested(e => {
                                         if (params === referencesParams) {
-                                            if (referencesRequestPending) {
-                                                let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                                if (!cancelling) {
-                                                    referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
-                                                    this.client.cancelReferences();
-                                                    this.client.sendRequestReferences();
-                                                }
-                                            } else {
-                                                referencesParams = null;
-                                            }
+                                            this.client.cancelReferences();
                                         }
                                     });
                                 };
@@ -675,8 +665,8 @@ export class DefaultClient implements Client {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
-                                        this.client.cancelReferences();
-                                        this.client.sendRequestReferences();
+                                        renamePending = false;
+                                        this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
                                 } else {
@@ -730,7 +720,6 @@ export class DefaultClient implements Client {
                                                 referencesPendingCancellations.pop();
                                                 pendingCancel.callback();
                                             } else {
-                                                renamePending = false;
                                                 // If rename UI Was cancelled, we will get a null result
                                                 // If null, return an empty list to avoid Rename failure dialog
                                                 if (referencesResult !== null) {
@@ -751,8 +740,8 @@ export class DefaultClient implements Client {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
-                                        this.client.cancelReferences();
-                                        this.client.sendRequestReferences();
+                                        renamePending = false;
+                                        this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
                                 } else {
@@ -972,17 +961,7 @@ export class DefaultClient implements Client {
 
                 // If any file has changed, we need to abort the current rename operation
                 if (renamePending) {
-                    renamePending = false;
-                    referencesParams = null;
-                    if (referencesRequestPending) {
-                        let cancelling: boolean = referencesPendingCancellations.length > 0;
-                        if (!cancelling) {
-                            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
-                            this.cancelReferences();
-                            this.sendRequestReferences();
-                            this.references.closeRenameUI();
-                        }
-                    }
+                    this.cancelReferences();
                 }
 
                 let oldVersion: number = this.openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
@@ -2166,7 +2145,16 @@ export class DefaultClient implements Client {
     }
 
     public cancelReferences(): void {
-        this.languageClient.sendNotification(CancelReferencesNotification);
+        referencesParams = null;
+        renamePending = false;
+        if (referencesRequestPending) {
+            let cancelling: boolean = referencesPendingCancellations.length > 0;
+            if (!cancelling) {
+                referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+                this.languageClient.sendNotification(CancelReferencesNotification);
+                this.references.closeRenameUI();
+            }
+        }
     }
 
     private handleReferencesProgress(notificationBody: refs.ReportReferencesProgressNotification): void {

@@ -283,7 +283,11 @@ export class RenameModel {
     }
 
     cancel(): void {
-        this.renameResultsCallback(null);
+        if (this.renameResultsCallback) {
+            let callback: (results: ReferencesResult) => void = this.renameResultsCallback;
+            this.renameResultsCallback = null;
+            callback(null);
+        }
     }
 
     complete(): void {
@@ -303,7 +307,9 @@ export class RenameModel {
             text: this.originalText,
             referenceInfos: referenceInfos
         };
-        this.renameResultsCallback(results);
+        let callback: (results: ReferencesResult) => void = this.renameResultsCallback;
+        this.renameResultsCallback = null;
+        callback(results);
     }
 }
 
