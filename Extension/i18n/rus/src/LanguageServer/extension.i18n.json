@@ -12,7 +12,7 @@
 	"ask.me.later.button": "Спросить позже",
 	"dont.show.again.button": "Больше не показывать",
 	"extension.updated": "Расширение C/C++ обновлено до версии {0}. Перезагрузите окно, чтобы изменения вступили в силу.",
-	"client.not.found": "клиент не найден",
+	"client.not.found": "Клиент не найден.",
 	"configuration.select.first": "Сначала откройте папку, чтобы выбрать конфигурацию",
 	"configuration.provider.select.first": "Сначала откройте папку, чтобы выбрать поставщик конфигурации",
 	"edit.configurations.open.first": "Сначала откройте папку для изменения конфигураций",

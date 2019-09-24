@@ -89,7 +89,7 @@
 	"terminating_child_process": "alt işlem sonlandırılıyor: {0}",
 	"still_alive_killing": "hala canlı, sonlandırılıyor...",
 	"giving_up": "vazgeçiliyor",
-	"not_exited_yet": "henüz çıkılmadı. {0} saniye boyunca uykuya geçirilecek ve yeniden denenecek",
+	"not_exited_yet": "not exited yet. Will sleep for {0} milliseconds and try again",
 	"failed_to_spawn_process": "İşlem üretilemedi. Hata: {0} ({1})",
 	"offering_completion": "Tamamlama teklif ediliyor",
 	"compiler_from_compiler_path": "\"compilerPath\" özelliğindeki derleyiciden ('{0}') varsayılan değerler alınmaya çalışılıyor",

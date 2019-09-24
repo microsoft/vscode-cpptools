@@ -89,7 +89,7 @@
 	"terminating_child_process": "ukončuje se podřízený proces: {0}",
 	"still_alive_killing": "stále běží, ukončuje se...",
 	"giving_up": "pokusy se ukončují",
-	"not_exited_yet": "ještě neukončeno. Počká se {0} s a zkusí se to znovu.",
+	"not_exited_yet": "not exited yet. Will sleep for {0} milliseconds and try again",
 	"failed_to_spawn_process": "Nepovedlo se vygenerovat proces. Chyba: {0} ({1})",
 	"offering_completion": "Dokončení nabídky",
 	"compiler_from_compiler_path": "Probíhá pokus získat výchozí hodnoty od kompilátoru ve vlastnosti compilerPath: {0}",

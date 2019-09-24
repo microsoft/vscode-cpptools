@@ -89,7 +89,7 @@
 	"terminating_child_process": "子プロセスを終了しています: {0}",
 	"still_alive_killing": "まだ稼働中です。中止しています...",
 	"giving_up": "中断しています",
-	"not_exited_yet": "まだ終了していません。{0} 秒間スリープ状態になり、再試行します",
+	"not_exited_yet": "not exited yet. Will sleep for {0} milliseconds and try again",
 	"failed_to_spawn_process": "プロセスを生成できませんでした。エラー: {0} ({1})",
 	"offering_completion": "オファリングの完了",
 	"compiler_from_compiler_path": "次の \"compilerPath\" プロパティのコンパイラから既定値を取得しようとしています: '{0}'",
