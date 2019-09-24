@@ -727,11 +727,11 @@
         }
       },
       {
-        "command": "C_Cpp.referencesViewGroupByFile",
-        "title": "%c_cpp.command.referencesViewGroupByFile.title%",
+        "command": "C_Cpp.referencesViewUngroupByType",
+        "title": "%c_cpp.command.referencesViewUngroupByType.title%",
         "icon": {
-          "light": "assets/ref-group-by-file-light.svg",
-          "dark": "assets/ref-group-by-file-dark.svg"
+          "light": "assets/ref-ungroup-by-type-light.svg",
+          "dark": "assets/ref-ungroup-by-type-dark.svg"
         }
       }
     ],
@@ -1521,7 +1521,7 @@
           "group": "navigation"
         },
         {
-          "command": "C_Cpp.referencesViewGroupByFile",
+          "command": "C_Cpp.referencesViewUngroupByType",
           "when": "view == CppReferencesView && !refView.isGroupedByFile",
           "group": "navigation"
         },
