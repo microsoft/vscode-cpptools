@@ -624,6 +624,7 @@ export class DefaultClient implements Client {
                                         // referencesParams does not match the object used when creating the request, abort it.
                                         if (params !== referencesParams) {
                                             reject();
+                                            return;
                                         }
                                         referencesRequestPending = true;
                                         this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
@@ -705,6 +706,7 @@ export class DefaultClient implements Client {
                                         // referencesParams does not match the object used when creating the request, abort it.
                                         if (params !== referencesParams) {
                                             reject();
+                                            return;
                                         }
                                         referencesRequestPending = true;
                                         this.client.languageClient.sendNotification(RenameNotification, params);
