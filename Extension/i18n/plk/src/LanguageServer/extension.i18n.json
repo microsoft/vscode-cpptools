@@ -12,7 +12,7 @@
 	"ask.me.later.button": "Zapytaj mnie później",
 	"dont.show.again.button": "Nie pokazuj ponownie",
 	"extension.updated": "Rozszerzenie języka C/C++ zostało zaktualizowane do wersji {0}. Załaduj ponownie okno, aby zmiany zostały zastosowane.",
-	"client.not.found": "nie można odnaleźć klienta",
+	"client.not.found": "nie znaleziono klienta",
 	"configuration.select.first": "Otwórz najpierw folder, aby wybrać konfigurację",
 	"configuration.provider.select.first": "Otwórz najpierw folder, aby wybrać dostawcę konfiguracji",
 	"edit.configurations.open.first": "Otwórz najpierw folder, aby edytować konfiguracje",

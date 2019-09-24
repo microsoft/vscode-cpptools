@@ -12,7 +12,7 @@
 	"ask.me.later.button": "Pergunte-me Mais Tarde",
 	"dont.show.again.button": "Não Mostrar Novamente",
 	"extension.updated": "A Extensão C/C++ foi atualizada para a versão {0}. Recarregue a janela para que as alterações entrem em vigor.",
-	"client.not.found": "cliente não encontrado",
+	"client.not.found": "o cliente não foi encontrado",
 	"configuration.select.first": "Abrir uma pasta primeiro para selecionar uma configuração",
 	"configuration.provider.select.first": "Abrir uma pasta primeiro para selecionar um provedor de configuração",
 	"edit.configurations.open.first": "Abrir uma pasta primeiro para editar as configurações",

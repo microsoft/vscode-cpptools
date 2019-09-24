@@ -89,7 +89,7 @@
 	"terminating_child_process": "Terminando el proceso secundario {0}.",
 	"still_alive_killing": "Aún activo; se está terminando...",
 	"giving_up": "Abandonando",
-	"not_exited_yet": "No se ha cerrado aún. Se suspenderá durante {0} segundos y se volverá a intentar.",
+	"not_exited_yet": "not exited yet. Will sleep for {0} milliseconds and try again",
 	"failed_to_spawn_process": "No se pudo generar el proceso. Error: {0} ({1})",
 	"offering_completion": "Oferta de finalización",
 	"compiler_from_compiler_path": "Intentando obtener los valores predeterminados del compilador en la propiedad \"compilerPath\": \"{0}\"",
