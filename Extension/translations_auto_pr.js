@@ -92,6 +92,9 @@ if (!hasAnyChanges()) {
 
 console.log("Changes detected");
 
+console.log(`Ensure master ref is up to date locally (git fetch)`);
+cp.execSync('git fetch');
+
 // Remove old localization branch, if any
 if (hasBranch("localization")) {
 	console.log(`Remove old localization branch, if any (git branch -D localization)`);
@@ -143,14 +146,14 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     } else {
         console.log("There is already a pull request.");
     }
+
+    console.log(`Restoring default git permissions`);
+    cp.execSync('git remote remove origin');
+    cp.execSync(`git remote add origin https://github.com/${repoOwner}/${repoName}.git`);
+    
+    console.log(`Switching back to master (git checkout master)`);
+    cp.execSync('git checkout master');
+
+    console.log(`Remove localization branch (git branch -D localization)`);
+    cp.execSync('git branch -D localization');
 });
-
-console.log(`Restoring default git permissions`);
-cp.execSync('git remote remove origin');
-cp.execSync(`git remote add origin https://github.com/${repoOwner}/${repoName}.git`);
-
-console.log(`Switching back to master (git checkout master)`);
-cp.execSync('git checkout master');
-
-console.log(`Remove localization branch (git branch -D localization)`);
-cp.execSync('git branch -D localization');
