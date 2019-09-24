@@ -109,7 +109,7 @@ export function convertReferenceTypeToString(referenceType: ReferenceType, upper
 
 function getReferenceCanceledString(upperCase?: boolean): string {
     return upperCase ?
-        localize("confirmation.canceled", "CONFIRMATION CANCELED") :
+        localize("confirmation.canceled.upper", "CONFIRMATION CANCELED") :
         localize("confirmation.canceled", "Confirmation canceled");
 }
 
