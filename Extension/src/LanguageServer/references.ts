@@ -44,8 +44,6 @@ enum ReferencesProgress {
     StartedRename,
     ProcessingSource,
     ProcessingTargets,
-    CanceledFinalResultsAvailable,
-    FinalResultsAvailable,
     Finished
 }
 
@@ -111,7 +109,7 @@ export function convertReferenceTypeToString(referenceType: ReferenceType, upper
 
 function getReferenceCanceledString(upperCase?: boolean): string {
     return upperCase ?
-        localize("confirmation.canceled", "CONFIRMATION CANCELED") :
+        localize("confirmation.canceled.upper", "CONFIRMATION CANCELED") :
         localize("confirmation.canceled", "Confirmation canceled");
 }
 
@@ -150,7 +148,10 @@ export class ReferencesManager {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
-    private resultsCallback: (results: ReferencesResult) => void;
+    private resultsCallback: (final: boolean, results: ReferencesResult) => void;
+    private currentUpdateProgressTimer: NodeJS.Timeout;
+    private currentUpdateProgressResolve: () => void;
+    private lastResult: ReferencesResult;
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -258,10 +259,6 @@ export class ReferencesManager {
                     this.referencesPrevProgressMessage = currentMessage;
                 }
                 break;
-            case ReferencesProgress.CanceledFinalResultsAvailable:
-            case ReferencesProgress.FinalResultsAvailable:
-                progress.report({ message: localize("finished", "Finished."), increment: 100 });
-                break;
         }
     }
 
@@ -279,26 +276,28 @@ export class ReferencesManager {
         this.referencesPrevProgressIncrement = 0;
         this.referencesPrevProgressMessage = "";
         this.referencesCurrentProgressUICounter = 0;
+        this.currentUpdateProgressTimer = null;
+        this.currentUpdateProgressResolve = null;
         let referencePreviousProgressUICounter: number = 0;
 
         this.clearViews();
 
         this.referencesDelayProgress = setInterval(() => {
+
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
             this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
             // tslint:disable-next-line: promise-must-complete
                 new Promise((resolve) => {
+                    this.currentUpdateProgressResolve = resolve;
                     this.reportProgress(progress, true, mode);
-                    let currentUpdateProgressTimer: NodeJS.Timeout = setInterval(() => {
+                    this.currentUpdateProgressTimer = setInterval(() => {
                         if (token.isCancellationRequested && !this.referencesCanceled) {
                             this.client.cancelReferences();
-                            if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
-                                this.client.sendRequestReferences();
-                            }
                             this.referencesCanceled = true;
                         }
                         if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
-                            clearInterval(currentUpdateProgressTimer);
+                            clearInterval(this.currentUpdateProgressTimer);
+                            this.currentUpdateProgressTimer = null;
                             if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
                                 referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
                                 this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
@@ -326,18 +325,21 @@ export class ReferencesManager {
                 }
                 this.handleProgressStarted(notificationBody.referencesProgress);
                 break;
-            case ReferencesProgress.CanceledFinalResultsAvailable:
-            case ReferencesProgress.FinalResultsAvailable:
-                if (notificationBody.referencesProgress === ReferencesProgress.CanceledFinalResultsAvailable) {
-                    this.referencesCanceled = true;
-                }
-                this.referencesCurrentProgress = notificationBody;
-                this.client.sendRequestReferences();
-                break;
             case ReferencesProgress.Finished:
                 this.referencesCurrentProgress = notificationBody;
-                this.client.setReferencesCommandMode(ReferencesCommandMode.None);
                 clearInterval(this.referencesDelayProgress);
+                if (this.currentUpdateProgressTimer) {
+                    clearInterval(this.currentUpdateProgressTimer);
+                    this.currentUpdateProgressResolve();
+                    this.currentUpdateProgressResolve = null;
+                }
+                if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
+                    let callback: (final: boolean, result: ReferencesResult) => void = this.resultsCallback;
+                    this.resultsCallback = null;
+                    callback(true, this.lastResult);
+                    this.lastResult = null;
+                }
+                this.client.setReferencesCommandMode(ReferencesCommandMode.None);
                 break;
             default:
                 this.referencesCurrentProgress = notificationBody;
@@ -363,7 +365,7 @@ export class ReferencesManager {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
-                    this.resultsCallback(referencesResult);
+                    this.resultsCallback(true, referencesResult);
                 } else {
                     this.renameView.show(true);
                     this.renameView.setData(referencesResult, this.resultsCallback);
@@ -375,10 +377,7 @@ export class ReferencesManager {
 
             // Display data based on command mode: peek references OR find all references
             if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
-                // Show confirmed references if: user previews results OR peek references is canceled
-                let showConfirmedReferences: boolean =
-                    (!this.referencesCanceled && this.referencesCurrentProgress.referencesProgress !== ReferencesProgress.FinalResultsAvailable)
-                    || (this.referencesCanceled && this.referencesCurrentProgress.referencesProgress === ReferencesProgress.CanceledFinalResultsAvailable);
+                let showConfirmedReferences: boolean = this.referencesCanceled;
                 let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
                 if (peekReferencesResults) {
                     this.referencesChannel.appendLine(peekReferencesResults);
@@ -387,11 +386,12 @@ export class ReferencesManager {
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            this.resultsCallback(referencesResult);
+            this.lastResult = referencesResult;
+            this.resultsCallback(false, referencesResult);
         }
     }
 
-    public setResultsCallback(callback: (results: ReferencesResult) => void): void {
+    public setResultsCallback(callback: (final: boolean, results: ReferencesResult) => void): void {
         this.resultsCallback = callback;
     }
 

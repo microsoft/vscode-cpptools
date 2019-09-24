@@ -237,10 +237,10 @@ let currentRenameModel: RenameModel;
 export class RenameModel {
     private pendingGroup: RenamePendingFilesGroupItem;
     private candidatesGroup: RenameCandidateReferenceTypeGroupItem;
-    private renameResultsCallback: (results: ReferencesResult) => void;
+    private renameResultsCallback: (final: boolean, results: ReferencesResult) => void;
     private originalText: string;
 
-    constructor(resultsInput: ReferencesResult, readonly pendingProvider: RenameDataProvider, readonly candidateProvider: RenameDataProvider, resultsCallback: (results: ReferencesResult) => void) {
+    constructor(resultsInput: ReferencesResult, readonly pendingProvider: RenameDataProvider, readonly candidateProvider: RenameDataProvider, resultsCallback: (final: boolean, results: ReferencesResult) => void) {
         currentRenameModel = this;
         this.originalText = resultsInput.text;
         this.renameResultsCallback = resultsCallback;
@@ -283,7 +283,11 @@ export class RenameModel {
     }
 
     cancel(): void {
-        this.renameResultsCallback(null);
+        if (this.renameResultsCallback) {
+            let callback: (final: boolean, results: ReferencesResult) => void = this.renameResultsCallback;
+            this.renameResultsCallback = null;
+            callback(true, null);
+        }
     }
 
     complete(): void {
@@ -303,7 +307,9 @@ export class RenameModel {
             text: this.originalText,
             referenceInfos: referenceInfos
         };
-        this.renameResultsCallback(results);
+        let callback: (final: boolean, results: ReferencesResult) => void = this.renameResultsCallback;
+        this.renameResultsCallback = null;
+        callback(true, results);
     }
 }
 

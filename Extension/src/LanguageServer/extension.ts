@@ -871,7 +871,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByType', onToggleRefGroupView));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByFile', onToggleRefGroupView));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('CppRenameView.cancel', onRenameViewCancel));
     disposables.push(vscode.commands.registerCommand('CppRenameView.done', onRenameViewDone));
     disposables.push(vscode.commands.registerCommand('CppRenameView.remove', onRenameViewRemove));

@@ -34,3 +34,6 @@ CMakeLists.txt
 debugAdapters/install.lock*
 typings/**
 **/*.map
+
+# ignore i18n language files
+i18n/**
