@@ -26,7 +26,7 @@
 	"dont.show.again": "Nicht mehr anzeigen",
 	"update.your.intellisense.settings": "Aktualisieren Sie Ihre IntelliSense-Einstellungen, oder verwenden Sie vcpkg, um Bibliotheken zur Suche nach fehlenden Headern zu installieren.",
 	"configure.your.intellisense.settings": "Konfigurieren Sie Ihre IntelliSense-Einstellungen, um fehlende Header zu suchen.",
-	"a.compile.commands.file": "Eine compile_commands.json-Datei",
+	"a.compile.commands.file": "eine compile_commands.json-Datei",
 	"auto-configure.intellisense.folder": "Möchten Sie {0} zum automatischen Konfigurieren von IntelliSense für den Ordner \"{1}\" verwenden?",
 	"auto-configure.intellisense.this.folder": "Möchten Sie {0} zum automatischen Konfigurieren von IntelliSense für diesen Ordner verwenden?",
 	"yes.button": "Ja",

@@ -14,6 +14,6 @@
 	"resolving.variables.in.sourcefilemap": "Variablen in \"{0}\" werden aufgelöst...",
 	"open.envfile": "{0} öffnen",
 	"unexpected.os": "Unerwarteter Betriebssystemtyp",
-	"path.to.pipe.program": "Vollständiger Pfad zum Pipeprogramm wie z.B. \"{0}\"",
+	"path.to.pipe.program": "Vollständiger Pfad zum Pipeprogramm wie z. B. \"{0}\"",
 	"enable.pretty.printing": "Automatische Strukturierung und Einrückung für \"{0}\" aktivieren"
 }
