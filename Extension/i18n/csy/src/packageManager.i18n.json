@@ -7,7 +7,7 @@
 	"package.manager.missing": "Manifest balíčku neexistuje.",
 	"downloading.package": "Stahuje se balíček {0}. ",
 	"downloading.progress.description": "Stahuje se {0}: {1}",
-	"error.from": "Chyba z {0}",
+	"error.from": "Chyba ze souboru {0}",
 	"failed.download.url": "Nepovedlo se stáhnout {0}.",
 	"failed.retrying": "Nepovedlo se. Pokus se opakuje...",
 	"done": "Hotovo!",
