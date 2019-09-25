@@ -1,1 +1,3 @@
-<svg width="39" height="5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden"><defs><clipPath id="clip0"><path d="M237 63 276 63 276 68 237 68Z" fill-rule="evenodd" clip-rule="evenodd"/></clipPath></defs><g clip-path="url(#clip0)" transform="translate(-237 -63)"><path d="M238 65 274 64.9999" stroke="#000000" stroke-width="4" stroke-miterlimit="8" fill="none" fill-rule="evenodd"/></g></svg>
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="5" y="8" width="6" height="1" fill="#424242"/>
+</svg>
