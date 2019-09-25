@@ -46,7 +46,7 @@ export class Model {
             fileItem.ReferenceItemsPending = noReferenceLocation;
             fileItemByRef.ReferenceItemsPending = noReferenceLocation;
             if (!noReferenceLocation) {
-                const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + 1);
+                const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + r.text.length);
                 const location: vscode.Location = new vscode.Location(fileItem.uri, range);
                 const reference: ReferenceItem = new ReferenceItem(r.position, location, r.text, fileItem, r.type);
 
