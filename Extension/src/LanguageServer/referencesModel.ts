@@ -4,15 +4,17 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceType, ReferenceInfo } from './references';
+import { ReferenceType, ReferenceInfo, ReferencesResult } from './references';
 
 export class Model {
     readonly FileItems: FileItem[] = [];
     readonly ReferenceItems: ReferenceItem[] = [];
     readonly ReferenceTypeItems: ReferenceTypeItem[] = [];
+    private originalSymbol: string = "";
 
-    constructor(resultsInput: ReferenceInfo[]) {
-        let results: ReferenceInfo[] = resultsInput.filter(r => r.type !== ReferenceType.Confirmed);
+    constructor(resultsInput: ReferencesResult) {
+        this.originalSymbol = resultsInput.text;
+        let results: ReferenceInfo[] = resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed);
         for (let r of results) {
             // Add file if it doesn't exist
             let fileItem: FileItem;
@@ -46,7 +48,7 @@ export class Model {
             fileItem.ReferenceItemsPending = noReferenceLocation;
             fileItemByRef.ReferenceItemsPending = noReferenceLocation;
             if (!noReferenceLocation) {
-                const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + 1);
+                const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + this.originalSymbol.length);
                 const location: vscode.Location = new vscode.Location(fileItem.uri, range);
                 const reference: ReferenceItem = new ReferenceItem(r.position, location, r.text, fileItem, r.type);
 
