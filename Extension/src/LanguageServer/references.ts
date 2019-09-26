@@ -114,7 +114,7 @@ function getReferenceCanceledString(upperCase?: boolean): string {
 }
 
 export function getReferenceTagString(referenceType: ReferenceType, referenceCanceled: boolean, upperCase?: boolean): string {
-    return referenceCanceled ? getReferenceCanceledString(upperCase) : convertReferenceTypeToString(referenceType, upperCase);
+    return referenceCanceled && referenceType === ReferenceType.ConfirmationInProgress ? getReferenceCanceledString(upperCase) : convertReferenceTypeToString(referenceType, upperCase);
 }
 
 export class ReferencesManager {
