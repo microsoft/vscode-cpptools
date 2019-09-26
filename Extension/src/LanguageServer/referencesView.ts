@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceInfo, ReferenceType, getReferenceTagString } from './references';
+import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
 import { ReferenceDataProvider } from './referencesProvider';
 import { FileItem, ReferenceItem } from './referencesModel';
 
@@ -29,7 +29,7 @@ export class FindAllRefsView {
         this.referenceViewProvider.toggleGroupView();
     }
 
-    setData(results: ReferenceInfo[], isCanceled: boolean): void {
+    setData(results: ReferencesResult, isCanceled: boolean): void {
         this.referenceViewProvider.setModel(results, isCanceled);
     }
 

@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import * as util from '../common';
 import { Model, FileItem, ReferenceItem, ReferenceTypeItem } from './referencesModel';
-import { ReferenceInfo, ReferenceType, getReferenceTagString } from './references';
+import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -66,7 +66,7 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         this._onDidChangeTreeData.fire();
     }
 
-    setModel(results: ReferenceInfo[], isCanceled: boolean): void {
+    setModel(results: ReferencesResult, isCanceled: boolean): void {
         this.referencesCanceled = isCanceled;
         this.references = new Model(results);
         this._onDidChangeTreeData.fire();

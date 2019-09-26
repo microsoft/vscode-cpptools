@@ -373,7 +373,7 @@ export class ReferencesManager {
             }
         } else {
             // Put results in data model
-            this.findAllRefsView.setData(referencesResult.referenceInfos, this.referencesCanceled);
+            this.findAllRefsView.setData(referencesResult, this.referencesCanceled);
 
             // Display data based on command mode: peek references OR find all references
             if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
