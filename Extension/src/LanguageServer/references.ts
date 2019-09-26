@@ -370,9 +370,11 @@ export class ReferencesManager {
                     this.renameView.show(true);
                     this.renameView.setData(referencesResult, this.resultsCallback);
                 }
+            } else {
+                // Do nothing when rename is canceled while searching for references was in progress.
+                this.resultsCallback(true, null);
             }
         } else {
-            // Put results in data model
             this.findAllRefsView.setData(referencesResult, this.referencesCanceled);
 
             // Display data based on command mode: peek references OR find all references
