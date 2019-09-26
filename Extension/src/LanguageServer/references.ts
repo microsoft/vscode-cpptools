@@ -387,7 +387,9 @@ export class ReferencesManager {
                 this.findAllRefsView.show(true);
             }
             this.lastResult = referencesResult;
-            this.resultsCallback(false, referencesResult);
+            if (!this.referencesCanceled) {
+                this.resultsCallback(false, referencesResult);
+            }
         }
     }
 
