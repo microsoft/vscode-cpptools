@@ -1632,7 +1632,7 @@
     "vscode:prepublish": "yarn run compile",
     "compile": "yarn run precompile && yarn run translations-generate && webpack --mode production --vscode-nls",
     "compile-dev": "yarn run precompile && webpack --mode development",
-    "compile-watch": "yarn run precompile && yarn run translations-generate && webpack --mode production --vscode-nls --watch --info-verbosity verbose",
+    "compile-watch": "yarn run precompile && webpack --mode production --vscode-nls --watch --info-verbosity verbose",
     "compile-dev-watch": "yarn run precompile && webpack --mode development --watch --info-verbosity verbose",
     "precompile": "node ./tools/prepublish.js && gulp generate-native-strings",
     "generateOptionsSchema": "node ./tools/prepublish.js && node ./out/tools/generateOptionsSchema.js",
