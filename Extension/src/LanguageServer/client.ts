@@ -712,7 +712,6 @@ export class DefaultClient implements Client {
                                         this.client.languageClient.sendNotification(RenameNotification, params);
                                         this.client.references.setResultsCallback((final, referencesResult) => {
                                             referencesRequestPending = false;
-                                            renamePending = false;
                                             let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                                             let cancelling: boolean = referencesPendingCancellations.length > 0;
                                             if (cancelling) {
@@ -2155,11 +2154,13 @@ export class DefaultClient implements Client {
     public cancelReferences(): void {
         referencesParams = null;
         renamePending = false;
-        let cancelling: boolean = referencesPendingCancellations.length > 0;
-        if (!cancelling) {
-            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
-            this.languageClient.sendNotification(CancelReferencesNotification);
-            this.references.closeRenameUI();
+        if (referencesRequestPending) {
+            let cancelling: boolean = referencesPendingCancellations.length > 0;
+            if (!cancelling) {
+                referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+                this.languageClient.sendNotification(CancelReferencesNotification);
+                this.references.closeRenameUI();
+            }
         }
     }
 
