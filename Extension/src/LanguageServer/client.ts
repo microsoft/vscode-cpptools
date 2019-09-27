@@ -629,9 +629,9 @@ export class DefaultClient implements Client {
                                         referencesRequestPending = true;
                                         this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
                                         // Register a single-fire handler for the reply.
-                                        this.client.references.setResultsCallback((final, result) => {
+                                        this.client.references.setResultsCallback((result) => {
                                             referencesRequestPending = false;
-                                            if (final && referencesPendingCancellations.length > 0) {
+                                            if (referencesPendingCancellations.length > 0) {
                                                 while (referencesPendingCancellations.length > 1) {
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
                                                     referencesPendingCancellations.pop();
@@ -705,7 +705,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         this.client.languageClient.sendNotification(RenameNotification, params);
-                                        this.client.references.setResultsCallback((final, referencesResult) => {
+                                        this.client.references.setResultsCallback((referencesResult) => {
                                             referencesRequestPending = false;
                                             let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                                             let cancelling: boolean = referencesPendingCancellations.length > 0;

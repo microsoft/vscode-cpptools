@@ -31,8 +31,9 @@ export interface ReferenceInfo {
 }
 
 export interface ReferencesResult {
-    text: string;
     referenceInfos: ReferenceInfo[];
+    text: string;
+    isFinished: boolean;
 }
 
 export interface ReferencesResultMessage {
@@ -43,8 +44,7 @@ enum ReferencesProgress {
     Started,
     StartedRename,
     ProcessingSource,
-    ProcessingTargets,
-    Finished
+    ProcessingTargets
 }
 
 enum TargetReferencesProgress {
@@ -148,10 +148,9 @@ export class ReferencesManager {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
-    private resultsCallback: (final: boolean, results: ReferencesResult) => void;
+    private resultsCallback: (results: ReferencesResult) => void;
     private currentUpdateProgressTimer: NodeJS.Timeout;
     private currentUpdateProgressResolve: () => void;
-    private lastResult: ReferencesResult;
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -295,7 +294,7 @@ export class ReferencesManager {
                             this.client.cancelReferences();
                             this.referencesCanceled = true;
                         }
-                        if (this.referencesCurrentProgress.referencesProgress === ReferencesProgress.Finished || this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
+                        if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
                             clearInterval(this.currentUpdateProgressTimer);
                             this.currentUpdateProgressTimer = null;
                             if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
@@ -325,22 +324,6 @@ export class ReferencesManager {
                 }
                 this.handleProgressStarted(notificationBody.referencesProgress);
                 break;
-            case ReferencesProgress.Finished:
-                this.referencesCurrentProgress = notificationBody;
-                clearInterval(this.referencesDelayProgress);
-                if (this.currentUpdateProgressTimer) {
-                    clearInterval(this.currentUpdateProgressTimer);
-                    this.currentUpdateProgressResolve();
-                    this.currentUpdateProgressResolve = null;
-                }
-                if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
-                    let callback: (final: boolean, result: ReferencesResult) => void = this.resultsCallback;
-                    this.resultsCallback = null;
-                    callback(true, this.lastResult);
-                    this.lastResult = null;
-                }
-                this.client.setReferencesCommandMode(ReferencesCommandMode.None);
-                break;
             default:
                 this.referencesCurrentProgress = notificationBody;
                 break;
@@ -365,7 +348,7 @@ export class ReferencesManager {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
-                    this.resultsCallback(true, referencesResult);
+                    this.resultsCallback(referencesResult);
                 } else {
                     this.renameView.show(true);
                     this.renameView.setData(referencesResult, this.resultsCallback);
@@ -386,14 +369,24 @@ export class ReferencesManager {
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            this.lastResult = referencesResult;
-            if (!this.referencesCanceled) {
-                this.resultsCallback(false, referencesResult);
+        }
+
+        if (referencesResult.isFinished) {
+            clearInterval(this.referencesDelayProgress);
+            if (this.currentUpdateProgressTimer) {
+                clearInterval(this.currentUpdateProgressTimer);
+                this.currentUpdateProgressResolve();
+                this.currentUpdateProgressResolve = null;
+                this.currentUpdateProgressTimer = null;
             }
+            if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
+                this.resultsCallback(referencesResult);
+            }
+            this.client.setReferencesCommandMode(ReferencesCommandMode.None);
         }
     }
 
-    public setResultsCallback(callback: (final: boolean, results: ReferencesResult) => void): void {
+    public setResultsCallback(callback: (results: ReferencesResult) => void): void {
         this.resultsCallback = callback;
     }
 
