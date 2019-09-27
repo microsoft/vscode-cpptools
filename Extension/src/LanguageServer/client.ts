@@ -286,6 +286,7 @@ let failureMessageShown: boolean = false;
 
 let referencesRequestPending: boolean = false;
 let renamePending: boolean = false;
+let renameRequestsPending: number = 0;
 let referencesParams: RenameParams | FindAllReferencesParams;
 
 interface ReferencesCancellationState {
@@ -693,6 +694,7 @@ export class DefaultClient implements Client {
                             // VS Code will attempt to issue new rename requests while another is still active.
                             // When we receive another rename request, cancel the one that is in progress.
                             renamePending = true;
+                            ++renameRequestsPending;
                             return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
                                 let callback: () => void = () => {
                                     let params: RenameParams = {
@@ -705,6 +707,7 @@ export class DefaultClient implements Client {
                                         // The current request is represented by referencesParams.  If a request detects
                                         // referencesParams does not match the object used when creating the request, abort it.
                                         if (params !== referencesParams) {
+                                            --renameRequestsPending;
                                             reject();
                                             return;
                                         }
@@ -712,6 +715,7 @@ export class DefaultClient implements Client {
                                         this.client.languageClient.sendNotification(RenameNotification, params);
                                         this.client.references.setResultsCallback((final, referencesResult) => {
                                             referencesRequestPending = false;
+                                            --renameRequestsPending;
                                             let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                                             let cancelling: boolean = referencesPendingCancellations.length > 0;
                                             if (cancelling) {
@@ -724,6 +728,9 @@ export class DefaultClient implements Client {
                                                 referencesPendingCancellations.pop();
                                                 pendingCancel.callback();
                                             } else {
+                                                if (renameRequestsPending === 0) {
+                                                    renamePending = false;
+                                                }
                                                 // If rename UI Was cancelled, we will get a null result
                                                 // If null, return an empty list to avoid Rename failure dialog
                                                 if (referencesResult !== null) {
@@ -741,10 +748,9 @@ export class DefaultClient implements Client {
                                 };
 
                                 if (referencesRequestPending) {
+                                    referencesPendingCancellations.push({ reject: () => { --renameRequestsPending; reject(); }, callback });
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                    referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
-                                        renamePending = false;
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
@@ -2154,10 +2160,10 @@ export class DefaultClient implements Client {
     public cancelReferences(): void {
         referencesParams = null;
         renamePending = false;
-        if (referencesRequestPending) {
+        if (referencesRequestPending || this.references.symbolSearchInProgress) {
+            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
             let cancelling: boolean = referencesPendingCancellations.length > 0;
             if (!cancelling) {
-                referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
                 this.languageClient.sendNotification(CancelReferencesNotification);
                 this.references.closeRenameUI();
             }

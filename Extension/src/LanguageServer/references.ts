@@ -126,6 +126,7 @@ export class ReferencesManager {
     private renameView: RenameView;
     private viewsInitialized: boolean = false;
 
+    public symbolSearchInProgress: boolean = false;
     private referencesCurrentProgress: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number;
     private referencesPrevProgressMessage: string;
@@ -323,9 +324,11 @@ export class ReferencesManager {
                 if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
                     telemetry.logLanguageServerEvent("peekReferences");
                 }
+                this.symbolSearchInProgress = true;
                 this.handleProgressStarted(notificationBody.referencesProgress);
                 break;
             case ReferencesProgress.Finished:
+                this.symbolSearchInProgress = false;
                 this.referencesCurrentProgress = notificationBody;
                 clearInterval(this.referencesDelayProgress);
                 if (this.currentUpdateProgressTimer) {
