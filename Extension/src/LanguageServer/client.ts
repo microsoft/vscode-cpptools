@@ -749,7 +749,7 @@ export class DefaultClient implements Client {
 
                                 if (referencesRequestPending) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                    referencesPendingCancellations.push({ reject, callback });
+                                    referencesPendingCancellations.push({ reject: () => { --renameRequestsPending; reject(); }, callback });
                                     if (!cancelling) {
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
