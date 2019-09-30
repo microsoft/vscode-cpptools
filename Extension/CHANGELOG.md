@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.0-insiders: September 24, 2019
+## Version 0.26.0-insiders: September 30, 2019
 ### New Features
 * Add localization support (translated text) via `Configure Display Language`. [#7](https://github.com/microsoft/vscode-cpptools/issues/7)
 * Add `Rename Symbol` with a pending rename UI. [#296](https://github.com/microsoft/vscode-cpptools/issues/296),  [PR #4277](https://github.com/microsoft/vscode-cpptools/pull/4277)
@@ -22,6 +22,10 @@
 * Fix parsing of `__has_include` (and other system macros) with gcc. [#4193](https://github.com/microsoft/vscode-cpptools/issues/4193)
 * Fix tag parse database not getting updated after changes occur to unopened files in the workspace. [#4211](https://github.com/microsoft/vscode-cpptools/issues/4211)
 * Fix `files.exclude` ending with `/` being treated like a per-file exclude (which aren't enabled by default). [#4262](https://github.com/microsoft/vscode-cpptools/issues/4262)
+* Fix `Find All References` incorrect results for string and comment references. [#4279](https://github.com/microsoft/vscode-cpptools/issues/4279)
+* Fix `Find All References` giving `Not a Reference` for constructors of templated classes. [#4345](https://github.com/microsoft/vscode-cpptools/issues/4345)
+* Fix squiggles appearing after a multi-edit replace or rename. [#4351](https://github.com/microsoft/vscode-cpptools/issues/4351)
+* Fix `gcc-x86` and `clang-x86` modes. [#4353](https://github.com/microsoft/vscode-cpptools/issues/4353)
 
 ## Version 0.25.1: August 28, 2019
 ### Bug Fixes
