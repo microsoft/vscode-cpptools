@@ -660,7 +660,7 @@ export class DefaultClient implements Client {
                                     });
                                 };
 
-                                if (referencesRequestPending || this.client.references.symbolSearchInProgress) {
+                                if (referencesRequestPending || (this.client.references.symbolSearchInProgress && !this.client.references.referencesViewFindPending)) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
