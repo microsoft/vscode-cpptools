@@ -43,6 +43,7 @@ export class FindAllRefsView {
         let otherRefs: string[] = [];
         let fileRefs: string[] = [];
 
+        // TODO: update this.referenceViewProvider.getReferenceItems() to query flat list of TreeNode objects
         let referenceItems: ReferenceItem[] = this.referenceViewProvider.getReferenceItems();
         for (let ref of referenceItems) {
             let line: string =
