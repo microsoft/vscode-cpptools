@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { RenamePendingItem, RenameCandidateItem, RenamePendingFileItem, RenameCandidateFileItem, getCurrentRenameModel, RenameModel, RenameCandidateReferenceTypeItem } from './renameModel';
-import { ReferenceItem, FileItem } from './referencesModel';
+import { ReferenceItem, FileItem, TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -1151,11 +1151,22 @@ function onRescanWorkspace(): void {
     clients.forEach(client => client.rescanFolder());
 }
 
-function onShowRefCommand(arg?: ReferenceItem | FileItem | RenamePendingItem | RenameCandidateItem | RenamePendingFileItem | RenameCandidateFileItem): void {
+function onShowRefCommand(arg?: ReferenceItem | FileItem | RenamePendingItem | RenameCandidateItem | RenamePendingFileItem | RenameCandidateFileItem | TreeNode): void {
     if (!arg) {
         return;
     }
-    if (arg instanceof ReferenceItem || arg instanceof RenamePendingItem || arg instanceof RenameCandidateItem) {
+    if (arg instanceof TreeNode) {
+        const { node } = arg;
+        if (node === NodeType.reference) {
+            const { referenceLocation } = arg;
+            vscode.window.showTextDocument(referenceLocation.uri, {
+                selection: referenceLocation.range.with({ start: referenceLocation.range.start, end: referenceLocation.range.end })
+            });
+        } else if (node === NodeType.fileWithPendingRef) {
+            const { fileUri } = arg;
+            vscode.window.showTextDocument(fileUri);
+        }
+    } else if (arg instanceof ReferenceItem || arg instanceof RenamePendingItem || arg instanceof RenameCandidateItem) {
         const { location } = arg;
         vscode.window.showTextDocument(location.uri, {
             selection: location.range.with({ start: location.range.start, end: location.range.end })
