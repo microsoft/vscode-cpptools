@@ -355,7 +355,7 @@ export class ReferencesManager {
                 }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
-                this.resultsCallback(true, null);
+                this.resultsCallback(null);
             }
         } else {
             this.findAllRefsView.setData(referencesResult, this.referencesCanceled);
