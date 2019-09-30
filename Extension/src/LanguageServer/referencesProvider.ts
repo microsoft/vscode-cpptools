@@ -44,7 +44,7 @@ function getReferenceCanceledIconPath(): { light: string; dark: string } {
 }
 
 function getReferenceItemIconPath(type: ReferenceType, isCanceled: boolean): { light: string; dark: string } {
-    return isCanceled ? getReferenceCanceledIconPath() : getReferenceTypeIconPath(type);
+    return (isCanceled && type === ReferenceType.ConfirmationInProgress) ? getReferenceCanceledIconPath() : getReferenceTypeIconPath(type);
 }
 
 type TreeObject = FileItem | ReferenceItem | ReferenceTypeItem;
