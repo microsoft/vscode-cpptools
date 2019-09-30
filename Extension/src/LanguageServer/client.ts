@@ -660,7 +660,7 @@ export class DefaultClient implements Client {
                                     });
                                 };
 
-                                if (referencesRequestPending) {
+                                if (referencesRequestPending || this.client.references.symbolSearchInProgress) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
@@ -744,7 +744,7 @@ export class DefaultClient implements Client {
                                     });
                                 };
 
-                                if (referencesRequestPending) {
+                                if (referencesRequestPending || this.client.references.symbolSearchInProgress) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject: () => { --renameRequestsPending; reject(); }, callback });
                                     if (!cancelling) {
