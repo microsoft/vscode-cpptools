@@ -344,8 +344,20 @@ export class ReferencesManager {
             this.referencesChannel.show(true);
         }
 
-        if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
+        let currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
+        if (referencesResult.isFinished) {
             this.symbolSearchInProgress = false;
+            clearInterval(this.referencesDelayProgress);
+            if (this.currentUpdateProgressTimer) {
+                clearInterval(this.currentUpdateProgressTimer);
+                this.currentUpdateProgressResolve();
+                this.currentUpdateProgressResolve = null;
+                this.currentUpdateProgressTimer = null;
+            }
+            this.client.setReferencesCommandMode(ReferencesCommandMode.None);
+        }
+
+        if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
             if (!this.referencesCanceled) {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
@@ -363,31 +375,17 @@ export class ReferencesManager {
             this.findAllRefsView.setData(referencesResult, this.referencesCanceled);
 
             // Display data based on command mode: peek references OR find all references
-            if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
+            if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
                 let showConfirmedReferences: boolean = this.referencesCanceled;
                 let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
                 if (peekReferencesResults) {
                     this.referencesChannel.appendLine(peekReferencesResults);
                     this.referencesChannel.show(true);
                 }
-            } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
+            } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-        }
-
-        if (referencesResult.isFinished) {
-            clearInterval(this.referencesDelayProgress);
-            if (this.currentUpdateProgressTimer) {
-                clearInterval(this.currentUpdateProgressTimer);
-                this.currentUpdateProgressResolve();
-                this.currentUpdateProgressResolve = null;
-                this.currentUpdateProgressTimer = null;
-            }
-            if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
-                this.symbolSearchInProgress = false;
-                this.resultsCallback(referencesResult);
-            }
-            this.client.setReferencesCommandMode(ReferencesCommandMode.None);
+            this.resultsCallback(referencesResult);
         }
     }
 
