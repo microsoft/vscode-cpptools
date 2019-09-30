@@ -2157,11 +2157,13 @@ export class DefaultClient implements Client {
     public cancelReferences(): void {
         referencesParams = null;
         renamePending = false;
-        let cancelling: boolean = referencesPendingCancellations.length > 0;
-        referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
-        if (!cancelling) {
-            this.languageClient.sendNotification(CancelReferencesNotification);
-            this.references.closeRenameUI();
+        if (referencesRequestPending || this.references.symbolSearchInProgress) {
+            let cancelling: boolean = referencesPendingCancellations.length > 0;
+            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+            if (!cancelling) {
+                this.languageClient.sendNotification(CancelReferencesNotification);
+                this.references.closeRenameUI();
+            }
         }
     }
 

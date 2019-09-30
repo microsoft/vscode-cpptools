@@ -126,6 +126,7 @@ export class ReferencesManager {
     private renameView: RenameView;
     private viewsInitialized: boolean = false;
 
+    public symbolSearchInProgress: boolean = false;
     private referencesCurrentProgress: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number;
     private referencesPrevProgressMessage: string;
@@ -344,6 +345,7 @@ export class ReferencesManager {
         }
 
         if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
+            this.symbolSearchInProgress = false;
             if (!this.referencesCanceled) {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
@@ -382,6 +384,7 @@ export class ReferencesManager {
                 this.currentUpdateProgressTimer = null;
             }
             if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
+                this.symbolSearchInProgress = false;
                 this.resultsCallback(referencesResult);
             }
             this.client.setReferencesCommandMode(ReferencesCommandMode.None);
@@ -389,6 +392,7 @@ export class ReferencesManager {
     }
 
     public setResultsCallback(callback: (results: ReferencesResult) => void): void {
+        this.symbolSearchInProgress = true;
         this.resultsCallback = callback;
     }
 
