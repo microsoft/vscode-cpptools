@@ -707,7 +707,9 @@ export class DefaultClient implements Client {
                                         // The current request is represented by referencesParams.  If a request detects
                                         // referencesParams does not match the object used when creating the request, abort it.
                                         if (params !== referencesParams) {
-                                            --renameRequestsPending;
+                                            if (--renameRequestsPending === 0) {
+                                                renamePending = false;
+                                            }
                                             reject();
                                             return;
                                         }
