@@ -671,6 +671,7 @@ export class DefaultClient implements Client {
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
                                         renamePending = false;
+                                        this.client.references.referencesCanceled = true;
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
@@ -754,6 +755,7 @@ export class DefaultClient implements Client {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject: () => { --renameRequestsPending; reject(); }, callback });
                                     if (!cancelling) {
+                                        this.client.references.referencesCanceled = true;
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
@@ -2167,6 +2169,7 @@ export class DefaultClient implements Client {
             let cancelling: boolean = referencesPendingCancellations.length > 0;
             referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
             if (!cancelling) {
+                this.references.referencesCanceled = true;
                 this.languageClient.sendNotification(CancelReferencesNotification);
                 this.references.closeRenameUI();
             }
