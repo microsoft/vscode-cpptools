@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceType, ReferencesResult, ReferenceInfo } from './references';
+import { ReferenceType, ReferencesResult, ReferenceInfo, ReferencesResultCallback } from './references';
 import { RenameDataProvider } from './renameDataProvider';
 
 export class RenamePendingItem {
@@ -237,10 +237,10 @@ let currentRenameModel: RenameModel;
 export class RenameModel {
     private pendingGroup: RenamePendingFilesGroupItem;
     private candidatesGroup: RenameCandidateReferenceTypeGroupItem;
-    private renameResultsCallback: (results: ReferencesResult) => void;
+    private renameResultsCallback: ReferencesResultCallback;
     private originalText: string;
 
-    constructor(resultsInput: ReferencesResult, readonly pendingProvider: RenameDataProvider, readonly candidateProvider: RenameDataProvider, resultsCallback: (results: ReferencesResult) => void) {
+    constructor(resultsInput: ReferencesResult, readonly pendingProvider: RenameDataProvider, readonly candidateProvider: RenameDataProvider, resultsCallback: ReferencesResultCallback) {
         currentRenameModel = this;
         this.originalText = resultsInput.text;
         this.renameResultsCallback = resultsCallback;
@@ -284,7 +284,7 @@ export class RenameModel {
 
     cancel(): void {
         if (this.renameResultsCallback) {
-            let callback: (results: ReferencesResult) => void = this.renameResultsCallback;
+            let callback: ReferencesResultCallback = this.renameResultsCallback;
             this.renameResultsCallback = null;
             callback(null);
         }
@@ -308,7 +308,7 @@ export class RenameModel {
             text: this.originalText,
             isFinished: true
         };
-        let callback: (results: ReferencesResult) => void = this.renameResultsCallback;
+        let callback: ReferencesResultCallback = this.renameResultsCallback;
         this.renameResultsCallback = null;
         callback(results);
     }
