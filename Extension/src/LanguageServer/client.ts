@@ -652,8 +652,9 @@ export class DefaultClient implements Client {
                                             resolve(locations);
                                         };
                                         if (this.client.references.lastResults) {
-                                            resultCallback(this.client.references.lastResults);
+                                            let lastResults: refs.ReferencesResult = this.client.references.lastResults;
                                             this.client.references.lastResults = null;
+                                            resultCallback(lastResults);
                                         } else {
                                             this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
                                             this.client.references.setResultsCallback(resultCallback);
