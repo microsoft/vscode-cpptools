@@ -159,8 +159,6 @@ export class ReferencesManager {
 
     initializeViews(): void {
         if (!this.viewsInitialized) {
-            this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.peek.references", "C/C++ Peek References"));
-            this.disposables.push(this.referencesChannel);
             this.findAllRefsView = new FindAllRefsView();
             this.renameView = new RenameView();
             this.viewsInitialized = true;
@@ -336,6 +334,11 @@ export class ReferencesManager {
         this.referencesViewFindPending = false;
         this.clearViews();
 
+        if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek && !this.referencesChannel) {
+            this.referencesChannel = vscode.window.createOutputChannel(localize("c.cpp.peek.references", "C/C++ Peek References"));
+            this.disposables.push(this.referencesChannel);
+        }
+
         if (this.referencesStartedWhileTagParsing) {
             let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
                 referencesCommandModeToString(this.client.ReferencesCommandMode));
@@ -403,7 +406,9 @@ export class ReferencesManager {
     }
 
     public clearViews(): void {
-        this.referencesChannel.clear();
+        if (this.referencesChannel) {
+            this.referencesChannel.clear();
+        }
         this.findAllRefsView.show(false);
         this.renameView.show(false);
     }
