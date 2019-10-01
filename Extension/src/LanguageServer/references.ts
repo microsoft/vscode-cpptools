@@ -137,7 +137,8 @@ export class ReferencesManager {
     public referencesViewFindPending: boolean = false;
     private referencesDelayProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
-    private referencesCanceled: boolean;
+    public referencesCanceled: boolean;
+    public referencesCanceledIgnoreResults: boolean;
     private referencesStartedWhileTagParsing: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
@@ -274,6 +275,7 @@ export class ReferencesManager {
 
         this.referencesRequestHasOccurred = false;
         this.referencesCanceled = false;
+        this.referencesCanceledIgnoreResults = false;
         this.referencesPrevProgressIncrement = 0;
         this.referencesPrevProgressMessage = "";
         this.referencesCurrentProgressUICounter = 0;
@@ -398,8 +400,9 @@ export class ReferencesManager {
             } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            if (referencesResult.isFinished && this.referencesRequestHasOccurred) {
+            if (referencesResult.isFinished && this.referencesRequestHasOccurred && !this.referencesCanceledIgnoreResults) {
                 this.lastResults = referencesResult;
+                this.referencesViewFindPending = true;
                 vscode.commands.executeCommand("references-view.refresh");
             } else {
                 this.resultsCallback(referencesResult);
