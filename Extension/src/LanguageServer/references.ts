@@ -373,7 +373,7 @@ export class ReferencesManager {
         }
 
         if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
-            if (!this.referencesCanceled) {
+            if (!this.referencesCanceled || this.referencesCanceledIgnoreResults) {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
