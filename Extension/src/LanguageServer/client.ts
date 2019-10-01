@@ -613,6 +613,7 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
                         public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+                        // tslint:disable-next-line: promise-must-complete
                             return new Promise<vscode.Location[]>((resolve, reject) => {
                                 let callback: () => void = () => {
                                     let params: FindAllReferencesParams = {
@@ -631,6 +632,18 @@ export class DefaultClient implements Client {
                                         // Register a single-fire handler for the reply.
                                         let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult) => {
                                             referencesRequestPending = false;
+                                            let locations: vscode.Location[] = [];
+                                            result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
+                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
+                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
+                                                    let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
+                                                    locations.push(new vscode.Location(uri, range));
+                                                }
+                                            });
+                                            if (!this.client.references.referencesCanceledIgnoreResults) {
+                                                this.client.references.referencesCanceledIgnoreResults = false;
+                                                resolve(locations);
+                                            }
                                             if (referencesPendingCancellations.length > 0) {
                                                 while (referencesPendingCancellations.length > 1) {
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
@@ -641,15 +654,6 @@ export class DefaultClient implements Client {
                                                 referencesPendingCancellations.pop();
                                                 pendingCancel.callback();
                                             }
-                                            let locations: vscode.Location[] = [];
-                                            result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
-                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
-                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
-                                                    let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
-                                                    locations.push(new vscode.Location(uri, range));
-                                                }
-                                            });
-                                            resolve(locations);
                                         };
                                         if (this.client.references.lastResults) {
                                             let lastResults: refs.ReferencesResult = this.client.references.lastResults;
@@ -672,7 +676,7 @@ export class DefaultClient implements Client {
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
                                         renamePending = false;
-                                        this.client.references.referencesCanceled = true;
+                                        this.client.references.referencesCanceledIgnoreResults = true;
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
@@ -756,7 +760,7 @@ export class DefaultClient implements Client {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject: () => { --renameRequestsPending; reject(); }, callback });
                                     if (!cancelling) {
-                                        this.client.references.referencesCanceled = true;
+                                        this.client.references.referencesCanceledIgnoreResults = true;
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
