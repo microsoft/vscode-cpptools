@@ -676,7 +676,9 @@ export class DefaultClient implements Client {
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
                                         renamePending = false;
-                                        this.client.references.referencesCanceledIgnoreResults = true;
+                                        if (!referencesRequestPending) {
+                                            this.client.references.referencesCanceledIgnoreResults = true;
+                                        }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
