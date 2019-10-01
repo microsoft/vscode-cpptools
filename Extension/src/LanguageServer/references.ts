@@ -37,6 +37,8 @@ export interface ReferencesResult {
     isFinished: boolean;
 }
 
+export type ReferencesResultCallback = (result: ReferencesResult) => void;
+
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
 }
@@ -127,6 +129,7 @@ export class ReferencesManager {
     private renameView: RenameView;
     private viewsInitialized: boolean = false;
 
+    public symbolSearchInProgress: boolean = false;
     private referencesCurrentProgress: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number;
     private referencesPrevProgressMessage: string;
@@ -149,7 +152,7 @@ export class ReferencesManager {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
-    private resultsCallback: (results: ReferencesResult) => void;
+    private resultsCallback: ReferencesResultCallback;
     private currentUpdateProgressTimer: NodeJS.Timeout;
     private currentUpdateProgressResolve: () => void;
 
@@ -354,7 +357,20 @@ export class ReferencesManager {
             }
         }
 
-        if (this.client.ReferencesCommandMode === ReferencesCommandMode.Rename) {
+        let currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
+        if (referencesResult.isFinished) {
+            this.symbolSearchInProgress = false;
+            clearInterval(this.referencesDelayProgress);
+            if (this.currentUpdateProgressTimer) {
+                clearInterval(this.currentUpdateProgressTimer);
+                this.currentUpdateProgressResolve();
+                this.currentUpdateProgressResolve = null;
+                this.currentUpdateProgressTimer = null;
+            }
+            this.client.setReferencesCommandMode(ReferencesCommandMode.None);
+        }
+
+        if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
             if (!this.referencesCanceled) {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
@@ -364,40 +380,37 @@ export class ReferencesManager {
                     this.renameView.show(true);
                     this.renameView.setData(referencesResult, this.resultsCallback);
                 }
+            } else {
+                // Do nothing when rename is canceled while searching for references was in progress.
+                this.resultsCallback(null);
             }
         } else {
-            // Put results in data model
             this.findAllRefsView.setData(referencesResult, this.referencesCanceled);
 
             // Display data based on command mode: peek references OR find all references
-            if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
+            if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
                 let showConfirmedReferences: boolean = this.referencesCanceled;
                 let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
                 if (peekReferencesResults) {
                     this.referencesChannel.appendLine(peekReferencesResults);
                     this.referencesChannel.show(true);
                 }
-            } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
+            } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-        }
-
-        if (referencesResult.isFinished) {
-            clearInterval(this.referencesDelayProgress);
-            if (this.currentUpdateProgressTimer) {
-                clearInterval(this.currentUpdateProgressTimer);
-                this.currentUpdateProgressResolve();
-                this.currentUpdateProgressResolve = null;
-                this.currentUpdateProgressTimer = null;
-            }
-            if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
+            if (referencesResult.isFinished && this.referencesRequestHasOccurred) {
+                this.lastResults = referencesResult;
+                vscode.commands.executeCommand("references-view.refresh");
+            } else {
                 this.resultsCallback(referencesResult);
             }
-            this.client.setReferencesCommandMode(ReferencesCommandMode.None);
         }
     }
 
-    public setResultsCallback(callback: (results: ReferencesResult) => void): void {
+    public lastResults: ReferencesResult = null; // Saved for the final request after a preview occurs.
+
+    public setResultsCallback(callback: ReferencesResultCallback): void {
+        this.symbolSearchInProgress = true;
         this.resultsCallback = callback;
     }
 
