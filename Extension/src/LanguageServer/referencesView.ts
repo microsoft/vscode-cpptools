@@ -23,7 +23,11 @@ export class FindAllRefsView {
         if (!showView) {
             this.clearData();
         }
-        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', this.referencesModel.hasResults());
+        let hasResults: boolean = false;
+        if (this.referencesModel) {
+            hasResults = this.referencesModel.hasResults();
+        }
+        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', hasResults);
     }
 
     toggleGroupView(): void {

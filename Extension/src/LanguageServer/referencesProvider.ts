@@ -225,12 +225,12 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeNode> 
         if (this.referencesModel.isRename) {
             if (this.isCandidates) {
                 if (this.groupByFile) {
-                    this.referencesModel.getRenameCandidateReferenceTypes();
+                    return this.referencesModel.getRenameCandidateReferenceTypes();
                 } else {
-                    this.referencesModel.getRenameCandidateFiles();
+                    return this.referencesModel.getRenameCandidateFiles();
                 }
             } else {
-                this.referencesModel.getRenamePendingFiles();
+                return this.referencesModel.getRenamePendingFiles();
             }
         } else {
             // Return root for tree view

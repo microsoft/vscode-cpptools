@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 //import { RenamePendingItem, RenameCandidateItem, RenamePendingFileItem, RenameCandidateFileItem, getCurrentRenameModel, RenameModel, RenameCandidateReferenceTypeItem } from './renameModel';
-import { TreeNode, NodeType } from './referencesModel';
+import { TreeNode, NodeType, getCurrentReferencesModel } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -1204,11 +1204,11 @@ function onShowRefCommand(arg?: TreeNode): void {
 // }
 
 function onRenameViewCancel(arg?: TreeNode): void {
-    arg.model.cancelRename();
+    getCurrentReferencesModel().cancelRename();
 }
 
 function onRenameViewDone(arg?: TreeNode): void {
-    arg.model.completeRename();
+    getCurrentReferencesModel().completeRename();
 }
 
 function onRenameViewRemove(arg?: TreeNode): void {

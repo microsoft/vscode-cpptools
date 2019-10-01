@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferencesResult } from './references';
+import { ReferencesResult, ReferencesResultCallback } from './references';
 import { ReferencesModel } from './referencesModel';
 import { ReferenceDataProvider } from './referencesProvider';
 
@@ -39,7 +39,7 @@ import { ReferenceDataProvider } from './referencesProvider';
 //         }
 //     }
 
-//     setData(results: ReferencesResult, resultsCallback: (results: ReferencesResult) => void): void {
+//     setData(results: ReferencesResult, resultsCallback: ReferencesResultCallback): void {
 //         this.model = new RenameModel(results, this.renamePendingDataProvider, this.renameCandidatesDataProvider, resultsCallback);
 //         this.renamePendingDataProvider.setModel(this.model);
 //         this.renameCandidatesDataProvider.setModel(this.model);
@@ -75,8 +75,7 @@ export class RenameView {
             vscode.commands.executeCommand(`CppRenamePendingView.focus`);
         } else if (this.visible) {
             this.visible = false;
-            // TBD
-            //this.referencesModel.cancel();
+            this.referencesModel.cancelRename();
             this.referencesModel = null;
             this.clearData();
         }
@@ -91,8 +90,8 @@ export class RenameView {
         this.renameCandidatesDataProvider.refresh();
     }
 
-    setData(results: ReferencesResult, resultsCallback: (results: ReferencesResult) => void): void {
-        this.referencesModel = new ReferencesModel(results, true, false, resultsCallback, this.refresh);
+    setData(results: ReferencesResult, resultsCallback: ReferencesResultCallback): void {
+        this.referencesModel = new ReferencesModel(results, true, false, resultsCallback, () => { this.refresh(); });
         this.renamePendingDataProvider.setModel(this.referencesModel);
         this.renameCandidatesDataProvider.setModel(this.referencesModel);
     }

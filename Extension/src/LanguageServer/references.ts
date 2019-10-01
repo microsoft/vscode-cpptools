@@ -9,7 +9,6 @@ import { FindAllRefsView } from './referencesView';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
 import { RenameView } from './renameView';
-//import { RenameView } from './renameView';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -36,6 +35,8 @@ export interface ReferencesResult {
     text: string;
     isFinished: boolean;
 }
+
+export type ReferencesResultCallback = (result: ReferencesResult) => void;
 
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
@@ -150,7 +151,7 @@ export class ReferencesManager {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
-    private resultsCallback: (results: ReferencesResult) => void;
+    private resultsCallback: ReferencesResultCallback;
     private currentUpdateProgressTimer: NodeJS.Timeout;
     private currentUpdateProgressResolve: () => void;
 
@@ -386,11 +387,18 @@ export class ReferencesManager {
             } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            this.resultsCallback(referencesResult);
+            if (referencesResult.isFinished && this.referencesRequestHasOccurred) {
+                this.lastResults = referencesResult;
+                vscode.commands.executeCommand("references-view.refresh");
+            } else {
+                this.resultsCallback(referencesResult);
+            }
         }
     }
 
-    public setResultsCallback(callback: (results: ReferencesResult) => void): void {
+    public lastResults: ReferencesResult = null; // Saved for the final request after a preview occurs.
+
+    public setResultsCallback(callback: ReferencesResultCallback): void {
         this.symbolSearchInProgress = true;
         this.resultsCallback = callback;
     }
