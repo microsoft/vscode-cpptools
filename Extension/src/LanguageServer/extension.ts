@@ -10,8 +10,8 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { RenamePendingItem, RenameCandidateItem, RenamePendingFileItem, RenameCandidateFileItem, getCurrentRenameModel, RenameModel, RenameCandidateReferenceTypeItem } from './renameModel';
-import { ReferenceItem, FileItem, TreeNode, NodeType } from './referencesModel';
+//import { RenamePendingItem, RenameCandidateItem, RenamePendingFileItem, RenameCandidateFileItem, getCurrentRenameModel, RenameModel, RenameCandidateReferenceTypeItem } from './renameModel';
+import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -1151,11 +1151,11 @@ function onRescanWorkspace(): void {
     clients.forEach(client => client.rescanFolder());
 }
 
-function onShowRefCommand(arg?: ReferenceItem | FileItem | RenamePendingItem | RenameCandidateItem | RenamePendingFileItem | RenameCandidateFileItem | TreeNode): void {
+function onShowRefCommand(arg?: TreeNode): void {
     if (!arg) {
         return;
     }
-    if (arg instanceof TreeNode) {
+    //if (arg instanceof TreeNode) {
         const { node } = arg;
         if (node === NodeType.reference) {
             const { referenceLocation } = arg;
@@ -1166,80 +1166,103 @@ function onShowRefCommand(arg?: ReferenceItem | FileItem | RenamePendingItem | R
             const { fileUri } = arg;
             vscode.window.showTextDocument(fileUri);
         }
-    } else if (arg instanceof ReferenceItem || arg instanceof RenamePendingItem || arg instanceof RenameCandidateItem) {
-        const { location } = arg;
-        vscode.window.showTextDocument(location.uri, {
-            selection: location.range.with({ start: location.range.start, end: location.range.end })
-        });
-    } else if (arg instanceof FileItem || arg instanceof RenamePendingFileItem || arg instanceof RenameCandidateFileItem) {
-        const { uri } = arg;
-        vscode.window.showTextDocument(uri);
-    }
+    // } else if (arg instanceof ReferenceItem || arg instanceof RenamePendingItem || arg instanceof RenameCandidateItem) {
+    //     const { location } = arg;
+    //     vscode.window.showTextDocument(location.uri, {
+    //         selection: location.range.with({ start: location.range.start, end: location.range.end })
+    //     });
+    // } else if (arg instanceof ReferenceFileItem || arg instanceof RenamePendingFileItem || arg instanceof RenameCandidateFileItem) {
+    //     const { uri } = arg;
+    //     vscode.window.showTextDocument(uri);
+    // }
 }
 
-function onRenameViewCancel(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.cancel();
-    }
+// function onShowRefCommand(arg?: ReferenceItem | ReferenceFileItem | RenamePendingItem | RenameCandidateItem | RenamePendingFileItem | RenameCandidateFileItem | TreeNode): void {
+//     if (!arg) {
+//         return;
+//     }
+//     if (arg instanceof TreeNode) {
+//         const { node } = arg;
+//         if (node === NodeType.reference) {
+//             const { referenceLocation } = arg;
+//             vscode.window.showTextDocument(referenceLocation.uri, {
+//                 selection: referenceLocation.range.with({ start: referenceLocation.range.start, end: referenceLocation.range.end })
+//             });
+//         } else if (node === NodeType.fileWithPendingRef) {
+//             const { fileUri } = arg;
+//             vscode.window.showTextDocument(fileUri);
+//         }
+//     } else if (arg instanceof ReferenceItem || arg instanceof RenamePendingItem || arg instanceof RenameCandidateItem) {
+//         const { location } = arg;
+//         vscode.window.showTextDocument(location.uri, {
+//             selection: location.range.with({ start: location.range.start, end: location.range.end })
+//         });
+//     } else if (arg instanceof ReferenceFileItem || arg instanceof RenamePendingFileItem || arg instanceof RenameCandidateFileItem) {
+//         const { uri } = arg;
+//         vscode.window.showTextDocument(uri);
+//     }
+// }
+
+function onRenameViewCancel(arg?: TreeNode): void {
+    arg.model.cancelRename();
 }
 
-function onRenameViewDone(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.complete();
-    }
+function onRenameViewDone(arg?: TreeNode): void {
+    arg.model.completeRename();
 }
 
-function onRenameViewRemove(arg?: RenamePendingItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
-    }
+function onRenameViewRemove(arg?: TreeNode): void {
+    arg.model.setRenameCandidate(arg.referenceItem);
+    // arg.referenceItem.isCandidate = true;
+    // arg.model.refreshCallback();
 }
 
-function onRenameViewAdd(arg?: RenameCandidateItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
-    }
+function onRenameViewAdd(arg?: TreeNode): void {
+    arg.model.setRenamePending(arg.referenceItem);
+    // arg.referenceItem.isCandidate = false;
+    // arg.model.refreshCallback();
 }
 
-function onRenameViewRemoveAll(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.getPendingGroup().changeGroup();
-        currentRenameModel.updateProviders();
-    }
+function onRenameViewRemoveAll(arg?: TreeNode): void {
+    arg.model.setAllRenamesCandidates();
+    // let currentRenameModel: RenameModel = getCurrentRenameModel();
+    // if (currentRenameModel) {
+    //     currentRenameModel.getPendingGroup().changeGroup();
+    //     currentRenameModel.updateProviders();
+    // }
 }
 
-function onRenameViewAddAll(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.getCandidatesGroup().changeGroup();
-        currentRenameModel.updateProviders();
-    }
+function onRenameViewAddAll(arg?: TreeNode): void {
+    arg.model.setAllRenamesPending();
+    // let currentRenameModel: RenameModel = getCurrentRenameModel();
+    // if (currentRenameModel) {
+    //     currentRenameModel.getCandidatesGroup().changeGroup();
+    //     currentRenameModel.updateProviders();
+    // }
 }
 
-function onRenameViewRemoveFile(arg?: RenamePendingFileItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
-    }
+function onRenameViewRemoveFile(arg?: TreeNode): void {
+    arg.model.setFileRenamesCandidates(arg.filename);
+    // if (arg) {
+    //     arg.changeGroup();
+    //     arg.model.updateProviders();
+    // }
 }
 
-function onRenameViewAddFile(arg?: RenameCandidateFileItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
-    }
+function onRenameViewAddFile(arg?: TreeNode): void {
+    arg.model.setFileRenamesPending(arg.filename);
+    // if (arg) {
+    //     arg.changeGroup();
+    //     arg.model.updateProviders();
+    // }
 }
 
-function onRenameViewAddReferenceType(arg?: RenameCandidateReferenceTypeItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
-    }
+function onRenameViewAddReferenceType(arg?: TreeNode): void {
+    arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
+    // if (arg) {
+    //     arg.changeGroup();
+    //     arg.model.updateProviders();
+    // }
 }
 
 function reportMacCrashes(): void {

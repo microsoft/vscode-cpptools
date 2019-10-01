@@ -6,13 +6,14 @@
 import * as vscode from 'vscode';
 import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
 import { ReferenceDataProvider } from './referencesProvider';
-import { FileItem, ReferenceItem } from './referencesModel';
+import { ReferencesModel, ReferenceFileItem } from './referencesModel';
 
 export class FindAllRefsView {
+    private referencesModel: ReferencesModel;
     private referenceViewProvider: ReferenceDataProvider;
 
     constructor() {
-        this.referenceViewProvider = new ReferenceDataProvider();
+        this.referenceViewProvider = new ReferenceDataProvider(false);
         vscode.window.createTreeView(
             'CppReferencesView',
             { treeDataProvider: this.referenceViewProvider, showCollapseAll: true });
@@ -22,7 +23,7 @@ export class FindAllRefsView {
         if (!showView) {
             this.clearData();
         }
-        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', this.referenceViewProvider.hasResults());
+        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', this.referencesModel.hasResults());
     }
 
     toggleGroupView(): void {
@@ -30,7 +31,8 @@ export class FindAllRefsView {
     }
 
     setData(results: ReferencesResult, isCanceled: boolean): void {
-        this.referenceViewProvider.setModel(results, isCanceled);
+        this.referencesModel = new ReferencesModel(results, false, isCanceled, null, this.referenceViewProvider.refresh);
+        this.referenceViewProvider.setModel(this.referencesModel);
     }
 
     clearData(): void {
@@ -43,11 +45,9 @@ export class FindAllRefsView {
         let otherRefs: string[] = [];
         let fileRefs: string[] = [];
 
-        // TODO: update this.referenceViewProvider.getReferenceItems() to query flat list of TreeNode objects
-        let referenceItems: ReferenceItem[] = this.referenceViewProvider.getReferenceItems();
-        for (let ref of referenceItems) {
+        for (let ref of this.referencesModel.referenceItems) {
             let line: string =
-                ("[" + getReferenceTagString(ref.type, this.referenceViewProvider.isCanceled()) + "] "
+                ("[" + getReferenceTagString(ref.type, this.referencesModel.isCanceled) + "] "
                 + ref.parent.name
                 + ":" + (ref.position.line + 1) + ":" + (ref.position.character + 1)
                 + " " + ref.text);
@@ -58,16 +58,16 @@ export class FindAllRefsView {
             }
         }
 
-        // Get files with pending references items (location of reference is pending)
-        let fileReferences: FileItem[] = this.referenceViewProvider.getFilesWithPendingReferences();
+        // // Get files with pending references items (location of reference is pending)
+        let fileReferences: ReferenceFileItem[] = this.referencesModel.fileItems.filter(i => i.referenceItemsPending);
         for (let fileRef of fileReferences) {
             let line: string =
-                ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referenceViewProvider.isCanceled()) + "] "
+                ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
                 + fileRef.name);
             fileRefs.push(line);
         }
 
-        results = results.concat(confirmedRefs, otherRefs, fileRefs);
+        //results = results.concat(confirmedRefs, otherRefs, fileRefs);
         return results.join('\n');
     }
 }

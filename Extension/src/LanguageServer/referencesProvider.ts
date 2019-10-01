@@ -5,8 +5,8 @@
 'use strict';
 import * as vscode from 'vscode';
 import * as util from '../common';
-import { Model, FileItem, ReferenceItem, ReferenceTypeItem, TreeNode, NodeType } from './referencesModel';
-import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
+import { ReferencesModel, TreeNode, NodeType } from './referencesModel';
+import { ReferenceType, getReferenceTagString } from './references';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -47,17 +47,18 @@ function getReferenceItemIconPath(type: ReferenceType, isCanceled: boolean): { l
     return (isCanceled && type === ReferenceType.ConfirmationInProgress) ? getReferenceCanceledIconPath() : getReferenceTypeIconPath(type);
 }
 
-type TreeObject = FileItem | ReferenceItem | ReferenceTypeItem | TreeNode;
-
-export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject> {
-    private references: Model;
-    private referencesCanceled: boolean = false;
-    private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeObject>();
+export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeNode> {
+    private referencesModel: ReferencesModel;
+    private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeNode>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
     private groupByFile: boolean = true;
 
-    constructor() {
+    constructor(readonly isCandidates: boolean) {
         vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', true);
+    }
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
     }
 
     toggleGroupView(): void {
@@ -66,87 +67,89 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
         this._onDidChangeTreeData.fire();
     }
 
-    setModel(results: ReferencesResult, isCanceled: boolean): void {
-        this.referencesCanceled = isCanceled;
-        this.references = new Model(results);
+    setModel(model: ReferencesModel): void {
+        this.referencesModel = model;
         this._onDidChangeTreeData.fire();
     }
 
-    isCanceled(): boolean {
-        return this.referencesCanceled;
-    }
+    // isCanceled(): boolean {
+    //     return this.referencesCanceled;
+    // }
 
     clear(): void {
-        this.references = undefined;
+        this.referencesModel = undefined;
         this._onDidChangeTreeData.fire();
     }
 
-    hasResults(): boolean {
-        return this.references &&
-            (this.references.ReferenceItems.length > 0 || this.references.FileItems.length > 0);
-    }
+    // hasResults(): boolean {
+    //     return this.referencesModel &&
+    //         (this.referencesModel.ReferenceItems.length > 0 || this.referencesModel.FileItems.length > 0);
+    // }
 
-    getReferenceItems(): ReferenceItem[] {
-        return this.references.ReferenceItems as ReferenceItem[];
-    }
+    // getReferenceItems(): ReferenceItem[] {
+    //     return this.referencesModel.ReferenceItems as ReferenceItem[];
+    // }
 
-    getFilesWithPendingReferences(): FileItem[] {
-        return this.references.FileItems.filter(i => i.ReferenceItemsPending) as FileItem[];
-    }
+    // getFilesWithPendingReferences(): ReferenceFileItem[] {
+    //     return this.referencesModel.FileItems.filter(i => i.ReferenceItemsPending) as ReferenceFileItem[];
+    // }
 
-    getTreeItem(element: TreeObject): vscode.TreeItem {
-        if (!this.references) {
+    getTreeItem(element: TreeNode): vscode.TreeItem {
+        if (!this.referencesModel) {
             return;
         }
 
-        if (element instanceof ReferenceItem) {
-            const result: vscode.TreeItem = new vscode.TreeItem(element.text);
-            result.collapsibleState = vscode.TreeItemCollapsibleState.None;
-            result.iconPath = getReferenceItemIconPath(element.type, this.referencesCanceled);
-            let tag: string = getReferenceTagString(element.type, this.referencesCanceled);
-            result.tooltip = `[${tag}]\n${element.text}`;
+        // if (element instanceof ReferenceItem) {
+        //     const result: vscode.TreeItem = new vscode.TreeItem(element.text);
+        //     result.collapsibleState = vscode.TreeItemCollapsibleState.None;
+        //     result.iconPath = getReferenceItemIconPath(element.type, this.referencesModel.isCanceled);
+        //     let tag: string = getReferenceTagString(element.type, this.referencesModel.isCanceled);
+        //     result.tooltip = `[${tag}]\n${element.text}`;
 
-            result.command = {
-                title: localize("goto.reference", "Go to reference"),
-                command: 'C_Cpp.ShowReferenceItem',
-                arguments: [element]
-            };
+        //     result.command = {
+        //         title: localize("goto.reference", "Go to reference"),
+        //         command: 'C_Cpp.ShowReferenceItem',
+        //         arguments: [element]
+        //     };
 
-            return result;
-        }
+        //     return result;
+        // }
 
-        if (element instanceof FileItem) {
-            const result: vscode.TreeItem = new vscode.TreeItem(element.uri);
-            result.collapsibleState = element.ReferenceItemsPending ?
-                vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded;
-            result.iconPath = vscode.ThemeIcon.File;
-            result.description = true;
+        // if (element instanceof ReferenceFileItem) {
+        //     const result: vscode.TreeItem = new vscode.TreeItem(element.uri);
+        //     result.collapsibleState = element.ReferenceItemsPending ?
+        //         vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded;
+        //     result.iconPath = vscode.ThemeIcon.File;
+        //     result.description = true;
 
-            if (element.ReferenceItemsPending) {
-                result.command = {
-                    title: localize("goto.reference", "Go to reference"),
-                    command: 'C_Cpp.ShowReferenceItem',
-                    arguments: [element]
-                };
-                let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesCanceled);
-                result.tooltip = `[${tag}]\n${element.name}`;
-            }
+        //     if (element.ReferenceItemsPending) {
+        //         result.command = {
+        //             title: localize("goto.reference", "Go to reference"),
+        //             command: 'C_Cpp.ShowReferenceItem',
+        //             arguments: [element]
+        //         };
+        //         let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled);
+        //         result.tooltip = `[${tag}]\n${element.name}`;
+        //     }
 
-            return result;
-        }
+        //     return result;
+        // }
 
-        if (element instanceof ReferenceTypeItem) {
-            const label: string = getReferenceTagString(element.type, this.referencesCanceled, true);
-            const result: vscode.TreeItem = new vscode.TreeItem(label);
-            result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-            return result;
-        }
+        // if (element instanceof ReferenceTypeItem) {
+        //     const label: string = getReferenceTagString(element.type, this.referencesModel.isCanceled, true);
+        //     const result: vscode.TreeItem = new vscode.TreeItem(label);
+        //     result.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+        //     return result;
+        // }
 
-        if (element instanceof TreeNode) {
+        //if (element instanceof TreeNode) {
             switch (element.node) {
                 case NodeType.referenceType:
-                    const label: string = getReferenceTagString(element.referenceType, this.referencesCanceled, true);
+                    const label: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled, true);
                     let result: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Expanded);
+                    if (this.referencesModel.isRename) {
+                        result.contextValue = this.isCandidates ? "candidateGroup" : "pendingGroup";
+                    }
                     return result;
 
                 case NodeType.file:
@@ -154,6 +157,9 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
                     let resultFile: vscode.TreeItem = new vscode.TreeItem(element.fileUri, vscode.TreeItemCollapsibleState.Expanded);
                     resultFile.iconPath = vscode.ThemeIcon.File;
                     resultFile.description = true;
+                    if (this.referencesModel.isRename) {
+                        resultFile.contextValue = this.isCandidates ? "candidateFile" : "pendingFile";
+                    }
 
                     if (element.node === NodeType.fileWithPendingRef) {
                         result.command = {
@@ -161,7 +167,7 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
                             command: 'C_Cpp.ShowReferenceItem',
                             arguments: [element]
                         };
-                        let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesCanceled);
+                        let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled);
                         result.tooltip = `[${tag}]\n${element.filename}`;
                     }
 
@@ -169,9 +175,12 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
 
                 case NodeType.reference:
                     let resultRef: vscode.TreeItem = new vscode.TreeItem(element.referenceText, vscode.TreeItemCollapsibleState.None);
-                    resultRef.iconPath = getReferenceItemIconPath(element.referenceType, this.referencesCanceled);
-                    let tag: string = getReferenceTagString(element.referenceType, this.referencesCanceled);
+                    resultRef.iconPath = getReferenceItemIconPath(element.referenceType, this.referencesModel.isCanceled);
+                    let tag: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled);
                     resultRef.tooltip = `[${tag}]\n${element.referenceText}`;
+                    if (this.referencesModel.isRename) {
+                        resultRef.contextValue = this.isCandidates ? "candidateItem" : "pendingItem";
+                    }
 
                     resultRef.command = {
                         title: localize("goto.reference", "Go to reference"),
@@ -181,43 +190,60 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeObject
 
                     return resultRef;
             }
-        }
+        //}
     }
 
-    getChildren(element?: TreeObject | undefined): TreeObject[] {
-        if (!this.references) {
+    getChildren(element?: TreeNode | undefined): TreeNode[] {
+        if (!this.referencesModel) {
             return;
         }
 
-        if (element instanceof FileItem) {
-            return element.getReferences();
-        }
+        // if (element instanceof ReferenceFileItem) {
+        //     return element.getReferences();
+        // }
 
-        if (element instanceof ReferenceTypeItem) {
-            return element.getFiles();
-        }
+        // if (element instanceof ReferenceTypeItem) {
+        //     return element.getFiles();
+        // }
 
+        //if (element instanceof TreeNode) {
         if (element instanceof TreeNode) {
-            // Replacement for FileItem
+            // Replacement for ReferenceFileItem
             if (element.node === NodeType.file) {
-                return this.references.getReferenceNodes(element.filename, element.referenceType);
+                return this.referencesModel.getReferenceNodes(element.filename, element.referenceType, this.isCandidates);
             }
             // Replacement for ReferenceTypeItem
             if (element.node === NodeType.referenceType) {
-                return this.references.getFileNodes(element.referenceType);
+                return this.referencesModel.getFileNodes(element.referenceType, this.isCandidates);
             }
+
+            // Should not get here
         }
 
-        // Return root for tree view
-        if (this.groupByFile) {
-            return this.references.getFileNodes(undefined);
-            // return this.references.FileItems;
+        // element should be null
+
+        if (this.referencesModel.isRename) {
+            if (this.isCandidates) {
+                if (this.groupByFile) {
+                    this.referencesModel.getRenameCandidateReferenceTypes();
+                } else {
+                    this.referencesModel.getRenameCandidateFiles();
+                }
+            } else {
+                this.referencesModel.getRenamePendingFiles();
+            }
         } else {
-            return this.references.getReferenceTypeNodes();
-            // TODO: handle references are canceled.
-            // TODO: handle preview references.
-            // return this.referencesCanceled ? this.references.getReferenceCanceledGroup2() : this.references.getReferenceTypeNodes();
-            // return this.referencesCanceled ? this.references.getReferenceCanceledGroup() : this.references.ReferenceTypeItems;
+            // Return root for tree view
+            if (this.groupByFile) {
+                return this.referencesModel.getFileNodes(undefined, false);
+                // return this.referencesModel.FileItems;
+            } else {
+                return this.referencesModel.getReferenceTypeNodes();
+                // TODO: handle references are canceled.
+                // TODO: handle preview references.
+                // return this.referencesCanceled ? this.referencesModel.getReferenceCanceledGroup2() : this.referencesModel.getReferenceTypeNodes();
+                // return this.referencesCanceled ? this.referencesModel.getReferenceCanceledGroup() : this.referencesModel.ReferenceTypeItems;
+            }
         }
     }
 }

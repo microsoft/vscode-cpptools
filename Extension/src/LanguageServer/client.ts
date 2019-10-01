@@ -728,7 +728,7 @@ export class DefaultClient implements Client {
                                                 if (renameRequestsPending === 0) {
                                                     renamePending = false;
                                                 }
-                                                // If rename UI Was cancelled, we will get a null result
+                                                // If rename UI Was canceled, we will get a null result
                                                 // If null, return an empty list to avoid Rename failure dialog
                                                 if (referencesResult !== null) {
                                                     for (let reference of referencesResult.referenceInfos) {
@@ -2043,7 +2043,7 @@ export class DefaultClient implements Client {
             ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider)
                 .then(extensionId => {
                     if (extensionId === undefined) {
-                        // operation was cancelled.
+                        // operation was canceled.
                         return;
                     }
                     this.configuration.updateCustomConfigurationProvider(extensionId)

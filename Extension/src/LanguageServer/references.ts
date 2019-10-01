@@ -9,6 +9,7 @@ import { FindAllRefsView } from './referencesView';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
 import { RenameView } from './renameView';
+//import { RenameView } from './renameView';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -364,8 +365,8 @@ export class ReferencesManager {
                 if (!foundUnconfirmed) {
                     this.resultsCallback(referencesResult);
                 } else {
-                    this.renameView.show(true);
                     this.renameView.setData(referencesResult, this.resultsCallback);
+                    this.renameView.show(true);
                 }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
