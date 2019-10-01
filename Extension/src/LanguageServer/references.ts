@@ -36,6 +36,8 @@ export interface ReferencesResult {
     isFinished: boolean;
 }
 
+export type ReferencesResultCallback = (result: ReferencesResult) => void;
+
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
 }
@@ -149,7 +151,7 @@ export class ReferencesManager {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
-    private resultsCallback: (results: ReferencesResult) => void;
+    private resultsCallback: ReferencesResultCallback;
     private currentUpdateProgressTimer: NodeJS.Timeout;
     private currentUpdateProgressResolve: () => void;
 
@@ -396,7 +398,7 @@ export class ReferencesManager {
 
     public lastResults: ReferencesResult = null; // Saved for the final request after a preview occurs.
 
-    public setResultsCallback(callback: (results: ReferencesResult) => void): void {
+    public setResultsCallback(callback: ReferencesResultCallback): void {
         this.symbolSearchInProgress = true;
         this.resultsCallback = callback;
     }

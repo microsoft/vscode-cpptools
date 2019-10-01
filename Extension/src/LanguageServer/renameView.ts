@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferencesResult } from './references';
+import { ReferencesResult, ReferencesResultCallback } from './references';
 import { RenameDataProvider } from './renameDataProvider';
 import { RenameModel } from './renameModel';
 
@@ -39,7 +39,7 @@ export class RenameView {
         }
     }
 
-    setData(results: ReferencesResult, resultsCallback: (results: ReferencesResult) => void): void {
+    setData(results: ReferencesResult, resultsCallback: ReferencesResultCallback): void {
         this.model = new RenameModel(results, this.renamePendingDataProvider, this.renameCandidatesDataProvider, resultsCallback);
         this.renamePendingDataProvider.setModel(this.model);
         this.renameCandidatesDataProvider.setModel(this.model);
