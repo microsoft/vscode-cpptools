@@ -385,9 +385,16 @@ export class ReferencesManager {
             } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            this.resultsCallback(referencesResult);
+            if (referencesResult.isFinished && this.referencesRequestHasOccurred) {
+                this.lastResults = referencesResult;
+                vscode.commands.executeCommand("references-view.refresh");
+            } else {
+                this.resultsCallback(referencesResult);
+            }
         }
     }
+
+    public lastResults: ReferencesResult = null; // Saved for the final request after a preview occurs.
 
     public setResultsCallback(callback: (results: ReferencesResult) => void): void {
         this.symbolSearchInProgress = true;

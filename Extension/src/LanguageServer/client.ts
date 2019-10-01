@@ -628,9 +628,8 @@ export class DefaultClient implements Client {
                                             return;
                                         }
                                         referencesRequestPending = true;
-                                        this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
                                         // Register a single-fire handler for the reply.
-                                        this.client.references.setResultsCallback((result) => {
+                                        let resultCallback: (result: refs.ReferencesResult) => void = (result) => {
                                             referencesRequestPending = false;
                                             if (referencesPendingCancellations.length > 0) {
                                                 while (referencesPendingCancellations.length > 1) {
@@ -651,7 +650,14 @@ export class DefaultClient implements Client {
                                                 }
                                             });
                                             resolve(locations);
-                                        });
+                                        };
+                                        if (this.client.references.lastResults) {
+                                            resultCallback(this.client.references.lastResults);
+                                            this.client.references.lastResults = null;
+                                        } else {
+                                            this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
+                                            this.client.references.setResultsCallback(resultCallback);
+                                        }
                                     });
                                     token.onCancellationRequested(e => {
                                         if (params === referencesParams) {
