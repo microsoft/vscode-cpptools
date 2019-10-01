@@ -21,7 +21,7 @@
 	"ok.button": "Aceptar",
 	"cancel.button": "CANCELAR",
 	"compiler.path": "Ruta de acceso del compilador",
-	"compiler.path.description": "La ruta de acceso completa al compilador que use para compilar el proyecto (por ejemplo, {0}) para mejorar la precisión de IntelliSense. La extensión consultará el compilador para determinar las rutas de acceso de inclusión del sistema y las definiciones predeterminadas que se usarán para IntelliSense.",
+	"compiler.path.description": "La ruta de acceso completa al compilador que usa para compilar el proyecto (por ejemplo, {0}) y mejorar la precisión de IntelliSense. La extensión consultará el compilador para determinar las rutas de acceso de inclusión del sistema y las definiciones predeterminadas que se van a usar para IntelliSense.",
 	"specify.a.compiler": "Especifique la ruta de acceso de un compilador o seleccione la ruta de acceso de un compilador detectado en la lista desplegable.",
 	"no.compiler.paths.detected": "(No se han detectado rutas de acceso del compilador).",
 	"compiler.arguments": "Argumentos del compilador para modificar las inclusiones o definiciones utilizadas; por ejemplo, {0}, {1}, etc.",
