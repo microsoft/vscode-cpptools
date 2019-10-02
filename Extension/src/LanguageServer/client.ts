@@ -629,20 +629,20 @@ export class DefaultClient implements Client {
                                             return;
                                         }
                                         referencesRequestPending = true;
-                                        this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
                                         // Register a single-fire handler for the reply.
                                         let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult) => {
                                             referencesRequestPending = false;
                                             let locations: vscode.Location[] = [];
-                                            result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => { 
-                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) { 
-                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file); 
+                                            result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
+                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
+                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
                                                     let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
                                                     locations.push(new vscode.Location(uri, range));
                                                 }
                                             });
-                                            if (!this.client.references.referencesCanceledIgnoreResults) {
+                                            if (this.client.references.referencesCanceledIgnoreResults) {
                                                 this.client.references.referencesCanceledIgnoreResults = false;
+                                            } else {
                                                 resolve(locations);
                                             }
                                             if (referencesPendingCancellations.length > 0) {
@@ -677,7 +677,10 @@ export class DefaultClient implements Client {
                                     referencesPendingCancellations.push({ reject, callback });
                                     if (!cancelling) {
                                         renamePending = false;
-                                        this.client.references.referencesCanceledIgnoreResults = true;
+                                        this.client.references.referencesCanceled = true;
+                                        if (!referencesRequestPending) {
+                                            this.client.references.referencesCanceledIgnoreResults = true;
+                                        }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
@@ -761,7 +764,10 @@ export class DefaultClient implements Client {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject: () => { --renameRequestsPending; reject(); }, callback });
                                     if (!cancelling) {
-                                        this.client.references.referencesCanceledIgnoreResults = true;
+                                        this.client.references.referencesCanceled = true;
+                                        if (!referencesRequestPending) {
+                                            this.client.references.referencesCanceledIgnoreResults = true;
+                                        }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }

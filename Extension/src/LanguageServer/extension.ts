@@ -1203,66 +1203,39 @@ function onShowRefCommand(arg?: TreeNode): void {
 //     }
 // }
 
-function onRenameViewCancel(arg?: TreeNode): void {
+function onRenameViewCancel(arg?: any): void {
     getCurrentReferencesModel().cancelRename();
 }
 
-function onRenameViewDone(arg?: TreeNode): void {
+function onRenameViewDone(arg?: any): void {
     getCurrentReferencesModel().completeRename();
 }
 
 function onRenameViewRemove(arg?: TreeNode): void {
     arg.model.setRenameCandidate(arg.referenceItem);
-    // arg.referenceItem.isCandidate = true;
-    // arg.model.refreshCallback();
 }
 
 function onRenameViewAdd(arg?: TreeNode): void {
     arg.model.setRenamePending(arg.referenceItem);
-    // arg.referenceItem.isCandidate = false;
-    // arg.model.refreshCallback();
 }
 
-function onRenameViewRemoveAll(arg?: TreeNode): void {
-    arg.model.setAllRenamesCandidates();
-    // let currentRenameModel: RenameModel = getCurrentRenameModel();
-    // if (currentRenameModel) {
-    //     currentRenameModel.getPendingGroup().changeGroup();
-    //     currentRenameModel.updateProviders();
-    // }
+function onRenameViewRemoveAll(arg?: any): void {
+    getCurrentReferencesModel().setAllRenamesCandidates();
 }
 
-function onRenameViewAddAll(arg?: TreeNode): void {
-    arg.model.setAllRenamesPending();
-    // let currentRenameModel: RenameModel = getCurrentRenameModel();
-    // if (currentRenameModel) {
-    //     currentRenameModel.getCandidatesGroup().changeGroup();
-    //     currentRenameModel.updateProviders();
-    // }
+function onRenameViewAddAll(arg?: any): void {
+    getCurrentReferencesModel().setAllRenamesPending();
 }
 
 function onRenameViewRemoveFile(arg?: TreeNode): void {
-    arg.model.setFileRenamesCandidates(arg.filename);
-    // if (arg) {
-    //     arg.changeGroup();
-    //     arg.model.updateProviders();
-    // }
 }
 
 function onRenameViewAddFile(arg?: TreeNode): void {
-    arg.model.setFileRenamesPending(arg.filename);
-    // if (arg) {
-    //     arg.changeGroup();
-    //     arg.model.updateProviders();
-    // }
+    arg.model.setFileRenamesPending(arg);
 }
 
 function onRenameViewAddReferenceType(arg?: TreeNode): void {
     arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
-    // if (arg) {
-    //     arg.changeGroup();
-    //     arg.model.updateProviders();
-    // }
 }
 
 function reportMacCrashes(): void {

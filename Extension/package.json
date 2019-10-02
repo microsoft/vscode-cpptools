@@ -1520,6 +1520,16 @@
           "group": "navigation"
         },
         {
+          "command": "C_Cpp.referencesViewGroupByType",
+          "when": "view == CppRenameCandidatesView && refView.isGroupedByFile",
+          "group": "navigation@1"
+        },
+        {
+          "command": "C_Cpp.referencesViewUngroupByType",
+          "when": "view == CppRenameCandidatesView && !refView.isGroupedByFile",
+          "group": "navigation@1"
+        },
+        {
           "command": "CppRenameView.removeAll",
           "when": "view == CppRenamePendingView && cppRename:hasResults",
           "group": "navigation@1"
@@ -1537,7 +1547,7 @@
         {
           "command": "CppRenameView.addAll",
           "when": "view == CppRenameCandidatesView && cppRename:hasResults",
-          "group": "navigation"
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [

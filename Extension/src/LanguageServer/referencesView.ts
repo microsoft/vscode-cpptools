@@ -29,18 +29,21 @@ export class FindAllRefsView {
         }
         vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', hasResults);
     }
-
-    toggleGroupView(): void {
-        this.referenceViewProvider.toggleGroupView();
-    }
-
-    setData(results: ReferencesResult, isCanceled: boolean): void {
-        this.referencesModel = new ReferencesModel(results, false, isCanceled, null, this.referenceViewProvider.refresh);
+    
+    setData(results: ReferencesResult, isCanceled: boolean, groupByFile: boolean): void {
+        this.referencesModel = new ReferencesModel(results, false, isCanceled, groupByFile, null, () => { this.referenceViewProvider.refresh(); });
         this.referenceViewProvider.setModel(this.referencesModel);
     }
 
     clearData(): void {
         this.referenceViewProvider.clear();
+    }
+
+    setGroupBy(groupByFile: boolean): void {
+        if (this.referencesModel) {
+            this.referencesModel.groupByFile = groupByFile;
+            this.referenceViewProvider.refresh();
+        }
     }
 
     getResultsAsText(includeConfirmedReferences: boolean): string {
@@ -71,7 +74,6 @@ export class FindAllRefsView {
             fileRefs.push(line);
         }
 
-        //results = results.concat(confirmedRefs, otherRefs, fileRefs);
         return results.join('\n');
     }
 }

@@ -155,6 +155,7 @@ export class ReferencesManager {
     private resultsCallback: ReferencesResultCallback;
     private currentUpdateProgressTimer: NodeJS.Timeout;
     private currentUpdateProgressResolve: () => void;
+    public groupByFile: boolean = true;
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -176,7 +177,9 @@ export class ReferencesManager {
     }
 
     public toggleGroupView(): void {
-        this.findAllRefsView.toggleGroupView();
+        this.groupByFile = !this.groupByFile;
+        this.findAllRefsView.setGroupBy(this.groupByFile);
+        this.renameView.setGroupBy(this.groupByFile);
     }
 
     public UpdateProgressUICounter(mode: ReferencesCommandMode): void {
@@ -368,7 +371,7 @@ export class ReferencesManager {
                 if (!foundUnconfirmed) {
                     this.resultsCallback(referencesResult);
                 } else {
-                    this.renameView.setData(referencesResult, this.resultsCallback);
+                    this.renameView.setData(referencesResult, this.groupByFile, this.resultsCallback);
                     this.renameView.show(true);
                 }
             } else {
@@ -376,7 +379,7 @@ export class ReferencesManager {
                 this.resultsCallback(null);
             }
         } else {
-            this.findAllRefsView.setData(referencesResult, this.referencesCanceled);
+            this.findAllRefsView.setData(referencesResult, this.referencesCanceled, this.groupByFile);
 
             // Display data based on command mode: peek references OR find all references
             if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
@@ -391,11 +394,8 @@ export class ReferencesManager {
             }
             if (referencesResult.isFinished && this.referencesRequestHasOccurred && !this.referencesCanceledIgnoreResults) {
                 this.lastResults = referencesResult;
-                this.lastResults = referencesResult;
                 this.referencesViewFindPending = true;
                 vscode.commands.executeCommand("references-view.refresh");
-                vscode.commands.executeCommand("references-view.refresh");
-            } else {
             } else {
                 this.resultsCallback(referencesResult);
             }
@@ -414,8 +414,12 @@ export class ReferencesManager {
     }
 
     public clearViews(): void {
-        this.referencesChannel.clear();
-        this.findAllRefsView.show(false);
         this.renameView.show(false);
+
+        // Rename should not clear the Find All References view, as it's in a different view container
+        if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
+            this.referencesChannel.clear();
+            this.findAllRefsView.show(false);
+        }
     }
 }

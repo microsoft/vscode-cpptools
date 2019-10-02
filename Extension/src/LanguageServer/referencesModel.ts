@@ -16,16 +16,14 @@ export class ReferencesModel {
 
     private renameResultsCallback: ReferencesResultCallback;
     private originalSymbol: string = "";
+    public groupByFile: boolean;
 
-    constructor(resultsInput: ReferencesResult, readonly isRename: boolean, readonly isCanceled: boolean, resultsCallback: ReferencesResultCallback, readonly refreshCallback: () => void) {
+    constructor(resultsInput: ReferencesResult, readonly isRename: boolean, readonly isCanceled: boolean, groupByFile: boolean, resultsCallback: ReferencesResultCallback, readonly refreshCallback: () => void) {
         this.originalSymbol = resultsInput.text;
         this.renameResultsCallback = resultsCallback;
         currentReferencesModel = this;
-        //this.createItems(resultsInput); // creates specific groups for ReferenceFileItem, ReferenceItem, ReferenceTypeItem objects.
-        //this.createNodes(resultsInput); // creates TreeNode objects.
-    //}
+        this.groupByFile = groupByFile;
 
-    //private createItems(resultsInput: ReferencesResult): void {
         let results: ReferenceInfo[];
         if (this.isRename) {
             results = resultsInput.referenceInfos;
@@ -93,39 +91,6 @@ export class ReferencesModel {
         }
     }
 
-    // private createNodes(resultsInput: ReferencesResult): void {
-    //     let results: ReferenceInfo[];
-    //     if (this.isRename) {
-    //         results = resultsInput.referenceInfos;
-    //     } else {
-    //         results = resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed);
-    //     }
-    //     // Create a node for each result.
-    //     for (let r of results) {
-    //         let noReferenceLocation: boolean = (r.position.line === 0 && r.position.character === 0);
-    //         if (noReferenceLocation) {
-    //             let node: TreeNode = new TreeNode(this, NodeType.fileWithPendingRef);
-    //             node.fileUri = vscode.Uri.file(r.file);
-    //             node.filename = r.file;
-    //             node.referenceType = r.type;
-    //             this.nodes.push(node);
-    //         } else {
-    //             const uri: vscode.Uri = vscode.Uri.file(r.file);
-    //             const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + this.originalSymbol.length);
-    //             const location: vscode.Location = new vscode.Location(uri, range);
-
-    //             let node: TreeNode = new TreeNode(this, NodeType.reference);
-    //             node.fileUri = uri;
-    //             node.filename = r.file;
-    //             node.referencePosition = r.position;
-    //             node.referenceLocation = location;
-    //             node.referenceText = r.text;
-    //             node.referenceType = r.type;
-    //             this.nodes.push(node);
-    //         }
-    //     }
-    // }
-
     hasResults(): boolean {
         return this.referenceItems.length > 0 || this.fileItems.length > 0;
     }
@@ -164,10 +129,10 @@ export class ReferencesModel {
         let filteredFiles: TreeNode[] = [];
 
         // Get files by reference type if refType is specified.
-        if (refType) {
+        if (refType !== undefined) {
             filteredFiles = this.nodes.filter(i => i.referenceType === refType && (!this.isRename || (isCandidate === i.referenceItem.isCandidate)));
         } else if (this.isRename) {
-            filteredFiles = this.nodes.filter(i => i.referenceType === refType && (!this.isRename || (isCandidate === i.referenceItem.isCandidate)));
+            filteredFiles = this.nodes.filter(i => isCandidate === i.referenceItem.isCandidate);
         } else {
             filteredFiles = this.nodes;
         }
@@ -196,26 +161,14 @@ export class ReferencesModel {
         if (refType === undefined && filename) {
             // Get all references in filename
             filteredReferences = this.nodes.filter(i => i.filename === filename && (!this.isRename || (isCandidate === i.referenceItem.isCandidate)));
-        } else if (refType && filename) {
+        } else if (refType !== undefined && filename) {
             // Get specific reference types in filename
-            filteredReferences = this.nodes.filter(i => i.filename === filename && (!this.isRename || (isCandidate === i.referenceItem.isCandidate)));
+            filteredReferences = this.nodes.filter(i => i.filename === filename && i.referenceType === refType && (!this.isRename || (isCandidate === i.referenceItem.isCandidate)));
         } else if (this.isRename) {
             filteredReferences = this.nodes.filter(i => isCandidate === i.referenceItem.isCandidate);
         } else {
             filteredReferences = this.nodes;
         }
-
-        // // Create new nodes for reference objects
-        // for (let ref of filteredReferences) {
-        //     let node: TreeNode = new TreeNode(this, NodeType.reference);
-        //     node.filename = ref.filename;
-        //     node.fileUri = ref.fileUri;
-        //     node.referenceLocation = ref.referenceLocation;
-        //     node.referencePosition = ref.referencePosition;
-        //     node.referenceText = ref.referenceText;
-        //     node.referenceType = ref.referenceType;
-        //     result.push(node);
-        // }
 
         return filteredReferences;
     }
@@ -325,18 +278,18 @@ export class ReferencesModel {
         this.refreshCallback();
     }
 
-    setFileRenamesCandidates(filename: string): void {
+    setFileRenamesCandidates(node: TreeNode): void {
         this.nodes.forEach(n => {
-            if (n.filename === filename) {
+            if (n.filename === node.filename) {
                 n.referenceItem.isCandidate = true;
             }
         });
         this.refreshCallback();
     }
 
-    setFileRenamesPending(filename: string): void {
+    setFileRenamesPending(node: TreeNode): void {
         this.nodes.forEach(n => {
-            if (n.filename === filename) {
+            if (n.filename === node.filename && node.referenceType === n.referenceType) {
                 n.referenceItem.isCandidate = false;
             }
         });
@@ -444,8 +397,6 @@ export class TreeNode {
     public referenceType?: ReferenceType | undefined;
 
     public referenceItem?: ReferenceItem | undefined;
-
-    // TODO: add optional properties for rename item
 
     constructor(readonly model: ReferencesModel, readonly node: NodeType) {
     }
