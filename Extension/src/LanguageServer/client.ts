@@ -613,7 +613,7 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
                         public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
-                            // tslint:disable-next-line: promise-must-complete
+                        // tslint:disable-next-line: promise-must-complete
                             return new Promise<vscode.Location[]>((resolve, reject) => {
                                 let callback: () => void = () => {
                                     let params: FindAllReferencesParams = {
