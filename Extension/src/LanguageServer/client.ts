@@ -625,7 +625,9 @@ export class DefaultClient implements Client {
                                         // The current request is represented by referencesParams.  If a request detects
                                         // referencesParams does not match the object used when creating the request, abort it.
                                         if (params !== referencesParams) {
-                                            reject();
+                                            // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                                            let locations: vscode.Location[] = [];
+                                            resolve(locations);
                                             return;
                                         }
                                         referencesRequestPending = true;
@@ -674,7 +676,11 @@ export class DefaultClient implements Client {
 
                                 if (referencesRequestPending || (this.client.references.symbolSearchInProgress && !this.client.references.referencesViewFindPending)) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                    referencesPendingCancellations.push({ reject, callback });
+                                    referencesPendingCancellations.push({ reject: () => {
+                                        // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                                        let locations: vscode.Location[] = [];
+                                        resolve(locations);
+                                    }, callback });
                                     if (!cancelling) {
                                         renamePending = false;
                                         this.client.references.referencesCanceled = true;
@@ -721,7 +727,10 @@ export class DefaultClient implements Client {
                                             if (--renameRequestsPending === 0) {
                                                 renamePending = false;
                                             }
-                                            reject();
+
+                                            // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                                            let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                            resolve(workspaceEdit);
                                             return;
                                         }
                                         referencesRequestPending = true;
@@ -762,7 +771,13 @@ export class DefaultClient implements Client {
 
                                 if (referencesRequestPending || this.client.references.symbolSearchInProgress) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                    referencesPendingCancellations.push({ reject: () => { --renameRequestsPending; reject(); }, callback });
+                                    referencesPendingCancellations.push({ reject: () =>
+                                        {
+                                            --renameRequestsPending;
+                                            // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                                            let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                            resolve(workspaceEdit);
+                                        }, callback });
                                     if (!cancelling) {
                                         this.client.references.referencesCanceled = true;
                                         if (!referencesRequestPending) {
