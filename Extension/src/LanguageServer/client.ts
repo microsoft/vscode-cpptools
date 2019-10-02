@@ -632,7 +632,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         // Register a single-fire handler for the reply.
-                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult, doResolve: boolean) => {
+                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult, referencesCanceledWhilePreviewing: boolean) => {
                                             referencesRequestPending = false;
                                             let locations: vscode.Location[] = [];
                                             if (result) {
@@ -644,7 +644,8 @@ export class DefaultClient implements Client {
                                                     }
                                                 });
                                             }
-                                            if (doResolve) {
+                                            // If references were cancelled while in a preview state, there is not an outstanding promise.
+                                            if (!referencesCanceledWhilePreviewing) {
                                                 resolve(locations);
                                             }
                                             if (referencesPendingCancellations.length > 0) {
@@ -685,7 +686,7 @@ export class DefaultClient implements Client {
                                         renamePending = false;
                                         this.client.references.referencesCanceled = true;
                                         if (!referencesRequestPending) {
-                                            this.client.references.referencesCanceledIgnoreResults = true;
+                                            this.client.references.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
@@ -734,7 +735,7 @@ export class DefaultClient implements Client {
                                             return;
                                         }
                                         referencesRequestPending = true;
-                                        this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
+                                        this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult, referencesCanceledWhilePreviewing: boolean) => {
                                             referencesRequestPending = false;
                                             --renameRequestsPending;
                                             let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -781,7 +782,7 @@ export class DefaultClient implements Client {
                                     if (!cancelling) {
                                         this.client.references.referencesCanceled = true;
                                         if (!referencesRequestPending) {
-                                            this.client.references.referencesCanceledIgnoreResults = true;
+                                            this.client.references.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();

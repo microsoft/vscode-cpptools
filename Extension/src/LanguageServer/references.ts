@@ -37,7 +37,7 @@ export interface ReferencesResult {
     isFinished: boolean;
 }
 
-export type ReferencesResultCallback = (result: ReferencesResult, doResolve: boolean) => void;
+export type ReferencesResultCallback = (result: ReferencesResult, referencesCanceledWhilePreviewing: boolean) => void;
 
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
@@ -138,7 +138,7 @@ export class ReferencesManager {
     private referencesDelayProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
     public referencesCanceled: boolean = false;
-    public referencesCanceledIgnoreResults: boolean = false;
+    public referencesCanceledWhilePreviewing: boolean = false;
     private referencesStartedWhileTagParsing: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
@@ -343,7 +343,7 @@ export class ReferencesManager {
             // and we need to ensure these values are already reset before that happens.
             this.referencesRequestHasOccurred = false;
             this.referencesCanceled = false;
-            this.referencesCanceledIgnoreResults = false;
+            this.referencesCanceledWhilePreviewing = false;
 
             this.resultsCallback(null, true);
         } else {
@@ -360,7 +360,7 @@ export class ReferencesManager {
             // and we need to ensure these values are already reset before that happens.
             this.referencesRequestHasOccurred = false;
             this.referencesCanceled = false;
-            this.referencesCanceledIgnoreResults = false;
+            this.referencesCanceledWhilePreviewing = false;
 
             this.resultsCallback(null, true);
         } else {
@@ -395,12 +395,12 @@ export class ReferencesManager {
 
         // Need to reset these before we call the callback, as the callback my trigger another request
         // and we need to ensure these values are already reset before that happens.
-        let doResolve: boolean = !this.referencesCanceledIgnoreResults;
+        let referencesCanceledWhilePreviewing: boolean = this.referencesCanceledWhilePreviewing;
         let referencesRequestHasOccurred: boolean = this.referencesRequestHasOccurred;
         let referencesCanceled: boolean = this.referencesCanceled;
         this.referencesRequestHasOccurred = false;
         this.referencesCanceled = false;
-        this.referencesCanceledIgnoreResults = false;
+        this.referencesCanceledWhilePreviewing = false;
 
         let currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
 
@@ -447,12 +447,12 @@ export class ReferencesManager {
             } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            if (referencesResult.isFinished && referencesRequestHasOccurred && doResolve) {
+            if (referencesResult.isFinished && referencesRequestHasOccurred && !referencesCanceledWhilePreviewing) {
                 this.lastResults = referencesResult;
                 this.referencesViewFindPending = true;
                 vscode.commands.executeCommand("references-view.refresh");
             } else {
-                this.resultsCallback(referencesResult, doResolve);
+                this.resultsCallback(referencesResult, referencesCanceledWhilePreviewing);
             }
         }
     }
