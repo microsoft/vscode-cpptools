@@ -772,13 +772,12 @@ export class DefaultClient implements Client {
 
                                 if (referencesRequestPending || this.client.references.symbolSearchInProgress) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                    referencesPendingCancellations.push({ reject: () =>
-                                        {
-                                            --renameRequestsPending;
-                                            // Complete with nothing instead of rejecting, to avoid an error message from VS Code
-                                            let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                            resolve(workspaceEdit);
-                                        }, callback });
+                                    referencesPendingCancellations.push({ reject: () => {
+                                        --renameRequestsPending;
+                                        // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                                        let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                        resolve(workspaceEdit);
+                                    }, callback });
                                     if (!cancelling) {
                                         this.client.references.referencesCanceled = true;
                                         if (!referencesRequestPending) {
