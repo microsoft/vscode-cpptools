@@ -29,7 +29,7 @@ export class FindAllRefsView {
         }
         vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', hasResults);
     }
-    
+
     setData(results: ReferencesResult, isCanceled: boolean, groupByFile: boolean): void {
         this.referencesModel = new ReferencesModel(results, false, isCanceled, groupByFile, null, () => { this.referenceViewProvider.refresh(); });
         this.referenceViewProvider.setModel(this.referencesModel);

@@ -217,13 +217,13 @@ interface LocalizeSymbolInformation {
     suffix: LocalizeStringParams;
 }
 
-interface RenameParams {
+export interface RenameParams {
     newName: string;
     position: Position;
     textDocument: TextDocumentIdentifier;
 }
 
-interface FindAllReferencesParams {
+export interface FindAllReferencesParams {
     position: Position;
     textDocument: TextDocumentIdentifier;
 }
@@ -630,19 +630,19 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         // Register a single-fire handler for the reply.
-                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult) => {
+                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult, doResolve: boolean) => {
                                             referencesRequestPending = false;
                                             let locations: vscode.Location[] = [];
-                                            result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
-                                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
-                                                    let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
-                                                    let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
-                                                    locations.push(new vscode.Location(uri, range));
-                                                }
-                                            });
-                                            if (this.client.references.referencesCanceledIgnoreResults) {
-                                                this.client.references.referencesCanceledIgnoreResults = false;
-                                            } else {
+                                            if (result) {
+                                                result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
+                                                    if (referenceInfo.type === refs.ReferenceType.Confirmed) {
+                                                        let uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
+                                                        let range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
+                                                        locations.push(new vscode.Location(uri, range));
+                                                    }
+                                                });
+                                            }
+                                            if (doResolve) {
                                                 resolve(locations);
                                             }
                                             if (referencesPendingCancellations.length > 0) {
@@ -659,10 +659,10 @@ export class DefaultClient implements Client {
                                         if (this.client.references.lastResults) {
                                             let lastResults: refs.ReferencesResult = this.client.references.lastResults;
                                             this.client.references.lastResults = null;
-                                            resultCallback(lastResults);
+                                            resultCallback(lastResults, true);
                                         } else {
-                                            this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
                                             this.client.references.setResultsCallback(resultCallback);
+                                            this.client.references.startFindAllReferences(params);
                                         }
                                     });
                                     token.onCancellationRequested(e => {
@@ -725,8 +725,7 @@ export class DefaultClient implements Client {
                                             return;
                                         }
                                         referencesRequestPending = true;
-                                        this.client.languageClient.sendNotification(RenameNotification, params);
-                                        this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult) => {
+                                        this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
                                             referencesRequestPending = false;
                                             --renameRequestsPending;
                                             let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -744,8 +743,8 @@ export class DefaultClient implements Client {
                                                 if (renameRequestsPending === 0) {
                                                     renamePending = false;
                                                 }
-                                                // If rename UI Was canceled, we will get a null result
-                                                // If null, return an empty list to avoid Rename failure dialog
+                                                // If rename UI was canceled, we will get a null result.
+                                                // If null, return an empty list to avoid Rename failure dialog.
                                                 if (referencesResult !== null) {
                                                     for (let reference of referencesResult.referenceInfos) {
                                                         let uri: vscode.Uri = vscode.Uri.file(reference.file);
@@ -757,6 +756,7 @@ export class DefaultClient implements Client {
                                             }
                                             resolve(workspaceEdit);
                                         });
+                                        this.client.references.startRename(params);
                                     });
                                 };
 
@@ -817,6 +817,14 @@ export class DefaultClient implements Client {
 
         this.colorizationSettings = new ColorizationSettings(this.RootUri);
         this.references = new refs.ReferencesManager(this);
+    }
+
+    public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
+        this.languageClient.sendNotification(FindAllReferencesNotification, params);
+    }
+
+    public sendRenameNofication(params: RenameParams): void {
+        this.languageClient.sendNotification(RenameNotification, params);
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {

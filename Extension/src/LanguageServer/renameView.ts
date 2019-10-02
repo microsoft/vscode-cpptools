@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferencesResult, ReferencesResultCallback } from './references';
-import { ReferencesModel } from './referencesModel';
+import { ReferencesResult } from './references';
+import { ReferencesModel, RenameResultCallback } from './referencesModel';
 import { ReferenceDataProvider } from './referencesProvider';
 
 export class RenameView {
@@ -45,7 +45,7 @@ export class RenameView {
         }
     }
 
-    setData(results: ReferencesResult, groupByFile: boolean, resultsCallback: ReferencesResultCallback): void {
+    setData(results: ReferencesResult, groupByFile: boolean, resultsCallback: RenameResultCallback): void {
         this.referencesModel = new ReferencesModel(results, true, false, groupByFile, resultsCallback, () => {
             this.renamePendingDataProvider.refresh();
             this.renameCandidatesDataProvider.refresh();

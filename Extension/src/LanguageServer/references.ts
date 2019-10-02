@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { DefaultClient } from './client';
+import { DefaultClient, RenameParams, FindAllReferencesParams } from './client';
 import { FindAllRefsView } from './referencesView';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
@@ -37,7 +37,7 @@ export interface ReferencesResult {
     isFinished: boolean;
 }
 
-export type ReferencesResultCallback = (result: ReferencesResult) => void;
+export type ReferencesResultCallback = (result: ReferencesResult, doResolve: boolean) => void;
 
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
@@ -133,12 +133,12 @@ export class ReferencesManager {
     private referencesCurrentProgress: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number;
     private referencesPrevProgressMessage: string;
-    public referencesRequestHasOccurred: boolean;
+    public referencesRequestHasOccurred: boolean = false;
     public referencesViewFindPending: boolean = false;
     private referencesDelayProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
-    public referencesCanceled: boolean;
-    public referencesCanceledIgnoreResults: boolean;
+    public referencesCanceled: boolean = false;
+    public referencesCanceledIgnoreResults: boolean = false;
     private referencesStartedWhileTagParsing: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
@@ -276,9 +276,6 @@ export class ReferencesManager {
             ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
         this.client.setReferencesCommandMode(mode);
 
-        this.referencesRequestHasOccurred = false;
-        this.referencesCanceled = false;
-        this.referencesCanceledIgnoreResults = false;
         this.referencesPrevProgressIncrement = 0;
         this.referencesPrevProgressMessage = "";
         this.referencesCurrentProgressUICounter = 0;
@@ -337,6 +334,40 @@ export class ReferencesManager {
         }
     }
 
+    public startRename(params: RenameParams): void {
+        if (this.referencesCanceled) {
+            // Request was canceled before the initial request was sent, so cancel message was already sent.
+            // Deliver empty cancelled result.
+
+            // Need to reset these before we call the callback, as the callback my trigger another request
+            // and we need to ensure these values are already reset before that happens.
+            this.referencesRequestHasOccurred = false;
+            this.referencesCanceled = false;
+            this.referencesCanceledIgnoreResults = false;
+
+            this.resultsCallback(null, true);
+        } else {
+            this.client.sendRenameNofication(params);
+        }
+    }
+
+    public startFindAllReferences(params: FindAllReferencesParams): void {
+        if (this.referencesCanceled) {
+            // Request was canceled before the initial request was sent, so cancel message was already sent.
+            // Deliver empty cancelled result.
+
+            // Need to reset these before we call the callback, as the callback my trigger another request
+            // and we need to ensure these values are already reset before that happens.
+            this.referencesRequestHasOccurred = false;
+            this.referencesCanceled = false;
+            this.referencesCanceledIgnoreResults = false;
+
+            this.resultsCallback(null, true);
+        } else {
+            this.client.sendFindAllReferencesNotification(params);
+        }
+    }
+
     public processResults(referencesResult: ReferencesResult): void {
         this.initializeViews();
         this.referencesViewFindPending = false;
@@ -362,7 +393,17 @@ export class ReferencesManager {
             }
         }
 
+        // Need to reset these before we call the callback, as the callback my trigger another request
+        // and we need to ensure these values are already reset before that happens.
+        let doResolve: boolean = !this.referencesCanceledIgnoreResults;
+        let referencesRequestHasOccurred: boolean = this.referencesRequestHasOccurred;
+        let referencesCanceled: boolean = this.referencesCanceled;
+        this.referencesRequestHasOccurred = false;
+        this.referencesCanceled = false;
+        this.referencesCanceledIgnoreResults = false;
+
         let currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
+
         if (referencesResult.isFinished) {
             this.symbolSearchInProgress = false;
             clearInterval(this.referencesDelayProgress);
@@ -376,25 +417,28 @@ export class ReferencesManager {
         }
 
         if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
-            if (!this.referencesCanceled) {
+            if (!referencesCanceled) {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
-                    this.resultsCallback(referencesResult);
+                    this.resultsCallback(referencesResult, true);
                 } else {
-                    this.renameView.setData(referencesResult, this.groupByFile, this.resultsCallback);
+                    this.renameView.setData(referencesResult, this.groupByFile, (result: ReferencesResult) => {
+                        this.referencesCanceled = false;
+                        this.resultsCallback(result, true);
+                    });
                     this.renameView.show(true);
                 }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
-                this.resultsCallback(null);
+                this.resultsCallback(null, true);
             }
         } else {
-            this.findAllRefsView.setData(referencesResult, this.referencesCanceled, this.groupByFile);
+            this.findAllRefsView.setData(referencesResult, referencesCanceled, this.groupByFile);
 
             // Display data based on command mode: peek references OR find all references
             if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
-                let showConfirmedReferences: boolean = this.referencesCanceled;
+                let showConfirmedReferences: boolean = referencesCanceled;
                 let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
                 if (peekReferencesResults) {
                     this.referencesChannel.appendLine(peekReferencesResults);
@@ -403,12 +447,12 @@ export class ReferencesManager {
             } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
                 this.findAllRefsView.show(true);
             }
-            if (referencesResult.isFinished && this.referencesRequestHasOccurred && !this.referencesCanceledIgnoreResults) {
+            if (referencesResult.isFinished && referencesRequestHasOccurred && doResolve) {
                 this.lastResults = referencesResult;
                 this.referencesViewFindPending = true;
                 vscode.commands.executeCommand("references-view.refresh");
             } else {
-                this.resultsCallback(referencesResult);
+                this.resultsCallback(referencesResult, doResolve);
             }
         }
     }

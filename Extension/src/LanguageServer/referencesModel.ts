@@ -4,7 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceType, ReferenceInfo, ReferencesResult, ReferencesResultCallback } from './references';
+import { ReferenceType, ReferenceInfo, ReferencesResult } from './references';
+
+export type RenameResultCallback = (result: ReferencesResult) => void;
 
 let currentReferencesModel: ReferencesModel;
 
@@ -14,11 +16,11 @@ export class ReferencesModel {
     readonly referenceItems: ReferenceItem[] = [];
     readonly referenceTypeItems: ReferenceTypeItem[] = [];
 
-    private renameResultsCallback: ReferencesResultCallback;
+    private renameResultsCallback: RenameResultCallback;
     private originalSymbol: string = "";
     public groupByFile: boolean;
 
-    constructor(resultsInput: ReferencesResult, readonly isRename: boolean, readonly isCanceled: boolean, groupByFile: boolean, resultsCallback: ReferencesResultCallback, readonly refreshCallback: () => void) {
+    constructor(resultsInput: ReferencesResult, readonly isRename: boolean, readonly isCanceled: boolean, groupByFile: boolean, resultsCallback: RenameResultCallback, readonly refreshCallback: () => void) {
         this.originalSymbol = resultsInput.text;
         this.renameResultsCallback = resultsCallback;
         currentReferencesModel = this;
@@ -228,7 +230,7 @@ export class ReferencesModel {
 
     cancelRename(): void {
         if (this.renameResultsCallback) {
-            let callback: ReferencesResultCallback = this.renameResultsCallback;
+            let callback: RenameResultCallback = this.renameResultsCallback;
             this.renameResultsCallback = null;
             callback(null);
         }
@@ -253,7 +255,7 @@ export class ReferencesModel {
             text: this.originalSymbol,
             isFinished: true
         };
-        let callback: ReferencesResultCallback = this.renameResultsCallback;
+        let callback: RenameResultCallback = this.renameResultsCallback;
         this.renameResultsCallback = null;
         callback(results);
     }
