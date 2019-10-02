@@ -21,7 +21,7 @@
 	"ok.button": "OK",
 	"cancel.button": "ANNULER",
 	"compiler.path": "Chemin du compilateur",
-	"compiler.path.description": "Chemin complet du compilateur que vous utilisez pour générer votre projet, par exemple, {0}, pour améliorer la précision d'IntelliSense. L'extension interroge le compilateur pour déterminer les chemins d'inclusion système et les définitions par défaut à utiliser pour IntelliSense.",
+	"compiler.path.description": "Chemin complet du compilateur utilisé pour générer le projet, par exemple {0}, afin d'améliorer la précision d'IntelliSense. L'extension interroge le compilateur pour déterminer les chemins include système et les définitions par défaut à utiliser pour IntelliSense.",
 	"specify.a.compiler": "Spécifiez un chemin de compilateur ou sélectionnez un chemin de compilateur détecté dans la liste déroulante.",
 	"no.compiler.paths.detected": "(Aucun chemin de compilateur détecté)",
 	"compiler.arguments": "Arguments du compilateur permettant de modifier les inclusions ou les définitions utilisées, par exemple, {0}, {1}, etc.",
