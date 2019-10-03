@@ -644,7 +644,7 @@ export class DefaultClient implements Client {
                                                     }
                                                 });
                                             }
-                                            // If references were cancelled while in a preview state, there is not an outstanding promise.
+                                            // If references were canceled while in a preview state, there is not an outstanding promise.
                                             if (!referencesCanceledWhilePreviewing) {
                                                 resolve(locations);
                                             }

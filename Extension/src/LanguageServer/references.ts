@@ -338,7 +338,7 @@ export class ReferencesManager {
     public startRename(params: RenameParams): void {
         if (this.referencesCanceled) {
             // Request was canceled before the initial request was sent, so cancel message was already sent.
-            // Deliver empty cancelled result.
+            // Deliver empty canceled result.
 
             // Need to reset these before we call the callback, as the callback my trigger another request
             // and we need to ensure these values are already reset before that happens.
@@ -355,7 +355,7 @@ export class ReferencesManager {
     public startFindAllReferences(params: FindAllReferencesParams): void {
         if (this.referencesCanceled) {
             // Request was canceled before the initial request was sent, so cancel message was already sent.
-            // Deliver empty cancelled result.
+            // Deliver empty canceled result.
 
             // Need to reset these before we call the callback, as the callback my trigger another request
             // and we need to ensure these values are already reset before that happens.

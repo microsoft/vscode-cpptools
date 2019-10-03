@@ -65,7 +65,7 @@ export class FindAllRefsView {
             }
         }
 
-        // // Get files with pending references items (location of reference is pending)
+        // Get files with pending references items (location of reference is pending)
         let fileReferences: ReferenceFileItem[] = this.referencesModel.fileItems.filter(i => i.referenceItemsPending);
         for (let fileRef of fileReferences) {
             let line: string =
