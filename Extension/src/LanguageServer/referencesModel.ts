@@ -35,9 +35,7 @@ export class ReferencesModel {
         for (let r of results) {
             // Add reference type if it doesn't exist
             let refTypeItem: ReferenceTypeItem;
-            let indexRef: number = this.referenceTypeItems.findIndex(function(i): boolean {
-                return i.type === r.type;
-            });
+            let indexRef: number = this.referenceTypeItems.findIndex(i => i.type === r.type);
             if (indexRef < 0) {
                 refTypeItem = new ReferenceTypeItem(r.type);
                 this.referenceTypeItems.push(refTypeItem);
@@ -49,9 +47,7 @@ export class ReferencesModel {
 
             // Add file if it doesn't exist
             let fileItem: ReferenceFileItem;
-            let index: number = this.fileItems.findIndex(function(item): boolean {
-                return item.name === r.file;
-             });
+            let index: number = this.fileItems.findIndex(item => item.name === r.file);
             if (index < 0) {
                 const uri: vscode.Uri = vscode.Uri.file(r.file);
                 fileItem = new ReferenceFileItem(uri, r.file, refTypeItem);
@@ -95,22 +91,6 @@ export class ReferencesModel {
 
     hasResults(): boolean {
         return this.referenceItems.length > 0 || this.fileItems.length > 0;
-    }
-
-    getReferenceCanceledGroup(): ReferenceTypeItem[] {
-        let group: ReferenceTypeItem[] = [];
-        let refType: ReferenceTypeItem = new ReferenceTypeItem(ReferenceType.ConfirmationInProgress);
-        refType.addFiles(this.fileItems);
-        group.push(refType);
-        return group;
-    }
-
-    getReferenceCanceledGroup2(): TreeNode[] {
-        let group: TreeNode[] = [];
-        let node: TreeNode = new TreeNode(this, NodeType.referenceType);
-        node.referenceType = ReferenceType.ConfirmationInProgress;
-        group.push(node);
-        return group;
     }
 
     getReferenceTypeNodes(): TreeNode[] {
@@ -238,7 +218,6 @@ export class ReferencesModel {
 
     completeRename(): void {
         let referenceInfos: ReferenceInfo[] = [];
-        // TODO: Scan for all nodes with !isCandidate
         this.nodes.forEach(n => {
             if (!n.referenceItem.isCandidate) {
                 let referenceInfo: ReferenceInfo = {
@@ -337,9 +316,7 @@ export class ReferenceTypeItem {
     }
 
     private indexOfFile(fileName: string): number {
-        return this.files.findIndex(function(item): boolean {
-            return item.name === fileName;
-        });
+        return this.files.findIndex(item => item.name === fileName);
     }
 }
 
