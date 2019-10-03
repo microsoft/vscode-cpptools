@@ -10,6 +10,7 @@ import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
 import { RenameView } from './renameView';
 import * as logger from '../logger';
+import { PersistentState } from './persistentState';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -156,7 +157,7 @@ export class ReferencesManager {
     private resultsCallback: ReferencesResultCallback;
     private currentUpdateProgressTimer: NodeJS.Timeout;
     private currentUpdateProgressResolve: () => void;
-    public groupByFile: boolean = true;
+    public groupByFile: PersistentState<boolean> = new PersistentState<boolean>("CPP.referencesGroupByFile", false);
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -176,9 +177,9 @@ export class ReferencesManager {
     }
 
     public toggleGroupView(): void {
-        this.groupByFile = !this.groupByFile;
-        this.findAllRefsView.setGroupBy(this.groupByFile);
-        this.renameView.setGroupBy(this.groupByFile);
+        this.groupByFile.Value = !this.groupByFile.Value;
+        this.findAllRefsView.setGroupBy(this.groupByFile.Value);
+        this.renameView.setGroupBy(this.groupByFile.Value);
     }
 
     public UpdateProgressUICounter(mode: ReferencesCommandMode): void {
@@ -423,7 +424,7 @@ export class ReferencesManager {
                 if (!foundUnconfirmed) {
                     this.resultsCallback(referencesResult, true);
                 } else {
-                    this.renameView.setData(referencesResult, this.groupByFile, (result: ReferencesResult) => {
+                    this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult) => {
                         this.referencesCanceled = false;
                         this.resultsCallback(result, true);
                     });
@@ -434,7 +435,7 @@ export class ReferencesManager {
                 this.resultsCallback(null, true);
             }
         } else {
-            this.findAllRefsView.setData(referencesResult, referencesCanceled, this.groupByFile);
+            this.findAllRefsView.setData(referencesResult, referencesCanceled, this.groupByFile.Value);
 
             // Display data based on command mode: peek references OR find all references
             if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
