@@ -133,12 +133,10 @@ export class ReferenceDataProvider implements vscode.TreeDataProvider<TreeNode> 
         }
 
         if (element instanceof TreeNode) {
-            // Replacement for ReferenceFileItem
             if (element.node === NodeType.file) {
                 let type: ReferenceType = (this.referencesModel.isRename && !this.isCandidates) ? undefined : element.referenceType;
                 return this.referencesModel.getReferenceNodes(element.filename, type, this.isCandidates);
             }
-            // Replacement for ReferenceTypeItem
             if (element.node === NodeType.referenceType) {
                 return this.referencesModel.getFileNodes(element.referenceType, this.isCandidates);
             }

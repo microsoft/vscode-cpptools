@@ -1175,11 +1175,11 @@ function onRenameViewDone(arg?: any): void {
 }
 
 function onRenameViewRemove(arg?: TreeNode): void {
-    arg.model.setRenameCandidate(arg.referenceItem);
+    arg.model.setRenameCandidate(arg);
 }
 
 function onRenameViewAdd(arg?: TreeNode): void {
-    arg.model.setRenamePending(arg.referenceItem);
+    arg.model.setRenamePending(arg);
 }
 
 function onRenameViewRemoveAll(arg?: any): void {

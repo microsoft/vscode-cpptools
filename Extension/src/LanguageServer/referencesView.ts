@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
 import { ReferenceDataProvider } from './referencesProvider';
-import { ReferencesModel, ReferenceFileItem } from './referencesModel';
+import { ReferencesModel, NodeType, TreeNode } from './referencesModel';
 
 export class FindAllRefsView {
     private referencesModel: ReferencesModel;
@@ -52,25 +52,27 @@ export class FindAllRefsView {
         let otherRefs: string[] = [];
         let fileRefs: string[] = [];
 
-        for (let ref of this.referencesModel.referenceItems) {
-            let line: string =
-                ("[" + getReferenceTagString(ref.type, this.referencesModel.isCanceled) + "] "
-                + ref.parent.name
-                + ":" + (ref.position.line + 1) + ":" + (ref.position.character + 1)
-                + " " + ref.text);
-            if (includeConfirmedReferences && ref.type === ReferenceType.Confirmed) {
-                confirmedRefs.push(line);
-            } else {
-                otherRefs.push(line);
+        for (let ref of this.referencesModel.nodes) {
+            if (ref.node === NodeType.reference) {
+                let line: string =
+                    ("[" + getReferenceTagString(ref.referenceType, this.referencesModel.isCanceled) + "] "
+                    + ref.filename
+                    + ":" + (ref.referencePosition.line + 1) + ":" + (ref.referencePosition.character + 1)
+                    + " " + ref.referenceText);
+                if (includeConfirmedReferences && ref.referenceType === ReferenceType.Confirmed) {
+                    confirmedRefs.push(line);
+                } else {
+                    otherRefs.push(line);
+                }
             }
         }
 
         // Get files with pending references items (location of reference is pending)
-        let fileReferences: ReferenceFileItem[] = this.referencesModel.fileItems.filter(i => i.referenceItemsPending);
+        let fileReferences: TreeNode[] = this.referencesModel.nodes.filter(i => (i.referencePosition.line === 0 && i.referencePosition.character === 0));
         for (let fileRef of fileReferences) {
             let line: string =
                 ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
-                + fileRef.name);
+                + fileRef.filename);
             fileRefs.push(line);
         }
 
