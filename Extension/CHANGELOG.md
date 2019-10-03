@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.26.0-insiders2: October 3, 2019
+### Bug Fixes
+* Fixed crash in document outline causing the extension to shut down. [#4375](https://github.com/microsoft/vscode-cpptools/issues/4375)
+
 ## Version 0.26.0-insiders: October 1, 2019
 ### New Features
 * Add localization support (translated text) via `Configure Display Language`. [#7](https://github.com/microsoft/vscode-cpptools/issues/7)
