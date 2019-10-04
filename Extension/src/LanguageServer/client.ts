@@ -2001,40 +2001,59 @@ export class DefaultClient implements Client {
     }
 
     private sendCustomBrowseConfiguration(config: any): Thenable<void> {
-        // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
-        if (!config || config instanceof Array) {
-            console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
-            return Promise.resolve();
-        }
+        let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
 
-        let sanitized: util.Mutable<WorkspaceBrowseConfiguration> = {...<WorkspaceBrowseConfiguration>config};
-        if (!util.isArrayOfString(sanitized.browsePath) ||
-            !util.isOptionalString(sanitized.compilerPath) ||
-            !util.isOptionalArrayOfString(sanitized.compilerArgs) ||
-            !util.isOptionalString(sanitized.standard) ||
-            !util.isOptionalString(sanitized.windowsSdkVersion)) {
-            console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
-            return Promise.resolve();
-        }
+        let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
+        while (true) {
+            // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
+            if (!config || config instanceof Array) {
+                console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
+                if (lastCustomBrowseConfiguration.Value !== null) {
+                    console.warn("Falling back to last received WorkspaceBrowseConfiguration: " + lastCustomBrowseConfiguration.Value);
+                    sanitized = lastCustomBrowseConfiguration.Value;
+                    break;
+                }
+                return Promise.resolve();
+            }
 
-        let settings: CppSettings = new CppSettings(this.RootUri);
-        let out: logger.Logger = logger.getOutputChannelLogger();
-        if (settings.loggingLevel === "Debug") {
-            out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
-        }
+            sanitized = {...<WorkspaceBrowseConfiguration>config};
+            if (!util.isArrayOfString(sanitized.browsePath) ||
+                !util.isOptionalString(sanitized.compilerPath) ||
+                !util.isOptionalArrayOfString(sanitized.compilerArgs) ||
+                !util.isOptionalString(sanitized.standard) ||
+                !util.isOptionalString(sanitized.windowsSdkVersion)) {
+                console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
+                if (lastCustomBrowseConfiguration.Value !== null) {
+                    console.warn("Falling back to last received WorkspaceBrowseConfiguration: " + lastCustomBrowseConfiguration.Value);
+                    sanitized = lastCustomBrowseConfiguration.Value;
+                    break;
+                }
+                return Promise.resolve();
+            }
 
-        // Separate compiler path and args before sending to language client
-        if (util.isString(sanitized.compilerPath)) {
-            let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
-                sanitized.compilerPath,
-                util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
-            sanitized.compilerPath = compilerPathAndArgs.compilerPath;
-            sanitized.compilerArgs = compilerPathAndArgs.additionalArgs;
+            let settings: CppSettings = new CppSettings(this.RootUri);
+            let out: logger.Logger = logger.getOutputChannelLogger();
+            if (settings.loggingLevel === "Debug") {
+                out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
+            }
+
+            // Separate compiler path and args before sending to language client
+            if (util.isString(sanitized.compilerPath)) {
+                let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
+                    sanitized.compilerPath,
+                    util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
+                sanitized.compilerPath = compilerPathAndArgs.compilerPath;
+                sanitized.compilerArgs = compilerPathAndArgs.additionalArgs;
+            }
+
+            lastCustomBrowseConfiguration.Value = sanitized;
+            break;
         }
 
         let params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized
         };
+
         return this.notifyWhenReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
     }
 
