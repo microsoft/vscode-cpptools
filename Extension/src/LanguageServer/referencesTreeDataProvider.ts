@@ -134,7 +134,13 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
         if (element instanceof TreeNode) {
             if (element.node === NodeType.file) {
-                let type: ReferenceType = (this.referencesModel.isRename && !this.isRenameCandidates) ? undefined : element.referenceType;
+                let type: ReferenceType = null;
+
+                // If this.referencesModel.groupByFile is false, or if not a rename pending view, group by reference
+                if (!this.referencesModel.groupByFile && (!this.referencesModel.isRename || this.isRenameCandidates)) {
+                    type = element.referenceType;
+                }
+
                 return this.referencesModel.getReferenceNodes(element.filename, type, this.isRenameCandidates);
             }
             if (element.node === NodeType.referenceType) {

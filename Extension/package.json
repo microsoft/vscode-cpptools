@@ -648,6 +648,7 @@
       },
       {
         "command": "CppRenameView.remove",
+        "enablement": "view == CppRenamePendingView",
         "title": "%c_cpp.command.CppRenameView.remove.title%",
         "icon": {
           "light": "assets/minus-light.svg",
@@ -656,6 +657,7 @@
       },
       {
         "command": "CppRenameView.add",
+        "enablement": "view == CppRenameCandidatesView",
         "title": "%c_cpp.command.CppRenameView.add.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -664,6 +666,7 @@
       },
       {
         "command": "CppRenameView.removeAll",
+        "enablement": "view == CppRenamePendingView",
         "title": "%c_cpp.command.CppRenameView.removeAll.title%",
         "icon": {
           "light": "assets/minus-light.svg",
@@ -672,6 +675,7 @@
       },
       {
         "command": "CppRenameView.addAll",
+        "enablement": "view == CppRenameCandidatesView",
         "title": "%c_cpp.command.CppRenameView.addAll.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -680,6 +684,7 @@
       },
       {
         "command": "CppRenameView.removeFile",
+        "enablement": "view == CppRenamePendingView",
         "title": "%c_cpp.command.CppRenameView.removeFile.title%",
         "icon": {
           "light": "assets/minus-light.svg",
@@ -688,6 +693,7 @@
       },
       {
         "command": "CppRenameView.addFile",
+        "enablement": "view == CppRenameCandidatesView",
         "title": "%c_cpp.command.CppRenameView.addFile.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -696,6 +702,7 @@
       },
       {
         "command": "CppRenameView.addReferenceType",
+        "enablement": "view == CppRenameCandidatesView",
         "title": "%c_cpp.command.CppRenameView.addReferenceType.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -704,6 +711,7 @@
       },
       {
         "command": "CppRenameView.cancel",
+        "enablement": "view == CppRenamePendingView",
         "title": "%c_cpp.command.CppRenameView.cancel.title%",
         "icon": {
           "light": "assets/cancel-light.svg",
@@ -712,6 +720,7 @@
       },
       {
         "command": "CppRenameView.done",
+        "enablement": "view == CppRenamePendingView",
         "title": "%c_cpp.command.CppRenameView.done.title%",
         "icon": {
           "light": "assets/check-light.svg",
@@ -720,6 +729,7 @@
       },
       {
         "command": "C_Cpp.referencesViewGroupByType",
+        "enablement": "view == CppRenameCandidatesView || view == CppReferencesView",
         "title": "%c_cpp.command.referencesViewGroupByType.title%",
         "icon": {
           "light": "assets/ref-group-by-type-light.svg",
@@ -728,6 +738,7 @@
       },
       {
         "command": "C_Cpp.referencesViewUngroupByType",
+        "enablement": "view == CppRenameCandidatesView || view == CppReferencesView",
         "title": "%c_cpp.command.referencesViewUngroupByType.title%",
         "icon": {
           "light": "assets/ref-ungroup-by-type-light.svg",

@@ -263,8 +263,14 @@ export class ReferencesModel {
 
     setFileRenamesPending(node: TreeNode): void {
         this.nodes.forEach(n => {
-            if (n.filename === node.filename && node.referenceType === n.referenceType) {
-                n.isRenameCandidate = false;
+            if (this.groupByFile) {
+                if (n.filename === node.filename) {
+                    n.isRenameCandidate = false;
+                }
+            } else {
+                if (n.filename === node.filename && node.referenceType === n.referenceType) {
+                    n.isRenameCandidate = false;
+                }
             }
         });
         this.refreshCallback();

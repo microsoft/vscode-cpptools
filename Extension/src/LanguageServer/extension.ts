@@ -1175,10 +1175,16 @@ function onRenameViewDone(arg?: any): void {
 }
 
 function onRenameViewRemove(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
     arg.model.setRenameCandidate(arg);
 }
 
 function onRenameViewAdd(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
     arg.model.setRenamePending(arg);
 }
 
@@ -1191,13 +1197,23 @@ function onRenameViewAddAll(arg?: any): void {
 }
 
 function onRenameViewRemoveFile(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
+    arg.model.setFileRenamesCandidates(arg);
 }
 
 function onRenameViewAddFile(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
     arg.model.setFileRenamesPending(arg);
 }
 
 function onRenameViewAddReferenceType(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
     arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
 }
 
