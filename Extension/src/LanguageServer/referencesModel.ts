@@ -8,7 +8,7 @@ import { ReferenceType, ReferenceInfo, ReferencesResult } from './references';
 
 export type RenameResultCallback = (result: ReferencesResult) => void;
 
-let currentReferencesModel: ReferencesModel;
+let currentRenameModel: ReferencesModel;
 
 export class ReferencesModel {
     readonly nodes: TreeNode[] = []; // Raw flat list of references
@@ -19,7 +19,9 @@ export class ReferencesModel {
     constructor(resultsInput: ReferencesResult, readonly isRename: boolean, readonly isCanceled: boolean, groupByFile: boolean, resultsCallback: RenameResultCallback, readonly refreshCallback: () => void) {
         this.originalSymbol = resultsInput.text;
         this.renameResultsCallback = resultsCallback;
-        currentReferencesModel = this;
+        if (isRename) {
+            currentRenameModel = this;
+        }
         this.groupByFile = groupByFile;
 
         let results: ReferenceInfo[];
@@ -28,6 +30,11 @@ export class ReferencesModel {
         } else {
             results = resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed);
         }
+
+        // Build a single flat list of all leaf nodes
+        // Currently, the hierachy is build each time referencesTreeDataProvider requests nodes.
+        // When moving between pending and candidate views in rename, the hierachy gets rebuilt.
+        // TODO: If that is a performance issue, we could change this to always build the tree up front.
         for (let r of results) {
             // Add reference to file
             let noReferenceLocation: boolean = (r.position.line === 0 && r.position.character === 0);
@@ -100,24 +107,45 @@ export class ReferencesModel {
         return result;
     }
 
-    getReferenceNodes(filename: string | undefined, refType: ReferenceType | undefined, isCandidate: boolean): TreeNode[] {
-        //let result: TreeNode[] = [];
-        let filteredReferences: TreeNode[] = [];
-
-        // Filter out which references to get
-        if (refType === undefined && filename) {
-            // Get all references in filename
-            filteredReferences = this.nodes.filter(i => i.filename === filename && (!this.isRename || (isCandidate === i.isCandidate)));
-        } else if (refType !== undefined && filename) {
-            // Get specific reference types in filename
-            filteredReferences = this.nodes.filter(i => i.filename === filename && i.referenceType === refType && (!this.isRename || (isCandidate === i.isCandidate)));
-        } else if (this.isRename) {
-            filteredReferences = this.nodes.filter(i => isCandidate === i.isCandidate);
-        } else {
-            filteredReferences = this.nodes;
+    getReferenceNodes(filename: string | undefined, refType: ReferenceType | undefined, isCandidate?: boolean): TreeNode[] {
+        if (this.isRename) {
+            if (refType === undefined || refType === null) {
+                if (filename === undefined || filename === null) {
+                    return this.nodes.filter(i => i.isCandidate === isCandidate);
+                }
+                return this.nodes.filter(i => i.isCandidate === isCandidate && i.filename === filename);
+            }
+            if (filename === undefined || filename === null) {
+                return this.nodes.filter(i => i.isCandidate === isCandidate && i.referenceType === refType);
+            }
+            return this.nodes.filter(i => i.isCandidate === isCandidate && i.filename === filename && i.referenceType === refType);
         }
 
-        return filteredReferences;
+        if (refType === undefined || refType === null) {
+            if (filename === undefined || filename === null) {
+                return this.nodes;
+            }
+            return this.nodes.filter(i => i.filename === filename);
+        }
+        if (filename === undefined || filename === null) {
+            return this.nodes.filter(i => i.referenceType === refType);
+        }
+        return this.nodes.filter(i => i.filename === filename && i.referenceType === refType);
+    }
+
+    getAllReferenceNodes(): TreeNode[] {
+        if (this.isRename) {
+            return this.nodes;
+        }
+        return this.nodes.filter(i => i.node === NodeType.reference);
+    }
+
+    getAllFilesWithPendingReferenceNodes(): TreeNode[] {
+        if (this.isRename) {
+            let empty: TreeNode[] = [];
+            return empty;
+        }
+        return this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
     }
 
     // For rename, this.nodes will contain only ReferenceItems's
@@ -277,6 +305,6 @@ export class TreeNode {
     }
 }
 
-export function getCurrentReferencesModel(): ReferencesModel {
-    return currentReferencesModel;
+export function getCurrentRenameModel(): ReferencesModel {
+    return currentRenameModel;
 }

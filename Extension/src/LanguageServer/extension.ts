@@ -10,7 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { TreeNode, NodeType, getCurrentReferencesModel } from './referencesModel';
+import { TreeNode, NodeType, getCurrentRenameModel } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -1167,11 +1167,11 @@ function onShowRefCommand(arg?: TreeNode): void {
 }
 
 function onRenameViewCancel(arg?: any): void {
-    getCurrentReferencesModel().cancelRename();
+    getCurrentRenameModel().cancelRename();
 }
 
 function onRenameViewDone(arg?: any): void {
-    getCurrentReferencesModel().completeRename();
+    getCurrentRenameModel().completeRename();
 }
 
 function onRenameViewRemove(arg?: TreeNode): void {
@@ -1183,11 +1183,11 @@ function onRenameViewAdd(arg?: TreeNode): void {
 }
 
 function onRenameViewRemoveAll(arg?: any): void {
-    getCurrentReferencesModel().setAllRenamesCandidates();
+    getCurrentRenameModel().setAllRenamesCandidates();
 }
 
 function onRenameViewAddAll(arg?: any): void {
-    getCurrentReferencesModel().setAllRenamesPending();
+    getCurrentRenameModel().setAllRenamesPending();
 }
 
 function onRenameViewRemoveFile(arg?: TreeNode): void {

@@ -6,23 +6,23 @@
 import * as vscode from 'vscode';
 import { ReferencesResult } from './references';
 import { ReferencesModel, RenameResultCallback } from './referencesModel';
-import { ReferenceDataProvider } from './referencesProvider';
+import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
 
 export class RenameView {
     private referencesModel: ReferencesModel;
-    private renamePendingDataProvider: ReferenceDataProvider;
-    private renameCandidatesDataProvider: ReferenceDataProvider;
+    private renamePendingTreeDataProvider: ReferencesTreeDataProvider;
+    private renameCandidatesTreeDataProvider: ReferencesTreeDataProvider;
     private visible: boolean = false;
 
     constructor() {
-        this.renamePendingDataProvider = new ReferenceDataProvider(false);
-        this.renameCandidatesDataProvider = new ReferenceDataProvider(true);
+        this.renamePendingTreeDataProvider = new ReferencesTreeDataProvider(false);
+        this.renameCandidatesTreeDataProvider = new ReferencesTreeDataProvider(true);
         vscode.window.createTreeView(
             'CppRenamePendingView',
-            { treeDataProvider: this.renamePendingDataProvider, showCollapseAll: false });
+            { treeDataProvider: this.renamePendingTreeDataProvider, showCollapseAll: false });
         vscode.window.createTreeView(
             'CppRenameCandidatesView',
-            { treeDataProvider: this.renameCandidatesDataProvider, showCollapseAll: false });
+            { treeDataProvider: this.renameCandidatesTreeDataProvider, showCollapseAll: false });
     }
 
     show(showView: boolean): void {
@@ -41,21 +41,21 @@ export class RenameView {
     setGroupBy(groupByFile: boolean): void {
         if (this.referencesModel) {
             this.referencesModel.groupByFile = groupByFile;
-            this.renameCandidatesDataProvider.refresh();
+            this.renameCandidatesTreeDataProvider.refresh();
         }
     }
 
     setData(results: ReferencesResult, groupByFile: boolean, resultsCallback: RenameResultCallback): void {
         this.referencesModel = new ReferencesModel(results, true, false, groupByFile, resultsCallback, () => {
-            this.renamePendingDataProvider.refresh();
-            this.renameCandidatesDataProvider.refresh();
+            this.renamePendingTreeDataProvider.refresh();
+            this.renameCandidatesTreeDataProvider.refresh();
         });
-        this.renamePendingDataProvider.setModel(this.referencesModel);
-        this.renameCandidatesDataProvider.setModel(this.referencesModel);
+        this.renamePendingTreeDataProvider.setModel(this.referencesModel);
+        this.renameCandidatesTreeDataProvider.setModel(this.referencesModel);
     }
 
     clearData(): void {
-        this.renamePendingDataProvider.clear();
-        this.renameCandidatesDataProvider.clear();
+        this.renamePendingTreeDataProvider.clear();
+        this.renameCandidatesTreeDataProvider.clear();
     }
 }

@@ -5,15 +5,15 @@
 'use strict';
 import * as vscode from 'vscode';
 import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
-import { ReferenceDataProvider } from './referencesProvider';
-import { ReferencesModel, NodeType, TreeNode } from './referencesModel';
+import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
+import { ReferencesModel, TreeNode } from './referencesModel';
 
 export class FindAllRefsView {
     private referencesModel: ReferencesModel;
-    private referenceViewProvider: ReferenceDataProvider;
+    private referenceViewProvider: ReferencesTreeDataProvider;
 
     constructor() {
-        this.referenceViewProvider = new ReferenceDataProvider(false);
+        this.referenceViewProvider = new ReferencesTreeDataProvider(false);
         vscode.window.createTreeView(
             'CppReferencesView',
             { treeDataProvider: this.referenceViewProvider, showCollapseAll: true });
@@ -52,23 +52,21 @@ export class FindAllRefsView {
         let otherRefs: string[] = [];
         let fileRefs: string[] = [];
 
-        for (let ref of this.referencesModel.nodes) {
-            if (ref.node === NodeType.reference) {
-                let line: string =
-                    ("[" + getReferenceTagString(ref.referenceType, this.referencesModel.isCanceled) + "] "
-                    + ref.filename
-                    + ":" + (ref.referencePosition.line + 1) + ":" + (ref.referencePosition.character + 1)
-                    + " " + ref.referenceText);
-                if (includeConfirmedReferences && ref.referenceType === ReferenceType.Confirmed) {
-                    confirmedRefs.push(line);
-                } else {
-                    otherRefs.push(line);
-                }
+        for (let ref of this.referencesModel.getAllReferenceNodes()) {
+            let line: string =
+                ("[" + getReferenceTagString(ref.referenceType, this.referencesModel.isCanceled) + "] "
+                + ref.filename
+                + ":" + (ref.referencePosition.line + 1) + ":" + (ref.referencePosition.character + 1)
+                + " " + ref.referenceText);
+            if (includeConfirmedReferences && ref.referenceType === ReferenceType.Confirmed) {
+                confirmedRefs.push(line);
+            } else {
+                otherRefs.push(line);
             }
         }
 
         // Get files with pending references items (location of reference is pending)
-        let fileReferences: TreeNode[] = this.referencesModel.nodes.filter(i => (i.referencePosition.line === 0 && i.referencePosition.character === 0));
+        let fileReferences: TreeNode[] = this.referencesModel.getAllFilesWithPendingReferenceNodes();
         for (let fileRef of fileReferences) {
             let line: string =
                 ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
@@ -76,6 +74,7 @@ export class FindAllRefsView {
             fileRefs.push(line);
         }
 
+        results = results.concat(confirmedRefs, otherRefs, fileRefs);
         return results.join('\n');
     }
 }
