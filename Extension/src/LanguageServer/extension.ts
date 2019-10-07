@@ -10,8 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { RenamePendingItem, RenameCandidateItem, RenamePendingFileItem, RenameCandidateFileItem, getCurrentRenameModel, RenameModel, RenameCandidateReferenceTypeItem } from './renameModel';
-import { ReferenceItem, FileItem } from './referencesModel';
+import { TreeNode, NodeType, getCurrentRenameModel } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -1151,84 +1150,71 @@ function onRescanWorkspace(): void {
     clients.forEach(client => client.rescanFolder());
 }
 
-function onShowRefCommand(arg?: ReferenceItem | FileItem | RenamePendingItem | RenameCandidateItem | RenamePendingFileItem | RenameCandidateFileItem): void {
+function onShowRefCommand(arg?: TreeNode): void {
     if (!arg) {
         return;
     }
-    if (arg instanceof ReferenceItem || arg instanceof RenamePendingItem || arg instanceof RenameCandidateItem) {
-        const { location } = arg;
-        vscode.window.showTextDocument(location.uri, {
-            selection: location.range.with({ start: location.range.start, end: location.range.end })
+    const { node } = arg;
+    if (node === NodeType.reference) {
+        const { referenceLocation } = arg;
+        vscode.window.showTextDocument(referenceLocation.uri, {
+            selection: referenceLocation.range.with({ start: referenceLocation.range.start, end: referenceLocation.range.end })
         });
-    } else if (arg instanceof FileItem || arg instanceof RenamePendingFileItem || arg instanceof RenameCandidateFileItem) {
-        const { uri } = arg;
-        vscode.window.showTextDocument(uri);
+    } else if (node === NodeType.fileWithPendingRef) {
+        const { fileUri } = arg;
+        vscode.window.showTextDocument(fileUri);
     }
 }
 
 function onRenameViewCancel(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.cancel();
-    }
+    getCurrentRenameModel().cancelRename();
 }
 
 function onRenameViewDone(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.complete();
-    }
+    getCurrentRenameModel().completeRename();
 }
 
-function onRenameViewRemove(arg?: RenamePendingItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
+function onRenameViewRemove(arg?: TreeNode): void {
+    if (!arg) {
+        return;
     }
+    arg.model.setRenameCandidate(arg);
 }
 
-function onRenameViewAdd(arg?: RenameCandidateItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
+function onRenameViewAdd(arg?: TreeNode): void {
+    if (!arg) {
+        return;
     }
+    arg.model.setRenamePending(arg);
 }
 
 function onRenameViewRemoveAll(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.getPendingGroup().changeGroup();
-        currentRenameModel.updateProviders();
-    }
+    getCurrentRenameModel().setAllRenamesCandidates();
 }
 
 function onRenameViewAddAll(arg?: any): void {
-    let currentRenameModel: RenameModel = getCurrentRenameModel();
-    if (currentRenameModel) {
-        currentRenameModel.getCandidatesGroup().changeGroup();
-        currentRenameModel.updateProviders();
-    }
+    getCurrentRenameModel().setAllRenamesPending();
 }
 
-function onRenameViewRemoveFile(arg?: RenamePendingFileItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
+function onRenameViewRemoveFile(arg?: TreeNode): void {
+    if (!arg) {
+        return;
     }
+    arg.model.setFileRenamesCandidates(arg);
 }
 
-function onRenameViewAddFile(arg?: RenameCandidateFileItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
+function onRenameViewAddFile(arg?: TreeNode): void {
+    if (!arg) {
+        return;
     }
+    arg.model.setFileRenamesPending(arg);
 }
 
-function onRenameViewAddReferenceType(arg?: RenameCandidateReferenceTypeItem): void {
-    if (arg) {
-        arg.changeGroup();
-        arg.model.updateProviders();
+function onRenameViewAddReferenceType(arg?: TreeNode): void {
+    if (!arg) {
+        return;
     }
+    arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
 }
 
 function reportMacCrashes(): void {

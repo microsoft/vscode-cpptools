@@ -5,14 +5,15 @@
 'use strict';
 import * as vscode from 'vscode';
 import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
-import { ReferenceDataProvider } from './referencesProvider';
-import { FileItem, ReferenceItem } from './referencesModel';
+import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
+import { ReferencesModel, TreeNode } from './referencesModel';
 
 export class FindAllRefsView {
-    private referenceViewProvider: ReferenceDataProvider;
+    private referencesModel: ReferencesModel;
+    private referenceViewProvider: ReferencesTreeDataProvider;
 
     constructor() {
-        this.referenceViewProvider = new ReferenceDataProvider();
+        this.referenceViewProvider = new ReferencesTreeDataProvider(false);
         vscode.window.createTreeView(
             'CppReferencesView',
             { treeDataProvider: this.referenceViewProvider, showCollapseAll: true });
@@ -22,19 +23,27 @@ export class FindAllRefsView {
         if (!showView) {
             this.clearData();
         }
-        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', this.referenceViewProvider.hasResults());
+        let hasResults: boolean = false;
+        if (this.referencesModel) {
+            hasResults = this.referencesModel.hasResults();
+        }
+        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', hasResults);
     }
 
-    toggleGroupView(): void {
-        this.referenceViewProvider.toggleGroupView();
-    }
-
-    setData(results: ReferencesResult, isCanceled: boolean): void {
-        this.referenceViewProvider.setModel(results, isCanceled);
+    setData(results: ReferencesResult, isCanceled: boolean, groupByFile: boolean): void {
+        this.referencesModel = new ReferencesModel(results, false, isCanceled, groupByFile, null, () => { this.referenceViewProvider.refresh(); });
+        this.referenceViewProvider.setModel(this.referencesModel);
     }
 
     clearData(): void {
         this.referenceViewProvider.clear();
+    }
+
+    setGroupBy(groupByFile: boolean): void {
+        if (this.referencesModel) {
+            this.referencesModel.groupByFile = groupByFile;
+            this.referenceViewProvider.refresh();
+        }
     }
 
     getResultsAsText(includeConfirmedReferences: boolean): string {
@@ -43,14 +52,13 @@ export class FindAllRefsView {
         let otherRefs: string[] = [];
         let fileRefs: string[] = [];
 
-        let referenceItems: ReferenceItem[] = this.referenceViewProvider.getReferenceItems();
-        for (let ref of referenceItems) {
+        for (let ref of this.referencesModel.getAllReferenceNodes()) {
             let line: string =
-                ("[" + getReferenceTagString(ref.type, this.referenceViewProvider.isCanceled()) + "] "
-                + ref.parent.name
-                + ":" + (ref.position.line + 1) + ":" + (ref.position.character + 1)
-                + " " + ref.text);
-            if (includeConfirmedReferences && ref.type === ReferenceType.Confirmed) {
+                ("[" + getReferenceTagString(ref.referenceType, this.referencesModel.isCanceled) + "] "
+                + ref.filename
+                + ":" + (ref.referencePosition.line + 1) + ":" + (ref.referencePosition.character + 1)
+                + " " + ref.referenceText);
+            if (includeConfirmedReferences && ref.referenceType === ReferenceType.Confirmed) {
                 confirmedRefs.push(line);
             } else {
                 otherRefs.push(line);
@@ -58,11 +66,11 @@ export class FindAllRefsView {
         }
 
         // Get files with pending references items (location of reference is pending)
-        let fileReferences: FileItem[] = this.referenceViewProvider.getFilesWithPendingReferences();
+        let fileReferences: TreeNode[] = this.referencesModel.getAllFilesWithPendingReferenceNodes();
         for (let fileRef of fileReferences) {
             let line: string =
-                ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referenceViewProvider.isCanceled()) + "] "
-                + fileRef.name);
+                ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
+                + fileRef.filename);
             fileRefs.push(line);
         }
 
