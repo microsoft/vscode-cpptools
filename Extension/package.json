@@ -648,7 +648,7 @@
       },
       {
         "command": "CppRenameView.remove",
-        "enablement": "view == CppRenamePendingView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.remove.title%",
         "icon": {
           "light": "assets/minus-light.svg",
@@ -657,7 +657,7 @@
       },
       {
         "command": "CppRenameView.add",
-        "enablement": "view == CppRenameCandidatesView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.add.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -666,7 +666,7 @@
       },
       {
         "command": "CppRenameView.removeAll",
-        "enablement": "view == CppRenamePendingView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.removeAll.title%",
         "icon": {
           "light": "assets/minus-light.svg",
@@ -675,7 +675,7 @@
       },
       {
         "command": "CppRenameView.addAll",
-        "enablement": "view == CppRenameCandidatesView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.addAll.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -684,7 +684,7 @@
       },
       {
         "command": "CppRenameView.removeFile",
-        "enablement": "view == CppRenamePendingView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.removeFile.title%",
         "icon": {
           "light": "assets/minus-light.svg",
@@ -693,7 +693,7 @@
       },
       {
         "command": "CppRenameView.addFile",
-        "enablement": "view == CppRenameCandidatesView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.addFile.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -702,7 +702,7 @@
       },
       {
         "command": "CppRenameView.addReferenceType",
-        "enablement": "view == CppRenameCandidatesView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.addReferenceType.title%",
         "icon": {
           "light": "assets/plus-light.svg",
@@ -711,7 +711,7 @@
       },
       {
         "command": "CppRenameView.cancel",
-        "enablement": "view == CppRenamePendingView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.cancel.title%",
         "icon": {
           "light": "assets/cancel-light.svg",
@@ -720,7 +720,7 @@
       },
       {
         "command": "CppRenameView.done",
-        "enablement": "view == CppRenamePendingView",
+        "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.done.title%",
         "icon": {
           "light": "assets/check-light.svg",
@@ -729,7 +729,7 @@
       },
       {
         "command": "C_Cpp.referencesViewGroupByType",
-        "enablement": "view == CppRenameCandidatesView || view == CppReferencesView",
+        "category": "C/C++",
         "title": "%c_cpp.command.referencesViewGroupByType.title%",
         "icon": {
           "light": "assets/ref-group-by-type-light.svg",
@@ -738,7 +738,7 @@
       },
       {
         "command": "C_Cpp.referencesViewUngroupByType",
-        "enablement": "view == CppRenameCandidatesView || view == CppReferencesView",
+        "category": "C/C++",
         "title": "%c_cpp.command.referencesViewUngroupByType.title%",
         "icon": {
           "light": "assets/ref-ungroup-by-type-light.svg",
@@ -1628,6 +1628,52 @@
           "when": "editorLangId == c",
           "command": "C_Cpp.BuildAndDebugActiveFile",
           "group": "other2_debug@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "CppRenameView.remove",
+          "when": "never"
+        },
+        {
+          "command": "CppRenameView.add",
+          "when": "never"
+        },
+        {
+          "command": "CppRenameView.removeAll",
+          "when": "cppRename:hasResults"
+        },
+        {
+          "command": "CppRenameView.addAll",
+          "when": "cppRename:hasResults"
+        },
+        {
+          "command": "CppRenameView.removeFile",
+          "when": "never"
+        },
+        {
+          "command": "CppRenameView.addFile",
+          "when": "never"
+        },
+        {
+          "command": "CppRenameView.addReferenceType",
+          "when": "never"
+        },
+        {
+          "command": "CppRenameView.cancel",
+          "when": "cppRename:hasResults"
+        },
+        {
+          "command": "CppRenameView.done",
+          "when": "cppRename:hasResults"
+        },
+        {
+          "command": "C_Cpp.referencesViewGroupByType",
+          "when": "cppRename:hasResults || cppReferenceTypes:hasResults"
+        },
+        {
+          "command": "C_Cpp.referencesViewUngroupByType",
+          "when": "cppRename:hasResults || cppReferenceTypes:hasResults"
         }
       ]
     },
