@@ -55,7 +55,7 @@ export class ReferencesModel {
                 node.referenceLocation = location;
                 node.referenceText = r.text;
                 node.referenceType = r.type;
-                node.isCandidate = r.type !== ReferenceType.Confirmed;
+                node.isRenameCandidate = r.type !== ReferenceType.Confirmed;
                 this.nodes.push(node);
             }
         }
@@ -78,15 +78,15 @@ export class ReferencesModel {
         return result;
     }
 
-    getFileNodes(refType: ReferenceType | undefined, isCandidate: boolean): TreeNode[] {
+    getFileNodes(refType: ReferenceType | undefined, isRenameCandidate: boolean): TreeNode[] {
         let result: TreeNode[] = [];
         let filteredFiles: TreeNode[] = [];
 
         // Get files by reference type if refType is specified.
         if (refType !== undefined) {
-            filteredFiles = this.nodes.filter(i => i.referenceType === refType && (!this.isRename || (isCandidate === i.isCandidate)));
+            filteredFiles = this.nodes.filter(i => i.referenceType === refType && (!this.isRename || (isRenameCandidate === i.isRenameCandidate)));
         } else if (this.isRename) {
-            filteredFiles = this.nodes.filter(i => isCandidate === i.isCandidate);
+            filteredFiles = this.nodes.filter(i => isRenameCandidate === i.isRenameCandidate);
         } else {
             filteredFiles = this.nodes;
         }
@@ -107,18 +107,18 @@ export class ReferencesModel {
         return result;
     }
 
-    getReferenceNodes(filename: string | undefined, refType: ReferenceType | undefined, isCandidate?: boolean): TreeNode[] {
+    getReferenceNodes(filename: string | undefined, refType: ReferenceType | undefined, isRenameCandidate?: boolean): TreeNode[] {
         if (this.isRename) {
             if (refType === undefined || refType === null) {
                 if (filename === undefined || filename === null) {
-                    return this.nodes.filter(i => i.isCandidate === isCandidate);
+                    return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate);
                 }
-                return this.nodes.filter(i => i.isCandidate === isCandidate && i.filename === filename);
+                return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.filename === filename);
             }
             if (filename === undefined || filename === null) {
-                return this.nodes.filter(i => i.isCandidate === isCandidate && i.referenceType === refType);
+                return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.referenceType === refType);
             }
-            return this.nodes.filter(i => i.isCandidate === isCandidate && i.filename === filename && i.referenceType === refType);
+            return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.filename === filename && i.referenceType === refType);
         }
 
         if (refType === undefined || refType === null) {
@@ -152,7 +152,7 @@ export class ReferencesModel {
     getRenameCandidateReferenceTypes(): TreeNode[] {
         let result: TreeNode[] = [];
         this.nodes.forEach(n => {
-            if (n.isCandidate) {
+            if (n.isRenameCandidate) {
                 let i: number = result.findIndex(e => e.referenceType === n.referenceType);
                 if (i < 0) {
                     let node: TreeNode = new TreeNode(this, NodeType.referenceType);
@@ -169,7 +169,7 @@ export class ReferencesModel {
     getRenameCandidateFiles(): TreeNode[] {
         let result: TreeNode[] = [];
         this.nodes.forEach(n => {
-            if (n.isCandidate) {
+            if (n.isRenameCandidate) {
                 let i: number = result.findIndex(e => e.filename === n.filename);
                 if (i < 0) {
                     let node: TreeNode = new TreeNode(this, NodeType.file);
@@ -187,7 +187,7 @@ export class ReferencesModel {
     getRenamePendingFiles(): TreeNode[] {
         let result: TreeNode[] = [];
         this.nodes.forEach(n => {
-            if (!n.isCandidate) {
+            if (!n.isRenameCandidate) {
                 let i: number = result.findIndex(e => e.filename === n.filename);
                 if (i < 0) {
                     let node: TreeNode = new TreeNode(this, NodeType.file);
@@ -212,7 +212,7 @@ export class ReferencesModel {
     completeRename(): void {
         let referenceInfos: ReferenceInfo[] = [];
         this.nodes.forEach(n => {
-            if (!n.isCandidate) {
+            if (!n.isRenameCandidate) {
                 let referenceInfo: ReferenceInfo = {
                     file: n.filename,
                     position: n.referenceLocation.range.start,
@@ -233,29 +233,29 @@ export class ReferencesModel {
     }
 
     setRenameCandidate(node: TreeNode): void {
-        node.isCandidate = true;
+        node.isRenameCandidate = true;
         this.refreshCallback();
     }
 
     setRenamePending(node: TreeNode): void {
-        node.isCandidate = false;
+        node.isRenameCandidate = false;
         this.refreshCallback();
     }
 
     setAllRenamesCandidates(): void {
-        this.nodes.forEach(n => n.isCandidate = true);
+        this.nodes.forEach(n => n.isRenameCandidate = true);
         this.refreshCallback();
     }
 
     setAllRenamesPending(): void {
-        this.nodes.forEach(n => n.isCandidate = false);
+        this.nodes.forEach(n => n.isRenameCandidate = false);
         this.refreshCallback();
     }
 
     setFileRenamesCandidates(node: TreeNode): void {
         this.nodes.forEach(n => {
             if (n.filename === node.filename) {
-                n.isCandidate = true;
+                n.isRenameCandidate = true;
             }
         });
         this.refreshCallback();
@@ -264,7 +264,7 @@ export class ReferencesModel {
     setFileRenamesPending(node: TreeNode): void {
         this.nodes.forEach(n => {
             if (n.filename === node.filename && node.referenceType === n.referenceType) {
-                n.isCandidate = false;
+                n.isRenameCandidate = false;
             }
         });
         this.refreshCallback();
@@ -273,7 +273,7 @@ export class ReferencesModel {
     setAllReferenceTypeRenamesPending(type: ReferenceType): void {
         this.nodes.forEach(n => {
             if (n.referenceType === type) {
-                n.isCandidate = false;
+                n.isRenameCandidate = false;
             }
         });
         this.refreshCallback();
@@ -299,7 +299,7 @@ export class TreeNode {
     public referenceLocation?: vscode.Location | undefined;
     public referenceText?: string | undefined;
     public referenceType?: ReferenceType | undefined;
-    public isCandidate?: boolean | undefined;
+    public isRenameCandidate?: boolean | undefined;
 
     constructor(readonly model: ReferencesModel, readonly node: NodeType) {
     }
