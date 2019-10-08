@@ -117,7 +117,7 @@
 	"c_cpp.debuggers.envFile.description": "包含環境變數定義之檔案的絕對路徑。此檔案具有以等號分隔每行的索引鍵值組。例如 KEY=VALUE",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": "要用於搜尋 .so 檔案的目錄清單 (以分號分隔)。範例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.MIMode.description": "表示 MIDebugEngine 將連線的主控台偵錯工具。允許的值為 \"gdb\" \"lldb\"。",
-	"c_cpp.debuggers.miDebuggerPath.description": "MI 偵錯工具 (例如 gdb) 的路徑。未指定時，會先搜尋偵錯工具的路徑。",
+	"c_cpp.debuggers.miDebuggerPath.description": "MI 偵錯工具 (例如 gdb) 的路徑。若未指定，會先搜尋偵錯工具的路徑。",
 	"c_cpp.debuggers.miDebuggerArgs.description": "MI 偵錯工具 (例如 gdb) 的其他引數。",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "MI 偵錯工具伺服器要連線至的網路位址 (範例: localhost:1234)。",
 	"c_cpp.debuggers.stopAtEntry.description": "選擇性參數。若為 true，則偵錯工具應該在目標的進入點停止。如果已傳遞 processId。就沒有效果。",
