@@ -270,6 +270,9 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns: (str
     let beginRules: vscode.OnEnterRule[] = [];
     let continueRules: vscode.OnEnterRule[] = [];
     let endRules: vscode.OnEnterRule[] = [];
+    if (!patterns) {
+        patterns = [ "/**" ];
+    }
     patterns.forEach(pattern => {
         let c: CommentPattern = (typeof pattern === "string") ? { begin: pattern, continue: pattern.startsWith('/*') ? " * " : pattern } : <CommentPattern>pattern;
         let r: Rules = constructCommentRules(c, languageId);
