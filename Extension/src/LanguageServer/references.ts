@@ -395,7 +395,6 @@ export class ReferencesManager {
         let referencesCanceled: boolean = this.referencesCanceled;
         this.referencesRequestPending = false;
         this.referencesCanceled = false;
-        //this.referencesCanceledWhilePreviewing = false;
 
         let currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
 
