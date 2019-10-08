@@ -632,7 +632,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         // Register a single-fire handler for the reply.
-                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult, referencesCanceledWhilePreviewing: boolean) => {
+                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult) => {
                                             referencesRequestPending = false;
                                             let locations: vscode.Location[] = [];
                                             if (result) {
@@ -645,9 +645,7 @@ export class DefaultClient implements Client {
                                                 });
                                             }
                                             // If references were canceled while in a preview state, there is not an outstanding promise.
-                                            if (!referencesCanceledWhilePreviewing) {
-                                                resolve(locations);
-                                            }
+                                            resolve(locations);
                                             if (referencesPendingCancellations.length > 0) {
                                                 while (referencesPendingCancellations.length > 1) {
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
@@ -659,13 +657,23 @@ export class DefaultClient implements Client {
                                                 pendingCancel.callback();
                                             }
                                         };
-                                        if (this.client.references.lastResults) {
-                                            let lastResults: refs.ReferencesResult = this.client.references.lastResults;
-                                            this.client.references.lastResults = null;
-                                            resultCallback(lastResults, true);
-                                        } else {
+                                        if (!this.client.references.referencesRefreshPending) {
                                             this.client.references.setResultsCallback(resultCallback);
                                             this.client.references.startFindAllReferences(params);
+                                        } else {
+                                            // We are responding to a refresh (preview or final result)
+                                            this.client.references.referencesRefreshPending = false;
+                                            if (this.client.references.lastResults) {
+                                                // This is a final result
+                                                let lastResults: refs.ReferencesResult = this.client.references.lastResults;
+                                                this.client.references.lastResults = null;
+                                                resultCallback(lastResults);
+                                            } else {
+                                                // This is a preview (2nd or later preview)
+                                                this.client.references.referencesRequestPending = true;
+                                                this.client.references.setResultsCallback(resultCallback);
+                                                this.client.languageClient.sendNotification(RequestReferencesNotification, false);
+                                            }
                                         }
                                     });
                                     token.onCancellationRequested(e => {
@@ -675,7 +683,7 @@ export class DefaultClient implements Client {
                                     });
                                 };
 
-                                if (referencesRequestPending || (this.client.references.symbolSearchInProgress && !this.client.references.referencesViewFindPending)) {
+                                if (referencesRequestPending || (this.client.references.symbolSearchInProgress && !this.client.references.referencesRefreshPending)) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject: () => {
                                         // Complete with nothing instead of rejecting, to avoid an error message from VS Code
@@ -685,9 +693,6 @@ export class DefaultClient implements Client {
                                     if (!cancelling) {
                                         renamePending = false;
                                         this.client.references.referencesCanceled = true;
-                                        if (!referencesRequestPending) {
-                                            this.client.references.referencesCanceledWhilePreviewing = true;
-                                        }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
@@ -735,7 +740,7 @@ export class DefaultClient implements Client {
                                             return;
                                         }
                                         referencesRequestPending = true;
-                                        this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult, referencesCanceledWhilePreviewing: boolean) => {
+                                        this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult) => {
                                             referencesRequestPending = false;
                                             --renameRequestsPending;
                                             let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -780,9 +785,6 @@ export class DefaultClient implements Client {
                                     }, callback });
                                     if (!cancelling) {
                                         this.client.references.referencesCanceled = true;
-                                        if (!referencesRequestPending) {
-                                            this.client.references.referencesCanceledWhilePreviewing = true;
-                                        }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
                                         this.client.references.closeRenameUI();
                                     }
@@ -2210,34 +2212,23 @@ export class DefaultClient implements Client {
             if (!cancelling) {
                 this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
                 if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
-                    this.sendRequestReferences();
+                    if (!this.references.referencesRequestPending) {
+                        if (this.references.referencesRequestHasOccurred) {
+                            // References are not usable if a references request is pending,
+                            // So after the initial request, we don't send a 2nd references request until the next request occurs.
+                            if (!this.references.referencesRefreshPending) {
+                                this.references.referencesRefreshPending = true;
+                                vscode.commands.executeCommand("references-view.refresh");
+                            }
+                        } else {
+                            this.references.referencesRequestHasOccurred = true;
+                            this.references.referencesRequestPending = true;
+                            this.languageClient.sendNotification(RequestReferencesNotification, false);
+                        }
+                    }
                 }
             }
         });
-    }
-
-    public sendRequestReferences(): void {
-        switch (this.model.referencesCommandMode.Value) {
-            case refs.ReferencesCommandMode.None:
-                break;
-            case refs.ReferencesCommandMode.Peek:
-            case refs.ReferencesCommandMode.Rename:
-                this.languageClient.sendNotification(RequestReferencesNotification, true);
-                break;
-            default:
-                if (this.references.referencesRequestHasOccurred) {
-                    // References are not usable if a references request is pending,
-                    // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                    if (!this.references.referencesViewFindPending) {
-                        this.references.referencesViewFindPending = true;
-                        vscode.commands.executeCommand("references-view.refresh");
-                    }
-                } else {
-                    this.languageClient.sendNotification(RequestReferencesNotification, false);
-                    this.references.referencesRequestHasOccurred = true;
-                }
-                break;
-        }
     }
 
     public cancelReferences(): void {
