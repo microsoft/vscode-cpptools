@@ -81,15 +81,16 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
         switch (element.node) {
             case NodeType.referenceType:
                 const label: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled, true);
-                let result: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Expanded);
+                let resultRefType: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Expanded);
                 if (this.referencesModel.isRename) {
-                    result.contextValue = "candidateReferenceType";
+                    resultRefType.contextValue = "candidateReferenceType";
                 }
-                return result;
+                return resultRefType;
 
             case NodeType.file:
             case NodeType.fileWithPendingRef:
-                let resultFile: vscode.TreeItem = new vscode.TreeItem(element.fileUri, vscode.TreeItemCollapsibleState.Expanded);
+                let resultFile: vscode.TreeItem = new vscode.TreeItem(element.fileUri);
+                resultFile.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                 resultFile.iconPath = vscode.ThemeIcon.File;
                 resultFile.description = true;
                 if (this.referencesModel.isRename) {
@@ -104,6 +105,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                     };
                     let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled);
                     resultFile.tooltip = `[${tag}]\n${element.filename}`;
+                    resultFile.collapsibleState = vscode.TreeItemCollapsibleState.None;
                 }
 
                 return resultFile;
