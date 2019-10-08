@@ -1,13 +1,14 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.0-insiders3: October 7, 2019
+## Version 0.26.0-insiders3: October 8, 2019
 ### Bug Fixes
-* Fixed crash in document outline causing the extension to shut down. [#4386](https://github.com/microsoft/vscode-cpptools/issues/4386)
+* Fix crash in document outline causing the extension to shut down. [#4386](https://github.com/microsoft/vscode-cpptools/issues/4386)
+* Fix document outline showing no results with nested namespaces. [#4389](https://github.com/microsoft/vscode-cpptools/issues/4389)
 * Fix missing references on the last line. [#4150](https://github.com/microsoft/vscode-cpptools/issues/4150)
 * Fix bug with forced includes in `compile_commands.json`. [#4293](https://github.com/microsoft/vscode-cpptools/issues/4293)
 * Fix crashes if the database can't be created. [#4359](https://github.com/microsoft/vscode-cpptools/issues/4359)
 * Fix bugs with comment references. [#4371](https://github.com/microsoft/vscode-cpptools/issues/4371), [#4372](https://github.com/microsoft/vscode-cpptools/issues/4372)
-* Improved reliability in Rename and Find All References. [#4378](https://github.com/microsoft/vscode-cpptools/pull/4378)
+* Improve reliability for `Rename` and `Find All References`. [#4378](https://github.com/microsoft/vscode-cpptools/pull/4378)
 
 ### Enhancements
 * App support for .rsp files in `compile_commands.json`. [#1718](https://github.com/microsoft/vscode-cpptools/issues/1718)
