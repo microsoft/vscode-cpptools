@@ -1215,27 +1215,33 @@ export class DefaultClient implements Client {
 
             // Initiate request for custom configuration.
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
-            let hasResumedParsing: boolean = false;
+            let hasCompleted: boolean = false;
             task().then(async config => {
                 await this.sendCustomBrowseConfiguration(config);
-                if (!hasResumedParsing && currentProvider.version >= Version.v2) {
-                    this.resumeParsing();
-                    hasResumedParsing = true;
+                if (!hasCompleted) {
+                    hasCompleted = true;
+                    if (currentProvider.version >= Version.v2) {
+                        this.resumeParsing();
+                    }
                 }
             }, () => {
-                if (!hasResumedParsing && currentProvider.version >= Version.v2) {
-                    this.resumeParsing();
-                    hasResumedParsing = true;
+                if (!hasCompleted) {
+                    hasCompleted = true;
+                    if (currentProvider.version >= Version.v2) {
+                        this.resumeParsing();
+                    }
                 }
             });
 
             // Set up a timeout to use previously received configuration and resume parsing if the provider times out
             global.setTimeout(async () => {
-                await this.sendCustomBrowseConfiguration(null);
-                if (!hasResumedParsing && currentProvider.version >= Version.v2) {
-                    this.log(localize("provier.timed.out", "Configuration Provider timed out in {0}ms.", configProviderTimeout));
-                    this.resumeParsing();
-                    hasResumedParsing = true;
+                if (!hasCompleted) {
+                    hasCompleted = true;
+                    await this.sendCustomBrowseConfiguration(null, true);
+                    if (currentProvider.version >= Version.v2) {
+                        console.warn("Configuration Provider timed out in {0}ms.", configProviderTimeout);
+                        this.resumeParsing();
+                    }
                 }
             }, configProviderTimeout);
         });
@@ -2048,21 +2054,23 @@ export class DefaultClient implements Client {
         }
     }
 
-    private sendCustomBrowseConfiguration(config: any): Thenable<void> {
+    private sendCustomBrowseConfiguration(config: any, timeoutOccured?: boolean): Thenable<void> {
         let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
-
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
 
         // This while (true) is here just so we can break out early if the config is set on error
         while (true) {
             // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
-            if (!config || config instanceof Array) {
-                console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
+            if (timeoutOccured || !config || config instanceof Array) {
+                if (!timeoutOccured) {
+                    console.log("Received an invalid browse configuration from configuration provider.");
+                }
                 if (lastCustomBrowseConfiguration.Value !== null) {
-                    console.warn("Falling back to last received WorkspaceBrowseConfiguration: " + lastCustomBrowseConfiguration.Value);
                     sanitized = lastCustomBrowseConfiguration.Value;
+                    console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
+                console.log("No browse configuration is available.");
                 return Promise.resolve();
             }
 
@@ -2072,18 +2080,18 @@ export class DefaultClient implements Client {
                 !util.isOptionalArrayOfString(sanitized.compilerArgs) ||
                 !util.isOptionalString(sanitized.standard) ||
                 !util.isOptionalString(sanitized.windowsSdkVersion)) {
-                console.warn("discarding invalid WorkspaceBrowseConfiguration: " + config);
+                console.log("Received an invalid browse configuration from configuration provider.");
                 if (lastCustomBrowseConfiguration.Value !== null) {
-                    console.warn("Falling back to last received WorkspaceBrowseConfiguration: " + lastCustomBrowseConfiguration.Value);
                     sanitized = lastCustomBrowseConfiguration.Value;
+                    console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
                 return Promise.resolve();
             }
 
             let settings: CppSettings = new CppSettings(this.RootUri);
-            let out: logger.Logger = logger.getOutputChannelLogger();
             if (settings.loggingLevel === "Debug") {
+                let out: logger.Logger = logger.getOutputChannelLogger();
                 out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
             }
 
