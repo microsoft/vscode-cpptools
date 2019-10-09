@@ -38,7 +38,7 @@ export interface ReferencesResult {
     isFinished: boolean;
 }
 
-export type ReferencesResultCallback = (result: ReferencesResult) => void;
+export type ReferencesResultCallback = (result: ReferencesResult, doResolve: boolean) => void;
 
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
@@ -141,6 +141,7 @@ export class ReferencesManager {
     private referencesDelayProgress: NodeJS.Timeout;
     private referencesProgressOptions: vscode.ProgressOptions;
     public referencesCanceled: boolean = false;
+    public referencesCanceledWhilePreviewing: boolean;
     private referencesStartedWhileTagParsing: boolean;
     private referencesProgressMethod: (progress: vscode.Progress<{
         message?: string;
@@ -341,9 +342,10 @@ export class ReferencesManager {
         this.referencesFinished = false;
         this.referencesRequestHasOccurred = false;
         this.referencesRequestPending = false;
+        this.referencesCanceledWhilePreviewing = false;
         if (this.referencesCanceled) {
             this.referencesCanceled = false;
-            this.resultsCallback(null);
+            this.resultsCallback(null, true);
         } else {
             this.client.sendRenameNofication(params);
         }
@@ -354,9 +356,10 @@ export class ReferencesManager {
         this.referencesFinished = false;
         this.referencesRequestHasOccurred = false;
         this.referencesRequestPending = false;
+        this.referencesCanceledWhilePreviewing = false;
         if (this.referencesCanceled) {
             this.referencesCanceled = false;
-            this.resultsCallback(null);
+            this.resultsCallback(null, true);
         } else {
             this.client.sendFindAllReferencesNotification(params);
         }
@@ -415,17 +418,17 @@ export class ReferencesManager {
                 // If there are only Confirmed results, complete the rename immediately.
                 let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
-                    this.resultsCallback(referencesResult);
+                    this.resultsCallback(referencesResult, true);
                 } else {
                     this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult) => {
                         this.referencesCanceled = false;
-                        this.resultsCallback(result);
+                        this.resultsCallback(result, true);
                     });
                     this.renameView.show(true);
                 }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
-                this.resultsCallback(null);
+                this.resultsCallback(null, true);
             }
         } else {
             this.findAllRefsView.setData(referencesResult, referencesCanceled, this.groupByFile.Value);
@@ -446,11 +449,11 @@ export class ReferencesManager {
                 this.referencesFinished = true;
             }
             if (!this.referencesRefreshPending) {
-                if (referencesResult.isFinished && this.referencesRequestHasOccurred && !referencesRequestPending) {
+                if (referencesResult.isFinished && this.referencesRequestHasOccurred && !referencesRequestPending && !this.referencesCanceledWhilePreviewing) {
                     this.referencesRefreshPending = true;
                     vscode.commands.executeCommand("references-view.refresh");
                 } else {
-                    this.resultsCallback(referencesResult);
+                    this.resultsCallback(referencesResult, !this.referencesCanceledWhilePreviewing);
                 }
             }
         }
