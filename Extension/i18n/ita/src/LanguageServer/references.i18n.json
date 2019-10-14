@@ -21,14 +21,14 @@
 	"inactive.reference": "Riferimento inattivo",
 	"cannot.confirm.reference": "Non è possibile confermare il riferimento",
 	"not.a.reference": "Non è un riferimento",
-	"confirmation.canceled": "CONFERMA ANNULLATA",
-	"c.cpp.references": "Riferimenti a C/C++",
+	"confirmation.canceled.upper": "CONFERMA ANNULLATA",
+	"confirmation.canceled": "Conferma annullata",
 	"click.search.icon": "Per visualizzare l'anteprima dei risultati, fare clic sull'icona di ricerca nella barra di stato.",
 	"started": "Avviato.",
 	"processing.source": "Elaborazione dell'origine.",
 	"searching.files": "Ricerca dei file.",
 	"files.searched": "{0}/{1} file cercati.{2}",
 	"files.confirmed": "{0}/{1} file confermati.{2}",
-	"finished": "Operazione completata.",
+	"c.cpp.peek.references": "C/C++ Peek References",
 	"some.references.may.be.missing": "[Avviso] Alcuni riferimenti potrebbero essere mancanti perché l'analisi dell'area di lavoro è stata incompleta quando è stato avviato {0}."
 }

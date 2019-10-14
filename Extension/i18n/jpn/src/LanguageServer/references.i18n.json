@@ -21,14 +21,14 @@
 	"inactive.reference": "アクティブでない参照",
 	"cannot.confirm.reference": "参照を確認できません",
 	"not.a.reference": "参照ではありません",
+	"confirmation.canceled.upper": "確認がキャンセルされました",
 	"confirmation.canceled": "確認がキャンセルされました",
-	"c.cpp.references": "C/C++ 参照",
 	"click.search.icon": "結果をプレビューするには、ステータス バーの検索アイコンをクリックします。",
 	"started": "開始しました。",
 	"processing.source": "ソースを処理しています。",
 	"searching.files": "ファイルを検索しています。",
 	"files.searched": "{0}/{1} 個のファイルが検索されました。{2}",
 	"files.confirmed": "{0}/{1} 個のファイルを確認しました。{2}",
-	"finished": "完了しました。",
+	"c.cpp.peek.references": "C/C++ Peek References",
 	"some.references.may.be.missing": "[警告] {0} が開始されたときにワークスペースの解析が不完全だったため、参照の一部がない可能性があります。"
 }

@@ -21,14 +21,14 @@
 	"inactive.reference": "Etkin olmayan başvuru",
 	"cannot.confirm.reference": "Başvuru onaylanamıyor",
 	"not.a.reference": "Başvuru değil",
+	"confirmation.canceled.upper": "Onay işlemi iptal edildi",
 	"confirmation.canceled": "Onay işlemi iptal edildi",
-	"c.cpp.references": "C/C++ Başvuruları",
 	"click.search.icon": "Sonuçların önizlemesini görüntülemek için durum çubuğundaki arama simgesine tıklayın.",
 	"started": "Başlatıldı.",
 	"processing.source": "Kaynak işleniyor.",
 	"searching.files": "Dosyalar aranıyor.",
 	"files.searched": "{1} dosya içinden {0} dosya arandı.{2}",
 	"files.confirmed": "{1} dosya içinden {0} dosya onaylandı.{2}",
-	"finished": "Tamamlandı.",
+	"c.cpp.peek.references": "C/C++ Peek References",
 	"some.references.may.be.missing": "[Uyarı] {0} başlatıldığında çalışma alanı ayrıştırma işlemi tamamlanmadığından bazı başvurular eksik olabilir."
 }
