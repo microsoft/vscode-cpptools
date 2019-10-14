@@ -21,14 +21,14 @@
 	"inactive.reference": "Neaktivní odkaz",
 	"cannot.confirm.reference": "Nelze potvrdit odkaz",
 	"not.a.reference": "Není odkaz",
-	"confirmation.canceled": "POTVRZENÍ SE ZRUŠILO",
-	"c.cpp.references": "Odkazy C/C++",
+	"confirmation.canceled.upper": "POTVRZENÍ SE ZRUŠILO",
+	"confirmation.canceled": "Potvrzení se zrušilo.",
 	"click.search.icon": "Pokud chcete zobrazit náhled výsledků, klikněte na ikonu hledání ve stavovém řádku.",
 	"started": "Spuštěno",
 	"processing.source": "Zpracovává se zdroj.",
 	"searching.files": "Hledají se soubory.",
 	"files.searched": "Počet prohledaných souborů: {0}/{1}.{2}",
 	"files.confirmed": "Počet potvrzených souborů: {0}/{1}.{2}",
-	"finished": "Dokončeno",
+	"c.cpp.peek.references": "C/C++ Peek References",
 	"some.references.may.be.missing": "[Upozornění] Některé odkazy můžou chybět, protože když se spustilo {0}, nebylo ještě hotové parsování pracovního prostoru."
 }
