@@ -48,7 +48,7 @@
         {
           "id": "CppRenameActivityBar",
           "title": "%c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title%",
-          "icon": "assets/cpp-rename-icon.svg"
+          "icon": "./assets/cpp-rename-icon.svg"
         }
       ]
     },
@@ -651,8 +651,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.remove.title%",
         "icon": {
-          "light": "assets/minus-light.svg",
-          "dark": "assets/minus-dark.svg"
+          "light": "./assets/minus-light.svg",
+          "dark": "./assets/minus-dark.svg"
         }
       },
       {
@@ -660,8 +660,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.add.title%",
         "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
+          "light": "./assets/plus-light.svg",
+          "dark": "./assets/plus-dark.svg"
         }
       },
       {
@@ -669,8 +669,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.removeAll.title%",
         "icon": {
-          "light": "assets/minus-light.svg",
-          "dark": "assets/minus-dark.svg"
+          "light": "./assets/minus-light.svg",
+          "dark": "./assets/minus-dark.svg"
         }
       },
       {
@@ -678,8 +678,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.addAll.title%",
         "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
+          "light": "./assets/plus-light.svg",
+          "dark": "./assets/plus-dark.svg"
         }
       },
       {
@@ -687,8 +687,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.removeFile.title%",
         "icon": {
-          "light": "assets/minus-light.svg",
-          "dark": "assets/minus-dark.svg"
+          "light": "./assets/minus-light.svg",
+          "dark": "./assets/minus-dark.svg"
         }
       },
       {
@@ -696,8 +696,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.addFile.title%",
         "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
+          "light": "./assets/plus-light.svg",
+          "dark": "./assets/plus-dark.svg"
         }
       },
       {
@@ -705,8 +705,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.addReferenceType.title%",
         "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
+          "light": "./assets/plus-light.svg",
+          "dark": "./assets/plus-dark.svg"
         }
       },
       {
@@ -714,8 +714,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.cancel.title%",
         "icon": {
-          "light": "assets/cancel-light.svg",
-          "dark": "assets/cancel-dark.svg"
+          "light": "./assets/cancel-light.svg",
+          "dark": "./assets/cancel-dark.svg"
         }
       },
       {
@@ -723,8 +723,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.CppRenameView.done.title%",
         "icon": {
-          "light": "assets/check-light.svg",
-          "dark": "assets/check-dark.svg"
+          "light": "./assets/check-light.svg",
+          "dark": "./assets/check-dark.svg"
         }
       },
       {
@@ -732,8 +732,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.referencesViewGroupByType.title%",
         "icon": {
-          "light": "assets/ref-group-by-type-light.svg",
-          "dark": "assets/ref-group-by-type-dark.svg"
+          "light": "./assets/ref-group-by-type-light.svg",
+          "dark": "./assets/ref-group-by-type-dark.svg"
         }
       },
       {
@@ -741,8 +741,8 @@
         "category": "C/C++",
         "title": "%c_cpp.command.referencesViewUngroupByType.title%",
         "icon": {
-          "light": "assets/ref-ungroup-by-type-light.svg",
-          "dark": "assets/ref-ungroup-by-type-dark.svg"
+          "light": "./assets/ref-ungroup-by-type-light.svg",
+          "dark": "./assets/ref-ungroup-by-type-dark.svg"
         }
       }
     ],
