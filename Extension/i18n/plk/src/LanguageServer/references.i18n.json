@@ -21,14 +21,14 @@
 	"inactive.reference": "Nieaktywne odwołanie",
 	"cannot.confirm.reference": "Nie można potwierdzić odwołania",
 	"not.a.reference": "To nie jest odwołanie",
-	"confirmation.canceled": "POTWIERDZENIE ANULOWANE",
-	"c.cpp.references": "Odwołania do języka C/C++",
+	"confirmation.canceled.upper": "POTWIERDZENIE ANULOWANE",
+	"confirmation.canceled": "Potwierdzenie anulowane",
 	"click.search.icon": "Aby wyświetlić podgląd wyników, kliknij ikonę wyszukiwania na pasku stanu.",
 	"started": "Uruchomiono.",
 	"processing.source": "Przetwarzanie źródła.",
 	"searching.files": "Wyszukiwanie plików.",
 	"files.searched": "Wyszukano pliki: {0}/{1}.{2}",
 	"files.confirmed": "Potwierdzono pliki: {0}/{1}.{2}",
-	"finished": "Zakończono.",
+	"c.cpp.peek.references": "C/C++ Peek References",
 	"some.references.may.be.missing": "[Ostrzeżenie] Może brakować niektórych odwołań, ponieważ analizowanie obszaru roboczego było niekompletne po uruchomieniu elementu {0}."
 }

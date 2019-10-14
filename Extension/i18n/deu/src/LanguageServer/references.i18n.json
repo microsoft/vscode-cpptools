@@ -21,14 +21,14 @@
 	"inactive.reference": "Inaktiver Verweis",
 	"cannot.confirm.reference": "Der Verweis kann nicht bestätigt werden.",
 	"not.a.reference": "Kein Verweis",
-	"confirmation.canceled": "BESTÄTIGUNG ABGEBROCHEN",
-	"c.cpp.references": "C/C++-Verweise",
+	"confirmation.canceled.upper": "BESTÄTIGUNG ABGEBROCHEN",
+	"confirmation.canceled": "Bestätigung abgebrochen",
 	"click.search.icon": "Klicken Sie auf das Suchsymbol in der Statusleiste, um eine Vorschau der Ergebnisse anzuzeigen.",
 	"started": "Gestartet.",
 	"processing.source": "Die Quelle wird verarbeitet.",
 	"searching.files": "Dateien werden gesucht.",
 	"files.searched": "{0}/{1} Dateien durchsucht.{2}",
 	"files.confirmed": "{0}/{1} Dateien bestätigt.{2}",
-	"finished": "Abgeschlossen",
+	"c.cpp.peek.references": "C/C++ Peek References",
 	"some.references.may.be.missing": "[Warnung] Einige Verweise fehlen möglicherweise, da die Arbeitsbereichsanalyse beim Starten von {0} unvollständig war."
 }
