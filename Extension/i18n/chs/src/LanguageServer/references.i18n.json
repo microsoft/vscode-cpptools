@@ -29,6 +29,6 @@
 	"searching.files": "正在搜索文件。",
 	"files.searched": "已搜索 {0} 个文件，共 {1} 个文件。{2}",
 	"files.confirmed": "已确认 {0} 个文件，共 {1} 个文件。{2}",
-	"c.cpp.peek.references": "C/C++ Peek References",
+	"c.cpp.peek.references": "C/C++ 速览引用",
 	"some.references.may.be.missing": "[警告] 某些引用可能丢失，因为在 {0} 启动时，工作区分析不完整。"
 }
