@@ -1,5 +1,38 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.26.0: October 15, 2019
+### New Features
+* Add localization support (translated text) via `Configure Display Language`. [#7](https://github.com/microsoft/vscode-cpptools/issues/7)
+* Add `Rename Symbol` with a pending rename UI. [#296](https://github.com/microsoft/vscode-cpptools/issues/296),  [PR #4277](https://github.com/microsoft/vscode-cpptools/pull/4277)
+* Add support for navigation breadcrumbs and nested symbols in the Outline view (and removed the Navigation status bar item). [#2230](https://github.com/microsoft/vscode-cpptools/issues/2230)
+* Add support for C++/CX (`/ZW`, `/ZW:nostdlib`, `/FI`, `/FU`, and `/AI` compiler arguments). [#3039](https://github.com/microsoft/vscode-cpptools/issues/3039)
+* Add a tree view UI for the other C++ references results. [#4079](https://github.com/microsoft/vscode-cpptools/issues/4079)
+
+### Enhancements
+* App support for .rsp files in `compile_commands.json`. [#1718](https://github.com/microsoft/vscode-cpptools/issues/1718)
+* Add support for `SymbolLoadInfo` to `launch.json`. [#3324](https://github.com/microsoft/vscode-cpptools/issues/3324)
+* Enable `${workspaceFolder}` in `compilerPath` and `compilerArgs`. [#3440](https://github.com/microsoft/vscode-cpptools/issues/3440)
+* Add support for parsing more file types by default. [#3567](https://github.com/microsoft/vscode-cpptools/issues/3567)
+* Move status icons to the left to minimize shifting and change the red flame to use the foreground color. [#4198](https://github.com/microsoft/vscode-cpptools/issues/4198)
+
+### Bug Fixes
+* Fix querying of non-ENU compilers. [#2874](https://github.com/microsoft/vscode-cpptools/issues/2874)
+* Fix `Find All References` not confirming references of method overrides in an inheritance hierarchy. [#4078](https://github.com/microsoft/vscode-cpptools/issues/4078)
+* Fix missing references on the last line. [#4150](https://github.com/microsoft/vscode-cpptools/issues/4150)
+* Fix `Go to Definition` on implicit default constructors. [#4162](https://github.com/microsoft/vscode-cpptools/issues/4162)
+* Fix configuration prompts from appearing if a configuration provider is set. [#4168](https://github.com/microsoft/vscode-cpptools/issues/4168)
+* Fix vcpkg code action for missing includes with more than one forward slash. [PR #4172](https://github.com/microsoft/vscode-cpptools/pull/4172)
+* Fix parsing of `__has_include` (and other system macros) with gcc. [#4193](https://github.com/microsoft/vscode-cpptools/issues/4193)
+* Fix tag parse database not getting updated after changes occur to unopened files in the workspace. [#4211](https://github.com/microsoft/vscode-cpptools/issues/4211)
+* Fix `files.exclude` ending with `/` being treated like a per-file exclude (which aren't enabled by default). [#4262](https://github.com/microsoft/vscode-cpptools/issues/4262)
+* Fix `Find All References` incorrect results for string and comment references. [#4279](https://github.com/microsoft/vscode-cpptools/issues/4279)
+* Fix bug with forced includes in `compile_commands.json`. [#4293](https://github.com/microsoft/vscode-cpptools/issues/4293)
+* Fix `Find All References` giving `Not a Reference` for constructors of templated classes. [#4345](https://github.com/microsoft/vscode-cpptools/issues/4345)
+* Fix squiggles appearing after a multi-edit replace or rename. [#4351](https://github.com/microsoft/vscode-cpptools/issues/4351)
+* Fix `gcc-x86` and `clang-x86` modes. [#4353](https://github.com/microsoft/vscode-cpptools/issues/4353)
+* Fix crashes if the database can't be created. [#4359](https://github.com/microsoft/vscode-cpptools/issues/4359)
+* Fix bugs with comment references. [#4371](https://github.com/microsoft/vscode-cpptools/issues/4371), [#4372](https://github.com/microsoft/vscode-cpptools/issues/4372)
+
 ## Version 0.25.1: August 28, 2019
 ### Bug Fixes
 * Fix `Switch Header/Source` for `.H` and `.C` targets. [#3048](https://github.com/microsoft/vscode-cpptools/issues/3048)

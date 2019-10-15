@@ -18,6 +18,11 @@ import * as https from 'https';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { getBuildTasks } from './LanguageServer/extension';
 import { OtherSettings } from './LanguageServer/settings';
+import { lookupString } from './nativeStrings';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export type Mutable<T> = {
     -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
@@ -33,7 +38,7 @@ export function setExtensionPath(path: string): void {
     extensionPath = path;
 }
 
-export const failedToParseTasksJson: string = "Failed to parse tasks.json, possibly due to comments or trailing commas.";
+export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
 
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
@@ -178,7 +183,7 @@ export async function isExtensionReady(): Promise<boolean> {
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
-export const extensionNotReadyString: string = 'The C/C++ extension is still installing. See the output window for more information.';
+export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
 export function displayExtensionNotReadyPrompt(): void {
 
@@ -552,7 +557,7 @@ export function getInstallLockPath(): string {
 
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
-    const readmeMessage: string = `Please refer to ${readmePath} for troubleshooting information. Issues can be created at https://github.com/Microsoft/vscode-cpptools/issues`;
+    const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
     return readmeMessage;
 }
 
@@ -619,7 +624,7 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
 
         child.on('exit', (code: number) => {
             if (code !== 0) {
-                reject(new Error(`${process} exited with error code ${code}`));
+                reject(new Error(localize("process.exited.with.code", "{0} exited with error code {1}", process, code)));
             } else {
                 resolve();
             }
@@ -641,7 +646,7 @@ export function allowExecution(file: string): Promise<void> {
                     });
                 } else {
                     getOutputChannelLogger().appendLine("");
-                    getOutputChannelLogger().appendLine(`Warning: Expected file ${file} is missing.`);
+                    getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
                     resolve();
                 }
             });
@@ -668,7 +673,7 @@ export function checkDistro(platformInfo: PlatformInformation): void {
     if (platformInfo.platform !== 'win32' && platformInfo.platform !== 'linux' && platformInfo.platform !== 'darwin') {
         // this should never happen because VSCode doesn't run on FreeBSD
         // or SunOS (the other platforms supported by node)
-        getOutputChannelLogger().appendLine(`Warning: Debugging has not been tested for this platform. ${getReadmeMessage()}`);
+        getOutputChannelLogger().appendLine(localize("warning.debugging.not.tested", "Warning: Debugging has not been tested for this platform.") + " " + getReadmeMessage());
     }
 }
 
@@ -695,11 +700,11 @@ export async function renamePromise(oldName: string, newName: string): Promise<v
 }
 
 export function promptForReloadWindowDueToSettingsChange(): void {
-    promptReloadWindow("Reload the workspace for the settings change to take effect.");
+    promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
 export function promptReloadWindow(message: string): void {
-    let reload: string = "Reload";
+    let reload: string = localize("reload.string", "Reload");
     vscode.window.showInformationMessage(message, reload).then((value: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
@@ -899,4 +904,42 @@ export class BlockingTask<T> {
     public getPromise(): Thenable<T> {
         return this.promise;
     }
+}
+
+export function getLocaleId(): string {
+    if (isString(process.env.VSCODE_NLS_CONFIG)) {
+        let vscodeNlsConfigJson: any = JSON.parse(process.env.VSCODE_NLS_CONFIG);
+        if (isString(vscodeNlsConfigJson.locale)) {
+            return vscodeNlsConfigJson.locale;
+        }
+    }
+    return "en";
+}
+
+export function getLocalizedHtmlPath(originalPath: string): string {
+    let locale: string = getLocaleId();
+    let localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
+    if (!fs.existsSync(localizedFilePath)) {
+        return getExtensionFilePath(originalPath);
+    }
+    return localizedFilePath;
+}
+
+export interface LocalizeStringParams {
+    text: string;
+    stringId: number;
+    stringArgs: string[];
+    indentSpaces: number;
+}
+
+export function getLocalizedString(params: LocalizeStringParams): string {
+    let indent: string = "";
+    if (params.indentSpaces) {
+        indent = " ".repeat(params.indentSpaces);
+    }
+    let text: string = params.text;
+    if (params.stringId !== 0) {
+        text = lookupString(params.stringId, params.stringArgs);
+    }
+    return indent + text;
 }

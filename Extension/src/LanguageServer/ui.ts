@@ -5,8 +5,13 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Client, ReferencesCommandMode, referencesCommandModeToString } from './client';
+import { Client } from './client';
+import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection } from './customProviders';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let ui: UI;
 
@@ -30,49 +35,39 @@ interface ConfigurationResult {
 }
 
 export class UI {
-    private navigationStatusBarItem: vscode.StatusBarItem;
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private configurationUIPromise: Thenable<ConfigurationResult>;
-    private readonly referencesPreviewTooltip: string = " (click to preview results)";
+    private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
 
     constructor() {
-        // 1000 = priority, it needs to be high enough to be on the left of the Ln/Col.
-        this.navigationStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
-        this.navigationStatusBarItem.tooltip = "C/C++ Navigation";
-        this.navigationStatusBarItem.command = "C_Cpp.Navigate";
-        this.ShowNavigation = true;
 
-        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 3);
+        this.configStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
-        this.configStatusBarItem.tooltip = "C/C++ Configuration";
+        this.configStatusBarItem.tooltip = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
         this.ShowConfiguration = true;
 
-        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 2);
+        this.referencesStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.text = "";
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = true;
 
-        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1);
+        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.text = "";
-        this.intelliSenseStatusBarItem.tooltip = "Updating IntelliSense...";
-        this.intelliSenseStatusBarItem.color = "Red";
+        this.intelliSenseStatusBarItem.tooltip = localize("updating.intellisense.tooltip", "Updating IntelliSense...");
+        this.intelliSenseStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.ShowFlameIcon = true;
 
-        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 0);
+        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 902);
         this.browseEngineStatusBarItem.text = "";
-        this.browseEngineStatusBarItem.tooltip = "Discovering files...";
+        this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files...");
         this.browseEngineStatusBarItem.color = new vscode.ThemeColor("statusBar.foreground");
         this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         this.ShowDBIcon = true;
-    }
-
-    private set NavigationLocation(location: string) {
-        this.navigationStatusBarItem.text = location;
     }
 
     private set ActiveConfig(label: string) {
@@ -102,7 +97,9 @@ export class UI {
 
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
-            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Peek) ? ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
+            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
+            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
+            ReferencesCommandMode.Peek));
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {
@@ -111,32 +108,33 @@ export class UI {
             this.ShowReferencesIcon = false;
         } else {
             this.referencesStatusBarItem.text = "$(search)";
-            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + (val === ReferencesCommandMode.Find ? this.referencesPreviewTooltip : "");
+            this.referencesStatusBarItem.tooltip =  referencesCommandModeToString(val) + (val !== ReferencesCommandMode.Find ? "" : this.referencesPreviewTooltip);
             this.ShowReferencesIcon = true;
         }
     }
 
-    private set ShowNavigation(show: boolean) {
-        if (show) {
-            this.navigationStatusBarItem.show();
-        } else {
-            this.navigationStatusBarItem.hide();
-        }
-    }
+    // Prevent icons from appearing too often and for too short of a time.
+    private readonly iconDelayTime: number = 1000;
 
+    private dbTimeout: NodeJS.Timeout;
     private set ShowDBIcon(show: boolean) {
         if (show && this.IsTagParsing) {
-            this.browseEngineStatusBarItem.show();
+            clearTimeout(this.dbTimeout);
+            this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            this.browseEngineStatusBarItem.hide();
+            clearTimeout(this.dbTimeout);
+            this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }
 
+    private flameTimeout: NodeJS.Timeout;
     private set ShowFlameIcon(show: boolean) {
         if (show && this.IsUpdatingIntelliSense) {
-            this.intelliSenseStatusBarItem.show();
+            clearTimeout(this.flameTimeout);
+            this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            this.intelliSenseStatusBarItem.hide();
+            clearTimeout(this.flameTimeout);
+            this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }
 
@@ -164,48 +162,26 @@ export class UI {
         let isSettingsJson: boolean = (activeEditor && (activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
 
         this.ShowConfiguration = isCpp || isSettingsJson;
-        this.ShowNavigation = isCpp;
     }
 
     public bind(client: Client): void {
         client.TagParsingChanged(value => { this.IsTagParsing = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
-        client.NavigationLocationChanged(value => { this.NavigationLocation = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
     }
 
-    public showNavigationOptions(navigationList: string): void {
-        let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select where to navigate to";
-
-        let items: IndexableQuickPickItem[] = [];
-        let navlist: string[] = navigationList.split(";");
-        for (let i: number = 0; i < navlist.length - 1; i += 2) {
-            items.push({ label: navlist[i], description: "", index: Number(navlist[i + 1]) });
-        }
-
-        vscode.window.showQuickPick(items, options)
-            .then(selection => {
-                if (!selection) {
-                    return;
-                }
-                vscode.window.activeTextEditor.revealRange(new vscode.Range(selection.index, 0, selection.index, 0), vscode.TextEditorRevealType.InCenter);
-                vscode.window.activeTextEditor.selection = new vscode.Selection(new vscode.Position(selection.index, 0), new vscode.Position(selection.index, 0));
-            });
-    }
-
     public showConfigurations(configurationNames: string[]): Thenable<number> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a Configuration...";
+        options.placeHolder = localize("select.a.configuration", "Select a Configuration...");
 
         let items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < configurationNames.length; i++) {
             items.push({ label: configurationNames[i], description: "", index: i });
         }
-        items.push({ label: "Edit Configurations (UI)", description: "", index: configurationNames.length });
-        items.push({ label: "Edit Configurations (JSON)", description: "", index: configurationNames.length + 1 });
+        items.push({ label: localize("edit.configuration.ui", "Edit Configurations (UI)"), description: "", index: configurationNames.length });
+        items.push({ label: localize("edit.configuration.json", "Edit Configurations (JSON)"), description: "", index: configurationNames.length + 1 });
 
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.index : -1);
@@ -213,18 +189,18 @@ export class UI {
 
     public showConfigurationProviders(currentProvider: string|null): Thenable<string|undefined> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a Configuration Provider...";
+        options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
 
         let items: KeyedQuickPickItem[] = [];
         providers.forEach(provider => {
             let label: string = provider.name;
             if (provider.extensionId === currentProvider) {
-                label += " (active)";
+                label += ` (${localize("active", "active")})`;
             }
             items.push({ label: label, description: "", key: provider.extensionId });
         });
-        items.push({ label: "(none)", description: "Disable the active configuration provider, if applicable.", key: "" });
+        items.push({ label: `(${localize("none", "none")})`, description: localize("disable.configuration.provider", "Disable the active configuration provider, if applicable."), key: "" });
 
         return vscode.window.showQuickPick(items, options)
             .then(selection => (selection) ? selection.key : undefined);
@@ -232,7 +208,7 @@ export class UI {
 
     public showCompileCommands(paths: string[]): Thenable<number> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a compile_commands.json...";
+        options.placeHolder = localize("select.compile.commands", "Select a compile_commands.json...");
 
         let items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
@@ -245,7 +221,7 @@ export class UI {
 
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a Workspace...";
+        options.placeHolder = localize("select.workspace", "Select a Workspace...");
 
         let items: KeyedQuickPickItem[] = [];
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
@@ -256,14 +232,14 @@ export class UI {
 
     public showParsingCommands(): Thenable<number> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = "Select a parsing command...";
+        options.placeHolder = localize("select.parsing.command", "Select a parsing command...");
 
         let items: IndexableQuickPickItem[];
         items = [];
         if (this.browseEngineStatusBarItem.tooltip === "Parsing paused") {
-            items.push({ label: "Resume Parsing", description: "", index: 1 });
+            items.push({ label: localize("resume.parsing", "Resume Parsing"), description: "", index: 1 });
         } else {
-            items.push({ label: "Pause Parsing", description: "", index: 0 });
+            items.push({ label: localize("pause.parsing", "Pause Parsing"), description: "", index: 0 });
         }
 
         return vscode.window.showQuickPick(items, options)
@@ -318,7 +294,6 @@ export class UI {
         this.browseEngineStatusBarItem.dispose();
         this.intelliSenseStatusBarItem.dispose();
         this.referencesStatusBarItem.dispose();
-        this.navigationStatusBarItem.dispose();
     }
 }
 

@@ -14,7 +14,7 @@ export class PackageVersion {
     constructor(version: string) {
         const tokens: string[] = version.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
         if (tokens.length < 3) {
-            throw new Error('Failed to parse version string: ' + version);
+            throw new Error(`Failed to parse version string: ${version}`);
         }
 
         this.major = parseInt(tokens[0]);
@@ -36,7 +36,7 @@ export class PackageVersion {
         }
 
         if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
-            throw new Error('Failed to parse version string: ' + version);
+            throw new Error(`Failed to parse version string: ${version}`);
         }
     }
 

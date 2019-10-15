@@ -10,6 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
+import { TreeNode, NodeType, getCurrentRenameModel } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -28,6 +29,10 @@ import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -104,7 +109,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
     const dummy: any[] = [{}]; // To distinguish between entry from CodeActions and the command palette
     return {
         command: { title: 'vcpkgOnlineHelpSuggested', command: 'C_Cpp.VcpkgOnlineHelpSuggested', arguments: dummy },
-        title: "Learn how to install a library for this header with vcpkg",
+        title: localize("learn.how.to.install.a.library", "Learn how to install a library for this header with vcpkg"),
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -112,7 +117,7 @@ function getVcpkgHelpAction(): vscode.CodeAction {
 function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
     return {
         command: { title: 'vcpkgClipboardInstallSuggested', command: 'C_Cpp.VcpkgClipboardInstallSuggested', arguments: [[port]] },
-        title: `Copy vcpkg command to install '${port}' to the clipboard`,
+        title: localize("copy.vcpkg.command", "Copy vcpkg command to install '{0}' to the clipboard", port),
         kind: vscode.CodeActionKind.QuickFix
     };
 }
@@ -122,7 +127,7 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
     if (!matches.length) {
         return [];
     }
-    const missingHeader: string = matches.groups['includeFile'].replace('/', '\\');
+    const missingHeader: string = matches.groups['includeFile'].replace(/\//g, '\\');
 
     let portsWithHeader: string[];
     const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
@@ -459,11 +464,28 @@ function realActivation(): void {
     if (settings.updateChannel === 'Default') {
         suggestInsidersChannel();
     } else if (settings.updateChannel === 'Insiders') {
-        insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+        insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
         checkAndApplyUpdate(settings.updateChannel);
     }
 
-    intervalTimer = setInterval(onInterval, 2500);
+    // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
+    class SchemaProvider implements vscode.TextDocumentContentProvider {
+        public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+            let fileName: string = uri.authority;
+            let locale: string = util.getLocaleId();
+            let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
+            return util.checkFileExists(localizedFilePath).then((fileExists) => {
+                if (!fileExists) {
+                    localizedFilePath = util.getExtensionFilePath(fileName);
+                }
+                return util.readFileText(localizedFilePath);
+            });
+        }
+    }
+
+    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
+
+    intervalTimer = global.setInterval(onInterval, 2500);
 }
 
 export function updateLanguageConfigurations(): void {
@@ -492,7 +514,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
         if (newUpdateChannel === 'Default') {
             clearInterval(insiderUpdateTimer);
         } else if (newUpdateChannel === 'Insiders') {
-            insiderUpdateTimer = setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+            insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
         }
 
         checkAndApplyUpdate(newUpdateChannel);
@@ -507,7 +529,7 @@ function onDidSaveTextDocument(doc: vscode.TextDocument): void {
 
     if (!saveMessageShown && new CppSettings(doc.uri).clangFormatOnSave) {
         saveMessageShown = true;
-        vscode.window.showInformationMessage("\"C_Cpp.clang_format_formatOnSave\" has been removed. Please use \"editor.formatOnSave\" instead.");
+        vscode.window.showInformationMessage(localize("removed.use.instead", '"{0}" has been removed. Please use "{1}" instead.', "C_Cpp.clang_format_formatOnSave", "editor.formatOnSave"));
     }
 }
 
@@ -633,7 +655,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
                     process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
 
                     // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-                    const timer: NodeJS.Timer = setTimeout(() => {
+                    const timer: NodeJS.Timer = global.setTimeout(() => {
                         process.kill();
                         reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
                     }, 30000);
@@ -669,7 +691,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
             }
 
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-            const timer: NodeJS.Timer = setTimeout(() => {
+            const timer: NodeJS.Timer = global.setTimeout(() => {
                 process.kill();
                 reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
             }, 30000);
@@ -709,10 +731,10 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!buildInfo) {
         return; // No need to update.
     }
-    const message: string = `Insiders version ${buildInfo.name} is available. Would you like to switch to the Insiders channel and install this update?`;
-    const yes: string = "Yes";
-    const askLater: string = "Ask Me Later";
-    const dontShowAgain: string = "Don't Show Again";
+    const message: string = localize('insiders.available', "Insiders version {0} is available. Would you like to switch to the Insiders channel and install this update?", buildInfo.name);
+    const yes: string = localize("yes.button", "Yes");
+    const askLater: string = localize("ask.me.later.button", "Ask Me Later");
+    const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
     let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
@@ -775,8 +797,9 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
                 return;
             }
             clearInterval(insiderUpdateTimer);
-            const message: string =
-                `The C/C++ Extension has been updated to version ${buildInfo.name}. Please reload the window for the changes to take effect.`;
+            const message: string = localize("extension.updated",
+                "The C/C++ Extension has been updated to version {0}. Please reload the window for the changes to take effect.",
+                buildInfo.name);
             util.promptReloadWindow(message);
             telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
             resolve();
@@ -826,7 +849,6 @@ export function registerCommands(): void {
 
     commandsRegistered = true;
     getTemporaryCommandRegistrarInstance().clearTempCommands();
-    disposables.push(vscode.commands.registerCommand('C_Cpp.Navigate', onNavigate));
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
@@ -846,22 +868,22 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByType', onToggleRefGroupView));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.cancel', onRenameViewCancel));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.done', onRenameViewDone));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.remove', onRenameViewRemove));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.add', onRenameViewAdd));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.removeAll', onRenameViewRemoveAll));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.addAll', onRenameViewAddAll));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.removeFile', onRenameViewRemoveFile));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.addFile', onRenameViewAddFile));
+    disposables.push(vscode.commands.registerCommand('CppRenameView.addReferenceType', onRenameViewAddReferenceType));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
-}
-
-function onNavigate(): void {
-    onActivationEvent();
-    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-    if (!activeEditor) {
-        return;
-    }
-
-    clients.ActiveClient.requestNavigationList(activeEditor.document).then((navigationList: string) => {
-        ui.showNavigationOptions(navigationList);
-    });
 }
 
 function onSwitchHeaderSource(): void {
@@ -922,7 +944,7 @@ function selectClient(): Thenable<Client> {
                     console.assert("client not found");
                 }
             }
-            return Promise.reject<Client>("client not found");
+            return Promise.reject<Client>(localize("client.not.found", "client not found"));
         });
     }
 }
@@ -936,7 +958,7 @@ function onResetDatabase(): void {
 function onSelectConfiguration(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to select a configuration');
+        vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
@@ -947,7 +969,7 @@ function onSelectConfiguration(): void {
 function onSelectConfigurationProvider(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to select a configuration provider');
+        vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider'));
     } else {
         selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
     }
@@ -957,7 +979,7 @@ function onEditConfigurationJSON(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, null);
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
     }
@@ -967,7 +989,7 @@ function onEditConfigurationUI(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, null);
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
     }
@@ -976,7 +998,7 @@ function onEditConfigurationUI(): void {
 function onEditConfiguration(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to edit configurations');
+        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
     }
@@ -984,7 +1006,7 @@ function onEditConfiguration(): void {
 
 function onAddToIncludePath(path: string): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage('Open a folder first to add to includePath');
+        vscode.window.showInformationMessage(localize('add.includepath.open.first', 'Open a folder first to add to {0}', "includePath"));
     } else {
         // This only applies to the active client. It would not make sense to add the include path
         // suggestion to a different workspace.
@@ -1038,6 +1060,12 @@ function onShowParsingCommands(): void {
 function onShowReferencesProgress(): void {
     onActivationEvent();
     selectClient().then(client => client.handleReferencesIcon(), rejected => {});
+}
+
+function onToggleRefGroupView(): void {
+    // Set context to switch icons
+    let client: Client = getActiveClient();
+    client.toggleReferenceResultsView();
 }
 
 function onTakeSurvey(): void {
@@ -1120,6 +1148,73 @@ function onLogDiagnostics(): void {
 function onRescanWorkspace(): void {
     onActivationEvent();
     clients.forEach(client => client.rescanFolder());
+}
+
+function onShowRefCommand(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
+    const { node } = arg;
+    if (node === NodeType.reference) {
+        const { referenceLocation } = arg;
+        vscode.window.showTextDocument(referenceLocation.uri, {
+            selection: referenceLocation.range.with({ start: referenceLocation.range.start, end: referenceLocation.range.end })
+        });
+    } else if (node === NodeType.fileWithPendingRef) {
+        const { fileUri } = arg;
+        vscode.window.showTextDocument(fileUri);
+    }
+}
+
+function onRenameViewCancel(arg?: any): void {
+    getCurrentRenameModel().cancelRename();
+}
+
+function onRenameViewDone(arg?: any): void {
+    getCurrentRenameModel().completeRename();
+}
+
+function onRenameViewRemove(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
+    arg.model.setRenameCandidate(arg);
+}
+
+function onRenameViewAdd(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
+    arg.model.setRenamePending(arg);
+}
+
+function onRenameViewRemoveAll(arg?: any): void {
+    getCurrentRenameModel().setAllRenamesCandidates();
+}
+
+function onRenameViewAddAll(arg?: any): void {
+    getCurrentRenameModel().setAllRenamesPending();
+}
+
+function onRenameViewRemoveFile(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
+    arg.model.setFileRenamesCandidates(arg);
+}
+
+function onRenameViewAddFile(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
+    arg.model.setFileRenamesPending(arg);
+}
+
+function onRenameViewAddReferenceType(arg?: TreeNode): void {
+    if (!arg) {
+        return;
+    }
+    arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
 }
 
 function reportMacCrashes(): void {

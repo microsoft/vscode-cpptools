@@ -34,3 +34,9 @@ CMakeLists.txt
 debugAdapters/install.lock*
 typings/**
 **/*.map
+import_edge_strings.js
+localized_string_ids.h
+translations_auto_pr.js
+
+# ignore i18n language files
+i18n/**

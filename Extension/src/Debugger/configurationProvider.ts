@@ -13,11 +13,15 @@ import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
 import { buildAndDebugActiveFileStr } from './extension';
 import * as logger from '../logger';
+import * as nls from 'vscode-nls';
 
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
 import { parse } from 'jsonc-parser';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 function isDebugLaunchStr(str: string): boolean {
     return str === "(gdb) Launch" || str === "(lldb) Launch" || str === "(Windows) Launch";
@@ -51,18 +55,18 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
             let menuItem: MenuItem = {label: config.name, configuration: config};
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
-                menuItem.label = "Default Configuration";
+                menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
             }
             return menuItem;
         });
 
-        const selection: MenuItem = await vscode.window.showQuickPick(items, {placeHolder: "Select a configuration"});
+        const selection: MenuItem = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
             throw new Error(); // User canceled it.
         }
         if (selection.label.startsWith("cl.exe")) {
             if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-                vscode.window.showErrorMessage('cl.exe build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.');
+                vscode.window.showErrorMessage(localize("cl.exe.not.available", "{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.", "cl.exe"));
                 throw new Error();
             }
         }
@@ -184,7 +188,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             if (config.type === 'cppvsdbg') {
                 // Fail if cppvsdbg type is running on non-Windows
                 if (os.platform() !== 'win32') {
-                    logger.getOutputChannelLogger().showWarningMessage("Debugger of type: 'cppvsdbg' is only available on Windows. Use type: 'cppdbg' on the current OS platform.");
+                    logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
                     return undefined;
                 }
 
@@ -254,7 +258,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
                 delete config.envFile;
             } catch (e) {
-                throw new Error(`Failed to use envFile. Reason: ${e.message}`);
+                throw new Error(localize("envfale.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
             }
         }
     }
@@ -274,7 +278,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 let target: string = sourceFileMapTarget;
 
                 if (sourceFileMapSource !== newSourceFileMapSource) {
-                    message = `\tReplacing sourcePath '${sourceFileMapSource}' with '${newSourceFileMapSource}'.`;
+                    message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
@@ -282,7 +286,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 if (sourceFileMapTarget !== newSourceFileMapTarget) {
                     // Add a space if source was changed, else just tab the target message.
                     message +=  (message ? ' ' : '\t');
-                    message += `Replacing targetPath '${sourceFileMapTarget}' with '${newSourceFileMapTarget}'.`;
+                    message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
                     target = newSourceFileMapTarget;
                 }
 
@@ -293,7 +297,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             }
 
             if (messages.length > 0) {
-                logger.getOutputChannel().appendLine("Resolving variables in sourceFileMap...");
+                logger.getOutputChannel().appendLine(localize("resolving.variables.in.sourcefilemap", "Resolving variables in {0}...", "sourceFileMap"));
                 messages.forEach((message) => {
                     logger.getOutputChannel().appendLine(message);
                 });
@@ -303,7 +307,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     }
 
     private static async showFileWarningAsync(message: string, fileName: string) : Promise<void> {
-        const openItem: vscode.MessageItem = { title: 'Open envFile' };
+        const openItem: vscode.MessageItem = { title: localize("open.envfile", "Open {0}", "envFile") };
         let result: vscode.MessageItem = await vscode.window.showWarningMessage(message, openItem);
         if (result && result.title === openItem.title) {
             let doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
@@ -341,7 +345,7 @@ export class ConfigurationAssetProviderFactory {
             case 'linux':
                 return new LinuxConfigurationProvider();
             default:
-                throw new Error("Unexpected OS type");
+                throw new Error(localize("unexpected.os", "Unexpected OS type"));
         }
     }
 }
@@ -378,11 +382,11 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
 
 class WindowsConfigurationProvider extends DefaultConfigurationProvider {
     private executable: string = "a.exe";
-    private pipeProgram: string = "<full path to pipe program such as plink.exe>";
+    private pipeProgram: string = "<" + localize("path.to.pipe.program", "full path to pipe program such as {0}", "plink.exe") + ">";
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "Enable pretty-printing for gdb",
+        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb")}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     }
@@ -416,7 +420,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "Enable pretty-printing for gdb",
+        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb")}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     }

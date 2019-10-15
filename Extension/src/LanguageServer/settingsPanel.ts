@@ -354,7 +354,8 @@ export class SettingsPanel {
 
     private getHtml(): string {
         let content: string | undefined;
-        content = fs.readFileSync(util.getExtensionFilePath("ui/settings.html")).toString();
+
+        content = fs.readFileSync(util.getLocalizedHtmlPath("ui/settings.html")).toString();
 
         content = content.replace(
             /{{root}}/g,
