@@ -55,7 +55,7 @@
 	"processing_folder_recursive": "Traitement du dossier (récursif) : {0}",
 	"file_exclude": "Exclusion de fichier : {0}",
 	"search_exclude": "Rechercher dans l'exclusion : {0}",
-	"discovery_files_processed": "Découverte de fichiers : {0} fichier(s) traité(s)",
+	"discovery_files_processed": "Découverte de fichiers : {0} fichier(s) traité(s)",
 	"files_removed_from_database": "{0} fichier(s) supprimé(s) dans la base de données",
 	"parsing_files_processed": "Analyse : {0} fichier(s) traité(s)",
 	"shutting_down_intellisense": "Arrêt du serveur IntelliSense : {0}",

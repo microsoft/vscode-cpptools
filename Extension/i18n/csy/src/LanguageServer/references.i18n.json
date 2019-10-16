@@ -29,6 +29,6 @@
 	"searching.files": "Hledají se soubory.",
 	"files.searched": "Počet prohledaných souborů: {0}/{1}.{2}",
 	"files.confirmed": "Počet potvrzených souborů: {0}/{1}.{2}",
-	"c.cpp.peek.references": "C/C++ Peek References",
+	"c.cpp.peek.references": "Odkazy na náhledy C/C++",
 	"some.references.may.be.missing": "[Upozornění] Některé odkazy můžou chybět, protože když se spustilo {0}, nebylo ještě hotové parsování pracovního prostoru."
 }
