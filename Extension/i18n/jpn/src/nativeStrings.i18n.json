@@ -55,7 +55,7 @@
 	"processing_folder_recursive": "フォルダーを処理しています (再帰的): {0}",
 	"file_exclude": "ファイルの除外: {0}",
 	"search_exclude": "検索除外: {0}",
-	"discovery_files_processed": "ファイルを検出しています: {0} 個のファイルを処理済み",
+	"discovery_files_processed": "ファイルを検出しています。{0} 個のファイルが処理されました",
 	"files_removed_from_database": "{0} 個のファイルがデータベースから削除されました",
 	"parsing_files_processed": "解析: {0} ファイルが処理されました",
 	"shutting_down_intellisense": "IntelliSense サーバーをシャットダウンしています: {0}",
