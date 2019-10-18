@@ -29,6 +29,6 @@
 	"searching.files": "正在搜尋檔案。",
 	"files.searched": "已搜尋 {0}/{1} 個檔案。{2}",
 	"files.confirmed": "已確認 {0}/{1} 個檔案。{2}",
-	"c.cpp.peek.references": "C/C++ Peek References",
+	"c.cpp.peek.references": "C/C++ 查看參考",
 	"some.references.may.be.missing": "[警告] 因為啟動 {0} 時工作區處於未完成狀態，所以可能缺少部分參考。"
 }
