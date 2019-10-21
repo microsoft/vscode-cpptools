@@ -29,6 +29,6 @@
 	"searching.files": "Dateien werden gesucht.",
 	"files.searched": "{0}/{1} Dateien durchsucht.{2}",
 	"files.confirmed": "{0}/{1} Dateien bestätigt.{2}",
-	"c.cpp.peek.references": "C/C++ Peek References",
+	"c.cpp.peek.references": "C/C++-Peek-Verweise",
 	"some.references.may.be.missing": "[Warnung] Einige Verweise fehlen möglicherweise, da die Arbeitsbereichsanalyse beim Starten von {0} unvollständig war."
 }

@@ -9,7 +9,7 @@
 	"rename": "Yeniden Adlandır",
 	"confirmed.reference.upper": "BAŞVURU ONAYLANDI",
 	"confirmation.in.progress.upper": "Onay işlemi devam ediyor",
-	"comment.reference.upper": "Açıklama başvurusu",
+	"comment.reference.upper": "AÇIKLAMA BAŞVURUSU",
 	"string.reference.upper": "Dize başvurusu",
 	"inactive.reference.upper": "Etkin olmayan başvuru",
 	"cannot.confirm.reference.upper": "Başvuru onaylanamıyor",
@@ -29,6 +29,6 @@
 	"searching.files": "Dosyalar aranıyor.",
 	"files.searched": "{1} dosya içinden {0} dosya arandı.{2}",
 	"files.confirmed": "{1} dosya içinden {0} dosya onaylandı.{2}",
-	"c.cpp.peek.references": "C/C++ Peek References",
+	"c.cpp.peek.references": "C/C++ Peek Başvuruları",
 	"some.references.may.be.missing": "[Uyarı] {0} başlatıldığında çalışma alanı ayrıştırma işlemi tamamlanmadığından bazı başvurular eksik olabilir."
 }
