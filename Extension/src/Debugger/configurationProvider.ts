@@ -24,7 +24,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 function isDebugLaunchStr(str: string): boolean {
-    return str === "(gdb) Launch" || str === "(lldb) Launch" || str === "(Windows) Launch";
+    return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
 }
 
 /*
@@ -114,7 +114,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
         // Filter out build tasks that don't match the currently selectede debug configuration type.
         buildTasks = buildTasks.filter((task: vscode.Task) => {
-            if (defaultConfig.name === "(Windows) Launch") {
+            if (defaultConfig.name.startsWith("(Windows) ")) {
                 if (task.name.startsWith("cl.exe")) {
                     return true;
                 }
