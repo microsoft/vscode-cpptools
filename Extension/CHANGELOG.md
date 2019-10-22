@@ -22,7 +22,7 @@
 
 ### Bug Fixes
 * Fix querying of non-ENU compilers. [#2874](https://github.com/microsoft/vscode-cpptools/issues/2874)
-* Fix IntelliSense error with `constexpr char* s[] = { "" }`. [#2939](https://github.com/microsoft/vscode-cpptools/issues/2939)
+* Fix IntelliSense error with `constexpr const char* s[] = { "" }`. [#2939](https://github.com/microsoft/vscode-cpptools/issues/2939)
 * Add support for C++20 designated initializers for cl and gcc. [#3491](https://github.com/Microsoft/vscode-cpptools/issues/3491)
 * Fix `Find All References` not confirming references of method overrides in an inheritance hierarchy. [#4078](https://github.com/microsoft/vscode-cpptools/issues/4078)
 * Fix missing references on the last line. [#4150](https://github.com/microsoft/vscode-cpptools/issues/4150)
