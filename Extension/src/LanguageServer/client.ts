@@ -864,8 +864,46 @@ export class DefaultClient implements Client {
             run: { command: serverModule },
             debug: { command: serverModule, args: [ serverName ] }
         };
-        let settings: CppSettings = new CppSettings(this.rootFolder ? this.rootFolder.uri : null);
-        let other: OtherSettings = new OtherSettings(this.rootFolder ? this.rootFolder.uri : null);
+
+        // Get all the per-workspace settings.
+        let settings_clangFormatPath: string[];
+        let settings_clangFormatStyle: string[];
+        let settings_clangFormatFallbackStyle: string[];
+        let settings_clangFormatSortIncludes: string[];
+        let settings_formatting: string[];
+        let settings_filesExclude: vscode.WorkspaceConfiguration[];
+        let settings_searchExclude: vscode.WorkspaceConfiguration[];
+        let settings_editorTabSize: number[];
+        let settings_intelliSenseEngine: string[];
+        let settings_intelliSenseEngineFallback: string[];
+        {
+            let settings: CppSettings[];
+            let otherSettings: OtherSettings[];
+            if (!this.rootFolder) {
+                settings.push(new CppSettings(null));
+                otherSettings.push(new OtherSettings(null));
+            } else {
+                for (let workspaceFolder of vscode.workspace.workspaceFolders) {
+                    settings.push(new CppSettings(workspaceFolder.uri));
+                    otherSettings.push(new OtherSettings(workspaceFolder.uri));
+                }
+            }
+            for (let setting of settings) {
+                settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
+                settings_clangFormatStyle.push(setting.clangFormatStyle);
+                settings_clangFormatFallbackStyle.push(setting.clangFormatFallbackStyle);
+                settings_clangFormatSortIncludes.push(setting.clangFormatSortIncludes);
+                settings_formatting.push(setting.formatting);
+                settings_intelliSenseEngine.push(setting.intelliSenseEngine);
+                settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
+            }
+            for (let otherSetting of otherSettings) {
+                settings_filesExclude.push(otherSetting.filesExclude);
+                settings_searchExclude.push(otherSetting.searchExclude);
+                settings_editorTabSize.push(otherSetting.editorTabSize);
+            }
+        }
+
         let abTestSettings: ABTestSettings = getABTestSettings();
 
         let intelliSenseCacheDisabled: boolean = false;
@@ -886,23 +924,22 @@ export class DefaultClient implements Client {
                 // Synchronize the setting section to the server
                 configurationSection: ['C_Cpp', 'files', 'search']
             },
-            workspaceFolder: this.rootFolder,
             initializationOptions: {
-                clang_format_path: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-                clang_format_style: settings.clangFormatStyle,
-                clang_format_fallbackStyle: settings.clangFormatFallbackStyle,
-                clang_format_sortIncludes: settings.clangFormatSortIncludes,
-                formatting: settings.formatting,
+                clang_format_path: settings_clangFormatPath,
+                clang_format_style: settings_clangFormatStyle,
+                clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
+                clang_format_sortIncludes: settings_clangFormatSortIncludes,
+                formatting: settings_formatting,
                 extension_path: util.extensionPath,
-                exclude_files: other.filesExclude,
-                exclude_search: other.searchExclude,
+                exclude_files: settings_filesExclude,
+                exclude_search: settings_searchExclude,
                 storage_path: this.storagePath,
-                tab_size: other.editorTabSize,
-                intelliSenseEngine: settings.intelliSenseEngine,
-                intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
+                tab_size: settings_editorTabSize,
+                intelliSenseEngine: settings_intelliSenseEngine,
+                intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                intelliSenseCachePath : util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
-                intelliSenseCacheSize : settings.intelliSenseCacheSize,
+                intelliSenseCachePath: util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
+                intelliSenseCacheSize: settings.intelliSenseCacheSize,
                 autocomplete: settings.autoComplete,
                 errorSquiggles: settings.errorSquiggles,
                 dimInactiveRegions: settings.dimInactiveRegions,
@@ -952,7 +989,7 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
+        return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
