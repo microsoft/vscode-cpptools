@@ -41,7 +41,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         const configs: vscode.DebugConfiguration[] = await this.underlyingProvider.provideDebugConfigurations(folder, token);
-        const defaultConfig: vscode.DebugConfiguration = configs.find(config => isDebugLaunchStr(config.name));
+        const defaultConfig: vscode.DebugConfiguration = configs.find(config => isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig);
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
@@ -105,7 +105,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
-            return isDebugLaunchStr(config.name);
+            return isDebugLaunchStr(config.name) && config.request === "launch";
         });
         console.assert(defaultConfig, "Could not find default debug configuration.");
 
