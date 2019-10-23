@@ -112,7 +112,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
 
-        // Filter out build tasks that don't match the currently selectede debug configuration type.
+        // Filter out build tasks that don't match the currently selected debug configuration type.
         buildTasks = buildTasks.filter((task: vscode.Task) => {
             if (defaultConfig.name.startsWith("(Windows) ")) {
                 if (task.name.startsWith("cl.exe")) {
