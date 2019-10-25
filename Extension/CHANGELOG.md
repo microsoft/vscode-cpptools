@@ -1,9 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.1: October 24, 2019
+## Version 0.26.1: October 28, 2019
 ### Bug Fixes
 * Fix `launch.json` creation when using non-English display languages. [#4464](https://github.com/microsoft/vscode-cpptools/issues/4464)
 * Fix CHS translation. [#4422](https://github.com/microsoft/vscode-cpptools/issues/4422)
+* Fix debugging hang when Windows 10 Beta Unicode (UTF-8) support is enabled. [#1527](https://github.com/microsoft/vscode-cpptools/issues/1527)
 
 ## Version 0.26.0: October 15, 2019
 ### New Features
