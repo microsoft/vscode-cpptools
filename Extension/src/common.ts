@@ -906,11 +906,25 @@ export class BlockingTask<T> {
     }
 }
 
+interface VSCodeNlsConfig {
+    locale: string;
+    availableLanguages: {
+        [pack: string]: string;
+    };
+}
+
 export function getLocaleId(): string {
+    // This replicates the language detection used by initializeSettings() in vscode-nls
     if (isString(process.env.VSCODE_NLS_CONFIG)) {
-        let vscodeNlsConfigJson: any = JSON.parse(process.env.VSCODE_NLS_CONFIG);
-        if (isString(vscodeNlsConfigJson.locale)) {
-            return vscodeNlsConfigJson.locale;
+        let vscodeOptions: VSCodeNlsConfig = JSON.parse(process.env.VSCODE_NLS_CONFIG) as VSCodeNlsConfig;
+        if (vscodeOptions.availableLanguages) {
+            let value: any = vscodeOptions.availableLanguages['*'];
+            if (isString(value)) {
+                return value;
+            }
+        }
+        if (isString(vscodeOptions.locale)) {
+            return vscodeOptions.locale.toLowerCase();
         }
     }
     return "en";

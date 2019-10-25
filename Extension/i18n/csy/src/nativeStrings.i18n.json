@@ -103,7 +103,7 @@
 	"sending_compilation_args": "posílají se argumenty kompilace pro {0}",
 	"include_label": "zahrnout: {0}",
 	"framework_label": "architektura: {0}",
-	"define_label": "define: {0}",
+	"define_label": "definovat: {0}",
 	"preinclude_label": "zahrnout předem: {0}",
 	"other_label": "jiné: {0}",
 	"sending_count_changes_to_server": "následující počet změn se posílá na server: {0}",

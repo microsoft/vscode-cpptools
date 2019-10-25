@@ -6,7 +6,7 @@
 {
 	"package.manager.missing": "Manifest pakietu nie istnieje",
 	"downloading.package": "Pobieranie pakietu „{0}” ",
-	"downloading.progress.description": "Pobieranie elementu {0}: {1}",
+	"downloading.progress.description": "Pobieranie — {0}: {1}",
 	"error.from": "Błąd z pliku {0}",
 	"failed.download.url": "Nie można pobrać elementu {0}",
 	"failed.retrying": "Niepowodzenie. Trwa ponawianie próby...",

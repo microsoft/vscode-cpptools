@@ -29,6 +29,6 @@
 	"searching.files": "Wyszukiwanie plików.",
 	"files.searched": "Wyszukano pliki: {0}/{1}.{2}",
 	"files.confirmed": "Potwierdzono pliki: {0}/{1}.{2}",
-	"c.cpp.peek.references": "C/C++ Peek References",
+	"c.cpp.peek.references": "Referencje podglądu języka C/C++",
 	"some.references.may.be.missing": "[Ostrzeżenie] Może brakować niektórych odwołań, ponieważ analizowanie obszaru roboczego było niekompletne po uruchomieniu elementu {0}."
 }

@@ -55,7 +55,7 @@
 	"processing_folder_recursive": "Przetwarzanie folderu (cykliczne): {0}",
 	"file_exclude": "Wykluczanie plików: {0}",
 	"search_exclude": "Wyszukaj wykluczenie: {0}",
-	"discovery_files_processed": "Odnajdowanie plików: przetworzone pliki — {0}",
+	"discovery_files_processed": "Odnajdywanie plików: przetworzono pliki w liczbie {0}",
 	"files_removed_from_database": "Pliki ({0}) usunięte z bazy danych",
 	"parsing_files_processed": "Analizowanie: przetworzone pliki ({0})",
 	"shutting_down_intellisense": "Zamykanie serwera funkcji IntelliSense: {0}",

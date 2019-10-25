@@ -29,6 +29,6 @@
 	"searching.files": "ファイルを検索しています。",
 	"files.searched": "{0}/{1} 個のファイルが検索されました。{2}",
 	"files.confirmed": "{0}/{1} 個のファイルを確認しました。{2}",
-	"c.cpp.peek.references": "C/C++ Peek References",
+	"c.cpp.peek.references": "C/C++ の参照のプレビュー",
 	"some.references.may.be.missing": "[警告] {0} が開始されたときにワークスペースの解析が不完全だったため、参照の一部がない可能性があります。"
 }
