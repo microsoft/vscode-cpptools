@@ -1747,7 +1747,7 @@
   "dependencies": {
     "escape-string-regexp": "^2.0.0",
     "http-proxy-agent": "^2.1.0",
-    "https-proxy-agent": "^2.2.2",
+    "https-proxy-agent": "^2.2.3",
     "jsonc-parser": "^2.1.1",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
