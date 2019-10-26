@@ -24,7 +24,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 function isDebugLaunchStr(str: string): boolean {
-    return str === "(gdb) Launch" || str === "(lldb) Launch" || str === "(Windows) Launch";
+    return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
 }
 
 /*
@@ -41,7 +41,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         const configs: vscode.DebugConfiguration[] = await this.underlyingProvider.provideDebugConfigurations(folder, token);
-        const defaultConfig: vscode.DebugConfiguration = configs.find(config => isDebugLaunchStr(config.name));
+        const defaultConfig: vscode.DebugConfiguration = configs.find(config => isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig);
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
@@ -105,16 +105,16 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
-            return isDebugLaunchStr(config.name);
+            return isDebugLaunchStr(config.name) && config.request === "launch";
         });
         console.assert(defaultConfig, "Could not find default debug configuration.");
 
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
 
-        // Filter out build tasks that don't match the currently selectede debug configuration type.
+        // Filter out build tasks that don't match the currently selected debug configuration type.
         buildTasks = buildTasks.filter((task: vscode.Task) => {
-            if (defaultConfig.name === "(Windows) Launch") {
+            if (defaultConfig.name.startsWith("(Windows) ")) {
                 if (task.name.startsWith("cl.exe")) {
                     return true;
                 }
