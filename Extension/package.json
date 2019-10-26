@@ -1761,6 +1761,9 @@
     "vscode-nls": "^4.1.1",
     "yauzl": "^2.10.0"
   },
+  "resolutions": {
+    "https-proxy-agent": "^2.2.4"
+  },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
