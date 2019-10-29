@@ -50,9 +50,9 @@ export class CppSettings extends Settings {
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }
     public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
-    public get workspaceParsingPriority(): boolean { return super.Section.get<boolean>("workspaceParsingPriority"); }
+    public get workspaceParsingPriority(): string { return super.Section.get<string>("workspaceParsingPriority"); }
     public get workspaceSymbols(): string { return super.Section.get<string>("workspaceSymbols"); }
-    public get exclusionPolicy(): boolean { return super.Section.get<boolean>("exclusionPolicy"); }
+    public get exclusionPolicy(): string { return super.Section.get<string>("exclusionPolicy"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string { return super.Section.get<string>("preferredPathSeparator"); }

@@ -226,7 +226,7 @@
           ],
           "default": "Error",
           "description": "%c_cpp.configuration.loggingLevel.description%",
-          "scope": "resource"
+          "scope": "application"
         },
         "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",

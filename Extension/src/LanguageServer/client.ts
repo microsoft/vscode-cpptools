@@ -876,6 +876,20 @@ export class DefaultClient implements Client {
         let settings_editorTabSize: number[];
         let settings_intelliSenseEngine: string[];
         let settings_intelliSenseEngineFallback: string[];
+        let settings_intelliSenseCachePath: string[];
+        let settings_intelliSenseCacheSize: number[];
+        let settings_autoComplete: string[];
+        let settings_errorSquiggles: string[];
+        let settings_dimInactiveRegions: boolean[];
+        let settings_enhancedColorization: boolean[];
+        let settings_suggestSnippets: boolean[];
+        let settings_workspaceParsingPriority: string[];
+        let settings_workspaceSymbols: string[];
+        let settings_exclusionPolicy: string[];
+        let settings_preferredPathSeparator: string[];
+        let settings_defaultSystemIncludePath: string[][];
+        let setting_loggingLevel: string;
+        let setting_experimentalFeatures: string;
         {
             let settings: CppSettings[];
             let otherSettings: OtherSettings[];
@@ -896,6 +910,22 @@ export class DefaultClient implements Client {
                 settings_formatting.push(setting.formatting);
                 settings_intelliSenseEngine.push(setting.intelliSenseEngine);
                 settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
+                settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
+                settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
+                settings_autoComplete.push(setting.autoComplete);
+                settings_errorSquiggles.push(setting.errorSquiggles);
+                settings_dimInactiveRegions.push(setting.dimInactiveRegions);
+                settings_enhancedColorization.push(setting.enhancedColorization);
+                settings_suggestSnippets.push(setting.suggestSnippets);
+                settings_workspaceParsingPriority.push(setting.workspaceParsingPriority);
+                settings_workspaceSymbols.push(setting.workspaceSymbols);
+                settings_exclusionPolicy.push(setting.exclusionPolicy);
+                settings_preferredPathSeparator.push(setting.preferredPathSeparator);
+                settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
+            }
+            if (settings.length > 0) {
+                setting_loggingLevel = settings[0].loggingLevel;
+                setting_experimentalFeatures = settings[0].experimentalFeatures;
             }
             for (let otherSetting of otherSettings) {
                 settings_filesExclude.push(otherSetting.filesExclude);
@@ -938,24 +968,24 @@ export class DefaultClient implements Client {
                 intelliSenseEngine: settings_intelliSenseEngine,
                 intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                intelliSenseCachePath: util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
-                intelliSenseCacheSize: settings.intelliSenseCacheSize,
-                autocomplete: settings.autoComplete,
-                errorSquiggles: settings.errorSquiggles,
-                dimInactiveRegions: settings.dimInactiveRegions,
-                enhancedColorization: settings.enhancedColorization,
-                suggestSnippets: settings.suggestSnippets,
-                loggingLevel: settings.loggingLevel,
-                workspaceParsingPriority: settings.workspaceParsingPriority,
-                workspaceSymbols: settings.workspaceSymbols,
-                exclusionPolicy: settings.exclusionPolicy,
-                preferredPathSeparator: settings.preferredPathSeparator,
+                intelliSenseCachePath: settings_intelliSenseCachePath,
+                intelliSenseCacheSize: settings_intelliSenseCacheSize,
+                autocomplete: settings_autoComplete,
+                errorSquiggles: settings_errorSquiggles,
+                dimInactiveRegions: settings_dimInactiveRegions,
+                enhancedColorization: settings_enhancedColorization,
+                suggestSnippets: settings_suggestSnippets,
+                loggingLevel: setting_loggingLevel,
+                workspaceParsingPriority: settings_workspaceParsingPriority,
+                workspaceSymbols: settings_workspaceSymbols,
+                exclusionPolicy: settings_exclusionPolicy,
+                preferredPathSeparator: settings_preferredPathSeparator,
                 default: {
-                    systemIncludePath: settings.defaultSystemIncludePath
+                    systemIncludePath: settings_defaultSystemIncludePath
                 },
                 vcpkg_root: util.getVcpkgRoot(),
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
-                experimentalFeatures: settings.experimentalFeatures,
+                experimentalFeatures: setting_experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
