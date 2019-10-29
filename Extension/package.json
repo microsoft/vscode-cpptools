@@ -226,7 +226,7 @@
           ],
           "default": "Error",
           "description": "%c_cpp.configuration.loggingLevel.description%",
-          "scope": "application"
+          "scope": "window"
         },
         "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
@@ -539,7 +539,7 @@
           ],
           "default": "Disabled",
           "description": "%c_cpp.configuration.experimentalFeatures.description%",
-          "scope": "application"
+          "scope": "window"
         },
         "C_Cpp.suggestSnippets": {
           "type": "boolean",
