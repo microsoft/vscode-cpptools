@@ -42,6 +42,8 @@ let ui: UI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
 
+let languageClient: LanguageClient;
+
 interface TelemetryPayload {
     event: string;
     properties?: { [key: string]: string };
@@ -461,10 +463,13 @@ export class DefaultClient implements Client {
             this.storagePath = path.join(this.storagePath, this.getUniqueWorkspaceStorageName(this.rootFolder));
         }
         try {
-            let languageClient: LanguageClient = this.createLanguageClient(allClients);
-            languageClient.registerProposedFeatures();
-            languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
-            util.setProgress(util.getProgressExecutableStarted());
+            let firstClient: boolean = !languageClient;
+            if (firstClient) {
+                languageClient = this.createLanguageClient(allClients);
+                languageClient.registerProposedFeatures();
+                languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
+                util.setProgress(util.getProgressExecutableStarted());
+            }
             ui = getUI();
             ui.bind(this);
 
@@ -532,8 +537,6 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
-
                     class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -566,7 +569,6 @@ export class DefaultClient implements Client {
                             });
                         }
                     }
-                    this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), null));
 
                     class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
                         private client: DefaultClient;
@@ -605,7 +607,6 @@ export class DefaultClient implements Client {
                                 });
                         }
                     }
-                    this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
 
                     class FindAllReferencesProvider implements vscode.ReferenceProvider {
                         private client: DefaultClient;
@@ -708,8 +709,6 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
-
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -803,21 +802,29 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
+                    if (firstClient) {
+                        this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
+                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), null));
+                        this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+                        this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
+                        this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
 
-                    // Listen for messages from the language server.
-                    this.registerNotifications();
-                    this.registerFileWatcher();
+                        // Listen for messages from the language server.
+                        this.registerNotifications();
+                        this.registerFileWatcher();
 
-                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                    // The event handlers must be set before this happens.
-                    return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
-                        this.configuration.CompilerDefaults = compilerDefaults;
+                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                        // The event handlers must be set before this happens.
+                        return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
+                            this.configuration.CompilerDefaults = compilerDefaults;
 
-                        // Only register the real commands after the extension has finished initializing,
-                        // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-                    });
+                            // Only register the real commands after the extension has finished initializing,
+                            // e.g. prevents empty c_cpp_properties.json from generation.
+                            registerCommands();
+                        });
+                    } else {
+                        return;
+                    }
                 },
                 (err) => {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -866,35 +873,33 @@ export class DefaultClient implements Client {
         };
 
         // Get all the per-workspace settings.
-        let settings_clangFormatPath: string[];
-        let settings_clangFormatStyle: string[];
-        let settings_clangFormatFallbackStyle: string[];
-        let settings_clangFormatSortIncludes: string[];
-        let settings_formatting: string[];
-        let settings_filesExclude: vscode.WorkspaceConfiguration[];
-        let settings_searchExclude: vscode.WorkspaceConfiguration[];
-        let settings_editorTabSize: number[];
-        let settings_intelliSenseEngine: string[];
-        let settings_intelliSenseEngineFallback: string[];
-        let settings_intelliSenseCachePath: string[];
-        let settings_intelliSenseCacheSize: number[];
-        let settings_autoComplete: string[];
-        let settings_errorSquiggles: string[];
-        let settings_dimInactiveRegions: boolean[];
-        let settings_enhancedColorization: boolean[];
-        let settings_suggestSnippets: boolean[];
-        let settings_workspaceParsingPriority: string[];
-        let settings_workspaceSymbols: string[];
-        let settings_exclusionPolicy: string[];
-        let settings_preferredPathSeparator: string[];
-        let settings_defaultSystemIncludePath: string[][];
-        let setting_loggingLevel: string;
-        let setting_experimentalFeatures: string;
+        let settings_clangFormatPath: string[] = [];
+        let settings_clangFormatStyle: string[] = [];
+        let settings_clangFormatFallbackStyle: string[] = [];
+        let settings_clangFormatSortIncludes: string[] = [];
+        let settings_filesExclude: vscode.WorkspaceConfiguration[] = [];
+        let settings_searchExclude: vscode.WorkspaceConfiguration[] = [];
+        let settings_editorTabSize: number[] = [];
+        let settings_intelliSenseEngine: string[] = [];
+        let settings_intelliSenseEngineFallback: string[] = [];
+        let settings_intelliSenseCachePath: string[] = [];
+        let settings_intelliSenseCacheSize: number[] = [];
+        let settings_errorSquiggles: string[] = [];
+        let settings_dimInactiveRegions: boolean[] = [];
+        let settings_enhancedColorization: boolean[] = [];
+        let settings_suggestSnippets: boolean[] = [];
+        let settings_workspaceParsingPriority: string[] = [];
+        let settings_workspaceSymbols: string[] = [];
+        let settings_exclusionPolicy: string[] = [];
+        let settings_preferredPathSeparator: string[] = [];
+        let settings_defaultSystemIncludePath: string[][] = [];
+        let workspaceSettings: CppSettings = new CppSettings(null);
         {
-            let settings: CppSettings[];
-            let otherSettings: OtherSettings[];
+            let settings: CppSettings[] = [];
+            let otherSettings: OtherSettings[] = [];
+
             if (!this.rootFolder) {
-                settings.push(new CppSettings(null));
+                settings.push(workspaceSettings);
                 otherSettings.push(new OtherSettings(null));
             } else {
                 for (let workspaceFolder of vscode.workspace.workspaceFolders) {
@@ -902,17 +907,16 @@ export class DefaultClient implements Client {
                     otherSettings.push(new OtherSettings(workspaceFolder.uri));
                 }
             }
+
             for (let setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_clangFormatStyle.push(setting.clangFormatStyle);
                 settings_clangFormatFallbackStyle.push(setting.clangFormatFallbackStyle);
                 settings_clangFormatSortIncludes.push(setting.clangFormatSortIncludes);
-                settings_formatting.push(setting.formatting);
                 settings_intelliSenseEngine.push(setting.intelliSenseEngine);
                 settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
-                settings_autoComplete.push(setting.autoComplete);
                 settings_errorSquiggles.push(setting.errorSquiggles);
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
                 settings_enhancedColorization.push(setting.enhancedColorization);
@@ -923,10 +927,7 @@ export class DefaultClient implements Client {
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
             }
-            if (settings.length > 0) {
-                setting_loggingLevel = settings[0].loggingLevel;
-                setting_experimentalFeatures = settings[0].experimentalFeatures;
-            }
+
             for (let otherSetting of otherSettings) {
                 settings_filesExclude.push(otherSetting.filesExclude);
                 settings_searchExclude.push(otherSetting.searchExclude);
@@ -959,7 +960,7 @@ export class DefaultClient implements Client {
                 clang_format_style: settings_clangFormatStyle,
                 clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings_clangFormatSortIncludes,
-                formatting: settings_formatting,
+                formatting: workspaceSettings.formatting,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
@@ -970,12 +971,12 @@ export class DefaultClient implements Client {
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
                 intelliSenseCachePath: settings_intelliSenseCachePath,
                 intelliSenseCacheSize: settings_intelliSenseCacheSize,
-                autocomplete: settings_autoComplete,
+                autocomplete: workspaceSettings.autoComplete,
                 errorSquiggles: settings_errorSquiggles,
                 dimInactiveRegions: settings_dimInactiveRegions,
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
-                loggingLevel: setting_loggingLevel,
+                loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: settings_workspaceParsingPriority,
                 workspaceSymbols: settings_workspaceSymbols,
                 exclusionPolicy: settings_exclusionPolicy,
@@ -985,7 +986,7 @@ export class DefaultClient implements Client {
                 },
                 vcpkg_root: util.getVcpkgRoot(),
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
-                experimentalFeatures: setting_experimentalFeatures,
+                experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
@@ -2164,7 +2165,7 @@ export class DefaultClient implements Client {
                 return Promise.resolve();
             }
 
-            let settings: CppSettings = new CppSettings(this.RootUri);
+            let settings: CppSettings = new CppSettings(null);
             if (settings.loggingLevel === "Debug") {
                 let out: logger.Logger = logger.getOutputChannelLogger();
                 out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));

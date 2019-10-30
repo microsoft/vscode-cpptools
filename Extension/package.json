@@ -160,7 +160,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.autocomplete.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.errorSquiggles": {
           "type": "string",
@@ -213,7 +213,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.formatting.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.loggingLevel": {
           "type": "string",
