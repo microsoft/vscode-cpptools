@@ -746,35 +746,50 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
-                                            referencesRequestPending = false;
-                                            --renameRequestsPending;
-                                            let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                            let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                            if (cancelling) {
-                                                while (referencesPendingCancellations.length > 1) {
+                                            if (doResolve && referencesResult === null) {
+                                                // The result callback will be called with doResult of true and a null result when the Find All References
+                                                // portion of the rename is complete.  We complete the promise with an empty edit at this point,
+                                                // to cause the progress indicator to be dismissed.
+                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                                resolve(workspaceEdit);
+                                            } else {
+                                                referencesRequestPending = false;
+                                                --renameRequestsPending;
+                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                                let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                                if (cancelling) {
+                                                    while (referencesPendingCancellations.length > 1) {
+                                                        let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                        referencesPendingCancellations.pop();
+                                                        pendingCancel.reject();
+                                                    }
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
                                                     referencesPendingCancellations.pop();
-                                                    pendingCancel.reject();
-                                                }
-                                                let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
-                                                referencesPendingCancellations.pop();
-                                                pendingCancel.callback();
-                                            } else {
-                                                if (renameRequestsPending === 0) {
-                                                    renamePending = false;
-                                                }
-                                                // If rename UI was canceled, we will get a null result.
-                                                // If null, return an empty list to avoid Rename failure dialog.
-                                                if (referencesResult !== null) {
-                                                    for (let reference of referencesResult.referenceInfos) {
-                                                        let uri: vscode.Uri = vscode.Uri.file(reference.file);
-                                                        let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
-                                                        workspaceEdit.replace(uri, range, newName);
+                                                    pendingCancel.callback();
+                                                } else {
+                                                    if (renameRequestsPending === 0) {
+                                                        renamePending = false;
                                                     }
+                                                    // If rename UI was canceled, we will get a null result.
+                                                    // If null, return an empty list to avoid Rename failure dialog.
+                                                    if (referencesResult !== null) {
+                                                        for (let reference of referencesResult.referenceInfos) {
+                                                            let uri: vscode.Uri = vscode.Uri.file(reference.file);
+                                                            let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
+                                                            workspaceEdit.replace(uri, range, newName);
+                                                        }
+                                                    }
+                                                    this.client.references.closeRenameUI();
                                                 }
-                                                this.client.references.closeRenameUI();
+                                                if (doResolve) {
+                                                    if (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0) {
+                                                        vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
+                                                    }
+                                                    resolve(workspaceEdit);
+                                                } else {
+                                                    vscode.workspace.applyEdit(workspaceEdit);
+                                                }
                                             }
-                                            resolve(workspaceEdit);
                                         });
                                         this.client.references.startRename(params);
                                     });

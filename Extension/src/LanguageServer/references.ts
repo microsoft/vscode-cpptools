@@ -420,9 +420,10 @@ export class ReferencesManager {
                 if (!foundUnconfirmed) {
                     this.resultsCallback(referencesResult, true);
                 } else {
+                    this.resultsCallback(null, true);
                     this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult) => {
                         this.referencesCanceled = false;
-                        this.resultsCallback(result, true);
+                        this.resultsCallback(result, false);
                     });
                     this.renameView.show(true);
                 }
