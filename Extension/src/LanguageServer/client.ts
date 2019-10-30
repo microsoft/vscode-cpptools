@@ -893,7 +893,7 @@ export class DefaultClient implements Client {
         let settings_exclusionPolicy: string[] = [];
         let settings_preferredPathSeparator: string[] = [];
         let settings_defaultSystemIncludePath: string[][] = [];
-        let workspaceSettings: CppSettings = new CppSettings(null);
+        let workspaceSettings: CppSettings = new CppSettings();
         {
             let settings: CppSettings[] = [];
             let otherSettings: OtherSettings[] = [];
@@ -1785,7 +1785,7 @@ export class DefaultClient implements Client {
             this.model.isUpdatingIntelliSense.Value = true;
             testHook.updateStatus(Status.IntelliSenseCompiling);
         } else if (message.endsWith("IntelliSense Ready")) {
-            let settings: CppSettings = new CppSettings(this.RootUri);
+            let settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
                 let out: logger.Logger = logger.getOutputChannelLogger();
                 let duration: number = Date.now() - timeStamp;
@@ -2080,7 +2080,7 @@ export class DefaultClient implements Client {
             return;
         }
 
-        let settings: CppSettings = new CppSettings(this.RootUri);
+        let settings: CppSettings = new CppSettings();
         let out: logger.Logger = logger.getOutputChannelLogger();
         if (settings.loggingLevel === "Debug") {
             out.appendLine(localize("configurations.received", "Custom configurations received:"));
@@ -2165,7 +2165,7 @@ export class DefaultClient implements Client {
                 return Promise.resolve();
             }
 
-            let settings: CppSettings = new CppSettings(null);
+            let settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
                 let out: logger.Logger = logger.getOutputChannelLogger();
                 out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
