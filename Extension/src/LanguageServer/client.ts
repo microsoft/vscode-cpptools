@@ -786,7 +786,7 @@ export class DefaultClient implements Client {
                                                         vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
                                                     }
                                                     resolve(workspaceEdit);
-                                                } else {
+                                                } else if (workspaceEdit.size > 0) {
                                                     vscode.workspace.applyEdit(workspaceEdit);
                                                 }
                                             }
