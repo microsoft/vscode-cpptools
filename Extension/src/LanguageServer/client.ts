@@ -118,27 +118,8 @@ interface QueryTranslationUnitSourceParams {
     uri: string;
 }
 
-export enum QueryTranslationUnitSourceConfigDisposition {
-
-    /**
-     * No custom config needed for this file
-     */
-    ConfigNotNeeded = 0,
-
-    /**
-     * Custom config is needed for this file
-     */
-    ConfigNeeded = 1,
-
-    /**
-     * Custom config is needed for the ancestor file returned in uri
-     */
-    AncestorConfigNeeded = 2
-}
-
 interface QueryTranslationUnitSourceResult {
-    uri: string;
-    configDisposition: QueryTranslationUnitSourceConfigDisposition;
+    candidates: string[];
 }
 
 interface GetDiagnosticsResult {
@@ -1177,6 +1158,7 @@ export class DefaultClient implements Client {
 
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
+            this.clearCustomConfigurations();
             if (!this.configurationProvider) {
                 return;
             }
@@ -1305,43 +1287,48 @@ export class DefaultClient implements Client {
                 uri: docUri.toString()
             };
             let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-            if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.ConfigNotNeeded) {
+            if (response.candidates === null || response.candidates.length === 0) {
+                // If we didn't receive any candidates, no configuration is needed.
                 onFinished();
                 return Promise.resolve();
             }
 
-            let tuUri: vscode.Uri = vscode.Uri.parse(response.uri);
-            let configName: string = this.configuration.CurrentConfiguration.name;
             const notReadyMessage: string = `${providerName} is not ready`;
-            let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
-                // The config requests that we use a provider, try to get IntelliSense configuration info from that provider.
-                try {
-                    let provider: CustomConfigurationProvider1|null = providers.get(providerId);
-                    if (provider) {
-                        if (!provider.isReady) {
-                            return Promise.reject(notReadyMessage);
-                        }
+            let provider: CustomConfigurationProvider1|null = providers.get(providerId);
+            if (provider) {
+                if (!provider.isReady) {
+                    return Promise.reject(notReadyMessage);
+                }
+                providerName = provider.name;
+            }
 
-                        providerName = provider.name;
-                        if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                            return provider.provideConfigurations([tuUri], tokenSource.token);
+            // Need to loop through candidates, to see if we can get a custom configuration from any of them.
+            // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
+            let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
+                if (provider) {
+                    for (let i: number = 0; i < response.candidates.length; ++i) {
+                        try {
+                            let candidate: string = response.candidates[i];
+                            let tuUri: vscode.Uri = vscode.Uri.parse(candidate);
+                            if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+                                let configs: SourceFileConfigurationItem[] = await provider.provideConfigurations([tuUri], tokenSource.token);
+                                if (configs && configs.length > 0 && configs[0]) {
+                                    return configs;
+                                }
+                            }
+                            if (tokenSource.token.isCancellationRequested) {
+                                return null;
+                            }
+                        } catch (err) {
+                            console.warn("Caught exception request configuration");
                         }
                     }
-                } catch (err) {
                 }
-                console.warn("failed to provide configuration");
-                return Promise.reject("");
             };
-
             return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
                 (configs: SourceFileConfigurationItem[]) => {
                     if (configs && configs.length > 0) {
                         this.sendCustomConfigurations(configs, false);
-                        if (response.configDisposition === QueryTranslationUnitSourceConfigDisposition.AncestorConfigNeeded) {
-                            // replacing uri with original uri
-                            let newConfig: SourceFileConfigurationItem =  { uri: docUri, configuration: configs[0].configuration };
-                            this.sendCustomConfigurations([newConfig], false);
-                        }
                     }
                     onFinished();
                 },
@@ -1357,6 +1344,7 @@ export class DefaultClient implements Client {
                     if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                         const dismiss: string = localize("dismiss.button", "Dismiss");
                         const disable: string = localize("diable.warnings.button", "Disable Warnings");
+                        let configName: string = this.configuration.CurrentConfiguration.name;
                         let message: string = localize("unable.to.provide.configuraiton",
                             "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
                             providerName, docUri.fsPath, configName);
@@ -1966,9 +1954,6 @@ export class DefaultClient implements Client {
         }).then(() => {
             let newProvider: string = this.configuration.CurrentConfigurationProvider;
             if (this.configurationProvider !== newProvider) {
-                if (this.configurationProvider) {
-                    this.clearCustomConfigurations();
-                }
                 this.configurationProvider = newProvider;
                 this.updateCustomConfigurations();
                 this.updateCustomBrowseConfiguration();
