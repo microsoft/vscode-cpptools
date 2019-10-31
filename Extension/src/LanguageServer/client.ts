@@ -1287,7 +1287,7 @@ export class DefaultClient implements Client {
                 uri: docUri.toString()
             };
             let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-            if (response.candidates || response.candidates.length === 0) {
+            if (!response.candidates || response.candidates.length === 0) {
                 // If we didn't receive any candidates, no configuration is needed.
                 onFinished();
                 return Promise.resolve();
