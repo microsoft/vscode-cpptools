@@ -1276,7 +1276,7 @@ export class DefaultClient implements Client {
                 return Promise.resolve();
             }
             console.log("provideCustomConfiguration");
-            let providerId: string|undefined = this.configuration.CurrentConfigurationProvider;
+            let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
             if (!providerId) {
                 onFinished();
                 return Promise.resolve();
@@ -1294,7 +1294,7 @@ export class DefaultClient implements Client {
             }
 
             const notReadyMessage: string = `${providerName} is not ready`;
-            let provider: CustomConfigurationProvider1|null = providers.get(providerId);
+            let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
             if (provider) {
                 if (!provider.isReady) {
                     return Promise.reject(notReadyMessage);

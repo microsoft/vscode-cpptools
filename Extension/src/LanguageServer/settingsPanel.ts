@@ -153,7 +153,7 @@ export class SettingsPanel {
         return this.configValues;
     }
 
-    public updateConfigUI(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
+    public updateConfigUI(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         if (this.panel) {
             this.updateWebview(configSelection, configuration, errors);
         }
@@ -208,7 +208,7 @@ export class SettingsPanel {
         }
     }
 
-    private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
+    private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         this.configValues = {...configuration}; // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
