@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.26.1: October 28, 2019
+### Bug Fixes
+* Fix `launch.json` creation when using non-English display languages. [#4464](https://github.com/microsoft/vscode-cpptools/issues/4464)
+* Fix CHS translation. [#4422](https://github.com/microsoft/vscode-cpptools/issues/4422)
+* Fix debugging hang when Windows 10 Beta Unicode (UTF-8) support is enabled. [#1527](https://github.com/microsoft/vscode-cpptools/issues/1527)
+
 ## Version 0.26.0: October 15, 2019
 ### New Features
 * Add localization support (translated text) via `Configure Display Language`. [#7](https://github.com/microsoft/vscode-cpptools/issues/7)
@@ -17,6 +23,8 @@
 
 ### Bug Fixes
 * Fix querying of non-ENU compilers. [#2874](https://github.com/microsoft/vscode-cpptools/issues/2874)
+* Fix IntelliSense error with `constexpr const char* s[] = { "" }`. [#2939](https://github.com/microsoft/vscode-cpptools/issues/2939)
+* Add support for C++20 designated initializers for cl and gcc. [#3491](https://github.com/Microsoft/vscode-cpptools/issues/3491)
 * Fix `Find All References` not confirming references of method overrides in an inheritance hierarchy. [#4078](https://github.com/microsoft/vscode-cpptools/issues/4078)
 * Fix missing references on the last line. [#4150](https://github.com/microsoft/vscode-cpptools/issues/4150)
 * Fix `Go to Definition` on implicit default constructors. [#4162](https://github.com/microsoft/vscode-cpptools/issues/4162)

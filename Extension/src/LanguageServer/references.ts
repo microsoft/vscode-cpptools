@@ -420,9 +420,12 @@ export class ReferencesManager {
                 if (!foundUnconfirmed) {
                     this.resultsCallback(referencesResult, true);
                 } else {
+                    // Passing a null result and doResult of true to resultsCallback will cause
+                    // the RenameProvider to resolve the promise, which causes the progress bar to be dismissed.
+                    this.resultsCallback(null, true);
                     this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult) => {
                         this.referencesCanceled = false;
-                        this.resultsCallback(result, true);
+                        this.resultsCallback(result, false);
                     });
                     this.renameView.show(true);
                 }

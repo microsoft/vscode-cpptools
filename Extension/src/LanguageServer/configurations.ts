@@ -157,7 +157,7 @@ export class CppProperties {
     public get CurrentConfiguration(): Configuration { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : null; }
     public get KnownCompiler(): KnownCompiler[] { return this.knownCompilers; }
 
-    public get CurrentConfigurationProvider(): string|null {
+    public get CurrentConfigurationProvider(): string | null {
         if (this.CurrentConfiguration.configurationProvider) {
             return this.CurrentConfiguration.configurationProvider;
         }
@@ -1022,7 +1022,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string|string[], isDirectory: boolean = true): string {
+    private validatePath(input: string | string[], isDirectory: boolean = true): string {
         if (!input) {
             return undefined;
         }
