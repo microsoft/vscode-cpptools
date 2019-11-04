@@ -136,7 +136,7 @@ export class CustomConfigurationProviderCollection {
         console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}.`);
     }
 
-    private getId(provider: string|CustomConfigurationProvider): string {
+    private getId(provider: string | CustomConfigurationProvider): string {
         if (typeof provider === "string") {
             return provider;
         } else if (provider.extensionId) {
@@ -179,7 +179,7 @@ export class CustomConfigurationProviderCollection {
         return !exists;
     }
 
-    public get(provider: string|CustomConfigurationProvider): CustomConfigurationProvider1|null {
+    public get(provider: string | CustomConfigurationProvider): CustomConfigurationProvider1 | null {
         let id: string = this.getId(provider);
 
         if (this.providers.has(id)) {

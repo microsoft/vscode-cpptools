@@ -187,7 +187,7 @@ export class UI {
             .then(selection => (selection) ? selection.index : -1);
     }
 
-    public showConfigurationProviders(currentProvider: string|null): Thenable<string|undefined> {
+    public showConfigurationProviders(currentProvider: string | null): Thenable<string | undefined> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
