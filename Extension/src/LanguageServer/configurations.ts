@@ -1087,8 +1087,8 @@ export class CppProperties {
             return;
         }
 
-        // Enable squiggles in JSON file if configurationJson.enableConfigurationSquiggles is true OR
-        // configurationJson.enableConfigurationSquiggles is undefined and settings.defaultEnableConfigurationSquiggles is true.
+        // Disable squiggles if:
+        // this.configurationJson.enableConfigurationSquiggles is undefined/false OR settings.defaultEnableConfigurationSquiggles is false
         const settings: CppSettings = new CppSettings(this.rootUri);
         if (!(this.configurationJson.enableConfigurationSquiggles || settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
