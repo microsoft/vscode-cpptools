@@ -1087,14 +1087,15 @@ export class CppProperties {
             return;
         }
 
-        // Disable squiggles if neither
-        // this.configurationJson.enableConfigurationSquiggles OR settings.defaultEnableConfigurationSquiggles is true
+        // Disable squiggles if
+        // this.configurationJson.enableConfigurationSquiggles is false OR
+        // this.configurationJson.enableConfigurationSquiggles is undefined and settings.defaultEnableConfigurationSquiggles is false.
         const settings: CppSettings = new CppSettings(this.rootUri);
-        if (!(this.configurationJson.enableConfigurationSquiggles || settings.defaultEnableConfigurationSquiggles)) {
+        if ((this.configurationJson.enableConfigurationSquiggles !== undefined && !this.configurationJson.enableConfigurationSquiggles) ||
+            (this.configurationJson.enableConfigurationSquiggles === undefined && !settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
             return;
         }
-
         vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
             let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 
