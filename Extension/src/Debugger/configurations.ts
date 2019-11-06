@@ -39,7 +39,7 @@ function createLaunchString(name: string, type: string, executable: string): str
         return `"name": "${name}",
 "type": "${type}",
 "request": "launch",
-"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable)}",
+"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/\"/g, "\\\"")}",
 "args": [],
 "stopAtEntry": false,
 "cwd": "$\{workspaceFolder\}",
@@ -54,7 +54,7 @@ function createAttachString(name: string, type: string, executable: string): str
 "type": "${type}",
 "request": "attach",{0}
 "processId": "$\{command:pickProcess\}"
-`, [type === "cppdbg" ? `${os.EOL}"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable)}",` : ""]);
+`, [type === "cppdbg" ? `${os.EOL}"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/\"/g, "\\\"")}",` : ""]);
     }
 
 function createRemoteAttachString(name: string, type: string, executable: string): string {
@@ -62,7 +62,7 @@ function createRemoteAttachString(name: string, type: string, executable: string
 "name": "${name}",
 "type": "${type}",
 "request": "attach",
-"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable)}",
+"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/\"/g, "\\\"")}",
 "processId": "$\{command:pickRemoteProcess\}"
 `;
     }
@@ -107,7 +107,7 @@ abstract class Configuration implements IConfiguration {
 export class MIConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("launch.string", "Launch")}`;
+        let name: string = `(${this.MIMode}) ${localize("launch.string", "Launch").replace(/\"/g, "\\\"")}`;
 
         let body: string = formatString(`{
 \t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
@@ -117,7 +117,7 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
 
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("launch.with", "Launch with {0}.", this.MIMode),
+            "description": localize("launch.with", "Launch with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "isInitialConfiguration": true,
             "debuggerType": DebuggerType.cppdbg
@@ -125,7 +125,7 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("attach.string", "Attach")}`;
+        let name: string = `(${this.MIMode}) ${localize("attach.string", "Attach").replace(/\"/g, "\\\"")}`;
 
         let body: string = formatString(`{
 \t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))},
@@ -135,7 +135,7 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
 
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("attach.with", "Attach with {0}.", this.MIMode),
+            "description": localize("attach.with", "Attach with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
@@ -146,7 +146,7 @@ this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalPrope
 export class PipeTransportConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("pipe.launch", "Pipe Launch")}`;
+        let name: string = `(${this.MIMode}) ${localize("pipe.launch", "Pipe Launch").replace(/\"/g, "\\\"")}`;
 
         let body: string = formatString(`
 {
@@ -157,7 +157,7 @@ export class PipeTransportConfigurations extends Configuration {
 
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("pipe.launch.with", "Pipe Launch with {0}.", this.MIMode),
+            "description": localize("pipe.launch.with", "Pipe Launch with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
@@ -165,7 +165,7 @@ export class PipeTransportConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("pipe.attach", "Pipe Attach")}`;
+        let name: string = `(${this.MIMode}) ${localize("pipe.attach", "Pipe Attach").replace(/\"/g, "\\\"")}`;
 
         let body: string = formatString(`
 {
@@ -175,7 +175,7 @@ export class PipeTransportConfigurations extends Configuration {
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("pipe.attach.with", "Pipe Attach with {0}.", this.MIMode),
+            "description": localize("pipe.attach.with", "Pipe Attach with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
@@ -186,7 +186,7 @@ export class PipeTransportConfigurations extends Configuration {
 export class WindowsConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(Windows) ${localize("launch.string", "Launch")}`;
+        let name: string = `(Windows) ${localize("launch.string", "Launch").replace(/\"/g, "\\\"")}`;
 
         let body: string = `
 {
@@ -195,7 +195,7 @@ export class WindowsConfigurations extends Configuration {
 
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("launch.with.vs.debugger", "Launch with the Visual Studio C/C++ debugger."),
+            "description": localize("launch.with.vs.debugger", "Launch with the Visual Studio C/C++ debugger.").replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "isInitialConfiguration": true,
             "debuggerType": DebuggerType.cppvsdbg
@@ -204,7 +204,7 @@ export class WindowsConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(Windows) ${localize("attach.string", "Attach")}`;
+        let name: string = `(Windows) ${localize("attach.string", "Attach").replace(/\"/g, "\\\"")}`;
 
         let body: string = `
 {
@@ -213,7 +213,7 @@ export class WindowsConfigurations extends Configuration {
 
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("attach.with.vs.debugger", "Attach to a process with the Visual Studio C/C++ debugger."),
+            "description": localize("attach.with.vs.debugger", "Attach to a process with the Visual Studio C/C++ debugger.").replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppvsdbg
         };
@@ -226,7 +226,7 @@ export class WSLConfigurations extends Configuration {
     public bashPipeProgram = process.arch === 'ia32' ? "${env:windir}\\\\sysnative\\\\bash.exe" : "${env:windir}\\\\system32\\\\bash.exe";
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("bash.on.windows.launch", "Bash on Windows Launch")}`;
+        let name: string = `(${this.MIMode}) ${localize("bash.on.windows.launch", "Bash on Windows Launch").replace(/\"/g, "\\\"")}`;
 
         let body: string = formatString(`
 {
@@ -236,14 +236,14 @@ export class WSLConfigurations extends Configuration {
 
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("launch.bash.windows", "Launch in Bash on Windows using {0}.", this.MIMode),
+            "description": localize("launch.bash.windows", "Launch in Bash on Windows using {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("bash.on.windows.attach", "Bash on Windows Attach")}`;
+        let name: string = `(${this.MIMode}) ${localize("bash.on.windows.attach", "Bash on Windows Attach").replace(/\"/g, "\\\"")}`;
 
         let body: string = formatString(`
 {
@@ -253,7 +253,7 @@ export class WSLConfigurations extends Configuration {
 
         return {
             "label": this.snippetPrefix + name,
-            "description": localize("remote.attach.bash.windows", "Attach to a remote process running in Bash on Windows using {0}.", this.MIMode),
+            "description": localize("remote.attach.bash.windows", "Attach to a remote process running in Bash on Windows using {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
         };
