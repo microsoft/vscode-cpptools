@@ -1515,7 +1515,7 @@
     "jsonValidation": [
       {
         "fileMatch": "c_cpp_properties.json",
-        "url": "cpptools-schema://c_cpp_properties.schema.json"
+        "url": "cpptools-schema:///c_cpp_properties.schema.json"
       }
     ],
     "menus": {
