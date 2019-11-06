@@ -697,6 +697,12 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
                         public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit> {
+                            let settings: CppSettings = new CppSettings(this.client.RootUri);
+                            if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
+                                vscode.window.showErrorMessage(localize("invalid.identifier.for.rename", "Invalid identifier provided for Rename Symbol operation"));
+                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                return Promise.resolve(workspaceEdit);
+                            }
                             // Normally, VS Code considers rename to be an atomic operation.
                             // If the user clicks anywhere in the document, it attempts to cancel it.
                             // Because that prevents our rename UI, we ignore cancellation requests.
