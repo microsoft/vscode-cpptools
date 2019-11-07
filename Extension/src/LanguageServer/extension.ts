@@ -474,12 +474,11 @@ function realActivation(): void {
             let fileName: string = uri.fsPath;
             let locale: string = util.getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
-            return util.checkFileExists(localizedFilePath).then((fileExists) => {
-                if (!fileExists) {
-                    localizedFilePath = util.getExtensionFilePath(fileName);
-                }
-                return util.readFileText(localizedFilePath);
-            });
+            const fileExists: boolean = await util.checkFileExists(localizedFilePath);
+            if (!fileExists) {
+                localizedFilePath = util.getExtensionFilePath(fileName.substr(1));
+            }
+            return util.readFileText(localizedFilePath);
         }
     }
 
