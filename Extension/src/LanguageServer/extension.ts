@@ -471,12 +471,12 @@ function realActivation(): void {
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
     class SchemaProvider implements vscode.TextDocumentContentProvider {
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-            let fileName: string = uri.fsPath;
+            let fileName: string = uri.path.substr(1);
             let locale: string = util.getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
             const fileExists: boolean = await util.checkFileExists(localizedFilePath);
             if (!fileExists) {
-                localizedFilePath = util.getExtensionFilePath(fileName.substr(1));
+                localizedFilePath = util.getExtensionFilePath(fileName);
             }
             return util.readFileText(localizedFilePath);
         }
