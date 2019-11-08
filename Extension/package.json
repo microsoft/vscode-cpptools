@@ -562,6 +562,12 @@
           "default": true,
           "markdownDescription": "%c_cpp.configuration.vcpkg.enabled.markdownDescription%",
           "scope": "resource"
+        },
+        "C_Cpp.renameRequiresIdentifier": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.renameRequiresIdentifier.description%",
+          "scope": "application"
         }
       }
     },
