@@ -1,20 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.26.2-insider: November 11, 2019
-
 ### Enhancements
 * Reworked how a source file is selected for TU creation when opening a header file. [#2856](https://github.com/microsoft/vscode-cpptools/issues/2856)
-* Reset memory usage of IntelliSense process if it grows beyond a threshold. [#4119](https://github.com/microsoft/vscode-cpptools/issues/4119)
+* Reset memory usage of the IntelliSense process if it grows beyond a threshold. [#4119](https://github.com/microsoft/vscode-cpptools/issues/4119)
 
 ### Bug Fixes
 * Fix child process creation when the Windows code page is set to a language with non-ASCII characters and there are non-ASCII characters in the extension's install path. [#1560](https://github.com/microsoft/vscode-cpptools/issues/1560)
 * Fix path canonicalization of UNC paths to avoid duplicate files opening with different casing. [#2528](https://github.com/microsoft/vscode-cpptools/issues/2528), [#3980](https://github.com/microsoft/vscode-cpptools/issues/3980)
-* Fix an issue with Rename UI that could cause the rename to not be applied. [#4510](https://github.com/microsoft/vscode-cpptools/issues/4510), [#4504](https://github.com/microsoft/vscode-cpptools/issues/4504)
-* Add display of an error message when a Rename fails due to the symbol not being found. [#4517](https://github.com/microsoft/vscode-cpptools/pull/4517)
-* Fix an issue with `launch.json` creation due to localized strings containing quotes. [#4526](https://github.com/microsoft/vscode-cpptools/issues/4526)
-* Fix an issue with configuration error squiggles not being applied unless setting was set in both `c_cpp_properties.json` and `settings.json`. [#4538](https://github.com/microsoft/vscode-cpptools/pull/4538)
 * Fix an issue in which a header may be opened without IntelliSense due to creation of a TU from a source file that includes the header in an inactive region. [#4320](https://github.com/microsoft/vscode-cpptools/issues/4320)
-* Fix a hang in the extension process that can occur when using a namespace named 'interface'.  [#4470](https://github.com/microsoft/vscode-cpptools/issues/4470)
+* Fix a hang in the extension process that can occur when using a scope named 'interface'.  [#4470](https://github.com/microsoft/vscode-cpptools/issues/4470)
+* Fix an issue with the Rename UI that could cause the rename to not be applied. [#4504](https://github.com/microsoft/vscode-cpptools/issues/4504)
+* Show an error message when a Rename fails due to the symbol not being found.  [#4510](https://github.com/microsoft/vscode-cpptools/issues/4510)
+* Fix an issue with `launch.json` creation due to localized strings containing quotes. [#4526](https://github.com/microsoft/vscode-cpptools/issues/4526)
+* Fix an issue with configuration error squiggles not being applied unless the setting was set in both `c_cpp_properties.json` and `settings.json`. [PR #4538](https://github.com/microsoft/vscode-cpptools/pull/4538)
 
 ## Version 0.26.1: October 28, 2019
 ### Bug Fixes
