@@ -567,7 +567,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.renameRequiresIdentifier.description%",
-          "scope": "resource"
+          "scope": "application"
         }
       }
     },

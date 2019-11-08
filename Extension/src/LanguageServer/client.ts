@@ -697,9 +697,9 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
                         public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit> {
-                            let settings: CppSettings = new CppSettings(this.client.RootUri);
+                            let settings: CppSettings = new CppSettings();
                             if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
-                                vscode.window.showErrorMessage(localize("invalid.identifier.for.rename", "Invalid identifier provided for Rename Symbol operation"));
+                                vscode.window.showErrorMessage(localize("invalid.identifier.for.rename", "Invalid identifier provided for the Rename Symbol operation"));
                                 let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                                 return Promise.resolve(workspaceEdit);
                             }
