@@ -987,6 +987,7 @@ function decodeUCS16(input: string): number[] {
 let allowedIdentifierUnicodeRanges: number[][] = [
     [0x0030, 0x0039], // digits
     [0x0041, 0x005A], // upper case letters
+    [0x005F, 0x005F], // underscore
     [0x0061, 0x007A], // lower case letters
     [0x00A8, 0x00A8], // DIARESIS
     [0x00AA, 0x00AA], // FEMININE ORDINAL INDICATOR
