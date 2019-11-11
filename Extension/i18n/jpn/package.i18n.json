@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "true の場合、スニペットは言語サーバーによって提供されます。",
 	"c_cpp.configuration.enhancedColorization.description": "有効にすると、IntelliSense に基づいてコードが色分けされます。この設定は、IntelliSense が無効になっている場合、または既定のハイ コントラスト テーマを使用している場合は効果がありません。",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg 依存関係マネージャー](https://aka.ms/vcpkg/) の統合サービスを有効にします。",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: その他の参照結果",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "C/C++ の名前変更",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "保留中の名前変更",

@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Pokud se nastaví na true, jazykový server poskytne fragmenty kódu.",
 	"c_cpp.configuration.enhancedColorization.description": "Pokud se tato možnost povolí, kód se bude barvit podle IntelliSense. Toto nastavení nemá žádný vliv, pokud se zakáže IntelliSense nebo pokud se použije výchozí motiv Vysoký kontrast.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Povolte integrační služby pro [správce závislostí vcpkg](https://aka.ms/vcpkg/).",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: výsledky jiných odkazů",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "Přejmenování C/C++",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "ČEKÁ NA PŘEJMENOVÁNÍ",

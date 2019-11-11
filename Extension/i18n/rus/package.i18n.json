@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Если задано значение true, фрагменты кода предоставляются языковым сервером.",
 	"c_cpp.configuration.enhancedColorization.description": "Если этот параметр включен, код выделяется цветом на основе IntelliSense. Этот параметр не работает, если функция IntelliSense отключена или используется тема с высокой контрастностью по умолчанию.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Включите службы интеграции для [диспетчера зависимостей vcpkg](https://aka.ms/vcpkg/).",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: результаты по другим ссылкам",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "Переименование C/C++",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "Ожидание переименования",
