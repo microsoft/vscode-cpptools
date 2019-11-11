@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Değer true ise, kod parçacıkları dil sunucusu tarafından sağlanır.",
 	"c_cpp.configuration.enhancedColorization.description": "Etkinleştirilirse, kod IntelliSense'e göre renklendirilir. IntelliSense devre dışı bırakılmışsa veya Varsayılan Yüksek Karşıtlık teması kullanılıyorsa bu ayarın bir etkisi olmaz.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg bağımlılık yöneticisi](https://aka.ms/vcpkg/) için tümleştirme hizmetlerini etkinleştirin.",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: Diğer başvuru sonuçları",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "C/C++ Yeniden Adlandırma",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "YENİDEN ADLANDIRMA BEKLENİYOR",

@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "True이면 언어 서버에서 코드 조각을 제공합니다.",
 	"c_cpp.configuration.enhancedColorization.description": "사용하도록 설정된 경우 IntelliSense를 기반으로 코드 색이 지정됩니다. 이 설정은 기본 고대비 테마를 사용하거나 IntelliSense가 사용하지 않도록 설정된 경우 아무런 영향을 주지 않습니다.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg 종속성 관리자](https://aka.ms/vcpkg/)에 통합 서비스를 사용하도록 설정합니다.",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 기타 참조 결과",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "C/C++ 이름 바꾸기",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "보류 중인 이름 바꾸기",

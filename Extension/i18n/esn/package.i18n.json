@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Si se establece en true, el servidor de lenguaje proporciona los fragmentos de código.",
 	"c_cpp.configuration.enhancedColorization.description": "Si se habilita esta opción, el código se colorea de acuerdo con IntelliSense. Esta configuración no tiene efecto si IntelliSense está deshabilitado o si se utiliza el tema de contraste alto predeterminado.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Habilita los servicios de integración para el [administrador de dependencias de vcpkg] (https://aka.ms/vcpkg/).",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: resultados de otras referencias",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "Cambio de nombre de C/C++",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "CAMBIO DE NOMBRE PENDIENTE",
