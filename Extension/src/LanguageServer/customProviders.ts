@@ -17,6 +17,9 @@ export interface CustomConfigurationProvider1 extends CustomConfigurationProvide
     readonly version: Version;
 }
 
+const oldCmakeToolsExtensionId: string = "vector-of-bool.cmake-tools";
+const newCmakeToolsExtensionId: string = "ms-vscode.cmake-tools";
+
 /**
  * Wraps the incoming CustomConfigurationProvider so that we can treat all of them as if they were the same version (e.g. latest)
  */
@@ -187,11 +190,11 @@ export class CustomConfigurationProviderCollection {
         }
 
         if (typeof provider === "string") {
-            // Consider old and new names for cmake-tools as equivilent
-            if (provider === "ms-vscode.cmake-tools") {
-                id = "vector-of-bool.cmake-tools";
-            } else if (provider === "vector-of-bool.cmake-tools") {
-                id = "ms-vscode.cmake-tools";
+            // Consider old and new names for cmake-tools as equivalent
+            if (provider === newCmakeToolsExtensionId) {
+                id = oldCmakeToolsExtensionId;
+            } else if (provider === oldCmakeToolsExtensionId) {
+                id = newCmakeToolsExtensionId;
             }
             if (this.providers.has(id)) {
                 return this.providers.get(id);
@@ -248,9 +251,9 @@ export function isSameProviderExtensionId(settingExtensionId: string, providerEx
     if (settingExtensionId === providerExtensionId) {
         return true;
     }
-    // Consider old and new names for cmake-tools as equivilent
-    if ((settingExtensionId === "ms-vscode.cmake-tools" && providerExtensionId === "vector-of-bool.cmake-tools")
-        || (settingExtensionId === "vector-of-bool.cmake-tools" && providerExtensionId === "ms-vscode.cmake-tools")) {
+    // Consider old and new names for cmake-tools as equivalent
+    if ((settingExtensionId === newCmakeToolsExtensionId && providerExtensionId === oldCmakeToolsExtensionId)
+        || (settingExtensionId === oldCmakeToolsExtensionId && providerExtensionId === newCmakeToolsExtensionId)) {
         return true;
     }
     return false;
