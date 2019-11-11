@@ -1516,6 +1516,9 @@
       },
       {
         "language": "cpp"
+      },
+      {
+        "language": "cuda"
       }
     ],
     "jsonValidation": [
