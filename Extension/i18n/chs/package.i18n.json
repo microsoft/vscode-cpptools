@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "如果为 true，则由语言服务器提供片段。",
 	"c_cpp.configuration.enhancedColorization.description": "如果启用了 IntelliSense，则基于 IntelliSense 对代码进行着色。如果禁用了 IntelliSense 或使用默认高对比度主题，则此设置不起任何作用。",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "为 [vcpkg 依赖关系管理器] 启用集成服务(https://aka.ms/vcpkg/)。",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 其他引用结果",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "C/C++ 重命名",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "正在等待重命名",
