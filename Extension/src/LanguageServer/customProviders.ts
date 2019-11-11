@@ -185,6 +185,18 @@ export class CustomConfigurationProviderCollection {
         if (this.providers.has(id)) {
             return this.providers.get(id);
         }
+
+        if (typeof provider === "string") {
+            // Consider old and new names for cmake-tools as equivilent
+            if (provider === "ms-vscode.cmake-tools") {
+                id = "vector-of-bool.cmake-tools";
+            } else if (provider === "vector-of-bool.cmake-tools") {
+                id = "ms-vscode.cmake-tools";
+            }
+            if (this.providers.has(id)) {
+                return this.providers.get(id);
+            }
+        }
         return null;
     }
 

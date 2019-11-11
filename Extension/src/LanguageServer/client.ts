@@ -1316,15 +1316,6 @@ export class DefaultClient implements Client {
 
             const notReadyMessage: string = `${providerName} is not ready`;
             let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
-            if (!provider) {
-                // Consider old and new names for cmake-tools as equivilent
-                if (providerId === "ms-vscode.cmake-tools") {
-                    providerId = "vector-of-bool.cmake-tools";
-                } else if (providerId === "vector-of-bool.cmake-tools") {
-                    providerId = "ms-vscode.cmake-tools";
-                }
-                provider = providers.get(providerId);
-            }
             if (provider) {
                 if (!provider.isReady) {
                     return Promise.reject(notReadyMessage);
