@@ -231,3 +231,15 @@ let providerCollection: CustomConfigurationProviderCollection = new CustomConfig
 export function getCustomConfigProviders(): CustomConfigurationProviderCollection {
     return providerCollection;
 }
+
+export function isSameProviderExtensionId(settingExtensionId: string, providerExtensionId: string): boolean {
+    if (settingExtensionId === providerExtensionId) {
+        return true;
+    }
+    // Consider old and new names for cmake-tools as equivilent
+    if ((settingExtensionId === "ms-vscode.cmake-tools" && providerExtensionId === "vector-of-bool.cmake-tools")
+        || (settingExtensionId === "vector-of-bool.cmake-tools" && providerExtensionId === "ms-vscode.cmake-tools")) {
+        return true;
+    }
+    return false;
+}
