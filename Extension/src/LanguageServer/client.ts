@@ -26,7 +26,7 @@ import * as logger from '../logger';
 import { updateLanguageConfigurations, registerCommands } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1 } from '../LanguageServer/customProviders';
+import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -1167,7 +1167,7 @@ export class DefaultClient implements Client {
                     },
                     () => ask.Value = false);
                 }
-            } else if (selectedProvider === provider.extensionId) {
+            } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
                 onRegistered();
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
             } else if (selectedProvider === provider.name) {
@@ -1974,7 +1974,7 @@ export class DefaultClient implements Client {
             this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
         }).then(() => {
             let newProvider: string = this.configuration.CurrentConfigurationProvider;
-            if (this.configurationProvider !== newProvider) {
+            if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
                 this.configurationProvider = newProvider;
                 this.updateCustomConfigurations();
                 this.updateCustomBrowseConfiguration();
