@@ -207,7 +207,8 @@ suite("extensibility tests v3", function(): void {
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -298,7 +299,8 @@ suite("extensibility tests v2", function(): void {
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -373,7 +375,8 @@ suite("extensibility tests v1", function(): void {
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -445,7 +448,8 @@ suite("extensibility tests v0", function(): void {
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -459,6 +463,7 @@ suite("configuration tests", function() {
         }
         // Open a c++ file to start the language server.
         await vscode.workspace.openTextDocument({ language: "cpp", content: "int main() { return 0; }"});
+        await vscode.window.showTextDocument(document);
     });
 
     suiteTeardown(async function() {
