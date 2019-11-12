@@ -15,7 +15,7 @@
 * Show an error message when a Rename fails due to the symbol not being found.  [#4510](https://github.com/microsoft/vscode-cpptools/issues/4510)
 * Fix an issue with `launch.json` creation due to localized strings containing quotes. [#4526](https://github.com/microsoft/vscode-cpptools/issues/4526)
 * Fix an issue with configuration error squiggles not being applied unless the setting was set in both `c_cpp_properties.json` and `settings.json`. [PR #4538](https://github.com/microsoft/vscode-cpptools/pull/4538)
-* Fix document symbol for outline view and breadcrumbs on Windows 7. [#5436](https://github.com/microsoft/vscode-cpptools/issues/4536).
+* Fix document symbol for outline view and breadcrumbs on Windows 7. [#4536](https://github.com/microsoft/vscode-cpptools/issues/4536).
 * Add support for `ms-vscode.cmake-tools` configurationProvider id. [#4586](https://github.com/microsoft/vscode-cpptools/issues/4586).
 
 ## Version 0.26.1: October 28, 2019
