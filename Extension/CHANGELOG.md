@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.2-insider: November 11, 2019
+## Version 0.26.2-insider: November 12, 2019
 ### Enhancements
 * Reworked how a source file is selected for TU creation when opening a header file. [#2856](https://github.com/microsoft/vscode-cpptools/issues/2856)
 * Reset memory usage of the IntelliSense process if it grows beyond a threshold. [#4119](https://github.com/microsoft/vscode-cpptools/issues/4119)
@@ -15,6 +15,8 @@
 * Show an error message when a Rename fails due to the symbol not being found.  [#4510](https://github.com/microsoft/vscode-cpptools/issues/4510)
 * Fix an issue with `launch.json` creation due to localized strings containing quotes. [#4526](https://github.com/microsoft/vscode-cpptools/issues/4526)
 * Fix an issue with configuration error squiggles not being applied unless the setting was set in both `c_cpp_properties.json` and `settings.json`. [PR #4538](https://github.com/microsoft/vscode-cpptools/pull/4538)
+* Fix document symbol for outline view and breadcrumbs on Windows 7. [#4536](https://github.com/microsoft/vscode-cpptools/issues/4536).
+* Add support for `ms-vscode.cmake-tools` configurationProvider id. [#4586](https://github.com/microsoft/vscode-cpptools/issues/4586).
 
 ## Version 0.26.1: October 28, 2019
 ### Bug Fixes
