@@ -47,7 +47,6 @@ export class ClientCollection {
         this.languageClients.set(key, this.activeClient);
 
         this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e => this.onDidChangeWorkspaceFolders(e)));
-        this.disposables.push(vscode.workspace.onDidOpenTextDocument(d => this.onDidOpenTextDocument(d)));
         this.disposables.push(vscode.workspace.onDidCloseTextDocument(d => this.onDidCloseTextDocument(d)));
     }
 
@@ -174,15 +173,7 @@ export class ClientCollection {
         newOwner.takeOwnership(document);
     }
 
-    private onDidOpenTextDocument(document: vscode.TextDocument): void {
-        if (document.languageId === "c" || document.languageId === "cpp"
-            || document.languageId === "json" && document.uri.fsPath.endsWith("c_cpp_properties.json")) {
-            // Make sure a client exists for this document's workspace.
-            this.getClientFor(document.uri);
-        }
-    }
-
-    private getClientFor(uri: vscode.Uri): cpptools.Client {
+    public getClientFor(uri: vscode.Uri): cpptools.Client {
         let folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
         if (!folder) {
             return this.defaultClient;

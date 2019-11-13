@@ -4,11 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
-import { CppSettings } from './settings';
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -22,44 +20,28 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
     /* tslint:enable */
 
     return {
-        didOpen: (document, sendMessage) => {
-            if (clients.checkOwnership(me, document)) {
-                me.TrackedDocuments.add(document);
-
-                // Work around vscode treating ".C" as c, by adding this file name to file associations as cpp
-                if (document.uri.path.endsWith(".C") && document.languageId === "c") {
-                    let cppSettings: CppSettings = new CppSettings(me.RootUri);
-                    if (cppSettings.autoAddFileAssociations) {
-                        const fileName: string = path.basename(document.uri.fsPath);
-                        const mappingString: string = fileName + "@" + document.uri.fsPath;
-                        me.addFileAssociations(mappingString, false);
-                    }
-                }
-
-                me.provideCustomConfiguration(document.uri, null);
-                me.notifyWhenReady(() => {
-                    me.onDidOpenTextDocument(document);
-                    sendMessage(document);
-                });
-            }
+        didOpen: (_document, _sendMessage) => {
+            // NO-OP
+            // didOpen handling has been moved to onDidChangeVisibleTextEditors in extension.ts.
+            // A file is only loaded when it is actually opened in the editor (not in response to
+            // control-hover, which sends a didOpen), and first becomes visible.
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
-            if (clients.ActiveClient === me) {
+            if (clients.ActiveClient === me && me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
                 me.onDidChangeTextDocument(textDocumentChangeEvent);
                 me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
             }
         },
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
-            if (clients.ActiveClient === me) {
+            if (clients.ActiveClient === me && me.TrackedDocuments.has(event.document)) {
                 return me.requestWhenReady(() => sendMessage(event));
             }
             return Promise.resolve([]);
         },
         didSave: defaultHandler,
         didClose: (document, sendMessage) => {
-            if (clients.ActiveClient === me) {
-                console.assert(me.TrackedDocuments.has(document));
+            if (clients.ActiveClient === me && me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
                 me.notifyWhenReady(() => sendMessage(document));
