@@ -157,7 +157,7 @@ export class CppProperties {
     public get CurrentConfiguration(): Configuration { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : null; }
     public get KnownCompiler(): KnownCompiler[] { return this.knownCompilers; }
 
-    public get CurrentConfigurationProvider(): string|null {
+    public get CurrentConfigurationProvider(): string | null {
         if (this.CurrentConfiguration.configurationProvider) {
             return this.CurrentConfiguration.configurationProvider;
         }
@@ -1022,7 +1022,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string|string[], isDirectory: boolean = true): string {
+    private validatePath(input: string | string[], isDirectory: boolean = true): string {
         if (!input) {
             return undefined;
         }
@@ -1087,17 +1087,15 @@ export class CppProperties {
             return;
         }
 
-        if (!this.configurationJson.enableConfigurationSquiggles) {
-            this.diagnosticCollection.clear();
-            return;
-        }
-
+        // Disable squiggles if
+        // this.configurationJson.enableConfigurationSquiggles is false OR
+        // this.configurationJson.enableConfigurationSquiggles is undefined and settings.defaultEnableConfigurationSquiggles is false.
         const settings: CppSettings = new CppSettings(this.rootUri);
-        if (!settings.defaultEnableConfigurationSquiggles) {
+        if ((this.configurationJson.enableConfigurationSquiggles !== undefined && !this.configurationJson.enableConfigurationSquiggles) ||
+            (this.configurationJson.enableConfigurationSquiggles === undefined && !settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
             return;
         }
-
         vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
             let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 

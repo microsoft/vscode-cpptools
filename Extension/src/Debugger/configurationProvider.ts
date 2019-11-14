@@ -382,11 +382,11 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
 
 class WindowsConfigurationProvider extends DefaultConfigurationProvider {
     private executable: string = "a.exe";
-    private pipeProgram: string = "<" + localize("path.to.pipe.program", "full path to pipe program such as {0}", "plink.exe") + ">";
+    private pipeProgram: string = "<" + localize("path.to.pipe.program", "full path to pipe program such as {0}", "plink.exe").replace(/\"/g, "\\\"") + ">";
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb")}",
+        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/\"/g, "\\\"")}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     }
@@ -420,7 +420,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     private MIMode: string = 'gdb';
     private setupCommandsBlock: string = `"setupCommands": [
     {
-        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb")}",
+        "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/\"/g, "\\\"")}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
     }

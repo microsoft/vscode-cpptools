@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import { Client } from './client';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection } from './customProviders';
+import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -187,7 +187,7 @@ export class UI {
             .then(selection => (selection) ? selection.index : -1);
     }
 
-    public showConfigurationProviders(currentProvider: string|null): Thenable<string|undefined> {
+    public showConfigurationProviders(currentProvider: string | null): Thenable<string | undefined> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
@@ -195,7 +195,7 @@ export class UI {
         let items: KeyedQuickPickItem[] = [];
         providers.forEach(provider => {
             let label: string = provider.name;
-            if (provider.extensionId === currentProvider) {
+            if (isSameProviderExtensionId(currentProvider, provider.extensionId)) {
                 label += ` (${localize("active", "active")})`;
             }
             items.push({ label: label, description: "", key: provider.extensionId });

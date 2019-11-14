@@ -17,6 +17,9 @@ export interface CustomConfigurationProvider1 extends CustomConfigurationProvide
     readonly version: Version;
 }
 
+const oldCmakeToolsExtensionId: string = "vector-of-bool.cmake-tools";
+const newCmakeToolsExtensionId: string = "ms-vscode.cmake-tools";
+
 /**
  * Wraps the incoming CustomConfigurationProvider so that we can treat all of them as if they were the same version (e.g. latest)
  */
@@ -136,7 +139,7 @@ export class CustomConfigurationProviderCollection {
         console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}.`);
     }
 
-    private getId(provider: string|CustomConfigurationProvider): string {
+    private getId(provider: string | CustomConfigurationProvider): string {
         if (typeof provider === "string") {
             return provider;
         } else if (provider.extensionId) {
@@ -179,11 +182,23 @@ export class CustomConfigurationProviderCollection {
         return !exists;
     }
 
-    public get(provider: string|CustomConfigurationProvider): CustomConfigurationProvider1|null {
+    public get(provider: string | CustomConfigurationProvider): CustomConfigurationProvider1 | null {
         let id: string = this.getId(provider);
 
         if (this.providers.has(id)) {
             return this.providers.get(id);
+        }
+
+        if (typeof provider === "string") {
+            // Consider old and new names for cmake-tools as equivalent
+            if (provider === newCmakeToolsExtensionId) {
+                id = oldCmakeToolsExtensionId;
+            } else if (provider === oldCmakeToolsExtensionId) {
+                id = newCmakeToolsExtensionId;
+            }
+            if (this.providers.has(id)) {
+                return this.providers.get(id);
+            }
         }
         return null;
     }
@@ -230,4 +245,16 @@ let providerCollection: CustomConfigurationProviderCollection = new CustomConfig
 
 export function getCustomConfigProviders(): CustomConfigurationProviderCollection {
     return providerCollection;
+}
+
+export function isSameProviderExtensionId(settingExtensionId: string, providerExtensionId: string): boolean {
+    if (settingExtensionId === providerExtensionId) {
+        return true;
+    }
+    // Consider old and new names for cmake-tools as equivalent
+    if ((settingExtensionId === newCmakeToolsExtensionId && providerExtensionId === oldCmakeToolsExtensionId)
+        || (settingExtensionId === oldCmakeToolsExtensionId && providerExtensionId === newCmakeToolsExtensionId)) {
+        return true;
+    }
+    return false;
 }
