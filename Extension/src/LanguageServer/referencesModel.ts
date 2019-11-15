@@ -5,6 +5,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { ReferenceType, ReferenceInfo, ReferencesResult } from './references';
+import * as path from 'path';
 
 export type RenameResultCallback = (result: ReferencesResult) => void;
 
@@ -41,7 +42,8 @@ export class ReferencesModel {
             if (noReferenceLocation) {
                 let node: TreeNode = new TreeNode(this, NodeType.fileWithPendingRef);
                 node.fileUri = vscode.Uri.file(r.file);
-                node.filename = r.file;
+                node.filepath = r.file;
+                node.filename = path.parse(r.file).base;
                 node.referenceType = r.type;
                 this.nodes.push(node);
             } else {
@@ -50,7 +52,8 @@ export class ReferencesModel {
                 const location: vscode.Location = new vscode.Location(uri, range);
                 let node: TreeNode = new TreeNode(this, NodeType.reference);
                 node.fileUri = uri;
-                node.filename = r.file;
+                node.filepath = r.file;
+                node.filename = path.parse(r.file).base;
                 node.referencePosition = r.position;
                 node.referenceLocation = location;
                 node.referenceText = r.text;
@@ -93,44 +96,45 @@ export class ReferencesModel {
 
         // Create new nodes per unique file
         for (let n of filteredFiles) {
-            let i: number = result.findIndex(item => item.filename === n.filename);
+            let i: number = result.findIndex(item => item.filepath === n.filepath);
             if (i < 0) {
                 let nodeType: NodeType = (n.node === NodeType.fileWithPendingRef ? NodeType.fileWithPendingRef : NodeType.file);
                 let node: TreeNode = new TreeNode(this, nodeType);
+                node.filepath = n.filepath;
                 node.filename = n.filename;
                 node.fileUri = n.fileUri;
                 node.referenceType = refType;
                 result.push(node);
             }
         }
-
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
         return result;
     }
 
-    getReferenceNodes(filename: string | undefined, refType: ReferenceType | undefined, isRenameCandidate?: boolean): TreeNode[] {
+    getReferenceNodes(filepath: string | undefined, refType: ReferenceType | undefined, isRenameCandidate?: boolean): TreeNode[] {
         if (this.isRename) {
             if (refType === undefined || refType === null) {
-                if (filename === undefined || filename === null) {
+                if (filepath === undefined || filepath === null) {
                     return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate);
                 }
-                return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.filename === filename);
+                return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.filepath === filepath);
             }
-            if (filename === undefined || filename === null) {
+            if (filepath === undefined || filepath === null) {
                 return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.referenceType === refType);
             }
-            return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.filename === filename && i.referenceType === refType);
+            return this.nodes.filter(i => i.isRenameCandidate === isRenameCandidate && i.filepath === filepath && i.referenceType === refType);
         }
 
         if (refType === undefined || refType === null) {
-            if (filename === undefined || filename === null) {
+            if (filepath === undefined || filepath === null) {
                 return this.nodes;
             }
-            return this.nodes.filter(i => i.filename === filename);
+            return this.nodes.filter(i => i.filepath === filepath);
         }
-        if (filename === undefined || filename === null) {
+        if (filepath === undefined || filepath === null) {
             return this.nodes.filter(i => i.referenceType === refType);
         }
-        return this.nodes.filter(i => i.filename === filename && i.referenceType === refType);
+        return this.nodes.filter(i => i.filepath === filepath && i.referenceType === refType);
     }
 
     getAllReferenceNodes(): TreeNode[] {
@@ -145,7 +149,9 @@ export class ReferencesModel {
             let empty: TreeNode[] = [];
             return empty;
         }
-        return this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
+        let result: TreeNode[] = this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
+        return result;
     }
 
     // For rename, this.nodes will contain only ReferenceItems's
@@ -170,16 +176,18 @@ export class ReferencesModel {
         let result: TreeNode[] = [];
         this.nodes.forEach(n => {
             if (n.isRenameCandidate) {
-                let i: number = result.findIndex(e => e.filename === n.filename);
+                let i: number = result.findIndex(e => e.filepath === n.filepath);
                 if (i < 0) {
                     let node: TreeNode = new TreeNode(this, NodeType.file);
                     node.fileUri = n.fileUri;
+                    node.filepath = n.filepath;
                     node.filename = n.filename;
                     node.referenceType = n.referenceType;
                     result.push(node);
                 }
             }
         });
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
         return result;
     }
 
@@ -188,16 +196,18 @@ export class ReferencesModel {
         let result: TreeNode[] = [];
         this.nodes.forEach(n => {
             if (!n.isRenameCandidate) {
-                let i: number = result.findIndex(e => e.filename === n.filename);
+                let i: number = result.findIndex(e => e.filepath === n.filepath);
                 if (i < 0) {
                     let node: TreeNode = new TreeNode(this, NodeType.file);
                     node.fileUri = n.fileUri;
+                    node.filepath = n.filepath;
                     node.filename = n.filename;
                     node.referenceType = n.referenceType;
                     result.push(node);
                 }
             }
         });
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
         return result;
     }
 
@@ -214,7 +224,7 @@ export class ReferencesModel {
         this.nodes.forEach(n => {
             if (!n.isRenameCandidate) {
                 let referenceInfo: ReferenceInfo = {
-                    file: n.filename,
+                    file: n.filepath,
                     position: n.referenceLocation.range.start,
                     text: n.referenceText,
                     type: n.referenceType
@@ -254,7 +264,7 @@ export class ReferencesModel {
 
     setFileRenamesCandidates(node: TreeNode): void {
         this.nodes.forEach(n => {
-            if (n.filename === node.filename) {
+            if (n.filepath === node.filepath) {
                 n.isRenameCandidate = true;
             }
         });
@@ -264,11 +274,11 @@ export class ReferencesModel {
     setFileRenamesPending(node: TreeNode): void {
         this.nodes.forEach(n => {
             if (this.groupByFile) {
-                if (n.filename === node.filename) {
+                if (n.filepath === node.filepath) {
                     n.isRenameCandidate = false;
                 }
             } else {
-                if (n.filename === node.filename && node.referenceType === n.referenceType) {
+                if (n.filepath === node.filepath && node.referenceType === n.referenceType) {
                     n.isRenameCandidate = false;
                 }
             }
@@ -297,6 +307,7 @@ export enum NodeType {
 
 export class TreeNode {
     // Optional properties for file related info
+    public filepath?: string | undefined;
     public filename?: string | undefined;
     public fileUri?: vscode.Uri | undefined;
 
