@@ -104,7 +104,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                         arguments: [element]
                     };
                     let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled);
-                    resultFile.tooltip = `[${tag}]\n${element.filepath}`;
+                    resultFile.tooltip = `[${tag}]\n${element.filename}`;
                     resultFile.collapsibleState = vscode.TreeItemCollapsibleState.None;
                 }
 
@@ -143,7 +143,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                     type = element.referenceType;
                 }
 
-                return this.referencesModel.getReferenceNodes(element.filepath, type, this.isRenameCandidates);
+                return this.referencesModel.getReferenceNodes(element.filename, type, this.isRenameCandidates);
             }
             if (element.node === NodeType.referenceType) {
                 return this.referencesModel.getFileNodes(element.referenceType, this.isRenameCandidates);
