@@ -4,9 +4,12 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
+import * as vscode from 'vscode';
+import { CppSettings } from './settings';
 
 export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -20,11 +23,37 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
     /* tslint:enable */
 
     return {
-        didOpen: (_document, _sendMessage) => {
-            // NO-OP
-            // didOpen handling has been moved to onDidChangeVisibleTextEditors in extension.ts.
-            // A file is only loaded when it is actually opened in the editor (not in response to
-            // control-hover, which sends a didOpen), and first becomes visible.
+        didOpen: (document, sendMessage) => {
+            let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document === document);
+            if (editor) {
+                // If the file was is visible editor when we were activated, we will not get a call to
+                // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
+                // Otherwise, we defer opening the file until it's actually visible.
+                if (clients.checkOwnership(me, document)) {
+                    me.TrackedDocuments.add(document);
+                    if (document.uri.path.endsWith(".C") && document.languageId === "c") {
+                        let cppSettings: CppSettings = new CppSettings(me.RootUri);
+                        if (cppSettings.autoAddFileAssociations) {
+                            const fileName: string = path.basename(document.uri.fsPath);
+                            const mappingString: string = fileName + "@" + document.uri.fsPath;
+                            me.addFileAssociations(mappingString, false);
+                        }
+                    }
+                    me.provideCustomConfiguration(document.uri, null);
+                    me.notifyWhenReady(() => {
+                        sendMessage(document);
+                        me.onDidOpenTextDocument(document);
+                    });
+                }
+            } else {
+                // NO-OP
+                // If the file is not opened into an editor (such as in response for a control-hover),
+                // we do not actually load a translation unit for it.  When we receive a didOpen, the file
+                // may not yet be visible.  So, we defer creation of the  translation until we receive a
+                // call to onDidChangeVisibleTextEditors(), in extension.ts.  A file is only loaded when
+                // it is actually opened in the editor (not in response to control-hover, which sends a
+                // didOpen), and first becomes visible.
+            }
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
             if (clients.ActiveClient === me && me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
