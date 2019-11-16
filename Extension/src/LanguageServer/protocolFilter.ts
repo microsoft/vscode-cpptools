@@ -26,7 +26,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
         didOpen: (document, sendMessage) => {
             let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
-                // If the file was is visible editor when we were activated, we will not get a call to
+                // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
                 if (clients.checkOwnership(me, document)) {
