@@ -1994,7 +1994,7 @@ export class DefaultClient implements Client {
 
     private onCompileCommandsChanged(path: string): void {
         let params: FileChangedParams = {
-            uri: path
+            uri: new vscode.Uri.file(path)
         };
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
