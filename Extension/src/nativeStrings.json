@@ -151,5 +151,6 @@
     "cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}",
     "suffix_declaration": "declaration",
     "suffix_type_alias": "type alias",
-    "fallback_to_32_bit_mode": "Compiler does not support 64-bit. Falling back to 32-bit intelliSenseMode"
+    "fallback_to_32_bit_mode": "Compiler does not support 64-bit. Falling back to 32-bit intelliSenseMode",
+    "fallback_to_64_bit_mode": "Compiler does not support 32-bit. Falling back to 64-bit intelliSenseMode"
 }
