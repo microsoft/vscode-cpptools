@@ -31,7 +31,7 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
                 // Otherwise, we defer opening the file until it's actually visible.
                 if (clients.checkOwnership(me, document)) {
                     me.TrackedDocuments.add(document);
-                    if (document.uri.path.endsWith(".C") && document.languageId === "c") {
+                    if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
                         let cppSettings: CppSettings = new CppSettings(me.RootUri);
                         if (cppSettings.autoAddFileAssociations) {
                             const fileName: string = path.basename(document.uri.fsPath);
