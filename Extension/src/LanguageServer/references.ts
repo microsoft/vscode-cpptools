@@ -470,18 +470,24 @@ export class ReferencesManager {
     }
 
     public closeRenameUI(): void {
-        this.renameView.show(false);
+        if (this.renameView) {
+            this.renameView.show(false);
+        }
     }
 
     public clearViews(): void {
-        this.renameView.show(false);
+        if (this.renameView) {
+            this.renameView.show(false);
+        }
 
         // Rename should not clear the Find All References view, as it's in a different view container
         if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
             if (this.referencesChannel) {
                 this.referencesChannel.clear();
             }
-            this.findAllRefsView.show(false);
+            if (this.findAllRefsView) {
+                this.findAllRefsView.show(false);
+            }
         }
     }
 }
