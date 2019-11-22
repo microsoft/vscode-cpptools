@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 0.26.2-insiders2: November 22, 2019
-### Enchangements
+### Enhancements
 * Deferred TU creation until the file is visible in the editor. This avoids the overhead of TU creation when the file is opened by VS Code internally for IntelliSense operations. [#4458](https://github.com/microsoft/vscode-cpptools/issues/4458)
 
 ### Bug Fixes
