@@ -115,5 +115,22 @@
 			],
 			"preLaunchTask": "Pretest"
 		},
+		{
+			"name": "Launch E2E tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"C:/git/Vcls-vscode-test/SingleRootProject",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/IntelliSenseFeatures"
+			],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/test/**/*.js"
+			],
+			"preLaunchTask": "Pretest"
+		},
 	]
 }
