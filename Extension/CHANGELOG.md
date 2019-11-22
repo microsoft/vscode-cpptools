@@ -1,16 +1,16 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.2-insiders2: November 21, 2019
+## Version 0.26.2-insiders2: November 22, 2019
 ### Enchangements
-* Deferred TU creation until the file is visible in the editor. This avoids the overhead of TU creation when the file is opened by VS Code internally for IntelliSense operations. [4458](https://github.com/microsoft/vscode-cpptools/issues/4458)
+* Deferred TU creation until the file is visible in the editor. This avoids the overhead of TU creation when the file is opened by VS Code internally for IntelliSense operations. [#4458](https://github.com/microsoft/vscode-cpptools/issues/4458)
 
 ### Bug Fixes
-* Fix an issue in which cancellation of Find All References could result in an exception. [2710](https://github.com/microsoft/vscode-cpptools/issues/2710)
-* Fix sort order of files in Find All References and Rename UI. [4615](https://github.com/microsoft/vscode-cpptools/issues/4615) 
-* Fix an issue in which localized Chinese strings would not be displayed on systems with case-sensitive file systems. [4619](https://github.com/microsoft/vscode-cpptools/issues/4619)
-* Fix an issue in 0.26.2-insiders in which memory cleanup in the native IntelliSense process might result in a crash. [4630](https://github.com/microsoft/vscode-cpptools/issues/4630)
-* Fix an issue in which files with an extention of `.H` were not correctly associated with C++. [4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
-* Fix an issue in which -m64 or -m32 were not being passed to gcc, causing the reported system includes and system defines to not match the requested `intelliSenseMode`. [4635](https://github.com/microsoft/vscode-cpptools/issues/4635)
+* Fix an issue in which cancellation of Find All References could result in an exception. [#2710](https://github.com/microsoft/vscode-cpptools/issues/2710)
+* Fix sort order of files in Find All References and Rename UI. [#4615](https://github.com/microsoft/vscode-cpptools/issues/4615)
+* Fix an issue in which localized Chinese strings would not be displayed on systems with case-sensitive file systems. [#4619](https://github.com/microsoft/vscode-cpptools/issues/4619)
+* Fix an issue in 0.26.2-insiders in which memory cleanup in the native IntelliSense process might result in a crash. [#4630](https://github.com/microsoft/vscode-cpptools/issues/4630)
+* Fix an issue in which files with an extention of `.H` were not correctly associated with C++. [#4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
+* Fix an issue in which -m64 or -m32 were not being passed to gcc, causing the reported system includes and system defines to not match the requested `intelliSenseMode`. [#4635](https://github.com/microsoft/vscode-cpptools/issues/4635)
 
 ## Version 0.26.2-insiders: November 12, 2019
 ### Enhancements
