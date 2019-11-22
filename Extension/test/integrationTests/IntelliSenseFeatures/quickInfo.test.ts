@@ -78,10 +78,7 @@ std::string::basic_string(const char *_Ptr)
 
     test("Hover over function param with squiggles", async () => {
         let result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(13, 18)));
-        let expected: string =
-        `\`\`\`cpp
-std::string::basic_string(const char *_Ptr)
-`;
+        let expected: string = `\`\`\`cpp\nint intVar\n\`\`\``;
         let actual: string = (<{ language: string; value: string }>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
