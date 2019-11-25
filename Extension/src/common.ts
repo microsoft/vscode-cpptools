@@ -635,7 +635,7 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
 export function isExecutable(file: string): Promise<boolean> {
     return new Promise((resolve) => {
         fs.access(file, fs.constants.X_OK, (err) => {
-            if(err) {
+            if (err) {
                 resolve(true);
             } else {
                 resolve(false);
