@@ -637,7 +637,7 @@ export function isExecutable(file: string): Promise<boolean> {
         fs.access(file, fs.constants.X_OK, (err) => {
             if(err) {
                 resolve(true);
-            else {
+            } else {
                 resolve(false);
             }
         });
