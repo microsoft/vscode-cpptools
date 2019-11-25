@@ -632,9 +632,9 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     });
 }
 
-export function isExecutable(file: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        fs.access(file, fs.constants.X_OK, (err: NodeJS.ErrnoException) => {
+export function isExecutable(file: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fs.access(file, fs.constants.X_OK, (err) => {
             resolve(err);
         });
     });
