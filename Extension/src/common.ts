@@ -632,11 +632,19 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     });
 }
 
+export function isExecutable(file: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.access(file, fs.constants.X_OK, (err: NodeJS.ErrnoException) => {
+            resolve(err);
+        });
+    });
+}
+
 export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         if (process.platform !== 'win32') {
             checkFileExists(file).then((exists: boolean) => {
-                if (exists) {
+                if (exists && !isExecutable(file)) {
                     fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
                         if (err) {
                             reject(err);
