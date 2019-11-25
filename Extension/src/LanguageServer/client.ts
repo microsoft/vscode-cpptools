@@ -26,7 +26,7 @@ import * as logger from '../logger';
 import { updateLanguageConfigurations, registerCommands } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -1184,18 +1184,22 @@ export class DefaultClient implements Client {
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) || this.trackedDocuments.size === 0) {
+            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
                 return;
             }
 
-            let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            let documentUris: vscode.Uri[] = [];
-            this.trackedDocuments.forEach(document => documentUris.push(document.uri));
+            this.trackedDocuments.forEach(document => {
+                this.provideCustomConfiguration(document.uri, null);
+            });
 
-            let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
-                return currentProvider.provideConfigurations(documentUris, tokenSource.token);
-            };
-            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs), () => {});
+            // let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+            // let documentUris: vscode.Uri[] = [];
+            // this.trackedDocuments.forEach(document => documentUris.push(document.uri));
+
+            // let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
+            //     return currentProvider.provideConfigurations(documentUris, tokenSource.token);
+            // };
+            // this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs), () => {});
         });
     }
 
@@ -1283,27 +1287,62 @@ export class DefaultClient implements Client {
         await this.notifyWhenReady(() => this.languageClient.sendNotification(RescanFolderNotification));
     }
 
+    // public getCustomConfigurationProvider(): CustomConfigurationProvider1 | null {
+    //     let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+    //     if (providers.size === 0) {
+    //         return null;
+    //     }
+    //     console.log("provideCustomConfiguration1");
+    //     let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
+    //     if (!providerId) {
+    //         return null;
+    //     }
+    //     let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
+    //     if (provider) {
+    //         if (!provider.isReady) {
+    //             return Promise.reject(`${providerId} is not ready`);
+    //         }
+    //     }
+    // }
+
+    // public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
+    //     let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+    //     if (providers.size === 0) {
+    //         return Promise.resolve();
+    //     }
+    //     console.log("provideCustomConfiguration1");
+    //     let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
+    //     if (!providerId) {
+    //         return Promise.resolve();
+    //     }
+    //     let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
+    //     if (provider) {
+    //         if (!provider.isReady) {
+    //             return Promise.reject(`${providerId} is not ready`);
+    //         }
+    //     }
+    //     await this.provideCustomConfigurationFromProvider(docUri, provider, requestFile);
+    // }
+
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
         let onFinished: () => void = () => {
             if (requestFile) {
                 this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
             }
         };
+        let provider: CustomConfigurationProvider1 | null = getCustomConfigProviders().get(this.configurationProvider);
+        if (provider) {
+            if (!provider.isReady) {
+                onFinished();
+                return Promise.reject(`${this.configurationProvider} is not ready`);
+            }
+        }
         return this.queueBlockingTask(async () => {
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-            if (providers.size === 0) {
-                onFinished();
-                return Promise.resolve();
-            }
-            console.log("provideCustomConfiguration");
-            let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
-            if (!providerId) {
-                onFinished();
-                return Promise.resolve();
-            }
+            console.log("provideCustomConfigurationFromProvider");
 
-            let providerName: string = providerId;
+            let providerName: string = provider.name;
+
             let params: QueryTranslationUnitSourceParams = {
                 uri: docUri.toString()
             };
@@ -1312,15 +1351,6 @@ export class DefaultClient implements Client {
                 // If we didn't receive any candidates, no configuration is needed.
                 onFinished();
                 return Promise.resolve();
-            }
-
-            const notReadyMessage: string = `${providerName} is not ready`;
-            let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
-            if (provider) {
-                if (!provider.isReady) {
-                    return Promise.reject(notReadyMessage);
-                }
-                providerName = provider.name;
             }
 
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
@@ -1358,9 +1388,6 @@ export class DefaultClient implements Client {
                         onFinished();
                         return;
                     }
-                    if (err === notReadyMessage) {
-                        return;
-                    }
                     let settings: CppSettings = new CppSettings(this.RootUri);
                     if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                         const dismiss: string = localize("dismiss.button", "Dismiss");
@@ -1385,6 +1412,106 @@ export class DefaultClient implements Client {
                 });
         });
     }
+
+    // public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
+    //     let onFinished: () => void = () => {
+    //         if (requestFile) {
+    //             this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+    //         }
+    //     };
+    //     return this.queueBlockingTask(async () => {
+    //         let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+    //         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+    //         if (providers.size === 0) {
+    //             onFinished();
+    //             return Promise.resolve();
+    //         }
+    //         console.log("provideCustomConfiguration");
+    //         let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
+    //         if (!providerId) {
+    //             onFinished();
+    //             return Promise.resolve();
+    //         }
+
+    //         let providerName: string = providerId;
+    //         let params: QueryTranslationUnitSourceParams = {
+    //             uri: docUri.toString()
+    //         };
+    //         let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
+    //         if (!response.candidates || response.candidates.length === 0) {
+    //             // If we didn't receive any candidates, no configuration is needed.
+    //             onFinished();
+    //             return Promise.resolve();
+    //         }
+
+    //         const notReadyMessage: string = `${providerName} is not ready`;
+    //         let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
+    //         if (provider) {
+    //             if (!provider.isReady) {
+    //                 return Promise.reject(notReadyMessage);
+    //             }
+    //             providerName = provider.name;
+    //         }
+
+    //         // Need to loop through candidates, to see if we can get a custom configuration from any of them.
+    //         // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
+    //         let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
+    //             if (provider) {
+    //                 for (let i: number = 0; i < response.candidates.length; ++i) {
+    //                     try {
+    //                         let candidate: string = response.candidates[i];
+    //                         let tuUri: vscode.Uri = vscode.Uri.parse(candidate);
+    //                         if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+    //                             let configs: SourceFileConfigurationItem[] = await provider.provideConfigurations([tuUri], tokenSource.token);
+    //                             if (configs && configs.length > 0 && configs[0]) {
+    //                                 return configs;
+    //                             }
+    //                         }
+    //                         if (tokenSource.token.isCancellationRequested) {
+    //                             return null;
+    //                         }
+    //                     } catch (err) {
+    //                         console.warn("Caught exception request configuration");
+    //                     }
+    //                 }
+    //             }
+    //         };
+    //         return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
+    //             (configs: SourceFileConfigurationItem[]) => {
+    //                 if (configs && configs.length > 0) {
+    //                     this.sendCustomConfigurations(configs, false);
+    //                 }
+    //                 onFinished();
+    //             },
+    //             (err) => {
+    //                 if (requestFile) {
+    //                     onFinished();
+    //                     return;
+    //                 }
+    //                 let settings: CppSettings = new CppSettings(this.RootUri);
+    //                 if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+    //                     const dismiss: string = localize("dismiss.button", "Dismiss");
+    //                     const disable: string = localize("diable.warnings.button", "Disable Warnings");
+    //                     let configName: string = this.configuration.CurrentConfiguration.name;
+    //                     let message: string = localize("unable.to.provide.configuraiton",
+    //                         "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
+    //                         providerName, docUri.fsPath, configName);
+    //                     if (err) {
+    //                         message += ` (${err})`;
+    //                     }
+
+    //                     vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
+    //                         switch (response) {
+    //                             case disable: {
+    //                                 settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+    //                                 break;
+    //                             }
+    //                         }
+    //                     });
+    //                 }
+    //             });
+    //     });
+    // }
 
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
         await this.provideCustomConfiguration(vscode.Uri.file(requestFile), requestFile);
@@ -1480,32 +1607,32 @@ export class DefaultClient implements Client {
         }
     }
 
-    private queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
-        let timer: NodeJS.Timer;
-        // Create a promise that rejects in <ms> milliseconds
-        let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
-            timer = global.setTimeout(() => {
-                clearTimeout(timer);
-                if (cancelToken) {
-                    cancelToken.cancel();
-                }
-                reject(localize("timed.out", "Timed out in {0}ms.", ms));
-            }, ms);
-        });
+    // private queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
+    //     let timer: NodeJS.Timer;
+    //     // Create a promise that rejects in <ms> milliseconds
+    //     let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
+    //         timer = global.setTimeout(() => {
+    //             clearTimeout(timer);
+    //             if (cancelToken) {
+    //                 cancelToken.cancel();
+    //             }
+    //             reject(localize("timed.out", "Timed out in {0}ms.", ms));
+    //         }, ms);
+    //     });
 
-        // Returns a race between our timeout and the passed in promise
-        return this.queueTask(() => {
-            return Promise.race([task(), timeout()]).then(
-                (result: any) => {
-                    clearTimeout(timer);
-                    return result;
-                },
-                (error: any) => {
-                    clearTimeout(timer);
-                    throw error;
-                });
-        });
-    }
+    //     // Returns a race between our timeout and the passed in promise
+    //     return this.queueTask(() => {
+    //         return Promise.race([task(), timeout()]).then(
+    //             (result: any) => {
+    //                 clearTimeout(timer);
+    //                 return result;
+    //             },
+    //             (error: any) => {
+    //                 clearTimeout(timer);
+    //                 throw error;
+    //             });
+    //     });
+    // }
 
     private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
         let timer: NodeJS.Timer;
@@ -1989,6 +2116,7 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeSelectedSettingNotification, params);
             this.model.activeConfigName.Value = this.configuration.ConfigurationNames[index];
+            this.configuration.onDidChangeSettings();
         });
     }
 
