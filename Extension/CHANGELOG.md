@@ -3,7 +3,7 @@
 ## Version 0.26.2-insiders3: November 25, 2019
 ### Bug Fixes
 * Fix an issue in which a header may be opened in a TU as C instead of C++. [#4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
-* Fix an issue introduced in prior insiders release in which compiler probing would fail if gcc/clang did not support x86 or x64 architectures. [#4657](https://github.com/microsoft/vscode-cpptools/issues/4657)
+* Fix an issue introduced in the prior insiders release in which compiler probing would fail if gcc/clang did not support x86 or x64 architectures. [#4657](https://github.com/microsoft/vscode-cpptools/issues/4657)
 
 ## Version 0.26.2-insiders2: November 22, 2019
 ### Enhancements
