@@ -1287,50 +1287,18 @@ export class DefaultClient implements Client {
         await this.notifyWhenReady(() => this.languageClient.sendNotification(RescanFolderNotification));
     }
 
-    // public getCustomConfigurationProvider(): CustomConfigurationProvider1 | null {
-    //     let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-    //     if (providers.size === 0) {
-    //         return null;
-    //     }
-    //     console.log("provideCustomConfiguration1");
-    //     let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
-    //     if (!providerId) {
-    //         return null;
-    //     }
-    //     let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
-    //     if (provider) {
-    //         if (!provider.isReady) {
-    //             return Promise.reject(`${providerId} is not ready`);
-    //         }
-    //     }
-    // }
-
-    // public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
-    //     let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-    //     if (providers.size === 0) {
-    //         return Promise.resolve();
-    //     }
-    //     console.log("provideCustomConfiguration1");
-    //     let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
-    //     if (!providerId) {
-    //         return Promise.resolve();
-    //     }
-    //     let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
-    //     if (provider) {
-    //         if (!provider.isReady) {
-    //             return Promise.reject(`${providerId} is not ready`);
-    //         }
-    //     }
-    //     await this.provideCustomConfigurationFromProvider(docUri, provider, requestFile);
-    // }
-
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
         let onFinished: () => void = () => {
             if (requestFile) {
                 this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
             }
         };
-        let provider: CustomConfigurationProvider1 | null = getCustomConfigProviders().get(this.configurationProvider);
+        let providerId: string | undefined = this.configurationProvider;
+        if (!providerId) {
+            onFinished();
+            return Promise.resolve();
+        }
+        let provider: CustomConfigurationProvider1 | null = getCustomConfigProviders().get(providerId);
         if (provider) {
             if (!provider.isReady) {
                 onFinished();
@@ -1339,7 +1307,7 @@ export class DefaultClient implements Client {
         }
         return this.queueBlockingTask(async () => {
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            console.log("provideCustomConfigurationFromProvider");
+            console.log("provideCustomConfiguration");
 
             let providerName: string = provider.name;
 
@@ -1412,106 +1380,6 @@ export class DefaultClient implements Client {
                 });
         });
     }
-
-    // public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
-    //     let onFinished: () => void = () => {
-    //         if (requestFile) {
-    //             this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
-    //         }
-    //     };
-    //     return this.queueBlockingTask(async () => {
-    //         let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-    //         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-    //         if (providers.size === 0) {
-    //             onFinished();
-    //             return Promise.resolve();
-    //         }
-    //         console.log("provideCustomConfiguration");
-    //         let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
-    //         if (!providerId) {
-    //             onFinished();
-    //             return Promise.resolve();
-    //         }
-
-    //         let providerName: string = providerId;
-    //         let params: QueryTranslationUnitSourceParams = {
-    //             uri: docUri.toString()
-    //         };
-    //         let response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-    //         if (!response.candidates || response.candidates.length === 0) {
-    //             // If we didn't receive any candidates, no configuration is needed.
-    //             onFinished();
-    //             return Promise.resolve();
-    //         }
-
-    //         const notReadyMessage: string = `${providerName} is not ready`;
-    //         let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
-    //         if (provider) {
-    //             if (!provider.isReady) {
-    //                 return Promise.reject(notReadyMessage);
-    //             }
-    //             providerName = provider.name;
-    //         }
-
-    //         // Need to loop through candidates, to see if we can get a custom configuration from any of them.
-    //         // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
-    //         let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
-    //             if (provider) {
-    //                 for (let i: number = 0; i < response.candidates.length; ++i) {
-    //                     try {
-    //                         let candidate: string = response.candidates[i];
-    //                         let tuUri: vscode.Uri = vscode.Uri.parse(candidate);
-    //                         if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-    //                             let configs: SourceFileConfigurationItem[] = await provider.provideConfigurations([tuUri], tokenSource.token);
-    //                             if (configs && configs.length > 0 && configs[0]) {
-    //                                 return configs;
-    //                             }
-    //                         }
-    //                         if (tokenSource.token.isCancellationRequested) {
-    //                             return null;
-    //                         }
-    //                     } catch (err) {
-    //                         console.warn("Caught exception request configuration");
-    //                     }
-    //                 }
-    //             }
-    //         };
-    //         return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
-    //             (configs: SourceFileConfigurationItem[]) => {
-    //                 if (configs && configs.length > 0) {
-    //                     this.sendCustomConfigurations(configs, false);
-    //                 }
-    //                 onFinished();
-    //             },
-    //             (err) => {
-    //                 if (requestFile) {
-    //                     onFinished();
-    //                     return;
-    //                 }
-    //                 let settings: CppSettings = new CppSettings(this.RootUri);
-    //                 if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
-    //                     const dismiss: string = localize("dismiss.button", "Dismiss");
-    //                     const disable: string = localize("diable.warnings.button", "Disable Warnings");
-    //                     let configName: string = this.configuration.CurrentConfiguration.name;
-    //                     let message: string = localize("unable.to.provide.configuraiton",
-    //                         "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-    //                         providerName, docUri.fsPath, configName);
-    //                     if (err) {
-    //                         message += ` (${err})`;
-    //                     }
-
-    //                     vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
-    //                         switch (response) {
-    //                             case disable: {
-    //                                 settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
-    //                                 break;
-    //                             }
-    //                         }
-    //                     });
-    //                 }
-    //             });
-    //     });
-    // }
 
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
         await this.provideCustomConfiguration(vscode.Uri.file(requestFile), requestFile);
