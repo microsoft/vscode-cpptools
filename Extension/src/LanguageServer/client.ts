@@ -1191,15 +1191,6 @@ export class DefaultClient implements Client {
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, null);
             });
-
-            // let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            // let documentUris: vscode.Uri[] = [];
-            // this.trackedDocuments.forEach(document => documentUris.push(document.uri));
-
-            // let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
-            //     return currentProvider.provideConfigurations(documentUris, tokenSource.token);
-            // };
-            // this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs), () => {});
         });
     }
 
@@ -1474,33 +1465,6 @@ export class DefaultClient implements Client {
             return Promise.reject(localize("unsupported.client", "Unsupported client"));
         }
     }
-
-    // private queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
-    //     let timer: NodeJS.Timer;
-    //     // Create a promise that rejects in <ms> milliseconds
-    //     let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
-    //         timer = global.setTimeout(() => {
-    //             clearTimeout(timer);
-    //             if (cancelToken) {
-    //                 cancelToken.cancel();
-    //             }
-    //             reject(localize("timed.out", "Timed out in {0}ms.", ms));
-    //         }, ms);
-    //     });
-
-    //     // Returns a race between our timeout and the passed in promise
-    //     return this.queueTask(() => {
-    //         return Promise.race([task(), timeout()]).then(
-    //             (result: any) => {
-    //                 clearTimeout(timer);
-    //                 return result;
-    //             },
-    //             (error: any) => {
-    //                 clearTimeout(timer);
-    //                 throw error;
-    //             });
-    //     });
-    // }
 
     private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
         let timer: NodeJS.Timer;
