@@ -648,7 +648,7 @@ export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         if (process.platform !== 'win32') {
             checkFileExists(file).then((exists: boolean) => {
-                if(exists) {
+                if (exists) {
                     isExecutable(file).then((isExec: boolean) => {
                         if (isExec) {
                             resolve();
