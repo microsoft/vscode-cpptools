@@ -21,8 +21,8 @@ if (!fs.existsSync(path.join(localizeRepoPath, ".git"))) {
 }
 
 const languages = [
-    { id: "zh-TW", folderName: "cht", transifexId: "zh-hant" },
-    { id: "zh-CN", folderName: "chs", transifexId: "zh-hans" },
+    { id: "zh-tw", folderName: "cht", transifexId: "zh-hant" },
+    { id: "zh-cn", folderName: "chs", transifexId: "zh-hans" },
     { id: "fr", folderName: "fra" },
     { id: "de", folderName: "deu" },
     { id: "it", folderName: "ita" },

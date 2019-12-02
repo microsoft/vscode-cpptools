@@ -11,6 +11,7 @@ import { getOutputChannel } from './logger';
 import * as LanguageServer from './LanguageServer/extension';
 import * as test from './testHook';
 import * as nls from 'vscode-nls';
+import { CppSettings } from './LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -58,7 +59,10 @@ export class CppTools implements CppToolsTestApi {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.add(provider, this.version)) {
             let added: CustomConfigurationProvider1 = providers.get(provider);
-            getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
+            let settings: CppSettings = new CppSettings();
+            if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
+                getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
+            }
             this.providers.push(added);
             LanguageServer.getClients().forEach(client => client.onRegisterCustomConfigurationProvider(added));
             this.addNotifyReadyTimer(added);

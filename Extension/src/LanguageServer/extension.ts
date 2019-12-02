@@ -434,12 +434,6 @@ function realActivation(): void {
     clients = new ClientCollection();
     ui = getUI();
 
-    // Check for files left open from the previous session. We won't get events for these until they gain focus,
-    // so we manually activate the visible file.
-    if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
-        onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
-    }
-
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
     clients.forEach(client => {
@@ -569,10 +563,40 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+    // Process delayed didOpen for any visible editors we haven't seen before
+    editors.forEach(editor => {
+        if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+            let client: Client = clients.getClientFor(editor.document.uri);
+            if (client) {
+                if (clients.checkOwnership(client, editor.document)) {
+                    if (!client.TrackedDocuments.has(editor.document)) {
+                        // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
+                        client.TrackedDocuments.add(editor.document);
+                        // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
+                        if ((editor.document.uri.path.endsWith(".C") || editor.document.uri.path.endsWith(".H")) && editor.document.languageId === "c") {
+                            let cppSettings: CppSettings = new CppSettings(client.RootUri);
+                            if (cppSettings.autoAddFileAssociations) {
+                                const fileName: string = path.basename(editor.document.uri.fsPath);
+                                const mappingString: string = fileName + "@" + editor.document.uri.fsPath;
+                                client.addFileAssociations(mappingString, false);
+                            }
+                        }
+                        client.provideCustomConfiguration(editor.document.uri, null);
+                        client.notifyWhenReady(() => {
+                            client.takeOwnership(editor.document);
+                            client.onDidOpenTextDocument(editor.document);
+                        });
+                    }
+                }
+            }
+        }
+    });
+
     clients.forEach(client => {
         let editorsForThisClient: vscode.TextEditor[] = [];
         editors.forEach(editor => {
-            if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+            if (editor.document.languageId === "c" || editor.document.languageId === "cpp"
+                || editor.document.languageId === "json" && editor.document.uri.fsPath.endsWith("c_cpp_properties.json")) {
                 if (clients.checkOwnership(client, editor.document)) {
                     editorsForThisClient.push(editor);
                 }
