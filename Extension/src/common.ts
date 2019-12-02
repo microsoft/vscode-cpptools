@@ -636,9 +636,9 @@ export function isExecutable(file: string): Promise<boolean> {
     return new Promise((resolve) => {
         fs.access(file, fs.constants.X_OK, (err) => {
             if (err) {
-                resolve(true);
-            } else {
                 resolve(false);
+            } else {
+                resolve(true);
             }
         });
     });
@@ -648,13 +648,19 @@ export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         if (process.platform !== 'win32') {
             checkFileExists(file).then((exists: boolean) => {
-                if (exists && !isExecutable(file)) {
-                    fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
-                        if (err) {
-                            reject(err);
-                            return;
+                if(exists) {
+                    isExecutable(file).then((isExec: boolean) => {
+                        if (isExec) {
+                            resolve();
+                        } else {
+                            fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
+                                if (err) {
+                                    reject(err);
+                                    return;
+                                }
+                                resolve();
+                            });
                         }
-                        resolve();
                     });
                 } else {
                     getOutputChannelLogger().appendLine("");
