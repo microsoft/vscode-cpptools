@@ -1290,11 +1290,13 @@ export class DefaultClient implements Client {
             return Promise.resolve();
         }
         let provider: CustomConfigurationProvider1 | null = getCustomConfigProviders().get(providerId);
-        if (provider) {
-            if (!provider.isReady) {
-                onFinished();
-                return Promise.reject(`${this.configurationProvider} is not ready`);
-            }
+        if (!provider) {
+            onFinished();
+            return Promise.resolve();
+        }
+        if (!provider.isReady) {
+            onFinished();
+            return Promise.reject(`${this.configurationProvider} is not ready`);
         }
         return this.queueBlockingTask(async () => {
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
