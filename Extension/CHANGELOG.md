@@ -1,23 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.2-insiders3: November 25, 2019
-### Bug Fixes
-* Fix an issue in which a header may be opened in a TU as C instead of C++. [#4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
-* Fix an issue introduced in the prior insiders release in which compiler probing would fail if gcc/clang did not support x86 or x64 architectures. [#4657](https://github.com/microsoft/vscode-cpptools/issues/4657)
-
-## Version 0.26.2-insiders2: November 22, 2019
-### Enhancements
-* Deferred TU creation until the file is visible in the editor. This avoids the overhead of TU creation when the file is opened by VS Code internally for IntelliSense operations. [#4458](https://github.com/microsoft/vscode-cpptools/issues/4458)
-
-### Bug Fixes
-* Fix an issue in which cancellation of Find All References could result in an exception. [#2710](https://github.com/microsoft/vscode-cpptools/issues/2710)
-* Fix sort order of files in Find All References and Rename UI. [#4615](https://github.com/microsoft/vscode-cpptools/issues/4615)
-* Fix an issue in which localized Chinese strings would not be displayed on systems with case-sensitive file systems. [#4619](https://github.com/microsoft/vscode-cpptools/issues/4619)
-* Fix an issue in 0.26.2-insiders in which memory cleanup in the native IntelliSense process might result in a crash. [#4630](https://github.com/microsoft/vscode-cpptools/issues/4630)
-* Fix an issue in which files with an extention of `.H` were not correctly associated with C++. [#4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
-* Fix an issue in which -m64 or -m32 were not being passed to gcc, causing the reported system includes and system defines to not match the requested `intelliSenseMode`. [#4635](https://github.com/microsoft/vscode-cpptools/issues/4635)
-
-## Version 0.26.2-insiders: November 12, 2019
+## Version 0.26.2: December 2, 2019
 ### Enhancements
 * Reworked how a source file is selected for TU creation when opening a header file. [#2856](https://github.com/microsoft/vscode-cpptools/issues/2856)
 * Updated the default value of the `C_Cpp.intelliSenseCachePath` setting to a path under `XDG_CACHE_HOME` on Linux, or `~/Library/Cache` on MacOS. [#3979](https://github.com/microsoft/vscode-cpptools/issues/3979)
@@ -25,6 +8,7 @@
 * Add validation that the new symbol name provided to 'Rename Symbol' is a valid identifier. Add the setting `C_Cpp.renameRequiresIdentifier` to allow that verification to be disabled. [#4409](https://github.com/microsoft/vscode-cpptools/issues/4409)
 * Enable setting of breakpoints in CUDA sources. [PR #4585](https://github.com/microsoft/vscode-cpptools/pull/4585)
   * Paul Taylor (@trxcllnt)
+* Deferred TU creation until the file is visible in the editor. This avoids the overhead of TU creation when the file is opened by VS Code internally for IntelliSense operations. [#4458](https://github.com/microsoft/vscode-cpptools/issues/4458)
 
 ### Bug Fixes
 * Fix child process creation when the Windows code page is set to a language with non-ASCII characters and there are non-ASCII characters in the extension's install path. [#1560](https://github.com/microsoft/vscode-cpptools/issues/1560)
@@ -37,6 +21,11 @@
 * Fix an issue with configuration error squiggles not being applied unless the setting was set in both `c_cpp_properties.json` and `settings.json`. [PR #4538](https://github.com/microsoft/vscode-cpptools/pull/4538)
 * Fix document symbol for outline view and breadcrumbs on Windows 7. [#4536](https://github.com/microsoft/vscode-cpptools/issues/4536).
 * Add support for `ms-vscode.cmake-tools` configurationProvider id. [#4586](https://github.com/microsoft/vscode-cpptools/issues/4586).
+* Fix an issue in which cancellation of Find All References could result in an exception. [#2710](https://github.com/microsoft/vscode-cpptools/issues/2710)
+* Fix sort order of files in Find All References and Rename UI. [#4615](https://github.com/microsoft/vscode-cpptools/issues/4615)
+* Fix an issue in which localized Chinese strings would not be displayed on systems with case-sensitive file systems. [#4619](https://github.com/microsoft/vscode-cpptools/issues/4619)
+* Fix an issue in which files with an extention of `.H` were not correctly associated with C++. [#4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
+* Fix an issue in which -m64 or -m32 were not being passed to gcc, causing the reported system includes and system defines to not match the requested `intelliSenseMode`. [#4635](https://github.com/microsoft/vscode-cpptools/issues/4635)
 
 ## Version 0.26.1: October 28, 2019
 ### Bug Fixes
