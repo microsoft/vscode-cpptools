@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Opcjonalna pełna ścieżka do pliku zrzutu dla określonego programu. Przykład: „c:\\temp\\app.dmp”. Wartość domyślna to null.",
 	"c_cpp.debuggers.enableDebugHeap.description": "W przypadku wartości false proces zostanie uruchomiony z wyłączoną stertą debugowania. Spowoduje to ustawienie zmiennej środowiskowej „_NO_DEBUG_HEAP” na wartość „1”.",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Jawna kontrola ładowania symboli.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Jeśli wartość jest równa true, zostaną załadowane symbole dla wszystkich bibliotekami, w przeciwnym razie nie zostaną załadowane symbole solib. Wartość domyślna to true.",
-	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista nazw plików (dozwolone symbole wieloznaczne) oddzielonych średnikami \";\". Modyfikuje zachowanie elementu LoadAll. Jeśli LoadAll ma wartość true, nie Ładuj symboli dla bibliotekami, które pasują do nazw na liście. W przeciwnym razie Załaduj tylko symbole dla bibliotekami, które pasują do siebie. Przykład: \"foo. so; bar;\"",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Jeśli wartość jest równa true, zostaną załadowane symbole dla wszystkich bibliotek. W przeciwnym razie nie zostaną załadowane symbole solib. Wartość domyślna to true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista nazw plików (dozwolone symbole wieloznaczne) rozdzielonych średnikami „;”. Modyfikuje zachowanie elementu LoadAll. Jeśli element LoadAll ma wartość true, nie ładuj symboli dla bibliotek, które pasują do dowolnych nazw na liście. W przeciwnym razie załaduj tylko symbole dla bibliotek, które pasują. Przykład: „foo.so;bar.so;”",
 	"c_cpp.debuggers.requireExactSource.description": "Opcjonalna flaga, która wymaga bieżącego kodu źródłowego, aby pasowała do pliku PDB."
 }

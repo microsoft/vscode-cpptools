@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "指定程序的转储文件的可选完整路径。例如: \"c:\\temp\\app.dmp\"。默认为 null。",
 	"c_cpp.debuggers.enableDebugHeap.description": "如果为 false，将在禁用调试堆的情况下启动该进程。这会将环境变量 \"_NO_DEBUG_HEAP\" 设置为 \"1\"。",
 	"c_cpp.debuggers.symbolLoadInfo.description": "对符号加载的显式控制。",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "如果为 true，则将加载所有库的符号，否则不会加载任何 solib 符号。默认值为 true。",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "如果为 true，则将加载所有库的符号；否则不加载任何 solib 符号。默认值为 true。",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "以分号 \";\" 分隔的文件名列表(允许使用通配符)。修改 LoadAll 的行为。如果 LoadAll 为 true，则不加载与列表中任何名称匹配的库的符号。否则，仅为匹配的库加载符号。示例: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "可选标志，用于要求当前源代码与 pdb 匹配。"
 }
