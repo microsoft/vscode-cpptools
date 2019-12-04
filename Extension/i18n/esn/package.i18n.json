@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Ruta de acceso completa opcional a un archivo de volcado de memoria para el programa especificado. Ejemplo: \"c:\\temp\\app.dmp\". El valor predeterminado es null.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Si se establece en false, el proceso se iniciará con el montón de depuración deshabilitado. Esta opción establece la variable de entorno \"_NO_DEBUG_HEAP\" en \"1\".",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Control explícito de la carga de símbolos.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si es true, se cargan los símbolos de todas las bibliotecas; de lo contrario, no se cargará ningún símbolo de solib. El valor predeterminado es true.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si es true, se cargan los símbolos de todas las bibliotecas; de lo contrario, no se cargará ningún símbolo de la biblioteca compartida (solib). El valor predeterminado es true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nombres de archivo (se permiten comodines) separados por punto y coma \";\". Modifica el comportamiento de LoadAll. Si LoadAll es true, no se cargan los símbolos para las bibliotecas que coincidan con cualquier nombre de la lista. De lo contrario, solo se cargan los símbolos para las bibliotecas que coincidan. Ejemplo: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Marca opcional que requiere que el código fuente actual coincida con el archivo PDB."
 }
