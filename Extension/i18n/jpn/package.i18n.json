@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "指定したプログラムのダンプ ファイルへの完全なパスです (オプション)。例: \"c:\\temp\\app.dmp\"。既定値は null です。",
 	"c_cpp.debuggers.enableDebugHeap.description": "false の場合、プロセスはデバッグ ヒープを無効にして起動します。これにより、環境変数 '_NO_DEBUG_HEAP' は '1' に設定されます。",
 	"c_cpp.debuggers.symbolLoadInfo.description": "シンボルの読み込みを明示的に制御します。",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "True の場合、すべてのライブラリのシンボルが読み込まれます。それ以外の場合は、solib シンボルは読み込まれません。既定値は true です。",
-	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "セミコロン '; ' で区切られたファイル名の一覧 (ワイルドカードも使用可能) は、LoadAll の動作を変更します。LoadAll が true の場合は、一覧内の名前に一致するライブラリのシンボルを読み込まないでください。それ以外の場合は、一致するライブラリのシンボルのみを読み込んでください。例: \"foo. so; bar. so\"",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "true の場合、すべてのライブラリのシンボルが読み込まれます。それ以外の場合、solib シンボルは読み込まれません。既定値は true です。",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "セミコロン '; ' で区切られたファイル名の一覧 (ワイルドカードも使用可能)。LoadAll の動作が変更されます。LoadAll が true の場合は、一覧内の名前に一致するライブラリのシンボルを読み込まないでください。それ以外の場合は、一致するライブラリのシンボルのみを読み込んでください。例: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "PDB に一致する現在のソース コードを必要とする省略可能なフラグです。"
 }
