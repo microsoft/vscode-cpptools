@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Percorso completo facoltativo di un file dump per il programma specificato. Esempio: \"c:\\temp\\app.dmp\". L'impostazione predefinita è Null.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Se è false, il processo verrà avviato con l'heap di debug disabilitato. Imposta la variabile di ambiente '_NO_DEBUG_HEAP' su '1'.",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Controllo esplicito del caricamento dei simboli.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Se è true, verranno caricati i simboli per tutte le librerie; in caso contrario, non verrà caricato alcun simbolo solib. Il valore predefinito è true.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Se è true, verranno caricati i simboli per tutte le librerie; in caso contrario, non verrà caricato alcun simbolo di solib. Il valore predefinito è true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Elenco di nomi di file (caratteri jolly consentiti) delimitati da punti e virgola ';'. Modifica il comportamento di LoadAll. Se LoadAll è true, non carica i simboli per le librerie corrispondenti a qualsiasi nome dell'elenco. In caso contrario, carica solo i simboli per le librerie corrispondenti. Esempio: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Flag facoltativo per richiedere che il codice sorgente corrente corrisponda al PDB."
 }
