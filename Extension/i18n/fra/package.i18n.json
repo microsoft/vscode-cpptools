@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Chemin complet facultatif d'un fichier d'image mémoire pour le programme spécifié. Exemple : \"c:\\temp\\app.dmp\". La valeur par défaut est null.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Si la valeur est false, le processus est lancé avec le tas de débogage désactivé. Cette valeur définit la variable d'environnement '_NO_DEBUG_HEAP' sur '1'.",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Contrôle explicite du chargement des symboles.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si true, les symboles de toutes les bibliothèques seront chargés, sinon aucun symbole solib ne sera chargé. La valeur par défaut est true.",
-	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Liste des noms de fichiers (caractères génériques autorisés) séparés par des points-virgules ';'. Modifie le comportement de LoadAll. Si LoadAll a la valeur true, ne chargez pas les symboles des bibliothèques correspondant à un nom de la liste. Sinon, chargez uniquement les symboles des bibliothèques qui correspondent. Exemple : \"foo.so;bar.so\"",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si la valeur est true, les symboles de toutes les bibliothèques sont chargés. Sinon, aucun symbole solib n'est chargé. La valeur par défaut est true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Liste des noms de fichiers (caractères génériques autorisés) séparés par des points-virgules ';'. Modifie le comportement de LoadAll. Si LoadAll a la valeur true, les symboles des bibliothèques correspondant à un nom de la liste ne sont pas chargés. Sinon, les symboles des bibliothèques ayant une correspondance sont chargés. Exemple : \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Indicateur facultatif pour exiger que le code source actuel corresponde au fichier pdb."
 }

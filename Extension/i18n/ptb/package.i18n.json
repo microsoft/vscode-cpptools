@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Caminho completo opcional para um arquivo de despejo para o programa especificado. Exemplo: \"c:\\temp\\app.dmp\". Usa nulo como padrão.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Se for false, o processo será iniciado com o heap de depuração desabilitado. Isso define a variável de ambiente '_NO_DEBUG_HEAP' como '1'.",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Controle explícito do carregamento de símbolo.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Se for true, os símbolos de todos os bibliotecas serão carregados, caso contrário, nenhum símbolo solib será carregado. O valor padrão é true.",
-	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nomes de (curingas permitidos) separados por ponto e vírgula '; '. Modifica o comportamento de LoadAll. Se LoadAll for true, não carregará símbolos para bibliotecas que correspondam a qualquer nome na lista. Caso contrário, só carregue símbolos para bibliotecas que correspondam. Exemplo: \"foo. so; bar. portanto\"",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Se for true, os símbolos de todas as bibliotecas serão carregados, caso contrário, não será carregado nenhum símbolo solib. O valor padrão é true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nomes de arquivo (curingas permitidos) separados por ponto e vírgula ';'. Modifica o comportamento de LoadAll. Se LoadAll for true, não carregue símbolos para bibliotecas que correspondam a um nome na lista. Caso contrário, carregue símbolos somente para bibliotecas que correspondam. Exemplo: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Sinalizador opcional para exigir que o código-fonte atual corresponda ao PDB."
 }

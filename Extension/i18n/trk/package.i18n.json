@@ -138,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Belirtilen program için döküm dosyasının isteğe bağlı tam yolu. Örnek: \"c:\\temp\\app.dmp\". Varsayılan olarak null değerini alır.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Değer false ise, işlem hata ayıklama yığını devre dışı bırakılarak başlatılır. Bu işlem '_NO_DEBUG_HEAP' ortam değişkenini '1' olarak ayarlar.",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Sembol yüklemesinin açık denetimi.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "True ise tüm kitaplıklar için simgeler yüklenir, aksi halde hiçbir solib simgesi yüklenmez. Varsayılan değer true.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "True ise tüm kitaplıklar için semboller yüklenir, aksi halde hiçbir solib sembolü yüklenmez. Varsayılan değer: true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Noktalı virgülle ';' ayrılmış dosya adları listesi (joker karakterlere izin verilir). LoadAll davranışını değiştirir. LoadAll değeri true ise, listedeki herhangi bir adla eşleşen kitaplıklar için sembolleri yüklemeyin. Aksi takdirde yalnızca eşleşen kitaplıklar için sembolleri yükleyin. Örnek: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Geçerli kaynak kodunun pdb ile eşleşmesini gerektiren isteğe bağlı bayrak."
 }

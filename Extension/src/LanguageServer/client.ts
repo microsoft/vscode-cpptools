@@ -26,7 +26,7 @@ import * as logger from '../logger';
 import { updateLanguageConfigurations, registerCommands } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -1184,18 +1184,13 @@ export class DefaultClient implements Client {
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) || this.trackedDocuments.size === 0) {
+            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
                 return;
             }
 
-            let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            let documentUris: vscode.Uri[] = [];
-            this.trackedDocuments.forEach(document => documentUris.push(document.uri));
-
-            let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
-                return currentProvider.provideConfigurations(documentUris, tokenSource.token);
-            };
-            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs), () => {});
+            this.trackedDocuments.forEach(document => {
+                this.provideCustomConfiguration(document.uri, null);
+            });
         });
     }
 
@@ -1289,21 +1284,26 @@ export class DefaultClient implements Client {
                 this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
             }
         };
+        let providerId: string | undefined = this.configurationProvider;
+        if (!providerId) {
+            onFinished();
+            return Promise.resolve();
+        }
+        let provider: CustomConfigurationProvider1 | null = getCustomConfigProviders().get(providerId);
+        if (!provider) {
+            onFinished();
+            return Promise.resolve();
+        }
+        if (!provider.isReady) {
+            onFinished();
+            return Promise.reject(`${this.configurationProvider} is not ready`);
+        }
         return this.queueBlockingTask(async () => {
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-            if (providers.size === 0) {
-                onFinished();
-                return Promise.resolve();
-            }
             console.log("provideCustomConfiguration");
-            let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
-            if (!providerId) {
-                onFinished();
-                return Promise.resolve();
-            }
 
-            let providerName: string = providerId;
+            let providerName: string = provider.name;
+
             let params: QueryTranslationUnitSourceParams = {
                 uri: docUri.toString()
             };
@@ -1312,15 +1312,6 @@ export class DefaultClient implements Client {
                 // If we didn't receive any candidates, no configuration is needed.
                 onFinished();
                 return Promise.resolve();
-            }
-
-            const notReadyMessage: string = `${providerName} is not ready`;
-            let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
-            if (provider) {
-                if (!provider.isReady) {
-                    return Promise.reject(notReadyMessage);
-                }
-                providerName = provider.name;
             }
 
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
@@ -1356,9 +1347,6 @@ export class DefaultClient implements Client {
                 (err) => {
                     if (requestFile) {
                         onFinished();
-                        return;
-                    }
-                    if (err === notReadyMessage) {
                         return;
                     }
                     let settings: CppSettings = new CppSettings(this.RootUri);
@@ -1478,33 +1466,6 @@ export class DefaultClient implements Client {
         } else {
             return Promise.reject(localize("unsupported.client", "Unsupported client"));
         }
-    }
-
-    private queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
-        let timer: NodeJS.Timer;
-        // Create a promise that rejects in <ms> milliseconds
-        let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
-            timer = global.setTimeout(() => {
-                clearTimeout(timer);
-                if (cancelToken) {
-                    cancelToken.cancel();
-                }
-                reject(localize("timed.out", "Timed out in {0}ms.", ms));
-            }, ms);
-        });
-
-        // Returns a race between our timeout and the passed in promise
-        return this.queueTask(() => {
-            return Promise.race([task(), timeout()]).then(
-                (result: any) => {
-                    clearTimeout(timer);
-                    return result;
-                },
-                (error: any) => {
-                    clearTimeout(timer);
-                    throw error;
-                });
-        });
     }
 
     private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
@@ -1989,6 +1950,7 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeSelectedSettingNotification, params);
             this.model.activeConfigName.Value = this.configuration.ConfigurationNames[index];
+            this.configuration.onDidChangeSettings();
         });
     }
 
