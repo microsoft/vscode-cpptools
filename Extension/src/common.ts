@@ -632,17 +632,35 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     });
 }
 
+export function isExecutable(file: string): Promise<boolean> {
+    return new Promise((resolve) => {
+        fs.access(file, fs.constants.X_OK, (err) => {
+            if (err) {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        });
+    });
+}
+
 export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         if (process.platform !== 'win32') {
             checkFileExists(file).then((exists: boolean) => {
                 if (exists) {
-                    fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
-                        if (err) {
-                            reject(err);
-                            return;
+                    isExecutable(file).then((isExec: boolean) => {
+                        if (isExec) {
+                            resolve();
+                        } else {
+                            fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
+                                if (err) {
+                                    reject(err);
+                                    return;
+                                }
+                                resolve();
+                            });
                         }
-                        resolve();
                     });
                 } else {
                     getOutputChannelLogger().appendLine("");
