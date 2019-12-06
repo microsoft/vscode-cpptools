@@ -195,7 +195,9 @@ suite("extensibility tests v3", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
+            let lastStatus: string = "";
             disposables.push(testHook.StatusChanged(status => {
+                lastStatus = status.toString();
                 if (status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
@@ -203,7 +205,7 @@ suite("extensibility tests v3", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout: last status " + lastStatus)); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -286,7 +288,9 @@ suite("extensibility tests v2", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
+            let lastStatus: string = "";
             disposables.push(testHook.StatusChanged(status => {
+                lastStatus = status.toString();
                 if (status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
@@ -294,7 +298,7 @@ suite("extensibility tests v2", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout: last status" + lastStatus)); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -362,14 +366,16 @@ suite("extensibility tests v1", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
+            let lastStatus: string = "";
             disposables.push(testHook.StatusChanged(status => {
+                lastStatus = status.toString();
                 if (status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout: last status " + lastStatus)); }, defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -434,14 +440,16 @@ suite("extensibility tests v0", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
+            let lastStatus: string = "";
             disposables.push(testHook.StatusChanged(status => {
+                lastStatus = status.toString();
                 if (status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout: last status " + lastStatus)); }, defaultTimeout);
         });
         disposables.push(testHook);
 

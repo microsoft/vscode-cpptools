@@ -45,10 +45,10 @@ suite("[Quick info test]", function(): void {
         `\`\`\`cpp
 void myfunction(int var1, std::string var2, std::string var3)
 \`\`\``;
-        let actual1: string = (<{ language: string; value: string }>result[0].contents[0]).value;
+        let actual1: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual1, expected1);
         let expected2: string = `comment for myfunction`;
-        let actual2: string = (<{ language: string; value: string }>result[0].contents[1]).value;
+        let actual2: string = (<vscode.MarkdownString>result[0].contents[1]).value;
         assert.equal(actual2, expected2);
     });
 
@@ -58,7 +58,7 @@ void myfunction(int var1, std::string var2, std::string var3)
         `\`\`\`cpp
 std::string stringVar
 \`\`\``;
-        let actual: string = (<{ language: string; value: string }>result[0].contents[0]).value;
+        let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
 
         assert.equal(actual, expected);
     });
@@ -72,14 +72,14 @@ std::string::basic_string(const char *_Ptr)
 
 +17 overloads
 `;
-        let actual: string = (<{ language: string; value: string }>result[0].contents[0]).value;
+        let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
 
     test("Hover over function param with squiggles", async () => {
         let result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(13, 18)));
         let expected: string = `\`\`\`cpp\nint intVar\n\`\`\``;
-        let actual: string = (<{ language: string; value: string }>result[0].contents[0]).value;
+        let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
 });
