@@ -39,6 +39,10 @@ suite("[Quick info test]", function(): void {
         await testResult;
     });
 
+    suiteTeardown(function(): void {
+        disposables.forEach(d => d.dispose());
+    });
+
     test("Hover over function call", async () => {
         let result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(12, 12)));
         let expected1: string =
