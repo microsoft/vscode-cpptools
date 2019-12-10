@@ -42,6 +42,11 @@ let ui: UI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
 
+// Data shared by all clients.
+let languageClient: LanguageClient;
+let pendingTask: util.BlockingTask<any>;
+let compilerDefaults: configs.CompilerDefaults;
+
 interface TelemetryPayload {
     event: string;
     properties?: { [key: string]: string };
@@ -209,6 +214,11 @@ export interface FindAllReferencesParams {
     textDocument: TextDocumentIdentifier;
 }
 
+interface DidChangeConfigurationParams {
+    settings: any;
+    uri: string;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -244,6 +254,7 @@ const CancelReferencesNotification: NotificationType<void, void> = new Notificat
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
+const SettingsChangedNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -419,8 +430,6 @@ export class DefaultClient implements Client {
      * @see notifyWhenReady(notify)
      */
 
-    private pendingTask: util.BlockingTask<any>;
-
     private getUniqueWorkspaceStorageName(workspaceFolder?: vscode.WorkspaceFolder) : string {
         let workspaceFolderName: string = this.getName(workspaceFolder);
         if (!workspaceFolder || workspaceFolder.index < 1) {
@@ -442,10 +451,14 @@ export class DefaultClient implements Client {
             this.storagePath = path.join(this.storagePath, this.getUniqueWorkspaceStorageName(this.rootFolder));
         }
         try {
-            let languageClient: LanguageClient = this.createLanguageClient(allClients);
-            languageClient.registerProposedFeatures();
-            languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
-            util.setProgress(util.getProgressExecutableStarted());
+            let firstClient: boolean = false;
+            if (!languageClient) {
+                languageClient = this.createLanguageClient(allClients);
+                languageClient.registerProposedFeatures();
+                languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
+                util.setProgress(util.getProgressExecutableStarted());
+                firstClient = true;
+            }
             ui = getUI();
             ui.bind(this);
 
@@ -513,8 +526,6 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
-
                     class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -547,7 +558,6 @@ export class DefaultClient implements Client {
                             });
                         }
                     }
-                    this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), null));
 
                     class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
                         private client: DefaultClient;
@@ -586,7 +596,6 @@ export class DefaultClient implements Client {
                                 });
                         }
                     }
-                    this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
 
                     class FindAllReferencesProvider implements vscode.ReferenceProvider {
                         private client: DefaultClient;
@@ -688,8 +697,6 @@ export class DefaultClient implements Client {
                             });
                         }
                     }
-
-                    this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
 
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
@@ -805,21 +812,31 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
-
-                    // Listen for messages from the language server.
-                    this.registerNotifications();
                     this.registerFileWatcher();
 
-                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                    // The event handlers must be set before this happens.
-                    return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((compilerDefaults: configs.CompilerDefaults) => {
-                        this.configuration.CompilerDefaults = compilerDefaults;
+                    if (firstClient) {
+                        this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
+                        this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
+                        this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), null));
+                        this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
 
-                        // Only register the real commands after the extension has finished initializing,
-                        // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-                    });
+                        // Listen for messages from the language server.
+                        this.registerNotifications();
+
+                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                        // The event handlers must be set before this happens.
+                        return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((inputCompilerDefaults: configs.CompilerDefaults) => {
+                            compilerDefaults = inputCompilerDefaults;
+                            this.configuration.CompilerDefaults = compilerDefaults;
+
+                            // Only register the real commands after the extension has finished initializing,
+                            // e.g. prevents empty c_cpp_properties.json from generation.
+                            registerCommands();
+                        });
+                    } else {
+                        this.configuration.CompilerDefaults = compilerDefaults;
+                    }
                 },
                 (err) => {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -866,8 +883,59 @@ export class DefaultClient implements Client {
             run: { command: serverModule },
             debug: { command: serverModule, args: [ serverName ] }
         };
-        let settings: CppSettings = new CppSettings(this.rootFolder ? this.rootFolder.uri : null);
-        let other: OtherSettings = new OtherSettings(this.rootFolder ? this.rootFolder.uri : null);
+
+        // Get all the per-workspace settings.
+        let settings_clangFormatPath: string[] = [];
+        let settings_clangFormatStyle: string[] = [];
+        let settings_clangFormatFallbackStyle: string[] = [];
+        let settings_clangFormatSortIncludes: string[] = [];
+        let settings_filesExclude: vscode.WorkspaceConfiguration[] = [];
+        let settings_searchExclude: vscode.WorkspaceConfiguration[] = [];
+        let settings_editorTabSize: number[] = [];
+        let settings_intelliSenseEngine: string[] = [];
+        let settings_intelliSenseEngineFallback: string[] = [];
+        let settings_errorSquiggles: string[] = [];
+        let settings_dimInactiveRegions: boolean[] = [];
+        let settings_enhancedColorization: boolean[] = [];
+        let settings_suggestSnippets: boolean[] = [];
+        let settings_exclusionPolicy: string[] = [];
+        let settings_preferredPathSeparator: string[] = [];
+        let settings_defaultSystemIncludePath: string[][] = [];
+        let workspaceSettings: CppSettings = new CppSettings();
+        {
+            let settings: CppSettings[] = [];
+            let otherSettings: OtherSettings[] = [];
+
+            settings.push(workspaceSettings);
+            otherSettings.push(new OtherSettings(null));
+            for (let workspaceFolder of vscode.workspace.workspaceFolders) {
+                settings.push(new CppSettings(workspaceFolder.uri));
+                otherSettings.push(new OtherSettings(workspaceFolder.uri));
+            }
+
+            for (let setting of settings) {
+                settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
+                settings_clangFormatStyle.push(setting.clangFormatStyle);
+                settings_clangFormatFallbackStyle.push(setting.clangFormatFallbackStyle);
+                settings_clangFormatSortIncludes.push(setting.clangFormatSortIncludes);
+                settings_intelliSenseEngine.push(setting.intelliSenseEngine);
+                settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
+                settings_errorSquiggles.push(setting.errorSquiggles);
+                settings_dimInactiveRegions.push(setting.dimInactiveRegions);
+                settings_enhancedColorization.push(setting.enhancedColorization);
+                settings_suggestSnippets.push(setting.suggestSnippets);
+                settings_exclusionPolicy.push(setting.exclusionPolicy);
+                settings_preferredPathSeparator.push(setting.preferredPathSeparator);
+                settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
+            }
+
+            for (let otherSetting of otherSettings) {
+                settings_filesExclude.push(otherSetting.filesExclude);
+                settings_searchExclude.push(otherSetting.searchExclude);
+                settings_editorTabSize.push(otherSetting.editorTabSize);
+            }
+        }
+
         let abTestSettings: ABTestSettings = getABTestSettings();
 
         let intelliSenseCacheDisabled: boolean = false;
@@ -884,43 +952,38 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cpp' },
                 { scheme: 'file', language: 'c' }
             ],
-            synchronize: {
-                // Synchronize the setting section to the server
-                configurationSection: ['C_Cpp', 'files', 'search']
-            },
-            workspaceFolder: this.rootFolder,
             initializationOptions: {
-                clang_format_path: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-                clang_format_style: settings.clangFormatStyle,
-                clang_format_fallbackStyle: settings.clangFormatFallbackStyle,
-                clang_format_sortIncludes: settings.clangFormatSortIncludes,
-                formatting: settings.formatting,
+                clang_format_path: settings_clangFormatPath,
+                clang_format_style: settings_clangFormatStyle,
+                clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
+                clang_format_sortIncludes: settings_clangFormatSortIncludes,
+                formatting: workspaceSettings.formatting,
                 extension_path: util.extensionPath,
-                exclude_files: other.filesExclude,
-                exclude_search: other.searchExclude,
+                exclude_files: settings_filesExclude,
+                exclude_search: settings_searchExclude,
                 storage_path: this.storagePath,
-                tab_size: other.editorTabSize,
-                intelliSenseEngine: settings.intelliSenseEngine,
-                intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
+                tab_size: settings_editorTabSize,
+                intelliSenseEngine: settings_intelliSenseEngine,
+                intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                intelliSenseCachePath : util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
-                intelliSenseCacheSize : settings.intelliSenseCacheSize,
-                autocomplete: settings.autoComplete,
-                errorSquiggles: settings.errorSquiggles,
-                dimInactiveRegions: settings.dimInactiveRegions,
-                enhancedColorization: settings.enhancedColorization,
-                suggestSnippets: settings.suggestSnippets,
-                loggingLevel: settings.loggingLevel,
-                workspaceParsingPriority: settings.workspaceParsingPriority,
-                workspaceSymbols: settings.workspaceSymbols,
-                exclusionPolicy: settings.exclusionPolicy,
-                preferredPathSeparator: settings.preferredPathSeparator,
+                intelliSenseCachePath: util.resolveCachePath(workspaceSettings.intelliSenseCachePath, this.AdditionalEnvironment),
+                intelliSenseCacheSize: workspaceSettings.intelliSenseCacheSize,
+                autocomplete: workspaceSettings.autoComplete,
+                errorSquiggles: settings_errorSquiggles,
+                dimInactiveRegions: settings_dimInactiveRegions,
+                enhancedColorization: settings_enhancedColorization,
+                suggestSnippets: settings_suggestSnippets,
+                loggingLevel: workspaceSettings.loggingLevel,
+                workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
+                workspaceSymbols: workspaceSettings.workspaceSymbols,
+                exclusionPolicy: settings_exclusionPolicy,
+                preferredPathSeparator: settings_preferredPathSeparator,
                 default: {
-                    systemIncludePath: settings.defaultSystemIncludePath
+                    systemIncludePath: settings_defaultSystemIncludePath
                 },
                 vcpkg_root: util.getVcpkgRoot(),
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
-                experimentalFeatures: settings.experimentalFeatures,
+                experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
             },
             middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
@@ -954,10 +1017,34 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
+        return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
+        let cppSettings: { [key: string]: any } = {};
+        // Gather the C_Cpp settings
+        {
+            let cppSettingsResourceScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.RootUri);
+            let cppSettingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+
+            for (let key in cppSettingsResourceScoped) {
+                let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+                if (curSetting === undefined) {
+                    continue;
+                }
+                let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? cppSettingsResourceScoped : cppSettingsNonScoped;
+                cppSettings[key] = settings.get(key);
+            }
+            cppSettings["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
+        }
+        let settingsChanged: any = {
+            C_Cpp: cppSettings,
+            files: { exclude: vscode.workspace.getConfiguration("files", this.RootUri).get("exclude") },
+            search: { exclude: vscode.workspace.getConfiguration("search", this.RootUri).get("exclude") },
+            tab_size: { tabSize: vscode.workspace.getConfiguration("editor", this.RootUri).get("tabSize") }
+        };
+        this.languageClient.sendNotification(SettingsChangedNotification, { settings: settingsChanged, uri: this.RootPath });
+
         let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
             || event.affectsConfiguration("editor.tokenColorCustomizations");
 
@@ -1442,11 +1529,11 @@ export class DefaultClient implements Client {
                 }
             };
 
-            if (this.pendingTask && !this.pendingTask.Done) {
+            if (pendingTask && !pendingTask.Done) {
                 // We don't want the queue to stall because of a rejected promise.
-                return this.pendingTask.getPromise().then(nextTask, nextTask);
+                return pendingTask.getPromise().then(nextTask, nextTask);
             } else {
-                this.pendingTask = undefined;
+                pendingTask = undefined;
                 return nextTask();
             }
         } else {
@@ -1461,8 +1548,8 @@ export class DefaultClient implements Client {
      */
     private queueBlockingTask(task: () => Thenable<any>): Thenable<any> {
         if (this.isSupported) {
-            this.pendingTask = new util.BlockingTask<any>(task, this.pendingTask);
-            return this.pendingTask.getPromise();
+            pendingTask = new util.BlockingTask<any>(task, pendingTask);
+            return pendingTask.getPromise();
         } else {
             return Promise.reject(localize("unsupported.client", "Unsupported client"));
         }

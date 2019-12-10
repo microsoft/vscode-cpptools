@@ -451,7 +451,7 @@ function realActivation(): void {
 
     reportMacCrashes();
 
-    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    const settings: CppSettings = new CppSettings();
 
     vcpkgDbPromise = initVcpkgDatabase();
 

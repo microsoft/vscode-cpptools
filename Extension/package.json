@@ -226,7 +226,7 @@
           ],
           "default": "Error",
           "description": "%c_cpp.configuration.loggingLevel.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
@@ -244,7 +244,7 @@
           ],
           "default": "highest",
           "description": "%c_cpp.configuration.workspaceParsingPriority.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.workspaceSymbols": {
           "type": "string",
@@ -254,7 +254,7 @@
           ],
           "default": "Just My Code",
           "description": "%c_cpp.configuration.workspaceSymbols.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.exclusionPolicy": {
           "type": "string",
@@ -529,7 +529,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
@@ -539,7 +539,7 @@
           ],
           "default": "Disabled",
           "description": "%c_cpp.configuration.experimentalFeatures.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.suggestSnippets": {
           "type": "boolean",
