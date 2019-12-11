@@ -66,13 +66,15 @@ interface ReportStatusNotificationBody {
 interface QueryCompilerDefaultsParams {
 }
 
-interface FolderSettingsParams {
+interface CppPropertiesParams {
     currentConfiguration: number;
     configurations: any[];
+    workspaceFolderUri?: string;
 }
 
 interface FolderSelectedSettingParams {
     currentConfiguration: number;
+    workspaceFolderUri: string;
 }
 
 interface SwitchHeaderSourceParams {
@@ -82,6 +84,11 @@ interface SwitchHeaderSourceParams {
 
 interface FileChangedParams {
     uri: string;
+}
+
+export interface WorkspaceFolderFileChangedParams {
+    fileUri: string;
+    workspaceFolderUri: string;
 }
 
 interface SemanticColorizationRegionsParams {
@@ -238,8 +245,8 @@ const PauseParsingNotification: NotificationType<void, void> = new NotificationT
 const ResumeParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeParsing');
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
 const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
-const ChangeFolderSettingsNotification: NotificationType<FolderSettingsParams, void> = new NotificationType<FolderSettingsParams, void>('cpptools/didChangeFolderSettings');
-const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
+const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeFolderSettings');
+const ChangeCompileCommandsNotification: NotificationType<WorkspaceFolderFileChangedParams, void> = new NotificationType<WorkspaceFolderFileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
@@ -2006,9 +2013,10 @@ export class DefaultClient implements Client {
     }
 
     private onConfigurationsChanged(configurations: configs.Configuration[]): void {
-        let params: FolderSettingsParams = {
+        let params: CppPropertiesParams = {
             configurations: configurations,
-            currentConfiguration: this.configuration.CurrentConfigurationIndex
+            currentConfiguration: this.configuration.CurrentConfigurationIndex,
+            workspaceFolderUri: this.RootPath
         };
         // Separate compiler path and args before sending to language client
         params.configurations.forEach((c: configs.Configuration) => {
@@ -2018,7 +2026,7 @@ export class DefaultClient implements Client {
             c.compilerArgs = compilerPathAndArgs.additionalArgs;
         });
         this.notifyWhenReady(() => {
-            this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
+            this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
             this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
         }).then(() => {
             let newProvider: string = this.configuration.CurrentConfigurationProvider;
@@ -2032,7 +2040,8 @@ export class DefaultClient implements Client {
 
     private onSelectedConfigurationChanged(index: number): void {
         let params: FolderSelectedSettingParams = {
-            currentConfiguration: index
+            currentConfiguration: index,
+            workspaceFolderUri: this.RootPath
         };
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeSelectedSettingNotification, params);
@@ -2042,8 +2051,9 @@ export class DefaultClient implements Client {
     }
 
     private onCompileCommandsChanged(path: string): void {
-        let params: FileChangedParams = {
-            uri: vscode.Uri.file(path).toString()
+        let params: WorkspaceFolderFileChangedParams = {
+            fileUri: vscode.Uri.file(path).toString(),
+            workspaceFolderUri: this.RootPath
         };
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
