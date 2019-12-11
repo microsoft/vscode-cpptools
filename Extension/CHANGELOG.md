@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.3-insiders: December 10, 2019
+## Version 0.26.3-insiders: December 11, 2019
 ### Bug Fixes
 * Fix an issue in which clang-cl was not properly detected and probed for system includes and defines.
 * IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)
