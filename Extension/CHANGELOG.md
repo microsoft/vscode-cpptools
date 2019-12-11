@@ -1,5 +1,18 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.26.3-insiders: December 11, 2019
+### Bug Fixes
+* Fix an issue in which clang-cl was not properly detected and probed for system includes and defines.
+* IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)
+* Update output of `C/C++: Log Diagnostics` to include correct set of defines when custom configurations or compile commands are used. [#3631](https://github.com/microsoft/vscode-cpptools/issues/3631) [#4270](https://github.com/microsoft/vscode-cpptools/issues/4270)
+* Fix an issue in which failure to invoke a compiler could result in a hang, on Linux and Mac. [#4627](https://github.com/microsoft/vscode-cpptools/issues/4627)
+* Fix an issue in which template members were not nested under the template type in the Outline view. [#4466](https://github.com/microsoft/vscode-cpptools/issues/4466)
+* Fix an issue in which custom configurations were not being applied to headers. [#4649](https://github.com/microsoft/vscode-cpptools/issues/4649)
+* Fix issues that caused headers to be opened into header-only TU's instead of TU's for candidate source files.  [#4696](https://github.com/microsoft/vscode-cpptools/issues/4696)
+
+### Enhancements
+* When tag parsing is complete, and includer/includee relationships become available, header-only TU's will be replaced with TU's for candidate source files, if available.
+
 ## Version 0.26.2: December 2, 2019
 ### Enhancements
 * Reworked how a source file is selected for TU creation when opening a header file. [#2856](https://github.com/microsoft/vscode-cpptools/issues/2856)
