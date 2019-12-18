@@ -40,6 +40,11 @@ export class PackageVersion {
         }
     }
 
+    public isEqual(other: PackageVersion): boolean {
+        return this.major === other.major && this.minor === other.minor && this.patch === other.patch &&
+            this.suffix === other.suffix && this.suffixVersion === other.suffixVersion;
+    }
+
     public isGreaterThan(other: PackageVersion, suffixStr: string = 'insiders'): boolean {
         if ((this.suffix && !this.suffix.startsWith(suffixStr)) || (other.suffix && !other.suffix.startsWith(suffixStr))) {
             return false;

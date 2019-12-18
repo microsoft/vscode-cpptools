@@ -142,7 +142,7 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
             // Allows testing pre-releases without accidentally downgrading to the latest version
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
             const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-            if (!testingInsidersVsixInstall && (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders'))) {
+            if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion)))) {
                 return undefined;
             }
 
@@ -179,7 +179,7 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || target.isGreaterThan(installed);
+        needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
         useBuild = (build: Build): boolean => true;
     } else if (updateChannel === 'Default') {
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
