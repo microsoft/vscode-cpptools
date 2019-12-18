@@ -3,7 +3,7 @@
 ## Version 0.26.3-insiders2: December 18, 2019
 ### Bug Fixes
 * Fix IntelliSense regression crashes. [#4754](https://github.com/microsoft/vscode-cpptools/issues/4754)
-* Fix Insider channel not auto-downgrading after an Insider vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
+* Fix Insiders channel not auto-downgrading after an Insiders vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
 
 ## Version 0.26.3-insiders: December 16, 2019
 ### Bug Fixes
