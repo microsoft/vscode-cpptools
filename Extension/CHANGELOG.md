@@ -4,6 +4,7 @@
 ### Bug Fixes
 * Fix IntelliSense regression crashes. [#4754](https://github.com/microsoft/vscode-cpptools/issues/4754)
 * Fix Insiders channel not auto-downgrading after an Insiders vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
+* Fix Insiders channel not working on remote targets. [#3874](https://github.com/microsoft/vscode-cpptools/issues/3874)
 
 ## Version 0.26.3-insiders: December 16, 2019
 ### Bug Fixes
