@@ -86,7 +86,7 @@ interface FileChangedParams {
     uri: string;
 }
 
-export interface WorkspaceFolderFileChangedParams {
+export interface WorkspaceFolderFileParams {
     fileUri: string;
     workspaceFolderUri: string;
 }
@@ -246,7 +246,7 @@ const ResumeParsingNotification: NotificationType<void, void> = new Notification
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
 const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
 const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeFolderSettings');
-const ChangeCompileCommandsNotification: NotificationType<WorkspaceFolderFileChangedParams, void> = new NotificationType<WorkspaceFolderFileChangedParams, void>('cpptools/didChangeCompileCommands');
+const ChangeCompileCommandsNotification: NotificationType<WorkspaceFolderFileParams, void> = new NotificationType<WorkspaceFolderFileParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
@@ -272,8 +272,8 @@ const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = n
 const DebugLogNotification:  NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLog');
 const SemanticColorizationRegionsNotification:  NotificationType<SemanticColorizationRegionsParams, void> = new NotificationType<SemanticColorizationRegionsParams, void>('cpptools/semanticColorizationRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
-const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
-const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
+const UpdateClangFormatPathNotification: NotificationType<WorkspaceFolderFileParams, void> = new NotificationType<WorkspaceFolderFileParams, void>('cpptools/updateClangFormatPath');
+const UpdateIntelliSenseCachePathNotification: NotificationType<WorkspaceFolderFileParams, void> = new NotificationType<WorkspaceFolderFileParams, void>('cpptools/updateIntelliSenseCachePath');
 const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, void> = new NotificationType<refs.ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
@@ -1095,11 +1095,19 @@ export class DefaultClient implements Client {
             }
             if (changedSettings["clang_format_path"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
+                let params: WorkspaceFolderFileParams = {
+                    fileUri: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
+                    workspaceFolderUri: this.RootPath
+                };
+                this.languageClient.sendNotification(UpdateClangFormatPathNotification, params);
             }
             if (changedSettings["intelliSenseCachePath"]) {
                 let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
+                let params: WorkspaceFolderFileParams = {
+                    fileUri: util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
+                    workspaceFolderUri: this.RootPath
+                };
+                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, params);
             }
             this.configuration.onDidChangeSettings();
             telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
@@ -2051,7 +2059,7 @@ export class DefaultClient implements Client {
     }
 
     private onCompileCommandsChanged(path: string): void {
-        let params: WorkspaceFolderFileChangedParams = {
+        let params: WorkspaceFolderFileParams = {
             fileUri: vscode.Uri.file(path).toString(),
             workspaceFolderUri: this.RootPath
         };
