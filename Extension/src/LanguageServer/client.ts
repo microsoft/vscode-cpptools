@@ -79,8 +79,7 @@ interface FolderSelectedSettingParams extends WorkspaceFolderParams {
     currentConfiguration: number;
 }
 
-interface SwitchHeaderSourceParams {
-    rootPath: string;
+interface SwitchHeaderSourceParams extends WorkspaceFolderParams {
     switchHeaderSourceFileName: string;
 }
 
@@ -1960,8 +1959,8 @@ export class DefaultClient implements Client {
 
     public requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> {
         let params: SwitchHeaderSourceParams = {
-            rootPath: rootPath,
-            switchHeaderSourceFileName: fileName
+            switchHeaderSourceFileName: fileName,
+            workspaceFolderUri: rootPath
         };
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
