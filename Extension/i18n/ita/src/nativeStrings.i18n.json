@@ -89,7 +89,7 @@
 	"terminating_child_process": "terminazione del processo figlio: {0}",
 	"still_alive_killing": "ancora attivo. Verrà terminato...",
 	"giving_up": "rinuncia",
-	"not_exited_yet": "non ancora terminato. Verrà sospeso per {0} millisecondi prima di riprovare",
+	"not_exited_yet": "non ancora terminato. Verrà sospeso per {0} millisecondi prima di riprovare.",
 	"failed_to_spawn_process": "Non è stato possibile generare il processo. Errore: {0} ({1})",
 	"offering_completion": "Offerta di completamento",
 	"compiler_from_compiler_path": "Tentativo di recuperare le impostazioni predefinite dal compilatore nella proprietà \"compilerPath\": '{0}'",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "Il percorso file {0} non è valido",
 	"cant_create_intellisense_client_for": "Non è possibile creare il client IntelliSense per {0}",
 	"suffix_declaration": "dichiarazione",
-	"suffix_type_alias": "alias di tipo"
+	"suffix_type_alias": "alias di tipo",
+	"fallback_to_32_bit_mode": "Il compilatore non supporta la modalità a 64 bit. Verrà eseguito il fallback a intelliSenseMode a 32 bit.",
+	"fallback_to_64_bit_mode": "Il compilatore non supporta la modalità a 32 bit. Verrà eseguito il fallback a intelliSenseMode a 64 bit.",
+	"fallback_to_32_bit_mode2": "Non è stato possibile eseguire una query sul compilatore. Verrà eseguito il fallback a intelliSenseMode a 32 bit.",
+	"fallback_to_64_bit_mode2": "Non è stato possibile eseguire una query sul compilatore. Verrà eseguito il fallback a intelliSenseMode a 64 bit.",
+	"fallback_to_no_bitness": "Non è stato possibile eseguire una query sul compilatore. Verrà eseguito il fallback alla modalità senza numero di bit.",
+	"intellisense_client_creation_aborted": "La creazione del client IntelliSense è stata interrotta: {0}"
 }

@@ -89,7 +89,7 @@
 	"terminating_child_process": "trwa kończenie procesu podrzędnego: {0}",
 	"still_alive_killing": "nadal aktywne, trwa zabijanie...",
 	"giving_up": "rezygnacja",
-	"not_exited_yet": "— rozwiązanie nie zostało jeszcze zamknięte. Pozostaw je w stanie uśpienia przez {0} ms i spróbuj ponownie",
+	"not_exited_yet": "— rozwiązanie nie zostało jeszcze zamknięte. Pozostaw je w stanie uśpienia przez {0} ms i spróbuj ponownie.",
 	"failed_to_spawn_process": "Nie można zduplikować procesu. Błąd: {0} ({1})",
 	"offering_completion": "Oferowanie uzupełniania",
 	"compiler_from_compiler_path": "Próba pobrania wartości domyślnych z kompilatora we właściwości „compilerPath”: „{0}”",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "Nieprawidłowa ścieżka pliku {0}",
 	"cant_create_intellisense_client_for": "Nie można utworzyć klienta IntelliSense dla elementu {0}",
 	"suffix_declaration": "deklaracja",
-	"suffix_type_alias": "alias typu"
+	"suffix_type_alias": "alias typu",
+	"fallback_to_32_bit_mode": "Kompilator nie obsługuje trybu 64-bitowego. Powrót do 32-bitowego trybu intelliSenseMode.",
+	"fallback_to_64_bit_mode": "Kompilator nie obsługuje trybu 32-bitowego. Powrót do 64-bitowego trybu intelliSenseMode.",
+	"fallback_to_32_bit_mode2": "Nie można wykonać zapytania dotyczącego kompilatora. Powrót do 32-bitowego trybu intelliSenseMode.",
+	"fallback_to_64_bit_mode2": "Nie można wykonać zapytania dotyczącego kompilatora. Powrót do 64-bitowego trybu intelliSenseMode.",
+	"fallback_to_no_bitness": "Nie można wykonać zapytania dotyczącego kompilatora. Powrót do braku liczby bitów.",
+	"intellisense_client_creation_aborted": "Przerwano tworzenie klienta IntelliSense: {0}"
 }
