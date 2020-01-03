@@ -35,7 +35,6 @@
         ],
         "label-position": true,
         "match-default-export-name": true,
-        "member-ordering": true,
         "new-parens": true,
         "no-arg": true,
         "no-bitwise": true,
@@ -100,7 +99,6 @@
             "call-signature"
         ],
         "typedef-whitespace": true,
-        "typeof-compare": true,
         "unified-signatures": true,
         "use-default-type-parameter": true,
         "use-isnan": true,
