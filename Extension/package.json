@@ -108,7 +108,7 @@
         "C_Cpp.clang_format_style": {
           "type": "string",
           "default": "file",
-          "description": "c_cpp.configuration.clang_format_style.description",
+          "description": "%c_cpp.configuration.clang_format_style.description%",
           "scope": "resource"
         },
         "C_Cpp.clang_format_fallbackStyle": {
