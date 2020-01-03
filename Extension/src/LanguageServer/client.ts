@@ -110,11 +110,11 @@ interface SourceFileConfigurationItemAdapter {
     configuration: SourceFileConfiguration;
 }
 
-interface CustomConfigurationParams {
+interface CustomConfigurationParams extends WorkspaceFolderParams {
     configurationItems: SourceFileConfigurationItemAdapter[];
 }
 
-interface CustomBrowseConfigurationParams {
+interface CustomBrowseConfigurationParams extends WorkspaceFolderParams {
     browseConfiguration: WorkspaceBrowseConfiguration;
 }
 
@@ -247,7 +247,7 @@ const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingP
 const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
-const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
+const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams, void> = new NotificationType<WorkspaceFolderParams, void>('cpptools/clearCustomConfigurations');
 const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
@@ -2120,7 +2120,8 @@ export class DefaultClient implements Client {
         }
 
         let params: CustomConfigurationParams = {
-            configurationItems: sanitized
+            configurationItems: sanitized,
+            workspaceFolderUri: this.RootPath
         };
 
         if (blockingTask) {
@@ -2187,14 +2188,18 @@ export class DefaultClient implements Client {
         }
 
         let params: CustomBrowseConfigurationParams = {
-            browseConfiguration: sanitized
+            browseConfiguration: sanitized,
+            workspaceFolderUri: this.RootPath
         };
 
         return this.notifyWhenReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
     }
 
     private clearCustomConfigurations(): void {
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification));
+        let params: WorkspaceFolderParams = {
+            workspaceFolderUri: this.RootPath
+        };
+        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification, params));
     }
 
     /*********************************************
