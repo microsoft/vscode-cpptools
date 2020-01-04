@@ -217,9 +217,8 @@ export interface FindAllReferencesParams {
     textDocument: TextDocumentIdentifier;
 }
 
-interface DidChangeConfigurationParams {
+interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
-    uri: string;
 }
 
 // Requests
@@ -1046,7 +1045,7 @@ export class DefaultClient implements Client {
             search: { exclude: vscode.workspace.getConfiguration("search", this.RootUri).get("exclude") },
             tab_size: { tabSize: vscode.workspace.getConfiguration("editor", this.RootUri).get("tabSize") }
         };
-        this.languageClient.sendNotification(SettingsChangedNotification, { settings: settingsChanged, uri: this.RootPath });
+        this.languageClient.sendNotification(SettingsChangedNotification, { settings: settingsChanged, workspaceFolderUri: this.RootPath });
 
         let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
             || event.affectsConfiguration("editor.tokenColorCustomizations");
