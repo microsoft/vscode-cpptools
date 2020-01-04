@@ -1696,7 +1696,7 @@ export class DefaultClient implements Client {
 
         this.languageClient.onNotification(DebugProtocolNotification, (output) => {
             if (!this.debugChannel) {
-                this.debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}: ${this.Name}`);
+                this.debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`);
                 this.disposables.push(this.debugChannel);
             }
             this.debugChannel.appendLine("");
@@ -1709,11 +1709,7 @@ export class DefaultClient implements Client {
 
     private log(output: string): void {
         if (!this.outputChannel) {
-            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-                this.outputChannel = vscode.window.createOutputChannel(`C/C++: ${this.Name}`);
-            } else {
-                this.outputChannel = logger.getOutputChannel();
-            }
+            this.outputChannel = logger.getOutputChannel();
             this.disposables.push(this.outputChannel);
         }
         this.outputChannel.appendLine(`${output}`);
