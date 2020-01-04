@@ -988,7 +988,7 @@ export class DefaultClient implements Client {
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
             },
-            middleware: createProtocolFilter(this, allClients),  // Only send messages directed at this client.
+            middleware: createProtocolFilter(allClients),
             errorHandler: {
                 error: () => ErrorAction.Continue,
                 closed: () => {
