@@ -89,7 +89,7 @@
 	"terminating_child_process": "正在終止子處理序: {0}",
 	"still_alive_killing": "仍在執行，正在終止...",
 	"giving_up": "正在放棄",
-	"not_exited_yet": "尚未結束。將進入睡眠狀態 {0} 毫秒並再試一次",
+	"not_exited_yet": "尚未結束。將睡眠 {0} 毫秒並再試一次。",
 	"failed_to_spawn_process": "無法產生處理序。錯誤: {0} ({1})",
 	"offering_completion": "正在提供完成",
 	"compiler_from_compiler_path": "正在嘗試從 \"compilerPath\" 屬性中的編譯器取得預設: '{0}'",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "檔案路徑 {0} 無效",
 	"cant_create_intellisense_client_for": "無法為 {0} 建立 IntelliSense 用戶端",
 	"suffix_declaration": "宣告",
-	"suffix_type_alias": "類型別名"
+	"suffix_type_alias": "類型別名",
+	"fallback_to_32_bit_mode": "編譯器不支援 64 位元。請回復成 32 位元 intelliSenseMode。",
+	"fallback_to_64_bit_mode": "編譯器不支援 32 位元。請回復成 64 位元 intelliSenseMode。",
+	"fallback_to_32_bit_mode2": "無法查詢編譯器。請回復成 32 位元 intelliSenseMode。",
+	"fallback_to_64_bit_mode2": "無法查詢編譯器。請回復成 64 位元 intelliSenseMode。",
+	"fallback_to_no_bitness": "無法查詢編譯器。請回復成沒有位元。",
+	"intellisense_client_creation_aborted": "已中止建立 IntelliSense 用戶端: {0}"
 }

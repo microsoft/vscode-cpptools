@@ -154,5 +154,11 @@
 	"invalid_file_path": "잘못된 파일 경로 {0}",
 	"cant_create_intellisense_client_for": "{0}에 대한 IntelliSense 클라이언트를 만들 수 없음",
 	"suffix_declaration": "선언",
-	"suffix_type_alias": "형식 별칭"
+	"suffix_type_alias": "형식 별칭",
+	"fallback_to_32_bit_mode": "컴파일러가 64비트를 지원하지 않습니다. 32비트 intelliSenseMode로 대체하는 중입니다.",
+	"fallback_to_64_bit_mode": "컴파일러가 32비트를 지원하지 않습니다. 64비트 intelliSenseMode로 대체하는 중입니다.",
+	"fallback_to_32_bit_mode2": "컴파일러를 쿼리하지 못했습니다. 32비트 intelliSenseMode로 대체하는 중입니다.",
+	"fallback_to_64_bit_mode2": "컴파일러를 쿼리하지 못했습니다. 64비트 intelliSenseMode로 대체하는 중입니다.",
+	"fallback_to_no_bitness": "컴파일러를 쿼리하지 못했습니다. 0비트로 대체하는 중입니다.",
+	"intellisense_client_creation_aborted": "IntelliSense 클라이언트 만들기가 중단되었습니다. {0}"
 }

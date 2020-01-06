@@ -154,5 +154,11 @@
 	"invalid_file_path": "Neplatná cesta k souboru: {0}",
 	"cant_create_intellisense_client_for": "Nejde vytvořit klienta IntelliSense pro {0}.",
 	"suffix_declaration": "deklarace",
-	"suffix_type_alias": "alias typu"
+	"suffix_type_alias": "alias typu",
+	"fallback_to_32_bit_mode": "Kompilátor nepodporuje 64 bitů. Probíhá návrat k 32bitovému režimu intelliSenseMode.",
+	"fallback_to_64_bit_mode": "Kompilátor nepodporuje 32 bitů. Probíhá návrat k 64bitovému režimu intelliSenseMode.",
+	"fallback_to_32_bit_mode2": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k 32bitovému režimu intelliSenseMode.",
+	"fallback_to_64_bit_mode2": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k 64bitovému režimu intelliSenseMode.",
+	"fallback_to_no_bitness": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k režimu bez bitové verze.",
+	"intellisense_client_creation_aborted": "Vytváření klienta IntelliSense se přerušilo: {0}"
 }

@@ -89,7 +89,7 @@
 	"terminating_child_process": "terminando o processo filho: {0}",
 	"still_alive_killing": "ainda está ativo, encerrando...",
 	"giving_up": "desistindo",
-	"not_exited_yet": "ainda não foi encerrado. Será suspenso por {0} segundos e tentará novamente",
+	"not_exited_yet": "ainda não foi encerrado. Será suspenso por {0} milissegundos e tentará novamente.",
 	"failed_to_spawn_process": "Falha ao gerar o processo. Erro: {0} ({1})",
 	"offering_completion": "Conclusão da oferta",
 	"compiler_from_compiler_path": "Tentando obter padrões do compilador na propriedade \"compilerPath\": '{0}'",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "Caminho de arquivo inválido {0}",
 	"cant_create_intellisense_client_for": "Não é possível criar o cliente IntelliSense para {0}",
 	"suffix_declaration": "declaração",
-	"suffix_type_alias": "alias de tipo"
+	"suffix_type_alias": "alias de tipo",
+	"fallback_to_32_bit_mode": "O compilador não dá suporte para 64 bits. Voltando para o intelliSenseMode de 32 bits.",
+	"fallback_to_64_bit_mode": "O compilador não dá suporte para 32 bits. Voltando para o intelliSenseMode de 64 bits.",
+	"fallback_to_32_bit_mode2": "Falha ao consultar o compilador. Voltando para o intelliSenseMode de 32 bits.",
+	"fallback_to_64_bit_mode2": "Falha ao consultar o compilador. Voltando para o intelliSenseMode de 64 bits.",
+	"fallback_to_no_bitness": "Falha ao consultar o compilador. Voltando para nenhum número de bit.",
+	"intellisense_client_creation_aborted": "Criação de cliente do IntelliSense anulada: {0}"
 }
