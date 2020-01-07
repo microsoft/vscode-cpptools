@@ -13,7 +13,7 @@ import * as config from '../../../src/LanguageServer/configurations';
 import { getActiveClient } from '../../../src/LanguageServer/extension';
 import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
 
-const defaultTimeout: number = 60000;
+const defaultTimeout: number = 100000; //60000;
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
@@ -372,7 +372,7 @@ suite("extensibility tests v1", function(): void {
                 }
             }));
             // increase timeout for this test
-            setTimeout(() => { reject(new Error("timeout")); }, 10000);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
