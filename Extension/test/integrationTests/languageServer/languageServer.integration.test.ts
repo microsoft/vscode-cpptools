@@ -101,7 +101,7 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, disp
         }));
 
         // Can't trust the file watcher, so we need to allocate additional time for the backup watcher to fire.
-        setTimeout(() => { reject(new Error("timeout")); }, 4000);
+        setTimeout(() => { reject(new Error("Get ActiveConfigChanged event: timeout")); }, 8000);
     });
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     let contents: string = await util.readFileText(cppPropertiesPath());
