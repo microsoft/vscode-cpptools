@@ -904,12 +904,13 @@ export class DefaultClient implements Client {
         let settings_preferredPathSeparator: string[] = [];
         let settings_defaultSystemIncludePath: string[][] = [];
         let workspaceSettings: CppSettings = new CppSettings();
+        let workspaceOtherSettings: OtherSettings = new OtherSettings(null);
         {
             let settings: CppSettings[] = [];
             let otherSettings: OtherSettings[] = [];
 
             settings.push(workspaceSettings);
-            otherSettings.push(new OtherSettings(null));
+            otherSettings.push(workspaceOtherSettings);
             for (let workspaceFolder of vscode.workspace.workspaceFolders) {
                 settings.push(new CppSettings(workspaceFolder.uri));
                 otherSettings.push(new OtherSettings(workspaceFolder.uri));
@@ -962,6 +963,7 @@ export class DefaultClient implements Client {
                 formatting: workspaceSettings.formatting,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
+                associations: workspaceOtherSettings.filesAssociations,
                 exclude_search: settings_searchExclude,
                 storage_path: this.storagePath,
                 tab_size: settings_editorTabSize,
