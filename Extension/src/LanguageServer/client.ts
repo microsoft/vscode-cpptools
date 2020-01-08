@@ -1223,7 +1223,7 @@ export class DefaultClient implements Client {
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
             task().then(async config => {
-                await this.sendCustomBrowseConfiguration(config, requestingProvider.extensionId);
+                await this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
                 if (!hasCompleted) {
                     hasCompleted = true;
                     if (currentProvider.version >= Version.v2) {
