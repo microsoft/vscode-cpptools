@@ -1938,7 +1938,7 @@ export class DefaultClient implements Client {
                 // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
                 // Should only execute on launch, for the initial delivery of configurations
                 let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
-                if (lastCustomBrowseConfigurationProviderId.Value == configurations[params.currentConfiguration].configurationProvider) {
+                if (lastCustomBrowseConfigurationProviderId.Value === configurations[params.currentConfiguration].configurationProvider) {
                     let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
                     if (lastCustomBrowseConfiguration.Value) {
                         this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
