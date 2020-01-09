@@ -1677,7 +1677,6 @@ export class DefaultClient implements Client {
 
     private updateStatus(notificationBody: ReportStatusNotificationBody): void {
         let message: string = notificationBody.status;
-        console.log("---------- IntelliSense Status: " + message);
         util.setProgress(util.getProgressExecutableSuccess());
         let testHook: TestHook = getTestHook();
         if (message.endsWith("Indexing...")) {

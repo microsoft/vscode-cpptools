@@ -195,7 +195,6 @@ suite("extensibility tests v3", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            console.log("-------------- waiting for status change ------- v3");
             disposables.push(testHook.StatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main3.cpp" && result.status === apit.Status.IntelliSenseReady) {
@@ -289,7 +288,6 @@ suite("extensibility tests v2", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            console.log("-------------- waiting for status change ------- v2");
             disposables.push(testHook.StatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main2.cpp" && result.status === apit.Status.IntelliSenseReady) {
@@ -368,7 +366,6 @@ suite("extensibility tests v1", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            console.log("-------------- waiting for status change ------- v1 ");
             disposables.push(testHook.StatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main1.cpp" && result.status === apit.Status.IntelliSenseReady) {
@@ -443,7 +440,6 @@ suite("extensibility tests v0", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            console.log("-------------- waiting for status change ------- v0 ");
             disposables.push(testHook.StatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main.cpp" && result.status === apit.Status.IntelliSenseReady) {
