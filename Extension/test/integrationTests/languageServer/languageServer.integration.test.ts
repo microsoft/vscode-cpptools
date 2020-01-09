@@ -195,7 +195,7 @@ suite("extensibility tests v3", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            disposables.push(testHook.StatusChanged(result => {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main3.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
@@ -288,7 +288,7 @@ suite("extensibility tests v2", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            disposables.push(testHook.StatusChanged(result => {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main2.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
@@ -366,7 +366,7 @@ suite("extensibility tests v1", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            disposables.push(testHook.StatusChanged(result => {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main1.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
@@ -440,7 +440,7 @@ suite("extensibility tests v0", function(): void {
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            disposables.push(testHook.StatusChanged(result => {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
