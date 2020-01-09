@@ -89,7 +89,7 @@
 	"terminating_child_process": "子プロセスを終了しています: {0}",
 	"still_alive_killing": "まだ稼働中です。中止しています...",
 	"giving_up": "中断しています",
-	"not_exited_yet": "まだ終了していません。{0} ミリ秒間スリープ状態になった後、再試行します",
+	"not_exited_yet": "まだ終了していません。{0} ミリ秒間スリープ状態になった後、再試行します。",
 	"failed_to_spawn_process": "プロセスを生成できませんでした。エラー: {0} ({1})",
 	"offering_completion": "オファリングの完了",
 	"compiler_from_compiler_path": "次の \"compilerPath\" プロパティのコンパイラから既定値を取得しようとしています: '{0}'",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "無効なファイル パス {0}",
 	"cant_create_intellisense_client_for": "{0} の IntelliSense クライアントを作成できません",
 	"suffix_declaration": "宣言",
-	"suffix_type_alias": "型のエイリアス"
+	"suffix_type_alias": "型のエイリアス",
+	"fallback_to_32_bit_mode": "コンパイラは 64 ビットをサポートしていません。32 ビットの intelliSenseMode に戻しています。",
+	"fallback_to_64_bit_mode": "コンパイラは 32 ビットをサポートしていません。64 ビットの intelliSenseMode に戻しています。",
+	"fallback_to_32_bit_mode2": "コンパイラを照会できませんでした。32 ビットの intelliSenseMode に戻しています。",
+	"fallback_to_64_bit_mode2": "コンパイラを照会できませんでした。64 ビットの intelliSenseMode に戻しています。",
+	"fallback_to_no_bitness": "コンパイラを照会できませんでした。ビットなしに戻ります。",
+	"intellisense_client_creation_aborted": "IntelliSense クライアントの作成が中止されました: {0}"
 }

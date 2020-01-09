@@ -154,5 +154,11 @@
 	"invalid_file_path": "Ruta de acceso al archivo {0} no válida",
 	"cant_create_intellisense_client_for": "No se puede crear el cliente de IntelliSense para {0}",
 	"suffix_declaration": "declaración",
-	"suffix_type_alias": "alias de tipo"
+	"suffix_type_alias": "alias de tipo",
+	"fallback_to_32_bit_mode": "El compilador no admite 64 bits. Revirtiendo a intelliSenseMode de 32 bits.",
+	"fallback_to_64_bit_mode": "El compilador no admite 32 bits. Revirtiendo a intelliSenseMode de 64 bits.",
+	"fallback_to_32_bit_mode2": "No se pudo consultar el compilador. Revirtiendo a intelliSenseMode de 32 bits.",
+	"fallback_to_64_bit_mode2": "No se pudo consultar el compilador. Revirtiendo a intelliSenseMode de 64 bits.",
+	"fallback_to_no_bitness": "No se pudo consultar el compilador. Revirtiendo para no establecer ningún valor de bits.",
+	"intellisense_client_creation_aborted": "Se anuló la creación del cliente de IntelliSense: {0}"
 }
