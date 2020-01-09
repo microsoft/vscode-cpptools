@@ -11,7 +11,7 @@ import {
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter
 } from 'vscode-languageclient';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
-import { Status } from 'vscode-cpptools/out/testApi';
+import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
@@ -1682,11 +1682,13 @@ export class DefaultClient implements Client {
         let testHook: TestHook = getTestHook();
         if (message.endsWith("Indexing...")) {
             this.model.isTagParsing.Value = true;
-            testHook.updateStatus(Status.TagParsingBegun);
+            let status: IntelliSenseStatus = { status: Status.TagParsingBegun };
+            testHook.updateStatus(status);
         } else if (message.endsWith("Updating IntelliSense...")) {
             timeStamp = Date.now();
             this.model.isUpdatingIntelliSense.Value = true;
-            testHook.updateStatus(Status.IntelliSenseCompiling);
+            let status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
+            testHook.updateStatus(status);
         } else if (message.endsWith("IntelliSense Ready")) {
             let settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.loggingLevel === "Debug") {
@@ -1695,11 +1697,18 @@ export class DefaultClient implements Client {
                 out.appendLine(localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", duration / 1000));
             }
             this.model.isUpdatingIntelliSense.Value = false;
-            testHook.updateStatus(Status.IntelliSenseReady);
+            let status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
+            testHook.updateStatus(status);
         } else if (message.endsWith("Ready")) { // Tag Parser Ready
             this.model.isTagParsing.Value = false;
-            testHook.updateStatus(Status.TagParsingDone);
+            let status: IntelliSenseStatus = { status: Status.TagParsingDone };
+            testHook.updateStatus(status);
             util.setProgress(util.getProgressParseRootSuccess());
+        } else if (message.includes("Squiggles Finished - File name:")) {
+            let index: number = message.lastIndexOf(":");
+            let name: string = message.substring(index + 2);
+            let status: IntelliSenseStatus = { status: Status.IntelliSenseReady, filename: name, };
+            testHook.updateStatus(status);
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
         } else if (message.endsWith("Unresolved Headers") && this.configuration.CurrentConfiguration.configurationProvider === undefined) {

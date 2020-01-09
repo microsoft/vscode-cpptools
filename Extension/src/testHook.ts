@@ -4,13 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CppToolsTestHook, Status } from 'vscode-cpptools/out/testApi';
+import { CppToolsTestHook, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as vscode from 'vscode';
 
 export class TestHook implements CppToolsTestHook {
-    private statusChangedEvent: vscode.EventEmitter<Status> = new vscode.EventEmitter<Status>();
+    private statusChangedEvent: vscode.EventEmitter<IntelliSenseStatus> = new vscode.EventEmitter<IntelliSenseStatus>();
 
-    public get StatusChanged(): vscode.Event<Status> {
+    public get StatusChanged(): vscode.Event<IntelliSenseStatus> {
         return this.statusChangedEvent.event;
     }
 
@@ -18,7 +18,7 @@ export class TestHook implements CppToolsTestHook {
         return !!this.statusChangedEvent;
     }
 
-    public updateStatus(status: Status): void {
+    public updateStatus(status: IntelliSenseStatus): void {
         this.statusChangedEvent.fire(status);
     }
 
