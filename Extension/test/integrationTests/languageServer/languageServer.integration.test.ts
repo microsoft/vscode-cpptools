@@ -17,7 +17,7 @@ suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
         if (!extension.isActive) {
-           await extension.activate();
+            await extension.activate();
         }
     });
 
@@ -89,16 +89,6 @@ function cppPropertiesPath(): string {
 }
 
 async function changeCppProperties(cppProperties: config.ConfigurationJson, disposables: vscode.Disposable[]): Promise<void> {
-    // let promise: Promise<void> = new Promise<void>((resolve, reject) => {
-    //     disposables.push(getActiveClient().ActiveConfigChanged(name => {
-    //         if (name === cppProperties.configurations[0].name) {
-    //             resolve();
-    //         }
-    //     }));
-
-    //     // Can't trust the file watcher, so we need to allocate additional time for the backup watcher to fire.
-    //     setTimeout(() => { reject(new Error("Get ActiveConfigChanged event: timeout")); }, 8000);
-    // });
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     let contents: string = await util.readFileText(cppPropertiesPath());
     console.log("    wrote c_cpp_properties.json: " + contents);
