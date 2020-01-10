@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.26.3-insiders3: January 8, 2020
+### Bug Fixes
+* Improve memory usage in projects with a large number of files. [#3326](https://github.com/microsoft/vscode-cpptools/issues/3326)
+* Fix `compile_commands.json` prompt appearing when a configuration provider is used. [#3972](https://github.com/microsoft/vscode-cpptools/issues/3972)
+* Improve IntelliSense performance with range-v3. [#4414](https://github.com/microsoft/vscode-cpptools/issues/4414)
+* Fix regression crashes. [#3607](https://github.com/microsoft/vscode-cpptools/issues/3607), [#4770](https://github.com/microsoft/vscode-cpptools/issues/4770)
+* Fix compiler querying with more than 40 `compilerArgs`. [#4791](https://github.com/microsoft/vscode-cpptools/issues/4791)
+* Fix files being removed from the database on startup with a configuration provider. [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
+* Fix a bug that could cause the browse database threads to get stuck.
+
 ## Version 0.26.3-insiders2: December 18, 2019
 ### Bug Fixes
 * Fix IntelliSense regression crashes. [#4754](https://github.com/microsoft/vscode-cpptools/issues/4754)

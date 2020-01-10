@@ -1771,8 +1771,7 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "https-proxy-agent": "^2.2.4",
-    "serialize-javascript": "^2.1.1"
+    "https-proxy-agent": "^2.2.4"
   },
   "runtimeDependencies": [
     {
