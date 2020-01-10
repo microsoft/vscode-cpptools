@@ -10,16 +10,12 @@ import * as util from '../../../src/common';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../../src/LanguageServer/configurations';
-import { getActiveClient } from '../../../src/LanguageServer/extension';
-import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
 
 const defaultTimeout: number = 100000;
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
-        util.setExtensionPath(extension.extensionPath);
-        //initializeTemporaryCommandRegistrar();
         if (!extension.isActive) {
            await extension.activate();
         }
@@ -106,7 +102,9 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, disp
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     let contents: string = await util.readFileText(cppPropertiesPath());
     console.log("    wrote c_cpp_properties.json: " + contents);
-    return new Promise(r => setTimeout(r, 1));
+
+    // Sleep for 4000ms for file watcher
+    return new Promise(r => setTimeout(r, 4000));
 }
 
 /******************************************************************************/
