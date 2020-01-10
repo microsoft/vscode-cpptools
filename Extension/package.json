@@ -1762,7 +1762,7 @@
     "mkdirp": "^0.5.1",
     "plist": "^3.0.1",
     "tmp": "^0.1.0",
-    "vscode-cpptools": "^3.0.1",
+    "vscode-cpptools": "3.0.1",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
@@ -1771,8 +1771,7 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "https-proxy-agent": "^2.2.4",
-    "serialize-javascript": "^2.1.1"
+    "https-proxy-agent": "^2.2.4"
   },
   "runtimeDependencies": [
     {
