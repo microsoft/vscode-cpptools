@@ -898,7 +898,7 @@ export class DefaultClient implements Client {
         let settings_intelliSenseEngineFallback: string[] = [];
         let settings_errorSquiggles: string[] = [];
         let settings_dimInactiveRegions: boolean[] = [];
-        let settings_enhancedColorization: boolean[] = [];
+        let settings_enhancedColorization: string[] = [];
         let settings_suggestSnippets: boolean[] = [];
         let settings_exclusionPolicy: string[] = [];
         let settings_preferredPathSeparator: string[] = [];
@@ -925,7 +925,7 @@ export class DefaultClient implements Client {
                 settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
                 settings_errorSquiggles.push(setting.errorSquiggles);
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
-                settings_enhancedColorization.push(setting.enhancedColorization);
+                settings_enhancedColorization.push(setting.enhancedColorization ? "Enabled" : "Disabled");
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);

@@ -975,8 +975,7 @@ function selectClient(): Thenable<Client> {
 
 function onResetDatabase(): void {
     onActivationEvent();
-    /* need to notify the affected client(s) */
-    selectClient().then(client => client.resetDatabase(), rejected => {});
+    clients.ActiveClient.resetDatabase();
 }
 
 function onSelectConfiguration(): void {
@@ -1068,22 +1067,22 @@ function onToggleDimInactiveRegions(): void {
 
 function onPauseParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.pauseParsing(), rejected => {});
+    clients.ActiveClient.pauseParsing();
 }
 
 function onResumeParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.resumeParsing(), rejected => {});
+    clients.ActiveClient.resumeParsing();
 }
 
 function onShowParsingCommands(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
+    clients.ActiveClient.handleShowParsingCommands();
 }
 
 function onShowReferencesProgress(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleReferencesIcon(), rejected => {});
+    clients.ActiveClient.handleReferencesIcon();
 }
 
 function onToggleRefGroupView(): void {

@@ -221,7 +221,7 @@ export class UI {
 
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.workspace", "Select a Workspace...");
+        options.placeHolder = localize("select.workspace", "Select a workspace folder...");
 
         let items: KeyedQuickPickItem[] = [];
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
