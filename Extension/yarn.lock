@@ -5160,10 +5160,10 @@ vrsource-tslint-rules@^6.0.0:
   resolved "https://registry.yarnpkg.com/vrsource-tslint-rules/-/vrsource-tslint-rules-6.0.0.tgz#a4e25e8f3fdd487684174f423c090c35d60f37a9"
   integrity sha512-pmcnJdIVziZTk1V0Cqehmh3gIabBRkBYXkv9vx+1CZDNEa41kNGUBFwQLzw21erYOd2QnD8jJeZhBGqnlT1HWw==
 
-vscode-cpptools@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-3.0.1.tgz#35ea986a48ac14eda85f3989ba5eedc64886c0c2"
-  integrity sha512-KAbwWhG36Ahnug9frcCOvWI3dUb3mzWeTqB6NQjIkzAazRTJWT/PiZ7gxpY/+jQIUylbbiU9ezWmzIIm8nP+TQ==
+vscode-cpptools@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-3.1.0.tgz#fbc0e493e81a05baf01702ea8b9467c39fba257d"
+  integrity sha512-z4W/A1TQMEtqTEWNY3Hb4HJcJ2J3HeaLHp3TyqCotoRkLU8ovH4jmDb5tNTyh3DgIiaAAnDalO03A4wm5IvNBg==
 
 vscode-debugadapter@^1.35.0:
   version "1.37.1"
