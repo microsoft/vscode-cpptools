@@ -89,7 +89,7 @@
 	"terminating_child_process": "Untergeordneter Prozess wird beendet: {0}",
 	"still_alive_killing": "Noch aktiv, wird beendet...",
 	"giving_up": "Wird aufgegeben.",
-	"not_exited_yet": "Noch nicht beendet. Wird für {0} Millisekunden in den Ruhezustand versetzt, danach wird der Vorgang wiederholt.",
+	"not_exited_yet": "wurde noch nicht beendet. Ruhezustand für {0} Millisekunden, anschließend wird der Vorgang wiederholt.",
 	"failed_to_spawn_process": "Fehler beim Erzeugen des Prozesses. Fehler: {0} ({1})",
 	"offering_completion": "Vervollständigung wird angeboten.",
 	"compiler_from_compiler_path": "Es wird versucht, Standardwerte vom Compiler in der Eigenschaft \"compilerPath\" abzurufen: {0}",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "Ungültiger Dateipfad \"{0}\".",
 	"cant_create_intellisense_client_for": "Der IntelliSense-Client für \"{0}\" kann nicht erstellt werden.",
 	"suffix_declaration": "Deklaration",
-	"suffix_type_alias": "Alias eingeben"
+	"suffix_type_alias": "Alias eingeben",
+	"fallback_to_32_bit_mode": "Der Compiler bietet keine 64-Bit-Unterstützung. Es wird ein Fallback auf den 32-Bit-intelliSenseMode durchgeführt.",
+	"fallback_to_64_bit_mode": "Der Compiler bietet keine 32-Bit-Unterstützung. Es wird ein Fallback auf den 64-Bit-intelliSenseMode durchgeführt.",
+	"fallback_to_32_bit_mode2": "Fehler beim Abfragen des Compilers. Es wird ein Fallback auf den 32-Bit-intelliSenseMode durchgeführt.",
+	"fallback_to_64_bit_mode2": "Fehler beim Abfragen des Compilers. Es wird ein Fallback auf den 64-Bit-intelliSenseMode durchgeführt.",
+	"fallback_to_no_bitness": "Fehler beim Abfragen des Compilers. Es wird ein Fallback auf keine Bitanzahl durchgeführt.",
+	"intellisense_client_creation_aborted": "IntelliSense-Clienterstellung abgebrochen: {0}"
 }

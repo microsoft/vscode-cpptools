@@ -46,7 +46,7 @@
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.object.continue.description": "Texto que se insertará en la línea siguiente cuando se presione Entrar dentro de un bloque de comentario de una o varias líneas.",
 	"c_cpp.configuration.commentContinuationPatterns.description": "Define el comportamiento del editor para cuando se presiona la tecla Entrar dentro de un bloque de comentario de una o varias líneas.",
 	"c_cpp.configuration.configurationWarnings.description": "Determina si se muestran notificaciones emergentes cuando una extensión del proveedor de configuración no puede proporcionar una configuración para un archivo de código fuente.",
-	"c_cpp.configuration.intelliSenseCachePath.description": "Define la ruta de acceso de la carpeta para los encabezados precompilados almacenados en caché que usa IntelliSense. La ruta de acceso de caché predeterminada es \"%LocalAppData%/Microsoft/vscode-cpptools\" en Windows y \"~/.vscode-cpptools\" en Linux y Mac. La ruta de acceso predeterminada se utiliza si no se especifica ninguna ruta de acceso o se especifica una que no es válida.",
+	"c_cpp.configuration.intelliSenseCachePath.description": "Define la ruta de acceso de la carpeta para los encabezados precompilados almacenados en caché que usa IntelliSense. La ruta de acceso de caché predeterminada es \"%LocalAppData%/Microsoft/vscode-cpptools\" en Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" en Linux (o \"~/.cache/vscode-cpptools/\" si XDG_CACHE_HOME no se ha definido) y \"~/Library/Caches/vscode-cpptools/\" en Mac. La ruta de acceso predeterminada se utiliza si no se especifica ninguna ruta de acceso o se especifica una que no es válida.",
 	"c_cpp.configuration.intelliSenseCacheSize.description": "Tamaño máximo del espacio del disco duro por área de trabajo en megabytes para los encabezados precompilados almacenados en caché. El uso real puede fluctuar en torno a este valor. El tamaño predeterminado es 5120 MB. El almacenamiento en caché de encabezados precompilados está deshabilitado cuando el tamaño es 0.",
 	"c_cpp.configuration.default.includePath.description": "Valor que debe usarse en una configuración si no se especifica \"includePath\", o bien los valores que deben insertarse si se especifica \"${default}\" en \"includePath\".",
 	"c_cpp.configuration.default.defines.description": "Valor que debe usarse en una configuración si no se especifica \"defines\", o bien los valores que se deben insertar si se especifica \"${default}\" en \"defines\".",
@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Si se establece en true, el servidor de lenguaje proporciona los fragmentos de código.",
 	"c_cpp.configuration.enhancedColorization.description": "Si se habilita esta opción, el código se colorea de acuerdo con IntelliSense. Esta configuración no tiene efecto si IntelliSense está deshabilitado o si se utiliza el tema de contraste alto predeterminado.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Habilita los servicios de integración para el [administrador de dependencias de vcpkg] (https://aka.ms/vcpkg/).",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "Si es true, \"Cambiar el nombre del símbolo\" requerirá un identificador de C/C++ válido.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: resultados de otras referencias",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "Cambio de nombre de C/C++",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "CAMBIO DE NOMBRE PENDIENTE",
@@ -137,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Ruta de acceso completa opcional a un archivo de volcado de memoria para el programa especificado. Ejemplo: \"c:\\temp\\app.dmp\". El valor predeterminado es null.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Si se establece en false, el proceso se iniciará con el montón de depuración deshabilitado. Esta opción establece la variable de entorno \"_NO_DEBUG_HEAP\" en \"1\".",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Control explícito de la carga de símbolos.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si es true, se cargan los símbolos de todas las bibliotecas; de lo contrario, no se cargará ningún símbolo de solib. El valor predeterminado es true.",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si es true, se cargan los símbolos de todas las bibliotecas; de lo contrario, no se cargará ningún símbolo de la biblioteca compartida (solib). El valor predeterminado es true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nombres de archivo (se permiten comodines) separados por punto y coma \";\". Modifica el comportamiento de LoadAll. Si LoadAll es true, no se cargan los símbolos para las bibliotecas que coincidan con cualquier nombre de la lista. De lo contrario, solo se cargan los símbolos para las bibliotecas que coincidan. Ejemplo: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Marca opcional que requiere que el código fuente actual coincida con el archivo PDB."
 }

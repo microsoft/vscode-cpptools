@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import { Client } from './client';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection } from './customProviders';
+import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -195,7 +195,7 @@ export class UI {
         let items: KeyedQuickPickItem[] = [];
         providers.forEach(provider => {
             let label: string = provider.name;
-            if (provider.extensionId === currentProvider) {
+            if (isSameProviderExtensionId(currentProvider, provider.extensionId)) {
                 label += ` (${localize("active", "active")})`;
             }
             items.push({ label: label, description: "", key: provider.extensionId });

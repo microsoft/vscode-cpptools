@@ -311,7 +311,7 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
         knownCompilerPaths = knownCompilers.map<string>(info => info.path);
     }
 
-    if (!knownCompilerPaths || !userCompilerPath) {
+    if (!knownCompilerPaths && !userCompilerPath) {
         // Don't prompt a message yet until we can make a data-based decision.
         telemetry.logLanguageServerEvent('noCompilerFound');
         // Display a message prompting the user to install compilers if none were found.
@@ -433,12 +433,6 @@ function realActivation(): void {
     console.log("starting language server");
     clients = new ClientCollection();
     ui = getUI();
-
-    // Check for files left open from the previous session. We won't get events for these until they gain focus,
-    // so we manually activate the visible file.
-    if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
-        onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
-    }
 
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
@@ -569,10 +563,40 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+    // Process delayed didOpen for any visible editors we haven't seen before
+    editors.forEach(editor => {
+        if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+            let client: Client = clients.getClientFor(editor.document.uri);
+            if (client) {
+                if (clients.checkOwnership(client, editor.document)) {
+                    if (!client.TrackedDocuments.has(editor.document)) {
+                        // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
+                        client.TrackedDocuments.add(editor.document);
+                        // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
+                        if ((editor.document.uri.path.endsWith(".C") || editor.document.uri.path.endsWith(".H")) && editor.document.languageId === "c") {
+                            let cppSettings: CppSettings = new CppSettings(client.RootUri);
+                            if (cppSettings.autoAddFileAssociations) {
+                                const fileName: string = path.basename(editor.document.uri.fsPath);
+                                const mappingString: string = fileName + "@" + editor.document.uri.fsPath;
+                                client.addFileAssociations(mappingString, false);
+                            }
+                        }
+                        client.provideCustomConfiguration(editor.document.uri, null);
+                        client.notifyWhenReady(() => {
+                            client.takeOwnership(editor.document);
+                            client.onDidOpenTextDocument(editor.document);
+                        });
+                    }
+                }
+            }
+        }
+    });
+
     clients.forEach(client => {
         let editorsForThisClient: vscode.TextEditor[] = [];
         editors.forEach(editor => {
-            if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+            if (editor.document.languageId === "c" || editor.document.languageId === "cpp"
+                || editor.document.languageId === "json" && editor.document.uri.fsPath.endsWith("c_cpp_properties.json")) {
                 if (clients.checkOwnership(client, editor.document)) {
                     editorsForThisClient.push(editor);
                 }
@@ -609,7 +633,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
 
     // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
     let lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
-    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand)) {
+    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand, "insider")) {
         return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
     }
 
@@ -648,7 +672,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
 
         // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
         let oldVersion: PackageVersion = new PackageVersion('1.27.2');
-        if (userVersion.isGreaterThan(oldVersion)) {
+        if (userVersion.isGreaterThan(oldVersion, "insider")) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
                 try {

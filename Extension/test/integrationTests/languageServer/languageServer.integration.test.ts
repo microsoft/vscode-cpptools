@@ -10,16 +10,12 @@ import * as util from '../../../src/common';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../../src/LanguageServer/configurations';
-import { getActiveClient } from '../../../src/LanguageServer/extension';
-import { initializeTemporaryCommandRegistrar } from '../../../src/commands';
 
-const defaultTimeout: number = 60000;
+const defaultTimeout: number = 100000;
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
         let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
-        util.setExtensionPath(extension.extensionPath);
-        initializeTemporaryCommandRegistrar();
         if (!extension.isActive) {
             await extension.activate();
         }
@@ -93,20 +89,12 @@ function cppPropertiesPath(): string {
 }
 
 async function changeCppProperties(cppProperties: config.ConfigurationJson, disposables: vscode.Disposable[]): Promise<void> {
-    let promise: Promise<void> = new Promise<void>((resolve, reject) => {
-        disposables.push(getActiveClient().ActiveConfigChanged(name => {
-            if (name === cppProperties.configurations[0].name) {
-                resolve();
-            }
-        }));
-
-        // Can't trust the file watcher, so we need to allocate additional time for the backup watcher to fire.
-        setTimeout(() => { reject(new Error("timeout")); }, 8000);
-    });
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     let contents: string = await util.readFileText(cppPropertiesPath());
     console.log("    wrote c_cpp_properties.json: " + contents);
-    return promise;
+
+    // Sleep for 4000ms for file watcher
+    return new Promise(r => setTimeout(r, 4000));
 }
 
 /******************************************************************************/
@@ -188,28 +176,28 @@ suite("extensibility tests v3", function(): void {
         disposables.forEach(d => d.dispose());
     });
 
-    test("Check provider", async () => {
+    test("Check provider - main3.cpp", async () => {
         // Open a c++ file to start the language server.
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main3.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            let lastStatus: string = "";
-            disposables.push(testHook.StatusChanged(status => {
-                lastStatus = status.toString();
-                if (status === apit.Status.IntelliSenseReady) {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "main3.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     assert.deepEqual(lastBrowseResult, defaultFolderBrowseConfig);
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout: last status " + lastStatus)); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -281,28 +269,29 @@ suite("extensibility tests v2", function(): void {
         disposables.forEach(d => d.dispose());
     });
 
-    test("Check provider", async () => {
+    test("Check provider - main2.cpp", async () => {
         // Open a c++ file to start the language server.
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main2.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            let lastStatus: string = "";
-            disposables.push(testHook.StatusChanged(status => {
-                lastStatus = status.toString();
-                if (status === apit.Status.IntelliSenseReady) {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "main2.cpp" && result.status === apit.Status.IntelliSenseReady) {
+
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     assert.deepEqual(lastBrowseResult, defaultBrowseConfig);
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout: last status" + lastStatus)); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -359,27 +348,27 @@ suite("extensibility tests v1", function(): void {
         disposables.forEach(d => d.dispose());
     });
 
-    test("Check provider", async () => {
+    test("Check provider - main1.cpp", async () => {
         // Open a c++ file to start the language server.
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main1.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            let lastStatus: string = "";
-            disposables.push(testHook.StatusChanged(status => {
-                lastStatus = status.toString();
-                if (status === apit.Status.IntelliSenseReady) {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "main1.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout: last status " + lastStatus)); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -433,27 +422,27 @@ suite("extensibility tests v0", function(): void {
         await util.deleteFile(cppPropertiesPath());
     });
 
-    test("Check provider", async () => {
+    test("Check provider - main.cpp", async () => {
         // Open a C++ file to start the language server.
         let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
         let uri: vscode.Uri = vscode.Uri.file(path);
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         let testResult: any = new Promise<void>((resolve, reject) => {
-            let lastStatus: string = "";
-            disposables.push(testHook.StatusChanged(status => {
-                lastStatus = status.toString();
-                if (status === apit.Status.IntelliSenseReady) {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "main.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout: last status " + lastStatus)); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
         disposables.push(testHook);
 
-        await vscode.workspace.openTextDocument(path);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(path);
+        await vscode.window.showTextDocument(document);
         await testResult;
     });
 });
@@ -467,6 +456,7 @@ suite("configuration tests", function() {
         }
         // Open a c++ file to start the language server.
         await vscode.workspace.openTextDocument({ language: "cpp", content: "int main() { return 0; }"});
+        await vscode.window.showTextDocument(document);
     });
 
     suiteTeardown(async function() {

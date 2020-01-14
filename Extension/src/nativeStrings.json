@@ -85,7 +85,7 @@
     "terminating_child_process": "terminating child process: {0}",
     "still_alive_killing": "still alive, killing...",
     "giving_up": "giving up",
-    "not_exited_yet": "not exited yet. Will sleep for {0} milliseconds and try again",
+    "not_exited_yet": "not exited yet. Will sleep for {0} milliseconds and try again.",
     "failed_to_spawn_process": "Failed to spawn process. Error: {0} ({1})",
     "offering_completion": "Offering completion",
     "compiler_from_compiler_path": "Attempting to get defaults from compiler in \"compilerPath\" property: '{0}'",
@@ -150,5 +150,11 @@
     "invalid_file_path": "Invalid file path {0}",
     "cant_create_intellisense_client_for": "Can't create IntelliSense client for {0}",
     "suffix_declaration": "declaration",
-    "suffix_type_alias": "type alias"
+    "suffix_type_alias": "type alias",
+    "fallback_to_32_bit_mode": "Compiler does not support 64-bit. Falling back to 32-bit intelliSenseMode.",
+    "fallback_to_64_bit_mode": "Compiler does not support 32-bit. Falling back to 64-bit intelliSenseMode.",
+    "fallback_to_32_bit_mode2": "Failed to query compiler. Falling back to 32-bit intelliSenseMode.",
+    "fallback_to_64_bit_mode2": "Failed to query compiler. Falling back to 64-bit intelliSenseMode.",
+    "fallback_to_no_bitness": "Failed to query compiler. Falling back to no bitness.",
+    "intellisense_client_creation_aborted": "IntelliSense client creation aborted: {0}"
 }

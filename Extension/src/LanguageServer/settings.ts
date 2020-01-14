@@ -50,14 +50,15 @@ export class CppSettings extends Settings {
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }
     public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
-    public get workspaceParsingPriority(): boolean { return super.Section.get<boolean>("workspaceParsingPriority"); }
+    public get workspaceParsingPriority(): string { return super.Section.get<string>("workspaceParsingPriority"); }
     public get workspaceSymbols(): string { return super.Section.get<string>("workspaceSymbols"); }
-    public get exclusionPolicy(): boolean { return super.Section.get<boolean>("exclusionPolicy"); }
+    public get exclusionPolicy(): string { return super.Section.get<string>("exclusionPolicy"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string { return super.Section.get<string>("preferredPathSeparator"); }
     public get updateChannel(): string { return super.Section.get<string>("updateChannel"); }
     public get vcpkgEnabled(): boolean { return super.Section.get<boolean>("vcpkg.enabled"); }
+    public get renameRequiresIdentifier(): boolean { return super.Section.get<boolean>("renameRequiresIdentifier"); }
     public get defaultIncludePath(): string[] { return super.Section.get<string[]>("default.includePath"); }
     public get defaultDefines(): string[] { return super.Section.get<string[]>("default.defines"); }
     public get defaultMacFrameworkPath(): string[] { return super.Section.get<string[]>("default.macFrameworkPath"); }

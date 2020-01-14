@@ -46,7 +46,7 @@
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.object.continue.description": "O texto que será inserido na próxima linha quando Enter for pressionado dentro de um bloco de comentário de linha única ou de várias linhas.",
 	"c_cpp.configuration.commentContinuationPatterns.description": "Define o comportamento do editor para quando a tecla Enter é pressionada dentro de um bloco de comentário de linha única ou de várias linhas.",
 	"c_cpp.configuration.configurationWarnings.description": "Determina se as notificações pop-up serão mostradas quando uma extensão do provedor de configuração não puder fornecer uma configuração para um arquivo de origem.",
-	"c_cpp.configuration.intelliSenseCachePath.description": "Define o caminho da pasta para cabeçalhos pré-compilados armazenados em cache usados pelo IntelliSense. O caminho de cache padrão é \"%LocalAppData%/Microsoft/vscode-cpptools\" no Windows e \"~/.vscode-cpptools\" em Linux e Mac. O caminho padrão será usado se nenhum caminho for especificado ou se um caminho especificado for inválido.",
+	"c_cpp.configuration.intelliSenseCachePath.description": "Define o caminho da pasta para os cabeçalhos pré-compilados armazenados em cache usados pelo IntelliSense. O caminho do cache padrão é \"%LocalAppData%/Microsoft/vscode-cpptools\" no Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" no Linux (ou \"~/.cache/vscode-cpptools/\" quando XDG_CACHE_HOME não está definido) e \"~/Library/Caches/vscode-cpptools/\" no Mac. O caminho padrão será usado se nenhum caminho for especificado ou se um caminho especificado for inválido.",
 	"c_cpp.configuration.intelliSenseCacheSize.description": "Tamanho máximo do espaço de disco rígido por workspace, em megabytes, para cabeçalhos pré-compilados armazenados em cache; o uso real pode flutuar ao redor desse valor. O tamanho padrão é de 5120 MB. O cache pré-compilado de cabeçalho é desabilitado quando o tamanho é 0.",
 	"c_cpp.configuration.default.includePath.description": "O valor a ser usado em uma configuração se \"includePath\" não for especificado ou os valores a serem inseridos se \"${default}\" estiver presente em \"includePath\".",
 	"c_cpp.configuration.default.defines.description": "O valor a ser usado em uma configuração se \"defines\" não for especificado ou os valores a serem inseridos se \"${default}\" estiver presente em \"defines\".",
@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Se for true, os snippets serão fornecidos pelo servidor de idiomas.",
 	"c_cpp.configuration.enhancedColorization.description": "Se habilitado, o código é colorizado com base no IntelliSense. Essa configuração não terá efeito se o IntelliSense estiver desabilitado ou se você estiver usando o tema de Alto Contraste Padrão.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Habilitar os serviços de integração para o [gerenciador de dependências vcpkg](https://aka.ms/vcpkg/).",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "Se for true, 'Renomear Símbolo' exigirá um identificador C/C++ válido.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: outros resultados de referências",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "Renomeação do C/C++",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "RENOMEAÇÃO PENDENTE",
@@ -137,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Caminho completo opcional para um arquivo de despejo para o programa especificado. Exemplo: \"c:\\temp\\app.dmp\". Usa nulo como padrão.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Se for false, o processo será iniciado com o heap de depuração desabilitado. Isso define a variável de ambiente '_NO_DEBUG_HEAP' como '1'.",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Controle explícito do carregamento de símbolo.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Se for true, os símbolos de todos os bibliotecas serão carregados, caso contrário, nenhum símbolo solib será carregado. O valor padrão é true.",
-	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nomes de (curingas permitidos) separados por ponto e vírgula '; '. Modifica o comportamento de LoadAll. Se LoadAll for true, não carregará símbolos para bibliotecas que correspondam a qualquer nome na lista. Caso contrário, só carregue símbolos para bibliotecas que correspondam. Exemplo: \"foo. so; bar. portanto\"",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Se for true, os símbolos de todas as bibliotecas serão carregados, caso contrário, não será carregado nenhum símbolo solib. O valor padrão é true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nomes de arquivo (curingas permitidos) separados por ponto e vírgula ';'. Modifica o comportamento de LoadAll. Se LoadAll for true, não carregue símbolos para bibliotecas que correspondam a um nome na lista. Caso contrário, carregue símbolos somente para bibliotecas que correspondam. Exemplo: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Sinalizador opcional para exigir que o código-fonte atual corresponda ao PDB."
 }

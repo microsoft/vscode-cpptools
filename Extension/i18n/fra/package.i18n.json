@@ -46,7 +46,7 @@
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.object.continue.description": "Texte à insérer sur la ligne suivante quand vous appuyez sur la touche Entrée dans un bloc de commentaires multiligne ou monoligne.",
 	"c_cpp.configuration.commentContinuationPatterns.description": "Définit le comportement de l'éditeur quand vous appuyez sur la touche Entrée dans un bloc de commentaires multiligne ou monoligne.",
 	"c_cpp.configuration.configurationWarnings.description": "Détermine si des notifications de fenêtre contextuelle s'affichent quand une extension de fournisseur de configuration ne peut pas fournir la configuration d'un fichier source.",
-	"c_cpp.configuration.intelliSenseCachePath.description": "Définit le chemin de dossier des en-têtes précompilés mis en cache utilisés par IntelliSense. Le chemin du cache par défaut est \"%LocalAppData%/Microsoft/vscode-cpptools\" sur Windows et \"~/.vscode-cpptools\" sur Linux et Mac. Le chemin par défaut est utilisé si aucun chemin n'est spécifié ou si le chemin spécifié n'est pas valide.",
+	"c_cpp.configuration.intelliSenseCachePath.description": "Définit le chemin de dossier des en-têtes précompilés mis en cache utilisés par IntelliSense. Le chemin du cache par défaut est \"%LocalAppData%/Microsoft/vscode-cpptools\" sur Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" sur Linux (ou \"~/.cache/vscode-cpptools/\" si XDG_CACHE_HOME n'est pas défini) et \"~/Library/Caches/vscode-cpptools/\" sur Mac. Le chemin par défaut est utilisé si aucun chemin n'est spécifié ou si le chemin spécifié n'est pas valide.",
 	"c_cpp.configuration.intelliSenseCacheSize.description": "Taille maximale de l'espace du disque dur par espace de travail en mégaoctets pour les en-têtes précompilés mis en cache. L'utilisation réelle peut varier autour de cette valeur. La taille par défaut est 5 120 Mo. La mise en cache des en-têtes précompilés est désactivée quand la taille est égale à 0.",
 	"c_cpp.configuration.default.includePath.description": "Valeur à utiliser dans une configuration si \"includePath\" n'est pas spécifié ou valeurs à insérer si \"${default}\" est présent dans \"includePath\".",
 	"c_cpp.configuration.default.defines.description": "Valeur à utiliser dans une configuration si \"defines\" n'est pas spécifié ou valeurs à insérer si \"${default}\" est présent dans \"defines\".",
@@ -70,6 +70,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Si la valeur est true, des extraits de code sont fournis par le serveur de langage.",
 	"c_cpp.configuration.enhancedColorization.description": "Si cette option est activée, la couleur du code est déterminée par IntelliSense. Ce paramètre n'a pas d'effet si IntelliSense est désactivé ou utilise le thème Contraste élevé par défaut.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Activez les services d'intégration pour le [gestionnaire de dépendances vcpkg] (https://aka.ms/vcpkg/).",
+	"c_cpp.configuration.renameRequiresIdentifier.description": "Si la valeur est true, l'opération Renommer le symbole nécessite un identificateur C/C++ valide.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++ : Autres résultats des références",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "Renommage C/C++",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "RENOMMAGE EN ATTENTE",
@@ -137,7 +138,7 @@
 	"c_cpp.debuggers.dumpPath.description": "Chemin complet facultatif d'un fichier d'image mémoire pour le programme spécifié. Exemple : \"c:\\temp\\app.dmp\". La valeur par défaut est null.",
 	"c_cpp.debuggers.enableDebugHeap.description": "Si la valeur est false, le processus est lancé avec le tas de débogage désactivé. Cette valeur définit la variable d'environnement '_NO_DEBUG_HEAP' sur '1'.",
 	"c_cpp.debuggers.symbolLoadInfo.description": "Contrôle explicite du chargement des symboles.",
-	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si true, les symboles de toutes les bibliothèques seront chargés, sinon aucun symbole solib ne sera chargé. La valeur par défaut est true.",
-	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Liste des noms de fichiers (caractères génériques autorisés) séparés par des points-virgules ';'. Modifie le comportement de LoadAll. Si LoadAll a la valeur true, ne chargez pas les symboles des bibliothèques correspondant à un nom de la liste. Sinon, chargez uniquement les symboles des bibliothèques qui correspondent. Exemple : \"foo.so;bar.so\"",
+	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si la valeur est true, les symboles de toutes les bibliothèques sont chargés. Sinon, aucun symbole solib n'est chargé. La valeur par défaut est true.",
+	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Liste des noms de fichiers (caractères génériques autorisés) séparés par des points-virgules ';'. Modifie le comportement de LoadAll. Si LoadAll a la valeur true, les symboles des bibliothèques correspondant à un nom de la liste ne sont pas chargés. Sinon, les symboles des bibliothèques ayant une correspondance sont chargés. Exemple : \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Indicateur facultatif pour exiger que le code source actuel corresponde au fichier pdb."
 }

@@ -632,17 +632,35 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     });
 }
 
+export function isExecutable(file: string): Promise<boolean> {
+    return new Promise((resolve) => {
+        fs.access(file, fs.constants.X_OK, (err) => {
+            if (err) {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        });
+    });
+}
+
 export function allowExecution(file: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         if (process.platform !== 'win32') {
             checkFileExists(file).then((exists: boolean) => {
                 if (exists) {
-                    fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
-                        if (err) {
-                            reject(err);
-                            return;
+                    isExecutable(file).then((isExec: boolean) => {
+                        if (isExec) {
+                            resolve();
+                        } else {
+                            fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
+                                if (err) {
+                                    reject(err);
+                                    return;
+                                }
+                                resolve();
+                            });
                         }
-                        resolve();
                     });
                 } else {
                     getOutputChannelLogger().appendLine("");
@@ -956,4 +974,120 @@ export function getLocalizedString(params: LocalizeStringParams): string {
         text = lookupString(params.stringId, params.stringArgs);
     }
     return indent + text;
+}
+
+function decodeUCS16(input: string): number[] {
+    let output: number[] = [];
+    let counter: number = 0;
+    let length: number = input.length;
+    let value: number;
+    let extra: number;
+    while (counter < length) {
+        value = input.charCodeAt(counter++);
+        // tslint:disable-next-line: no-bitwise
+        if ((value & 0xF800) === 0xD800 && counter < length) {
+            // high surrogate, and there is a next character
+            extra = input.charCodeAt(counter++);
+            // tslint:disable-next-line: no-bitwise
+            if ((extra & 0xFC00) === 0xDC00) { // low surrogate
+                // tslint:disable-next-line: no-bitwise
+                output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+            } else {
+                output.push(value, extra);
+            }
+        } else {
+            output.push(value);
+        }
+    }
+    return output;
+}
+
+let allowedIdentifierUnicodeRanges: number[][] = [
+    [0x0030, 0x0039], // digits
+    [0x0041, 0x005A], // upper case letters
+    [0x005F, 0x005F], // underscore
+    [0x0061, 0x007A], // lower case letters
+    [0x00A8, 0x00A8], // DIARESIS
+    [0x00AA, 0x00AA], // FEMININE ORDINAL INDICATOR
+    [0x00AD, 0x00AD], // SOFT HYPHEN
+    [0x00AF, 0x00AF], // MACRON
+    [0x00B2, 0x00B5], // SUPERSCRIPT TWO - MICRO SIGN
+    [0x00B7, 0x00BA], // MIDDLE DOT - MASCULINE ORDINAL INDICATOR
+    [0x00BC, 0x00BE], // VULGAR FRACTION ONE QUARTER - VULGAR FRACTION THREE QUARTERS
+    [0x00C0, 0x00D6], // LATIN CAPITAL LETTER A WITH GRAVE - LATIN CAPITAL LETTER O WITH DIAERESIS
+    [0x00D8, 0x00F6], // LATIN CAPITAL LETTER O WITH STROKE - LATIN SMALL LETTER O WITH DIAERESIS
+    [0x00F8, 0x167F], // LATIN SMALL LETTER O WITH STROKE - CANADIAN SYLLABICS BLACKFOOT W
+    [0x1681, 0x180D], // OGHAM LETTER BEITH - MONGOLIAN FREE VARIATION SELECTOR THREE
+    [0x180F, 0x1FFF], // SYRIAC LETTER BETH - GREEK DASIA
+    [0x200B, 0x200D], // ZERO WIDTH SPACE - ZERO WIDTH JOINER
+    [0x202A, 0x202E], // LEFT-TO-RIGHT EMBEDDING - RIGHT-TO-LEFT OVERRIDE
+    [0x203F, 0x2040], // UNDERTIE - CHARACTER TIE
+    [0x2054, 0x2054], // INVERTED UNDERTIE
+    [0x2060, 0x218F], // WORD JOINER - TURNED DIGIT THREE
+    [0x2460, 0x24FF], // CIRCLED DIGIT ONE - NEGATIVE CIRCLED DIGIT ZERO
+    [0x2776, 0x2793], // DINGBAT NEGATIVE CIRCLED DIGIT ONE - DINGBAT NEGATIVE CIRCLED SANS-SERIF NUMBER TEN
+    [0x2C00, 0x2DFF], // GLAGOLITIC CAPITAL LETTER AZU - COMBINING CYRILLIC LETTER IOTIFIED BIG YUS
+    [0x2E80, 0x2FFF], // CJK RADICAL REPEAT - IDEOGRAPHIC DESCRIPTION CHARACTER OVERLAID
+    [0x3004, 0x3007], // JAPANESE INDUSTRIAL STANDARD SYMBOL - IDEOGRAPHIC NUMBER ZERO
+    [0x3021, 0x302F], // HANGZHOU NUMERAL ONE - HANGUL DOUBLE DOT TONE MARK
+    [0x3031, 0xD7FF], // VERTICAL KANA REPEAT MARK - HANGUL JONGSEONG PHIEUPH-THIEUTH
+    [0xF900, 0xFD3D], // CJK COMPATIBILITY IDEOGRAPH-F900 - ARABIC LIGATURE ALEF WITH FATHATAN ISOLATED FORM
+    [0xFD40, 0xFDCF], // ARABIC LIGATURE TEH WITH JEEM WITH MEEM INITIAL FORM - ARABIC LIGATURE NOON WITH JEEM WITH YEH FINAL FORM
+    [0xFDF0, 0xFE44], // ARABIC LIGATURE SALLA USED AS KORANIC STOP SIGN ISOLATED FORM - PRESENTATION FORM FOR VERTICAL RIGHT WHITE CORNER BRACKET
+    [0xFE47, 0xFFFD], // PRESENTATION FORM FOR VERTICAL LEFT SQUARE BRACKET - REPLACEMENT CHARACTER
+    [0x10000, 0x1FFFD], // LINEAR B SYLLABLE B008 A - CHEESE WEDGE (U+1F9C0)
+    [0x20000, 0x2FFFD], //
+    [0x30000, 0x3FFFD], //
+    [0x40000, 0x4FFFD], //
+    [0x50000, 0x5FFFD], //
+    [0x60000, 0x6FFFD], //
+    [0x70000, 0x7FFFD], //
+    [0x80000, 0x8FFFD], //
+    [0x90000, 0x9FFFD], //
+    [0xA0000, 0xAFFFD], //
+    [0xB0000, 0xBFFFD], //
+    [0xC0000, 0xCFFFD], //
+    [0xD0000, 0xDFFFD], //
+    [0xE0000, 0xEFFFD]  // LANGUAGE TAG (U+E0001) - VARIATION SELECTOR-256 (U+E01EF)
+];
+
+let disallowedFirstCharacterIdentifierUnicodeRanges: number[][] = [
+    [0x0030, 0x0039], // digits
+    [0x0300, 0x036F], // COMBINING GRAVE ACCENT - COMBINING LATIN SMALL LETTER X
+    [0x1DC0, 0x1DFF], // COMBINING DOTTED GRAVE ACCENT - COMBINING RIGHT ARROWHEAD AND DOWN ARROWHEAD BELOW
+    [0x20D0, 0x20FF], // COMBINING LEFT HARPOON ABOVE - COMBINING ASTERISK ABOVE
+    [0xFE20, 0xFE2F], // COMBINING LIGATURE LEFT HALF - COMBINING CYRILLIC TITLO RIGHT HALF
+];
+
+export function isValidIdentifier(candidate: string): boolean {
+    if (!candidate) {
+        return false;
+    }
+    let decoded: number[] = decodeUCS16(candidate);
+    if (!decoded || !decoded.length) {
+        return false;
+    }
+
+    // Reject if first character is disallowed
+    for (let i: number = 0; i < disallowedFirstCharacterIdentifierUnicodeRanges.length; i++) {
+        let disallowedCharacters: number[] = disallowedFirstCharacterIdentifierUnicodeRanges[i];
+        if (decoded[0] >= disallowedCharacters[0] && decoded[0] <= disallowedCharacters[1]) {
+            return false;
+        }
+    }
+
+    for (let position: number = 0; position < decoded.length; position++) {
+        let found: boolean = false;
+        for (let i: number = 0; i < allowedIdentifierUnicodeRanges.length; i++) {
+            let allowedCharacters: number[] = allowedIdentifierUnicodeRanges[i];
+            if (decoded[position] >= allowedCharacters[0] && decoded[position] <= allowedCharacters[1]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
 }

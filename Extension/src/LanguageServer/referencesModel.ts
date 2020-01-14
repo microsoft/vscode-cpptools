@@ -103,7 +103,7 @@ export class ReferencesModel {
                 result.push(node);
             }
         }
-
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
         return result;
     }
 
@@ -145,7 +145,9 @@ export class ReferencesModel {
             let empty: TreeNode[] = [];
             return empty;
         }
-        return this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
+        let result: TreeNode[] = this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
+        return result;
     }
 
     // For rename, this.nodes will contain only ReferenceItems's
@@ -180,6 +182,7 @@ export class ReferencesModel {
                 }
             }
         });
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
         return result;
     }
 
@@ -198,6 +201,7 @@ export class ReferencesModel {
                 }
             }
         });
+        result.sort((a, b) => a.filename.localeCompare(b.filename));
         return result;
     }
 
