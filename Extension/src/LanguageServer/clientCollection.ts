@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as cpptools from './client';
-import * as path from 'path';
 import { getCustomConfigProviders } from './customProviders';
 
 const defaultClientKey: string = "@@default@@";
@@ -81,17 +80,8 @@ export class ClientCollection {
     }
 
     public checkOwnership(client: cpptools.Client, document: vscode.TextDocument): boolean {
-        let owners: cpptools.Client[] = [];
-        this.languageClients.forEach(languageClient => {
-            if (document.uri.fsPath.startsWith(languageClient.RootPath + path.sep)) {
-                owners.push(languageClient);
-            }
-        });
-        if (owners.length === 0) {
-            owners.push(this.activeClient);
-        }
 
-        return (owners[0] === client);  // TODO: we may want to pick the owner with the longest path?
+        return (this.getClientFor(document.uri) === client);
     }
 
     /**
