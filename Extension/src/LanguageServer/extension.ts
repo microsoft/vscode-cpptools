@@ -479,7 +479,9 @@ function realActivation(): void {
 
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
-    intervalTimer = global.setInterval(onInterval, 2500);
+    clients.ActiveClient.notifyWhenReady(() => {
+        intervalTimer = global.setInterval(onInterval, 2500);
+    });
 }
 
 export function updateLanguageConfigurations(): void {
