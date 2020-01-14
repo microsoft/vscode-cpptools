@@ -9,7 +9,7 @@ import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import { activateCppExtension } from '../testHelpers';
 
-const defaultTimeout: number = 60000;
+const defaultTimeout: number = 100000;
 
 suite("[Quick info test]", function(): void {
     let cpptools: apit.CppToolsTestApi;
@@ -24,15 +24,17 @@ suite("[Quick info test]", function(): void {
         cpptools = await apit.getCppToolsTestApi(api.Version.latest);
 
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
+        disposables.push(testHook);
+
         let testResult: any = new Promise<void>((resolve, reject) => {
-            disposables.push(testHook.StatusChanged(status => {
-                if (status === apit.Status.IntelliSenseReady) {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "quickInfo.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     resolve();
                 }
             }));
             setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
         });
-        disposables.push(testHook);
 
         // Start language server
         await vscode.commands.executeCommand("vscode.open", fileUri);
