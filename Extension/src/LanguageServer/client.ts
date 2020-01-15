@@ -1180,17 +1180,23 @@ export class DefaultClient implements Client {
 
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
-            this.clearCustomConfigurations();
             if (!this.configurationProvider) {
+                this.clearCustomConfigurations();
                 this.clearCustomBrowseConfiguration();
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
+            if (!currentProvider) {
+                this.clearCustomConfigurations();
                 this.clearCustomBrowseConfiguration();
+                return;
+             }
+             if (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) {
+                // If we are being called by a configuration provider other than the current one, ignore it.
                 return;
             }
 
+            this.clearCustomConfigurations();
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, null);
             });
