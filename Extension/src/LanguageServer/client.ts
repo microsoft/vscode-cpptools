@@ -2287,7 +2287,9 @@ export class DefaultClient implements Client {
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
-        if (this.languageClient !== undefined && this.configuration !== undefined) {
+        if (this.languageClient !== undefined && this.configuration !== undefined &&
+                // This check is required for when workspace folders are removed.
+                this.languageClient.initializeResult !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
         }
