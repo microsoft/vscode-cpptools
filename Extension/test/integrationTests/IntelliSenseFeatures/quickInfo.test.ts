@@ -8,9 +8,7 @@ import * as assert from 'assert';
 import * as os from 'os';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
-import { activateCppExtension } from '../testHelpers';
-
-const defaultTimeout: number = 100000;
+import * as testHelpers from '../testHelpers';
 
 suite("[Quick info test]", function(): void {
     let cpptools: apit.CppToolsTestApi;
@@ -20,9 +18,8 @@ suite("[Quick info test]", function(): void {
     let platform: string = "";
 
     suiteSetup(async function(): Promise<void> {
-        await activateCppExtension();
+        await testHelpers.activateCppExtension();
 
-        // TODO: create common function to start language server that accepts source file as input
         cpptools = await apit.getCppToolsTestApi(api.Version.latest);
         platform = os.platform();
         let testHook: apit.CppToolsTestHook = cpptools.getTestHook();
@@ -35,7 +32,7 @@ suite("[Quick info test]", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("Timeout: IntelliSenseStatusChanged event")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("Timeout: IntelliSenseStatusChanged event")); }, testHelpers.defaultTimeout);
         });
 
         // Start language server

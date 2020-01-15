@@ -5,6 +5,8 @@
 
 import * as vscode from 'vscode';
 
+export const defaultTimeout: number = 100000;
+
 export async function activateCppExtension(): Promise<void> {
     let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
     if (!extension.isActive) {

@@ -28,7 +28,7 @@ testRunner.configure({
     ui: 'tdd', 		// the TDD UI is being used in *.test.ts (suite, test, etc.)
     useColors: true, // colored output from test results
     fullStackTrace: true,
-    timeout: 60000
+    timeout: 120000
 });
 
 const logFolder: string = path.join(__dirname, ".logs");
@@ -36,7 +36,7 @@ const logFolder: string = path.join(__dirname, ".logs");
 if (!fs.existsSync(logFolder)) {
     fs.mkdirSync(logFolder);
 }
-const logFilePath: string = path.join(logFolder, "featuresTests.log");
+const logFilePath: string = path.join(logFolder, "intelliSenseFeaturesTests.log");
 subscribeToAllLoggers(message => fs.appendFileSync(logFilePath, message));
 
 module.exports = testRunner;

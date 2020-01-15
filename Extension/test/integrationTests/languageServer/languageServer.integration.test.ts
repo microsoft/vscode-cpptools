@@ -10,15 +10,11 @@ import * as util from '../../../src/common';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../../src/LanguageServer/configurations';
-
-const defaultTimeout: number = 100000;
+import * as testHelpers from '../testHelpers';
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
-        if (!extension.isActive) {
-            await extension.activate();
-        }
+        await testHelpers.activateCppExtension();
     });
 
     let defaultRules: vscode.OnEnterRule[] = [
@@ -192,7 +188,7 @@ suite("extensibility tests v3", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -286,7 +282,7 @@ suite("extensibility tests v2", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -363,7 +359,7 @@ suite("extensibility tests v1", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -437,7 +433,7 @@ suite("extensibility tests v0", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
