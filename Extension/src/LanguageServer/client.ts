@@ -1183,10 +1183,12 @@ export class DefaultClient implements Client {
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
             if (!this.configurationProvider) {
+                this.clearCustomConfigurations();
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
             if (!currentProvider) {
+                this.clearCustomConfigurations();
                 return;
              }
              if (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) {
@@ -1194,6 +1196,7 @@ export class DefaultClient implements Client {
                 return;
             }
 
+            this.clearCustomConfigurations();
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, null);
             });
@@ -1961,7 +1964,6 @@ export class DefaultClient implements Client {
         let newProvider: string = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
             if (this.configurationProvider) {
-                this.clearCustomConfigurations();
                 this.clearCustomBrowseConfiguration();
             }
             this.configurationProvider = newProvider;
