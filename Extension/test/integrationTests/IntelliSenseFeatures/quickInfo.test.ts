@@ -92,7 +92,7 @@ suite("[Quick info test]", function(): void {
         let expected: string = "";
         switch (platform) {
             case "win32":
-                expected = `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n\`\`\``;
+                expected = `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n`;
                 break;
             case "linux":
                 expected = `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`;
