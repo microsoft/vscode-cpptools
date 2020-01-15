@@ -180,7 +180,7 @@ interface GetDocumentSymbolRequestParams {
     uri: string;
 }
 
-interface WorkspaceSymbolParams {
+interface WorkspaceSymbolParams extends WorkspaceFolderParams {
     query: string;
 }
 
@@ -569,7 +569,8 @@ export class DefaultClient implements Client {
 
                         public async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
                             let params: WorkspaceSymbolParams = {
-                                query: query
+                                query: query,
+                                workspaceFolderUri: this.client.RootPath
                             };
 
                             return this.client.languageClient.sendRequest(GetSymbolInfoRequest, params)
