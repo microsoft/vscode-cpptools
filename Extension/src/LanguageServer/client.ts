@@ -1183,14 +1183,10 @@ export class DefaultClient implements Client {
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
             if (!this.configurationProvider) {
-                this.clearCustomConfigurations();
-                this.clearCustomBrowseConfiguration();
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
             if (!currentProvider) {
-                this.clearCustomConfigurations();
-                this.clearCustomBrowseConfiguration();
                 return;
              }
              if (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) {
@@ -1198,7 +1194,6 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            this.clearCustomConfigurations();
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, null);
             });
@@ -1965,6 +1960,11 @@ export class DefaultClient implements Client {
         this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
         let newProvider: string = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
+            if (this.configurationProvider)
+            {
+                this.clearCustomConfigurations();
+                this.clearCustomBrowseConfiguration();
+            }
             this.configurationProvider = newProvider;
             this.updateCustomBrowseConfiguration();
             this.updateCustomConfigurations();
@@ -2150,8 +2150,8 @@ export class DefaultClient implements Client {
                         .then(() => {
                             if (extensionId) {
                                 let provider: CustomConfigurationProvider1 = getCustomConfigProviders().get(extensionId);
-                                this.updateCustomConfigurations(provider);
                                 this.updateCustomBrowseConfiguration(provider);
+                                this.updateCustomConfigurations(provider);
                                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
                             } else {
                                 this.clearCustomConfigurations();
