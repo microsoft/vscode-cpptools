@@ -235,6 +235,7 @@ const IntervalTimerNotification: NotificationType<void, void> = new Notification
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
+const ClearCustomBrowseConfigurationNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomBrowseConfiguration');
 const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
@@ -1181,10 +1182,12 @@ export class DefaultClient implements Client {
         return this.notifyWhenReady(() => {
             this.clearCustomConfigurations();
             if (!this.configurationProvider) {
+                this.clearCustomBrowseConfiguration();
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
             if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
+                this.clearCustomBrowseConfiguration();
                 return;
             }
 
@@ -2108,6 +2111,10 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification));
     }
 
+    private clearCustomBrowseConfiguration(): void {
+        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification));
+    }
+
     /*********************************************
      * command handlers
      *********************************************/
@@ -2140,6 +2147,7 @@ export class DefaultClient implements Client {
                                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
                             } else {
                                 this.clearCustomConfigurations();
+                                this.clearCustomBrowseConfiguration();
                             }
                         });
                 });
