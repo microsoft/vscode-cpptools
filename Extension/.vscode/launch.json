@@ -116,7 +116,7 @@
 			"preLaunchTask": "Pretest"
 		},
 		{
-			"name": "Launch E2E tests",
+			"name": "Launch E2E intelliSense features tests",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
