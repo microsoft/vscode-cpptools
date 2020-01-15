@@ -1960,8 +1960,7 @@ export class DefaultClient implements Client {
         this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
         let newProvider: string = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
-            if (this.configurationProvider)
-            {
+            if (this.configurationProvider) {
                 this.clearCustomConfigurations();
                 this.clearCustomBrowseConfiguration();
             }
