@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import * as assert from 'assert';
-import os from 'os';
+import * as os from 'os';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import { activateCppExtension } from '../testHelpers';
