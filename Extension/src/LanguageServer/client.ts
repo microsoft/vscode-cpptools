@@ -959,58 +959,60 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
-        let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
-            || event.affectsConfiguration("editor.tokenColorCustomizations");
+        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
+        this.notifyWhenReady(() => {
+            let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
+                || event.affectsConfiguration("editor.tokenColorCustomizations");
 
-        let colorizationNeedsRefresh: boolean = colorizationNeedsReload
-            || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.dimInactiveRegions", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
+            let colorizationNeedsRefresh: boolean = colorizationNeedsReload
+                || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.dimInactiveRegions", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
 
-        let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
-        if (colorThemeChanged) {
-            let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
-            this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
-        }
+            let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
+            if (colorThemeChanged) {
+                let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
+                this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
+            }
 
-        if (colorizationNeedsReload) {
-            this.colorizationSettings.reload();
-        }
-        if (colorizationNeedsRefresh) {
-            let processedUris: vscode.Uri[] = [];
-            for (let e of vscode.window.visibleTextEditors) {
-                let uri: vscode.Uri = e.document.uri;
+            if (colorizationNeedsReload) {
+                this.colorizationSettings.reload();
+            }
+            if (colorizationNeedsRefresh) {
+                let processedUris: vscode.Uri[] = [];
+                for (let e of vscode.window.visibleTextEditors) {
+                    let uri: vscode.Uri = e.document.uri;
 
-                // Make sure we don't process the same file multiple times.
-                // colorizationState.onSettingsChanged ensures all visible text editors for that file get
-                // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
-                if (!processedUris.find(e => e === uri)) {
-                    processedUris.push(uri);
-                    let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
-                    if (colorizationState) {
-                        colorizationState.onSettingsChanged(uri);
+                    // Make sure we don't process the same file multiple times.
+                    // colorizationState.onSettingsChanged ensures all visible text editors for that file get
+                    // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
+                    if (!processedUris.find(e => e === uri)) {
+                        processedUris.push(uri);
+                        let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
+                        if (colorizationState) {
+                            colorizationState.onSettingsChanged(uri);
+                        }
                     }
                 }
             }
-        }
-        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
-        if (Object.keys(changedSettings).length > 0) {
-            if (changedSettings["commentContinuationPatterns"]) {
-                updateLanguageConfigurations();
+            if (Object.keys(changedSettings).length > 0) {
+                if (changedSettings["commentContinuationPatterns"]) {
+                    updateLanguageConfigurations();
+                }
+                if (changedSettings["clang_format_path"]) {
+                    let settings: CppSettings = new CppSettings(this.RootUri);
+                    this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
+                }
+                if (changedSettings["intelliSenseCachePath"]) {
+                    let settings: CppSettings = new CppSettings(this.RootUri);
+                    this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
+                }
+                this.configuration.onDidChangeSettings();
+                telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
             }
-            if (changedSettings["clang_format_path"]) {
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
-            }
-            if (changedSettings["intelliSenseCachePath"]) {
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
-            }
-            this.configuration.onDidChangeSettings();
-            telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
-        }
+        });
         return changedSettings;
     }
 
