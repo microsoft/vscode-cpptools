@@ -2226,7 +2226,10 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomBrowseConfiguration(): void {
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification));
+        let params: WorkspaceFolderParams = {
+            workspaceFolderUri: this.RootPath
+        };
+        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification, params));
     }
 
     /*********************************************
