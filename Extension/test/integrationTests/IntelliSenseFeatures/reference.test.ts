@@ -59,6 +59,7 @@ suite(`[Reference test]`, function(): void {
         let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         workspaceEdit.insert(fileUri, new vscode.Position(34, 5), "int y = func1();");
         await vscode.workspace.applyEdit(workspaceEdit);
+        await vscode.workspace.saveAll();
         await delay(10000);
 
         let afterEditResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
