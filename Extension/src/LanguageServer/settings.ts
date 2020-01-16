@@ -6,6 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
+import * as which from 'which';
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
@@ -30,7 +31,14 @@ export class CppSettings extends Settings {
         super("C_Cpp", resource);
     }
 
-    public get clangFormatPath(): string { return super.Section.get<string>("clang_format_path"); }
+    public get clangFormatPath(): string {
+        let path: string = super.Section.get<string>("clang_format_path");
+        if (!path) {
+            path = which.sync('clang-format', {nothrow: true});
+        }
+        return path;
+    }
+
     public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string { return super.Section.get<string>("clang_format_sortIncludes"); }
