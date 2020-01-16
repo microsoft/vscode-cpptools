@@ -19,7 +19,7 @@ suite(`[Reference test]`, function(): void {
     let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/references.cpp";
     let fileUri: vscode.Uri = vscode.Uri.file(path);
     let testHook: apit.CppToolsTestHook;
-    let getintelliSenseStatus: any;
+    let getIntelliSenseStatus: any;
     let document: vscode.TextDocument;
 
     suiteSetup(async function(): Promise<void> {
@@ -27,7 +27,7 @@ suite(`[Reference test]`, function(): void {
 
         cpptools = await apit.getCppToolsTestApi(api.Version.latest);
         testHook = cpptools.getTestHook();
-        getintelliSenseStatus = new Promise<void>((resolve, reject) => {
+        getIntelliSenseStatus = new Promise<void>((resolve, reject) => {
             disposables.push(testHook.IntelliSenseStatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "references.cpp" && result.status === apit.Status.IntelliSenseReady) {
@@ -42,7 +42,7 @@ suite(`[Reference test]`, function(): void {
         console.log("Open file: " + fileUri.toString());
         document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await getintelliSenseStatus;
+        await getIntelliSenseStatus;
     });
 
     test("[Find confirmed references of a symbol]", async () => {
@@ -56,7 +56,7 @@ suite(`[Reference test]`, function(): void {
         assert.deepEqual(declarationResult, functionCallResult);
     });
 
-    test("[Find references on local param]", async () => {
+    test("[Find references of local param]", async () => {
         // Get reference of local param: var1 in "int func1(float var1)"
         let result: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(21, 18)));
 
@@ -76,10 +76,7 @@ suite(`[Reference test]`, function(): void {
         let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         workspaceEdit.insert(fileUri, new vscode.Position(34, 5), "int y = func1();");
         await vscode.workspace.applyEdit(workspaceEdit);
-
-        //console.log("getintelliSenseStatus");
-        //await getintelliSenseStatus;
-        await delay(50000);
+        await getIntelliSenseStatus;
 
         let afterEditResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
         assert.equal(afterEditResult.length, 4);
