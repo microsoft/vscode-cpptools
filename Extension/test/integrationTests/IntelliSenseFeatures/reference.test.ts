@@ -45,7 +45,7 @@ suite(`[Reference test]`, function(): void {
         await getIntelliSenseStatus;
     });
 
-    test("[Find confirmed references of a symbol]", async () => {
+    test("[Find confirmed references of a symbol and then add new reference]", async () => {
         // Get reference of function declaration "int func1()"
         let declarationResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
         let functionCallResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(24, 21)));
@@ -54,23 +54,6 @@ suite(`[Reference test]`, function(): void {
         assertTextInLocation(document, expectedText, declarationResult);
         assertTextInLocation(document, expectedText, functionCallResult);
         assert.deepEqual(declarationResult, functionCallResult);
-    });
-
-    test("[Find references of local param]", async () => {
-        // Get reference of local param: var1 in "int func1(float var1)"
-        let result: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(21, 18)));
-
-        let expectedText: string = "var1";
-        assertTextInLocation(document, expectedText, result);
-        assert.equal(result.length, 2);
-    });
-
-    test("[Add new call to a function and find reference]", async () => {
-        // Get reference of "int func1()"declaration
-        let beforeEditResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
-        let expectedText: string = "func1";
-        assert.equal(beforeEditResult.length, 3);
-        assertTextInLocation(document, expectedText, beforeEditResult);
 
         // Add another reference to "func1()"
         let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -83,6 +66,34 @@ suite(`[Reference test]`, function(): void {
 
         assertTextInLocation(document, expectedText, afterEditResult);
     });
+
+    test("[Find references of local param]", async () => {
+        // Get reference of local param: var1 in "int func1(float var1)"
+        let result: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(21, 18)));
+
+        let expectedText: string = "var1";
+        assertTextInLocation(document, expectedText, result);
+        assert.equal(result.length, 2);
+    });
+
+    // test("[Add new call to a function and find reference]", async () => {
+    //     // Get reference of "int func1()"declaration
+    //     let beforeEditResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
+    //     let expectedText: string = "func1";
+    //     assert.equal(beforeEditResult.length, 3);
+    //     assertTextInLocation(document, expectedText, beforeEditResult);
+
+    //     // Add another reference to "func1()"
+    //     let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+    //     workspaceEdit.insert(fileUri, new vscode.Position(34, 5), "int y = func1();");
+    //     await vscode.workspace.applyEdit(workspaceEdit);
+    //     await getIntelliSenseStatus;
+
+    //     let afterEditResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
+    //     assert.equal(afterEditResult.length, 4);
+
+    //     assertTextInLocation(document, expectedText, afterEditResult);
+    // });
 });
 
 function assertTextInLocation(document: vscode.TextDocument, expectedText: string, Locations: vscode.Location[], displayLog: boolean = false): void {
