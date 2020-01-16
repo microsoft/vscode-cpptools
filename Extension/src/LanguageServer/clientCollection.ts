@@ -184,6 +184,7 @@ export class ClientCollection {
 
     public dispose(): Thenable<void> {
         let promises: Thenable<void>[] = [];
+        this.disposables.forEach((d: vscode.Disposable) => d.dispose());
 
         // this.defaultClient is already in this.languageClients, so do not call dispose() on it.
         this.defaultClient = undefined;

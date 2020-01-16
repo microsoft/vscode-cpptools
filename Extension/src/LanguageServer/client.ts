@@ -44,6 +44,7 @@ const configProviderTimeout: number = 2000;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
+let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any>;
 let compilerDefaults: configs.CompilerDefaults;
 
@@ -457,6 +458,7 @@ export class DefaultClient implements Client {
             let firstClient: boolean = false;
             if (!languageClient) {
                 languageClient = this.createLanguageClient(allClients);
+                clientCollection = allClients;
                 languageClient.registerProposedFeatures();
                 languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
                 util.setProgress(util.getProgressExecutableStarted());
@@ -2303,16 +2305,14 @@ export class DefaultClient implements Client {
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
-        if (this.languageClient !== undefined && this.configuration !== undefined &&
-                // This check is required for when workspace folders are removed.
-                this.languageClient.initializeResult !== undefined) {
+        if (this.languageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
         }
     }
 
     public dispose(): Thenable<void> {
-        let promise: Thenable<void> = (this.languageClient) ? this.languageClient.stop() : Promise.resolve();
+        let promise: Thenable<void> = (this.languageClient && clientCollection.Count === 0) ? this.languageClient.stop() : Promise.resolve();
         return promise.then(() => {
 
             this.colorizationState.forEach(colorizationState => {
