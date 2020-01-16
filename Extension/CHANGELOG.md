@@ -7,6 +7,9 @@
 * Fix an issue in which `Build and Debug Active File` would fail to detect a compiler, without a compiler present in `compilerPath`.  [#4834](https://github.com/microsoft/vscode-cpptools/issues/4834)
 * Fix a crash when failing to launch external executables on Linux and Mac.
 
+### Enhancements
+* If clang-format is found in the environment path, that version will take precedence over the copy of clang-format bundled with the extension. [#3569](https://github.com/microsoft/vscode-cpptools/issues/3569)
+
 ## Version 0.26.3-insiders3: January 8, 2020
 ### Bug Fixes
 * Improve memory usage in projects with a large number of files. [#3326](https://github.com/microsoft/vscode-cpptools/issues/3326)
