@@ -4,7 +4,7 @@
 ### Bug Fixes
 * Update dependent modules to address a security warning due to use of a deprecated API.  [#4381](https://github.com/microsoft/vscode-cpptools/issues/4381)
 * Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed.  [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
-* Fix an issue in which `Build and Debug Active File` would fail to detect a compiler, despite a compiler present in `compilerPath`.  [#4834](https://github.com/microsoft/vscode-cpptools/issues/4834)
+* Fix an issue in which `Build and Debug Active File` would fail to detect a compiler, without a compiler present in `compilerPath`.  [#4834](https://github.com/microsoft/vscode-cpptools/issues/4834)
 * Fix a crash when failing to launch external executables on Linux and Mac.
 
 ## Version 0.26.3-insiders3: January 8, 2020
