@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.3-insiders4: January 17, 2020
+## Version 0.26.3-insiders4: January 16, 2020
 ### Bug Fixes
 * Update dependent modules to address a security warning due to use of a deprecated API.  [#4381](https://github.com/microsoft/vscode-cpptools/issues/4381)
 * Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed.  [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
