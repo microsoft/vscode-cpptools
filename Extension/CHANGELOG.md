@@ -6,7 +6,7 @@
 * Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed.  [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
 * Fix an issue in which `Build and Debug Active File` would fail to detect a compiler, without a compiler present in `compilerPath`.  [#4834](https://github.com/microsoft/vscode-cpptools/issues/4834)
 * Fix a crash when failing to launch external executables on Linux and Mac.
-* Add a version check for `-break-insert` so later versions of `lldb-mi` can be used as a `midebugger`.
+* Add a version check for `-break-insert` so later versions of `lldb-mi` can be used as a `midebugger`. [#946](https://github.com/microsoft/MIEngine/issues/946)
 
 ### Enhancements
 * If clang-format is found in the environment path, that version will take precedence over the copy of clang-format bundled with the extension. [#3569](https://github.com/microsoft/vscode-cpptools/issues/3569)
