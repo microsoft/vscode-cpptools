@@ -1,45 +1,30 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.3-insiders4: January 16, 2020
+## Version 0.26.3: January 21, 2020
 ### Bug Fixes
-* Update dependent modules to address a security warning due to use of a deprecated API.  [#4381](https://github.com/microsoft/vscode-cpptools/issues/4381)
-* Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed.  [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
-* Fix an issue in which `Build and Debug Active File` would fail to detect a compiler, without a compiler present in `compilerPath`.  [#4834](https://github.com/microsoft/vscode-cpptools/issues/4834)
-* Fix a crash when failing to launch external executables on Linux and Mac.
-* Add a version check for `-break-insert` so later versions of `lldb-mi` can be used as a `midebugger`. [MIEngine#946](https://github.com/microsoft/MIEngine/issues/946)
-
-### Enhancements
-* If clang-format is found in the environment path, that version will take precedence over the copy of clang-format bundled with the extension. [#3569](https://github.com/microsoft/vscode-cpptools/issues/3569)
-
-## Version 0.26.3-insiders3: January 8, 2020
-### Bug Fixes
+* IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)
 * Improve memory usage in projects with a large number of files. [#3326](https://github.com/microsoft/vscode-cpptools/issues/3326)
+* Fix a crash when failing to launch external executables on Linux and Mac. [#3607](https://github.com/microsoft/vscode-cpptools/issues/3607)
+* Update output of `C/C++: Log Diagnostics` to include the correct set of defines when custom configurations or compile commands are used. [#3631](https://github.com/microsoft/vscode-cpptools/issues/3631) [#4270](https://github.com/microsoft/vscode-cpptools/issues/4270)
+* Fix Insiders channel not working on remote targets. [#3874](https://github.com/microsoft/vscode-cpptools/issues/3874)
 * Fix `compile_commands.json` prompt appearing when a configuration provider is used. [#3972](https://github.com/microsoft/vscode-cpptools/issues/3972)
 * Improve IntelliSense performance with range-v3. [#4414](https://github.com/microsoft/vscode-cpptools/issues/4414)
-* Fix regression crashes. [#3607](https://github.com/microsoft/vscode-cpptools/issues/3607), [#4770](https://github.com/microsoft/vscode-cpptools/issues/4770)
-* Fix compiler querying with more than 40 `compilerArgs`. [#4791](https://github.com/microsoft/vscode-cpptools/issues/4791)
-* Fix files being removed from the database on startup with a configuration provider. [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
-* Fix a bug that could cause the browse database threads to get stuck.
-
-## Version 0.26.3-insiders2: December 18, 2019
-### Bug Fixes
-* Fix IntelliSense regression crashes. [#4754](https://github.com/microsoft/vscode-cpptools/issues/4754)
-* Fix Insiders channel not auto-downgrading after an Insiders vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
-* Fix Insiders channel not working on remote targets. [#3874](https://github.com/microsoft/vscode-cpptools/issues/3874)
-
-## Version 0.26.3-insiders: December 16, 2019
-### Bug Fixes
-* Fix clang-cl detection for system includes and defines.
-* IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)
-* Update output of `C/C++: Log Diagnostics` to include the correct set of defines when custom configurations or compile commands are used. [#3631](https://github.com/microsoft/vscode-cpptools/issues/3631) [#4270](https://github.com/microsoft/vscode-cpptools/issues/4270)
-* Fix an issue in which failure to invoke a compiler could result in a hang on Linux and Mac. [#4627](https://github.com/microsoft/vscode-cpptools/issues/4627)
 * Fix template members not being nested under the template type in the Outline view. [#4466](https://github.com/microsoft/vscode-cpptools/issues/4466)
+* Fix an issue in which failure to invoke a compiler could result in a hang on Linux and Mac. [#4627](https://github.com/microsoft/vscode-cpptools/issues/4627)
 * Fix custom configurations sometimes not being applied to headers. [#4649](https://github.com/microsoft/vscode-cpptools/issues/4649)
 * Fix headers opening into header-only TU's instead of TU's for candidate source files. [#4696](https://github.com/microsoft/vscode-cpptools/issues/4696)
 * Fix the missing description of `C_Cpp.clang_format_style`.
   * @Enna1 [PR 4734](https://github.com/microsoft/vscode-cpptools/pull/4734)
+* Fix Insiders channel not auto-downgrading after an Insiders vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
+* Fix compiler querying with more than 40 `compilerArgs`. [#4791](https://github.com/microsoft/vscode-cpptools/issues/4791)
+* Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed. [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
+* Fix an issue in which `Build and Debug Active File` would fail to detect a compiler, without a compiler present in `compilerPath`. [#4834](https://github.com/microsoft/vscode-cpptools/issues/4834)
+* Add a version check for `-break-insert` so later versions of `lldb-mi` can be used as a `midebugger`. [MIEngine#946](https://github.com/microsoft/MIEngine/issues/946)
+* Fix clang-cl detection for system includes and defines.
+* Fix a bug that could cause the browse database threads to get stuck.
 
 ### Enhancements
+* If clang-format is found in the environment path, that version will take precedence over the copy of clang-format bundled with the extension. [#3569](https://github.com/microsoft/vscode-cpptools/issues/3569)
 * When tag parsing is complete, and includer/includee relationships become available, header-only TU's will be replaced with TU's for candidate source files, if available.
 
 ## Version 0.26.2: December 2, 2019
@@ -78,7 +63,7 @@
 ## Version 0.26.0: October 15, 2019
 ### New Features
 * Add localization support (translated text) via `Configure Display Language`. [#7](https://github.com/microsoft/vscode-cpptools/issues/7)
-* Add `Rename Symbol` with a pending rename UI. [#296](https://github.com/microsoft/vscode-cpptools/issues/296),  [PR #4277](https://github.com/microsoft/vscode-cpptools/pull/4277)
+* Add `Rename Symbol` with a pending rename UI. [#296](https://github.com/microsoft/vscode-cpptools/issues/296), [PR #4277](https://github.com/microsoft/vscode-cpptools/pull/4277)
 * Add support for navigation breadcrumbs and nested symbols in the Outline view (and removed the Navigation status bar item). [#2230](https://github.com/microsoft/vscode-cpptools/issues/2230)
 * Add support for C++/CX (`/ZW`, `/ZW:nostdlib`, `/FI`, `/FU`, and `/AI` compiler arguments). [#3039](https://github.com/microsoft/vscode-cpptools/issues/3039)
 * Add a tree view UI for the other C++ references results. [#4079](https://github.com/microsoft/vscode-cpptools/issues/4079)
@@ -163,7 +148,7 @@
 * Fix debugger can't debug file whose folder path includes a parenthesis. [#4030](https://github.com/microsoft/vscode-cpptools/issues/4030)
 * Fix duplicate content appearing after formatting of a new file. [#4091](https://github.com/microsoft/vscode-cpptools/issues/4091)
 * Fix `files.exclude` bug on Windows. [#4095](https://github.com/microsoft/vscode-cpptools/issues/4095)
-* Fix NullReferenceException when `cwd` is null.  [MIEngine#911](https://github.com/microsoft/MIEngine/issues/911)
+* Fix NullReferenceException when `cwd` is null. [MIEngine#911](https://github.com/microsoft/MIEngine/issues/911)
 * Fix wrong IntelliSense for C++ types after editing within a function and after a lambda.
 
 ## Version 0.24.1: July 22, 2019
