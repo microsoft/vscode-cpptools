@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.26.3: January 21, 2020
+## Version 0.26.3: January 22, 2020
 ### Bug Fixes
 * IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)
 * Improve memory usage in projects with a large number of files. [#3326](https://github.com/microsoft/vscode-cpptools/issues/3326)
