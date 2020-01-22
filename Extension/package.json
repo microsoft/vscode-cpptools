@@ -1812,8 +1812,8 @@
         "darwin"
       ],
       "binaries": [
-        "./bin/cpptools.darwin",
-        "./bin/cpptools-srv.darwin"
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
       ]
     },
     {

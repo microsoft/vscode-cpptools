@@ -1328,8 +1328,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const process1: string = "cpptools-srv.darwin\t";
-    const process2: string = "cpptools.darwin\t";
+    const process1: string = "cpptools-srv\t";
+    const process2: string = "cpptools\t";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
         data = `${process1}${binaryVersion}\n${data}`;

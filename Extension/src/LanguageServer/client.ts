@@ -2275,9 +2275,7 @@ export class DefaultClient implements Client {
 function getLanguageServerFileName(): string {
     let extensionProcessName: string = 'cpptools';
     let plat: NodeJS.Platform = process.platform;
-    if (plat === 'darwin') {
-        extensionProcessName += '.darwin';
-    } else if (plat === 'win32') {
+    if (plat === 'win32') {
         extensionProcessName += '.exe';
     } else {
         throw "Invalid Platform";
