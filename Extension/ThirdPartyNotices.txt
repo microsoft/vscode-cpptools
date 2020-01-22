@@ -224,8 +224,9 @@ the licensed code:
 
 -------------------------------------------------------------------
 
-glob 7.1.4 - ISC
+glob 7.1.6 - ISC
 https://github.com/isaacs/node-glob#readme
+Copyright (c) Isaac Z. Schlueter and Contributors
 
 The ISC License
 
@@ -299,6 +300,31 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
+
+
+-------------------------------------------------------------------
+
+-------------------------------------------------------------------
+
+isexe 2.0.0 - ISC
+https://github.com/isaacs/isexe#readme
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
 -------------------------------------------------------------------
@@ -384,6 +410,31 @@ semver 5.7.1 - ISC
 https://github.com/npm/node-semver#readme
 Copyright Isaac Z.
 Copyright Isaac Z. Schlueter
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+-------------------------------------------------------------------
+
+-------------------------------------------------------------------
+
+which 2.0.2 - ISC
+https://github.com/isaacs/node-which#readme
 Copyright (c) Isaac Z. Schlueter and Contributors
 
 The ISC License
@@ -901,8 +952,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 -------------------------------------------------------------------
 
-jsonc-parser 2.1.1 - MIT
-https://github.com/Microsoft/node-jsonc-parser#readme
+jsonc-parser 2.2.0 - MIT
+https://github.com/microsoft/node-jsonc-parser#readme
 Copyright (c) Microsoft
 Copyright 2018, Microsoft
 Copyright (c) Microsoft Corporation.
@@ -992,7 +1043,7 @@ THE SOFTWARE.
 
 -------------------------------------------------------------------
 
-ms 2.0.0 - MIT
+ms 2.1.2 - MIT
 https://github.com/zeit/ms#readme
 Copyright (c) 2016 Zeit, Inc.
 
@@ -1023,7 +1074,7 @@ SOFTWARE.
 
 -------------------------------------------------------------------
 
-ms 2.1.2 - MIT
+ms 2.0.0 - MIT
 https://github.com/zeit/ms#readme
 Copyright (c) 2016 Zeit, Inc.
 
@@ -1213,7 +1264,7 @@ SOFTWARE.
 
 -------------------------------------------------------------------
 
-vscode-cpptools 3.0.1 - MIT
+vscode-cpptools 3.1.0 - MIT
 https://github.com/Microsoft/vscode-cpptools-api#readme
 Copyright (c) Microsoft Corporation.
 
@@ -1235,7 +1286,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 -------------------------------------------------------------------
 
-vscode-debugadapter 1.36.0 - MIT
+vscode-debugadapter 1.37.1 - MIT
 https://github.com/Microsoft/vscode-debugadapter-node#readme
 Copyright (c) Microsoft Corporation.
 
@@ -1256,8 +1307,9 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 -------------------------------------------------------------------
 
-vscode-debugprotocol 1.36.0 - MIT
+vscode-debugprotocol 1.37.0 - MIT
 https://github.com/Microsoft/vscode-debugadapter-node#readme
+Copyright (c) Microsoft Corporation.
 
 Copyright (c) Microsoft Corporation
 
@@ -1480,22 +1532,7 @@ SOFTWARE.
 
 -------------------------------------------------------------------
 
--------------------------------------------------------------------
 
-xmldom 0.1.27 - LGPL-2.0 OR MIT
-https://github.com/jindw/xmldom
-
-You can choose any one of those:
-
-The MIT License (MIT):
-
-link:http://opensource.org/licenses/MIT
-
-LGPL:
-http://www.gnu.org/licenses/lgpl.html
-
-
--------------------------------------------------------------------
 
 
 -------------------------------------------------------------------
