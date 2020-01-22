@@ -89,7 +89,7 @@
 	"terminating_child_process": "Untergeordneter Prozess wird beendet: {0}",
 	"still_alive_killing": "Noch aktiv, wird beendet...",
 	"giving_up": "Wird aufgegeben.",
-	"not_exited_yet": "wurde noch nicht beendet. Ruhezustand für {0} Millisekunden, anschließend wird der Vorgang wiederholt.",
+	"not_exited_yet": "Der Prozess wurde noch nicht beendet. Ruhezustand für {0} Millisekunden, anschließend wird der Vorgang wiederholt.",
 	"failed_to_spawn_process": "Fehler beim Erzeugen des Prozesses. Fehler: {0} ({1})",
 	"offering_completion": "Vervollständigung wird angeboten.",
 	"compiler_from_compiler_path": "Es wird versucht, Standardwerte vom Compiler in der Eigenschaft \"compilerPath\" abzurufen: {0}",
