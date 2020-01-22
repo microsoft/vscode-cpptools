@@ -1709,7 +1709,6 @@
     "translations-export": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-export",
     "translations-generate": "node ./tools/prepublish.js && gulp translations-generate",
     "translations-import": "node ./tools/prepublish.js && gulp translations-import",
-    "postinstall": "node ./node_modules/vscode/bin/install",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "node ./tools/prepublish.js && tsc -p test.tsconfig.json",
     "pr-check": "node ./tools/prepublish.js && gulp pr-check",
