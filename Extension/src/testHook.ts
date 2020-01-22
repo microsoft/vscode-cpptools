@@ -4,25 +4,34 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CppToolsTestHook, Status } from 'vscode-cpptools/out/testApi';
+import { CppToolsTestHook, Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as vscode from 'vscode';
 
 export class TestHook implements CppToolsTestHook {
+    private intelliSenseStatusChangedEvent: vscode.EventEmitter<IntelliSenseStatus> = new vscode.EventEmitter<IntelliSenseStatus>();
     private statusChangedEvent: vscode.EventEmitter<Status> = new vscode.EventEmitter<Status>();
 
+    // The StatusChanged event is deprecated in CppToolsTestHook API.
     public get StatusChanged(): vscode.Event<Status> {
         return this.statusChangedEvent.event;
     }
 
-    public get valid(): boolean {
-        return !!this.statusChangedEvent;
+    public get IntelliSenseStatusChanged(): vscode.Event<IntelliSenseStatus> {
+        return this.intelliSenseStatusChangedEvent.event;
     }
 
-    public updateStatus(status: Status): void {
-        this.statusChangedEvent.fire(status);
+    public get valid(): boolean {
+        return !!this.intelliSenseStatusChangedEvent && !!this.statusChangedEvent;
+    }
+
+    public updateStatus(status: IntelliSenseStatus): void {
+        this.intelliSenseStatusChangedEvent.fire(status);
+        this.statusChangedEvent.fire(status.status);
     }
 
     public dispose(): void {
+        this.intelliSenseStatusChangedEvent.dispose();
+        this.intelliSenseStatusChangedEvent = null;
         this.statusChangedEvent.dispose();
         this.statusChangedEvent = null;
     }

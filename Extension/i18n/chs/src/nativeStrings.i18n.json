@@ -89,7 +89,7 @@
 	"terminating_child_process": "正在终止子进程: {0}",
 	"still_alive_killing": "仍处于活动状态，正在中止...",
 	"giving_up": "放弃",
-	"not_exited_yet": "尚未退出。将休眠 {0} 毫秒，然后重试",
+	"not_exited_yet": "尚未退出。将休眠 {0} 毫秒，然后重试。",
 	"failed_to_spawn_process": "未能生成进程。错误: {0}({1})",
 	"offering_completion": "提供完成",
 	"compiler_from_compiler_path": "正在尝试从 \"compilerPath\" 属性中的编译器获取默认值:“{0}”",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "文件路径 {0} 无效",
 	"cant_create_intellisense_client_for": "无法为 {0} 创建 IntelliSense 客户端",
 	"suffix_declaration": "声明",
-	"suffix_type_alias": "类型别名"
+	"suffix_type_alias": "类型别名",
+	"fallback_to_32_bit_mode": "编译器不支持 64 位。请回退到 32 位 intelliSenseMode。",
+	"fallback_to_64_bit_mode": "编译器不支持 32 位。请回退到 64 位 intelliSenseMode。",
+	"fallback_to_32_bit_mode2": "未能查询编译器。请回退到 32 位 intelliSenseMode。",
+	"fallback_to_64_bit_mode2": "未能查询编译器。请回退到 64 位 intelliSenseMode。",
+	"fallback_to_no_bitness": "未能查询编译器。请回退到无位数。",
+	"intellisense_client_creation_aborted": "已中止创建 IntelliSense 客户端: {0}"
 }

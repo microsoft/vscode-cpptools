@@ -1,31 +1,58 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.26.3: January 22, 2020
+### Bug Fixes
+* IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)
+* Improve memory usage in projects with a large number of files. [#3326](https://github.com/microsoft/vscode-cpptools/issues/3326)
+* Fix a crash when failing to launch external executables on Linux and Mac. [#3607](https://github.com/microsoft/vscode-cpptools/issues/3607)
+* Update output of `C/C++: Log Diagnostics` to include the correct set of defines when custom configurations or compile commands are used. [#3631](https://github.com/microsoft/vscode-cpptools/issues/3631) [#4270](https://github.com/microsoft/vscode-cpptools/issues/4270)
+* Fix Insiders channel not working on remote targets. [#3874](https://github.com/microsoft/vscode-cpptools/issues/3874)
+* Fix `compile_commands.json` prompt appearing when a configuration provider is used. [#3972](https://github.com/microsoft/vscode-cpptools/issues/3972)
+* Improve IntelliSense performance with range-v3. [#4414](https://github.com/microsoft/vscode-cpptools/issues/4414)
+* Fix template members not being nested under the template type in the Outline view. [#4466](https://github.com/microsoft/vscode-cpptools/issues/4466)
+* Fix an issue in which failure to invoke a compiler could result in a hang on Linux and Mac. [#4627](https://github.com/microsoft/vscode-cpptools/issues/4627)
+* Fix custom configurations sometimes not being applied to headers. [#4649](https://github.com/microsoft/vscode-cpptools/issues/4649)
+* Fix headers opening into header-only TU's instead of TU's for candidate source files. [#4696](https://github.com/microsoft/vscode-cpptools/issues/4696)
+* Fix the missing description of `C_Cpp.clang_format_style`.
+  * @Enna1 [PR 4734](https://github.com/microsoft/vscode-cpptools/pull/4734)
+* Fix Insiders channel not auto-downgrading after an Insiders vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
+* Fix compiler querying with more than 40 `compilerArgs`. [#4791](https://github.com/microsoft/vscode-cpptools/issues/4791)
+* Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed. [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
+* Fix an issue in which `Build and Debug Active File` would fail to detect a compiler, without a compiler present in `compilerPath`. [#4834](https://github.com/microsoft/vscode-cpptools/issues/4834)
+* Add a version check for `-break-insert` so later versions of `lldb-mi` can be used as a `midebugger`. [MIEngine#946](https://github.com/microsoft/MIEngine/issues/946)
+* Fix clang-cl detection for system includes and defines.
+* Fix a bug that could cause the browse database threads to get stuck.
+
+### Enhancements
+* If clang-format is found in the environment path, that version will take precedence over the copy of clang-format bundled with the extension. [#3569](https://github.com/microsoft/vscode-cpptools/issues/3569)
+* When tag parsing is complete, and includer/includee relationships become available, header-only TU's will be replaced with TU's for candidate source files, if available.
+
 ## Version 0.26.2: December 2, 2019
 ### Enhancements
 * Reworked how a source file is selected for TU creation when opening a header file. [#2856](https://github.com/microsoft/vscode-cpptools/issues/2856)
 * Updated the default value of the `C_Cpp.intelliSenseCachePath` setting to a path under `XDG_CACHE_HOME` on Linux, or `~/Library/Cache` on MacOS. [#3979](https://github.com/microsoft/vscode-cpptools/issues/3979)
 * Reset memory usage of the IntelliSense process if it grows beyond a threshold. [#4119](https://github.com/microsoft/vscode-cpptools/issues/4119)
 * Add validation that the new symbol name provided to 'Rename Symbol' is a valid identifier. Add the setting `C_Cpp.renameRequiresIdentifier` to allow that verification to be disabled. [#4409](https://github.com/microsoft/vscode-cpptools/issues/4409)
-* Enable setting of breakpoints in CUDA sources. [PR #4585](https://github.com/microsoft/vscode-cpptools/pull/4585)
-  * Paul Taylor (@trxcllnt)
+* Enable setting of breakpoints in CUDA sources.
+  * Paul Taylor (@trxcllnt) [PR #4585](https://github.com/microsoft/vscode-cpptools/pull/4585)
 * Deferred TU creation until the file is visible in the editor. This avoids the overhead of TU creation when the file is opened by VS Code internally for IntelliSense operations. [#4458](https://github.com/microsoft/vscode-cpptools/issues/4458)
 
 ### Bug Fixes
 * Fix child process creation when the Windows code page is set to a language with non-ASCII characters and there are non-ASCII characters in the extension's install path. [#1560](https://github.com/microsoft/vscode-cpptools/issues/1560)
 * Fix path canonicalization of UNC paths to avoid duplicate files opening with different casing. [#2528](https://github.com/microsoft/vscode-cpptools/issues/2528), [#3980](https://github.com/microsoft/vscode-cpptools/issues/3980)
-* Fix an issue in which a header may be opened without IntelliSense due to creation of a TU from a source file that includes the header in an inactive region. [#4320](https://github.com/microsoft/vscode-cpptools/issues/4320)
-* Fix a hang in the extension process that can occur when using a scope named 'interface'.  [#4470](https://github.com/microsoft/vscode-cpptools/issues/4470)
+* Fix header opening without IntelliSense due to creation of a TU from a source file that includes the header in an inactive region. [#4320](https://github.com/microsoft/vscode-cpptools/issues/4320)
+* Fix a hang in the extension process that can occur when using a scope named 'interface'. [#4470](https://github.com/microsoft/vscode-cpptools/issues/4470)
 * Fix an issue with the Rename UI that could cause the rename to not be applied. [#4504](https://github.com/microsoft/vscode-cpptools/issues/4504)
-* Show an error message when a Rename fails due to the symbol not being found.  [#4510](https://github.com/microsoft/vscode-cpptools/issues/4510)
-* Fix an issue with `launch.json` creation due to localized strings containing quotes. [#4526](https://github.com/microsoft/vscode-cpptools/issues/4526)
-* Fix an issue with configuration error squiggles not being applied unless the setting was set in both `c_cpp_properties.json` and `settings.json`. [PR #4538](https://github.com/microsoft/vscode-cpptools/pull/4538)
-* Fix document symbol for outline view and breadcrumbs on Windows 7. [#4536](https://github.com/microsoft/vscode-cpptools/issues/4536).
-* Add support for `ms-vscode.cmake-tools` configurationProvider id. [#4586](https://github.com/microsoft/vscode-cpptools/issues/4586).
-* Fix an issue in which cancellation of Find All References could result in an exception. [#2710](https://github.com/microsoft/vscode-cpptools/issues/2710)
-* Fix sort order of files in Find All References and Rename UI. [#4615](https://github.com/microsoft/vscode-cpptools/issues/4615)
-* Fix an issue in which localized Chinese strings would not be displayed on systems with case-sensitive file systems. [#4619](https://github.com/microsoft/vscode-cpptools/issues/4619)
-* Fix an issue in which files with an extention of `.H` were not correctly associated with C++. [#4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
-* Fix an issue in which -m64 or -m32 were not being passed to gcc, causing the reported system includes and system defines to not match the requested `intelliSenseMode`. [#4635](https://github.com/microsoft/vscode-cpptools/issues/4635)
+* Show an error message when a Rename fails due to the symbol not being found. [#4510](https://github.com/microsoft/vscode-cpptools/issues/4510)
+* Fix `launch.json` creation due to localized strings containing quotes. [#4526](https://github.com/microsoft/vscode-cpptools/issues/4526)
+* Fix configuration error squiggles not being applied unless the setting was set in both `c_cpp_properties.json` and `settings.json`. [PR #4538](https://github.com/microsoft/vscode-cpptools/pull/4538)
+* Fix document symbol for Outline view and breadcrumbs on Windows 7. [#4536](https://github.com/microsoft/vscode-cpptools/issues/4536).
+* Add support for `"ms-vscode.cmake-tools"` `configurationProvider` id. [#4586](https://github.com/microsoft/vscode-cpptools/issues/4586).
+* Fix cancellation of Find All References sometimes resulting in an exception. [#2710](https://github.com/microsoft/vscode-cpptools/issues/2710)
+* Fix the sort order of files in the Find All References and Rename UI's. [#4615](https://github.com/microsoft/vscode-cpptools/issues/4615)
+* Fix localized Chinese strings not displaying on systems with case-sensitive file systems. [#4619](https://github.com/microsoft/vscode-cpptools/issues/4619)
+* Fix files with an extention of `.H` not correctly associating with C++. [#4632](https://github.com/microsoft/vscode-cpptools/issues/4632)
+* Fix -m64 or -m32 not being passed to gcc, causing the reported system includes and system defines to not match the requested `intelliSenseMode`. [#4635](https://github.com/microsoft/vscode-cpptools/issues/4635)
 
 ## Version 0.26.1: October 28, 2019
 ### Bug Fixes
@@ -36,7 +63,7 @@
 ## Version 0.26.0: October 15, 2019
 ### New Features
 * Add localization support (translated text) via `Configure Display Language`. [#7](https://github.com/microsoft/vscode-cpptools/issues/7)
-* Add `Rename Symbol` with a pending rename UI. [#296](https://github.com/microsoft/vscode-cpptools/issues/296),  [PR #4277](https://github.com/microsoft/vscode-cpptools/pull/4277)
+* Add `Rename Symbol` with a pending rename UI. [#296](https://github.com/microsoft/vscode-cpptools/issues/296), [PR #4277](https://github.com/microsoft/vscode-cpptools/pull/4277)
 * Add support for navigation breadcrumbs and nested symbols in the Outline view (and removed the Navigation status bar item). [#2230](https://github.com/microsoft/vscode-cpptools/issues/2230)
 * Add support for C++/CX (`/ZW`, `/ZW:nostdlib`, `/FI`, `/FU`, and `/AI` compiler arguments). [#3039](https://github.com/microsoft/vscode-cpptools/issues/3039)
 * Add a tree view UI for the other C++ references results. [#4079](https://github.com/microsoft/vscode-cpptools/issues/4079)
@@ -121,7 +148,7 @@
 * Fix debugger can't debug file whose folder path includes a parenthesis. [#4030](https://github.com/microsoft/vscode-cpptools/issues/4030)
 * Fix duplicate content appearing after formatting of a new file. [#4091](https://github.com/microsoft/vscode-cpptools/issues/4091)
 * Fix `files.exclude` bug on Windows. [#4095](https://github.com/microsoft/vscode-cpptools/issues/4095)
-* Fix NullReferenceException when `cwd` is null.  [MIEngine#911](https://github.com/microsoft/MIEngine/issues/911)
+* Fix NullReferenceException when `cwd` is null. [MIEngine#911](https://github.com/microsoft/MIEngine/issues/911)
 * Fix wrong IntelliSense for C++ types after editing within a function and after a lambda.
 
 ## Version 0.24.1: July 22, 2019

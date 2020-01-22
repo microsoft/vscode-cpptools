@@ -89,7 +89,7 @@
 	"terminating_child_process": "arrêt du processus enfant : {0}",
 	"still_alive_killing": "toujours actif, suppression...",
 	"giving_up": "abandon",
-	"not_exited_yet": "pas encore arrêté. Se met en veille pendant {0} millisecondes avant de réessayer",
+	"not_exited_yet": "pas encore arrêté. Va se mettre en veille pendant {0} millisecondes avant de réessayer.",
 	"failed_to_spawn_process": "La génération du processus a échoué. Erreur : {0} ({1})",
 	"offering_completion": "Complétion proposée",
 	"compiler_from_compiler_path": "Tentative d'obtention des valeurs par défaut du compilateur dans la propriété \"compilerPath\" : '{0}'",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "Chemin de fichier {0} non valide",
 	"cant_create_intellisense_client_for": "Impossible de créer le client IntelliSense pour {0}",
 	"suffix_declaration": "déclaration",
-	"suffix_type_alias": "alias de type"
+	"suffix_type_alias": "alias de type",
+	"fallback_to_32_bit_mode": "Le compilateur ne prend pas en charge le mode 64 bits. Retour au intelliSenseMode 32 bits.",
+	"fallback_to_64_bit_mode": "Le compilateur ne prend pas en charge le mode 32 bits. Retour au intelliSenseMode 64 bits.",
+	"fallback_to_32_bit_mode2": "Échec de l'interrogation du compilateur. Retour au intelliSenseMode 32 bits.",
+	"fallback_to_64_bit_mode2": "Échec de l'interrogation du compilateur. Retour au intelliSenseMode 64 bits.",
+	"fallback_to_no_bitness": "Échec de l'interrogation du compilateur. Retour au mode sans nombre de bits.",
+	"intellisense_client_creation_aborted": "Abandon de la création du client IntelliSense : {0}"
 }

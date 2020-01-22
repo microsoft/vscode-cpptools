@@ -11,7 +11,7 @@ import {
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter
 } from 'vscode-languageclient';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
-import { Status } from 'vscode-cpptools/out/testApi';
+import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, OtherSettings } from './settings';
@@ -26,7 +26,7 @@ import * as logger from '../logger';
 import { updateLanguageConfigurations, registerCommands } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -235,6 +235,7 @@ const IntervalTimerNotification: NotificationType<void, void> = new Notification
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
+const ClearCustomBrowseConfigurationNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomBrowseConfiguration');
 const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
@@ -958,58 +959,60 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
-        let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
-            || event.affectsConfiguration("editor.tokenColorCustomizations");
+        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
+        this.notifyWhenReady(() => {
+            let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
+                || event.affectsConfiguration("editor.tokenColorCustomizations");
 
-        let colorizationNeedsRefresh: boolean = colorizationNeedsReload
-            || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.dimInactiveRegions", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
+            let colorizationNeedsRefresh: boolean = colorizationNeedsReload
+                || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.dimInactiveRegions", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
 
-        let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
-        if (colorThemeChanged) {
-            let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
-            this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
-        }
+            let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
+            if (colorThemeChanged) {
+                let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
+                this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
+            }
 
-        if (colorizationNeedsReload) {
-            this.colorizationSettings.reload();
-        }
-        if (colorizationNeedsRefresh) {
-            let processedUris: vscode.Uri[] = [];
-            for (let e of vscode.window.visibleTextEditors) {
-                let uri: vscode.Uri = e.document.uri;
+            if (colorizationNeedsReload) {
+                this.colorizationSettings.reload();
+            }
+            if (colorizationNeedsRefresh) {
+                let processedUris: vscode.Uri[] = [];
+                for (let e of vscode.window.visibleTextEditors) {
+                    let uri: vscode.Uri = e.document.uri;
 
-                // Make sure we don't process the same file multiple times.
-                // colorizationState.onSettingsChanged ensures all visible text editors for that file get
-                // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
-                if (!processedUris.find(e => e === uri)) {
-                    processedUris.push(uri);
-                    let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
-                    if (colorizationState) {
-                        colorizationState.onSettingsChanged(uri);
+                    // Make sure we don't process the same file multiple times.
+                    // colorizationState.onSettingsChanged ensures all visible text editors for that file get
+                    // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
+                    if (!processedUris.find(e => e === uri)) {
+                        processedUris.push(uri);
+                        let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
+                        if (colorizationState) {
+                            colorizationState.onSettingsChanged(uri);
+                        }
                     }
                 }
             }
-        }
-        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
-        if (Object.keys(changedSettings).length > 0) {
-            if (changedSettings["commentContinuationPatterns"]) {
-                updateLanguageConfigurations();
+            if (Object.keys(changedSettings).length > 0) {
+                if (changedSettings["commentContinuationPatterns"]) {
+                    updateLanguageConfigurations();
+                }
+                if (changedSettings["clang_format_path"]) {
+                    let settings: CppSettings = new CppSettings(this.RootUri);
+                    this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
+                }
+                if (changedSettings["intelliSenseCachePath"]) {
+                    let settings: CppSettings = new CppSettings(this.RootUri);
+                    this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
+                }
+                this.configuration.onDidChangeSettings();
+                telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
             }
-            if (changedSettings["clang_format_path"]) {
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
-            }
-            if (changedSettings["intelliSenseCachePath"]) {
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
-            }
-            this.configuration.onDidChangeSettings();
-            telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
-        }
+        });
         return changedSettings;
     }
 
@@ -1179,23 +1182,24 @@ export class DefaultClient implements Client {
 
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
-            this.clearCustomConfigurations();
             if (!this.configurationProvider) {
+                this.clearCustomConfigurations();
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) || this.trackedDocuments.size === 0) {
+            if (!currentProvider) {
+                this.clearCustomConfigurations();
+                return;
+             }
+             if (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) {
+                // If we are being called by a configuration provider other than the current one, ignore it.
                 return;
             }
 
-            let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            let documentUris: vscode.Uri[] = [];
-            this.trackedDocuments.forEach(document => documentUris.push(document.uri));
-
-            let task: () => Thenable<SourceFileConfigurationItem[]> = () => {
-                return currentProvider.provideConfigurations(documentUris, tokenSource.token);
-            };
-            this.queueTaskWithTimeout(task, configProviderTimeout, tokenSource).then(configs => this.sendCustomConfigurations(configs), () => {});
+            this.clearCustomConfigurations();
+            this.trackedDocuments.forEach(document => {
+                this.provideCustomConfiguration(document.uri, null);
+            });
         });
     }
 
@@ -1228,7 +1232,7 @@ export class DefaultClient implements Client {
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
             task().then(async config => {
-                await this.sendCustomBrowseConfiguration(config);
+                this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
                 if (!hasCompleted) {
                     hasCompleted = true;
                     if (currentProvider.version >= Version.v2) {
@@ -1248,7 +1252,7 @@ export class DefaultClient implements Client {
             global.setTimeout(async () => {
                 if (!hasCompleted) {
                     hasCompleted = true;
-                    await this.sendCustomBrowseConfiguration(null, true);
+                    this.sendCustomBrowseConfiguration(null, null, true);
                     if (currentProvider.version >= Version.v2) {
                         console.warn("Configuration Provider timed out in {0}ms.", configProviderTimeout);
                         this.resumeParsing();
@@ -1289,21 +1293,26 @@ export class DefaultClient implements Client {
                 this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
             }
         };
+        let providerId: string | undefined = this.configurationProvider;
+        if (!providerId) {
+            onFinished();
+            return Promise.resolve();
+        }
+        let provider: CustomConfigurationProvider1 | null = getCustomConfigProviders().get(providerId);
+        if (!provider) {
+            onFinished();
+            return Promise.resolve();
+        }
+        if (!provider.isReady) {
+            onFinished();
+            return Promise.reject(`${this.configurationProvider} is not ready`);
+        }
         return this.queueBlockingTask(async () => {
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-            if (providers.size === 0) {
-                onFinished();
-                return Promise.resolve();
-            }
             console.log("provideCustomConfiguration");
-            let providerId: string | undefined = this.configuration.CurrentConfigurationProvider;
-            if (!providerId) {
-                onFinished();
-                return Promise.resolve();
-            }
 
-            let providerName: string = providerId;
+            let providerName: string = provider.name;
+
             let params: QueryTranslationUnitSourceParams = {
                 uri: docUri.toString()
             };
@@ -1312,15 +1321,6 @@ export class DefaultClient implements Client {
                 // If we didn't receive any candidates, no configuration is needed.
                 onFinished();
                 return Promise.resolve();
-            }
-
-            const notReadyMessage: string = `${providerName} is not ready`;
-            let provider: CustomConfigurationProvider1 | null = providers.get(providerId);
-            if (provider) {
-                if (!provider.isReady) {
-                    return Promise.reject(notReadyMessage);
-                }
-                providerName = provider.name;
             }
 
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
@@ -1349,16 +1349,13 @@ export class DefaultClient implements Client {
             return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
                 (configs: SourceFileConfigurationItem[]) => {
                     if (configs && configs.length > 0) {
-                        this.sendCustomConfigurations(configs, false);
+                        this.sendCustomConfigurations(configs);
                     }
                     onFinished();
                 },
                 (err) => {
                     if (requestFile) {
                         onFinished();
-                        return;
-                    }
-                    if (err === notReadyMessage) {
                         return;
                     }
                     let settings: CppSettings = new CppSettings(this.RootUri);
@@ -1480,33 +1477,6 @@ export class DefaultClient implements Client {
         }
     }
 
-    private queueTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
-        let timer: NodeJS.Timer;
-        // Create a promise that rejects in <ms> milliseconds
-        let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
-            timer = global.setTimeout(() => {
-                clearTimeout(timer);
-                if (cancelToken) {
-                    cancelToken.cancel();
-                }
-                reject(localize("timed.out", "Timed out in {0}ms.", ms));
-            }, ms);
-        });
-
-        // Returns a race between our timeout and the passed in promise
-        return this.queueTask(() => {
-            return Promise.race([task(), timeout()]).then(
-                (result: any) => {
-                    clearTimeout(timer);
-                    return result;
-                },
-                (error: any) => {
-                    clearTimeout(timer);
-                    throw error;
-                });
-        });
-    }
-
     private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
@@ -1536,16 +1506,12 @@ export class DefaultClient implements Client {
         return this.queueTask(request);
     }
 
-    public notifyWhenReady(notify: () => void, blockingTask?: boolean): Thenable<void> {
+    public notifyWhenReady(notify: () => void): Thenable<void> {
         let task: () => Thenable<void> = () => new Promise(resolve => {
             notify();
             resolve();
         });
-        if (blockingTask) {
-            return this.queueBlockingTask(task);
-        } else {
-            return this.queueTask(task);
-        }
+        return this.queueTask(task);
     }
 
     /**
@@ -1720,11 +1686,13 @@ export class DefaultClient implements Client {
         let testHook: TestHook = getTestHook();
         if (message.endsWith("Indexing...")) {
             this.model.isTagParsing.Value = true;
-            testHook.updateStatus(Status.TagParsingBegun);
+            let status: IntelliSenseStatus = { status: Status.TagParsingBegun };
+            testHook.updateStatus(status);
         } else if (message.endsWith("Updating IntelliSense...")) {
             timeStamp = Date.now();
             this.model.isUpdatingIntelliSense.Value = true;
-            testHook.updateStatus(Status.IntelliSenseCompiling);
+            let status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
+            testHook.updateStatus(status);
         } else if (message.endsWith("IntelliSense Ready")) {
             let settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.loggingLevel === "Debug") {
@@ -1733,11 +1701,18 @@ export class DefaultClient implements Client {
                 out.appendLine(localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", duration / 1000));
             }
             this.model.isUpdatingIntelliSense.Value = false;
-            testHook.updateStatus(Status.IntelliSenseReady);
+            let status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
+            testHook.updateStatus(status);
         } else if (message.endsWith("Ready")) { // Tag Parser Ready
             this.model.isTagParsing.Value = false;
-            testHook.updateStatus(Status.TagParsingDone);
+            let status: IntelliSenseStatus = { status: Status.TagParsingDone };
+            testHook.updateStatus(status);
             util.setProgress(util.getProgressParseRootSuccess());
+        } else if (message.includes("Squiggles Finished - File name:")) {
+            let index: number = message.lastIndexOf(":");
+            let name: string = message.substring(index + 2);
+            let status: IntelliSenseStatus = { status: Status.IntelliSenseReady, filename: name, };
+            testHook.updateStatus(status);
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
         } else if (message.endsWith("Unresolved Headers") && this.configuration.CurrentConfiguration.configurationProvider === undefined) {
@@ -1849,7 +1824,7 @@ export class DefaultClient implements Client {
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
-        if (this.configuration.CurrentConfiguration.compileCommands !== undefined && this.configuration.CurrentConfiguration.configurationProvider !== undefined) {
+        if (this.configuration.CurrentConfiguration.compileCommands !== undefined || this.configuration.CurrentConfiguration.configurationProvider !== undefined) {
             return;
         }
 
@@ -1957,6 +1932,8 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
     }
 
+    private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
+
     private onConfigurationsChanged(configurations: configs.Configuration[]): void {
         let params: FolderSettingsParams = {
             configurations: configurations,
@@ -1969,17 +1946,30 @@ export class DefaultClient implements Client {
             c.compilerPath = compilerPathAndArgs.compilerPath;
             c.compilerArgs = compilerPathAndArgs.additionalArgs;
         });
-        this.notifyWhenReady(() => {
-            this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
-            this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
-        }).then(() => {
-            let newProvider: string = this.configuration.CurrentConfigurationProvider;
-            if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
-                this.configurationProvider = newProvider;
-                this.updateCustomConfigurations();
-                this.updateCustomBrowseConfiguration();
+        if (!this.doneInitialCustomBrowseConfigurationCheck) {
+            // Send the last custom browse configuration we received from this provider.
+            // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
+            // Should only execute on launch, for the initial delivery of configurations
+            let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
+            if (isSameProviderExtensionId(lastCustomBrowseConfigurationProviderId.Value, configurations[params.currentConfiguration].configurationProvider)) {
+                let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
+                if (lastCustomBrowseConfiguration.Value) {
+                    this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
+                }
             }
-        });
+            this.doneInitialCustomBrowseConfigurationCheck = true;
+        }
+        this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
+        this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
+        let newProvider: string = this.configuration.CurrentConfigurationProvider;
+        if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
+            if (this.configurationProvider) {
+                this.clearCustomBrowseConfiguration();
+            }
+            this.configurationProvider = newProvider;
+            this.updateCustomBrowseConfiguration();
+            this.updateCustomConfigurations();
+        }
     }
 
     private onSelectedConfigurationChanged(index: number): void {
@@ -1989,6 +1979,7 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ChangeSelectedSettingNotification, params);
             this.model.activeConfigName.Value = this.configuration.ConfigurationNames[index];
+            this.configuration.onDidChangeSettings();
         });
     }
 
@@ -2011,7 +2002,7 @@ export class DefaultClient implements Client {
             util.isOptionalArrayOfString(input.configuration.forcedInclude));
     }
 
-    private sendCustomConfigurations(configs: any, blockingTask?: boolean): void {
+    private sendCustomConfigurations(configs: any): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
@@ -2059,17 +2050,12 @@ export class DefaultClient implements Client {
             configurationItems: sanitized
         };
 
-        if (blockingTask) {
-            this.notifyWhenReady(() => {
-                this.languageClient.sendNotification(CustomConfigurationNotification, params);
-            } , blockingTask);
-        } else {
-            this.languageClient.sendNotification(CustomConfigurationNotification, params);
-        }
+        this.languageClient.sendNotification(CustomConfigurationNotification, params);
     }
 
-    private sendCustomBrowseConfiguration(config: any, timeoutOccured?: boolean): Thenable<void> {
+    private sendCustomBrowseConfiguration(config: any, providerId: string, timeoutOccured?: boolean): void {
         let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
+        let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
 
         // This while (true) is here just so we can break out early if the config is set on error
@@ -2085,7 +2071,7 @@ export class DefaultClient implements Client {
                     break;
                 }
                 console.log("No browse configuration is available.");
-                return Promise.resolve();
+                return;
             }
 
             sanitized = {...<WorkspaceBrowseConfiguration>config};
@@ -2100,7 +2086,7 @@ export class DefaultClient implements Client {
                     console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
-                return Promise.resolve();
+                return;
             }
 
             let settings: CppSettings = new CppSettings(this.RootUri);
@@ -2119,6 +2105,7 @@ export class DefaultClient implements Client {
             }
 
             lastCustomBrowseConfiguration.Value = sanitized;
+            lastCustomBrowseConfigurationProviderId.Value = providerId;
             break;
         }
 
@@ -2126,11 +2113,15 @@ export class DefaultClient implements Client {
             browseConfiguration: sanitized
         };
 
-        return this.notifyWhenReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
+        this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params);
     }
 
     private clearCustomConfigurations(): void {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification));
+    }
+
+    private clearCustomBrowseConfiguration(): void {
+        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification));
     }
 
     /*********************************************
@@ -2160,11 +2151,12 @@ export class DefaultClient implements Client {
                         .then(() => {
                             if (extensionId) {
                                 let provider: CustomConfigurationProvider1 = getCustomConfigProviders().get(extensionId);
-                                this.updateCustomConfigurations(provider);
                                 this.updateCustomBrowseConfiguration(provider);
+                                this.updateCustomConfigurations(provider);
                                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
                             } else {
                                 this.clearCustomConfigurations();
+                                this.clearCustomBrowseConfiguration();
                             }
                         });
                 });

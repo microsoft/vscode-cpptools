@@ -89,7 +89,7 @@
 	"terminating_child_process": "alt işlem sonlandırılıyor: {0}",
 	"still_alive_killing": "hala canlı, sonlandırılıyor...",
 	"giving_up": "vazgeçiliyor",
-	"not_exited_yet": "henüz çıkılmadı. {0} saniye boyunca uykuya geçirilecek ve yeniden denenecek",
+	"not_exited_yet": "henüz çıkılmadı. {0} milisaniye boyunca uykuya geçirilecek ve yeniden denenecek.",
 	"failed_to_spawn_process": "İşlem üretilemedi. Hata: {0} ({1})",
 	"offering_completion": "Tamamlama teklif ediliyor",
 	"compiler_from_compiler_path": "\"compilerPath\" özelliğindeki derleyiciden ('{0}') varsayılan değerler alınmaya çalışılıyor",
@@ -154,5 +154,11 @@
 	"invalid_file_path": "Geçersiz dosya yolu {0}",
 	"cant_create_intellisense_client_for": "{0} için IntelliSense istemcisi oluşturulamıyor",
 	"suffix_declaration": "bildirim",
-	"suffix_type_alias": "tür diğer adı"
+	"suffix_type_alias": "tür diğer adı",
+	"fallback_to_32_bit_mode": "Derleyici 64 bit desteğine sahip değil. 32 bit intelliSenseMode'a geri dönülüyor.",
+	"fallback_to_64_bit_mode": "Derleyici 32 bit desteğine sahip değil. 64 bit intelliSenseMode'a geri dönülüyor.",
+	"fallback_to_32_bit_mode2": "Derleyici sorgulanamadı. 32 bit intelliSenseMode'a geri dönülüyor.",
+	"fallback_to_64_bit_mode2": "Derleyici sorgulanamadı. 64 bit intelliSenseMode'a geri dönülüyor.",
+	"fallback_to_no_bitness": "Derleyici sorgulanamadı. Bit genişliği yok durumuna geri dönülüyor.",
+	"intellisense_client_creation_aborted": "IntelliSense istemcisi oluşturma işlemi durduruldu: {0}"
 }
