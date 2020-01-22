@@ -1785,8 +1785,8 @@
         "x86_64"
       ],
       "binaries": [
-        "./bin/Microsoft.VSCode.CPP.Extension.linux",
-        "./bin/Microsoft.VSCode.CPP.IntelliSense.Msvc.linux"
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
       ]
     },
     {
@@ -1801,8 +1801,8 @@
         "i386"
       ],
       "binaries": [
-        "./bin/Microsoft.VSCode.CPP.Extension.linux",
-        "./bin/Microsoft.VSCode.CPP.IntelliSense.Msvc.linux"
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
       ]
     },
     {
@@ -1812,8 +1812,8 @@
         "darwin"
       ],
       "binaries": [
-        "./bin/Microsoft.VSCode.CPP.Extension.darwin",
-        "./bin/Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin"
+        "./bin/cpptools.darwin",
+        "./bin/cpptools-srv.darwin"
       ]
     },
     {
