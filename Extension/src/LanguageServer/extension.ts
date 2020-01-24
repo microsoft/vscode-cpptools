@@ -907,6 +907,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
@@ -1158,6 +1159,10 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
 
     await vscode.env.clipboard.writeText(installCommand);
+}
+
+function onSetActiveConfigName(configurationName: string) : Thenable<void> {
+    return clients.ActiveClient.setCurrentConfigName(configurationName);
 }
 
 function onGetActiveConfigName(): Thenable<string> {

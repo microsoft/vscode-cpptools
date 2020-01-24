@@ -309,6 +309,7 @@ export interface Client {
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
+    setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
@@ -1395,6 +1396,20 @@ export class DefaultClient implements Client {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
     }
 
+    public setCurrentConfigName(configurationName: string): Thenable<void> {
+        return this.queueTask(() => new Promise((resolve, reject) => {
+            let configurations : configs.Configuration[] = this.configuration.Configurations || [];
+            let configurationIndex : number = configurations.findIndex((config) => config.name === configurationName);
+
+            if (configurationIndex !== -1) {
+                this.configuration.select(configurationIndex);
+                resolve();
+            } else {
+                reject(new Error(`requested configuration name is not found: ${configurationName}`));
+            }
+        }));
+    }
+
     public getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs> {
         return this.queueTask(() => Promise.resolve(
             util.extractCompilerPathAndArgs(
@@ -2310,6 +2325,7 @@ class NullClient implements Client {
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void {}
+    setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
