@@ -89,7 +89,7 @@
 	"terminating_child_process": "arrêt du processus enfant : {0}",
 	"still_alive_killing": "toujours actif, suppression...",
 	"giving_up": "abandon",
-	"not_exited_yet": "pas encore arrêté. Va se mettre en veille pendant {0} millisecondes avant de réessayer.",
+	"not_exited_yet": "pas encore fermé. Va se mettre en veille pendant {0} millisecondes avant de réessayer.",
 	"failed_to_spawn_process": "La génération du processus a échoué. Erreur : {0} ({1})",
 	"offering_completion": "Complétion proposée",
 	"compiler_from_compiler_path": "Tentative d'obtention des valeurs par défaut du compilateur dans la propriété \"compilerPath\" : '{0}'",
