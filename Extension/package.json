@@ -1688,10 +1688,12 @@
     },
     "configurationDefaults": {
       "[cpp]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": false,
+        "editor.suggest.insertMode": "replace"
       },
       "[c]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": false,
+        "editor.suggest.insertMode": "replace"
       },
       "[Log]": {
         "editor.wordWrap": "off"
@@ -1774,7 +1776,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2112727",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2116522",
       "platforms": [
         "linux"
       ],
@@ -1788,7 +1790,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2112728",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2116454",
       "platforms": [
         "linux"
       ],
@@ -1804,7 +1806,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2112725",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2116453",
       "platforms": [
         "darwin"
       ],
@@ -1815,7 +1817,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2112726",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2116521",
       "platforms": [
         "win32"
       ],
