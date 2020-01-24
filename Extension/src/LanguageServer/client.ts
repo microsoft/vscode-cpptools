@@ -2277,7 +2277,7 @@ function getLanguageServerFileName(): string {
     let plat: NodeJS.Platform = process.platform;
     if (plat === 'win32') {
         extensionProcessName += '.exe';
-    } else {
+    } else if (plat !== 'linux' && plat !== 'darwin') {
         throw "Invalid Platform";
     }
     return path.resolve(util.getExtensionFilePath("bin"), extensionProcessName);
