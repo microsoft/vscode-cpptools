@@ -1398,14 +1398,14 @@ export class DefaultClient implements Client {
 
     public setCurrentConfigName(configurationName: string): Thenable<void> {
         return this.queueTask(() => new Promise((resolve, reject) => {
-            let configurations : configs.Configuration[] = this.configuration.Configurations || [];
-            let configurationIndex : number = configurations.findIndex((config) => config.name === configurationName);
+            let configurations: configs.Configuration[] = this.configuration.Configurations || [];
+            let configurationIndex: number = configurations.findIndex((config) => config.name === configurationName);
 
             if (configurationIndex !== -1) {
                 this.configuration.select(configurationIndex);
                 resolve();
             } else {
-                reject(new Error(`requested configuration name is not found: ${configurationName}`));
+                reject(new Error(localize("config.not.found", "The requested configuration name is not found: {0}", configurationName)));
             }
         }));
     }
