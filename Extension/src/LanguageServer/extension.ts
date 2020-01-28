@@ -567,7 +567,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
-        if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+        if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp")) {
             let client: Client = clients.getClientFor(editor.document.uri);
             if (client) {
                 if (clients.checkOwnership(client, editor.document)) {
@@ -1265,7 +1265,7 @@ function reportMacCrashes(): void {
                         return;
                     }
                     prevCrashFile = filename;
-                    if (!filename.startsWith("Microsoft.VSCode.CPP.")) {
+                    if (!filename.startsWith("cpptools")) {
                         return;
                     }
                     // Wait 5 seconds to allow time for the crash log to finish being written.
@@ -1329,8 +1329,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const process1: string = "Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin\t";
-    const process2: string = "Microsoft.VSCode.CPP.Extension.darwin\t";
+    const process1: string = "cpptools-srv\t";
+    const process2: string = "cpptools\t";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
         data = `${process1}${binaryVersion}\n${data}`;

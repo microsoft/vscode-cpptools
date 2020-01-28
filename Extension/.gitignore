@@ -9,7 +9,7 @@ dist
 server
 debugAdapters
 LLVM
-bin/Microsoft.VSCode.CPP.*
+bin/cpptools*
 bin/vcmeta.dll
 
 # ignore lock files

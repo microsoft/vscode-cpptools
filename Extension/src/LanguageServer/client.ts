@@ -2383,15 +2383,11 @@ export class DefaultClient implements Client {
 }
 
 function getLanguageServerFileName(): string {
-    let extensionProcessName: string = 'Microsoft.VSCode.CPP.Extension';
+    let extensionProcessName: string = 'cpptools';
     let plat: NodeJS.Platform = process.platform;
-    if (plat === 'linux') {
-        extensionProcessName += '.linux';
-    } else if (plat === 'darwin') {
-        extensionProcessName += '.darwin';
-    } else if (plat === 'win32') {
+    if (plat === 'win32') {
         extensionProcessName += '.exe';
-    } else {
+    } else if (plat !== 'linux' && plat !== 'darwin') {
         throw "Invalid Platform";
     }
     return path.resolve(util.getExtensionFilePath("bin"), extensionProcessName);
