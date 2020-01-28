@@ -96,7 +96,7 @@
       "type": "object",
       "title": "C/C++",
       "properties": {
-        "C_Cpp.clang_format_path": {
+        "C_Cpp.clangFormat.path": {
           "type": [
             "string",
             "null"
@@ -105,19 +105,19 @@
           "description": "%c_cpp.configuration.clang_format_path.description%",
           "scope": "resource"
         },
-        "C_Cpp.clang_format_style": {
+        "C_Cpp.clangFormat.style": {
           "type": "string",
           "default": "file",
           "description": "%c_cpp.configuration.clang_format_style.description%",
           "scope": "resource"
         },
-        "C_Cpp.clang_format_fallbackStyle": {
+        "C_Cpp.clangFormat.fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
           "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
           "scope": "resource"
         },
-        "C_Cpp.clang_format_sortIncludes": {
+        "C_Cpp.clangFormat.sortIncludes": {
           "type": [
             "boolean",
             "null"
@@ -131,18 +131,23 @@
           "description": "%c_cpp.configuration.clang_format_sortIncludes.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSenseEngine": {
+        "C_Cpp.intelliSense.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.intelliSense.enabled.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.intelliSense.engine": {
           "type": "string",
           "enum": [
             "Default",
-            "Tag Parser",
-            "Disabled"
+            "Tag Parser"
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.intelliSenseEngine.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSenseEngineFallback": {
+        "C_Cpp.intelliSense.fallback": {
           "type": "string",
           "enum": [
             "Enabled",
@@ -152,7 +157,7 @@
           "description": "%c_cpp.configuration.intelliSenseEngineFallback.description%",
           "scope": "resource"
         },
-        "C_Cpp.autocomplete": {
+        "C_Cpp.intelliSense.autocomplete": {
           "type": "string",
           "enum": [
             "Default",
@@ -205,14 +210,10 @@
           "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
           "scope": "resource"
         },
-        "C_Cpp.formatting": {
-          "type": "string",
-          "enum": [
-            "Default",
-            "Disabled"
-          ],
-          "default": "Default",
-          "description": "%c_cpp.configuration.formatting.description%",
+        "C_Cpp.formatting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.formatting.enabled.description%",
           "scope": "resource"
         },
         "C_Cpp.loggingLevel": {
@@ -234,7 +235,7 @@
           "description": "%c_cpp.configuration.autoAddFileAssociations.description%",
           "scope": "resource"
         },
-        "C_Cpp.workspaceParsingPriority": {
+        "C_Cpp.workspaceIndexing.priority": {
           "type": "string",
           "enum": [
             "highest",
@@ -315,13 +316,13 @@
           "description": "%c_cpp.configuration.configurationWarnings.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSenseCachePath": {
+        "C_Cpp.intelliSense.cachePath": {
           "type": "string",
           "default": null,
           "description": "%c_cpp.configuration.intelliSenseCachePath.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSenseCacheSize": {
+        "C_Cpp.intelliSense.cacheSize": {
           "type": "number",
           "default": 5120,
           "description": "%c_cpp.configuration.intelliSenseCacheSize.description%",

@@ -245,6 +245,7 @@ const CancelReferencesNotification: NotificationType<void, void> = new Notificat
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
+const DidChangeSettingsNotification: NotificationType<any, void> = new NotificationType<any, void>('cpptools/didChangeSettings');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -961,6 +962,32 @@ export class DefaultClient implements Client {
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
         let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
+            // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
+            // build a new JSON object with everything we need on the native side.
+            let settings: any = {
+                "C_Cpp": { ...vscode.workspace.getConfiguration("C_Cpp", this.RootUri) },
+                "files": vscode.workspace.getConfiguration("files", this.RootUri),
+                "search": vscode.workspace.getConfiguration("search", this.RootUri)
+            };
+            // Migrate new settings to deprecated settings, as deprecated settings are still used on the native side
+            settings.C_Cpp.clang_format_style = settings.C_Cpp.clangFormat.style;
+            settings.C_Cpp.clang_format_path = settings.C_Cpp.clangFormat.path;
+            settings.C_Cpp.clang_format_fallbackStyle = settings.C_Cpp.clangFormat.fallbackStyle;
+            settings.C_Cpp.clang_format_sortIncludes = settings.C_Cpp.clangFormat.sortIncludes;
+            settings.C_Cpp.errorSquiggles = settings.C_Cpp.intelliSense.errorSquiggles;
+            settings.C_Cpp.exclusionPolicy = settings.C_Cpp.workspaceIndexing.exclusionPolicy;
+            settings.C_Cpp.workspaceParsingPriority = settings.C_Cpp.workspaceIndexing.priority;
+            settings.C_Cpp.formatting = settings.C_Cpp.formatting.enabled ? "Default" : "Disabled";
+            settings.C_Cpp.intelliSenseCachePath = settings.C_Cpp.intelliSense.cachePath;
+            settings.C_Cpp.intelliSenseCacheSize = settings.C_Cpp.intelliSense.cacheSize;
+            settings.C_Cpp.intelliSenseEngine = settings.C_Cpp.intelliSense.engine;
+            settings.C_Cpp.intelliSenseEngineFallback = settings.C_Cpp.intelliSense.fallback;
+            if (!settings.C_Cpp.intelliSense.enabled) {
+                settings.C_Cpp.intelliSenseEngine = "Disabled"
+            }
+            // Send adjusted settings blob to native side
+            this.languageClient.sendNotification(DidChangeSettingsNotification, settings);
+
             let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
                 || event.affectsConfiguration("editor.tokenColorCustomizations");
 
@@ -1001,11 +1028,11 @@ export class DefaultClient implements Client {
                 if (changedSettings["commentContinuationPatterns"]) {
                     updateLanguageConfigurations();
                 }
-                if (changedSettings["clang_format_path"]) {
+                if (changedSettings["clangFormat.path"] || changedSettings["clang_format_path"]) {
                     let settings: CppSettings = new CppSettings(this.RootUri);
                     this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
                 }
-                if (changedSettings["intelliSenseCachePath"]) {
+                if (changedSettings["intelliSenseCachePath"] || changedSettings["intelliSense.cachePath"]) {
                     let settings: CppSettings = new CppSettings(this.RootUri);
                     this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
                 }
