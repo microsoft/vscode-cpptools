@@ -84,14 +84,14 @@ export class CppSettings extends Settings {
     public get intelliSenseEngine(): string {
         let result: string = super.getWithFallback<string>("intelliSense.engine", "intelliSenseEngine");
         if (result === "Disabled") {
-            // intelliSenseEngine may be set to disabled, but that is reflected in intelliSense.enabled now.
+            // intelliSenseEngine may be set to disabled, but that is reflected in languageServer.enabled now.
             result = "Default";
         }
         return result;
     }
-    public get intelliSenseEnabled(): boolean {
+    public get languageServerEnabled(): boolean {
         let result: boolean;
-        let info: any = this.Section.inspect<boolean>("intelliSense.enabled");
+        let info: any = this.Section.inspect<boolean>("languageServer.enabled");
         if (info.workspaceFolderValue !== undefined) {
             result = info.workspaceFolderValue;
         } else if (info.workspaceValue !== undefined) {
@@ -149,13 +149,13 @@ export class CppSettings extends Settings {
 
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
-            && this.intelliSenseEnabled
+            && this.languageServerEnabled
             && this.intelliSenseEngine === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
     public get dimInactiveRegions(): boolean {
-        return this.intelliSenseEnabled
+        return this.languageServerEnabled
             && this.intelliSenseEngine === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }

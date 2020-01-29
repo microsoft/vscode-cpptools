@@ -413,7 +413,7 @@ function onActivationEvent(): void {
 }
 
 function realActivation(): void {
-    if (!new CppSettings().intelliSenseEnabled) {
+    if (!new CppSettings().languageServerEnabled) {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");

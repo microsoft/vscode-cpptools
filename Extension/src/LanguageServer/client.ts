@@ -918,8 +918,7 @@ export class DefaultClient implements Client {
                     },
                     errorSquiggles: settings.errorSquiggles,
                     engine: settings.intelliSenseEngine,
-                    fallback: settings.intelliSenseEngineFallback,
-                    enabled: settings.intelliSenseEnabled
+                    fallback: settings.intelliSenseEngineFallback
                 },
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
                 loggingLevel: settings.loggingLevel,
@@ -1010,7 +1009,6 @@ export class DefaultClient implements Client {
             settings.C_Cpp.intelliSense.cache.size = cppSettings.intelliSenseCacheSize;
             settings.C_Cpp.intelliSense.engine = cppSettings.intelliSenseEngine;
             settings.C_Cpp.intelliSense.fallback = cppSettings.intelliSenseEngineFallback;
-            settings.C_Cpp.intelliSense.enabled = cppSettings.intelliSenseEnabled;
 
             // Send adjusted settings json to native side
             this.languageClient.sendNotification(DidChangeSettingsNotification, settings);

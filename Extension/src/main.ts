@@ -289,11 +289,11 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 
 async function finalizeExtensionActivation(): Promise<void> {
     let settings: CppSettings = new CppSettings();
-    if (!settings.intelliSenseEnabled) {
+    if (!settings.languageServerEnabled) {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
         disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && settings.intelliSenseEnabled) {
+            if (!reloadMessageShown && settings.languageServerEnabled) {
                 reloadMessageShown = true;
                 util.promptForReloadWindowDueToSettingsChange();
             }
@@ -301,7 +301,7 @@ async function finalizeExtensionActivation(): Promise<void> {
         return;
     }
     disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-        if (!reloadMessageShown && !settings.intelliSenseEnabled) {
+        if (!reloadMessageShown && !settings.languageServerEnabled) {
             reloadMessageShown = true;
             util.promptForReloadWindowDueToSettingsChange();
         }

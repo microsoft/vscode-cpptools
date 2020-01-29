@@ -131,10 +131,10 @@
           "description": "%c_cpp.configuration.clang_format_sortIncludes.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSense.enabled": {
+        "C_Cpp.languageServer.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.intelliSense.enabled.description%",
+          "description": "%c_cpp.configuration.languageServer.enabled.description%",
           "scope": "resource"
         },
         "C_Cpp.intelliSense.engine": {
