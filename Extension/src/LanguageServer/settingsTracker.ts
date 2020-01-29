@@ -162,7 +162,7 @@ export class SettingsTracker {
                     break;
                 }
                 default: {
-                    if (key === "clang_format_path" || key === "clangFormat.path" || key === "intelliSense.cachePath" || key === "intelliSenseCachePath" || key.startsWith("default.")) {
+                    if (key === "clang_format_path" || key === "clangFormat.path" || key === "intelliSense.cache.path" || key === "intelliSenseCachePath" || key.startsWith("default.")) {
                         value = this.areEqual(val, settings.inspect(key).defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     } else {
                         value = String(this.previousCppSettings[key]);

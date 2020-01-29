@@ -157,7 +157,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
-        if (new CppSettings().intelliSenseEngine === "Disabled") {
+        if (new CppSettings().intelliSenseEnabled !== true) {
             console.warn("IntelliSense is disabled. Provider will not be registered.");
             return false;
         }

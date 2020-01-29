@@ -235,7 +235,7 @@
           "description": "%c_cpp.configuration.autoAddFileAssociations.description%",
           "scope": "resource"
         },
-        "C_Cpp.workspaceIndexing.priority": {
+        "C_Cpp.workspaceParsing.priority": {
           "type": "string",
           "enum": [
             "highest",
@@ -257,7 +257,7 @@
           "description": "%c_cpp.configuration.workspaceSymbols.description%",
           "scope": "resource"
         },
-        "C_Cpp.exclusionPolicy": {
+        "C_Cpp.workspaceParsing.exclusionPolicy": {
           "type": "string",
           "enum": [
             "checkFolders",
@@ -316,13 +316,13 @@
           "description": "%c_cpp.configuration.configurationWarnings.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSense.cachePath": {
+        "C_Cpp.intelliSense.cache.path": {
           "type": "string",
           "default": null,
           "description": "%c_cpp.configuration.intelliSenseCachePath.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSense.cacheSize": {
+        "C_Cpp.intelliSense.cache.size": {
           "type": "number",
           "default": 5120,
           "description": "%c_cpp.configuration.intelliSenseCacheSize.description%",
