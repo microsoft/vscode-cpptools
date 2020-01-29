@@ -552,7 +552,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
-        if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+        if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp")) {
             let client: Client = clients.getClientFor(editor.document.uri);
             if (client) {
                 if (clients.checkOwnership(client, editor.document)) {
