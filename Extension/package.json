@@ -135,7 +135,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.languageServer.enabled.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.intelliSense.engine": {
           "type": "string",
