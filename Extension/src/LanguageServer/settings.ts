@@ -26,17 +26,18 @@ class Settings {
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
 
     protected getWithFallback<T>(section: string, deprecatedSection: string): T {
-        let info = this.settings.inspect<T>(section);
-        if (info.workspaceFolderValue != undefined) {
+        let info: any = this.settings.inspect<T>(section);
+        if (info.workspaceFolderValue !== undefined) {
             return info.workspaceFolderValue;
-        } else if (info.workspaceValue != undefined) {
+        } else if (info.workspaceValue !== undefined) {
             return info.workspaceValue;
-        } else if (info.globalValue != undefined) {
+        } else if (info.globalValue !== undefined) {
             return info.globalValue;
         }
         let value: T = this.settings.get<T>(deprecatedSection);
-        if (value != undefined)
+        if (value !== undefined) {
             return value;
+        }
         return info.defaultValue;
     }
 }
@@ -57,15 +58,14 @@ export class CppSettings extends Settings {
     public get clangFormatStyle(): string { return super.getWithFallback<string>("clangFormat.style", "clang_format_style"); }
     public get clangFormatFallbackStyle(): string { return super.getWithFallback<string>("clangFormat.fallbackStyle", "clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string { return super.getWithFallback<string>("clangFormat.sortIncludes", "clang_format_sortIncludes"); }
-    public get formatting(): boolean
-    {
+    public get formatting(): boolean {
         let result: boolean;
-        let info = this.Section.inspect<boolean>("formatting.enabled");
-        if (info.workspaceFolderValue != undefined) {
+        let info: any = this.Section.inspect<boolean>("formatting.enabled");
+        if (info.workspaceFolderValue !== undefined) {
             result = info.workspaceFolderValue;
-        } else if (info.workspaceValue != undefined) {
+        } else if (info.workspaceValue !== undefined) {
             result = info.workspaceValue;
-        } else if (info.globalValue != undefined) {
+        } else if (info.globalValue !== undefined) {
             result = info.globalValue;
         } else {
             let value: string = this.Section.get<string>("formatting");
@@ -81,24 +81,22 @@ export class CppSettings extends Settings {
     }
     public get experimentalFeatures(): string { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): string
-    {
-        let result = super.getWithFallback<string>("intelliSense.engine", "intelliSenseEngine");
+    public get intelliSenseEngine(): string {
+        let result: string = super.getWithFallback<string>("intelliSense.engine", "intelliSenseEngine");
         if (result === "Disabled") {
             // intelliSenseEngine may be set to disabled, but that is reflected in intelliSense.enabled now.
             result = "Default";
         }
         return result;
     }
-    public get intelliSenseEnabled(): boolean
-    {
+    public get intelliSenseEnabled(): boolean {
         let result: boolean;
-        let info = this.Section.inspect<boolean>("intelliSense.enabled");
-        if (info.workspaceFolderValue != undefined) {
+        let info: any = this.Section.inspect<boolean>("intelliSense.enabled");
+        if (info.workspaceFolderValue !== undefined) {
             result = info.workspaceFolderValue;
-        } else if (info.workspaceValue != undefined) {
+        } else if (info.workspaceValue !== undefined) {
             result = info.workspaceValue;
-        } else if (info.globalValue != undefined) {
+        } else if (info.globalValue !== undefined) {
             result = info.globalValue;
         } else {
             let value: string = this.Section.get<string>("intelliSenseEngine");
@@ -151,13 +149,13 @@ export class CppSettings extends Settings {
 
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
-            && this.intelliSenseEnabled === true
+            && this.intelliSenseEnabled
             && this.intelliSenseEngine === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
     public get dimInactiveRegions(): boolean {
-        return this.intelliSenseEnabled === true
+        return this.intelliSenseEnabled
             && this.intelliSenseEngine === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
