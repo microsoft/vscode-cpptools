@@ -893,7 +893,7 @@ export class DefaultClient implements Client {
                 clangFormat: {
                     path: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
                     style: settings.clangFormatStyle,
-                    fallbackStule: settings.clangFormatFallbackStyle,
+                    fallbackStyle: settings.clangFormatFallbackStyle,
                     sortIncludes: settings.clangFormatSortIncludes
                 },
                 default: {
