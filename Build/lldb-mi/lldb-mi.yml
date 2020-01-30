@@ -108,6 +108,9 @@ jobs:
         # Set rpath next to the lldb-mi executable LLDB.Framework
         log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./debugadapters/lldb/bin/lldb-mi"
 
+        # Grab NOTICE.TXT
+        cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugadapters/lldb/.
+
   # Build can be found at https://dev.azure.com/ms/vscode-cpptools/_build?definitionId=313
   # Click on the build and select 'Artifacts'
   - task: PublishPipelineArtifact@1
