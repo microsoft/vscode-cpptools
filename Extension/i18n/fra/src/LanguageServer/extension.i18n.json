@@ -6,7 +6,6 @@
 {
 	"learn.how.to.install.a.library": "Découvrir comment installer une bibliothèque pour cet en-tête avec vcpkg",
 	"copy.vcpkg.command": "Copier la commande vcpkg pour installer '{0}' dans le Presse-papiers",
-	"removed.use.instead": "\"{0}\" a été supprimé. Utilisez \"{1}\" à la place.",
 	"insiders.available": "La version Insiders {0} est disponible. Voulez-vous basculer sur le canal Insiders et installer cette mise à jour ?",
 	"yes.button": "Oui",
 	"ask.me.later.button": "Me demander plus tard",

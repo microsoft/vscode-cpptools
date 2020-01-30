@@ -6,7 +6,6 @@
 {
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 为此标头安装库",
 	"copy.vcpkg.command": "将用于安装“{0}”的 vcpkg 命令复制到剪贴板",
-	"removed.use.instead": "已删除“{0}”。请改用“{1}”。",
 	"insiders.available": "预览体验版本 {0} 可用。是否要切换到预览体验通道并安装此更新?",
 	"yes.button": "是",
 	"ask.me.later.button": "稍后询问我",
