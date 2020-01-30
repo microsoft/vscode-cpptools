@@ -18,6 +18,7 @@ const elementId: { [key: string]: string } = {
     compilerPath: "compilerPath",
     compilerPathInvalid: "compilerPathInvalid",
     knownCompilers: "knownCompilers",
+    noCompilerPathsDetected: "noCompilerPathsDetected",
     compilerArgs: "compilerArgs",
 
     intelliSenseMode: "intelliSenseMode",
@@ -338,19 +339,23 @@ class SettingsApp {
             }
 
             if (compilers.length === 0) {
-                this.showElement("noCompilerPathsDetected", true);
-                return;
-            }
-
-            this.showElement("compilerPath", true);
-            this.showElement("knownCompilers", true);
-
-            for (let path of compilers) {
+                // Get HTML element containing the string, as we can't localize strings in HTML js
+                let noCompilerSpan: HTMLSpanElement = <HTMLSpanElement>document.getElementById(elementId.noCompilerPathsDetected);
                 let option: HTMLOptionElement = document.createElement("option");
-                option.text = path;
-                option.value = path;
+                option.text = noCompilerSpan.textContent;
+                option.disabled = true;
                 list.append(option);
+            } else {
+                for (let path of compilers) {
+                    let option: HTMLOptionElement = document.createElement("option");
+                    option.text = path;
+                    option.value = path;
+                    list.append(option);
+                }
             }
+
+            this.showElement(elementId.compilerPath, true);
+            this.showElement(elementId.knownCompilers, true);
 
             // Initialize list with no selected item
             list.value = "";
