@@ -230,9 +230,67 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     config.pipeTransport.pipeProgram = replacedPipeProgram;
                 }
             }
+
+            const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
+            const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
+
+            const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
+
+            // Validate LLDB-MI
+            if (os.platform() === 'darwin' && // Check for macOS
+                fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
+                (!macOSMIMode || macOSMIMode === 'lldb') &&
+                !macOSMIDebuggerPath // User did not provide custom lldb-mi
+            ) {
+                const frameworkPath: string = this.getLLDBFrameworkPath();
+
+                if (!frameworkPath) {
+                    const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
+                    const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
+
+                    vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
+                        .then(value => {
+                            if (value === moreInfoButton) {
+                                let helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
+                                vscode.env.openExternal(vscode.Uri.parse(helpURL));
+                            }
+                        });
+
+                    return undefined;
+                }
+            }
         }
         // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213
         return config && config.type ? config : null;
+    }
+
+    private getLLDBFrameworkPath(): string {
+        const LLDBFramework: string = "LLDB.framework";
+        // Note: When adding more search paths, make sure the shipped lldb-mi also has it. See Build/lldb-mi.yml and 'install_name_tool' commands.
+        let searchPaths: string[] = [
+            "/Library/Developer/CommandLineTools/Library/PrivateFrameworks", // XCode CLI
+            "/Applications/Xcode.app/Contents/SharedFrameworks" // App Store XCode
+        ];
+
+        for (const searchPath of searchPaths) {
+            if (fs.existsSync(path.join(searchPath, LLDBFramework))) {
+                // Found a framework that 'lldb-mi' can use.
+                return searchPath;
+            }
+        }
+
+        const outputChannel: logger.Logger = logger.getOutputChannelLogger();
+
+        outputChannel.appendLine(localize("lldb.find.failed", "Missing dependency '{0}' for lldb-mi executable.", LLDBFramework));
+        outputChannel.appendLine(localize("lldb.search.paths", "Searched in:"));
+        searchPaths.forEach(searchPath => {
+            outputChannel.appendLine(`\t${searchPath}`);
+        });
+        const xcodeCLIInstallCmd: string = "xcode-select --install";
+        outputChannel.appendLine(localize("lldb.install.help", "To resolve this issue, either install XCode through the Apple App Store or install the XCode Command Line Tools by running '{0}' in a Terminal window.", xcodeCLIInstallCmd));
+        logger.showOutputChannel();
+
+        return null;
     }
 
     private resolveEnvFile(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder): void {
