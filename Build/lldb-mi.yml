@@ -4,7 +4,8 @@ variables:
   llvm_build_type: Release
   llvm_arch: x86_64
   llvm_additional_parameters: "-DLLDB_RELOCATABLE_PYTHON=1 -DLLDB_INCLUDE_TESTS=OFF -DLLDB_BUILD_FRAMEWORK=1"
-  lldb_mi_repo: https://github.com/WardenGnaw/lldb-mi # TODO: Change to lldb-tools when changes have been merged.
+  # TODO: fix lldb_mi_repo and lldb_mi_branch (https://github.com/lldb-tools/lldb-mi/pull/37 and https://github.com/lldb-tools/lldb-mi/pull/39)
+  lldb_mi_repo: https://github.com/WardenGnaw/lldb-mi # TODO: Change to lldb-tools
   lldb_mi_branch: release/cpptools # TODO: Change to master
   lldb_mi_additional_parameters: "-DUSE_LLDB_FRAMEWORK=1"
 
@@ -58,12 +59,15 @@ jobs:
           exit 1
         fi
 
-        log_and_exec_cmd "ninja install" # this install will fail.
+        ### Workaround for https://github.com/llvm/llvm-project/issues/108
+        log_and_exec_cmd "ninja install"
 
-        # Workaround to build lldb/sources/API first
+        # Remove conflicting LLDB.framework file.
         log_and_exec_cmd "rm -rf $(Build.StagingDirectory)/buildspace/llvm-inst/Library/Frameworks/LLDB.framework"
 
+        # Build lldb/sources/API first
         log_and_exec_cmd "cmake -P $(Build.StagingDirectory)/buildspace/llvm-build/tools/lldb/source/API/cmake_install.cmake"
+        ### End of Workaround
 
         log_and_exec_cmd "ninja install"
         if [[ $? -ne 0 ]]
@@ -104,6 +108,8 @@ jobs:
         # Set rpath next to the lldb-mi executable LLDB.Framework
         log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./bin/lldb-mi"
 
+  # Build can be found at https://dev.azure.com/ms/vscode-cpptools/_build?definitionId=313
+  # Click on the build and select 'Artifacts'
   - task: PublishPipelineArtifact@1
     displayName: 'Publish LLDB-MI'
     inputs:
