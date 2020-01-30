@@ -53,20 +53,12 @@ export class ABTestSettings {
         setInterval(() => { this.downloadCpptoolsJsonPkgAsync(); }, 30 * 60 * 1000); // 30 minutes.
     }
 
-    public get UseDefaultIntelliSenseEngine(): boolean {
-        return util.isNumber(this.settings.defaultIntelliSenseEngine) ? this.settings.defaultIntelliSenseEngine >= this.bucket.Value : true;
-    }
-
     public get UseRecursiveIncludes(): boolean {
         return util.isNumber(this.settings.recursiveIncludes) ? this.settings.recursiveIncludes >= this.bucket.Value : true;
     }
 
     public get UseGoToDefIntelliSense(): boolean {
         return util.isNumber(this.settings.gotoDefIntelliSense) ? this.settings.gotoDefIntelliSense >= this.bucket.Value : true;
-    }
-
-    public get UseEnhancedColorization(): boolean {
-        return util.isNumber(this.settings.enhancedColorization) ? this.settings.enhancedColorization >= this.bucket.Value : true;
     }
 
     private updateSettings(): void {
