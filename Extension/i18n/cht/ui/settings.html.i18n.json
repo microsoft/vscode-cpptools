@@ -24,6 +24,7 @@
 	"compiler.path.description": "用於建置專案的編譯器完整路徑 (例如 {0})，其可讓 IntelliSense 更加精準。該延伸模組將會查詢編譯器，決定要用於 IntelliSense 的系統 include 路徑與預設的定義。",
 	"specify.a.compiler": "指定編譯器路徑，或從下拉式清單中選取偵測到的編譯器路徑。",
 	"no.compiler.paths.detected": "(未偵測到編譯器路徑)",
+	"compiler.args": "Compiler arguments",
 	"compiler.arguments": "用來修改所使用之包含或定義的編譯器引數，例如 {0}、{1} 等。",
 	"one.argument.per.line": "每行一個引數。",
 	"intellisense.mode": "IntelliSense 模式",

@@ -24,6 +24,7 @@
 	"compiler.path.description": "더 정확한 IntelliSense를 사용하도록 설정하는 데 사용되는, 프로젝트를 빌드하는 데 사용하는 컴파일러의 전체 경로입니다(예: {0}). 확장에서는 컴파일러에 쿼리하여 IntelliSense에 사용할 시스템 포함 경로 및 기본 정의를 확인합니다.",
 	"specify.a.compiler": "컴파일러 경로를 지정하거나 드롭다운 목록에서 검색된 컴파일러 경로를 선택합니다.",
 	"no.compiler.paths.detected": "(검색된 컴파일러 경로가 없음)",
+	"compiler.args": "Compiler arguments",
 	"compiler.arguments": "사용된 포함 또는 정의를 수정하는 컴파일러 인수입니다(예: {0}, {1} 등).",
 	"one.argument.per.line": "줄당 하나의 인수입니다.",
 	"intellisense.mode": "IntelliSense 모드",
