@@ -88,6 +88,11 @@ jobs:
         log_and_exec_cmd "cd build"
         log_and_exec_cmd "cmake -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ $(lldb_mi_additional_parameters) -GNinja .."
         log_and_exec_cmd "ninja"
+        if [[ $? -ne 0 ]]
+        then
+          echo "##[error] ninja failed"
+          exit 1
+        fi
 
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/publish"
         log_and_exec_cmd "cd $(Build.StagingDirectory)/publish"
