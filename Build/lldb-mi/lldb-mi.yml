@@ -79,9 +79,9 @@ jobs:
         echo "##[section] Build LLDB-MI"
         # Download lldb-mi and build it against our custom installation.
         log_and_exec_cmd "cd $(Build.StagingDirectory)/buildspace"
-        log_and_exec_cmd "git clone $(lldb_mi_repo)"
+        log_and_exec_cmd "git clone $(lldb_mi_repo) lldb-mi"
         log_and_exec_cmd "cd lldb-mi"
-        log_and_exec_cmd "git checkout $(lldb_mi_branch) lldb-mi"
+        log_and_exec_cmd "git checkout $(lldb_mi_branch)"
 
         # Create a separate build directory for building lldb-mi.
         log_and_exec_cmd "mkdir build"
@@ -92,29 +92,29 @@ jobs:
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/publish"
         log_and_exec_cmd "cd $(Build.StagingDirectory)/publish"
 
-        log_and_exec_cmd "mkdir -p ./debugadapters/lldb/bin"
+        log_and_exec_cmd "mkdir -p ./debugAdapters/lldb/bin"
 
-        log_and_exec_cmd "cp $(Build.StagingDirectory)/buildspace/lldb-mi/build/src/lldb-mi ./debugadapters/lldb/bin/."
+        log_and_exec_cmd "cp $(Build.StagingDirectory)/buildspace/lldb-mi/build/src/lldb-mi ./debugAdapters/lldb/bin/."
 
         # Set rpath for finding LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath @rpath/LLDB.framework/Versions/A/LLDB ./debugadapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath @rpath/LLDB.framework/Versions/A/LLDB ./debugAdapters/lldb/bin/lldb-mi"
 
          # Set rpath for App Store XCode LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath /Applications/Xcode.app/Contents/SharedFrameworks/ ./debugadapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath /Applications/Xcode.app/Contents/SharedFrameworks/ ./debugAdapters/lldb/bin/lldb-mi"
 
         # Set rpath for XCode CLI LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath /Library/Developer/CommandLineTools/Library/PrivateFrameworks/ ./debugadapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath /Library/Developer/CommandLineTools/Library/PrivateFrameworks/ ./debugAdapters/lldb/bin/lldb-mi"
 
         # Set rpath next to the lldb-mi executable LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./debugadapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./debugAdapters/lldb/bin/lldb-mi"
 
         # Grab NOTICE.TXT
-        cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugadapters/lldb/.
+        cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugAdapters/lldb/.
 
   # Build can be found at https://dev.azure.com/ms/vscode-cpptools/_build?definitionId=313
   # Click on the build and select 'Artifacts'
   - task: PublishPipelineArtifact@1
     displayName: 'Publish LLDB-MI'
     inputs:
-      targetPath: '$(Build.StagingDirectory)/publish/debugAdapters'
+      targetPath: '$(Build.StagingDirectory)/publish'
       artifactName: 'lldb-mi'
