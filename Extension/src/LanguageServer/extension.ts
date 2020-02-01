@@ -413,7 +413,7 @@ function onActivationEvent(): void {
 }
 
 function realActivation(): void {
-    if (new CppSettings().intelliSenseEngine === "Disabled") {
+    if (!new CppSettings().languageServerEnabled) {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
@@ -441,7 +441,6 @@ function realActivation(): void {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
@@ -514,18 +513,6 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
         }
 
         checkAndApplyUpdate(newUpdateChannel);
-    }
-}
-
-let saveMessageShown: boolean = false;
-function onDidSaveTextDocument(doc: vscode.TextDocument): void {
-    if (!vscode.window.activeTextEditor || doc !== vscode.window.activeTextEditor.document || (doc.languageId !== "cpp" && doc.languageId !== "c")) {
-        return;
-    }
-
-    if (!saveMessageShown && new CppSettings(doc.uri).clangFormatOnSave) {
-        saveMessageShown = true;
-        vscode.window.showInformationMessage(localize("removed.use.instead", '"{0}" has been removed. Please use "{1}" instead.', "C_Cpp.clang_format_formatOnSave", "editor.formatOnSave"));
     }
 }
 
@@ -909,6 +896,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
@@ -1043,21 +1031,21 @@ function onEnableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "Enabled");
+    settings.update<string>("intelliSense.errorSquiggles", "Enabled");
 }
 
 function onDisableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "Disabled");
+    settings.update<string>("intelliSense.errorSquiggles", "Disabled");
 }
 
 function onToggleIncludeFallback(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
+    settings.toggleIntelliSenseEngineFallback();
 }
 
 function onToggleDimInactiveRegions(): void {
@@ -1159,6 +1147,10 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
 
     await vscode.env.clipboard.writeText(installCommand);
+}
+
+function onSetActiveConfigName(configurationName: string) : Thenable<void> {
+    return clients.ActiveClient.setCurrentConfigName(configurationName);
 }
 
 function onGetActiveConfigName(): Thenable<string> {

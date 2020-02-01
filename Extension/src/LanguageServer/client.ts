@@ -258,7 +258,7 @@ const CancelReferencesNotification: NotificationType<void, void> = new Notificat
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
-const SettingsChangedNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
+const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -269,8 +269,6 @@ const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = n
 const DebugLogNotification:  NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLog');
 const SemanticColorizationRegionsNotification:  NotificationType<SemanticColorizationRegionsParams, void> = new NotificationType<SemanticColorizationRegionsParams, void>('cpptools/semanticColorizationRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
-const UpdateClangFormatPathNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/updateClangFormatPath');
-const UpdateIntelliSenseCachePathNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/updateIntelliSenseCachePath');
 const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, void> = new NotificationType<refs.ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
@@ -323,6 +321,7 @@ export interface Client {
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
+    setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
@@ -907,6 +906,10 @@ export class DefaultClient implements Client {
         let settings_exclusionPolicy: string[] = [];
         let settings_preferredPathSeparator: string[] = [];
         let settings_defaultSystemIncludePath: string[][] = [];
+        let settings_intelliSenseCachePath: string[] = [];
+        let settings_intelliSenseCacheSize: number[] = [];
+        let settings_autocomplete: string[] = [];
+        let settings_formatting: boolean[] = [];
         let workspaceSettings: CppSettings = new CppSettings();
         let workspaceOtherSettings: OtherSettings = new OtherSettings(null);
         {
@@ -934,6 +937,10 @@ export class DefaultClient implements Client {
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
+                settings_intelliSenseCachePath.push(settings.intelliSenseCachePath);
+                settings_intelliSenseCacheSize.push(settings.intelliSenseCacheSize);
+                settings_autocomplete.push(settings.autocomplete);
+                settings_formatting.push(settings.formatting);
             }
 
             for (let otherSetting of otherSettings) {
@@ -960,39 +967,49 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'c' }
             ],
             initializationOptions: {
-                clang_format_path: settings_clangFormatPath,
-                clang_format_style: settings_clangFormatStyle,
-                clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
-                clang_format_sortIncludes: settings_clangFormatSortIncludes,
-                formatting: workspaceSettings.formatting,
+                clangFormat: {
+                    path: settings_clangFormatPath,
+                    style: settings_clangFormatStyle,
+                    fallbackStyle: settings_clangFormatFallbackStyle,
+                    sortIncludes: settings_clangFormatSortIncludes
+                },
+                default: {
+                    systemIncludePath: settings_defaultSystemIncludePath
+                },
+                dimInactiveRegions: settings_dimInactiveRegions,
+                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
+                enhancedColorization: settings_enhancedColorization,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
                 associations: workspaceOtherSettings.filesAssociations,
                 exclude_search: settings_searchExclude,
-                storage_path: this.storagePath,
-                tab_size: settings_editorTabSize,
-                intelliSenseEngine: settings_intelliSenseEngine,
-                intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
-                intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                intelliSenseCachePath: util.resolveCachePath(workspaceSettings.intelliSenseCachePath, this.AdditionalEnvironment),
-                intelliSenseCacheSize: workspaceSettings.intelliSenseCacheSize,
-                autocomplete: workspaceSettings.autoComplete,
-                errorSquiggles: settings_errorSquiggles,
-                dimInactiveRegions: settings_dimInactiveRegions,
-                enhancedColorization: settings_enhancedColorization,
-                suggestSnippets: settings_suggestSnippets,
-                loggingLevel: workspaceSettings.loggingLevel,
-                workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
-                workspaceSymbols: workspaceSettings.workspaceSymbols,
-                exclusionPolicy: settings_exclusionPolicy,
-                preferredPathSeparator: settings_preferredPathSeparator,
-                default: {
-                    systemIncludePath: settings_defaultSystemIncludePath
-                },
-                vcpkg_root: util.getVcpkgRoot(),
-                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
-                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
+                formatting: {
+                    enabled: settings_formatting
+                },
+                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
+                intelliSense: {
+                    autocomplete: settings_autoComplete,
+                    cache: {
+                        path : settings_intelliSenseCachePath,
+                        size : settings_intelliSenseCacheSize
+                    },
+                    errorSquiggles: settings_errorSquiggles,
+                    engine: settings_intelliSenseEngine,
+                    fallback: settings_intelliSenseEngineFallback
+                },
+                intelliSenseCacheDisabled: intelliSenseCacheDisabled,
+                loggingLevel: workspaceSettings.loggingLevel,
+                preferredPathSeparator: settings_preferredPathSeparator,
+                storage_path: this.storagePath,
+                suggestSnippets: settings_suggestSnippets,
+                tabSize: settings_editorTabSize,
+                vcpkg_root: util.getVcpkgRoot(),
+                workspaceParsing: {
+                    priority: workspaceSettings.workspaceParsingPriority,
+                    exclusionPolicy: settings_exclusionPolicy
+                },
+                workspaceSymbols: workspaceSettings.workspaceSymbols
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
@@ -1029,32 +1046,69 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
-                let cppSettings: { [key: string]: any } = {};
-        // Gather the C_Cpp settings
-        {
-            let cppSettingsResourceScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.RootUri);
-            let cppSettingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
-
-            for (let key in cppSettingsResourceScoped) {
-                let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-                if (curSetting === undefined) {
-                    continue;
-                }
-                let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? cppSettingsResourceScoped : cppSettingsNonScoped;
-                cppSettings[key] = settings.get(key);
-            }
-            cppSettings["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
-        }
-        let settingsChanged: any = {
-            C_Cpp: cppSettings,
-            files: { exclude: vscode.workspace.getConfiguration("files", this.RootUri).get("exclude") },
-            search: { exclude: vscode.workspace.getConfiguration("search", this.RootUri).get("exclude") },
-            tab_size: { tabSize: vscode.workspace.getConfiguration("editor", this.RootUri).get("tabSize") }
-        };
-        this.languageClient.sendNotification(SettingsChangedNotification, { settings: settingsChanged, workspaceFolderUri: this.RootPath });
-
         let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
+            let cppSettingsScoped: { [key: string]: any } = {};
+            // Gather the C_Cpp settings
+            {
+                let cppSettingsResourceScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.RootUri);
+                let cppSettingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+
+                for (let key in cppSettingsResourceScoped) {
+                    let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+                    if (curSetting === undefined) {
+                        continue;
+                    }
+                    let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? cppSettingsResourceScoped : cppSettingsNonScoped;
+                    cppSettingsScoped[key] = settings.get(key);
+                }
+                cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
+            }
+
+            // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
+            // build a new JSON object with everything we need on the native side.
+            let settings: any = {
+                C_Cpp: {
+                    ...cppSettingsScoped,
+                    tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri),
+                    clangFormat: {
+                        ...vscode.workspace.getConfiguration("C_Cpp.clangFormat", this.RootUri),
+                    },
+                    intelliSense: {
+                        ...vscode.workspace.getConfiguration("C_Cpp.intelliSense", this.RootUri),
+                        cache: {
+                            ...vscode.workspace.getConfiguration("C_Cpp.intelliSense.cache", this.RootUri),
+                        }
+                    },
+                    workspaceParsing: {
+                        ...vscode.workspace.getConfiguration("C_Cpp.workspaceParsing", this.RootUri),
+                    }
+                },
+                files: {
+                    exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
+                },
+                search: {
+                    exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
+                }
+            };
+
+            // Migrate old settings to new settings
+            let cppSettings: CppSettings = new CppSettings(this.RootUri);
+            settings.C_Cpp.clangFormat.style = cppSettings.clangFormatStyle;
+            settings.C_Cpp.clangFormat.path = util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment);
+            settings.C_Cpp.clangFormat.fallbackStyle = cppSettings.clangFormatFallbackStyle;
+            settings.C_Cpp.clangFormat.sortIncludes = cppSettings.clangFormatSortIncludes;
+            settings.C_Cpp.intelliSense.errorSquiggles = cppSettings.errorSquiggles;
+            settings.C_Cpp.workspaceParsing.exclusionPolicy = cppSettings.exclusionPolicy;
+            settings.C_Cpp.workspaceParsing.priority = cppSettings.workspaceParsingPriority;
+            settings.C_Cpp.intelliSense.cache.path = util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment);
+            settings.C_Cpp.intelliSense.cache.size = cppSettings.intelliSenseCacheSize;
+            settings.C_Cpp.intelliSense.engine = cppSettings.intelliSenseEngine;
+            settings.C_Cpp.intelliSense.fallback = cppSettings.intelliSenseEngineFallback;
+
+            // Send adjusted settings json to native side
+            this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
+
             let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
                 || event.affectsConfiguration("editor.tokenColorCustomizations");
 
@@ -1094,22 +1148,6 @@ export class DefaultClient implements Client {
             if (Object.keys(changedSettings).length > 0) {
                 if (changedSettings["commentContinuationPatterns"]) {
                     updateLanguageConfigurations();
-                }
-                if (changedSettings["clang_format_path"]) {
-                    let settings: CppSettings = new CppSettings(this.RootUri);
-                let params: FileChangedParams = {
-                    uri: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-                    workspaceFolderUri: this.RootPath
-                };
-                this.languageClient.sendNotification(UpdateClangFormatPathNotification, params);
-                }
-                if (changedSettings["intelliSenseCachePath"]) {
-                    let settings: CppSettings = new CppSettings(this.RootUri);
-                    let params: FileChangedParams = {
-                        uri: util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
-                        workspaceFolderUri: this.RootPath
-                    };
-                    this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, params);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
@@ -1496,6 +1534,20 @@ export class DefaultClient implements Client {
 
     public getCurrentConfigName(): Thenable<string> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
+    }
+
+    public setCurrentConfigName(configurationName: string): Thenable<void> {
+        return this.queueTask(() => new Promise((resolve, reject) => {
+            let configurations: configs.Configuration[] = this.configuration.Configurations || [];
+            let configurationIndex: number = configurations.findIndex((config) => config.name === configurationName);
+
+            if (configurationIndex !== -1) {
+                this.configuration.select(configurationIndex);
+                resolve();
+            } else {
+                reject(new Error(localize("config.not.found", "The requested configuration name is not found: {0}", configurationName)));
+            }
+        }));
     }
 
     public getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs> {
@@ -2420,6 +2472,7 @@ class NullClient implements Client {
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void {}
+    setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }

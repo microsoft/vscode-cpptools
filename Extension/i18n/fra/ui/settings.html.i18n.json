@@ -24,6 +24,7 @@
 	"compiler.path.description": "Chemin complet du compilateur utilisé pour générer le projet, par exemple {0}, afin d'améliorer la précision d'IntelliSense. L'extension interroge le compilateur pour déterminer les chemins include système et les définitions par défaut à utiliser pour IntelliSense.",
 	"specify.a.compiler": "Spécifiez un chemin de compilateur ou sélectionnez un chemin de compilateur détecté dans la liste déroulante.",
 	"no.compiler.paths.detected": "(Aucun chemin de compilateur détecté)",
+	"compiler.args": "Compiler arguments",
 	"compiler.arguments": "Arguments du compilateur permettant de modifier les inclusions ou les définitions utilisées, par exemple, {0}, {1}, etc.",
 	"one.argument.per.line": "Un argument par ligne.",
 	"intellisense.mode": "Mode IntelliSense",

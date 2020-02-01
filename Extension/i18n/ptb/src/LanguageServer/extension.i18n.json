@@ -6,7 +6,6 @@
 {
 	"learn.how.to.install.a.library": "Saiba como instalar uma biblioteca para este cabeçalho com vcpkg",
 	"copy.vcpkg.command": "Copiar o comando vcpkg para instalar '{0}' para a área de transferência",
-	"removed.use.instead": "\"{0}\" foi removido. Em seu lugar, use \"{1}\".",
 	"insiders.available": "A versão {0} do Insiders está disponível. Deseja mudar para o canal do Insiders e instalar essa atualização?",
 	"yes.button": "Sim",
 	"ask.me.later.button": "Pergunte-me Mais Tarde",

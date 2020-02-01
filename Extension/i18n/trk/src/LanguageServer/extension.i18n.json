@@ -6,7 +6,6 @@
 {
 	"learn.how.to.install.a.library": "vcpkg ile bu üst bilgi için bir kitaplık yüklemeyi öğrenin",
 	"copy.vcpkg.command": "'{0}' yükleme vcpkg komutunu panoya kopyalayın",
-	"removed.use.instead": "\"{0}\" kaldırıldı. Lütfen bunun yerine \"{1}\" kullanın.",
 	"insiders.available": "Insider üyeleri için {0} sürümü kullanıma sunuldu. Insider üyeleri kanalına geçmek ve bu güncelleştirmeyi yüklemek ister misiniz?",
 	"yes.button": "Evet",
 	"ask.me.later.button": "Daha Sonra Sor",
