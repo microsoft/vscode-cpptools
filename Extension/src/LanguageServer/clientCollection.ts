@@ -36,9 +36,11 @@ export class ClientCollection {
     constructor() {
         let key: string = defaultClientKey;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-            let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders[0];
-            key = util.asFolder(folder.uri);
-            this.activeClient = cpptools.createClient(this, folder);
+            vscode.workspace.workspaceFolders.forEach(folder => {
+                this.languageClients.set(util.asFolder(folder.uri), cpptools.createClient(this, folder));
+            });
+            key = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
+            this.activeClient = this.languageClients.get(key);
         } else {
             this.activeClient = cpptools.createClient(this);
         }
@@ -121,10 +123,6 @@ export class ClientCollection {
         }
     }
 
-    /**
-     * Remove folders that were closed. We don't check the e.added property because we will
-     * add new clients on-demand as files are opened.
-     */
     private onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent): void {
         let folderCount: number = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0;
         if (folderCount > 1) {
@@ -152,6 +150,13 @@ export class ClientCollection {
                     }
 
                     client.dispose();
+                }
+            });
+            e.added.forEach(folder => {
+                let path: string = util.asFolder(folder.uri);
+                let client: cpptools.Client = this.languageClients.get(path);
+                if (!client) {
+                    this.languageClients.set(path, cpptools.createClient(this, folder));
                 }
             });
         }
