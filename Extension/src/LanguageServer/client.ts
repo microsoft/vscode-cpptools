@@ -908,7 +908,7 @@ export class DefaultClient implements Client {
         let settings_defaultSystemIncludePath: string[][] = [];
         let settings_intelliSenseCachePath: string[] = [];
         let settings_intelliSenseCacheSize: number[] = [];
-        let settings_autocomplete: string[] = [];
+        let settings_autoComplete: string[] = [];
         let settings_formatting: boolean[] = [];
         let workspaceSettings: CppSettings = new CppSettings();
         let workspaceOtherSettings: OtherSettings = new OtherSettings(null);
@@ -937,10 +937,10 @@ export class DefaultClient implements Client {
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
-                settings_intelliSenseCachePath.push(settings.intelliSenseCachePath);
-                settings_intelliSenseCacheSize.push(settings.intelliSenseCacheSize);
-                settings_autocomplete.push(settings.autocomplete);
-                settings_formatting.push(settings.formatting);
+                settings_intelliSenseCachePath.push(setting.intelliSenseCachePath);
+                settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
+                settings_autoComplete.push(setting.autoComplete);
+                settings_formatting.push(setting.formatting);
             }
 
             for (let otherSetting of otherSettings) {
