@@ -1826,7 +1826,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=872607",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2117044",
       "platforms": [
         "linux"
       ],
@@ -1839,7 +1839,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=872608",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2117145",
       "platforms": [
         "linux"
       ],
@@ -1854,7 +1854,7 @@
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=872609",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2117146",
       "platforms": [
         "darwin"
       ],
@@ -1864,7 +1864,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=872610",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2117043",
       "platforms": [
         "win32"
       ],
