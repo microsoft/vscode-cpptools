@@ -97,24 +97,24 @@ jobs:
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/publish"
         log_and_exec_cmd "cd $(Build.StagingDirectory)/publish"
 
-        log_and_exec_cmd "mkdir -p ./debugAdapters/lldb/bin"
+        log_and_exec_cmd "mkdir -p ./debugAdapters/lldb-mi/bin"
 
-        log_and_exec_cmd "cp $(Build.StagingDirectory)/buildspace/lldb-mi/build/src/lldb-mi ./debugAdapters/lldb/bin/."
+        log_and_exec_cmd "cp $(Build.StagingDirectory)/buildspace/lldb-mi/build/src/lldb-mi ./debugAdapters/lldb-mi/bin/."
 
         # Set rpath for finding LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath @rpath/LLDB.framework/Versions/A/LLDB ./debugAdapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath @rpath/LLDB.framework/Versions/A/LLDB ./debugAdapters/lldb-mi/bin/lldb-mi"
 
          # Set rpath for App Store XCode LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath /Applications/Xcode.app/Contents/SharedFrameworks/ ./debugAdapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath /Applications/Xcode.app/Contents/SharedFrameworks/ ./debugAdapters/lldb-mi/bin/lldb-mi"
 
         # Set rpath for XCode CLI LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath /Library/Developer/CommandLineTools/Library/PrivateFrameworks/ ./debugAdapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath /Library/Developer/CommandLineTools/Library/PrivateFrameworks/ ./debugAdapters/lldb-mi/bin/lldb-mi"
 
         # Set rpath next to the lldb-mi executable LLDB.Framework
-        log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./debugAdapters/lldb/bin/lldb-mi"
+        log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./debugAdapters/lldb-mi/bin/lldb-mi"
 
         # Grab NOTICE.TXT
-        cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugAdapters/lldb/.
+        cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugAdapters/lldb-mi/.
 
   # Build can be found at https://dev.azure.com/ms/vscode-cpptools/_build?definitionId=313
   # Click on the build and select 'Artifacts'
