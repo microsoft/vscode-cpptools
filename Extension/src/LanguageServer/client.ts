@@ -1845,7 +1845,7 @@ export class DefaultClient implements Client {
             let status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
             testHook.updateStatus(status);
         } else if (message.endsWith("IntelliSense Ready")) {
-            let settings: CppSettings = new CppSettings(this.RootUri);
+            let settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
                 let out: logger.Logger = logger.getOutputChannelLogger();
                 let duration: number = Date.now() - timeStamp;
@@ -2163,7 +2163,7 @@ export class DefaultClient implements Client {
             return;
         }
 
-        let settings: CppSettings = new CppSettings(this.RootUri);
+        let settings: CppSettings = new CppSettings();
         let out: logger.Logger = logger.getOutputChannelLogger();
         if (settings.loggingLevel === "Debug") {
             out.appendLine(localize("configurations.received", "Custom configurations received:"));
@@ -2244,7 +2244,7 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            let settings: CppSettings = new CppSettings(this.RootUri);
+            let settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
                 let out: logger.Logger = logger.getOutputChannelLogger();
                 out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
