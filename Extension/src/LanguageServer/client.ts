@@ -47,6 +47,7 @@ let languageClient: LanguageClient;
 let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any>;
 let compilerDefaults: configs.CompilerDefaults;
+let diagnosticsChannel: vscode.OutputChannel;
 
 interface TelemetryPayload {
     event: string;
@@ -370,7 +371,6 @@ export class DefaultClient implements Client {
     private trackedDocuments = new Set<vscode.TextDocument>();
     private outputChannel: vscode.OutputChannel;
     private debugChannel: vscode.OutputChannel;
-    private diagnosticsChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
@@ -1408,9 +1408,9 @@ export class DefaultClient implements Client {
 
     public async logDiagnostics(): Promise<void> {
         let response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
-        if (!this.diagnosticsChannel) {
-            this.diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
-            this.disposables.push(this.diagnosticsChannel);
+        if (!diagnosticsChannel) {
+            diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
+            this.disposables.push(diagnosticsChannel);
         }
 
         let header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
@@ -1419,8 +1419,8 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
-        this.diagnosticsChannel.appendLine(`${header}${version}${configJson}${response.diagnostics}`);
-        this.diagnosticsChannel.show(false);
+        diagnosticsChannel.appendLine(`${header}${version}${configJson}${response.diagnostics}`);
+        diagnosticsChannel.show(false);
     }
 
     public async rescanFolder(): Promise<void> {
