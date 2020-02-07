@@ -1866,7 +1866,7 @@ export class DefaultClient implements Client {
             testHook.updateStatus(status);
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
-        } else if (message.endsWith("Unresolved Headers") && this.configuration.CurrentConfiguration.configurationProvider === undefined) {
+        } else if (message.endsWith("Unresolved Headers") && !this.configuration.CurrentConfiguration.configurationProvider) {
             let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
             if (showIntelliSenseFallbackMessage.Value) {
                 ui.showConfigureIncludePathMessage(() => {
@@ -1975,7 +1975,7 @@ export class DefaultClient implements Client {
     }
 
     private promptCompileCommands(params: CompileCommandsPaths) : void {
-        if (this.configuration.CurrentConfiguration.compileCommands !== undefined || this.configuration.CurrentConfiguration.configurationProvider !== undefined) {
+        if (this.configuration.CurrentConfiguration.compileCommands || this.configuration.CurrentConfiguration.configurationProvider) {
             return;
         }
 
