@@ -24,7 +24,7 @@
 	"compiler.path.description": "O caminho completo para o compilador usado para compilar o projeto. Por exemplo, {0}, para habilitar o IntelliSense mais preciso. A extensão consultará o compilador para determinar as definições padrão e os caminhos de inclusão do sistema a serem usados para o IntelliSense.",
 	"specify.a.compiler": "Especifique um caminho do compilador ou selecione um caminho de compilador detectado na lista suspensa.",
 	"no.compiler.paths.detected": "(Nenhum caminho de compilador detectado)",
-	"compiler.args": "Compiler arguments",
+	"compiler.args": "Argumentos do compilador",
 	"compiler.arguments": "Argumentos do compilador para modificar as inclusões ou definições usadas, por exemplo, {0}, {1} etc.",
 	"one.argument.per.line": "Um argumento por linha.",
 	"intellisense.mode": "Modo do IntelliSense",

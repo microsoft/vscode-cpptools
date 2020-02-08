@@ -24,7 +24,7 @@
 	"compiler.path.description": "Pełna ścieżka do kompilatora używanego w celu kompilowania projektu, na przykład {0}. Umożliwia ona zwiększenie dokładności funkcji IntelliSense. Rozszerzenie zbada kompilator, aby ustalić systemowe ścieżki dołączania i domyślne definicje, które mają być używane dla funkcji IntelliSense.",
 	"specify.a.compiler": "Określ ścieżkę kompilatora lub wybierz wykrytą ścieżkę kompilatora z listy rozwijanej.",
 	"no.compiler.paths.detected": "(Nie wykryto ścieżek kompilatora)",
-	"compiler.args": "Compiler arguments",
+	"compiler.args": "Argumenty kompilatora",
 	"compiler.arguments": "Argumenty kompilatora do modyfikacji użytych elementów include lub define, np. {0}, {1} itp.",
 	"one.argument.per.line": "Jeden argument na wiersz.",
 	"intellisense.mode": "Tryb funkcji IntelliSense",

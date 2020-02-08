@@ -24,7 +24,7 @@
 	"compiler.path.description": "プロジェクトをビルドするために使用するコンパイラへの完全なパスです。たとえば、より正確な IntelliSense を有効にするためには {0} を指定します。拡張機能では、IntelliSense に使用するシステム インクルード パスと既定の定義を特定するためにコンパイラに対してクエリが実行されます。",
 	"specify.a.compiler": "コンパイラ パスを指定するか、検出されたコンパイラ パスをドロップダウン リストから選択してください。",
 	"no.compiler.paths.detected": "(コンパイラ パスが検出されませんでした)",
-	"compiler.args": "Compiler arguments",
+	"compiler.args": "コンパイラ引数",
 	"compiler.arguments": "たとえば {0}、{1} など、使用されているインクルードや定義を変更するコンパイラ引数です。",
 	"one.argument.per.line": "1 行につき 1 つの引数です。",
 	"intellisense.mode": "IntelliSense モード",
