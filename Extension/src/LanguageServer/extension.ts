@@ -413,7 +413,7 @@ function onActivationEvent(): void {
 }
 
 function realActivation(): void {
-    if (!new CppSettings().languageServerEnabled) {
+    if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
@@ -1030,21 +1030,21 @@ function onEnableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("intelliSense.errorSquiggles", "Enabled");
+    settings.update<string>("errorSquiggles", "Enabled");
 }
 
 function onDisableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("intelliSense.errorSquiggles", "Disabled");
+    settings.update<string>("errorSquiggles", "Disabled");
 }
 
 function onToggleIncludeFallback(): void {
     onActivationEvent();
     // This only applies to the active client.
     let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleIntelliSenseEngineFallback();
+    settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
 }
 
 function onToggleDimInactiveRegions(): void {
