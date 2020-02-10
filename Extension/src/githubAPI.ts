@@ -45,7 +45,6 @@ function getVsixDownloadUrl(build: Build, vsixName: string): string {
     return downloadUrl;
 }
 
-
 /**
  * Determine whether an object is of type Asset.
  * @param input Incoming object.
