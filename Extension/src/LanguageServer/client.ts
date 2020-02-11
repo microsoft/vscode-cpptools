@@ -48,6 +48,94 @@ let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any>;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsChannel: vscode.OutputChannel;
+let outputChannel: vscode.OutputChannel;
+let debugChannel: vscode.OutputChannel;
+let diagnosticsCollection: vscode.DiagnosticCollection;
+let workspaceColorizationState: Map<string, ColorizationState> = new Map<string, ColorizationState>();
+let workspaceDisposables: vscode.Disposable[] = [];
+
+export function disposeWorkspaceData(): void {
+    workspaceDisposables.forEach((d) => d.dispose());
+    workspaceDisposables = [];
+
+    workspaceColorizationState.forEach(colorizationState => {
+        colorizationState.dispose();
+    });
+}
+
+function logTelemetry(notificationBody: TelemetryPayload): void {
+    telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
+}
+
+/**
+ * listen for logging messages from the language server and print them to the Output window
+ */
+function setupOutputHandlers(): void {
+    console.assert(languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
+
+    languageClient.onNotification(DebugProtocolNotification, (output) => {
+        if (!debugChannel) {
+            debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`);
+            workspaceDisposables.push(debugChannel);
+        }
+        debugChannel.appendLine("");
+        debugChannel.appendLine("************************************************************************************************************************");
+        debugChannel.append(`${output}`);
+    });
+
+    languageClient.onNotification(DebugLogNotification, logLocalized);
+}
+
+function log(output: string): void {
+    if (!outputChannel) {
+        outputChannel = logger.getOutputChannel();
+        workspaceDisposables.push(outputChannel);
+    }
+    outputChannel.appendLine(`${output}`);
+}
+
+function logLocalized(params: LocalizeStringParams): void {
+    let output: string = util.getLocalizedString(params);
+    log(output);
+}
+
+function showMessageWindow(params: ShowMessageWindowParams): void {
+    let message: string = util.getLocalizedString(params.localizeStringParams);
+    switch (params.type) {
+        case 1: // Error
+            vscode.window.showErrorMessage(message);
+            break;
+        case 2: // Warning
+            vscode.window.showWarningMessage(message);
+            break;
+        case 3: // Info
+            vscode.window.showInformationMessage(message);
+            break;
+        default:
+            console.assert("Unrecognized type for showMessageWindow");
+            break;
+    }
+}
+
+function publishDiagnostics(params: PublishDiagnosticsParams): void {
+    if (!diagnosticsCollection) {
+        diagnosticsCollection = vscode.languages.createDiagnosticCollection("C/C++");
+    }
+
+    // Convert from our Diagnostic objects to vscode Diagnostic objects
+    let diagnostics: vscode.Diagnostic[] = [];
+    params.diagnostics.forEach((d) => {
+        let message: string = util.getLocalizedString(d.localizeStringParams);
+        let r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
+        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
+        diagnostic.code = d.code;
+        diagnostic.source = d.source;
+        diagnostics.push(diagnostic);
+    });
+
+    let realUri: vscode.Uri = vscode.Uri.parse(params.uri);
+    diagnosticsCollection.set(realUri, diagnostics);
+}
 
 interface TelemetryPayload {
     event: string;
@@ -369,13 +457,10 @@ export class DefaultClient implements Client {
     private rootFolder: vscode.WorkspaceFolder | undefined;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
-    private outputChannel: vscode.OutputChannel;
-    private debugChannel: vscode.OutputChannel;
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
     private references: refs.ReferencesManager;
-    private colorizationState = new Map<string, ColorizationState>();
     private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
@@ -1138,7 +1223,7 @@ export class DefaultClient implements Client {
                     // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
                     if (!processedUris.find(e => e === uri)) {
                         processedUris.push(uri);
-                        let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
+                        let colorizationState: ColorizationState = workspaceColorizationState.get(uri.toString());
                         if (colorizationState) {
                             colorizationState.onSettingsChanged(uri);
                         }
@@ -1174,7 +1259,7 @@ export class DefaultClient implements Client {
                 if (newVersion > oldVersion) {
                     this.openFileVersions.set(textDocumentChangeEvent.document.uri.toString(), newVersion);
                     try {
-                        let colorizationState: ColorizationState = this.colorizationState.get(textDocumentChangeEvent.document.uri.toString());
+                        let colorizationState: ColorizationState = workspaceColorizationState.get(textDocumentChangeEvent.document.uri.toString());
                         if (colorizationState) {
                             // Adjust colorization ranges after this edit.  (i.e. if a line was added, push decorations after it down one line)
                             colorizationState.addEdits(textDocumentChangeEvent.contentChanges, this.editVersion);
@@ -1191,13 +1276,13 @@ export class DefaultClient implements Client {
     public onDidOpenTextDocument(document: vscode.TextDocument): void {
         if (document.uri.scheme === "file") {
             this.openFileVersions.set(document.uri.toString(), document.version);
-            this.colorizationState.set(document.uri.toString(), new ColorizationState(document.uri, this.colorizationSettings));
+            workspaceColorizationState.set(document.uri.toString(), new ColorizationState(document.uri, this.colorizationSettings));
             this.sendVisibleRanges(document.uri);
         }
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
-        this.colorizationState.delete(document.uri.toString());
+        workspaceColorizationState.delete(document.uri.toString());
         this.openFileVersions.delete(document.uri.toString());
     }
 
@@ -1205,7 +1290,7 @@ export class DefaultClient implements Client {
         let processedUris: vscode.Uri[] = [];
         editors.forEach(editor => {
             if (editor.document.uri.scheme === "file") {
-                let colorizationState: ColorizationState = this.colorizationState.get(editor.document.uri.toString());
+                let colorizationState: ColorizationState = workspaceColorizationState.get(editor.document.uri.toString());
                 if (colorizationState) {
                     colorizationState.refresh(editor);
                     if (!processedUris.find(uri => uri === editor.document.uri)) {
@@ -1410,7 +1495,7 @@ export class DefaultClient implements Client {
         let response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
         if (!diagnosticsChannel) {
             diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
-            this.disposables.push(diagnosticsChannel);
+            workspaceDisposables.push(diagnosticsChannel);
         }
 
         let header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
@@ -1676,7 +1761,7 @@ export class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
-        this.languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
+        this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
@@ -1684,14 +1769,14 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
-        this.languageClient.onNotification(PublishDiagnosticsNotification, (e) => this.publishDiagnostics(e));
-        this.languageClient.onNotification(ShowMessageWindowNotification, (e) => this.showMessageWindow(e));
+        this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
+        this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
-        this.setupOutputHandlers();
+        setupOutputHandlers();
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
-        let cppSettings: CppSettings = new CppSettings(this.RootUri);
+        let cppSettings: CppSettings = new CppSettings();
         if (cppSettings.autoAddFileAssociations) {
             const is_c: boolean = languageStr.startsWith("c;");
             languageStr = languageStr.substr(is_c ? 2 : 1);
@@ -1750,48 +1835,12 @@ export class DefaultClient implements Client {
         }
     }
 
-    /**
-     * listen for logging messages from the language server and print them to the Output window
-     */
-    private setupOutputHandlers(): void {
-        console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
-
-        this.languageClient.onNotification(DebugProtocolNotification, (output) => {
-            if (!this.debugChannel) {
-                this.debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`);
-                this.disposables.push(this.debugChannel);
-            }
-            this.debugChannel.appendLine("");
-            this.debugChannel.appendLine("************************************************************************************************************************");
-            this.debugChannel.append(`${output}`);
-        });
-
-        this.languageClient.onNotification(DebugLogNotification, (params) => this.logLocalized(params));
-    }
-
-    private log(output: string): void {
-        if (!this.outputChannel) {
-            this.outputChannel = logger.getOutputChannel();
-            this.disposables.push(this.outputChannel);
-        }
-        this.outputChannel.appendLine(`${output}`);
-    }
-
-    private logLocalized(params: LocalizeStringParams): void {
-        let output: string = util.getLocalizedString(params);
-        this.log(output);
-    }
-
     /*******************************************************
      * handle notifications coming from the language server
      *******************************************************/
 
-    private logTelemetry(notificationBody: TelemetryPayload): void {
-        telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
-    }
-
     public addFileAssociations(fileAssociations: string, is_c: boolean): void {
-        let settings: OtherSettings = new OtherSettings(this.RootUri);
+        let settings: OtherSettings = new OtherSettings();
         let assocs: any = settings.filesAssociations;
 
         let filesAndPaths: string[] = fileAssociations.split(";");
@@ -1913,7 +1962,7 @@ export class DefaultClient implements Client {
     }
 
     private updateSemanticColorizationRegions(params: SemanticColorizationRegionsParams): void {
-        let colorizationState: ColorizationState = this.colorizationState.get(params.uri);
+        let colorizationState: ColorizationState = workspaceColorizationState.get(params.uri);
         if (colorizationState) {
             // Convert the params to vscode.Range's before passing to colorizationState.updateSemantic()
             let semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
@@ -1931,46 +1980,6 @@ export class DefaultClient implements Client {
             });
             colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
             this.languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri });
-        }
-    }
-
-    diagnosticsCollection: vscode.DiagnosticCollection;
-
-    private publishDiagnostics(params: PublishDiagnosticsParams): void {
-        if (!this.diagnosticsCollection) {
-            this.diagnosticsCollection = vscode.languages.createDiagnosticCollection("C/C++");
-        }
-
-        // Convert from our Diagnostic objects to vscode Diagnostic objects
-        let diagnostics: vscode.Diagnostic[] = [];
-        params.diagnostics.forEach((d) => {
-            let message: string = util.getLocalizedString(d.localizeStringParams);
-            let r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
-            let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
-            diagnostic.code = d.code;
-            diagnostic.source = d.source;
-            diagnostics.push(diagnostic);
-        });
-
-        let realUri: vscode.Uri = vscode.Uri.parse(params.uri);
-        this.diagnosticsCollection.set(realUri, diagnostics);
-    }
-
-    private showMessageWindow(params: ShowMessageWindowParams): void {
-        let message: string = util.getLocalizedString(params.localizeStringParams);
-        switch (params.type) {
-            case 1: // Error
-                vscode.window.showErrorMessage(message);
-                break;
-            case 2: // Warning
-                vscode.window.showWarningMessage(message);
-                break;
-            case 3: // Info
-                vscode.window.showInformationMessage(message);
-                break;
-            default:
-                console.assert("Unrecognized type for showMessageWindow");
-                break;
         }
     }
 
@@ -2366,11 +2375,6 @@ export class DefaultClient implements Client {
     public dispose(): Thenable<void> {
         let promise: Thenable<void> = (this.languageClient && clientCollection.Count === 0) ? this.languageClient.stop() : Promise.resolve();
         return promise.then(() => {
-
-            this.colorizationState.forEach(colorizationState => {
-                colorizationState.dispose();
-            });
-
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
 

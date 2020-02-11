@@ -196,6 +196,7 @@ export class ClientCollection {
 
         this.languageClients.forEach(client => promises.push(client.dispose()));
         this.languageClients.clear();
+        cpptools.disposeWorkspaceData();
         return Promise.all(promises).then(() => undefined);
     }
 }

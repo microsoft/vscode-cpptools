@@ -7,11 +7,9 @@ import * as vscode from 'vscode';
 export class DataBinding<T> {
     private value: T;
     private valueChanged = new vscode.EventEmitter<T>();
-    private isActive: boolean = true;
 
     constructor(value: T) {
         this.value = value;
-        this.isActive = true;
     }
 
     public get Value(): T {
@@ -21,9 +19,7 @@ export class DataBinding<T> {
     public set Value(value: T) {
         if (value !== this.value) {
             this.value = value;
-            if (this.isActive) {
-                this.valueChanged.fire(this.value);
-            }
+            this.valueChanged.fire(this.value);
         }
     }
 
@@ -32,12 +28,10 @@ export class DataBinding<T> {
     }
 
     public activate(): void {
-        this.isActive = true;
         this.valueChanged.fire(this.value);
     }
 
     public deactivate(): void {
-        this.isActive = false;
     }
 
     public dispose(): void {
