@@ -53,6 +53,7 @@ let debugChannel: vscode.OutputChannel;
 let diagnosticsCollection: vscode.DiagnosticCollection;
 let workspaceColorizationState: Map<string, ColorizationState> = new Map<string, ColorizationState>();
 let workspaceDisposables: vscode.Disposable[] = [];
+let workspaceReferences: refs.ReferencesManager;
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -482,7 +483,6 @@ export class DefaultClient implements Client {
     private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
-    private references: refs.ReferencesManager;
     private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
@@ -761,21 +761,21 @@ export class DefaultClient implements Client {
                                                 pendingCancel.callback();
                                             }
                                         };
-                                        if (!this.client.references.referencesRefreshPending) {
-                                            this.client.references.setResultsCallback(resultCallback);
-                                            this.client.references.startFindAllReferences(params);
+                                        if (!workspaceReferences.referencesRefreshPending) {
+                                            workspaceReferences.setResultsCallback(resultCallback);
+                                            workspaceReferences.startFindAllReferences(params);
                                         } else {
                                             // We are responding to a refresh (preview or final result)
-                                            this.client.references.referencesRefreshPending = false;
-                                            if (this.client.references.lastResults) {
+                                            workspaceReferences.referencesRefreshPending = false;
+                                            if (workspaceReferences.lastResults) {
                                                 // This is a final result
-                                                let lastResults: refs.ReferencesResult = this.client.references.lastResults;
-                                                this.client.references.lastResults = null;
+                                                let lastResults: refs.ReferencesResult = workspaceReferences.lastResults;
+                                                workspaceReferences.lastResults = null;
                                                 resultCallback(lastResults, true);
                                             } else {
                                                 // This is a preview (2nd or later preview)
-                                                this.client.references.referencesRequestPending = true;
-                                                this.client.references.setResultsCallback(resultCallback);
+                                                workspaceReferences.referencesRequestPending = true;
+                                                workspaceReferences.setResultsCallback(resultCallback);
                                                 this.client.languageClient.sendNotification(RequestReferencesNotification, false);
                                             }
                                         }
@@ -787,7 +787,7 @@ export class DefaultClient implements Client {
                                     });
                                 };
 
-                                if (referencesRequestPending || (this.client.references.symbolSearchInProgress && !this.client.references.referencesRefreshPending)) {
+                                if (referencesRequestPending || (workspaceReferences.symbolSearchInProgress && !workspaceReferences.referencesRefreshPending)) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject: () => {
                                         // Complete with nothing instead of rejecting, to avoid an error message from VS Code
@@ -796,12 +796,12 @@ export class DefaultClient implements Client {
                                     }, callback });
                                     if (!cancelling) {
                                         renamePending = false;
-                                        this.client.references.referencesCanceled = true;
+                                        workspaceReferences.referencesCanceled = true;
                                         if (!referencesRequestPending) {
-                                            this.client.references.referencesCanceledWhilePreviewing = true;
+                                            workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        this.client.references.closeRenameUI();
+                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -851,7 +851,7 @@ export class DefaultClient implements Client {
                                             return;
                                         }
                                         referencesRequestPending = true;
-                                        this.client.references.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
+                                        workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
                                             if (doResolve && referencesResult === null) {
                                                 // The result callback will be called with doResult of true and a null result when the Find All References
                                                 // portion of the rename is complete.  We complete the promise with an empty edit at this point,
@@ -885,7 +885,7 @@ export class DefaultClient implements Client {
                                                             workspaceEdit.replace(uri, range, newName);
                                                         }
                                                     }
-                                                    this.client.references.closeRenameUI();
+                                                    workspaceReferences.closeRenameUI();
                                                 }
                                                 if (doResolve) {
                                                     if (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0) {
@@ -897,11 +897,11 @@ export class DefaultClient implements Client {
                                                 }
                                             }
                                         });
-                                        this.client.references.startRename(params);
+                                        workspaceReferences.startRename(params);
                                     });
                                 };
 
-                                if (referencesRequestPending || this.client.references.symbolSearchInProgress) {
+                                if (referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
                                     let cancelling: boolean = referencesPendingCancellations.length > 0;
                                     referencesPendingCancellations.push({ reject: () => {
                                         --renameRequestsPending;
@@ -910,12 +910,12 @@ export class DefaultClient implements Client {
                                         resolve(workspaceEdit);
                                     }, callback });
                                     if (!cancelling) {
-                                        this.client.references.referencesCanceled = true;
+                                        workspaceReferences.referencesCanceled = true;
                                         if (!referencesRequestPending) {
-                                            this.client.references.referencesCanceledWhilePreviewing = true;
+                                            workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        this.client.references.closeRenameUI();
+                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -935,6 +935,8 @@ export class DefaultClient implements Client {
 
                         // Listen for messages from the language server.
                         this.registerNotifications();
+
+                        workspaceReferences = new refs.ReferencesManager(this);
 
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
@@ -972,7 +974,6 @@ export class DefaultClient implements Client {
         }
 
         this.colorizationSettings = new ColorizationSettings(this.RootUri);
-        this.references = new refs.ReferencesManager(this);
     }
 
     public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
@@ -1363,7 +1364,7 @@ export class DefaultClient implements Client {
             if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
                 if (textEditorVisibleRangesChangeEvent.visibleRanges.length === 1) {
                     let visibleRangesLength: number = textEditorVisibleRangesChangeEvent.visibleRanges[0].end.line - textEditorVisibleRangesChangeEvent.visibleRanges[0].start.line;
-                    this.references.updateVisibleRange(visibleRangesLength);
+                    workspaceReferences.updateVisibleRange(visibleRangesLength);
                 }
             }
             this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
@@ -1510,7 +1511,7 @@ export class DefaultClient implements Client {
     }
 
     public toggleReferenceResultsView(): void {
-        this.references.toggleGroupView();
+        workspaceReferences.toggleGroupView();
     }
 
     public async logDiagnostics(): Promise<void> {
@@ -1790,7 +1791,10 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(RequestCustomConfig, (e) => this.handleRequestCustomConfig(e));
+        this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
+            let client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(requestFile));
+            client.handleRequestCustomConfig(requestFile);
+        });
         this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
@@ -2394,19 +2398,19 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => {
             let cancelling: boolean = referencesPendingCancellations.length > 0;
             if (!cancelling) {
-                this.references.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
+                workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
                 if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
-                    if (!this.references.referencesRequestPending) {
-                        if (this.references.referencesRequestHasOccurred) {
+                    if (!workspaceReferences.referencesRequestPending) {
+                        if (workspaceReferences.referencesRequestHasOccurred) {
                             // References are not usable if a references request is pending,
                             // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                            if (!this.references.referencesRefreshPending) {
-                                this.references.referencesRefreshPending = true;
+                            if (!workspaceReferences.referencesRefreshPending) {
+                                workspaceReferences.referencesRefreshPending = true;
                                 vscode.commands.executeCommand("references-view.refresh");
                             }
                         } else {
-                            this.references.referencesRequestHasOccurred = true;
-                            this.references.referencesRequestPending = true;
+                            workspaceReferences.referencesRequestHasOccurred = true;
+                            workspaceReferences.referencesRequestPending = true;
                             this.languageClient.sendNotification(RequestReferencesNotification, false);
                         }
                     }
@@ -2418,23 +2422,23 @@ export class DefaultClient implements Client {
     public cancelReferences(): void {
         referencesParams = null;
         renamePending = false;
-        if (referencesRequestPending || this.references.symbolSearchInProgress) {
+        if (referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
             let cancelling: boolean = referencesPendingCancellations.length > 0;
             referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
             if (!cancelling) {
-                this.references.referencesCanceled = true;
-                this.languageClient.sendNotification(CancelReferencesNotification);
-                this.references.closeRenameUI();
+                workspaceReferences.referencesCanceled = true;
+                languageClient.sendNotification(CancelReferencesNotification);
+                workspaceReferences.closeRenameUI();
             }
         }
     }
 
     private handleReferencesProgress(notificationBody: refs.ReportReferencesProgressNotification): void {
-        this.references.handleProgress(notificationBody);
+        workspaceReferences.handleProgress(notificationBody);
     }
 
     private processReferencesResult(referencesResult: refs.ReferencesResult): void {
-        this.references.processResults(referencesResult);
+        workspaceReferences.processResults(referencesResult);
     }
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
