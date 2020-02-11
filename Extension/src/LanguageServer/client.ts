@@ -137,6 +137,32 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
     diagnosticsCollection.set(realUri, diagnostics);
 }
 
+function updateSemanticColorizationRegions(params: SemanticColorizationRegionsParams): void {
+    let colorizationState: ColorizationState = workspaceColorizationState.get(params.uri);
+    if (colorizationState) {
+        // Convert the params to vscode.Range's before passing to colorizationState.updateSemantic()
+        let semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
+        for (let i: number = 0; i < TokenKind.Count; i++) {
+            semanticRanges[i] = [];
+        }
+        params.regions.forEach(element => {
+            let newRange : vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
+            semanticRanges[element.kind].push(newRange);
+        });
+        let inactiveRanges: vscode.Range[] = [];
+        params.inactiveRegions.forEach(element => {
+            let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+            inactiveRanges.push(newRange);
+        });
+        colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
+        languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri });
+    }
+}
+
+interface WorkspaceFolderParams {
+    workspaceFolderUri?: string;
+}
+
 interface TelemetryPayload {
     event: string;
     properties?: { [key: string]: string };
@@ -149,15 +175,11 @@ interface DebugProtocolParams {
     params?: any;
 }
 
-interface ReportStatusNotificationBody {
+interface ReportStatusNotificationBody extends WorkspaceFolderParams {
     status: string;
 }
 
 interface QueryCompilerDefaultsParams {
-}
-
-interface WorkspaceFolderParams {
-    workspaceFolderUri?: string;
 }
 
 interface CppPropertiesParams extends WorkspaceFolderParams {
@@ -208,7 +230,7 @@ interface CustomBrowseConfigurationParams extends WorkspaceFolderParams {
     browseConfiguration: WorkspaceBrowseConfiguration;
 }
 
-interface CompileCommandsPaths {
+interface CompileCommandsPaths extends WorkspaceFolderParams {
     paths: string[];
 }
 
@@ -1764,7 +1786,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
-        this.languageClient.onNotification(SemanticColorizationRegionsNotification, (e) => this.updateSemanticColorizationRegions(e));
+        this.languageClient.onNotification(SemanticColorizationRegionsNotification, updateSemanticColorizationRegions);
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
@@ -1915,44 +1937,47 @@ export class DefaultClient implements Client {
             testHook.updateStatus(status);
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
-        } else if (message.endsWith("Unresolved Headers") && !this.configuration.CurrentConfiguration.configurationProvider) {
-            let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
-            if (showIntelliSenseFallbackMessage.Value) {
-                ui.showConfigureIncludePathMessage(() => {
-                    let configJSON: string = localize("configure.json.button", "Configure (JSON)");
-                    let configUI: string = localize("configure.ui.button", "Configure (UI)");
-                    let dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
-                    let fallbackMsg: string = this.configuration.VcpkgInstalled ?
-                        localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
-                        localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
-                    return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then((value) => {
-                        switch (value) {
-                            case configJSON:
-                                vscode.commands.getCommands(true).then((commands: string[]) => {
-                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                        vscode.commands.executeCommand("workbench.action.problems.focus");
-                                    }
-                                });
-                                this.handleConfigurationEditJSONCommand();
-                                telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, null);
-                                break;
-                            case configUI:
-                                vscode.commands.getCommands(true).then((commands: string[]) => {
-                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                        vscode.commands.executeCommand("workbench.action.problems.focus");
-                                    }
-                                });
-                                this.handleConfigurationEditUICommand();
-                                telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, null);
-                                break;
-                            case dontShowAgain:
-                                showIntelliSenseFallbackMessage.Value = false;
-                                break;
-                        }
-                        return true;
-                    });
-                },
-                () => showIntelliSenseFallbackMessage.Value = false);
+        } else if (message.endsWith("Unresolved Headers")) {
+            let client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(notificationBody.workspaceFolderUri));
+            if (!client.configuration.CurrentConfiguration.configurationProvider) {
+                let showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
+                if (showIntelliSenseFallbackMessage.Value) {
+                    ui.showConfigureIncludePathMessage(() => {
+                        let configJSON: string = localize("configure.json.button", "Configure (JSON)");
+                        let configUI: string = localize("configure.ui.button", "Configure (UI)");
+                        let dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
+                        let fallbackMsg: string = client.configuration.VcpkgInstalled ?
+                            localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
+                            localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
+                        return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then((value) => {
+                            switch (value) {
+                                case configJSON:
+                                    vscode.commands.getCommands(true).then((commands: string[]) => {
+                                        if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                            vscode.commands.executeCommand("workbench.action.problems.focus");
+                                        }
+                                    });
+                                    client.handleConfigurationEditJSONCommand();
+                                    telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, null);
+                                    break;
+                                case configUI:
+                                    vscode.commands.getCommands(true).then((commands: string[]) => {
+                                        if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                            vscode.commands.executeCommand("workbench.action.problems.focus");
+                                        }
+                                    });
+                                    client.handleConfigurationEditUICommand();
+                                    telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, null);
+                                    break;
+                                case dontShowAgain:
+                                    showIntelliSenseFallbackMessage.Value = false;
+                                    break;
+                            }
+                            return true;
+                        });
+                    },
+                    () => showIntelliSenseFallbackMessage.Value = false);
+                }
             }
         }
     }
@@ -1961,34 +1986,13 @@ export class DefaultClient implements Client {
         this.model.tagParserStatus.Value = util.getLocalizedString(notificationBody);
     }
 
-    private updateSemanticColorizationRegions(params: SemanticColorizationRegionsParams): void {
-        let colorizationState: ColorizationState = workspaceColorizationState.get(params.uri);
-        if (colorizationState) {
-            // Convert the params to vscode.Range's before passing to colorizationState.updateSemantic()
-            let semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
-            for (let i: number = 0; i < TokenKind.Count; i++) {
-                semanticRanges[i] = [];
-            }
-            params.regions.forEach(element => {
-                let newRange : vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
-                semanticRanges[element.kind].push(newRange);
-            });
-            let inactiveRanges: vscode.Range[] = [];
-            params.inactiveRegions.forEach(element => {
-                let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
-                inactiveRanges.push(newRange);
-            });
-            colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
-            this.languageClient.sendNotification(SemanticColorizationRegionsReceiptNotification, { uri: params.uri });
-        }
-    }
-
     private promptCompileCommands(params: CompileCommandsPaths) : void {
-        if (this.configuration.CurrentConfiguration.compileCommands || this.configuration.CurrentConfiguration.configurationProvider) {
+        let client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(params.workspaceFolderUri));
+        if (client.configuration.CurrentConfiguration.compileCommands || client.configuration.CurrentConfiguration.configurationProvider) {
             return;
         }
 
-        let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, this.RootPath);
+        let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, client.RootPath);
         if (!ask.Value) {
             return;
         }
@@ -1996,7 +2000,7 @@ export class DefaultClient implements Client {
         let aCompileCommandsFile: string = localize("a.compile.commands.file", "a compile_commands.json file");
         let compileCommandStr: string = params.paths.length > 1 ? aCompileCommandsFile : params.paths[0];
         const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
-            ? localize("auto-configure.intellisense.folder", "Would you like to use {0} to auto-configure IntelliSense for the '{1}' folder?", compileCommandStr, this.Name)
+            ? localize("auto-configure.intellisense.folder", "Would you like to use {0} to auto-configure IntelliSense for the '{1}' folder?", compileCommandStr, client.Name)
             : localize("auto-configure.intellisense.this.folder", "Would you like to use {0} to auto-configure IntelliSense for this folder?", compileCommandStr);
 
         ui.showConfigureCompileCommandsMessage(() => {

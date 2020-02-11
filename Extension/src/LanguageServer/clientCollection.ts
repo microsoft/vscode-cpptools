@@ -169,7 +169,7 @@ export class ClientCollection {
     }
 
     public getClientFor(uri: vscode.Uri): cpptools.Client {
-        let folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+        let folder: vscode.WorkspaceFolder = uri ? vscode.workspace.getWorkspaceFolder(uri) : null;
         if (!folder) {
             return this.defaultClient;
         } else {
