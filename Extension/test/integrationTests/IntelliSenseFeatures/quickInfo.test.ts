@@ -47,18 +47,13 @@ suite("[Quick info test]", function(): void {
 
     test("[Hover over function call]", async () => {
         let result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(12, 12)));
-        let expected1: string = "";
-        switch (platform) {
-            case "win32":
-                expected1 = `\`\`\`cpp\nvoid myfunction(int var1, std::string var2, std::string var3)\n\`\`\``;
-                break;
-            case "linux":
-                expected1 = `\`\`\`cpp\nvoid myfunction(int var1, std::__cxx11::string var2, std::__cxx11::string var3)\n\`\`\``;
-                break;
-            case "darwin":
-                expected1 = `\`\`\`cpp\nvoid myfunction(int var1, std::__1::string var2, std::__1::string var3)\n\`\`\``;
-                break;
-        }
+
+        let expectedMap: Map<string, string> = new Map<string, string>();
+        expectedMap.set("win32", `\`\`\`cpp\nvoid myfunction(int var1, std::string var2, std::string var3)\n\`\`\``);
+        expectedMap.set("linux", `\`\`\`cpp\nvoid myfunction(int var1, std::__cxx11::string var2, std::__cxx11::string var3)\n\`\`\``);
+        expectedMap.set("darwin", `\`\`\`cpp\nvoid myfunction(int var1, std::__1::string var2, std::__1::string var3)\n\`\`\``);
+
+        let expected1: string = expectedMap.get(platform);
         let actual1: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual1, expected1);
         let expected2: string = `comment for myfunction`;
@@ -68,36 +63,26 @@ suite("[Quick info test]", function(): void {
 
     test("[Hover over function param string variable]", async () => {
         let result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(12, 30)));
-        let expected: string = "";
-        switch (platform) {
-            case "win32":
-                expected = `\`\`\`cpp\nstd::string stringVar\n\`\`\``;
-                break;
-            case "linux":
-                expected = `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``;
-                break;
-            case "darwin":
-                expected = `\`\`\`cpp\nstd::__1::string stringVar\n\`\`\``;
-                break;
-        }
+
+        let expectedMap: Map<string, string> = new Map<string, string>();
+        expectedMap.set("win32", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
+        expectedMap.set("linux", `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``);
+        expectedMap.set("darwin", `\`\`\`cpp\nstd::__1::string stringVar\n\`\`\``);
+
+        let expected: string = expectedMap.get(platform);
         let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
 
     test("[Hover over function param string literal]", async () => {
         let result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(12, 44)));
-        let expected: string = "";
-        switch (platform) {
-            case "win32":
-                expected = `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n`;
-                break;
-            case "linux":
-                expected = `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`;
-                break;
-            case "darwin":
-                expected = `\`\`\`cpp\nstd::__1::string::basic_string<std::nullptr_t>(const char *__s)\n\`\`\`\n\n+21 overloads\n`;
-                break;
-        }
+
+        let expectedMap: Map<string, string> = new Map<string, string>();
+        expectedMap.set("win32", `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n`);
+        expectedMap.set("linux", `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`);
+        expectedMap.set("darwin", `\`\`\`cpp\nstd::__1::string::basic_string<std::nullptr_t>(const char *__s)\n\`\`\`\n\n+21 overloads\n`);
+
+        let expected: string = expectedMap.get(platform);
         let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
