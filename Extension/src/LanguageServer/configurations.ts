@@ -56,7 +56,6 @@ export interface Configuration {
     name: string;
     compilerPath?: string;
     compilerArgs?: string[];
-    knownCompilers?: KnownCompiler[];
     cStandard?: string;
     cppStandard?: string;
     includePath?: string[];
@@ -307,9 +306,6 @@ export class CppProperties {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
             configuration.compilerPath = this.defaultCompilerPath;
-        }
-        if (this.knownCompilers) {
-            configuration.knownCompilers = this.knownCompilers;
         }
         if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
             configuration.cStandard = this.defaultCStandard;
@@ -736,7 +732,6 @@ export class CppProperties {
         // Create default config and add to list of configurations
         let newConfig: Configuration = { name: configName };
         this.applyDefaultConfigurationValues(newConfig);
-        delete newConfig.knownCompilers;
         this.configurationJson.configurations.push(newConfig);
 
         // Update UI
@@ -796,11 +791,8 @@ export class CppProperties {
                     });
                     settings.update("default.configurationProvider", undefined); // delete the setting
                 }
-                let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
-                delete this.configurationJson.configurations[0].knownCompilers;
 
                 await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, 4));
-                this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
@@ -879,8 +871,8 @@ export class CppProperties {
             }
 
             this.configurationJson.configurations.forEach(e => {
-                if (e.knownCompilers) {
-                    delete e.knownCompilers;
+                if ((<any>e).knownCompilers) {
+                    delete (<any>e).knownCompilers;
                     dirty = true;
                 }
             });
