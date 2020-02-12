@@ -80,7 +80,7 @@ suite("[Quick info test]", function(): void {
         let expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n`);
         expectedMap.set("linux", `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`);
-        expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`);
+        expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string::basic_string<...>(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+17 overloads\n`);
 
         let expected: string = expectedMap.get(platform);
         let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
