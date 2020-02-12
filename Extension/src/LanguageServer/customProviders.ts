@@ -157,7 +157,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
-        if (!new CppSettings().languageServerEnabled) {
+        if (new CppSettings().intelliSenseEngine === "Disabled") {
             console.warn("Language service is disabled. Provider will not be registered.");
             return false;
         }

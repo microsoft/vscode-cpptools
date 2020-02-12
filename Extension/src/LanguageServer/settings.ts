@@ -48,81 +48,33 @@ export class CppSettings extends Settings {
     }
 
     public get clangFormatPath(): string {
-        let path: string = super.getWithFallback<string>("clangFormat.path", "clang_format_path");
+        let path: string = super.Section.get<string>("clang_format_path");
         if (!path) {
             path = which.sync('clang-format', {nothrow: true});
         }
         return path;
     }
 
-    public get clangFormatStyle(): string { return super.getWithFallback<string>("clangFormat.style", "clang_format_style"); }
-    public get clangFormatFallbackStyle(): string { return super.getWithFallback<string>("clangFormat.fallbackStyle", "clang_format_fallbackStyle"); }
-    public get clangFormatSortIncludes(): string { return super.getWithFallback<string>("clangFormat.sortIncludes", "clang_format_sortIncludes"); }
-    public get formatting(): boolean {
-        let result: boolean;
-        let info: any = this.Section.inspect<boolean>("formatting.enabled");
-        if (info.workspaceFolderValue !== undefined) {
-            result = info.workspaceFolderValue;
-        } else if (info.workspaceValue !== undefined) {
-            result = info.workspaceValue;
-        } else if (info.globalValue !== undefined) {
-            result = info.globalValue;
-        } else {
-            let value: string = this.Section.get<string>("formatting");
-            if (value === "Default") {
-                result = true;
-            } else if (value === "Disabled") {
-                result = false;
-            } else {
-                result = info.defaultValue;
-            }
-        }
-        return result;
-    }
+    public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
+    public get clangFormatFallbackStyle(): string { return super.Section.get<string>("clang_format_fallbackStyle"); }
+    public get clangFormatSortIncludes(): string { return super.Section.get<string>("clang_format_sortIncludes"); }
+    public get formatting(): string { return super.Section.get<string>("formatting"); }
     public get experimentalFeatures(): string { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): string {
-        let result: string = super.getWithFallback<string>("intelliSense.engine", "intelliSenseEngine");
-        if (result === "Disabled") {
-            // intelliSenseEngine may be set to disabled, but that is reflected in languageServer.enabled now.
-            result = "Default";
-        }
-        return result;
-    }
-    public get languageServerEnabled(): boolean {
-        let result: boolean;
-        let info: any = this.Section.inspect<boolean>("languageServer.enabled");
-        if (info.workspaceFolderValue !== undefined) {
-            result = info.workspaceFolderValue;
-        } else if (info.workspaceValue !== undefined) {
-            result = info.workspaceValue;
-        } else if (info.globalValue !== undefined) {
-            result = info.globalValue;
-        } else {
-            let value: string = this.Section.get<string>("intelliSenseEngine");
-            if (value === "Default" || value === "Tag Parser") {
-                result = true;
-            } else if (value === "Disabled") {
-                result = false;
-            } else {
-                result = info.defaultValue;
-            }
-        }
-        return result;
-    }
-    public get intelliSenseEngineFallback(): string { return super.getWithFallback<string>("intelliSense.fallback", "intelliSenseEngineFallback"); }
-    public get intelliSenseCachePath(): string { return super.getWithFallback<string>("intelliSense.cache.path", "intelliSenseCachePath"); }
-    public get intelliSenseCacheSize(): number { return super.getWithFallback<number>("intelliSense.cache.size", "intelliSenseCacheSize"); }
-    public get errorSquiggles(): string { return super.getWithFallback<string>("intelliSense.errorSquiggles", "errorSquiggles"); }
+    public get intelliSenseEngine(): string { return super.Section.get<string>("intelliSenseEngine"); }
+    public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }
+    public get intelliSenseCachePath(): string { return super.Section.get<string>("intelliSenseCachePath"); }
+    public get intelliSenseCacheSize(): number { return super.Section.get<number>("intelliSenseCacheSize"); }
+    public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
     public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
-    public get autoComplete(): string { return super.getWithFallback<string>("intelliSense.autocomplete", "autocomplete"); }
+    public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
     public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
-    public get workspaceParsingPriority(): string { return super.getWithFallback<string>("workspaceParsing.priority", "workspaceParsingPriority"); }
+    public get workspaceParsingPriority(): string { return super.Section.get<string>("workspaceParsingPriority"); }
     public get workspaceSymbols(): string { return super.Section.get<string>("workspaceSymbols"); }
-    public get exclusionPolicy(): string { return super.getWithFallback<string>("workspaceParsing.exclusionPolicy", "exclusionPolicy"); }
+    public get exclusionPolicy(): string { return super.Section.get<string>("exclusionPolicy"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string { return super.Section.get<string>("preferredPathSeparator"); }
@@ -149,25 +101,19 @@ export class CppSettings extends Settings {
 
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
-            && this.languageServerEnabled
-            && this.intelliSenseEngine === "Default"
+            && super.Section.get<string>("intelliSenseEngine") === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
     public get dimInactiveRegions(): boolean {
-        return this.languageServerEnabled
-            && this.intelliSenseEngine === "Default"
+        return super.Section.get<boolean>("dimInactiveRegions")
+        && super.Section.get<string>("intelliSenseEngine") === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         let value: string = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
-    }
-
-    public toggleIntelliSenseEngineFallback(): void {
-        let value: string = this.intelliSenseEngineFallback;
-        super.Section.update("intelliSense.fallback", value === "Enabled" ? "Disabled" : "Enabled", getTarget());
     }
 
     public update<T>(name: string, value: T): void {
