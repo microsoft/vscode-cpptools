@@ -1091,3 +1091,16 @@ export function isValidIdentifier(candidate: string): boolean {
     }
     return true;
 }
+
+export function getUniqueWorkspaceName(workspaceFolder?: vscode.WorkspaceFolder) : string {
+    let workspaceFolderName: string = workspaceFolder ? workspaceFolder.name : "untitled";
+    if (!workspaceFolder || workspaceFolder.index < 1) {
+        return workspaceFolderName; // No duplicate names to search for.
+    }
+    for (let i: number = 0; i < workspaceFolder.index; ++i) {
+        if (vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
+            return path.join(workspaceFolderName, String(workspaceFolder.index)); // Use the index as a subfolder.
+        }
+    }
+    return workspaceFolderName; // No duplicate names found.
+}

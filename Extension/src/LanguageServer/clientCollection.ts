@@ -36,8 +36,15 @@ export class ClientCollection {
     constructor() {
         let key: string = defaultClientKey;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+            let isFirstWorkspaceFolder: boolean = true;
             vscode.workspace.workspaceFolders.forEach(folder => {
-                this.languageClients.set(util.asFolder(folder.uri), cpptools.createClient(this, folder));
+                let newClient: cpptools.Client = cpptools.createClient(this, folder);
+                this.languageClients.set(util.asFolder(folder.uri), newClient);
+                if (isFirstWorkspaceFolder) {
+                    isFirstWorkspaceFolder = false;
+                } else {
+                    newClient.deactivate();
+                }
             });
             key = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
             this.activeClient = this.languageClients.get(key);

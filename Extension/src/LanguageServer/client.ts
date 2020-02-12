@@ -540,25 +540,12 @@ export class DefaultClient implements Client {
      * @see notifyWhenReady(notify)
      */
 
-    private getUniqueWorkspaceStorageName(workspaceFolder?: vscode.WorkspaceFolder) : string {
-        let workspaceFolderName: string = this.getName(workspaceFolder);
-        if (!workspaceFolder || workspaceFolder.index < 1) {
-            return workspaceFolderName; // No duplicate names to search for.
-        }
-        for (let i: number = 0; i < workspaceFolder.index; ++i) {
-            if (vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
-                return path.join(workspaceFolderName, String(workspaceFolder.index)); // Use the index as a subfolder.
-            }
-        }
-        return workspaceFolderName; // No duplicate names found.
-    }
-
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
         this.storagePath = util.extensionContext ? util.extensionContext.storagePath :
             path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.storagePath = path.join(this.storagePath, this.getUniqueWorkspaceStorageName(this.rootFolder));
+            this.storagePath = path.join(this.storagePath, util.getUniqueWorkspaceName(this.rootFolder));
         }
         try {
             let firstClient: boolean = false;
@@ -576,7 +563,7 @@ export class DefaultClient implements Client {
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(() => languageClient.onReady().then(
                 () => {
-                    this.configuration = new configs.CppProperties(this.RootUri);
+                    this.configuration = new configs.CppProperties(this.RootUri, this.rootFolder);
                     this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                     this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
                     this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
@@ -2129,7 +2116,7 @@ export class DefaultClient implements Client {
             this.doneInitialCustomBrowseConfigurationCheck = true;
         }
         this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
-        this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
+        this.model.activeConfigName.setValueIfActive(configurations[params.currentConfiguration].name);
         let newProvider: string = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
             if (this.configurationProvider) {
