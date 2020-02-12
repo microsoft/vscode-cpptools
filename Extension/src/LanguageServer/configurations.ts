@@ -879,8 +879,10 @@ export class CppProperties {
             }
 
             this.configurationJson.configurations.forEach(e => {
-                delete e.knownCompilers;
-                dirty = true;
+                if (e.knownCompilers) {
+                    delete e.knownCompilers;
+                    dirty = true;
+                }
             });
 
             if (dirty) {
