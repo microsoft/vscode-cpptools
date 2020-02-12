@@ -51,7 +51,7 @@ suite("[Quick info test]", function(): void {
         let expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nvoid myfunction(int var1, std::string var2, std::string var3)\n\`\`\``);
         expectedMap.set("linux", `\`\`\`cpp\nvoid myfunction(int var1, std::__cxx11::string var2, std::__cxx11::string var3)\n\`\`\``);
-        expectedMap.set("darwin", `\`\`\`cpp\nvoid myfunction(int var1, std::__1::string var2, std::__1::string var3)\n\`\`\``);
+        expectedMap.set("darwin", `\`\`\`cpp\nvoid myfunction(int var1, std::__cxx11::string var2, std::__cxx11::string var3)\n\`\`\``);
 
         let expected1: string = expectedMap.get(platform);
         let actual1: string = (<vscode.MarkdownString>result[0].contents[0]).value;
@@ -67,7 +67,7 @@ suite("[Quick info test]", function(): void {
         let expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
         expectedMap.set("linux", `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``);
-        expectedMap.set("darwin", `\`\`\`cpp\nstd::__1::string stringVar\n\`\`\``);
+        expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``);
 
         let expected: string = expectedMap.get(platform);
         let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
@@ -80,7 +80,7 @@ suite("[Quick info test]", function(): void {
         let expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n`);
         expectedMap.set("linux", `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`);
-        expectedMap.set("darwin", `\`\`\`cpp\nstd::__1::string::basic_string<std::nullptr_t>(const char *__s)\n\`\`\`\n\n+21 overloads\n`);
+        expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`);
 
         let expected: string = expectedMap.get(platform);
         let actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
