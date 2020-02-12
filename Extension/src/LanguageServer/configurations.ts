@@ -878,12 +878,10 @@ export class CppProperties {
                 }
             }
 
-            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-                if (this.configurationJson.configurations[i].knownCompilers) {
-                    delete this.configurationJson.configurations[i].knownCompilers;
-                    dirty = true;
-                }
-            }
+            this.configurationJson.configurations.forEach(e => {
+                delete e.knownCompilers;
+                dirty = true;
+            });
 
             if (dirty) {
                 try {
