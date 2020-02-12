@@ -24,6 +24,7 @@
 	"compiler.path.description": "Percorso completo del compilatore usato per compilare il progetto, ad esempio {0}, per abilitare una versione più accurata di IntelliSense. L'estensione eseguirà una query sul compilatore per determinare i percorsi di inclusione del sistema e le direttive define predefinite da usare per IntelliSense.",
 	"specify.a.compiler": "Specificare un percorso del compilatore o selezionare un percorso del compilatore rilevato dall'elenco a discesa.",
 	"no.compiler.paths.detected": "(Non sono stati rilevati percorsi del compilatore)",
+	"compiler.args": "Argomenti del compilatore",
 	"compiler.arguments": "Argomenti del compilatore per modificare le direttive include o define usate, ad esempio {0}, {1} e così via.",
 	"one.argument.per.line": "Un argomento per riga.",
 	"intellisense.mode": "Modalità IntelliSense",

@@ -35,9 +35,10 @@ interface Build {
 * @return The download URL of the VSIX
 */
 function getVsixDownloadUrl(build: Build, vsixName: string): string {
-    const downloadUrl: string = build.assets.find(asset => {
+    const asset: Asset | undefined = build.assets.find(asset => {
         return asset.name === vsixName;
-    }).browser_download_url;
+    });
+    const downloadUrl: string | null = (asset) ? asset.browser_download_url : null;
     if (!downloadUrl) {
         throw new Error(`Failed to find VSIX: ${vsixName} in build: ${build.name}`);
     }
@@ -156,6 +157,9 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
                 const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
                 const vsixName: string = vsixNameForPlatform(platformInfo);
                 const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
+                if (!downloadUrl) {
+                    return undefined;
+                }
                 return { downloadUrl: downloadUrl, name: build.name };
             } catch (error) {
                 return Promise.reject(error);

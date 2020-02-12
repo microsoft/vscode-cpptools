@@ -24,6 +24,7 @@
 	"compiler.path.description": "用于生成项目来启用更准确的 IntelliSense 的编译器的完整路径，例如 {0}。扩展将查询编译器以确定要用于 IntelliSense 的系统是否包含路径和默认定义。",
 	"specify.a.compiler": "指定编译器路径或从下拉列表中选择检测到的编译器路径。",
 	"no.compiler.paths.detected": "(未检测到编译器路径)",
+	"compiler.args": "编译器参数",
 	"compiler.arguments": "用于修改所使用的包含或定义的编译器参数，例如 {0}、{1} 等。",
 	"one.argument.per.line": "每行一个参数。",
 	"intellisense.mode": "IntelliSense 模式",

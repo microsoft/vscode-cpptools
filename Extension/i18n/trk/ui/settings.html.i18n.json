@@ -24,6 +24,7 @@
 	"compiler.path.description": "Projenizi derlemek için kullandığınız derleyicinin tam yolu, örneğin, daha doğru IntelliSense'i etkinleştirmek için {0}. Uzantı, IntelliSense için kullanılacak sistem ekleme yollarını ve varsayılan tanımları belirlemek için derleyiciyi sorgular.",
 	"specify.a.compiler": "Derleyici yolunu belirtin veya açılan listeden, algılanan bir derleyici yolu seçin.",
 	"no.compiler.paths.detected": "(Derleyici yolu algılanmadı)",
+	"compiler.args": "Derleyici bağımsız değişkenleri",
 	"compiler.arguments": "Kullanılan eklemeleri veya tanımları değiştirmek için derleyici bağımsız değişkenleri. Örneğin {0}, {1}, vb.",
 	"one.argument.per.line": "Satır başına bir bağımsız değişken.",
 	"intellisense.mode": "IntelliSense modu",

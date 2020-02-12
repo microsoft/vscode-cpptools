@@ -441,7 +441,6 @@ function realActivation(): void {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
@@ -515,18 +514,6 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
-let saveMessageShown: boolean = false;
-function onDidSaveTextDocument(doc: vscode.TextDocument): void {
-    if (!vscode.window.activeTextEditor || doc !== vscode.window.activeTextEditor.document || (doc.languageId !== "cpp" && doc.languageId !== "c")) {
-        return;
-    }
-
-    if (!saveMessageShown && new CppSettings(doc.uri).clangFormatOnSave) {
-        saveMessageShown = true;
-        vscode.window.showInformationMessage(localize("removed.use.instead", '"{0}" has been removed. Please use "{1}" instead.', "C_Cpp.clang_format_formatOnSave", "editor.formatOnSave"));
-    }
-}
-
 function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -565,7 +552,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
-        if (editor.document.languageId === "c" || editor.document.languageId === "cpp") {
+        if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp")) {
             let client: Client = clients.getClientFor(editor.document.uri);
             if (client) {
                 if (clients.checkOwnership(client, editor.document)) {
@@ -907,6 +894,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
@@ -1160,6 +1148,10 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     await vscode.env.clipboard.writeText(installCommand);
 }
 
+function onSetActiveConfigName(configurationName: string) : Thenable<void> {
+    return clients.ActiveClient.setCurrentConfigName(configurationName);
+}
+
 function onGetActiveConfigName(): Thenable<string> {
     return clients.ActiveClient.getCurrentConfigName();
 }
@@ -1264,7 +1256,7 @@ function reportMacCrashes(): void {
                         return;
                     }
                     prevCrashFile = filename;
-                    if (!filename.startsWith("Microsoft.VSCode.CPP.")) {
+                    if (!filename.startsWith("cpptools")) {
                         return;
                     }
                     // Wait 5 seconds to allow time for the crash log to finish being written.
@@ -1328,8 +1320,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const process1: string = "Microsoft.VSCode.CPP.IntelliSense.Msvc.darwin\t";
-    const process2: string = "Microsoft.VSCode.CPP.Extension.darwin\t";
+    const process1: string = "cpptools-srv\t";
+    const process2: string = "cpptools\t";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
         data = `${process1}${binaryVersion}\n${data}`;

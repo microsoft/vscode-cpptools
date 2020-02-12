@@ -19,6 +19,7 @@
 	"dismiss.button": "關閉",
 	"diable.warnings.button": "停用警告",
 	"unable.to.provide.configuraiton": "{0} 無法提供 '{1}' 的 IntelliSense 組態資訊。將改用來自 '{2}' 組態的設定。",
+	"config.not.found": "找不到要求的組態名稱: {0}",
 	"unsupported.client": "不支援的用戶端",
 	"timed.out": "逾時 ({0} 毫秒內)。",
 	"c.cpp.debug.protocol": "C/C++ 偵錯通訊協定",

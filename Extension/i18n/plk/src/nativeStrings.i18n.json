@@ -89,7 +89,7 @@
 	"terminating_child_process": "trwa kończenie procesu podrzędnego: {0}",
 	"still_alive_killing": "nadal aktywne, trwa zabijanie...",
 	"giving_up": "rezygnacja",
-	"not_exited_yet": "— rozwiązanie nie zostało jeszcze zamknięte. Pozostaw je w stanie uśpienia przez {0} ms i spróbuj ponownie.",
+	"not_exited_yet": "— nie zamknięto jeszcze. Spróbuj ponownie po czasie uśpienia równym {0} ms.",
 	"failed_to_spawn_process": "Nie można zduplikować procesu. Błąd: {0} ({1})",
 	"offering_completion": "Oferowanie uzupełniania",
 	"compiler_from_compiler_path": "Próba pobrania wartości domyślnych z kompilatora we właściwości „compilerPath”: „{0}”",

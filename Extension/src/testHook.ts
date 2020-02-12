@@ -21,11 +21,12 @@ export class TestHook implements CppToolsTestHook {
     }
 
     public get valid(): boolean {
-        return !!this.intelliSenseStatusChangedEvent;
+        return !!this.intelliSenseStatusChangedEvent && !!this.statusChangedEvent;
     }
 
     public updateStatus(status: IntelliSenseStatus): void {
         this.intelliSenseStatusChangedEvent.fire(status);
+        this.statusChangedEvent.fire(status.status);
     }
 
     public dispose(): void {

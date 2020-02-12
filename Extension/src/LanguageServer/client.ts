@@ -235,6 +235,7 @@ const IntervalTimerNotification: NotificationType<void, void> = new Notification
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomConfigurations');
+const ClearCustomBrowseConfigurationNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/clearCustomBrowseConfiguration');
 const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
 const DidChangeVisibleRangesNotification: NotificationType<DidChangeVisibleRangesParams, void> = new NotificationType<DidChangeVisibleRangesParams, void>('cpptools/didChangeVisibleRanges');
 const SemanticColorizationRegionsReceiptNotification: NotificationType<SemanticColorizationRegionsReceiptParams, void> = new NotificationType<SemanticColorizationRegionsReceiptParams, void>('cpptools/semanticColorizationRegionsReceipt');
@@ -244,6 +245,7 @@ const CancelReferencesNotification: NotificationType<void, void> = new Notificat
 const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
+const DidChangeSettingsNotification: NotificationType<any, void> = new NotificationType<any, void>('cpptools/didChangeSettings');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -254,8 +256,6 @@ const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = n
 const DebugLogNotification:  NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLog');
 const SemanticColorizationRegionsNotification:  NotificationType<SemanticColorizationRegionsParams, void> = new NotificationType<SemanticColorizationRegionsParams, void>('cpptools/semanticColorizationRegions');
 const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
-const UpdateClangFormatPathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateClangFormatPath');
-const UpdateIntelliSenseCachePathNotification: NotificationType<string, void> = new NotificationType<string, void>('cpptools/updateIntelliSenseCachePath');
 const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, void> = new NotificationType<refs.ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
@@ -308,6 +308,7 @@ export interface Client {
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
+    setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
@@ -899,7 +900,7 @@ export class DefaultClient implements Client {
                 exclude_files: other.filesExclude,
                 exclude_search: other.searchExclude,
                 storage_path: this.storagePath,
-                tab_size: other.editorTabSize,
+                tabSize: other.editorTabSize,
                 intelliSenseEngine: settings.intelliSenseEngine,
                 intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
@@ -958,58 +959,70 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
-        let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
-            || event.affectsConfiguration("editor.tokenColorCustomizations");
+        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
+        this.notifyWhenReady(() => {
+            // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
+            // build a new JSON object with everything we need on the native side.
+            let settings: any = {
+                C_Cpp: {
+                    ...vscode.workspace.getConfiguration("C_Cpp", this.RootUri),
+                    tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
+                },
+                files: {
+                    exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
+                },
+                search: {
+                    exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
+                }
+            };
 
-        let colorizationNeedsRefresh: boolean = colorizationNeedsReload
-            || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.dimInactiveRegions", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
-            || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
+            // Send settings json to native side
+            this.languageClient.sendNotification(DidChangeSettingsNotification, settings);
 
-        let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
-        if (colorThemeChanged) {
-            let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
-            this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
-        }
+            let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
+                || event.affectsConfiguration("editor.tokenColorCustomizations");
 
-        if (colorizationNeedsReload) {
-            this.colorizationSettings.reload();
-        }
-        if (colorizationNeedsRefresh) {
-            let processedUris: vscode.Uri[] = [];
-            for (let e of vscode.window.visibleTextEditors) {
-                let uri: vscode.Uri = e.document.uri;
+            let colorizationNeedsRefresh: boolean = colorizationNeedsReload
+                || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.dimInactiveRegions", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionOpacity", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
+                || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
 
-                // Make sure we don't process the same file multiple times.
-                // colorizationState.onSettingsChanged ensures all visible text editors for that file get
-                // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
-                if (!processedUris.find(e => e === uri)) {
-                    processedUris.push(uri);
-                    let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
-                    if (colorizationState) {
-                        colorizationState.onSettingsChanged(uri);
+            let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
+            if (colorThemeChanged) {
+                let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
+                this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
+            }
+
+            if (colorizationNeedsReload) {
+                this.colorizationSettings.reload();
+            }
+            if (colorizationNeedsRefresh) {
+                let processedUris: vscode.Uri[] = [];
+                for (let e of vscode.window.visibleTextEditors) {
+                    let uri: vscode.Uri = e.document.uri;
+
+                    // Make sure we don't process the same file multiple times.
+                    // colorizationState.onSettingsChanged ensures all visible text editors for that file get
+                    // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
+                    if (!processedUris.find(e => e === uri)) {
+                        processedUris.push(uri);
+                        let colorizationState: ColorizationState = this.colorizationState.get(uri.toString());
+                        if (colorizationState) {
+                            colorizationState.onSettingsChanged(uri);
+                        }
                     }
                 }
             }
-        }
-        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
-        if (Object.keys(changedSettings).length > 0) {
-            if (changedSettings["commentContinuationPatterns"]) {
-                updateLanguageConfigurations();
+            if (Object.keys(changedSettings).length > 0) {
+                if (changedSettings["commentContinuationPatterns"]) {
+                    updateLanguageConfigurations();
+                }
+                this.configuration.onDidChangeSettings();
+                telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
             }
-            if (changedSettings["clang_format_path"]) {
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateClangFormatPathNotification, util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment));
-            }
-            if (changedSettings["intelliSenseCachePath"]) {
-                let settings: CppSettings = new CppSettings(this.RootUri);
-                this.languageClient.sendNotification(UpdateIntelliSenseCachePathNotification, util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment));
-            }
-            this.configuration.onDidChangeSettings();
-            telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
-        }
+        });
         return changedSettings;
     }
 
@@ -1179,15 +1192,21 @@ export class DefaultClient implements Client {
 
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
         return this.notifyWhenReady(() => {
-            this.clearCustomConfigurations();
             if (!this.configurationProvider) {
+                this.clearCustomConfigurations();
                 return;
             }
             let currentProvider: CustomConfigurationProvider1 = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
+            if (!currentProvider) {
+                this.clearCustomConfigurations();
+                return;
+             }
+             if (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) {
+                // If we are being called by a configuration provider other than the current one, ignore it.
                 return;
             }
 
+            this.clearCustomConfigurations();
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, null);
             });
@@ -1223,7 +1242,7 @@ export class DefaultClient implements Client {
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
             task().then(async config => {
-                await this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
                 if (!hasCompleted) {
                     hasCompleted = true;
                     if (currentProvider.version >= Version.v2) {
@@ -1243,7 +1262,7 @@ export class DefaultClient implements Client {
             global.setTimeout(async () => {
                 if (!hasCompleted) {
                     hasCompleted = true;
-                    await this.sendCustomBrowseConfiguration(null, null, true);
+                    this.sendCustomBrowseConfiguration(null, null, true);
                     if (currentProvider.version >= Version.v2) {
                         console.warn("Configuration Provider timed out in {0}ms.", configProviderTimeout);
                         this.resumeParsing();
@@ -1340,7 +1359,7 @@ export class DefaultClient implements Client {
             return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
                 (configs: SourceFileConfigurationItem[]) => {
                     if (configs && configs.length > 0) {
-                        this.sendCustomConfigurations(configs, false);
+                        this.sendCustomConfigurations(configs);
                     }
                     onFinished();
                 },
@@ -1384,6 +1403,20 @@ export class DefaultClient implements Client {
 
     public getCurrentConfigName(): Thenable<string> {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration.name));
+    }
+
+    public setCurrentConfigName(configurationName: string): Thenable<void> {
+        return this.queueTask(() => new Promise((resolve, reject) => {
+            let configurations: configs.Configuration[] = this.configuration.Configurations || [];
+            let configurationIndex: number = configurations.findIndex((config) => config.name === configurationName);
+
+            if (configurationIndex !== -1) {
+                this.configuration.select(configurationIndex);
+                resolve();
+            } else {
+                reject(new Error(localize("config.not.found", "The requested configuration name is not found: {0}", configurationName)));
+            }
+        }));
     }
 
     public getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs> {
@@ -1497,16 +1530,12 @@ export class DefaultClient implements Client {
         return this.queueTask(request);
     }
 
-    public notifyWhenReady(notify: () => void, blockingTask?: boolean): Thenable<void> {
+    public notifyWhenReady(notify: () => void): Thenable<void> {
         let task: () => Thenable<void> = () => new Promise(resolve => {
             notify();
             resolve();
         });
-        if (blockingTask) {
-            return this.queueBlockingTask(task);
-        } else {
-            return this.queueTask(task);
-        }
+        return this.queueTask(task);
     }
 
     /**
@@ -1942,30 +1971,30 @@ export class DefaultClient implements Client {
             c.compilerPath = compilerPathAndArgs.compilerPath;
             c.compilerArgs = compilerPathAndArgs.additionalArgs;
         });
-        this.notifyWhenReady(() => {
-            if (!this.doneInitialCustomBrowseConfigurationCheck) {
-                // Send the last custom browse configuration we received from this provider.
-                // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
-                // Should only execute on launch, for the initial delivery of configurations
-                let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
-                if (lastCustomBrowseConfigurationProviderId.Value === configurations[params.currentConfiguration].configurationProvider) {
-                    let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
-                    if (lastCustomBrowseConfiguration.Value) {
-                        this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
-                    }
+        if (!this.doneInitialCustomBrowseConfigurationCheck) {
+            // Send the last custom browse configuration we received from this provider.
+            // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
+            // Should only execute on launch, for the initial delivery of configurations
+            let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
+            if (isSameProviderExtensionId(lastCustomBrowseConfigurationProviderId.Value, configurations[params.currentConfiguration].configurationProvider)) {
+                let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
+                if (lastCustomBrowseConfiguration.Value) {
+                    this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
                 }
-                this.doneInitialCustomBrowseConfigurationCheck = true;
             }
-            this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
-            this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
-        }).then(() => {
-            let newProvider: string = this.configuration.CurrentConfigurationProvider;
-            if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
-                this.configurationProvider = newProvider;
-                this.updateCustomBrowseConfiguration();
-                this.updateCustomConfigurations();
+            this.doneInitialCustomBrowseConfigurationCheck = true;
+        }
+        this.languageClient.sendNotification(ChangeFolderSettingsNotification, params);
+        this.model.activeConfigName.Value = configurations[params.currentConfiguration].name;
+        let newProvider: string = this.configuration.CurrentConfigurationProvider;
+        if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
+            if (this.configurationProvider) {
+                this.clearCustomBrowseConfiguration();
             }
-        });
+            this.configurationProvider = newProvider;
+            this.updateCustomBrowseConfiguration();
+            this.updateCustomConfigurations();
+        }
     }
 
     private onSelectedConfigurationChanged(index: number): void {
@@ -1998,7 +2027,7 @@ export class DefaultClient implements Client {
             util.isOptionalArrayOfString(input.configuration.forcedInclude));
     }
 
-    private sendCustomConfigurations(configs: any, blockingTask?: boolean): void {
+    private sendCustomConfigurations(configs: any): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
@@ -2046,16 +2075,10 @@ export class DefaultClient implements Client {
             configurationItems: sanitized
         };
 
-        if (blockingTask) {
-            this.notifyWhenReady(() => {
-                this.languageClient.sendNotification(CustomConfigurationNotification, params);
-            } , blockingTask);
-        } else {
-            this.languageClient.sendNotification(CustomConfigurationNotification, params);
-        }
+        this.languageClient.sendNotification(CustomConfigurationNotification, params);
     }
 
-    private sendCustomBrowseConfiguration(config: any, providerId: string, timeoutOccured?: boolean): Thenable<void> {
+    private sendCustomBrowseConfiguration(config: any, providerId: string, timeoutOccured?: boolean): void {
         let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
         let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
@@ -2073,7 +2096,7 @@ export class DefaultClient implements Client {
                     break;
                 }
                 console.log("No browse configuration is available.");
-                return Promise.resolve();
+                return;
             }
 
             sanitized = {...<WorkspaceBrowseConfiguration>config};
@@ -2088,7 +2111,7 @@ export class DefaultClient implements Client {
                     console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
-                return Promise.resolve();
+                return;
             }
 
             let settings: CppSettings = new CppSettings(this.RootUri);
@@ -2115,11 +2138,15 @@ export class DefaultClient implements Client {
             browseConfiguration: sanitized
         };
 
-        return this.notifyWhenReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
+        this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params);
     }
 
     private clearCustomConfigurations(): void {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification));
+    }
+
+    private clearCustomBrowseConfiguration(): void {
+        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification));
     }
 
     /*********************************************
@@ -2149,11 +2176,12 @@ export class DefaultClient implements Client {
                         .then(() => {
                             if (extensionId) {
                                 let provider: CustomConfigurationProvider1 = getCustomConfigProviders().get(extensionId);
-                                this.updateCustomConfigurations(provider);
                                 this.updateCustomBrowseConfiguration(provider);
+                                this.updateCustomConfigurations(provider);
                                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
                             } else {
                                 this.clearCustomConfigurations();
+                                this.clearCustomBrowseConfiguration();
                             }
                         });
                 });
@@ -2270,15 +2298,11 @@ export class DefaultClient implements Client {
 }
 
 function getLanguageServerFileName(): string {
-    let extensionProcessName: string = 'Microsoft.VSCode.CPP.Extension';
+    let extensionProcessName: string = 'cpptools';
     let plat: NodeJS.Platform = process.platform;
-    if (plat === 'linux') {
-        extensionProcessName += '.linux';
-    } else if (plat === 'darwin') {
-        extensionProcessName += '.darwin';
-    } else if (plat === 'win32') {
+    if (plat === 'win32') {
         extensionProcessName += '.exe';
-    } else {
+    } else if (plat !== 'linux' && plat !== 'darwin') {
         throw "Invalid Platform";
     }
     return path.resolve(util.getExtensionFilePath("bin"), extensionProcessName);
@@ -2311,6 +2335,7 @@ class NullClient implements Client {
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void {}
+    setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }

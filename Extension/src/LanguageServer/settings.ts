@@ -6,6 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
+import * as which from 'which';
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
@@ -23,6 +24,22 @@ class Settings {
     }
 
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
+
+    protected getWithFallback<T>(section: string, deprecatedSection: string): T {
+        let info: any = this.settings.inspect<T>(section);
+        if (info.workspaceFolderValue !== undefined) {
+            return info.workspaceFolderValue;
+        } else if (info.workspaceValue !== undefined) {
+            return info.workspaceValue;
+        } else if (info.globalValue !== undefined) {
+            return info.globalValue;
+        }
+        let value: T = this.settings.get<T>(deprecatedSection);
+        if (value !== undefined) {
+            return value;
+        }
+        return info.defaultValue;
+    }
 }
 
 export class CppSettings extends Settings {
@@ -30,11 +47,17 @@ export class CppSettings extends Settings {
         super("C_Cpp", resource);
     }
 
-    public get clangFormatPath(): string { return super.Section.get<string>("clang_format_path"); }
+    public get clangFormatPath(): string {
+        let path: string = super.Section.get<string>("clang_format_path");
+        if (!path) {
+            path = which.sync('clang-format', {nothrow: true});
+        }
+        return path;
+    }
+
     public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string { return super.Section.get<string>("clang_format_sortIncludes"); }
-    public get clangFormatOnSave(): string { return super.Section.get<string>("clang_format_formatOnSave"); }
     public get formatting(): string { return super.Section.get<string>("formatting"); }
     public get experimentalFeatures(): string { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean { return super.Section.get<boolean>("suggestSnippets"); }
@@ -48,7 +71,6 @@ export class CppSettings extends Settings {
     public get inactiveRegionBackgroundColor(): string { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
     public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
     public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
-    public get navigationLength(): number { return super.Section.get<number>("navigation.length", 60); }
     public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): string { return super.Section.get<string>("workspaceParsingPriority"); }
     public get workspaceSymbols(): string { return super.Section.get<string>("workspaceSymbols"); }
@@ -85,7 +107,7 @@ export class CppSettings extends Settings {
 
     public get dimInactiveRegions(): boolean {
         return super.Section.get<boolean>("dimInactiveRegions")
-            && super.Section.get<string>("intelliSenseEngine") === "Default"
+        && super.Section.get<string>("intelliSenseEngine") === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
@@ -93,6 +115,7 @@ export class CppSettings extends Settings {
         let value: string = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
     }
+
     public update<T>(name: string, value: T): void {
         super.Section.update(name, value);
     }

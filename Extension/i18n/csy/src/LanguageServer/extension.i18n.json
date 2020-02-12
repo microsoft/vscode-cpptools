@@ -6,7 +6,6 @@
 {
 	"learn.how.to.install.a.library": "Jak nainstalovat knihovnu pro tuto hlavičku pomocí vcpkg",
 	"copy.vcpkg.command": "Zkopírovat příkaz vcpkg pro instalaci {0} do schránky",
-	"removed.use.instead": "{0} se odebralo. Použijte prosím místo toho {1}.",
 	"insiders.available": "Je k dispozici verze {0} pro účastníky programu Insider. Chcete se přepnout na kanál pro účastníky programu Insider a nainstalovat tuto aktualizaci?",
 	"yes.button": "Ano",
 	"ask.me.later.button": "Požádat později",

@@ -89,7 +89,7 @@
 	"terminating_child_process": "terminazione del processo figlio: {0}",
 	"still_alive_killing": "ancora attivo. Verrà terminato...",
 	"giving_up": "rinuncia",
-	"not_exited_yet": "non ancora terminato. Verrà sospeso per {0} millisecondi prima di riprovare.",
+	"not_exited_yet": "Il processo non è stato ancora terminato. Verrà sospeso per {0} millisecondi prima di riprovare.",
 	"failed_to_spawn_process": "Non è stato possibile generare il processo. Errore: {0} ({1})",
 	"offering_completion": "Offerta di completamento",
 	"compiler_from_compiler_path": "Tentativo di recuperare le impostazioni predefinite dal compilatore nella proprietà \"compilerPath\": '{0}'",
