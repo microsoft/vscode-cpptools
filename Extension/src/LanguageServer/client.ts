@@ -1470,7 +1470,17 @@ export class DefaultClient implements Client {
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
             task().then(async config => {
-                this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                // TODO: This is a hack to get around CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
+                let foundMatch: boolean = false;
+                for (let c of config.browsePath) {
+                    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+                if (foundMatch) {
+                    this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                }
                 if (!hasCompleted) {
                     hasCompleted = true;
                     if (currentProvider.version >= Version.v2) {
