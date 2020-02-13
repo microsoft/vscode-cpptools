@@ -563,7 +563,7 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
                         client.TrackedDocuments.add(editor.document);
                         // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                         if ((editor.document.uri.path.endsWith(".C") || editor.document.uri.path.endsWith(".H")) && editor.document.languageId === "c") {
-                            let cppSettings: CppSettings = new CppSettings(client.RootUri);
+                            let cppSettings: CppSettings = new CppSettings();
                             if (cppSettings.autoAddFileAssociations) {
                                 const fileName: string = path.basename(editor.document.uri.fsPath);
                                 const mappingString: string = fileName + "@" + editor.document.uri.fsPath;

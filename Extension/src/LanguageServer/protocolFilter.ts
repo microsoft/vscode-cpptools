@@ -33,7 +33,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                 if (clients.checkOwnership(me, document)) {
                     me.TrackedDocuments.add(document);
                     if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
-                        let cppSettings: CppSettings = new CppSettings(me.RootUri);
+                        let cppSettings: CppSettings = new CppSettings();
                         if (cppSettings.autoAddFileAssociations) {
                             const fileName: string = path.basename(document.uri.fsPath);
                             const mappingString: string = fileName + "@" + document.uri.fsPath;

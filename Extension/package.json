@@ -233,7 +233,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.autoAddFileAssociations.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.workspaceParsing.priority": {
           "type": "string",
