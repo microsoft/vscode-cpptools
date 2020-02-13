@@ -10,15 +10,11 @@ import * as util from '../../../src/common';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../../src/LanguageServer/configurations';
-
-const defaultTimeout: number = 100000;
+import * as testHelpers from '../testHelpers';
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
-        if (!extension.isActive) {
-            await extension.activate();
-        }
+        await testHelpers.activateCppExtension();
     });
 
     let defaultRules: vscode.OnEnterRule[] = [
@@ -192,7 +188,7 @@ suite("extensibility tests v3", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -279,13 +275,14 @@ suite("extensibility tests v2", function(): void {
             disposables.push(testHook.IntelliSenseStatusChanged(result => {
                 result = result as apit.IntelliSenseStatus;
                 if (result.filename === "main2.cpp" && result.status === apit.Status.IntelliSenseReady) {
+
                     let expected: api.SourceFileConfigurationItem[] = [ {uri: uri.toString(), configuration: defaultConfig} ];
                     assert.deepEqual(lastResult, expected);
                     assert.deepEqual(lastBrowseResult, defaultBrowseConfig);
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -362,7 +359,7 @@ suite("extensibility tests v1", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
@@ -436,7 +433,7 @@ suite("extensibility tests v0", function(): void {
                     resolve();
                 }
             }));
-            setTimeout(() => { reject(new Error("timeout")); }, defaultTimeout);
+            setTimeout(() => { reject(new Error("timeout")); }, testHelpers.defaultTimeout);
         });
         disposables.push(testHook);
 
