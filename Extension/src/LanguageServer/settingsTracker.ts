@@ -135,9 +135,7 @@ export class SettingsTracker {
             this.previousCppSettings[key] = val;
             switch (key) {
                 case "clang_format_style":
-                case "clang_format_fallbackStyle":
-                case "clangFormat.style":
-                case "clangFormat.fallbackStyle": {
+                case "clang_format_fallbackStyle": {
                     let newKey: string = key + "2";
                     if (val) {
                         switch (String(val).toLowerCase()) {
@@ -168,7 +166,7 @@ export class SettingsTracker {
                     break;
                 }
                 default: {
-                    if (key === "clang_format_path" || key === "clangFormat.path" || key === "intelliSense.cache.path" || key === "intelliSenseCachePath" || key.startsWith("default.")) {
+                    if (key === "clang_format_path" || key === "intelliSenseCachePath" || key.startsWith("default.")) {
                         value = this.areEqual(val, settings.inspect(key).defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     } else {
                         value = String(this.previousCppSettings[key]);

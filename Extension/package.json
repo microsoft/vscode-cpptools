@@ -96,7 +96,7 @@
       "type": "object",
       "title": "C/C++",
       "properties": {
-        "C_Cpp.clangFormat.path": {
+        "C_Cpp.clang_format_path": {
           "type": [
             "string",
             "null"
@@ -105,19 +105,19 @@
           "description": "%c_cpp.configuration.clang_format_path.description%",
           "scope": "resource"
         },
-        "C_Cpp.clangFormat.style": {
+        "C_Cpp.clang_format_style": {
           "type": "string",
           "default": "file",
           "description": "%c_cpp.configuration.clang_format_style.description%",
           "scope": "resource"
         },
-        "C_Cpp.clangFormat.fallbackStyle": {
+        "C_Cpp.clang_format_fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
           "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
           "scope": "resource"
         },
-        "C_Cpp.clangFormat.sortIncludes": {
+        "C_Cpp.clang_format_sortIncludes": {
           "type": [
             "boolean",
             "null"
@@ -131,23 +131,18 @@
           "description": "%c_cpp.configuration.clang_format_sortIncludes.description%",
           "scope": "resource"
         },
-        "C_Cpp.languageServer.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "%c_cpp.configuration.languageServer.enabled.description%",
-          "scope": "window"
-        },
-        "C_Cpp.intelliSense.engine": {
+        "C_Cpp.intelliSenseEngine": {
           "type": "string",
           "enum": [
             "Default",
-            "Tag Parser"
+            "Tag Parser",
+            "Disabled"
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.intelliSenseEngine.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSense.fallback": {
+        "C_Cpp.intelliSenseFallback": {
           "type": "string",
           "enum": [
             "Enabled",
@@ -157,7 +152,7 @@
           "description": "%c_cpp.configuration.intelliSenseEngineFallback.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSense.autocomplete": {
+        "C_Cpp.autocomplete": {
           "type": "string",
           "enum": [
             "Default",
@@ -210,10 +205,14 @@
           "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
           "scope": "resource"
         },
-        "C_Cpp.formatting.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "%c_cpp.configuration.formatting.enabled.description%",
+        "C_Cpp.formatting": {
+          "type": "string",
+          "enum": [
+            "Default",
+            "Disabled"
+          ],
+          "default": "Default",
+          "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
         "C_Cpp.loggingLevel": {
@@ -235,7 +234,7 @@
           "description": "%c_cpp.configuration.autoAddFileAssociations.description%",
           "scope": "window"
         },
-        "C_Cpp.workspaceParsing.priority": {
+        "C_Cpp.workspaceParsingPriority": {
           "type": "string",
           "enum": [
             "highest",
@@ -257,7 +256,7 @@
           "description": "%c_cpp.configuration.workspaceSymbols.description%",
           "scope": "window"
         },
-        "C_Cpp.workspaceParsing.exclusionPolicy": {
+        "C_Cpp.exclusionPolicy": {
           "type": "string",
           "enum": [
             "checkFolders",
@@ -316,13 +315,13 @@
           "description": "%c_cpp.configuration.configurationWarnings.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSense.cache.path": {
+        "C_Cpp.intelliSenseCachePath": {
           "type": "string",
           "default": null,
           "description": "%c_cpp.configuration.intelliSenseCachePath.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSense.cache.size": {
+        "C_Cpp.intelliSenseCacheSize": {
           "type": "number",
           "default": 5120,
           "description": "%c_cpp.configuration.intelliSenseCacheSize.description%",

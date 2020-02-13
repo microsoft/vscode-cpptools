@@ -1065,49 +1065,38 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'c' }
             ],
             initializationOptions: {
-                clangFormat: {
-                    path: settings_clangFormatPath,
-                    style: settings_clangFormatStyle,
-                    fallbackStyle: settings_clangFormatFallbackStyle,
-                    sortIncludes: settings_clangFormatSortIncludes
-                },
-                default: {
-                    systemIncludePath: settings_defaultSystemIncludePath
-                },
-                dimInactiveRegions: settings_dimInactiveRegions,
-                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
-                enhancedColorization: settings_enhancedColorization,
+                clang_format_path: settings_clangFormatPath,
+                clang_format_style: settings_clangFormatStyle,
+                clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
+                clang_format_sortIncludes: settings_clangFormatSortIncludes,
+                formatting: settings_formatting,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
                 associations: workspaceOtherSettings.filesAssociations,
-                exclude_search: settings_searchExclude,
-                experimentalFeatures: workspaceSettings.experimentalFeatures,
-                formatting: {
-                    enabled: settings_formatting
-                },
-                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
-                intelliSense: {
-                    autocomplete: settings_autoComplete,
-                    cache: {
-                        path : settings_intelliSenseCachePath,
-                        size : settings_intelliSenseCacheSize
-                    },
-                    errorSquiggles: settings_errorSquiggles,
-                    engine: settings_intelliSenseEngine,
-                    fallback: settings_intelliSenseEngineFallback
-                },
-                intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                loggingLevel: workspaceSettings.loggingLevel,
-                preferredPathSeparator: settings_preferredPathSeparator,
                 storage_path: this.storagePath,
-                suggestSnippets: settings_suggestSnippets,
                 tabSize: settings_editorTabSize,
-                vcpkg_root: util.getVcpkgRoot(),
-                workspaceParsing: {
-                    priority: workspaceSettings.workspaceParsingPriority,
-                    exclusionPolicy: settings_exclusionPolicy
+                intelliSenseEngine: settings_intelliSenseEngine,
+                intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
+                intelliSenseCacheDisabled: intelliSenseCacheDisabled,
+                intelliSenseCachePath : util.resolveCachePath(settings_intelliSenseCachePath, this.AdditionalEnvironment),
+                intelliSenseCacheSize : settings_intelliSenseCacheSize,
+                autocomplete: settings_autoComplete,
+                errorSquiggles: settings_errorSquiggles,
+                dimInactiveRegions: settings_dimInactiveRegions,
+                enhancedColorization: settings_enhancedColorization,
+                suggestSnippets: settings_suggestSnippets,
+                loggingLevel: workspaceSettings.loggingLevel,
+                workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
+                workspaceSymbols: workspaceSettings.workspaceSymbols,
+                exclusionPolicy: settings_exclusionPolicy,
+                preferredPathSeparator: settings_preferredPathSeparator,
+                default: {
+                    systemIncludePath: settings_defaultSystemIncludePath
                 },
-                workspaceSymbols: workspaceSettings.workspaceSymbols
+                vcpkg_root: util.getVcpkgRoot(),
+                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
+                experimentalFeatures: workspaceSettings.experimentalFeatures,
+                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
@@ -1168,19 +1157,7 @@ export class DefaultClient implements Client {
             let settings: any = {
                 C_Cpp: {
                     ...cppSettingsScoped,
-                    tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri),
-                    clangFormat: {
-                        ...vscode.workspace.getConfiguration("C_Cpp.clangFormat", this.RootUri),
-                    },
-                    intelliSense: {
-                        ...vscode.workspace.getConfiguration("C_Cpp.intelliSense", this.RootUri),
-                        cache: {
-                            ...vscode.workspace.getConfiguration("C_Cpp.intelliSense.cache", this.RootUri),
-                        }
-                    },
-                    workspaceParsing: {
-                        ...vscode.workspace.getConfiguration("C_Cpp.workspaceParsing", this.RootUri),
-                    }
+                    tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
                 },
                 files: {
                     exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
@@ -1190,21 +1167,8 @@ export class DefaultClient implements Client {
                 }
             };
 
-            // Migrate old settings to new settings
-            let cppSettings: CppSettings = new CppSettings(this.RootUri);
-            settings.C_Cpp.clangFormat.style = cppSettings.clangFormatStyle;
-            settings.C_Cpp.clangFormat.path = util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment);
-            settings.C_Cpp.clangFormat.fallbackStyle = cppSettings.clangFormatFallbackStyle;
-            settings.C_Cpp.clangFormat.sortIncludes = cppSettings.clangFormatSortIncludes;
-            settings.C_Cpp.intelliSense.errorSquiggles = cppSettings.errorSquiggles;
-            settings.C_Cpp.workspaceParsing.exclusionPolicy = cppSettings.exclusionPolicy;
-            settings.C_Cpp.workspaceParsing.priority = cppSettings.workspaceParsingPriority;
-            settings.C_Cpp.intelliSense.cache.path = util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment);
-            settings.C_Cpp.intelliSense.cache.size = cppSettings.intelliSenseCacheSize;
-            settings.C_Cpp.intelliSense.engine = cppSettings.intelliSenseEngine;
-            settings.C_Cpp.intelliSense.fallback = cppSettings.intelliSenseEngineFallback;
 
-            // Send adjusted settings json to native side
+            // Send settings json to native side
             this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
 
             let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")

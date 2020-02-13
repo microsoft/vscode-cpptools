@@ -24,7 +24,7 @@
 	"compiler.path.description": "Úplná cesta ke kompilátoru, pomocí kterého sestavíte svůj projekt, třeba {0}. Umožní přesnější IntelliSense. Rozšíření pošle kompilátoru dotaz, aby určilo systémové cesty pro vložené soubory a výchozí direktivy define, které se použijí pro IntelliSense.",
 	"specify.a.compiler": "Zadejte cestu ke kompilátoru nebo vyberte zjištěnou cestu z rozevíracího seznamu.",
 	"no.compiler.paths.detected": "(Nezjistily se žádný cesty ke kompilátoru.)",
-	"compiler.args": "Compiler arguments",
+	"compiler.args": "Argumenty kompilátoru",
 	"compiler.arguments": "Argumenty kompilátoru, které upraví použité direktivy include a define, např. {0}, {1} atd.",
 	"one.argument.per.line": "Na každý řádek jeden argument",
 	"intellisense.mode": "Režim IntelliSense",
