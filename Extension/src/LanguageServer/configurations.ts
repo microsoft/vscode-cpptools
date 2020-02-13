@@ -142,7 +142,7 @@ export class CppProperties {
         console.assert(rootUri !== undefined);
         this.rootUri = rootUri;
         let rootPath: string = rootUri ? rootUri.fsPath : "";
-        this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, util.getUniqueWorkspaceName(workspaceFolder));
+        this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, workspaceFolder);
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();

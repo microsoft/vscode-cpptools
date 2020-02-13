@@ -512,6 +512,9 @@ export class DefaultClient implements Client {
     public get RootUri(): vscode.Uri {
         return (this.rootFolder) ? this.rootFolder.uri : null;
     }
+    public get RootFolder(): vscode.WorkspaceFolder | undefined {
+        return this.rootFolder;
+    }
     public get Name(): string {
         return this.getName(this.rootFolder);
     }
@@ -545,7 +548,7 @@ export class DefaultClient implements Client {
         this.storagePath = util.extensionContext ? util.extensionContext.storagePath :
             path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.storagePath = path.join(this.storagePath, util.getUniqueWorkspaceName(this.rootFolder));
+            this.storagePath = path.join(this.storagePath, util.getUniqueWorkspaceStorageName(this.rootFolder));
         }
         try {
             let firstClient: boolean = false;
@@ -1372,7 +1375,7 @@ export class DefaultClient implements Client {
             }
             let selectedProvider: string = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
-                let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
+                let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootFolder);
                 if (ask.Value) {
                     ui.showConfigureCustomProviderMessage(() => {
                         const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
@@ -1983,7 +1986,7 @@ export class DefaultClient implements Client {
             return;
         }
 
-        let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, client.RootPath);
+        let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, client.RootFolder);
         if (!ask.Value) {
             return;
         }
@@ -2106,9 +2109,9 @@ export class DefaultClient implements Client {
             // Send the last custom browse configuration we received from this provider.
             // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
             // Should only execute on launch, for the initial delivery of configurations
-            let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
+            let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootFolder);
             if (isSameProviderExtensionId(lastCustomBrowseConfigurationProviderId.Value, configurations[params.currentConfiguration].configurationProvider)) {
-                let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
+                let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootFolder);
                 if (lastCustomBrowseConfiguration.Value) {
                     this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
                 }
@@ -2213,8 +2216,8 @@ export class DefaultClient implements Client {
     }
 
     private sendCustomBrowseConfiguration(config: any, providerId: string, timeoutOccured?: boolean): void {
-        let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootPath);
-        let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootPath);
+        let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootFolder);
+        let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootFolder);
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
 
         // This while (true) is here just so we can break out early if the config is set on error
