@@ -1007,7 +1007,7 @@ export class DefaultClient implements Client {
         let settings_intelliSenseCachePath: string[] = [];
         let settings_intelliSenseCacheSize: number[] = [];
         let settings_autoComplete: string[] = [];
-        let settings_formatting: boolean[] = [];
+        let settings_formatting: string[] = [];
         let workspaceSettings: CppSettings = new CppSettings();
         let workspaceOtherSettings: OtherSettings = new OtherSettings(null);
         {
@@ -1035,7 +1035,7 @@ export class DefaultClient implements Client {
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
-                settings_intelliSenseCachePath.push(setting.intelliSenseCachePath);
+                settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
                 settings_autoComplete.push(setting.autoComplete);
                 settings_formatting.push(setting.formatting);
@@ -1078,7 +1078,7 @@ export class DefaultClient implements Client {
                 intelliSenseEngine: settings_intelliSenseEngine,
                 intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                intelliSenseCachePath : util.resolveCachePath(settings_intelliSenseCachePath, this.AdditionalEnvironment),
+                intelliSenseCachePath : settings_intelliSenseCachePath,
                 intelliSenseCacheSize : settings_intelliSenseCacheSize,
                 autocomplete: settings_autoComplete,
                 errorSquiggles: settings_errorSquiggles,
@@ -1166,7 +1166,6 @@ export class DefaultClient implements Client {
                     exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
                 }
             };
-
 
             // Send settings json to native side
             this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
