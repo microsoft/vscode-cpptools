@@ -2059,7 +2059,6 @@ export class DefaultClient implements Client {
                 this.model[key].deactivate();
             }
         }
-        this.pauseParsing();
     }
 
     public pauseParsing(): void {
