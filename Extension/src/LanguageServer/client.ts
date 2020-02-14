@@ -1809,7 +1809,14 @@ export class DefaultClient implements Client {
                 if (dotIndex !== -1) {
                     let ext: string = uri.fsPath.substr(dotIndex + 1);
                     if (this.associations_for_did_change.has(ext)) {
-                        this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() });
+                        // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
+                        // which causes a large backlog of "files to parse" to accumulate.
+                        // We workaround this via only sending the change message if the modified time is within 10 seconds.
+                        let mtime: Date = fs.statSync(uri.fsPath).mtime;
+                        let duration: number = Date.now() - mtime.getTime();
+                        if (duration < 10000) {
+                            this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() });
+                        }
                     }
                 }
             });
