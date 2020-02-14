@@ -6,7 +6,11 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
+import { getExtensionFilePath } from '../common';
+import * as os from 'os';
 import * as which from 'which';
+import { execSync } from 'child_process';
+import * as semver from 'semver';
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
@@ -47,10 +51,47 @@ export class CppSettings extends Settings {
         super("C_Cpp", resource);
     }
 
+    private get clangFormatName(): string {
+        switch (os.platform()) {
+            case "win32":
+                return "clang-format.exe";
+            case "darwin":
+                return "clang-format.darwin";
+            case "linux":
+            default:
+                return "clang-format";
+        }
+    }
+
     public get clangFormatPath(): string {
         let path: string = super.Section.get<string>("clang_format_path");
         if (!path) {
             path = which.sync('clang-format', {nothrow: true});
+            if (path) {
+                // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
+                let clangFormatVersion: string;
+                try {
+                    let exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
+                    let output: string[] = execSync(`${exePath} --version`).toString().split(" ");
+                    if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || !semver.valid(output[2])) {
+                        return path;
+                    }
+                    clangFormatVersion = output[2];
+                } catch (e) {
+                    // Unable to invoke our own clang-format.  Use the system installed clang-format.
+                    return path;
+                }
+
+                // Invoke the version on the system to compare versions.  Use ours if it's more recent.
+                try {
+                    let output: string[] = execSync(`"${path}" --version`).toString().split(" ");
+                    if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
+                        path = "";
+                    }
+                } catch (e) {
+                    path = "";
+                }
+            }
         }
         return path;
     }
