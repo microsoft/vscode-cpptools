@@ -6,7 +6,11 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
+import { getExtensionFilePath } from '../common';
+import * as os from 'os';
 import * as which from 'which';
+import { execSync } from 'child_process';
+import * as semver from 'semver';
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
@@ -47,12 +51,51 @@ export class CppSettings extends Settings {
         super("C_Cpp", resource);
     }
 
-    public get clangFormatPath(): string {
-        let path: string = super.Section.get<string>("clang_format_path");
-        if (!path) {
-            path = which.sync('clang-format', {nothrow: true});
+    private get clangFormatName(): string {
+        switch (os.platform()) {
+            case "win32":
+                return "clang-format.exe";
+            case "linux":
+                return "clang-format.darwin";
+            case "darwin":
+                return "clang-format";
         }
-        return path;
+    }
+
+    public get clangFormatPath(): string {
+        let clangFormatPath: string = super.Section.get<string>("clang_format_path");
+        if (!clangFormatPath) {
+            clangFormatPath = which.sync('clang-format', {nothrow: true});
+            if (clangFormatPath) {
+                // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
+                let clangFormatVersion: string;
+                try {
+                    let path: string = getExtensionFilePath("./LLVM/bin/" + this.clangFormatName);
+                    let output: string[] = execSync(path + " --version").toString().split(" ");
+
+                    // Compares against our version of clang-format.
+                    // This hard-coded version will need to be updated whenever we update our clang-format
+                    if (output.length < 3 || output[0] != "clang-format" || output[1] != "version" || !semver.valid(output[2])) {
+                        return clangFormatPath;
+                    }
+                    clangFormatVersion = output[2];
+                } catch (e) {
+                    // Unable to invoke our own clang-format.  Use the system installed clang-format.
+                    return clangFormatPath;
+                }
+
+                // Invoke the version on the system to compare versions.  Use ours if it's more recent.
+                try {
+                    let output: string[] = execSync("\"" + clangFormatPath + "\" --version").toString().split(" ");
+                    if (output.length < 3 || output[0] != "clang-format" || output[1] != "version" || semver.ltr(output[2], clangFormatVersion)) {
+                        clangFormatPath = "";
+                    }
+                } catch (e) {
+                    clangFormatPath = "";
+                }
+            }
+        }
+        return clangFormatPath;
     }
 
     public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
