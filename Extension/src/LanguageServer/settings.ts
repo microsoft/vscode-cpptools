@@ -71,8 +71,8 @@ export class CppSettings extends Settings {
                 // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
                 let clangFormatVersion: string;
                 try {
-                    let exePath: string = getExtensionFilePath("./LLVM/bin/" + this.clangFormatName);
-                    let output: string[] = execSync(exePath + " --version").toString().split(" ");
+                    let exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
+                    let output: string[] = execSync(`${exePath} --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || !semver.valid(output[2])) {
                         return path;
                     }
@@ -84,7 +84,7 @@ export class CppSettings extends Settings {
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
-                    let output: string[] = execSync("\"" + path + "\" --version").toString().split(" ");
+                    let output: string[] = execSync(`"${path}" --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
                         path = "";
                     }
