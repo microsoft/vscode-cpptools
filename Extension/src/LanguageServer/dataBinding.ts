@@ -26,9 +26,11 @@ export class DataBinding<T> {
     }
 
     public setValueIfActive(value: T): void {
-        if (this.isActive && value !== this.value) {
+        if (value !== this.value) {
             this.value = value;
-            this.valueChanged.fire(this.value);
+            if (this.isActive) {
+                this.valueChanged.fire(this.value);
+            }
         }
     }
 

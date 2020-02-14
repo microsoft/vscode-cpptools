@@ -10,6 +10,7 @@ import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import * as vscode from 'vscode';
 import { CppSettings } from './settings';
+import { onDidChangeActiveTextEditor } from './extension';
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -44,6 +45,9 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                     me.notifyWhenReady(() => {
                         sendMessage(document);
                         me.onDidOpenTextDocument(document);
+                        if (editor === vscode.window.activeTextEditor) {
+                            onDidChangeActiveTextEditor(editor);
+                        }
                     });
                 }
             } else {

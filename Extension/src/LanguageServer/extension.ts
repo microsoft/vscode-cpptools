@@ -516,7 +516,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
-function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
+export function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
     if (clients === undefined) {
