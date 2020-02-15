@@ -98,8 +98,8 @@ export class UI {
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
             (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
-            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
-            ReferencesCommandMode.Peek));
+                (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
+                    ReferencesCommandMode.Peek));
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {

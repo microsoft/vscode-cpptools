@@ -264,7 +264,7 @@ export class CppProperties {
         this.configurationIncomplete = true;
     }
 
-     private applyDefaultIncludePathsAndFrameworks(): void {
+    private applyDefaultIncludePathsAndFrameworks(): void {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             let configuration: Configuration = this.CurrentConfiguration;
             this.applyDefaultConfigurationValues(configuration);
@@ -274,10 +274,8 @@ export class CppProperties {
 
     private applyDefaultConfigurationValues(configuration: Configuration): void {
         let settings: CppSettings = new CppSettings(this.rootUri);
-        let isUnset: (input: any) => boolean = (input: any) => {
-                // default values for "default" config settings is null.
-                return input === null;
-        };
+        // default values for "default" config settings is null.
+        let isUnset: (input: any) => boolean = (input: any) => input === null;
 
         // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
         // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
@@ -590,11 +588,11 @@ export class CppProperties {
     // paths are expected to have variables resolved already
     public updateCompileCommandsFileWatchers(): void {
         this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-        this.compileCommandFileWatchers = []; //reset it
+        this.compileCommandFileWatchers = []; // reset it
         let filePaths: Set<string> = new Set<string>();
         this.configurationJson.configurations.forEach(c => {
             if (c.compileCommands !== undefined) {
-                let fileSystemCompileCommandsPath : string = this.resolvePath(c.compileCommands, os.platform() === "win32");
+                let fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands, os.platform() === "win32");
                 if (fs.existsSync(fileSystemCompileCommandsPath)) {
                     filePaths.add(fileSystemCompileCommandsPath);
                 }
@@ -966,9 +964,7 @@ export class CppProperties {
             resolvedCompilerPath = compilerPathAndArgs.compilerPath;
 
             let pathExists: boolean = true;
-            let existsWithExeAdded: (path: string) => boolean = (path: string) => {
-                return isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
-            };
+            let existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
             if (!fs.existsSync(resolvedCompilerPath)) {
                 if (existsWithExeAdded(resolvedCompilerPath)) {
                     resolvedCompilerPath += ".exe";
@@ -1226,9 +1222,7 @@ export class CppProperties {
 
                 const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
                 let pathExists: boolean = true;
-                let existsWithExeAdded: (path: string) => boolean = (path: string) => {
-                    return isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
-                };
+                let existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
                 if (!fs.existsSync(resolvedPath)) {
                     if (existsWithExeAdded(resolvedPath)) {
                         resolvedPath += ".exe";
@@ -1300,7 +1294,7 @@ export class CppProperties {
                         }
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                                            document.positionAt(curTextStartOffset + endOffset)),
+                                document.positionAt(curTextStartOffset + endOffset)),
                             message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
                     }
@@ -1325,7 +1319,7 @@ export class CppProperties {
                             }
                             let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                                 new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
-                                                document.positionAt(envTextStartOffSet + endOffset)),
+                                    document.positionAt(envTextStartOffSet + endOffset)),
                                 message, vscode.DiagnosticSeverity.Warning);
                             diagnostics.push(diagnostic);
                         }
@@ -1438,7 +1432,7 @@ export class CppProperties {
         this.disposables = [];
 
         this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-        this.compileCommandFileWatchers = []; //reset it
+        this.compileCommandFileWatchers = []; // reset it
 
         this.diagnosticCollection.dispose();
     }

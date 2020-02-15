@@ -50,9 +50,10 @@ function getReferenceItemIconPath(type: ReferenceType, isCanceled: boolean): { l
 export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     private referencesModel: ReferencesModel;
     private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeNode>();
-    readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+    readonly onDidChangeTreeData;
 
     constructor(readonly isRenameCandidates: boolean) {
+        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     }
 
     refresh(): void {

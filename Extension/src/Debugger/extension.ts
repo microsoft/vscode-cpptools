@@ -58,14 +58,12 @@ export function initialize(context: vscode.ExtensionContext): void {
             return Promise.resolve();
         }
 
-        let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
-            return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
-        });
+        let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config =>
+            config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
 
         if (vsdbgProvider) {
-            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config => {
-                return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
-            });
+            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config =>
+                config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
             if (vsdbgConfigs) {
                 configs.push(...vsdbgConfigs);
             }
@@ -75,9 +73,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             configuration: vscode.DebugConfiguration;
         }
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => {
-            return {label: config.name, configuration: config};
-        });
+        const items: MenuItem[] = configs.map<MenuItem>(config => ({label: config.name, configuration: config}));
 
         vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.compiler", "Select a compiler"))}).then(async selection => {
             if (!selection) {

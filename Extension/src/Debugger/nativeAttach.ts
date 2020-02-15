@@ -102,9 +102,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
             default:
                 return Promise.reject<Process[]>(new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform())));
         }
-        return execChildProcess(processCmd, null).then(processes => {
-            return PsProcessParser.ParseProcessFromPs(processes);
-        });
+        return execChildProcess(processCmd, null).then(processes => PsProcessParser.ParseProcessFromPs(processes));
     }
 }
 
@@ -195,9 +193,7 @@ export class WmicAttachItemsProvider extends NativeAttachItemsProvider {
 
     protected getInternalProcessEntries(): Promise<Process[]> {
         const wmicCommand: string = 'wmic process get Name,ProcessId,CommandLine /FORMAT:list';
-        return execChildProcess(wmicCommand, null).then(processes => {
-            return WmicProcessParser.ParseProcessFromWmic(processes);
-        });
+        return execChildProcess(wmicCommand, null).then(processes => WmicProcessParser.ParseProcessFromWmic(processes));
     }
 }
 
