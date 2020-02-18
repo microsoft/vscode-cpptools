@@ -7,7 +7,7 @@
 
 const gulp = require('gulp');
 const env = require('gulp-env')
-const tslint = require('gulp-tslint');
+const eslint = require('gulp-eslint');
 const mocha = require('gulp-mocha');
 const fs = require('fs');
 const nls = require('vscode-nls-dev');
@@ -81,20 +81,15 @@ const lintReporter = (output, file, options) => {
     let relativeBase = file.base.substring(file.cwd.length + 1).replace('\\', '/');
     output.forEach(e => {
         let message = relativeBase + e.name + ':' + (e.startPosition.line + 1) + ':' + (e.startPosition.character + 1) + ': ' + e.failure;
-        console.log('[tslint] ' + message);
+        console.log('[lint] ' + message);
     });
 };
 
-gulp.task('tslint', () => {
+gulp.task('lint', function () {
     return gulp.src(allTypeScript)
-        .pipe(tslint({
-            program: require('tslint').Linter.createProgram("./tsconfig.json"),
-            configuration: "./tslint.json"
-        }))
-        .pipe(tslint.report(lintReporter, {
-            summarizeFailureOutput: false,
-            emitError: false
-        }))
+        .pipe(eslint({ configFile: ".eslintrc.js" }))
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 });
 
 gulp.task('pr-check', (done) => {

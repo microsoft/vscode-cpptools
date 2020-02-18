@@ -25,6 +25,7 @@ jobs/**
 tsconfig.json
 test.tsconfig.json
 tslint.json
+.eslintrc.js
 webpack.config.js
 tscCompileList.txt
 gulpfile.js

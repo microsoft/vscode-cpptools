@@ -84,8 +84,8 @@ export class SettingsPanel {
 
     public createOrShow(configSelection: string[], activeConfiguration: config.Configuration, errors: config.ConfigurationErrors): void {
         const column: vscode.ViewColumn = vscode.window.activeTextEditor
-                ? vscode.window.activeTextEditor.viewColumn
-                : undefined;
+            ? vscode.window.activeTextEditor.viewColumn
+            : undefined;
 
         // Show existing panel
         if (this.panel) {
@@ -273,9 +273,7 @@ export class SettingsPanel {
     }
 
     private updateConfig(message: any): void {
-        let splitEntries: (input: any) => string[] = (input: any) => {
-            return input.split("\n").filter((e: string) => e);
-        };
+        let splitEntries: (input: any) => string[] = (input: any) => input.split("\n").filter((e: string) => e);
 
         switch (message.key) {
             case elementId.configName:
@@ -360,8 +358,8 @@ export class SettingsPanel {
         content = content.replace(
             /{{root}}/g,
             vscode.Uri.file(util.extensionPath)
-            .with({ scheme: 'vscode-resource' })
-            .toString());
+                .with({ scheme: 'vscode-resource' })
+                .toString());
 
         content = content.replace(
             /{{nonce}}/g,

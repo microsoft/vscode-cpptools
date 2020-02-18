@@ -274,9 +274,9 @@ export class ReferencesManager {
         this.referencesStartedWhileTagParsing = this.client.IsTagParsing;
 
         let mode: ReferencesCommandMode =
-            (referencesProgress === ReferencesProgress.StartedRename) ? ReferencesCommandMode.Rename :
-            (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
-            ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
+                (referencesProgress === ReferencesProgress.StartedRename) ? ReferencesCommandMode.Rename :
+                    (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
+                        ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
         this.client.setReferencesCommandMode(mode);
 
         this.referencesPrevProgressIncrement = 0;

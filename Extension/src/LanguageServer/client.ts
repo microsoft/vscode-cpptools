@@ -295,7 +295,7 @@ export interface Client {
     RootUri: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string };
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string };
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
@@ -422,7 +422,7 @@ export class DefaultClient implements Client {
 
     private pendingTask: util.BlockingTask<any>;
 
-    private getUniqueWorkspaceStorageName(workspaceFolder?: vscode.WorkspaceFolder) : string {
+    private getUniqueWorkspaceStorageName(workspaceFolder?: vscode.WorkspaceFolder): string {
         let workspaceFolderName: string = this.getName(workspaceFolder);
         if (!workspaceFolder || workspaceFolder.index < 1) {
             return workspaceFolderName; // No duplicate names to search for.
@@ -928,27 +928,27 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: () => ErrorAction.Continue,
                 closed: () => {
-                        this.crashTimes.push(Date.now());
-                        if (this.crashTimes.length < 5) {
+                    this.crashTimes.push(Date.now());
+                    if (this.crashTimes.length < 5) {
+                        let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
+                        newClient.crashTimes = this.crashTimes;
+                    } else {
+                        let elapsed: number = this.crashTimes[this.crashTimes.length - 1] - this.crashTimes[0];
+                        if (elapsed <= 3 * 60 * 1000) {
+                            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
+                                vscode.window.showErrorMessage(localize('server.crashed', "The language server for '{0}' crashed 5 times in the last 3 minutes. It will not be restarted.", serverName));
+                            } else {
+                                vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
+                            }
+                            allClients.replace(this, false);
+                        } else {
+                            this.crashTimes.shift();
                             let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
                             newClient.crashTimes = this.crashTimes;
-                        } else {
-                            let elapsed: number = this.crashTimes[this.crashTimes.length - 1] - this.crashTimes[0];
-                            if (elapsed <= 3 * 60 * 1000) {
-                                if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-                                    vscode.window.showErrorMessage(localize('server.crashed', "The language server for '{0}' crashed 5 times in the last 3 minutes. It will not be restarted.", serverName));
-                                } else {
-                                    vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                                }
-                                allClients.replace(this, false);
-                            } else {
-                                this.crashTimes.shift();
-                                let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
-                                newClient.crashTimes = this.crashTimes;
-                            }
                         }
-                        return CloseAction.DoNotRestart;
                     }
+                    return CloseAction.DoNotRestart;
+                }
             }
 
             // TODO: should I set the output channel?  Does this sort output between servers?
@@ -958,8 +958,8 @@ export class DefaultClient implements Client {
         return new LanguageClient(`cpptools: ${serverName}`, serverOptions, clientOptions);
     }
 
-    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
-        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
+    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
+        let changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
             // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
             // build a new JSON object with everything we need on the native side.
@@ -1200,8 +1200,8 @@ export class DefaultClient implements Client {
             if (!currentProvider) {
                 this.clearCustomConfigurations();
                 return;
-             }
-             if (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) {
+            }
+            if (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId) {
                 // If we are being called by a configuration provider other than the current one, ignore it.
                 return;
             }
@@ -1459,10 +1459,10 @@ export class DefaultClient implements Client {
         this.trackedDocuments.add(document);
     }
 
-    /*************************************************************************************
+    /**
      * wait until the all pendingTasks are complete (e.g. language client is ready for use)
      * before attempting to send messages or operate on the client.
-     *************************************************************************************/
+     */
 
     public queueTask(task: () => Thenable<any>): Thenable<any> {
         if (this.isSupported) {
@@ -1580,9 +1580,9 @@ export class DefaultClient implements Client {
             // WARNING: The default limit on Linux is 8k, so for big directories, this can cause file watching to fail.
             this.rootPathFileWatcher = vscode.workspace.createFileSystemWatcher(
                 "**/*",
-                false /*ignoreCreateEvents*/,
-                false /*ignoreChangeEvents*/,
-                false /*ignoreDeleteEvents*/);
+                false /* ignoreCreateEvents */,
+                false /* ignoreChangeEvents */,
+                false /* ignoreDeleteEvents */);
 
             this.rootPathFileWatcher.onDidCreate((uri) => {
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
@@ -1655,9 +1655,9 @@ export class DefaultClient implements Client {
         this.log(output);
     }
 
-    /*******************************************************
+    /**
      * handle notifications coming from the language server
-     *******************************************************/
+     */
 
     private logTelemetry(notificationBody: TelemetryPayload): void {
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
@@ -1735,7 +1735,7 @@ export class DefaultClient implements Client {
         } else if (message.includes("Squiggles Finished - File name:")) {
             let index: number = message.lastIndexOf(":");
             let name: string = message.substring(index + 2);
-            let status: IntelliSenseStatus = { status: Status.IntelliSenseReady, filename: name, };
+            let status: IntelliSenseStatus = { status: Status.IntelliSenseReady, filename: name };
             testHook.updateStatus(status);
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
@@ -1794,12 +1794,12 @@ export class DefaultClient implements Client {
                 semanticRanges[i] = [];
             }
             params.regions.forEach(element => {
-                let newRange : vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
+                let newRange: vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
                 semanticRanges[element.kind].push(newRange);
             });
             let inactiveRanges: vscode.Range[] = [];
             params.inactiveRegions.forEach(element => {
-                let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+                let newRange: vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
                 inactiveRanges.push(newRange);
             });
             colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
@@ -1847,7 +1847,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private promptCompileCommands(params: CompileCommandsPaths) : void {
+    private promptCompileCommands(params: CompileCommandsPaths): void {
         if (this.configuration.CurrentConfiguration.compileCommands !== undefined || this.configuration.CurrentConfiguration.configurationProvider !== undefined) {
             return;
         }
@@ -1892,10 +1892,9 @@ export class DefaultClient implements Client {
         () => ask.Value = false);
     }
 
-    /*********************************************
+    /**
      * requests to the language server
-     *********************************************/
-
+     */
     public requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> {
         let params: SwitchHeaderSourceParams = {
             rootPath: rootPath,
@@ -1904,10 +1903,9 @@ export class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
-    /*********************************************
+    /**
      * notifications to the language server
-     *********************************************/
-
+     */
     public activeDocumentChanged(document: vscode.TextDocument): void {
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
@@ -2148,9 +2146,9 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification));
     }
 
-    /*********************************************
+    /**
      * command handlers
-     *********************************************/
+     */
     public handleConfigurationSelectCommand(): void {
         this.notifyWhenReady(() => {
             ui.showConfigurations(this.configuration.ConfigurationNames)
@@ -2321,7 +2319,7 @@ class NullClient implements Client {
     RootUri: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } { return {}; }
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void {}
     onDidCloseTextDocument(document: vscode.TextDocument): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}

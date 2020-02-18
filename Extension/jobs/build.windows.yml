@@ -25,7 +25,7 @@ jobs:
     displayName: 'Validate Extension/package.json'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: yarn run tslint
+  - script: yarn run lint
     displayName: 'Run Linter'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 

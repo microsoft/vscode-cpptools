@@ -31,9 +31,8 @@ export class PlatformInformation {
         }
 
         return Promise.all<string | LinuxDistribution>([architecturePromise, distributionPromise])
-            .then(([arch, distro]: [string, LinuxDistribution]) => {
-                return new PlatformInformation(platform, arch, distro);
-            });
+            .then(([arch, distro]: [string, LinuxDistribution]) =>
+                new PlatformInformation(platform, arch, distro));
     }
 
     public static GetUnknownArchitecture(): string { return "Unknown"; }
@@ -55,9 +54,7 @@ export class PlatformInformation {
                     }
                 }
                 return PlatformInformation.GetUnknownArchitecture();
-            }).catch((error) => {
-                return PlatformInformation.GetUnknownArchitecture();
-            });
+            }).catch((error) => PlatformInformation.GetUnknownArchitecture());
     }
 
     private static GetUnixArchitecture(): Promise<string> {
