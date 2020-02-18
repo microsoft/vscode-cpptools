@@ -13,7 +13,7 @@ module.exports = {
         "@typescript-eslint",
         "@typescript-eslint/tslint",
         "eslint-plugin-jsdoc",
-        "eslint-plugin-tslint",
+        "@typescript-eslint/eslint-plugin-tslint",
         "eslint-plugin-import",
     ],
     "rules": {
