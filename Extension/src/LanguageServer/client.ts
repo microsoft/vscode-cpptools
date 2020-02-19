@@ -1133,8 +1133,9 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string] : string } {
-        let changedSettings: { [key: string] : string } = this.settingsTracker.getChangedSettings();
+        let changedSettings: { [key: string] : string };
         this.notifyWhenReady(() => {
+            changedSettings = this.settingsTracker.getChangedSettings();
             let cppSettingsScoped: { [key: string]: any } = {};
             // Gather the C_Cpp settings
             {

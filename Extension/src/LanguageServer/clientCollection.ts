@@ -171,8 +171,9 @@ export class ClientCollection {
 
     private transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client): void {
         let newOwner: cpptools.Client = this.getClientFor(document.uri);
-        console.assert(newOwner !== oldOwner, "'oldOwner' should not be in the list of clients to consider");
-        newOwner.takeOwnership(document);
+        if (newOwner !== oldOwner) {
+            newOwner.takeOwnership(document);
+        }
     }
 
     public getClientFor(uri: vscode.Uri): cpptools.Client {
