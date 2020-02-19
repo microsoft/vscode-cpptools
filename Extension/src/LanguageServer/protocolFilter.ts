@@ -14,13 +14,13 @@ import { onDidChangeActiveTextEditor } from './extension';
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
+    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
     /* tslint:disable */
-    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data));};
     // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
-    let invoke2 = (a, b, callback: (a, b) => any) => { return clients.ActiveClient.requestWhenReady(() => callback(a, b)); };
-    let invoke3 = (a, b, c, callback: (a, b, c) => any) => { return clients.ActiveClient.requestWhenReady(() => callback(a, b, c)); };
-    let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => { return clients.ActiveClient.requestWhenReady(() => callback(a, b, c, d)); };
-    let invoke5 = (a, b, c, d, e, callback: (a, b, c, d, e) => any) => { return clients.ActiveClient.requestWhenReady(() => callback(a, b, c, d, e)); };
+    let invoke2 = (a, b, callback: (a, b) => any) => clients.ActiveClient.requestWhenReady(() => callback(a, b));
+    let invoke3 = (a, b, c, callback: (a, b, c) => any) => clients.ActiveClient.requestWhenReady(() => callback(a, b, c));
+    let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => clients.ActiveClient.requestWhenReady(() => callback(a, b, c, d));
+    let invoke5 = (a, b, c, d, e, callback: (a, b, c, d, e) => any) => clients.ActiveClient.requestWhenReady(() => callback(a, b, c, d, e));
     /* tslint:enable */
 
     return {

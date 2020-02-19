@@ -147,12 +147,12 @@ function updateSemanticColorizationRegions(params: SemanticColorizationRegionsPa
             semanticRanges[i] = [];
         }
         params.regions.forEach(element => {
-            let newRange : vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
+            let newRange: vscode.Range = new vscode.Range(element.range.start.line, element.range.start.character, element.range.end.line, element.range.end.character);
             semanticRanges[element.kind].push(newRange);
         });
         let inactiveRanges: vscode.Range[] = [];
         params.inactiveRegions.forEach(element => {
-            let newRange : vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+            let newRange: vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
             inactiveRanges.push(newRange);
         });
         colorizationState.updateSemantic(params.uri, semanticRanges, inactiveRanges, params.editVersion);
@@ -705,7 +705,6 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
                         public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
-                        // tslint:disable-next-line: promise-must-complete
                             return new Promise<vscode.Location[]>((resolve, reject) => {
                                 let callback: () => void = () => {
                                     let params: FindAllReferencesParams = {
@@ -1133,7 +1132,7 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
-        let changedSettings: { [key: string] : string };
+        let changedSettings: { [key: string]: string };
         this.notifyWhenReady(() => {
             changedSettings = this.settingsTracker.getChangedSettings();
             let cppSettingsScoped: { [key: string]: any } = {};

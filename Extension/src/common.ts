@@ -1091,7 +1091,7 @@ export function isValidIdentifier(candidate: string): boolean {
     return true;
 }
 
-function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, addSubfolder: boolean) : string {
+function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, addSubfolder: boolean): string {
     let workspaceFolderName: string = workspaceFolder ? workspaceFolder.name : "untitled";
     if (!workspaceFolder || workspaceFolder.index < 1) {
         return workspaceFolderName; // No duplicate names to search for.
@@ -1105,10 +1105,10 @@ function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, a
     return workspaceFolderName; // No duplicate names found.
 }
 
-export function getUniqueWorkspaceName(workspaceFolder: vscode.WorkspaceFolder) : string {
+export function getUniqueWorkspaceName(workspaceFolder: vscode.WorkspaceFolder): string {
     return getUniqueWorkspaceNameHelper(workspaceFolder, false);
 }
 
-export function getUniqueWorkspaceStorageName(workspaceFolder: vscode.WorkspaceFolder) : string {
+export function getUniqueWorkspaceStorageName(workspaceFolder: vscode.WorkspaceFolder): string {
     return getUniqueWorkspaceNameHelper(workspaceFolder, true);
 }
