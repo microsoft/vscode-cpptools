@@ -25,6 +25,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export type Mutable<T> = {
+    // eslint-disable-next-line @typescript-eslint/array-type
     -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
 };
 
@@ -85,9 +86,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         rawTasksJson.tasks = new Array();
     }
     // Find or create the task which should be created based on the selected "debug configuration".
-    let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => {
-        return task.label && task.label === task;
-    });
+    let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => task.label && task.label === task);
     if (selectedTask) {
         return;
     }
@@ -499,8 +498,8 @@ export function readDir(dirPath: string): Promise<string[]> {
     return new Promise((resolve) => {
         fs.readdir(dirPath, (err, list) => {
             resolve(list);
-            });
         });
+    });
 }
 
 /** Test whether the lock file exists.*/
@@ -984,13 +983,13 @@ function decodeUCS16(input: string): number[] {
     let extra: number;
     while (counter < length) {
         value = input.charCodeAt(counter++);
-        // tslint:disable-next-line: no-bitwise
+        // eslint-disable-next-line no-bitwise
         if ((value & 0xF800) === 0xD800 && counter < length) {
             // high surrogate, and there is a next character
             extra = input.charCodeAt(counter++);
-            // tslint:disable-next-line: no-bitwise
+            // eslint-disable-next-line no-bitwise
             if ((extra & 0xFC00) === 0xDC00) { // low surrogate
-                // tslint:disable-next-line: no-bitwise
+                // eslint-disable-next-line no-bitwise
                 output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
             } else {
                 output.push(value, extra);
@@ -1056,7 +1055,7 @@ let disallowedFirstCharacterIdentifierUnicodeRanges: number[][] = [
     [0x0300, 0x036F], // COMBINING GRAVE ACCENT - COMBINING LATIN SMALL LETTER X
     [0x1DC0, 0x1DFF], // COMBINING DOTTED GRAVE ACCENT - COMBINING RIGHT ARROWHEAD AND DOWN ARROWHEAD BELOW
     [0x20D0, 0x20FF], // COMBINING LEFT HARPOON ABOVE - COMBINING ASTERISK ABOVE
-    [0xFE20, 0xFE2F], // COMBINING LIGATURE LEFT HALF - COMBINING CYRILLIC TITLO RIGHT HALF
+    [0xFE20, 0xFE2F]  // COMBINING LIGATURE LEFT HALF - COMBINING CYRILLIC TITLO RIGHT HALF
 ];
 
 export function isValidIdentifier(candidate: string): boolean {

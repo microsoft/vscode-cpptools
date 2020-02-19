@@ -35,9 +35,7 @@ interface Build {
 * @return The download URL of the VSIX
 */
 function getVsixDownloadUrl(build: Build, vsixName: string): string {
-    const asset: Asset | undefined = build.assets.find(asset => {
-        return asset.name === vsixName;
-    });
+    const asset: Asset | undefined = build.assets.find(asset => asset.name === vsixName);
     const downloadUrl: string | null = (asset) ? asset.browser_download_url : null;
     if (!downloadUrl) {
         throw new Error(`Failed to find VSIX: ${vsixName} in build: ${build.name}`);

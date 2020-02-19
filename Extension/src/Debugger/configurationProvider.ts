@@ -104,9 +104,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
-        const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
-            return isDebugLaunchStr(config.name) && config.request === "launch";
-        });
+        const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config =>
+            isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig, "Could not find default debug configuration.");
 
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
@@ -194,7 +193,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
                 // Disable debug heap by default, enable if 'enableDebugHeap' is set.
                 if (!config.enableDebugHeap) {
-                    const disableDebugHeapEnvSetting : Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
+                    const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
 
                     if (config.environment && util.isArray(config.environment)) {
                         config.environment.push(disableDebugHeapEnvSetting);
@@ -306,7 +305,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         }
     }
 
-    private static async showFileWarningAsync(message: string, fileName: string) : Promise<void> {
+    private static async showFileWarningAsync(message: string, fileName: string): Promise<void> {
         const openItem: vscode.MessageItem = { title: localize("open.envfile", "Open {0}", "envFile") };
         let result: vscode.MessageItem = await vscode.window.showWarningMessage(message, openItem);
         if (result && result.title === openItem.title) {
@@ -398,7 +397,7 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
             new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new WindowsConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
-            new WSLConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
+            new WSLConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
         ];
     }
 }
@@ -411,7 +410,7 @@ class OSXConfigurationProvider extends DefaultConfigurationProvider {
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram),
+            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram)
         ];
     }
 }

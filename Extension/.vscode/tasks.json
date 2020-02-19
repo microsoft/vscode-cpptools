@@ -33,11 +33,11 @@
             "command": "yarn",
             "args": [
                 "run",
-                "tslint"
+                "lint"
             ],
             "problemMatcher": {
                 "fileLocation": "absolute",
-                "source": "tslint",
+                "source": "lint",
                 "pattern": [
                     {
                         "regexp": "(ERROR:) ([a-zA-Z/:\\-\\.]*)\\[(\\d+), (\\d+)\\]: (.*)",

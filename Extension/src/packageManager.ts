@@ -95,14 +95,14 @@ export class PackageManager {
 
     public InstallPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
         return this.GetPackages()
-        .then((packages) => {
-            let count: number = 1;
-            return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                const p: Promise<void> = this.InstallPackage(pkg, `${count}/${packages.length}`, progress);
-                count += 1;
-                return p;
+            .then((packages) => {
+                let count: number = 1;
+                return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
+                    const p: Promise<void> = this.InstallPackage(pkg, `${count}/${packages.length}`, progress);
+                    count += 1;
+                    return p;
+                });
             });
-        });
     }
 
     /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
@@ -112,9 +112,7 @@ export class PackageManager {
         let promiseChain: Promise<TPromise> = Promise.resolve<TPromise>(null);
 
         for (let item of items) {
-            promiseChain = promiseChain.then(() => {
-                return promiseBuilder(item);
-            });
+            promiseChain = promiseChain.then(() => promiseBuilder(item));
         }
 
         return promiseChain;
@@ -129,9 +127,7 @@ export class PackageManager {
                     // Convert relative binary paths to absolute
                     for (let pkg of this.allPackages) {
                         if (pkg.binaries) {
-                            pkg.binaries = pkg.binaries.map((value) => {
-                                return util.getExtensionFilePath(value);
-                            });
+                            pkg.binaries = pkg.binaries.map((value) => util.getExtensionFilePath(value));
                         }
                     }
 
@@ -147,12 +143,10 @@ export class PackageManager {
 
     private GetPackages(): Promise<IPackage[]> {
         return this.GetPackageList()
-            .then((list) => {
-                return list.filter((value, index, array) => {
-                    return (!value.architectures || value.architectures.indexOf(this.platformInfo.architecture) !== -1) &&
-                        (!value.platforms || value.platforms.indexOf(this.platformInfo.platform) !== -1);
-                });
-            });
+            .then((list) =>
+                list.filter((value, index, array) =>
+                    (!value.architectures || value.architectures.indexOf(this.platformInfo.architecture) !== -1) &&
+                    (!value.platforms || value.platforms.indexOf(this.platformInfo.platform) !== -1)));
     }
 
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
@@ -286,13 +280,10 @@ export class PackageManager {
                             }
                         });
 
-                        response.on('end', () => {
-                            return resolve();
-                        });
+                        response.on('end', resolve);
 
-                        response.on('error', (error) => {
-                            return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error.stack, error.name));
-                        });
+                        response.on('error', (error) =>
+                            reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error.stack, error.name)));
 
                         // Begin piping data from the response to the package file
                         response.pipe(tmpFile, { end: false });
@@ -301,12 +292,11 @@ export class PackageManager {
 
                 let request: ClientRequest = https.request(options, handleHttpResponse);
 
-                request.on('error', (error) => {
-                    return reject(new PackageManagerError(
+                request.on('error', (error) =>
+                    reject(new PackageManagerError(
                         'HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""),
                         localize("web.request.error", 'HTTP/HTTPS Request error') + (urlString.includes("fwlink") ? ": fwlink" : ""),
-                        'DownloadFile', pkg, error.stack, error.message));
-                });
+                        'DownloadFile', pkg, error.stack, error.message)));
 
                 // Execute the request
                 request.end();
@@ -330,13 +320,9 @@ export class PackageManager {
                 }
 
                 // setup zip file events
-                zipfile.on('end', () => {
-                    return resolve();
-                });
+                zipfile.on('end', resolve);
 
-                zipfile.on('error', err => {
-                    return reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err, err.code));
-                });
+                zipfile.on('error', err => reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err, err.code)));
 
                 zipfile.readEntry();
 
@@ -361,9 +347,8 @@ export class PackageManager {
                                         return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
                                     }
 
-                                    readStream.on('error', (err) => {
-                                        return reject(new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err));
-                                    });
+                                    readStream.on('error', (err) =>
+                                        reject(new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err)));
 
                                     mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
                                         if (err) {
@@ -397,9 +382,8 @@ export class PackageManager {
                                             zipfile.readEntry();
                                         });
 
-                                        writeStream.on('error', (err) => {
-                                            return reject(new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err));
-                                        });
+                                        writeStream.on('error', (err) =>
+                                            reject(new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err)));
 
                                         readStream.pipe(writeStream);
                                     });

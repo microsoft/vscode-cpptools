@@ -21,13 +21,8 @@ export class LinuxDistribution {
         // First check /etc/os-release and only fallback to /usr/lib/os-release
         // as per the os-release documentation.
         linuxDistro = LinuxDistribution.getDistroInformationFromFile('/etc/os-release')
-            .catch(() => {
-                return LinuxDistribution.getDistroInformationFromFile('/usr/lib/os-release');
-            }).catch(() => {
-                // couldn't get distro information
-                return Promise.resolve(new LinuxDistribution('unknown', 'unknown'));
-            });
-
+            .catch(() => LinuxDistribution.getDistroInformationFromFile('/usr/lib/os-release'))
+            .catch(() => Promise.resolve(new LinuxDistribution('unknown', 'unknown'))); // couldn't get distro information;
         return linuxDistro;
     }
 

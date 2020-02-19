@@ -98,9 +98,7 @@ export class RemoteAttachPicker {
                         };
 
                         return vscode.window.showQuickPick(processes, attachPickOptions)
-                            .then(item => {
-                                return item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected.")));
-                            });
+                            .then(item => item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected."))));
                     });
             }
         });

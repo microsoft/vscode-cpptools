@@ -123,7 +123,7 @@ function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
 }
 
 async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number): Promise<string[]> {
-    const matches : RegExpMatchArray = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
+    const matches: RegExpMatchArray = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
     if (!matches.length) {
         return [];
     }
@@ -169,9 +169,7 @@ export function activate(activationEventOccurred: boolean): void {
     }
 
     taskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
-        provideTasks: () => {
-            return getBuildTasks(false);
-        },
+        provideTasks: () => getBuildTasks(false),
         resolveTask(task: vscode.Task): vscode.Task {
             // Currently cannot implement because VS Code does not call this. Can implement custom output file directory when enabled.
             return undefined;
@@ -303,11 +301,10 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
     let knownCompilerPaths: string[];
     let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
     if (knownCompilers) {
-        knownCompilers = knownCompilers.filter(info => {
-            return ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+        knownCompilers = knownCompilers.filter(info =>
+            ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
-                (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
-        });
+                (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
         knownCompilerPaths = knownCompilers.map<string>(info => info.path);
     }
 
@@ -354,7 +351,7 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
             label: taskName,
             command: isCl ? compilerPathBase : compilerPath,
             args: args,
-            options: isCl ? undefined : {"cwd": cwd},
+            options: isCl ? undefined : {"cwd": cwd}
         };
 
         if (returnCompilerPath) {
@@ -376,9 +373,7 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
 
     // Tasks for known compiler paths
     if (knownCompilerPaths) {
-        buildTasks = knownCompilerPaths.map<vscode.Task>(compilerPath => {
-            return createTask(compilerPath);
-        });
+        buildTasks = knownCompilerPaths.map<vscode.Task>(compilerPath => createTask(compilerPath, undefined));
     }
 
     // Task for user compiler path setting
@@ -420,9 +415,8 @@ function realActivation(): void {
         let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
-            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean => {
-                return extension.isActive && extension.id === "mitaki28.vscode-clang";
-            });
+            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean =>
+                extension.isActive && extension.id === "mitaki28.vscode-clang");
             if (clangCommandAdapterActive) {
                 telemetry.logLanguageServerEvent("conflictingExtension");
             }
@@ -491,13 +485,12 @@ export function updateLanguageConfigurations(): void {
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
 }
 
-/*********************************************
+/**
  * workspace events
- *********************************************/
-
+ */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     let activeClient: Client = clients.ActiveClient;
-    const changedActiveClientSettings: { [key: string] : string } = activeClient.onDidChangeSettings(event);
+    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event);
     clients.forEach(client => {
         if (client !== activeClient) {
             client.onDidChangeSettings(event);
@@ -850,9 +843,9 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     await applyUpdate(buildInfo);
 }
 
-/*********************************************
+/**
  * registered commands
- *********************************************/
+ */
 let commandsRegistered: boolean = false;
 
 export function registerCommands(): void {
@@ -1149,7 +1142,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     await vscode.env.clipboard.writeText(installCommand);
 }
 
-function onSetActiveConfigName(configurationName: string) : Thenable<void> {
+function onSetActiveConfigName(configurationName: string): Thenable<void> {
     return clients.ActiveClient.setCurrentConfigName(configurationName);
 }
 

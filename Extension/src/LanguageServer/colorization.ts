@@ -583,7 +583,7 @@ export class ColorizationState {
     }
 
     // Apply any pending edits to the currently cached tokens
-    private applyEdits() : void {
+    private applyEdits(): void {
         this.versionedEdits.forEach((edit) => {
             if (edit.editVersion > this.currentSemanticVersion) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
@@ -646,7 +646,7 @@ export class ColorizationState {
     }
 
     public updateSemantic(uri: string, semanticRanges: vscode.Range[][], inactiveRanges: vscode.Range[], editVersion: number): void {
-       this.inactiveRanges = inactiveRanges;
+        this.inactiveRanges = inactiveRanges;
         for (let i: number = 0; i < TokenKind.Count; i++) {
             this.semanticRanges[i] = semanticRanges[i];
         }

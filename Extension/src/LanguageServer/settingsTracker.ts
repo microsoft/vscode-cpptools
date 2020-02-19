@@ -26,16 +26,12 @@ export class SettingsTracker {
     }
 
     public getUserModifiedSettings(): { [key: string]: string } {
-        let filter: FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
-            return !this.areEqual(val, settings.inspect(key).defaultValue);
-        };
+        let filter: FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => !this.areEqual(val, settings.inspect(key).defaultValue);
         return this.collectSettings(filter);
     }
 
     public getChangedSettings(): { [key: string]: string } {
-        let filter: FilterFunction = (key: string, val: string) => {
-            return !(key in this.previousCppSettings) || !this.areEqual(val, this.previousCppSettings[key]);
-        };
+        let filter: FilterFunction = (key: string, val: string) => !(key in this.previousCppSettings) || !this.areEqual(val, this.previousCppSettings[key]);
         return this.collectSettings(filter);
     }
 
