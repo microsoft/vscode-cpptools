@@ -1134,7 +1134,7 @@ export class DefaultClient implements Client {
     }
 
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
-        let wasRegistered: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider.wasRegistered", true, this.RootPath);
+        let wasRegistered: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider.wasRegistered", false, this.RootPath);
         let onRegistered: () => void = () => {
             // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
             // the provider has sent the correct browse.path value.
