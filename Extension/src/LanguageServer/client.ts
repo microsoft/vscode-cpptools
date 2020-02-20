@@ -1134,9 +1134,11 @@ export class DefaultClient implements Client {
     }
 
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
+        let wasRegistered: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider.wasRegistered", true, this.RootPath);
         let onRegistered: () => void = () => {
             // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
             // the provider has sent the correct browse.path value.
+            wasRegistered.Value = true;
             if (provider.version >= Version.v2) {
                 this.pauseParsing();
             }
@@ -1148,7 +1150,7 @@ export class DefaultClient implements Client {
             let selectedProvider: string = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
                 let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootPath);
-                if (ask.Value) {
+                if (ask.Value || wasRegistered.Value) {
                     ui.showConfigureCustomProviderMessage(() => {
                         const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
                             ? localize("provider.configure.folder", "{0} would like to configure IntelliSense for the '{1}' folder.", provider.name, this.Name)
@@ -1162,12 +1164,13 @@ export class DefaultClient implements Client {
                                 case allow: {
                                     this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
                                         onRegistered();
+                                        ask.Value = false;
                                         telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
                                     });
-                                    ask.Value = false;
                                     return true;
                                 }
                                 case dontAllow: {
+                                    wasRegistered.Value = false;
                                     ask.Value = false;
                                     break;
                                 }
@@ -1178,7 +1181,10 @@ export class DefaultClient implements Client {
                             return false;
                         });
                     },
-                    () => ask.Value = false);
+                    () => {
+                        wasRegistered.Value = false;
+                        ask.Value = false;
+                    });
                 }
             } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
                 onRegistered();
