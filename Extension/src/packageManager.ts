@@ -36,6 +36,13 @@ export interface IPackage {
     // Architectures for which the package is applicable
     architectures: string[];
 
+    // OS Version regex to check if package is applicable
+    versionRegex: string;
+
+    // A flag to indicate if 'versionRegex' should match or not match.
+    // Required if versionRegex is used. Default is false.
+    matchVersion: boolean;
+
     // Binaries in the package that should be executable when deployed
     binaries: string[];
 
@@ -145,8 +152,43 @@ export class PackageManager {
         return this.GetPackageList()
             .then((list) =>
                 list.filter((value, index, array) =>
-                    (!value.architectures || value.architectures.indexOf(this.platformInfo.architecture) !== -1) &&
-                    (!value.platforms || value.platforms.indexOf(this.platformInfo.platform) !== -1)));
+                    this.ArchitecturesMatch(value) &&
+                        this.PlatformsMatch(value) &&
+                        this.VersionsMatch(value)
+                )
+            );
+    }
+
+    private ArchitecturesMatch(value: IPackage): boolean {
+        return !value.architectures || value.architectures.indexOf(this.platformInfo.architecture) !== -1;
+    }
+
+    private PlatformsMatch(value: IPackage): boolean {
+        return !value.platforms || value.platforms.indexOf(this.platformInfo.platform) !== -1;
+    }
+
+    private VersionsMatch(value: IPackage): boolean {
+
+        // If we have a versionRegex but did not get a platformVersion
+        if (value.versionRegex && !this.platformInfo.version) {
+            // If we are expecting to match the versionRegex, return false since there was no version found.
+            //
+            // If we are expecting to not match the versionRegex, return true since we are expecting to
+            // not match the version string, the only match would be if versionRegex was not set.
+            return !value.matchVersion;
+        }
+
+        if (value.versionRegex) {
+            const regex: RegExp = new RegExp(value.versionRegex);
+
+            return (value.matchVersion ?
+                regex.test(this.platformInfo.version) :
+                !regex.test(this.platformInfo.version)
+            );
+        }
+
+        // No versionRegex provided.
+        return true;
     }
 
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
