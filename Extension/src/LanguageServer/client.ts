@@ -1339,6 +1339,10 @@ export class DefaultClient implements Client {
             let selectedProvider: string = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
                 let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, this.RootFolder);
+                // If c_cpp_properties.json and settings.json are both missing, reset our prompt
+                if (!fs.existsSync(`${this.RootPath}/.vscode/c_cpp_properties.json`) && !fs.existsSync(`${this.RootPath}/.vscode/settings.json`)) {
+                    ask.Value = true;
+                }
                 if (ask.Value) {
                     ui.showConfigureCustomProviderMessage(() => {
                         const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
@@ -1353,9 +1357,9 @@ export class DefaultClient implements Client {
                                 case allow: {
                                     this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
                                         onRegistered();
+                                        ask.Value = false;
                                         telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
                                     });
-                                    ask.Value = false;
                                     return true;
                                 }
                                 case dontAllow: {
