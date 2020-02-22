@@ -186,6 +186,7 @@ interface QueryCompilerDefaultsParams {
 interface CppPropertiesParams extends WorkspaceFolderParams {
     currentConfiguration: number;
     configurations: any[];
+    isReady?: boolean;
 }
 
 interface FolderSelectedSettingParams extends WorkspaceFolderParams {
@@ -2077,7 +2078,8 @@ export class DefaultClient implements Client {
         let params: CppPropertiesParams = {
             configurations: configurations,
             currentConfiguration: this.configuration.CurrentConfigurationIndex,
-            workspaceFolderUri: this.RootPath
+            workspaceFolderUri: this.RootPath,
+            isReady: true
         };
         // Separate compiler path and args before sending to language client
         params.configurations.forEach((c: configs.Configuration) => {
@@ -2086,20 +2088,28 @@ export class DefaultClient implements Client {
             c.compilerPath = compilerPathAndArgs.compilerPath;
             c.compilerArgs = compilerPathAndArgs.additionalArgs;
         });
-        this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
+        let sendLastCustomBrowseConfiguration: boolean = false;
+        let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string>;
+        let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration>;
         if (!this.doneInitialCustomBrowseConfigurationCheck) {
             // Send the last custom browse configuration we received from this provider.
             // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
             // Should only execute on launch, for the initial delivery of configurations
-            let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string> = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootFolder);
+            lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string>("CPP.lastCustomBrowseConfigurationProviderId", null, this.RootFolder);
             if (isSameProviderExtensionId(lastCustomBrowseConfigurationProviderId.Value, configurations[params.currentConfiguration].configurationProvider)) {
-                let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration> = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootFolder);
+                lastCustomBrowseConfiguration  = new PersistentFolderState<WorkspaceBrowseConfiguration>("CPP.lastCustomBrowseConfiguration", null, this.RootFolder);
                 if (lastCustomBrowseConfiguration.Value) {
-                    this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
+                    sendLastCustomBrowseConfiguration = true;
+                    params.isReady = false;
                 }
             }
             this.doneInitialCustomBrowseConfigurationCheck = true;
         }
+        this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
+        if (sendLastCustomBrowseConfiguration) {
+            this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
+        }
+
         this.model.activeConfigName.setValueIfActive(configurations[params.currentConfiguration].name);
         let newProvider: string = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
