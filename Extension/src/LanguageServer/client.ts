@@ -2082,6 +2082,7 @@ export class DefaultClient implements Client {
             c.compilerPath = compilerPathAndArgs.compilerPath;
             c.compilerArgs = compilerPathAndArgs.additionalArgs;
         });
+        this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
         if (!this.doneInitialCustomBrowseConfigurationCheck) {
             // Send the last custom browse configuration we received from this provider.
             // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
@@ -2095,7 +2096,6 @@ export class DefaultClient implements Client {
             }
             this.doneInitialCustomBrowseConfigurationCheck = true;
         }
-        this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
         this.model.activeConfigName.setValueIfActive(configurations[params.currentConfiguration].name);
         let newProvider: string = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
