@@ -495,20 +495,23 @@ export class DefaultClient implements Client {
 
                                 return this.client.languageClient.sendRequest(GetCodeActionsRequest, params)
                                     .then((commands) => {
-                                        let resultCommands: vscode.Command[] = [];
+                                        let resultCodeActions: vscode.CodeAction[] = [];
 
-                                        // Convert to vscode.Command array
+                                        // Convert to vscode.CodeAction array
                                         commands.forEach((command) => {
                                             let title: string = util.getLocalizedString(command.localizeStringParams);
-                                            let vscodeCommand: vscode.Command = {
+                                            let vscodeCodeAction: vscode.CodeAction = {
                                                 title: title,
-                                                command: command.command,
-                                                arguments: command.arguments
+                                                command: {
+                                                    title: title,
+                                                    command: command.command,
+                                                    arguments: command.arguments
+                                                }
                                             };
-                                            resultCommands.push(vscodeCommand);
+                                            resultCodeActions.push(vscodeCodeAction);
                                         });
 
-                                        return resultCommands;
+                                        return resultCodeActions;
                                     });
                             });
                         }
