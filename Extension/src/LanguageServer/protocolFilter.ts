@@ -10,7 +10,7 @@ import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import * as vscode from 'vscode';
 import { CppSettings } from './settings';
-import { onDidChangeActiveTextEditor } from './extension';
+import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
@@ -62,15 +62,16 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
             let me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
-            if (clients.ActiveClient === me && me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
-                me.onDidChangeTextDocument(textDocumentChangeEvent);
-                me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
+            if (!me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
+                processDelayedDidOpen(textDocumentChangeEvent.document);
             }
+            me.onDidChangeTextDocument(textDocumentChangeEvent);
+            me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
         },
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
             let me: Client = clients.getClientFor(event.document.uri);
-            if (clients.ActiveClient === me && me.TrackedDocuments.has(event.document)) {
+            if (me.TrackedDocuments.has(event.document)) {
                 return me.requestWhenReady(() => sendMessage(event));
             }
             return Promise.resolve([]);
@@ -78,7 +79,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         didSave: defaultHandler,
         didClose: (document, sendMessage) => {
             let me: Client = clients.getClientFor(document.uri);
-            if (clients.ActiveClient === me && me.TrackedDocuments.has(document)) {
+            if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
                 me.notifyWhenReady(() => sendMessage(document));
