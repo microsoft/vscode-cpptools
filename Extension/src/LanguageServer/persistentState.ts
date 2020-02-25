@@ -6,7 +6,6 @@
 
 import * as util from '../common';
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 class PersistentStateBase<T> {
     private key: string;
@@ -51,8 +50,8 @@ export class PersistentWorkspaceState<T> extends PersistentStateBase<T> {
 }
 
 export class PersistentFolderState<T> extends PersistentWorkspaceState<T> {
-    constructor(key: string, defaultValue: T, folder: string) {
-        let newKey: string = key + (folder ? `-${path.basename(folder)}` : "-untitled");
+    constructor(key: string, defaultValue: T, folder: vscode.WorkspaceFolder) {
+        let newKey: string = key + (folder ? `-${util.getUniqueWorkspaceName(folder)}` : "-untitled");
         super(newKey, defaultValue);
     }
 }

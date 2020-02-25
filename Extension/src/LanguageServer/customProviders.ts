@@ -248,6 +248,9 @@ export function getCustomConfigProviders(): CustomConfigurationProviderCollectio
 }
 
 export function isSameProviderExtensionId(settingExtensionId: string, providerExtensionId: string): boolean {
+    if (!settingExtensionId && !providerExtensionId) {
+        return true;
+    }
     if (settingExtensionId === providerExtensionId) {
         return true;
     }

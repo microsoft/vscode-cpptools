@@ -123,8 +123,8 @@ function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
 }
 
 async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number): Promise<string[]> {
-    const matches: RegExpMatchArray = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
-    if (!matches.length) {
+    const matches: RegExpMatchArray | null = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
+    if (!matches || !matches.length) {
         return [];
     }
     const missingHeader: string = matches.groups['includeFile'].replace(/\//g, '\\');
@@ -444,7 +444,7 @@ function realActivation(): void {
 
     reportMacCrashes();
 
-    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    const settings: CppSettings = new CppSettings();
 
     vcpkgDbPromise = initVcpkgDatabase();
 
@@ -472,7 +472,9 @@ function realActivation(): void {
 
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
-    intervalTimer = global.setInterval(onInterval, 2500);
+    clients.ActiveClient.notifyWhenReady(() => {
+        intervalTimer = global.setInterval(onInterval, 2500);
+    });
 }
 
 export function updateLanguageConfigurations(): void {
@@ -507,7 +509,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
-function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
+export function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
     if (clients === undefined) {
@@ -542,33 +544,37 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
+export function processDelayedDidOpen(document: vscode.TextDocument): void {
+    let client: Client = clients.getClientFor(document.uri);
+    if (client) {
+        if (clients.checkOwnership(client, document)) {
+            if (!client.TrackedDocuments.has(document)) {
+                // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
+                client.TrackedDocuments.add(document);
+                // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
+                if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
+                    let cppSettings: CppSettings = new CppSettings();
+                    if (cppSettings.autoAddFileAssociations) {
+                        const fileName: string = path.basename(document.uri.fsPath);
+                        const mappingString: string = fileName + "@" + document.uri.fsPath;
+                        client.addFileAssociations(mappingString, false);
+                    }
+                }
+                client.provideCustomConfiguration(document.uri, null);
+                client.notifyWhenReady(() => {
+                    client.takeOwnership(document);
+                    client.onDidOpenTextDocument(document);
+                });
+            }
+        }
+    }
+}
+
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
         if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp")) {
-            let client: Client = clients.getClientFor(editor.document.uri);
-            if (client) {
-                if (clients.checkOwnership(client, editor.document)) {
-                    if (!client.TrackedDocuments.has(editor.document)) {
-                        // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
-                        client.TrackedDocuments.add(editor.document);
-                        // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
-                        if ((editor.document.uri.path.endsWith(".C") || editor.document.uri.path.endsWith(".H")) && editor.document.languageId === "c") {
-                            let cppSettings: CppSettings = new CppSettings(client.RootUri);
-                            if (cppSettings.autoAddFileAssociations) {
-                                const fileName: string = path.basename(editor.document.uri.fsPath);
-                                const mappingString: string = fileName + "@" + editor.document.uri.fsPath;
-                                client.addFileAssociations(mappingString, false);
-                            }
-                        }
-                        client.provideCustomConfiguration(editor.document.uri, null);
-                        client.notifyWhenReady(() => {
-                            client.takeOwnership(editor.document);
-                            client.onDidOpenTextDocument(editor.document);
-                        });
-                    }
-                }
-            }
+            processDelayedDidOpen(editor.document);
         }
     });
 
@@ -956,8 +962,7 @@ function selectClient(): Thenable<Client> {
 
 function onResetDatabase(): void {
     onActivationEvent();
-    /* need to notify the affected client(s) */
-    selectClient().then(client => client.resetDatabase(), rejected => {});
+    clients.ActiveClient.resetDatabase();
 }
 
 function onSelectConfiguration(): void {
@@ -1049,22 +1054,22 @@ function onToggleDimInactiveRegions(): void {
 
 function onPauseParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.pauseParsing(), rejected => {});
+    clients.ActiveClient.pauseParsing();
 }
 
 function onResumeParsing(): void {
     onActivationEvent();
-    selectClient().then(client => client.resumeParsing(), rejected => {});
+    clients.ActiveClient.resumeParsing();
 }
 
 function onShowParsingCommands(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleShowParsingCommands(), rejected => {});
+    clients.ActiveClient.handleShowParsingCommands();
 }
 
 function onShowReferencesProgress(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleReferencesIcon(), rejected => {});
+    clients.ActiveClient.handleReferencesIcon();
 }
 
 function onToggleRefGroupView(): void {

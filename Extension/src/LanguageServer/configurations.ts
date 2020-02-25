@@ -137,11 +137,11 @@ export class CppProperties {
     // we want to track when the default includes have been added to it.
     private configurationIncomplete: boolean = true;
 
-    constructor(rootUri: vscode.Uri) {
+    constructor(rootUri: vscode.Uri, workspaceFolder: vscode.WorkspaceFolder) {
         console.assert(rootUri !== undefined);
         this.rootUri = rootUri;
         let rootPath: string = rootUri ? rootUri.fsPath : "";
-        this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
+        this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, workspaceFolder);
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();
@@ -591,7 +591,7 @@ export class CppProperties {
         this.compileCommandFileWatchers = []; // reset it
         let filePaths: Set<string> = new Set<string>();
         this.configurationJson.configurations.forEach(c => {
-            if (c.compileCommands !== undefined) {
+            if (c.compileCommands) {
                 let fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands, os.platform() === "win32");
                 if (fs.existsSync(fileSystemCompileCommandsPath)) {
                     filePaths.add(fileSystemCompileCommandsPath);
