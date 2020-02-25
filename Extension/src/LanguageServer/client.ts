@@ -988,6 +988,9 @@ export class DefaultClient implements Client {
         };
 
         // Get all the per-workspace settings.
+        // They're sent as individual arrays to make it easier to process on the server,
+        // so don't refactor this to an array of settings objects unless a good method is
+        // found for processing data in that format on the server.
         let settings_clangFormatPath: string[] = [];
         let settings_clangFormatStyle: string[] = [];
         let settings_clangFormatFallbackStyle: string[] = [];
