@@ -20,7 +20,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 let disposables: vscode.Disposable[] = [];
 
 export function buildAndDebugActiveFileStr(): string {
-    return " build and debug active file";
+    return ` - ${localize("build.and.debug.active.file", 'Build and debug active file')}`;
 }
 
 export function initialize(context: vscode.ExtensionContext): void {
