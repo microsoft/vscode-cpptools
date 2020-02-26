@@ -361,7 +361,7 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
         const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
-        let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, '$gcc');
+        let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, isCl ? '$msCompile' : '$gcc');
         task.definition = kind; // The constructor for vscode.Task will consume the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
 
