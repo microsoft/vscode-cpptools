@@ -16,7 +16,7 @@
 	"none": "nessuno",
 	"disable.configuration.provider": "Disabilita il provider di configurazione attivo, se applicabile.",
 	"select.compile.commands": "Seleziona un file compile_commands.json...",
-	"select.workspace": "Seleziona un'area di lavoro...",
+	"select.workspace": "Select a workspace folder...",
 	"select.parsing.command": "Seleziona un comando di analisi...",
 	"resume.parsing": "Riprendi analisi",
 	"pause.parsing": "Sospendi analisi"

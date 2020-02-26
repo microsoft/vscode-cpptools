@@ -16,7 +16,7 @@
 	"none": "无",
 	"disable.configuration.provider": "禁用活动配置提供程序(如果适用)。",
 	"select.compile.commands": "选择 compile_commands.json...",
-	"select.workspace": "选择工作区...",
+	"select.workspace": "Select a workspace folder...",
 	"select.parsing.command": "选择分析命令...",
 	"resume.parsing": "继续分析",
 	"pause.parsing": "暂停分析"

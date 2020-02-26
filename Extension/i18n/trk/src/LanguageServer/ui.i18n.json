@@ -16,7 +16,7 @@
 	"none": "yok",
 	"disable.configuration.provider": "Varsa etkin yapılandırma sağlayıcısını devre dışı bırakın.",
 	"select.compile.commands": "compile_commands.json dosyası seçin...",
-	"select.workspace": "Çalışma Alanı Seçin...",
+	"select.workspace": "Select a workspace folder...",
 	"select.parsing.command": "Ayrıştırma komutu seçin...",
 	"resume.parsing": "Ayrıştırmayı Sürdür",
 	"pause.parsing": "Ayrıştırmayı Duraklat"

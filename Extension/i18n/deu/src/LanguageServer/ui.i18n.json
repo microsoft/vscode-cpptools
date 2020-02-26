@@ -16,7 +16,7 @@
 	"none": "Keine",
 	"disable.configuration.provider": "Deaktivieren Sie den aktiven Konfigurationsanbieter, falls zutreffend.",
 	"select.compile.commands": "compile_commands.json-Datei auswählen...",
-	"select.workspace": "Arbeitsbereich auswählen...",
+	"select.workspace": "Select a workspace folder...",
 	"select.parsing.command": "Analysebefehl auswählen...",
 	"resume.parsing": "Analyse fortsetzen",
 	"pause.parsing": "Analyse anhalten"
