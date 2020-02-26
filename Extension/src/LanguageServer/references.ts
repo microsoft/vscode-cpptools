@@ -292,7 +292,6 @@ export class ReferencesManager {
 
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
             this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
-            // tslint:disable-next-line: promise-must-complete
                 new Promise((resolve) => {
                     this.currentUpdateProgressResolve = resolve;
                     this.reportProgress(progress, true, mode);

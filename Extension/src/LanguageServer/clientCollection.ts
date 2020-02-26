@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as cpptools from './client';
-import * as path from 'path';
 import { getCustomConfigProviders } from './customProviders';
 
 const defaultClientKey: string = "@@default@@";
@@ -37,9 +36,18 @@ export class ClientCollection {
     constructor() {
         let key: string = defaultClientKey;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-            let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders[0];
-            key = util.asFolder(folder.uri);
-            this.activeClient = cpptools.createClient(this, folder);
+            let isFirstWorkspaceFolder: boolean = true;
+            vscode.workspace.workspaceFolders.forEach(folder => {
+                let newClient: cpptools.Client = cpptools.createClient(this, folder);
+                this.languageClients.set(util.asFolder(folder.uri), newClient);
+                if (isFirstWorkspaceFolder) {
+                    isFirstWorkspaceFolder = false;
+                } else {
+                    newClient.deactivate();
+                }
+            });
+            key = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
+            this.activeClient = this.languageClients.get(key);
         } else {
             this.activeClient = cpptools.createClient(this);
         }
@@ -81,17 +89,8 @@ export class ClientCollection {
     }
 
     public checkOwnership(client: cpptools.Client, document: vscode.TextDocument): boolean {
-        let owners: cpptools.Client[] = [];
-        this.languageClients.forEach(languageClient => {
-            if (document.uri.fsPath.startsWith(languageClient.RootPath + path.sep)) {
-                owners.push(languageClient);
-            }
-        });
-        if (owners.length === 0) {
-            owners.push(this.activeClient);
-        }
 
-        return (owners[0] === client);  // TODO: we may want to pick the owner with the longest path?
+        return (this.getClientFor(document.uri) === client);
     }
 
     /**
@@ -131,10 +130,6 @@ export class ClientCollection {
         }
     }
 
-    /**
-     * Remove folders that were closed. We don't check the e.added property because we will
-     * add new clients on-demand as files are opened.
-     */
     private onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent): void {
         let folderCount: number = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0;
         if (folderCount > 1) {
@@ -164,17 +159,25 @@ export class ClientCollection {
                     client.dispose();
                 }
             });
+            e.added.forEach(folder => {
+                let path: string = util.asFolder(folder.uri);
+                let client: cpptools.Client = this.languageClients.get(path);
+                if (!client) {
+                    this.languageClients.set(path, cpptools.createClient(this, folder));
+                }
+            });
         }
     }
 
     private transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client): void {
         let newOwner: cpptools.Client = this.getClientFor(document.uri);
-        console.assert(newOwner !== oldOwner, "'oldOwner' should not be in the list of clients to consider");
-        newOwner.takeOwnership(document);
+        if (newOwner !== oldOwner) {
+            newOwner.takeOwnership(document);
+        }
     }
 
     public getClientFor(uri: vscode.Uri): cpptools.Client {
-        let folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+        let folder: vscode.WorkspaceFolder = uri ? vscode.workspace.getWorkspaceFolder(uri) : null;
         if (!folder) {
             return this.defaultClient;
         } else {
@@ -194,12 +197,14 @@ export class ClientCollection {
 
     public dispose(): Thenable<void> {
         let promises: Thenable<void>[] = [];
+        this.disposables.forEach((d: vscode.Disposable) => d.dispose());
 
         // this.defaultClient is already in this.languageClients, so do not call dispose() on it.
         this.defaultClient = undefined;
 
         this.languageClients.forEach(client => promises.push(client.dispose()));
         this.languageClients.clear();
+        cpptools.disposeWorkspaceData();
         return Promise.all(promises).then(() => undefined);
     }
 }
