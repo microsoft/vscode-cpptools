@@ -163,7 +163,9 @@ export class ClientCollection {
                 let path: string = util.asFolder(folder.uri);
                 let client: cpptools.Client = this.languageClients.get(path);
                 if (!client) {
-                    this.languageClients.set(path, cpptools.createClient(this, folder));
+                    let newClient: cpptools.Client = cpptools.createClient(this, folder);
+                    this.languageClients.set(path, newClient);
+                    newClient.deactivate(); // e.g. prevent the current config from switching.
                 }
             });
         }
