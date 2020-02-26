@@ -16,7 +16,7 @@
 	"none": "žádné",
 	"disable.configuration.provider": "Zakažte aktivního poskytovatele konfigurací, pokud je to možné.",
 	"select.compile.commands": "Vyberte soubor compile_commands.json...",
-	"select.workspace": "Vyberte pracovní prostor...",
+	"select.workspace": "Select a workspace folder...",
 	"select.parsing.command": "Vyberte příkaz parsování...",
 	"resume.parsing": "Pokračovat v parsování",
 	"pause.parsing": "Pozastavit parsování"

@@ -16,7 +16,7 @@
 	"none": "なし",
 	"disable.configuration.provider": "該当する場合は、アクティブな構成プロバイダーを無効にします。",
 	"select.compile.commands": "compile_commands.json を選択してください...",
-	"select.workspace": "ワークスペースを選択してください...",
+	"select.workspace": "Select a workspace folder...",
 	"select.parsing.command": "解析コマンドを選択してください...",
 	"resume.parsing": "解析の再開",
 	"pause.parsing": "解析の一時停止"

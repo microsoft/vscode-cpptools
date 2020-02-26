@@ -16,7 +16,7 @@
 	"none": "無",
 	"disable.configuration.provider": "如果適用，停用現有組態提供者。",
 	"select.compile.commands": "選取 compile_commands.json...",
-	"select.workspace": "選取工作區...",
+	"select.workspace": "Select a workspace folder...",
 	"select.parsing.command": "選取剖析命令...",
 	"resume.parsing": "繼續剖析",
 	"pause.parsing": "暫停剖析"
