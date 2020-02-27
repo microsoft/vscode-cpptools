@@ -9,8 +9,8 @@
 * Add `cpptools.setActiveConfigName` command. [#4870](https://github.com/microsoft/vscode-cpptools/issues/4870)
   * @aleksey-sergey [PR 4893](https://github.com/microsoft/vscode-cpptools/pull/4893)
 * Default to the bundled `clang-format` if its version is newer. [#4963](https://github.com/microsoft/vscode-cpptools/issues/4963)
-* Include only `lldb-mi` for macOS
-  * Enable debugging support on macOS Catalina [#3829](https://github.com/microsoft/vscode-cpptools/issues/3829)
+* Include only `lldb-mi` for macOS.
+  * Enable debugging support on macOS Catalina. [#3829](https://github.com/microsoft/vscode-cpptools/issues/3829)
   * Fix visualization of standard library types in lldb. [#1768](https://github.com/microsoft/vscode-cpptools/issues/1768)
 
 ### Bug Fixes
