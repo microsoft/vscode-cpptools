@@ -1138,44 +1138,50 @@ export class DefaultClient implements Client {
         return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
+    public sendDidChangeSettings(): void {
+        let cppSettingsScoped: { [key: string]: any } = {};
+        // Gather the C_Cpp settings
+        {
+            let cppSettingsResourceScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.RootUri);
+            let cppSettingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+
+            for (let key in cppSettingsResourceScoped) {
+                let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+                if (curSetting === undefined) {
+                    continue;
+                }
+                let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? cppSettingsResourceScoped : cppSettingsNonScoped;
+                cppSettingsScoped[key] = settings.get(key);
+            }
+            cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
+        }
+
+        // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
+        // build a new JSON object with everything we need on the native side.
+        let settings: any = {
+            C_Cpp: {
+                ...cppSettingsScoped,
+                tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
+            },
+            files: {
+                exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
+            },
+            search: {
+                exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
+            }
+        };
+
+        // Send settings json to native side
+        this.notifyWhenReady(() => {
+            this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
+        });
+    }
+
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
         let changedSettings: { [key: string]: string };
+        this.sendDidChangeSettings();
         this.notifyWhenReady(() => {
             changedSettings = this.settingsTracker.getChangedSettings();
-            let cppSettingsScoped: { [key: string]: any } = {};
-            // Gather the C_Cpp settings
-            {
-                let cppSettingsResourceScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.RootUri);
-                let cppSettingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
-
-                for (let key in cppSettingsResourceScoped) {
-                    let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-                    if (curSetting === undefined) {
-                        continue;
-                    }
-                    let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? cppSettingsResourceScoped : cppSettingsNonScoped;
-                    cppSettingsScoped[key] = settings.get(key);
-                }
-                cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
-            }
-
-            // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
-            // build a new JSON object with everything we need on the native side.
-            let settings: any = {
-                C_Cpp: {
-                    ...cppSettingsScoped,
-                    tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
-                },
-                files: {
-                    exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
-                },
-                search: {
-                    exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
-                }
-            };
-
-            // Send settings json to native side
-            this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
 
             let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
                 || event.affectsConfiguration("editor.tokenColorCustomizations");
