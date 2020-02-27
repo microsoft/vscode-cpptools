@@ -24,7 +24,7 @@
 * Fix failure to detect CL.exe if VS Installer files are stored on a drive other than the system drive. [#4929](https://github.com/microsoft/vscode-cpptools/issues/4929)
 * Fix "Unrecognized format of field "msg" in result" on macOS. [#2492](https://github.com/microsoft/vscode-cpptools/issues/2492)
 * Fix for timeout on slow terminals while debugging. [#2889](https://github.com/microsoft/vscode-cpptools/issues/2889)
- * @Epikem [PR MIEngine#965](https://github.com/microsoft/MIEngine/pull/965)
+  * @Epikem [PR MIEngine#965](https://github.com/microsoft/MIEngine/pull/965)
 
 ## Version 0.26.3: January 22, 2020
 ### Bug Fixes
