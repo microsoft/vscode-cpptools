@@ -166,6 +166,8 @@ export class ClientCollection {
                     let newClient: cpptools.Client = cpptools.createClient(this, folder);
                     this.languageClients.set(path, newClient);
                     newClient.deactivate(); // e.g. prevent the current config from switching.
+                    let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
+                    defaultClient.sendDidChangeSettings();
                 }
             });
         }
@@ -188,6 +190,8 @@ export class ClientCollection {
                 let newClient: cpptools.Client = cpptools.createClient(this, folder);
                 this.languageClients.set(key, newClient);
                 getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
+                let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
+                defaultClient.sendDidChangeSettings();
             }
             return this.languageClients.get(key);
         }
