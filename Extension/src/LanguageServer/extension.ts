@@ -288,24 +288,28 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
     }
 
     // Get user compiler path.
-    const userCompilerPathAndArgs: util.CompilerPathAndArgs = await activeClient.getCurrentCompilerPathAndArgs();
-    let userCompilerPath: string | undefined = userCompilerPathAndArgs.compilerPath;
-    if (userCompilerPath && userCompilerPathAndArgs.compilerName) {
-        userCompilerPath = userCompilerPath.trim();
-        if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
-            userCompilerPath = undefined;
-        } else {
-            userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
+    const userCompilerPathAndArgs: util.CompilerPathAndArgs | undefined = await activeClient.getCurrentCompilerPathAndArgs();
+    let userCompilerPath: string | undefined;
+    if (userCompilerPathAndArgs) {
+        userCompilerPath = userCompilerPathAndArgs.compilerPath;
+        if (userCompilerPath && userCompilerPathAndArgs.compilerName) {
+            userCompilerPath = userCompilerPath.trim();
+            if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
+                userCompilerPath = undefined;
+            } else {
+                userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
+            }
         }
     }
 
     // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
     // Filter them based on the file type to get a reduced list appropriate for the active file.
     let knownCompilerPaths: string[] | undefined;
-    let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
+    let knownCompilers: configs.KnownCompiler[]  | undefined = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info =>
             ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+                userCompilerPathAndArgs &&
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
                 (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
         knownCompilerPaths = knownCompilers.map<string>(info => info.path);
@@ -388,7 +392,7 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
 
     // Task for user compiler path setting
     if (userCompilerPath) {
-        let task: vscode.Task = createTask(userCompilerPath, userCompilerPathAndArgs.additionalArgs);
+        let task: vscode.Task = createTask(userCompilerPath, userCompilerPathAndArgs?.additionalArgs);
         buildTasks.push(task);
     }
 
@@ -1171,7 +1175,7 @@ function onSetActiveConfigName(configurationName: string): Thenable<void> {
     return clients.ActiveClient.setCurrentConfigName(configurationName);
 }
 
-function onGetActiveConfigName(): Thenable<string> {
+function onGetActiveConfigName(): Thenable<string | undefined> {
     return clients.ActiveClient.getCurrentConfigName();
 }
 

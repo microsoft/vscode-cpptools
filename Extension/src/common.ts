@@ -840,13 +840,13 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
 }
 
 export interface CompilerPathAndArgs {
-    compilerPath: string;
+    compilerPath: string | undefined;
     compilerName: string;
     additionalArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string = inputCompilerPath;
+export function extractCompilerPathAndArgs(inputCompilerPath: string | undefined, inputCompilerArgs?: string[]): CompilerPathAndArgs {
+    let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let additionalArgs: string[] = [];
     let isWindows: boolean = os.platform() === 'win32';

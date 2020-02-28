@@ -665,7 +665,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditCommand(onBeforeOpen: () => void, showDocument: (document: vscode.TextDocument) => void): void {
+    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
         let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
         if (otherSettings.settingsEditor === "ui") {
             this.handleConfigurationEditUICommand(onBeforeOpen, showDocument);
@@ -675,7 +675,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditJSONCommand(onBeforeOpen: () => void, showDocument: (document: vscode.TextDocument) => void): void {
+    public handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             console.assert(this.propertiesFile);
             if (onBeforeOpen) {
@@ -706,7 +706,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditUICommand(onBeforeOpen: () => void, showDocument: (document: vscode.TextDocument) => void): void {
+    public handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             if (this.propertiesFile) {
                 if (onBeforeOpen) {
@@ -1018,7 +1018,7 @@ export class CppProperties {
         let config: Configuration = this.configurationJson.configurations[configIndex];
 
         // Validate compilerPath
-        let resolvedCompilerPath: string = this.resolvePath(config.compilerPath, isWindows);
+        let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         if (resolvedCompilerPath &&
             // Don't error cl.exe paths because it could be for an older preview build.
@@ -1030,6 +1030,7 @@ export class CppProperties {
             let compilerPathNeedsQuotes: boolean =
                 compilerPathAndArgs.additionalArgs &&
                 !resolvedCompilerPath.startsWith('"') &&
+                compilerPathAndArgs.compilerPath !== undefined &&
                 compilerPathAndArgs.compilerPath.includes(" ");
 
             let compilerPathErrors: string[] = [];
@@ -1039,40 +1040,41 @@ export class CppProperties {
 
             // Get compiler path without arguments before checking if it exists
             resolvedCompilerPath = compilerPathAndArgs.compilerPath;
-
-            let pathExists: boolean = true;
-            let existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
-            if (!fs.existsSync(resolvedCompilerPath)) {
-                if (existsWithExeAdded(resolvedCompilerPath)) {
-                    resolvedCompilerPath += ".exe";
-                } else {
-                    // Check again for a relative path.
-                    const relativePath: string = this.rootUri.fsPath + path.sep + resolvedCompilerPath;
-                    if (!fs.existsSync(relativePath)) {
-                        if (existsWithExeAdded(resolvedCompilerPath)) {
-                            resolvedCompilerPath += ".exe";
-                        } else {
-                            pathExists = false;
-                        }
+            if (resolvedCompilerPath) {
+                let pathExists: boolean = true;
+                let existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
+                if (!fs.existsSync(resolvedCompilerPath)) {
+                    if (existsWithExeAdded(resolvedCompilerPath)) {
+                        resolvedCompilerPath += ".exe";
                     } else {
-                        resolvedCompilerPath = relativePath;
+                        // Check again for a relative path.
+                        const relativePath: string = this.rootUri.fsPath + path.sep + resolvedCompilerPath;
+                        if (!fs.existsSync(relativePath)) {
+                            if (existsWithExeAdded(resolvedCompilerPath)) {
+                                resolvedCompilerPath += ".exe";
+                            } else {
+                                pathExists = false;
+                            }
+                        } else {
+                            resolvedCompilerPath = relativePath;
+                        }
                     }
                 }
-            }
 
-            if (!pathExists) {
-                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
-                compilerPathErrors.push(message);
-            } else if (compilerPathAndArgs.compilerPath === "") {
-                let message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
-                compilerPathErrors.push(message);
-            } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
-                let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
-                compilerPathErrors.push(message);
-            }
+                if (!pathExists) {
+                    let message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
+                    compilerPathErrors.push(message);
+                } else if (compilerPathAndArgs.compilerPath === "") {
+                    let message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
+                    compilerPathErrors.push(message);
+                } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
+                    let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
+                    compilerPathErrors.push(message);
+                }
 
-            if (compilerPathErrors.length > 0) {
-                errors.compilerPath = compilerPathErrors.join('\n');
+                if (compilerPathErrors.length > 0) {
+                    errors.compilerPath = compilerPathErrors.join('\n');
+                }
             }
         }
 
@@ -1295,8 +1297,13 @@ export class CppProperties {
                     if (isWindows && compilerPathAndArgs.compilerName === "cl.exe") {
                         continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
                     }
+                    if (!compilerPathAndArgs.compilerPath) {
+                        continue;
+                    }
                     // Squiggle when the compiler's path has spaces without quotes but args are used.
-                    compilerPathNeedsQuotes = compilerPathAndArgs.additionalArgs && !resolvedPath.startsWith('"') && compilerPathAndArgs.compilerPath.includes(" ");
+                    compilerPathNeedsQuotes = compilerPathAndArgs.additionalArgs
+                        && !resolvedPath.startsWith('"')
+                        && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
                 }
 

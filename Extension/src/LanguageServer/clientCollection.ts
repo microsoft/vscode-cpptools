@@ -189,14 +189,16 @@ export class ClientCollection {
             return this.defaultClient;
         } else {
             let key: string = util.asFolder(folder.uri);
-            if (!this.languageClients.has(key)) {
-                let newClient: cpptools.Client = cpptools.createClient(this, folder);
-                this.languageClients.set(key, newClient);
-                getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
-                let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
-                defaultClient.sendDidChangeSettings();
+            let client: cpptools.Client | undefined = this.languageClients.get(key);
+            if (client) {
+                return client;
             }
-            return this.languageClients.get(key);
+            let newClient: cpptools.Client = cpptools.createClient(this, folder);
+            this.languageClients.set(key, newClient);
+            getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
+            let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
+            defaultClient.sendDidChangeSettings();
+            return newClient;
         }
     }
 
