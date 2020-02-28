@@ -139,7 +139,7 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
 }
 
 function updateSemanticColorizationRegions(params: SemanticColorizationRegionsParams): void {
-    let colorizationState: ColorizationState = workspaceColorizationState.get(params.uri);
+    let colorizationState: ColorizationState | undefined = workspaceColorizationState.get(params.uri);
     if (colorizationState) {
         // Convert the params to vscode.Range's before passing to colorizationState.updateSemantic()
         let semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
@@ -418,7 +418,7 @@ export interface Client {
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
     RootPath: string;
-    RootUri: vscode.Uri;
+    RootUri: vscode.Uri | undefined;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string };
@@ -510,8 +510,8 @@ export class DefaultClient implements Client {
     public get RootPath(): string {
         return (this.rootFolder) ? this.rootFolder.uri.fsPath : "";
     }
-    public get RootUri(): vscode.Uri {
-        return (this.rootFolder) ? this.rootFolder.uri : null;
+    public get RootUri(): vscode.Uri | undefined {
+        return (this.rootFolder) ? this.rootFolder.uri : undefined;
     }
     public get RootFolder(): vscode.WorkspaceFolder | undefined {
         return this.rootFolder;
@@ -546,10 +546,17 @@ export class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
-        this.storagePath = util.extensionContext ? util.extensionContext.storagePath :
-            path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.storagePath = path.join(this.storagePath, util.getUniqueWorkspaceStorageName(this.rootFolder));
+        if (util.extensionContext) {
+            let path: string | undefined = util.extensionContext.storagePath;
+            if (path) {
+                this.storagePath = path;
+            }
+        }
+        if (!this.storagePath) {
+            this.storagePath = path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
+        }
+        if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
+            this.storagePath = path.join(this.storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
         try {
             let firstClient: boolean = false;
@@ -567,14 +574,22 @@ export class DefaultClient implements Client {
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(() => languageClient.onReady().then(
                 () => {
-                    this.configuration = new configs.CppProperties(this.RootUri, this.rootFolder);
+                    let uri: vscode.Uri | undefined = this.RootUri;
+                    if (!uri) {
+                        throw new Error("Empty URI in client constructor");
+                    }
+                    let workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
+                    if (!workspaceFolder) {
+                        throw new Error("Empty URI in client constructor");
+                    }
+                    this.configuration = new configs.CppProperties(uri, workspaceFolder);
                     this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                     this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
                     this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
                     this.disposables.push(this.configuration);
 
                     this.languageClient = languageClient;
-                    this.settingsTracker = getTracker(this.RootUri);
+                    this.settingsTracker = getTracker(uri);
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
 
@@ -845,7 +860,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
-                                            if (doResolve && referencesResult === null) {
+                                            if (doResolve && !referencesResult) {
                                                 // The result callback will be called with doResult of true and a null result when the Find All References
                                                 // portion of the rename is complete.  We complete the promise with an empty edit at this point,
                                                 // to cause the progress indicator to be dismissed.
@@ -871,7 +886,7 @@ export class DefaultClient implements Client {
                                                     }
                                                     // If rename UI was canceled, we will get a null result.
                                                     // If null, return an empty list to avoid Rename failure dialog.
-                                                    if (referencesResult !== null) {
+                                                    if (referencesResult) {
                                                         for (let reference of referencesResult.referenceInfos) {
                                                             let uri: vscode.Uri = vscode.Uri.file(reference.file);
                                                             let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
@@ -881,7 +896,7 @@ export class DefaultClient implements Client {
                                                     workspaceReferences.closeRenameUI();
                                                 }
                                                 if (doResolve) {
-                                                    if (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0) {
+                                                    if (!referencesResult.referenceInfos || referencesResult.referenceInfos.length === 0) {
                                                         vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
                                                     }
                                                     resolve(workspaceEdit);
@@ -923,8 +938,8 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
                         this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), null));
-                        this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), null));
+                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
+                        this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
 
                         // Listen for messages from the language server.
                         this.registerNotifications();
@@ -966,7 +981,11 @@ export class DefaultClient implements Client {
             }
         }
 
-        this.colorizationSettings = new ColorizationSettings(this.RootUri);
+        let uri: vscode.Uri | undefined = this.RootUri;
+        if (!uri) {
+            throw new Error("Empty URI in client constructor");
+        }
+        this.colorizationSettings = new ColorizationSettings(uri);
     }
 
     public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
@@ -994,26 +1013,26 @@ export class DefaultClient implements Client {
         // They're sent as individual arrays to make it easier to process on the server,
         // so don't refactor this to an array of settings objects unless a good method is
         // found for processing data in that format on the server.
-        let settings_clangFormatPath: string[] = [];
-        let settings_clangFormatStyle: string[] = [];
-        let settings_clangFormatFallbackStyle: string[] = [];
-        let settings_clangFormatSortIncludes: string[] = [];
-        let settings_filesExclude: vscode.WorkspaceConfiguration[] = [];
-        let settings_searchExclude: vscode.WorkspaceConfiguration[] = [];
-        let settings_editorTabSize: number[] = [];
-        let settings_intelliSenseEngine: string[] = [];
-        let settings_intelliSenseEngineFallback: string[] = [];
-        let settings_errorSquiggles: string[] = [];
+        let settings_clangFormatPath: (string | undefined)[] = [];
+        let settings_clangFormatStyle: (string | undefined)[] = [];
+        let settings_clangFormatFallbackStyle: (string | undefined)[] = [];
+        let settings_clangFormatSortIncludes: (string | undefined)[] = [];
+        let settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        let settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        let settings_editorTabSize: (number | undefined)[] = [];
+        let settings_intelliSenseEngine: (string | undefined)[] = [];
+        let settings_intelliSenseEngineFallback: (string | undefined)[] = [];
+        let settings_errorSquiggles: (string | undefined)[] = [];
         let settings_dimInactiveRegions: boolean[] = [];
         let settings_enhancedColorization: string[] = [];
-        let settings_suggestSnippets: boolean[] = [];
-        let settings_exclusionPolicy: string[] = [];
-        let settings_preferredPathSeparator: string[] = [];
-        let settings_defaultSystemIncludePath: string[][] = [];
-        let settings_intelliSenseCachePath: string[] = [];
-        let settings_intelliSenseCacheSize: number[] = [];
-        let settings_autoComplete: string[] = [];
-        let settings_formatting: string[] = [];
+        let settings_suggestSnippets: (boolean | undefined)[] = [];
+        let settings_exclusionPolicy: (string | undefined)[] = [];
+        let settings_preferredPathSeparator: (string | undefined)[] = [];
+        let settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
+        let settings_intelliSenseCachePath: (string | undefined)[] = [];
+        let settings_intelliSenseCacheSize: (number | undefined)[] = [];
+        let settings_autoComplete: (string | undefined)[] = [];
+        let settings_formatting: (string | undefined)[] = [];
         let workspaceSettings: CppSettings = new CppSettings();
         let workspaceOtherSettings: OtherSettings = new OtherSettings(null);
         {
@@ -1022,9 +1041,11 @@ export class DefaultClient implements Client {
 
             settings.push(workspaceSettings);
             otherSettings.push(workspaceOtherSettings);
-            for (let workspaceFolder of vscode.workspace.workspaceFolders) {
-                settings.push(new CppSettings(workspaceFolder.uri));
-                otherSettings.push(new OtherSettings(workspaceFolder.uri));
+            if (vscode.workspace.workspaceFolders) {
+                for (let workspaceFolder of vscode.workspace.workspaceFolders) {
+                    settings.push(new CppSettings(workspaceFolder.uri));
+                    otherSettings.push(new OtherSettings(workspaceFolder.uri));
+                }
             }
 
             for (let setting of settings) {
@@ -1138,7 +1159,7 @@ export class DefaultClient implements Client {
         return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
-    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
+    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } | undefined {
         let changedSettings: { [key: string]: string };
         this.notifyWhenReady(() => {
             changedSettings = this.settingsTracker.getChangedSettings();
@@ -1206,7 +1227,7 @@ export class DefaultClient implements Client {
                     // refreshed, after it creates a set of decorators to be shared by all visible instances of the file.
                     if (!processedUris.find(e => e === uri)) {
                         processedUris.push(uri);
-                        let colorizationState: ColorizationState = workspaceColorizationState.get(uri.toString());
+                        let colorizationState: ColorizationState | undefined = workspaceColorizationState.get(uri.toString());
                         if (colorizationState) {
                             colorizationState.onSettingsChanged(uri);
                         }
@@ -1218,7 +1239,7 @@ export class DefaultClient implements Client {
                     updateLanguageConfigurations();
                 }
                 this.configuration.onDidChangeSettings();
-                telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, null);
+                telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
             }
         });
         return changedSettings;
@@ -1520,7 +1541,7 @@ export class DefaultClient implements Client {
             onFinished();
             return Promise.resolve();
         }
-        let provider: CustomConfigurationProvider1 | null = getCustomConfigProviders().get(providerId);
+        let provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
         if (!provider) {
             onFinished();
             return Promise.resolve();
@@ -2455,7 +2476,7 @@ class NullClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
     RootPath: string = "/";
-    RootUri: vscode.Uri = vscode.Uri.file("/");
+    RootUri: vscode.Uri | undefined = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } { return {}; }

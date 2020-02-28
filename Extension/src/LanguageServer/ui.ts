@@ -155,13 +155,17 @@ export class UI {
     }
 
     public activeDocumentChanged(): void {
-        let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-        let isCpp: boolean = (activeEditor && activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
+        let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!activeEditor) {
+            this.ShowConfiguration = false;
+        } else {
+            let isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
-        // It's sometimes desirable to see the config and icons when making settings changes.
-        let isSettingsJson: boolean = (activeEditor && (activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
+            // It's sometimes desirable to see the config and icons when making settings changes.
+            let isSettingsJson: boolean = ((activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
 
-        this.ShowConfiguration = isCpp || isSettingsJson;
+            this.ShowConfiguration = isCpp || isSettingsJson;
+        }
     }
 
     public bind(client: Client): void {
@@ -298,7 +302,7 @@ export class UI {
 }
 
 export function getUI(): UI {
-    if (ui === undefined) {
+    if (!ui) {
         ui = new UI();
     }
     return ui;

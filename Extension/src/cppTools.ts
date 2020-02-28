@@ -43,7 +43,7 @@ export class CppTools implements CppToolsTestApi {
 
     private removeNotifyReadyTimer(provider: CustomConfigurationProvider1): void {
         if (this.version >= Version.v2) {
-            let timer: NodeJS.Timer = this.timers.get(provider.extensionId);
+            let timer: NodeJS.Timer | undefined = this.timers.get(provider.extensionId);
             if (timer) {
                 this.timers.delete(provider.extensionId);
                 clearTimeout(timer);
@@ -58,14 +58,17 @@ export class CppTools implements CppToolsTestApi {
     public registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.add(provider, this.version)) {
-            let added: CustomConfigurationProvider1 = providers.get(provider);
-            let settings: CppSettings = new CppSettings();
-            if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
-                getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
+            let addedMayBeUndefined: CustomConfigurationProvider1 | undefined = providers.get(provider);
+            if (addedMayBeUndefined) {
+                let added: CustomConfigurationProvider1 = addedMayBeUndefined;
+                let settings: CppSettings = new CppSettings();
+                if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
+                    getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
+                }
+                this.providers.push(added);
+                LanguageServer.getClients().forEach(client => client.onRegisterCustomConfigurationProvider(added));
+                this.addNotifyReadyTimer(added);
             }
-            this.providers.push(added);
-            LanguageServer.getClients().forEach(client => client.onRegisterCustomConfigurationProvider(added));
-            this.addNotifyReadyTimer(added);
         } else {
             this.failedRegistrations.push(provider);
         }
@@ -73,7 +76,7 @@ export class CppTools implements CppToolsTestApi {
 
     public notifyReady(provider: CustomConfigurationProvider): void {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-        let p: CustomConfigurationProvider1 = providers.get(provider);
+        let p: CustomConfigurationProvider1 | undefined = providers.get(provider);
 
         if (p) {
             this.removeNotifyReadyTimer(p);
@@ -91,7 +94,7 @@ export class CppTools implements CppToolsTestApi {
 
     public didChangeCustomConfiguration(provider: CustomConfigurationProvider): void {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-        let p: CustomConfigurationProvider1 = providers.get(provider);
+        let p: CustomConfigurationProvider1 | undefined = providers.get(provider);
 
         if (p) {
             if (!p.isReady) {
@@ -107,7 +110,7 @@ export class CppTools implements CppToolsTestApi {
 
     public didChangeCustomBrowseConfiguration(provider: CustomConfigurationProvider): void {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-        let p: CustomConfigurationProvider1 = providers.get(provider);
+        let p: CustomConfigurationProvider1 | undefined = providers.get(provider);
 
         if (p) {
             LanguageServer.getClients().forEach(client => client.updateCustomBrowseConfiguration(p));

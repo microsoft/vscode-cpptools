@@ -20,6 +20,7 @@ import { getBuildTasks } from './LanguageServer/extension';
 import { OtherSettings } from './LanguageServer/settings';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
+import { Readable } from 'stream';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -30,7 +31,7 @@ export type Mutable<T> = {
 };
 
 export let extensionPath: string;
-export let extensionContext: vscode.ExtensionContext;
+export let extensionContext: vscode.ExtensionContext | undefined;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
     extensionPath = extensionContext.extensionPath;
@@ -42,13 +43,13 @@ export function setExtensionPath(path: string): void {
 export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
 
 // Use this package.json to read values
-export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools").packageJSON;
+export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
 // Use getRawPackageJson to read and write back to package.json
 // This prevents obtaining any of VSCode's expanded variables.
 let rawPackageJson: any = null;
 export function getRawPackageJson(): any {
-    if (rawPackageJson === null) {
+    if (rawPackageJson === null || rawPackageJson === undefined) {
         const fileContents: Buffer = fs.readFileSync(getPackageJsonPath());
         rawPackageJson = JSON.parse(fileContents.toString());
     }
@@ -56,11 +57,11 @@ export function getRawPackageJson(): any {
 }
 
 export function getRawTasksJson(): Promise<any> {
-    const path: string = getTasksJsonPath();
-    if (!path) {
-        return undefined;
-    }
     return new Promise<any>((resolve, reject) => {
+        const path: string | undefined = getTasksJsonPath();
+        if (!path) {
+            return resolve({});
+        }
         fs.exists(path, exists => {
             if (!exists) {
                 return resolve({});
@@ -86,7 +87,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         rawTasksJson.tasks = new Array();
     }
     // Find or create the task which should be created based on the selected "debug configuration".
-    let selectedTask: vscode.Task = rawTasksJson.tasks.find(task => task.label && task.label === task);
+    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find(task => task.label && task.label === task);
     if (selectedTask) {
         return;
     }
@@ -94,16 +95,25 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     const buildTasks: vscode.Task[] = await getBuildTasks(false);
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
+    if (!selectedTask) {
+        throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
+    }
 
     rawTasksJson.version = "2.0.0";
 
-    if (!rawTasksJson.tasks.find(task => task.label === selectedTask.definition.label)) {
-        rawTasksJson.tasks.push(selectedTask.definition);
+    let selectedTask2: vscode.Task = selectedTask;
+    if (!rawTasksJson.tasks.find(task => task.label === selectedTask2.definition.label)) {
+        rawTasksJson.tasks.push(selectedTask2.definition);
     }
 
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     let settings: OtherSettings = new OtherSettings();
-    await writeFileText(getTasksJsonPath(), JSON.stringify(rawTasksJson, null, settings.editorTabSize));
+    let tasksJsonPath: string | undefined = getTasksJsonPath();
+    if (!tasksJsonPath) {
+        throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
+    }
+
+    await writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
 }
 
 export function fileIsCOrCppSource(file: string): boolean {
@@ -112,8 +122,11 @@ export function fileIsCOrCppSource(file: string): boolean {
 }
 
 export function isEditorFileCpp(file: string): boolean {
-    let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
-    return editor && editor.document.languageId === "cpp";
+    let editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
+    if (!editor) {
+        return false;
+    }
+    return editor.document.languageId === "cpp";
 }
 
 // This function is used to stringify the rawPackageJson.
@@ -131,9 +144,12 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
-export function getTasksJsonPath(): string {
-    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
-    const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+export function getTasksJsonPath(): string | undefined {
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!editor) {
+        return undefined;
+    }
+    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
     if (!folder) {
         return undefined;
     }
@@ -142,9 +158,17 @@ export function getTasksJsonPath(): string {
 
 export function getVcpkgPathDescriptorFile(): string {
     if (process.platform === 'win32') {
-        return path.join(process.env.LOCALAPPDATA, "vcpkg/vcpkg.path.txt");
+        let pathPrefix: string | undefined = process.env.LOCALAPPDATA;
+        if (!pathPrefix) {
+            throw new Error("Unable to read process.env.LOCALAPPDATA");
+        }
+        return path.join(pathPrefix, "vcpkg/vcpkg.path.txt");
     } else {
-        return path.join(process.env.HOME, ".vcpkg/vcpkg.path.txt");
+        let pathPrefix: string | undefined = process.env.HOME;
+        if (!pathPrefix) {
+            throw new Error("Unable to read process.env.HOME");
+        }
+        return path.join(pathPrefix, ".vcpkg/vcpkg.path.txt");
     }
 }
 
@@ -224,7 +248,7 @@ export function setProgress(progress: number): void {
     if (extensionContext && getProgress() < progress) {
         extensionContext.globalState.update(installProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
-        let progressName: string;
+        let progressName: string | undefined;
         switch (progress) {
             case 0: progressName = "install started"; break;
             case progressInstallSuccess: progressName = "install succeeded"; break;
@@ -232,7 +256,9 @@ export function setProgress(progress: number): void {
             case progressExecutableSuccess: progressName = "executable succeeded"; break;
             case progressParseRootSuccess: progressName = "parse root succeeded"; break;
         }
-        telemetryProperties['progress'] = progressName;
+        if (progressName) {
+            telemetryProperties['progress'] = progressName;
+        }
         Telemetry.logDebuggerEvent("progress", telemetryProperties);
     }
 }
@@ -241,11 +267,13 @@ export function setIntelliSenseProgress(progress: number): void {
     if (extensionContext && getIntelliSenseProgress() < progress) {
         extensionContext.globalState.update(intelliSenseProgressStr, progress);
         let telemetryProperties: { [key: string]: string } = {};
-        let progressName: string;
+        let progressName: string | undefined;
         switch (progress) {
             case progressIntelliSenseNoSquiggles: progressName = "IntelliSense no squiggles"; break;
         }
-        telemetryProperties['progress'] = progressName;
+        if (progressName) {
+            telemetryProperties['progress'] = progressName;
+        }
         Telemetry.logDebuggerEvent("progress", telemetryProperties);
     }
 }
@@ -288,7 +316,7 @@ export function isOptionalArrayOfString(input: any): input is string[] | undefin
     return input === undefined || isArrayOfString(input);
 }
 
-export function resolveCachePath(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+export function resolveCachePath(input: string | undefined, additionalEnvironment: {[key: string]: string | string[]}): string {
     let resolvedPath: string = "";
     if (!input) {
         // If no path is set, return empty string to language service process, where it will set the default path as
@@ -301,12 +329,15 @@ export function resolveCachePath(input: string, additionalEnvironment: {[key: st
     return resolvedPath;
 }
 
-export function resolveVariables(input: string, additionalEnvironment: {[key: string]: string | string[]}): string {
+export function resolveVariables(input: string | undefined, additionalEnvironment: undefined | {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
     }
+    let additionalEnvironment2: {[key: string]: string | string[]};
     if (!additionalEnvironment) {
-        additionalEnvironment = {};
+        additionalEnvironment2 = {};
+    } else {
+        additionalEnvironment2 = additionalEnvironment;
     }
 
     // Replace environment and configuration variables.
@@ -318,19 +349,19 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
         ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
             // Historically, if the variable didn't have anything before the "." or ":"
             // it was assumed to be an environment variable
-            if (varType === undefined) {
+            if (!varType) {
                 varType = "env";
             }
-            let newValue: string;
+            let newValue: string | undefined;
             switch (varType) {
                 case "env": {
-                    let v: string | string[] = additionalEnvironment[name];
+                    let v: string | string[] = additionalEnvironment2[name];
                     if (isString(v)) {
                         newValue = v;
                     } else if (input === match && isArrayOfString(v)) {
                         newValue = v.join(";");
                     }
-                    if (!isString(newValue)) {
+                    if (!newValue) {
                         newValue = process.env[name];
                     }
                     break;
@@ -347,7 +378,7 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
                     // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
                     // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
                     if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
-                        let folder: vscode.WorkspaceFolder = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+                        let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
                         if (folder) {
                             newValue = folder.uri.fsPath;
                         }
@@ -356,15 +387,15 @@ export function resolveVariables(input: string, additionalEnvironment: {[key: st
                 }
                 default: { assert.fail("unknown varType matched"); }
             }
-            return (isString(newValue)) ? newValue : match;
+            return newValue ? newValue : match;
         });
     }
 
     // Resolve '~' at the start of the path.
     regexp = () => /^\~/g;
     ret = ret.replace(regexp(), (match: string, name: string) => {
-        let newValue: string = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
-        return (newValue) ? newValue : match;
+        let newValue: string | undefined = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
+        return newValue ? newValue : match;
     });
 
     return ret;
@@ -395,19 +426,19 @@ export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
 
-export function getHttpsProxyAgent(): HttpsProxyAgent {
-    let proxy: string = vscode.workspace.getConfiguration().get<string>('http.proxy');
+export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
+    let proxy: string | undefined = vscode.workspace.getConfiguration().get<string>('http.proxy');
     if (!proxy) {
         proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
         if (!proxy) {
-            return null; // No proxy
+            return undefined; // No proxy
         }
     }
 
     // Basic sanity checking on proxy url
     let proxyUrl: any = url.parse(proxy);
     if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:") {
-        return null;
+        return undefined;
     }
 
     let strictProxy: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
@@ -566,7 +597,7 @@ export function logToFile(message: string): void {
     fs.writeFileSync(logFolder, `${message}${os.EOL}`, { flag: 'a' });
 }
 
-export function execChildProcess(process: string, workingDirectory: string, channel?: vscode.OutputChannel): Promise<string> {
+export function execChildProcess(process: string, workingDirectory: string | undefined, channel?: vscode.OutputChannel): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error, stdout: string, stderr: string) => {
             if (channel) {
@@ -613,13 +644,19 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     return new Promise<void>(function (resolve, reject): void {
         const child: child_process.ChildProcess = child_process.spawn(process, args, { cwd: workingDirectory });
 
-        child.stdout.on('data', (data) => {
-            dataCallback(`${data}`);
-        });
+        let stdout: Readable | null = child.stdout;
+        if (stdout) {
+            stdout.on('data', (data) => {
+                dataCallback(`${data}`);
+            });
+        }
 
-        child.stderr.on('data', (data) => {
-            errorCallback(`${data}`);
-        });
+        let stderr: Readable | null = child.stderr;
+        if (stderr) {
+            stderr.on('data', (data) => {
+                errorCallback(`${data}`);
+            });
+        }
 
         child.on('exit', (code: number) => {
             if (code !== 0) {
@@ -745,6 +782,9 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
                 if (typeof response.headers.location === 'string') {
                     redirectUrl = response.headers.location;
                 } else {
+                    if (!response.headers.location) {
+                        return reject(new Error(localize("invalid.download.location.received", 'Invalid download location received')));
+                    }
                     redirectUrl = response.headers.location[0];
                 }
                 return resolve(downloadFileToDestination(redirectUrl, destinationPath, headers));
@@ -779,6 +819,9 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
                 if (typeof response.headers.location === 'string') {
                     redirectUrl = response.headers.location;
                 } else {
+                    if (!response.headers.location) {
+                        return reject(new Error(localize("invalid.download.location.received", 'Invalid download location received')));
+                    }
                     redirectUrl = response.headers.location[0];
                 }
                 return resolve(downloadFileToStr(redirectUrl, headers));
@@ -1097,7 +1140,7 @@ function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, a
         return workspaceFolderName; // No duplicate names to search for.
     }
     for (let i: number = 0; i < workspaceFolder.index; ++i) {
-        if (vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
             return addSubfolder ? path.join(workspaceFolderName, String(workspaceFolder.index)) : // Use the index as a subfolder.
                 workspaceFolderName + String(workspaceFolder.index);
         }

@@ -53,11 +53,15 @@ export class FindAllRefsView {
         let fileRefs: string[] = [];
 
         for (let ref of this.referencesModel.getAllReferenceNodes()) {
-            let line: string =
-                ("[" + getReferenceTagString(ref.referenceType, this.referencesModel.isCanceled) + "] "
-                + ref.filename
-                + ":" + (ref.referencePosition.line + 1) + ":" + (ref.referencePosition.character + 1)
-                + " " + ref.referenceText);
+            let line: string = "";
+            if (ref.referenceType !== null && ref.referenceType !== undefined) {
+                line = "[" + getReferenceTagString(ref.referenceType, this.referencesModel.isCanceled) + "] ";
+            }
+            line += ref.filename;
+            if (ref.referencePosition !== null && ref.referencePosition !== undefined) {
+                line += ":" + (ref.referencePosition.line + 1) + ":" + (ref.referencePosition.character + 1)
+                + " " + ref.referenceText;
+            }
             if (includeConfirmedReferences && ref.referenceType === ReferenceType.Confirmed) {
                 confirmedRefs.push(line);
             } else {

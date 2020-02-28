@@ -16,9 +16,9 @@ export interface Environment {
 
 export class ParsedEnvironmentFile {
     public Env: Environment[];
-    public Warning: string | null;
+    public Warning: string | undefined;
 
-    private constructor(env: Environment[], warning: string | null) {
+    private constructor(env: Environment[], warning: string | undefined) {
         this.Env = env;
         this.Warning = warning;
     }
@@ -48,9 +48,9 @@ export class ParsedEnvironmentFile {
 
         content.split("\n").forEach(line => {
             // Split the line between key and value
-            const r: RegExpMatchArray = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
+            const r: RegExpMatchArray | null = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
 
-            if (r !== null) {
+            if (r) {
                 const key: string = r[1];
                 let value: string = r[2] || "";
                 if ((value.length > 0) && (value.charAt(0) === '"') && (value.charAt(value.length - 1) === '"')) {
@@ -70,7 +70,7 @@ export class ParsedEnvironmentFile {
         });
 
         // show error message if single lines cannot get parsed
-        let warning: string = null;
+        let warning: string | undefined;
         if (parseErrors.length !== 0) {
             warning = localize("ignoring.lines.in.envfile", "Ignoring non-parseable lines in {0} {1}: ", "envFile", envFile);
             parseErrors.forEach(function (value, idx, array): void {

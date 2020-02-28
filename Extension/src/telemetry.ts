@@ -12,7 +12,7 @@ interface IPackageInfo {
     version: string;
 }
 
-let telemetryReporter: TelemetryReporter;
+let telemetryReporter: TelemetryReporter | null;
 const appInsightsKey: string = "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217";
 
 export function activate(): void {
@@ -43,7 +43,7 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
     }
 }
 
-function createReporter(): TelemetryReporter {
+function createReporter(): TelemetryReporter | null {
     if (util.extensionContext) {
         let packageInfo: IPackageInfo = getPackageInfo();
         if (packageInfo) {

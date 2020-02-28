@@ -6,17 +6,17 @@
 import * as vscode from 'vscode';
 import { ReferenceType, ReferenceInfo, ReferencesResult } from './references';
 
-export type RenameResultCallback = (result: ReferencesResult) => void;
+export type RenameResultCallback = (result: ReferencesResult | null) => void;
 
 let currentRenameModel: ReferencesModel;
 
 export class ReferencesModel {
     readonly nodes: TreeNode[] = []; // Raw flat list of references
-    private renameResultsCallback: RenameResultCallback;
+    private renameResultsCallback: RenameResultCallback | null;
     private originalSymbol: string = "";
     public groupByFile: boolean;
 
-    constructor(resultsInput: ReferencesResult, readonly isRename: boolean, readonly isCanceled: boolean, groupByFile: boolean, resultsCallback: RenameResultCallback, readonly refreshCallback: () => void) {
+    constructor(resultsInput: ReferencesResult, readonly isRename: boolean, readonly isCanceled: boolean, groupByFile: boolean, resultsCallback: RenameResultCallback | null, readonly refreshCallback: () => void) {
         this.originalSymbol = resultsInput.text;
         this.renameResultsCallback = resultsCallback;
         if (isRename) {
@@ -103,7 +103,19 @@ export class ReferencesModel {
                 result.push(node);
             }
         }
-        result.sort((a, b) => a.filename.localeCompare(b.filename));
+        result.sort((a, b) => {
+            if (a.filename === undefined) {
+                if (b.filename === undefined) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else if (b.filename === undefined) {
+                return 1;
+            } else {
+                return a.filename.localeCompare(b.filename);
+            }
+        });
         return result;
     }
 
@@ -146,7 +158,19 @@ export class ReferencesModel {
             return empty;
         }
         let result: TreeNode[] = this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
-        result.sort((a, b) => a.filename.localeCompare(b.filename));
+        result.sort((a, b) => {
+            if (a.filename === undefined) {
+                if (b.filename === undefined) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else if (b.filename === undefined) {
+                return 1;
+            } else {
+                return a.filename.localeCompare(b.filename);
+            }
+        });
         return result;
     }
 
@@ -163,7 +187,19 @@ export class ReferencesModel {
                 }
             }
         });
-        result.sort((a, b) => (a.referenceType < b.referenceType) ? -1 : ((a.referenceType > b.referenceType) ? 1 : 0));
+        result.sort((a, b) => {
+            if (a.referenceType === undefined) {
+                if (b.referenceType === undefined) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else if (b.referenceType === undefined) {
+                return 1;
+            } else {
+                return (a.referenceType < b.referenceType) ? -1 : ((a.referenceType > b.referenceType) ? 1 : 0);
+            }
+        });
         return result;
     }
 
@@ -182,7 +218,19 @@ export class ReferencesModel {
                 }
             }
         });
-        result.sort((a, b) => a.filename.localeCompare(b.filename));
+        result.sort((a, b) => {
+            if (a.filename === undefined) {
+                if (b.filename === undefined) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else if (b.filename === undefined) {
+                return 1;
+            } else {
+                return a.filename.localeCompare(b.filename);
+            }
+        });
         return result;
     }
 
@@ -201,7 +249,19 @@ export class ReferencesModel {
                 }
             }
         });
-        result.sort((a, b) => a.filename.localeCompare(b.filename));
+        result.sort((a, b) => {
+            if (a.filename === undefined) {
+                if (b.filename === undefined) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else if (b.filename === undefined) {
+                return 1;
+            } else {
+                return a.filename.localeCompare(b.filename);
+            }
+        });
         return result;
     }
 
@@ -217,6 +277,9 @@ export class ReferencesModel {
         let referenceInfos: ReferenceInfo[] = [];
         this.nodes.forEach(n => {
             if (!n.isRenameCandidate) {
+                if (!n.filename || !n.referenceLocation || !n.referenceText || !n.referenceType) {
+                    throw new Error("Invalid TreeNode detected in completeRename()");
+                }
                 let referenceInfo: ReferenceInfo = {
                     file: n.filename,
                     position: n.referenceLocation.range.start,
@@ -231,9 +294,11 @@ export class ReferencesModel {
             text: this.originalSymbol,
             isFinished: true
         };
-        let callback: RenameResultCallback = this.renameResultsCallback;
+        let callback: RenameResultCallback | null = this.renameResultsCallback;
         this.renameResultsCallback = null;
-        callback(results);
+        if (callback) {
+            callback(results);
+        }
     }
 
     setRenameCandidate(node: TreeNode): void {
@@ -301,15 +366,15 @@ export enum NodeType {
 
 export class TreeNode {
     // Optional properties for file related info
-    public filename?: string | undefined;
-    public fileUri?: vscode.Uri | undefined;
+    public filename?: string;
+    public fileUri?: vscode.Uri;
 
     // Optional properties for reference item info
-    public referencePosition?: vscode.Position | undefined;
-    public referenceLocation?: vscode.Location | undefined;
-    public referenceText?: string | undefined;
-    public referenceType?: ReferenceType | undefined;
-    public isRenameCandidate?: boolean | undefined;
+    public referencePosition?: vscode.Position;
+    public referenceLocation?: vscode.Location;
+    public referenceText?: string;
+    public referenceType?: ReferenceType;
+    public isRenameCandidate?: boolean;
 
     constructor(readonly model: ReferencesModel, readonly node: NodeType) {
     }

@@ -10,10 +10,10 @@ import * as vscode from 'vscode';
 class PersistentStateBase<T> {
     private key: string;
     private defaultvalue: T;
-    private state: vscode.Memento;
+    private state?: vscode.Memento;
     private curvalue: T;
 
-    constructor(key: string, defaultValue: T, state: vscode.Memento) {
+    constructor(key: string, defaultValue: T, state: vscode.Memento | undefined) {
         this.key = key;
         this.defaultvalue = defaultValue;
         this.state = state;
@@ -34,18 +34,26 @@ class PersistentStateBase<T> {
     public get DefaultValue(): T {
         return this.defaultvalue;
     }
+
+    public setDefault(): void {
+        if (this.state) {
+            this.state.update(this.key, this.defaultvalue);
+        }
+        this.curvalue = this.defaultvalue;
+    }
+
 }
 
 // Abstraction for global state that persists across activations but is not present in a settings file
 export class PersistentState<T> extends PersistentStateBase<T> {
     constructor(key: string, defaultValue: T) {
-        super(key, defaultValue, util.extensionContext ? util.extensionContext.globalState : null);
+        super(key, defaultValue, util.extensionContext ? util.extensionContext.globalState : undefined);
     }
 }
 
 export class PersistentWorkspaceState<T> extends PersistentStateBase<T> {
     constructor(key: string, defaultValue: T) {
-        super(key, defaultValue, util.extensionContext ? util.extensionContext.workspaceState : null);
+        super(key, defaultValue, util.extensionContext ? util.extensionContext.workspaceState : undefined);
     }
 }
 

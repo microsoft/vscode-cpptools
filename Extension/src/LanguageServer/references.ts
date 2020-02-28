@@ -38,7 +38,7 @@ export interface ReferencesResult {
     isFinished: boolean;
 }
 
-export type ReferencesResultCallback = (result: ReferencesResult, doResolve: boolean) => void;
+export type ReferencesResultCallback = (result: ReferencesResult | null, doResolve: boolean) => void;
 
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
@@ -157,8 +157,8 @@ export class ReferencesManager {
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
     private resultsCallback: ReferencesResultCallback;
-    private currentUpdateProgressTimer: NodeJS.Timeout;
-    private currentUpdateProgressResolve: () => void;
+    private currentUpdateProgressTimer: NodeJS.Timeout | null;
+    private currentUpdateProgressResolve: (() => void) | null;
     public groupByFile: PersistentState<boolean> = new PersistentState<boolean>("CPP.referencesGroupByFile", false);
 
     constructor(client: DefaultClient) {
@@ -301,7 +301,9 @@ export class ReferencesManager {
                             this.referencesCanceled = true;
                         }
                         if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
-                            clearInterval(this.currentUpdateProgressTimer);
+                            if (this.currentUpdateProgressTimer) {
+                                clearInterval(this.currentUpdateProgressTimer);
+                            }
                             this.currentUpdateProgressTimer = null;
                             if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
                                 referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
@@ -405,7 +407,9 @@ export class ReferencesManager {
             clearInterval(this.referencesDelayProgress);
             if (this.currentUpdateProgressTimer) {
                 clearInterval(this.currentUpdateProgressTimer);
-                this.currentUpdateProgressResolve();
+                if (this.currentUpdateProgressResolve) {
+                    this.currentUpdateProgressResolve();
+                }
                 this.currentUpdateProgressResolve = null;
                 this.currentUpdateProgressTimer = null;
             }
@@ -415,7 +419,7 @@ export class ReferencesManager {
         if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
             if (!referencesCanceled) {
                 // If there are only Confirmed results, complete the rename immediately.
-                let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
+                let foundUnconfirmed: ReferenceInfo | undefined = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
                     this.resultsCallback(referencesResult, true);
                 } else {
@@ -461,7 +465,7 @@ export class ReferencesManager {
         }
     }
 
-    public lastResults: ReferencesResult = null; // Saved for the final request after a preview occurs.
+    public lastResults: ReferencesResult | null = null; // Saved for the final request after a preview occurs.
 
     public setResultsCallback(callback: ReferencesResultCallback): void {
         this.symbolSearchInProgress = true;

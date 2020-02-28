@@ -24,7 +24,7 @@ export interface AttachItemsProvider {
 export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
-    public ShowAttachEntries(): Promise<string> {
+    public ShowAttachEntries(): Promise<string | undefined> {
         return util.isExtensionReady().then(ready => {
             if (!ready) {
                 util.displayExtensionNotReadyPrompt();
@@ -40,22 +40,24 @@ export class RemoteAttachPicker {
         this._channel = vscode.window.createOutputChannel('remote-attach');
     }
 
-    private _channel: vscode.OutputChannel = null;
+    private _channel: vscode.OutputChannel | undefined;
 
-    public ShowAttachEntries(config: any): Promise<string> {
+    public ShowAttachEntries(config: any): Promise<string | undefined> {
         return util.isExtensionReady().then(ready => {
             if (!ready) {
                 util.displayExtensionNotReadyPrompt();
             } else {
-                this._channel.clear();
+                if (this._channel) {
+                    this._channel.clear();
+                }
 
-                let pipeTransport: any = config ? config.pipeTransport : null;
+                let pipeTransport: any = config ? config.pipeTransport : undefined;
 
-                if (pipeTransport === null) {
+                if (!pipeTransport) {
                     return Promise.reject<string>(new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport")));
                 }
 
-                let pipeProgram: string = null;
+                let pipeProgram: string | undefined;
 
                 if (os.platform() === 'win32' &&
                     pipeTransport.pipeProgram &&
@@ -124,7 +126,7 @@ export class RemoteAttachPicker {
         // Do not add any quoting in execCommand.
         const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
 
-        return util.execChildProcess(execCommand, null, this._channel).then(output => {
+        return util.execChildProcess(execCommand, undefined, this._channel).then(output => {
             // OS will be on first line
             // Processes will follow if listed
             let lines: string[] = output.split(/\r?\n/);

@@ -10,7 +10,8 @@
 		"rootDir": ".",
 		"removeComments": true,
 		"noImplicitUseStrict": true,
-		"noUnusedLocals": true
+		"noUnusedLocals": true,
+		"strictNullChecks": true
 	},
 	"include": [
 		"src/**/*.ts",

@@ -19,9 +19,9 @@ export class PlatformInformation {
 
     public static GetPlatformInformation(): Promise<PlatformInformation> {
         let platform: string = os.platform();
-        let architecturePromise: Promise<string>;
-        let distributionPromise: Promise<LinuxDistribution> = Promise.resolve<LinuxDistribution>(null);
-        let versionPromise: Promise<string> = Promise.resolve<string>(null);
+        let architecturePromise: Promise<string | null>;
+        let distributionPromise: Promise<LinuxDistribution | null> = Promise.resolve<LinuxDistribution | null>(null);
+        let versionPromise: Promise<string | null> = Promise.resolve<string | null>(null);
 
         switch (platform) {
             case "win32":
@@ -37,9 +37,12 @@ export class PlatformInformation {
                 architecturePromise = PlatformInformation.GetUnixArchitecture();
                 versionPromise = PlatformInformation.GetDarwinVersion();
                 break;
+
+            default:
+                throw new Error(localize("unknown.os.platform", "Unknown OS platform"));
         }
 
-        return Promise.all<string | LinuxDistribution>([architecturePromise, distributionPromise, versionPromise])
+        return Promise.all<string | LinuxDistribution | null>([architecturePromise, distributionPromise, versionPromise])
             .then(([arch, distro, version]: [string, LinuxDistribution, string]) =>
                 new PlatformInformation(platform, arch, distro, version)
             );
@@ -67,7 +70,7 @@ export class PlatformInformation {
             }).catch((error) => PlatformInformation.GetUnknownArchitecture());
     }
 
-    private static GetUnixArchitecture(): Promise<string> {
+    private static GetUnixArchitecture(): Promise<string | null> {
         return util.execChildProcess('uname -m', util.packageJson.extensionFolderPath)
             .then((architecture) => {
                 if (architecture) {

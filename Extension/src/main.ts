@@ -61,7 +61,7 @@ export function deactivate(): Thenable<void> {
     disposables.forEach(d => d.dispose());
 
     if (languageServiceDisabled) {
-        return;
+        return Promise.resolve();
     }
     return LanguageServer.deactivate();
 }

@@ -25,7 +25,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
 
     return {
         didOpen: (document, sendMessage) => {
-            let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document === document);
+            let editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
@@ -41,11 +41,11 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                             me.addFileAssociations(mappingString, false);
                         }
                     }
-                    me.provideCustomConfiguration(document.uri, null);
+                    me.provideCustomConfiguration(document.uri, undefined);
                     me.notifyWhenReady(() => {
                         sendMessage(document);
                         me.onDidOpenTextDocument(document);
-                        if (editor === vscode.window.activeTextEditor) {
+                        if (editor && editor === vscode.window.activeTextEditor) {
                             onDidChangeActiveTextEditor(editor);
                         }
                     });
