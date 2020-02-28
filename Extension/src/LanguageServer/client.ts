@@ -563,6 +563,7 @@ export class DefaultClient implements Client {
             }
             ui = getUI();
             ui.bind(this);
+            this.settingsTracker = getTracker(this.RootUri);
 
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(() => languageClient.onReady().then(
@@ -574,7 +575,6 @@ export class DefaultClient implements Client {
                     this.disposables.push(this.configuration);
 
                     this.languageClient = languageClient;
-                    this.settingsTracker = getTracker(this.RootUri);
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
 
@@ -1178,11 +1178,10 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
-        let changedSettings: { [key: string]: string };
         this.sendDidChangeSettings();
+        let changedSettings: { [key: string]: string };
+        changedSettings = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
-            changedSettings = this.settingsTracker.getChangedSettings();
-
             let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
                 || event.affectsConfiguration("editor.tokenColorCustomizations");
 
@@ -1749,7 +1748,7 @@ export class DefaultClient implements Client {
         return this.queueTask(request);
     }
 
-    public notifyWhenReady(notify: () => void): Thenable<void> {
+    public notifyWhenReady(notify: () => any): Thenable<any> {
         let task: () => Thenable<void> = () => new Promise(resolve => {
             notify();
             resolve();
