@@ -845,7 +845,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
-                                            if (doResolve && referencesResult === null) {
+                                            if (doResolve && referencesResult === null && referencesPendingCancellations.length === 0) {
                                                 // The result callback will be called with doResult of true and a null result when the Find All References
                                                 // portion of the rename is complete.  We complete the promise with an empty edit at this point,
                                                 // to cause the progress indicator to be dismissed.
@@ -881,7 +881,7 @@ export class DefaultClient implements Client {
                                                     workspaceReferences.closeRenameUI();
                                                 }
                                                 if (doResolve) {
-                                                    if (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0) {
+                                                    if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
                                                         vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
                                                     }
                                                     resolve(workspaceEdit);
