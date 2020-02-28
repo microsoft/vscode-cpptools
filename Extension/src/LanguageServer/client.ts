@@ -442,7 +442,7 @@ export interface Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[]>;
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
-    requestWhenReady(request: () => Thenable<any>): Thenable<any>;
+    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
     notifyWhenReady(notify: () => void): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
@@ -570,6 +570,7 @@ export class DefaultClient implements Client {
             }
             ui = getUI();
             ui.bind(this);
+            this.settingsTracker = getTracker(this.RootUri);
 
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(() => languageClient.onReady().then(
@@ -589,7 +590,6 @@ export class DefaultClient implements Client {
                     this.disposables.push(this.configuration);
 
                     this.languageClient = languageClient;
-                    this.settingsTracker = getTracker(uri);
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
 
@@ -1200,11 +1200,10 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
-        let changedSettings: { [key: string]: string };
         this.sendDidChangeSettings();
+        let changedSettings: { [key: string]: string };
+        changedSettings = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
-            changedSettings = this.settingsTracker.getChangedSettings();
-
             let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
                 || event.affectsConfiguration("editor.tokenColorCustomizations");
 
@@ -1705,9 +1704,9 @@ export class DefaultClient implements Client {
      * before attempting to send messages or operate on the client.
      */
 
-    public queueTask(task: () => Thenable<any>): Thenable<any> {
+    public queueTask<T>(task: () => Thenable<T>): Thenable<T> {
         if (this.isSupported) {
-            let nextTask: () => Thenable<any> = async () => {
+            let nextTask: () => Thenable<T> = async () => {
                 try {
                     return await task();
                 } catch (err) {
@@ -1733,19 +1732,19 @@ export class DefaultClient implements Client {
      * during language client startup and for custom configuration providers.
      * @param task The task that blocks all future tasks
      */
-    private queueBlockingTask(task: () => Thenable<any>): Thenable<any> {
+    private queueBlockingTask<T>(task: () => Thenable<T>): Thenable<T> {
         if (this.isSupported) {
-            pendingTask = new util.BlockingTask<any>(task, pendingTask);
+            pendingTask = new util.BlockingTask<T>(task, pendingTask);
             return pendingTask.getPromise();
         } else {
             return Promise.reject(localize("unsupported.client", "Unsupported client"));
         }
     }
 
-    private callTaskWithTimeout(task: () => Thenable<any>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<any> {
+    private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<T> {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
-        let timeout: () => Promise<any> = () => new Promise((resolve, reject) => {
+        let timeout: () => Promise<T> = () => new Promise<T>((resolve, reject) => {
             timer = global.setTimeout(() => {
                 clearTimeout(timer);
                 if (cancelToken) {
@@ -1767,14 +1766,13 @@ export class DefaultClient implements Client {
             });
     }
 
-    public requestWhenReady(request: () => Thenable<any>): Thenable<any> {
+    public requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
         return this.queueTask(request);
     }
 
-    public notifyWhenReady(notify: () => void): Thenable<void> {
-        let task: () => Thenable<void> = () => new Promise(resolve => {
-            notify();
-            resolve();
+    public notifyWhenReady<T>(notify: () => T): Thenable<T> {
+        let task: () => Thenable<T> = () => new Promise<T>(resolve => {
+            resolve(notify());
         });
         return this.queueTask(task);
     }
@@ -2507,7 +2505,7 @@ class NullClient implements Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[]> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
-    requestWhenReady(request: () => Thenable<any>): Thenable<any> { return; }
+    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return; }
     notifyWhenReady(notify: () => void): void {}
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
