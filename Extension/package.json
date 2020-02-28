@@ -142,7 +142,7 @@
           "description": "%c_cpp.configuration.intelliSenseEngine.description%",
           "scope": "resource"
         },
-        "C_Cpp.intelliSenseFallback": {
+        "C_Cpp.intelliSenseEngineFallback": {
           "type": "string",
           "enum": [
             "Enabled",

@@ -860,7 +860,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
-                                            if (doResolve && !referencesResult) {
+                                            if (doResolve && referencesResult === null && referencesPendingCancellations.length === 0) {
                                                 // The result callback will be called with doResult of true and a null result when the Find All References
                                                 // portion of the rename is complete.  We complete the promise with an empty edit at this point,
                                                 // to cause the progress indicator to be dismissed.
@@ -896,7 +896,7 @@ export class DefaultClient implements Client {
                                                     workspaceReferences.closeRenameUI();
                                                 }
                                                 if (doResolve) {
-                                                    if (!referencesResult.referenceInfos || referencesResult.referenceInfos.length === 0) {
+                                                    if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
                                                         vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
                                                     }
                                                     resolve(workspaceEdit);
@@ -1159,44 +1159,51 @@ export class DefaultClient implements Client {
         return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
-    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } | undefined {
+
+    public sendDidChangeSettings(): void {
+        let cppSettingsScoped: { [key: string]: any } = {};
+        // Gather the C_Cpp settings
+        {
+            let cppSettingsResourceScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.RootUri);
+            let cppSettingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+
+            for (let key in cppSettingsResourceScoped) {
+                let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+                if (curSetting === undefined) {
+                    continue;
+                }
+                let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? cppSettingsResourceScoped : cppSettingsNonScoped;
+                cppSettingsScoped[key] = settings.get(key);
+            }
+            cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
+        }
+
+        // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
+        // build a new JSON object with everything we need on the native side.
+        let settings: any = {
+            C_Cpp: {
+                ...cppSettingsScoped,
+                tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
+            },
+            files: {
+                exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
+            },
+            search: {
+                exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
+            }
+        };
+
+        // Send settings json to native side
+        this.notifyWhenReady(() => {
+            this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
+        });
+    }
+
+    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
         let changedSettings: { [key: string]: string };
+        this.sendDidChangeSettings();
         this.notifyWhenReady(() => {
             changedSettings = this.settingsTracker.getChangedSettings();
-            let cppSettingsScoped: { [key: string]: any } = {};
-            // Gather the C_Cpp settings
-            {
-                let cppSettingsResourceScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.RootUri);
-                let cppSettingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
-
-                for (let key in cppSettingsResourceScoped) {
-                    let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-                    if (curSetting === undefined) {
-                        continue;
-                    }
-                    let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? cppSettingsResourceScoped : cppSettingsNonScoped;
-                    cppSettingsScoped[key] = settings.get(key);
-                }
-                cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
-            }
-
-            // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
-            // build a new JSON object with everything we need on the native side.
-            let settings: any = {
-                C_Cpp: {
-                    ...cppSettingsScoped,
-                    tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
-                },
-                files: {
-                    exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
-                },
-                search: {
-                    exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
-                }
-            };
-
-            // Send settings json to native side
-            this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
 
             let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
                 || event.affectsConfiguration("editor.tokenColorCustomizations");

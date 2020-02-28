@@ -1,5 +1,32 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.27.0-insiders: March 2, 2019
+### Enhancements
+* Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multiroot%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
+* Update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
+* Rename language server processes to `cpptools` and `cpptools-srv` (IntelliSense process). [#4364](https://github.com/microsoft/vscode-cpptools/issues/4364)
+* Add support for `-iframework` in `compile_commands.json`. [#4819](https://github.com/microsoft/vscode-cpptools/issues/4819)
+* Add `cpptools.setActiveConfigName` command. [#4870](https://github.com/microsoft/vscode-cpptools/issues/4870)
+  * @aleksey-sergey [PR 4893](https://github.com/microsoft/vscode-cpptools/pull/4893)
+* Default to the bundled `clang-format` if its version is newer. [#4963](https://github.com/microsoft/vscode-cpptools/issues/4963)
+* Include only `lldb-mi` for macOS.
+  * Fix visualization of standard library types in lldb. [#1768](https://github.com/microsoft/vscode-cpptools/issues/1768)
+  * Enable debugging support on macOS Catalina. [#3829](https://github.com/microsoft/vscode-cpptools/issues/3829)
+
+### Bug Fixes
+* Fix issue in which the user is not again prompted to use a custom configuration provider if settings files have been deleted. [#2346](https://github.com/microsoft/vscode-cpptools/issues/2346)
+* Fix "Unrecognized format of field "msg" in result" on macOS. [#2492](https://github.com/microsoft/vscode-cpptools/issues/2492)
+* Fix IntelliSense using too much CPU when switching branches. [#2806](https://github.com/microsoft/vscode-cpptools/issues/2806)
+* Fix for timeout on slow terminals while debugging. [#2889](https://github.com/microsoft/vscode-cpptools/issues/2889)
+  * @Epikem [PR MIEngine#965](https://github.com/microsoft/MIEngine/pull/965)
+* Fix non-localized text. [#4481](https://github.com/microsoft/vscode-cpptools/issues/4481), [#4879](https://github.com/microsoft/vscode-cpptools/issues/4879)
+* Fix issues with paths containing certain Unicode sequences on Mac. [#4712](https://github.com/microsoft/vscode-cpptools/issues/4712)
+* Fix IntelliSense parsing bugs and crashes. [#4717](https://github.com/microsoft/vscode-cpptools/issues/4717), [#4798](https://github.com/microsoft/vscode-cpptools/issues/4798)
+* Fix configuration UI disabling `compilerPath` if no default compiler is found. [#4727](https://github.com/microsoft/vscode-cpptools/issues/4727)
+* Fix issue with providing custom configurations for files specified using URIs schemes we do not recognize. [#4889](https://github.com/microsoft/vscode-cpptools/issues/4889)
+* Fix failure to detect CL.exe if VS Installer files are stored on a drive other than the system drive. [#4929](https://github.com/microsoft/vscode-cpptools/issues/4929)
+* Fix issue with cancellation of a `Rename` operation causing subsequent `Find All References` and `Rename` operations to fail.  [#5022](https://github.com/microsoft/vscode-cpptools/issues/5022)
+
 ## Version 0.26.3: January 22, 2020
 ### Bug Fixes
 * IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)

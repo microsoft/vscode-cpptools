@@ -169,6 +169,8 @@ export class ClientCollection {
                     let newClient: cpptools.Client = cpptools.createClient(this, folder);
                     this.languageClients.set(path, newClient);
                     newClient.deactivate(); // e.g. prevent the current config from switching.
+                    let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
+                    defaultClient.sendDidChangeSettings();
                 }
             });
         }
@@ -187,14 +189,14 @@ export class ClientCollection {
             return this.defaultClient;
         } else {
             let key: string = util.asFolder(folder.uri);
-            let client: cpptools.Client | undefined = this.languageClients.get(key);
-            if (client) {
-                return client;
+            if (!this.languageClients.has(key)) {
+                let newClient: cpptools.Client = cpptools.createClient(this, folder);
+                this.languageClients.set(key, newClient);
+                getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
+                let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
+                defaultClient.sendDidChangeSettings();
             }
-            let createdClient: cpptools.Client = cpptools.createClient(this, folder);
-            this.languageClients.set(key, createdClient);
-            getCustomConfigProviders().forEach(provider => createdClient.onRegisterCustomConfigurationProvider(provider));
-            return createdClient;
+            return this.languageClients.get(key);
         }
     }
 
