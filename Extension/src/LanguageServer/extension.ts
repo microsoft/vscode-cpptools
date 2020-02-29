@@ -1270,7 +1270,7 @@ function reportMacCrashes(): void {
         let crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
             let crashObject: { [key: string]: string } = {};
-            if (err && err.code !== null && err.code !== undefined) {
+            if (err?.code) {
                 // If the directory isn't there, we have a problem...
                 crashObject["fs.stat: err.code"] = err.code;
                 telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
