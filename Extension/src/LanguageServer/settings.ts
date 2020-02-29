@@ -140,7 +140,7 @@ export class CppSettings extends Settings {
     public get defaultForcedInclude(): string[] | undefined { return super.Section.get<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string | undefined {
-        let result: string | undefined | null = super.Section.get<string>("default.compilerPath");
+        let result: string | undefined | null = super.Section.get<string | null>("default.compilerPath");
         if (result === null) {
             return undefined;
         }
