@@ -367,7 +367,7 @@
         "C_Cpp.default.windowsSdkVersion": {
           "type": "string",
           "description": "%c_cpp.configuration.default.windowsSdkVersion.description%",
-          "pattern": "^\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1$",
+          "pattern": "^((\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1)|())$",
           "scope": "resource"
         },
         "C_Cpp.default.compileCommands": {
