@@ -13,7 +13,7 @@ import { CppTools } from './cppTools';
  * but returns CppToolsTestExtension for v1 and later.
  */
 export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
-    private backupApi: CppTools;
+    private backupApi: CppTools | undefined;
 
     private get BackupApi(): CppToolsTestApi {
         if (!this.backupApi) {
@@ -69,7 +69,7 @@ export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
  * an unsupported platform.
  */
 export class NullCppTools implements CppToolsApi, CppToolsExtension {
-    private version: Version;
+    private version: Version = Version.v0;
 
     getApi(version: Version): CppToolsApi {
         this.version = version;

@@ -115,7 +115,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
-        const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config =>
+        const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find((config: any) =>
             isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig, "Could not find default debug configuration.");
 
@@ -419,7 +419,7 @@ export class ConfigurationAssetProviderFactory {
 }
 
 abstract class DefaultConfigurationProvider implements IConfigurationAssetProvider {
-    configurations: IConfiguration[];
+    configurations: IConfiguration[] = [];
 
     public getInitialConfigurations(debuggerType: DebuggerType): any {
         let configurationSnippet: IConfigurationSnippet[] = [];

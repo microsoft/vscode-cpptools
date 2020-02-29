@@ -9,7 +9,7 @@ import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
 import { ReferencesModel, TreeNode } from './referencesModel';
 
 export class FindAllRefsView {
-    private referencesModel: ReferencesModel;
+    private referencesModel?: ReferencesModel;
     private referenceViewProvider: ReferencesTreeDataProvider;
 
     constructor() {
@@ -52,6 +52,9 @@ export class FindAllRefsView {
         let otherRefs: string[] = [];
         let fileRefs: string[] = [];
 
+        if (!this.referencesModel) {
+            throw new Error("Missiung ReferencesModel in getResultsAsText()");
+        }
         for (let ref of this.referencesModel.getAllReferenceNodes()) {
             let line: string = "";
             if (ref.referenceType !== null && ref.referenceType !== undefined) {

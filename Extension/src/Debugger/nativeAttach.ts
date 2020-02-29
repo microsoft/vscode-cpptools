@@ -167,7 +167,7 @@ export class PsProcessParser {
  */
 function execChildProcess(process: string, workingDirectory: string | undefined): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error, stdout: string, stderr: string) => {
+        child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error |  null, stdout: string, stderr: string) => {
 
             if (error) {
                 reject(error);

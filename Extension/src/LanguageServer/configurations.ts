@@ -527,41 +527,37 @@ export class CppProperties {
         return result;
     }
 
-    private resolveVariablesStringOrBoolean(input: string | boolean | undefined, defaultValue: string | boolean | undefined, env: Environment): string | boolean | undefined {
-        if (input === undefined || input === "${default}") {
-            input = defaultValue;
+    private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
+        if (!property || property === "${default}") {
+            property = defaultValue;
         }
-        if (!input || typeof input === "boolean") {
-            return input;
+        if (!property || (acceptBlank !== true && property === "")) {
+            return undefined;
         }
-        return util.resolveVariables(input, env);
-    }
-
-    private resolveVariablesString(input: string | undefined, defaultValue: string | undefined, env: Environment): string | undefined {
-        if (input === undefined || input === "${default}") {
-            input = defaultValue;
-        }
-        if (!input) {
-            return input;
-        }
-        return util.resolveVariables(input, env);
-    }
-
-    private updateConfigurationString(property: string | undefined, defaultValue: string | undefined, env: Environment): string | undefined {
-        return this.resolveVariablesString(property, defaultValue, env);
+        return util.resolveVariables(property, env);
     }
 
     private updateConfigurationStringArray(property: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] | undefined {
         if (property) {
             return this.resolveAndSplit(property, defaultValue, env);
-        } else if (property === undefined && defaultValue) {
+        }
+        if (!property && defaultValue) {
             return this.resolveAndSplit(defaultValue, [], env);
         }
         return property;
     }
 
-    private updateConfigurationStringOrBoolean(property: string | boolean | undefined, defaultValue: boolean | undefined, env: Environment): string | boolean | undefined {
-        return this.resolveVariablesStringOrBoolean(property, defaultValue, env);
+    private updateConfigurationStringOrBoolean(property: string | boolean | undefined | null, defaultValue: boolean | undefined | null, env: Environment): string | boolean | undefined {
+        if (!property || property === "${default}") {
+            property = defaultValue;
+        }
+        if (!property || property === "") {
+            return undefined;
+        }
+        if (typeof property === "boolean") {
+            return property;
+        }
+        return util.resolveVariables(property, env);
     }
 
     private updateServerOnFolderSettingsChange(): void {
@@ -579,7 +575,7 @@ export class CppProperties {
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
             configuration.forcedInclude = this.updateConfigurationStringArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
             configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
-            configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env);
+            configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
@@ -850,7 +846,7 @@ export class CppProperties {
                 if (settings.defaultConfigurationProvider) {
                     if (this.configurationJson) {
                         this.configurationJson.configurations.forEach(config => {
-                            config.configurationProvider = settings.defaultConfigurationProvider;
+                            config.configurationProvider = settings.defaultConfigurationProvider ? settings.defaultConfigurationProvider : undefined;
                         });
                     }
                     settings.update("default.configurationProvider", undefined); // delete the setting
@@ -1218,8 +1214,8 @@ export class CppProperties {
                 }
                 curText = curText.substr(0, nextNameStart2);
             }
-            if (this.prevSquiggleMetrics[currentConfiguration.name] === undefined) {
-                this.prevSquiggleMetrics[currentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+            if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
+                this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
             }
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
             const isWindows: boolean = os.platform() === 'win32';
@@ -1422,25 +1418,25 @@ export class CppProperties {
 
             // Send telemetry on squiggle changes.
             let changedSquiggleMetrics: { [key: string]: number } = {};
-            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics[currentConfiguration.name].PathNonExistent) {
+            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNonExistent) {
                 changedSquiggleMetrics.PathNonExistent = newSquiggleMetrics.PathNonExistent;
             }
-            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics[currentConfiguration.name].PathNotAFile) {
+            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotAFile) {
                 changedSquiggleMetrics.PathNotAFile = newSquiggleMetrics.PathNotAFile;
             }
-            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics[currentConfiguration.name].PathNotADirectory) {
+            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotADirectory) {
                 changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
             }
-            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics[currentConfiguration.name].CompilerPathMissingQuotes) {
+            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerPathMissingQuotes) {
                 changedSquiggleMetrics.CompilerPathMissingQuotes = newSquiggleMetrics.CompilerPathMissingQuotes;
             }
-            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics[currentConfiguration.name].CompilerModeMismatch) {
+            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerModeMismatch) {
                 changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
             }
             if (Object.keys(changedSquiggleMetrics).length > 0) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);
             }
-            this.prevSquiggleMetrics[currentConfiguration.name] = newSquiggleMetrics;
+            this.prevSquiggleMetrics.set(currentConfiguration.name, newSquiggleMetrics);
         });
     }
 

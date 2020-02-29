@@ -403,12 +403,44 @@ interface ReferencesCancellationState {
 
 let referencesPendingCancellations: ReferencesCancellationState[] = [];
 
-interface ClientModel {
-    isTagParsing: DataBinding<boolean>;
-    isUpdatingIntelliSense: DataBinding<boolean>;
-    referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
-    tagParserStatus: DataBinding<string>;
-    activeConfigName: DataBinding<string>;
+class ClientModel {
+    public isTagParsing: DataBinding<boolean>;
+    public isUpdatingIntelliSense: DataBinding<boolean>;
+    public referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
+    public tagParserStatus: DataBinding<string>;
+    public activeConfigName: DataBinding<string>;
+
+    constructor() {
+        this.isTagParsing = new DataBinding<boolean>(false);
+        this.isUpdatingIntelliSense = new DataBinding<boolean>(false);
+        this.referencesCommandMode = new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None);
+        this.tagParserStatus = new DataBinding<string>("");
+        this.activeConfigName = new DataBinding<string>("");
+    }
+
+    public activate(): void {
+        this.isTagParsing.activate();
+        this.isUpdatingIntelliSense.activate();
+        this.referencesCommandMode.activate();
+        this.tagParserStatus.activate();
+        this.activeConfigName.activate();
+    }
+
+    public deactivate(): void {
+        this.isTagParsing.deactivate();
+        this.isUpdatingIntelliSense.deactivate();
+        this.referencesCommandMode.deactivate();
+        this.tagParserStatus.deactivate();
+        this.activeConfigName.deactivate();
+    }
+
+    public dispose(): void {
+        this.isTagParsing.dispose();
+        this.isUpdatingIntelliSense.dispose();
+        this.referencesCommandMode.dispose();
+        this.tagParserStatus.dispose();
+        this.activeConfigName.dispose();
+    }
 }
 
 export interface Client {
@@ -474,9 +506,9 @@ export function createNullClient(): Client {
 }
 
 export class DefaultClient implements Client {
-    private languageClient: LanguageClient; // The "client" that launches and communicates with our language "server" process.
+    private innerLanguageClient?: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
-    private configuration: configs.CppProperties;
+    private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher: vscode.FileSystemWatcher | undefined;
     private rootFolder: vscode.WorkspaceFolder | undefined;
     private storagePath: string;
@@ -490,13 +522,7 @@ export class DefaultClient implements Client {
     private configurationProvider: string | undefined;
 
     // The "model" that is displayed via the UI (status bar).
-    private model: ClientModel = {
-        isTagParsing: new DataBinding<boolean>(false),
-        isUpdatingIntelliSense: new DataBinding<boolean>(false),
-        referencesCommandMode: new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None),
-        tagParserStatus: new DataBinding<string>(""),
-        activeConfigName: new DataBinding<string>("")
-    };
+    private model: ClientModel = new ClientModel();
 
     public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
@@ -529,6 +555,20 @@ export class DefaultClient implements Client {
         return this.model.referencesCommandMode.Value;
     }
 
+    private get languageClient(): LanguageClient {
+        if (!this.innerLanguageClient) {
+            throw new Error("Attempting to use languageClient before initialized");
+        }
+        return this.innerLanguageClient;
+    }
+
+    private get configuration(): configs.CppProperties {
+        if (!this.innerConfiguration) {
+            throw new Error("Attempting to use configuration before initialized");
+        }
+        return this.innerConfiguration;
+    }
+
     private get AdditionalEnvironment(): { [key: string]: string | string[] } {
         return { workspaceFolderBasename: this.Name, workspaceStorage: this.storagePath };
     }
@@ -546,18 +586,26 @@ export class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
+        let storagePath: string | undefined;
         if (util.extensionContext) {
             let path: string | undefined = util.extensionContext.storagePath;
             if (path) {
-                this.storagePath = path;
+                storagePath = path;
             }
         }
-        if (!this.storagePath) {
-            this.storagePath = path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
+        if (!storagePath) {
+            storagePath = path.join((this.rootFolder ? this.rootFolder.uri.fsPath : ""), "/.vscode");
         }
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.storagePath = path.join(this.storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
+            storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
+        this.storagePath = storagePath;
+        let rootUri: vscode.Uri | undefined = this.RootUri;
+        if (!rootUri) {
+            throw new Error("Empty URI in client constructor");
+        }
+        this.settingsTracker = getTracker(rootUri);
+        this.colorizationSettings = new ColorizationSettings(rootUri);
         try {
             let firstClient: boolean = false;
             if (!languageClient) {
@@ -570,11 +618,6 @@ export class DefaultClient implements Client {
             }
             ui = getUI();
             ui.bind(this);
-            let rootUri: vscode.Uri | undefined = this.RootUri;
-            if (!rootUri) {
-                throw new Error("Empty URI in client constructor");
-            }
-            this.settingsTracker = getTracker(rootUri);
 
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(() => languageClient.onReady().then(
@@ -587,13 +630,13 @@ export class DefaultClient implements Client {
                     if (!workspaceFolder) {
                         throw new Error("Empty URI in client constructor");
                     }
-                    this.configuration = new configs.CppProperties(rootUri, workspaceFolder);
-                    this.configuration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
-                    this.configuration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
-                    this.configuration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
-                    this.disposables.push(this.configuration);
+                    this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
+                    this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
+                    this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
+                    this.innerConfiguration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
+                    this.disposables.push(this.innerConfiguration);
 
-                    this.languageClient = languageClient;
+                    this.innerLanguageClient = languageClient;
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
 
@@ -746,7 +789,7 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         // Register a single-fire handler for the reply.
-                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult, doResolve: boolean) => {
+                                        let resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult | null, doResolve: boolean) => {
                                             referencesRequestPending = false;
                                             let locations: vscode.Location[] = [];
                                             if (result) {
@@ -863,7 +906,7 @@ export class DefaultClient implements Client {
                                             return;
                                         }
                                         referencesRequestPending = true;
-                                        workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult, doResolve: boolean) => {
+                                        workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult | null, doResolve: boolean) => {
                                             if (doResolve && referencesResult === null && referencesPendingCancellations.length === 0) {
                                                 // The result callback will be called with doResult of true and a null result when the Find All References
                                                 // portion of the rename is complete.  We complete the promise with an empty edit at this point,
@@ -971,7 +1014,7 @@ export class DefaultClient implements Client {
                         vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
                     }
                 }));
-            this.colorizationSettings = new ColorizationSettings(rootUri);
+            this.colorizationSettings.reload();
         } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
             if (!failureMessageShown) {
@@ -1457,7 +1500,7 @@ export class DefaultClient implements Client {
             }
 
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            let task: () => Thenable<WorkspaceBrowseConfiguration> = async () => {
+            let task: () => Thenable<WorkspaceBrowseConfiguration | null> = async () => {
                 if (!currentProvider) {
                     return null;
                 }
@@ -1477,7 +1520,7 @@ export class DefaultClient implements Client {
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
             task().then(async config => {
-                if (!currentProvider) {
+                if (!currentProvider || !config) {
                     return;
                 }
                 // TODO: This is a hack to get around CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
@@ -1593,7 +1636,7 @@ export class DefaultClient implements Client {
 
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
             // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
-            let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[]> = async () => {
+            let provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | null | undefined> = async () => {
                 if (provider) {
                     for (let i: number = 0; i < response.candidates.length; ++i) {
                         try {
@@ -1615,7 +1658,7 @@ export class DefaultClient implements Client {
                 }
             };
             return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
-                (configs: SourceFileConfigurationItem[]) => {
+                (configs: SourceFileConfigurationItem[] | null | undefined) => {
                     if (configs && configs.length > 0) {
                         this.sendCustomConfigurations(configs);
                     }
@@ -1698,7 +1741,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Thenable<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(cppSettings.vcpkgEnabled);
+        return Promise.resolve(cppSettings.vcpkgEnabled === true);
     }
 
     public getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> {
@@ -1835,7 +1878,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private associations_for_did_change: Set<string>;
+    private associations_for_did_change?: Set<string>;
 
     /**
      * listen for file created/deleted events under the ${workspaceFolder} folder
@@ -1870,7 +1913,7 @@ export class DefaultClient implements Client {
                 let dotIndex: number = uri.fsPath.lastIndexOf('.');
                 if (dotIndex !== -1) {
                     let ext: string = uri.fsPath.substr(dotIndex + 1);
-                    if (this.associations_for_did_change.has(ext)) {
+                    if (this.associations_for_did_change && this.associations_for_did_change.has(ext)) {
                         // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                         // which causes a large backlog of "files to parse" to accumulate.
                         // We workaround this via only sending the change message if the modified time is within 10 seconds.
@@ -2102,11 +2145,7 @@ export class DefaultClient implements Client {
      * enable UI updates from this client and resume tag parsing on the server.
      */
     public activate(): void {
-        for (let key in this.model) {
-            if (this.model.hasOwnProperty(key)) {
-                this.model[key].activate();
-            }
-        }
+        this.model.activate();
         this.resumeParsing();
     }
 
@@ -2124,11 +2163,7 @@ export class DefaultClient implements Client {
      * disable UI updates from this client and pause tag parsing on the server.
      */
     public deactivate(): void {
-        for (let key in this.model) {
-            if (this.model.hasOwnProperty(key)) {
-                this.model[key].deactivate();
-            }
-        }
+        this.model.deactivate();
     }
 
     public pauseParsing(): void {
@@ -2456,12 +2491,7 @@ export class DefaultClient implements Client {
         return promise.then(() => {
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
-
-            for (let key in this.model) {
-                if (this.model.hasOwnProperty(key)) {
-                    this.model[key].dispose();
-                }
-            }
+            this.model.dispose();
         });
     }
 

@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 export class LinuxDistribution {
-    constructor(public name, public version) { }
+    constructor(public name: string, public version: string) { }
 
     /**
      * There is no standard way on Linux to find the distribution name and version.

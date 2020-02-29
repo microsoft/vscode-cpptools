@@ -87,7 +87,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         rawTasksJson.tasks = new Array();
     }
     // Find or create the task which should be created based on the selected "debug configuration".
-    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find(task => task.label && task.label === task);
+    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === task);
     if (selectedTask) {
         return;
     }
@@ -102,7 +102,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     rawTasksJson.version = "2.0.0";
 
     let selectedTask2: vscode.Task = selectedTask;
-    if (!rawTasksJson.tasks.find(task => task.label === selectedTask2.definition.label)) {
+    if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
         rawTasksJson.tasks.push(selectedTask2.definition);
     }
 
@@ -599,7 +599,7 @@ export function logToFile(message: string): void {
 
 export function execChildProcess(process: string, workingDirectory: string | undefined, channel?: vscode.OutputChannel): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error, stdout: string, stderr: string) => {
+        child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error | null, stdout: string, stderr: string) => {
             if (channel) {
                 let message: string = "";
                 let err: Boolean = false;
@@ -689,7 +689,7 @@ export function allowExecution(file: string): Promise<void> {
                         if (isExec) {
                             resolve();
                         } else {
-                            fs.chmod(file, '755', (err: NodeJS.ErrnoException) => {
+                            fs.chmod(file, '755', (err: NodeJS.ErrnoException | null) => {
                                 if (err) {
                                     reject(err);
                                     return;
@@ -759,7 +759,7 @@ export function promptForReloadWindowDueToSettingsChange(): void {
 
 export function promptReloadWindow(message: string): void {
     let reload: string = localize("reload.string", "Reload");
-    vscode.window.showInformationMessage(message, reload).then((value: string) => {
+    vscode.window.showInformationMessage(message, reload).then((value: string | undefined) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
@@ -934,7 +934,6 @@ export function escapeForSquiggles(s: string): string {
 }
 
 export class BlockingTask<T> {
-    private dependency: BlockingTask<any>;
     private done: boolean = false;
     private promise: Thenable<T>;
 
@@ -942,7 +941,6 @@ export class BlockingTask<T> {
         if (!dependency) {
             this.promise = task();
         } else {
-            this.dependency = dependency;
             this.promise = new Promise<T>((resolve, reject) => {
                 let f1: () => void = () => {
                     task().then(resolve, reject);
@@ -951,7 +949,7 @@ export class BlockingTask<T> {
                     console.log(err);
                     task().then(resolve, reject);
                 };
-                this.dependency.promise.then(f1, f2);
+                dependency.promise.then(f1, f2);
             });
         }
         this.promise.then(() => this.done = true, () => this.done = true);

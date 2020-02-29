@@ -39,7 +39,7 @@ export class UI {
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
-    private configurationUIPromise: Thenable<ConfigurationResult>;
+    private configurationUIPromise?: Thenable<ConfigurationResult>;
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
 
     constructor() {
@@ -116,24 +116,26 @@ export class UI {
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
 
-    private dbTimeout: NodeJS.Timeout;
+    private dbTimeout?: NodeJS.Timeout;
     private set ShowDBIcon(show: boolean) {
-        if (show && this.IsTagParsing) {
+        if (this.dbTimeout) {
             clearTimeout(this.dbTimeout);
+        }
+        if (show && this.IsTagParsing) {
             this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            clearTimeout(this.dbTimeout);
             this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }
 
-    private flameTimeout: NodeJS.Timeout;
+    private flameTimeout?: NodeJS.Timeout;
     private set ShowFlameIcon(show: boolean) {
-        if (show && this.IsUpdatingIntelliSense) {
+        if (this.flameTimeout) {
             clearTimeout(this.flameTimeout);
+        }
+        if (show && this.IsUpdatingIntelliSense) {
             this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            clearTimeout(this.flameTimeout);
             this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }

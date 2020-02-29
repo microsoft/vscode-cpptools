@@ -19,6 +19,7 @@ import * as Telemetry from './telemetry';
 import { IncomingMessage, ClientRequest } from 'http';
 import { Logger } from './logger';
 import * as nls from 'vscode-nls';
+import { Readable } from 'stream';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -79,7 +80,7 @@ export class PackageManagerWebResponseError extends PackageManagerError {
 }
 
 export class PackageManager {
-    private allPackages: IPackage[];
+    private allPackages?: IPackage[];
 
     public constructor(
         private platformInfo: PlatformInformation,
@@ -115,7 +116,7 @@ export class PackageManager {
     /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
      *  Like Promise.all, but runs the promises in sequence rather than simultaneously.
      */
-    private BuildPromiseChain<TItem, TPromise>(items: TItem[], promiseBuilder: (TItem) => Promise<TPromise>): Promise<TPromise | null> {
+    private BuildPromiseChain<TItem, TPromise>(items: TItem[], promiseBuilder: (item: TItem) => Promise<TPromise>): Promise<TPromise | null> {
         let promiseChain: Promise<TPromise | null> = Promise.resolve<TPromise | null>(null);
 
         for (let item of items) {
@@ -160,7 +161,7 @@ export class PackageManager {
     }
 
     private ArchitecturesMatch(value: IPackage): boolean {
-        return !value.architectures || value.architectures.indexOf(this.platformInfo.architecture) !== -1;
+        return !value.architectures || (this.platformInfo.architecture !== undefined && value.architectures.indexOf(this.platformInfo.architecture) !== -1);
     }
 
     private PlatformsMatch(value: IPackage): boolean {
@@ -168,17 +169,15 @@ export class PackageManager {
     }
 
     private VersionsMatch(value: IPackage): boolean {
-
-        // If we have a versionRegex but did not get a platformVersion
-        if (value.versionRegex && !this.platformInfo.version) {
-            // If we are expecting to match the versionRegex, return false since there was no version found.
-            //
-            // If we are expecting to not match the versionRegex, return true since we are expecting to
-            // not match the version string, the only match would be if versionRegex was not set.
-            return !value.matchVersion;
-        }
-
         if (value.versionRegex) {
+            // If we have a versionRegex but did not get a platformVersion
+            if (!this.platformInfo.version) {
+                // If we are expecting to match the versionRegex, return false since there was no version found.
+                //
+                // If we are expecting to not match the versionRegex, return true since we are expecting to
+                // not match the version string, the only match would be if versionRegex was not set.
+                return !value.matchVersion;
+            }
             const regex: RegExp = new RegExp(value.versionRegex);
 
             return (value.matchVersion ?
@@ -393,8 +392,8 @@ export class PackageManager {
                         util.checkFileExists(absoluteEntryPath).then((exists: boolean) => {
                             if (!exists) {
                                 // File - extract it
-                                zipfile.openReadStream(entry, (err, readStream: fs.ReadStream) => {
-                                    if (err) {
+                                zipfile.openReadStream(entry, (err, readStream: Readable | undefined) => {
+                                    if (err || !readStream) {
                                         return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
                                     }
 

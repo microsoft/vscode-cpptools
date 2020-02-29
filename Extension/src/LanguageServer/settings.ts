@@ -44,6 +44,14 @@ class Settings {
         }
         return info.defaultValue;
     }
+
+    protected getWithNullAsUndefined<T>(section: string): T | undefined {
+        let result: T | undefined | null = this.settings.get<T>(section);
+        if (result === null) {
+            return undefined;
+        }
+        return result;
+    }
 }
 
 export class CppSettings extends Settings {
@@ -64,10 +72,12 @@ export class CppSettings extends Settings {
     }
 
     public get clangFormatPath(): string | undefined {
-        let path: string | undefined = super.Section.get<string>("clang_format_path");
+        let path: string | undefined | null = super.Section.get<string>("clang_format_path");
         if (!path) {
             path = which.sync('clang-format', {nothrow: true});
-            if (path) {
+            if (!path) {
+                return undefined;
+            } else {
                 // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
                 let clangFormatVersion: string;
                 try {
@@ -129,7 +139,13 @@ export class CppSettings extends Settings {
     public get defaultCompileCommands(): string | undefined { return super.Section.get<string>("default.compileCommands"); }
     public get defaultForcedInclude(): string[] | undefined { return super.Section.get<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string | undefined { return super.Section.get<string>("default.compilerPath"); }
+    public get defaultCompilerPath(): string | undefined {
+        let result: string | undefined | null = super.Section.get<string>("default.compilerPath");
+        if (result === null) {
+            return undefined;
+        }
+        return result;
+    }
     public get defaultCompilerArgs(): string[] | undefined { return super.Section.get<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }

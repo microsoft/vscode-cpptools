@@ -21,7 +21,7 @@ export class ClientCollection {
     private languageClients = new Map<string, cpptools.Client>();
     private defaultClient: cpptools.Client;
     private activeClient: cpptools.Client;
-    private activeDocument: vscode.TextDocument;
+    private activeDocument?: vscode.TextDocument;
 
     public get ActiveClient(): cpptools.Client { return this.activeClient; }
     public get Names(): ClientKey[] {

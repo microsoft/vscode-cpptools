@@ -14,13 +14,13 @@ import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension'
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
-    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
+    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
     /* tslint:disable */
     // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
-    let invoke2 = (a, b, callback: (a, b) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
-    let invoke3 = (a, b, c, callback: (a, b, c) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
-    let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d));
-    let invoke5 = (a, b, c, d, e, callback: (a, b, c, d, e) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d, e));
+    let invoke2 = (a: any, b: any, callback: (a: any, b: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
+    let invoke3 = (a: any, b: any, c: any, callback: (a: any, b: any, c: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
+    let invoke4 = (a: any, b: any, c: any, d: any, callback: (a: any, b: any, c: any, d: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d));
+    let invoke5 = (a: any, b: any, c: any, d: any, e: any, callback: (a: any, b: any, c: any, d: any, e: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d, e));
     /* tslint:enable */
 
     return {
@@ -88,7 +88,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
 
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: (document, position, token, next: (document, position, token) => any) => {
+        provideHover: (document, position, token, next: (document: any, position: any, token: any) => any) => {
             let me: Client = clients.getClientFor(document.uri);
             if (clients.checkOwnership(me, document)) {
                 return clients.ActiveClient.requestWhenReady(() => next(document, position, token));

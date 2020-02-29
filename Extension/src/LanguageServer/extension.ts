@@ -523,7 +523,7 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
-export function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
+export function onDidChangeActiveTextEditor(editor: vscode.TextEditor | undefined): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
     if (clients === undefined) {
@@ -531,7 +531,7 @@ export function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
     }
 
     let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
+    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();

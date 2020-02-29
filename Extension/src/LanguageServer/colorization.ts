@@ -51,15 +51,15 @@ interface VersionedEdits {
 }
 
 class ThemeStyle {
-    foreground: string;
-    background: string;
+    foreground?: string;
+    background?: string;
     fontStyle: string | undefined;
 }
 
 export class ColorizationSettings {
     private uri: vscode.Uri;
-    private pendingTask: util.BlockingTask<any>;
-    private editorBackground: string;
+    private pendingTask?: util.BlockingTask<any>;
+    private editorBackground?: string;
 
     public themeStyleCMap: ThemeStyle[] = [];
     public themeStyleCppMap: ThemeStyle[] = [];
@@ -78,7 +78,6 @@ export class ColorizationSettings {
 
     constructor(uri: vscode.Uri) {
         this.uri = uri;
-        this.reload();
     }
 
     // Given a TextMate rule 'settings' node, update a ThemeStyle to include any color or style information
@@ -86,7 +85,7 @@ export class ColorizationSettings {
         if (textMateRuleSettings.foreground) {
             baseStyle.foreground = textMateRuleSettings.foreground;
         }
-        if (textMateRuleSettings.background && textMateRuleSettings.background.toUpperCase() !== this.editorBackground.toUpperCase()) {
+        if (!this.editorBackground || textMateRuleSettings.background && textMateRuleSettings.background.toUpperCase() !== this.editorBackground.toUpperCase()) {
             baseStyle.background = textMateRuleSettings.background;
         }
         // Any (even empty) string for fontStyle removes inherited value
@@ -301,7 +300,7 @@ export class ColorizationSettings {
                     let packageJsonText: string = await util.readFileText(extensionPackageJsonPath);
                     let packageJson: any = jsonc.parse(packageJsonText);
                     if (packageJson.contributes && packageJson.contributes.themes) {
-                        let foundTheme: any = packageJson.contributes.themes.find(e => e.id === themeName || e.label === themeName);
+                        let foundTheme: any = packageJson.contributes.themes.find((e: any) => e.id === themeName || e.label === themeName);
                         if (foundTheme) {
                             let themeRelativePath: string = foundTheme.path;
                             let themeFullPath: string = path.join(extensionPath, themeRelativePath);

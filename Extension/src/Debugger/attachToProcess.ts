@@ -63,7 +63,7 @@ export class RemoteAttachPicker {
                     pipeTransport.pipeProgram &&
                     !fs.existsSync(pipeTransport.pipeProgram)) {
                     const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
-                    const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch];
+                    const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
 
                     // Check for pipeProgram
                     if (!fs.existsSync(config.pipeTransport.pipeProgram)) {
