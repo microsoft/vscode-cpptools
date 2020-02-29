@@ -328,7 +328,7 @@ export class CppProperties {
 
     private get ExtendedEnvironment(): Environment {
         let result: Environment = {};
-        if (this.configurationJson && this.configurationJson.env) {
+        if (this.configurationJson?.env) {
             Object.assign(result, this.configurationJson.env);
         }
 
