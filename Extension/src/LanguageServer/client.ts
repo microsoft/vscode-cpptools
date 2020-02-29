@@ -450,7 +450,7 @@ export interface Client {
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
     RootPath: string;
-    RootUri: vscode.Uri | undefined;
+    RootUri?: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string };
@@ -509,8 +509,8 @@ export class DefaultClient implements Client {
     private innerLanguageClient?: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
     private innerConfiguration?: configs.CppProperties;
-    private rootPathFileWatcher: vscode.FileSystemWatcher | undefined;
-    private rootFolder: vscode.WorkspaceFolder | undefined;
+    private rootPathFileWatcher?: vscode.FileSystemWatcher;
+    private rootFolder?: vscode.WorkspaceFolder;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private crashTimes: number[] = [];
@@ -519,7 +519,7 @@ export class DefaultClient implements Client {
     private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
-    private configurationProvider: string | undefined;
+    private configurationProvider?: string;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -1658,7 +1658,7 @@ export class DefaultClient implements Client {
                 }
             };
             return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
-                (configs: SourceFileConfigurationItem[] | null | undefined) => {
+                (configs?: SourceFileConfigurationItem[] | null) => {
                     if (configs && configs.length > 0) {
                         this.sendCustomConfigurations(configs);
                     }
@@ -1913,7 +1913,7 @@ export class DefaultClient implements Client {
                 let dotIndex: number = uri.fsPath.lastIndexOf('.');
                 if (dotIndex !== -1) {
                     let ext: string = uri.fsPath.substr(dotIndex + 1);
-                    if (this.associations_for_did_change && this.associations_for_did_change.has(ext)) {
+                    if (this.associations_for_did_change?.has(ext)) {
                         // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                         // which causes a large backlog of "files to parse" to accumulate.
                         // We workaround this via only sending the change message if the modified time is within 10 seconds.
@@ -2318,7 +2318,7 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(CustomConfigurationNotification, params);
     }
 
-    private sendCustomBrowseConfiguration(config: any, providerId: string | undefined, timeoutOccured?: boolean): void {
+    private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
         let rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         if (!rootFolder) {
             throw new Error("Invalid Root Folder in sendCustomBrowseConfiguration()");
@@ -2569,7 +2569,7 @@ class NullClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
     RootPath: string = "/";
-    RootUri: vscode.Uri | undefined = vscode.Uri.file("/");
+    RootUri?: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } { return {}; }

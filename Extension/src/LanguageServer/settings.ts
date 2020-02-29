@@ -179,9 +179,9 @@ export class CppSettings extends Settings {
 }
 
 export interface TextMateRuleSettings {
-    foreground: string | undefined;
-    background: string | undefined;
-    fontStyle: string | undefined;
+    foreground?: string;
+    background?: string;
+    fontStyle?: string;
 }
 
 export interface TextMateRule {

@@ -597,7 +597,7 @@ export function logToFile(message: string): void {
     fs.writeFileSync(logFolder, `${message}${os.EOL}`, { flag: 'a' });
 }
 
-export function execChildProcess(process: string, workingDirectory: string | undefined, channel?: vscode.OutputChannel): Promise<string> {
+export function execChildProcess(process: string, workingDirectory?: string, channel?: vscode.OutputChannel): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error | null, stdout: string, stderr: string) => {
             if (channel) {
@@ -759,7 +759,7 @@ export function promptForReloadWindowDueToSettingsChange(): void {
 
 export function promptReloadWindow(message: string): void {
     let reload: string = localize("reload.string", "Reload");
-    vscode.window.showInformationMessage(message, reload).then((value: string | undefined) => {
+    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
@@ -845,7 +845,7 @@ export interface CompilerPathAndArgs {
     additionalArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath: string | undefined, inputCompilerArgs?: string[]): CompilerPathAndArgs {
+export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let additionalArgs: string[] = [];

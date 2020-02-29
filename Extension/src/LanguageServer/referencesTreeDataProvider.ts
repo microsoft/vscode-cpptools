@@ -143,7 +143,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
         throw new Error("Invalid NoteType in getTreeItem()");
     }
 
-    getChildren(element?: TreeNode | undefined): TreeNode[] | undefined {
+    getChildren(element?: TreeNode): TreeNode[] | undefined {
         if (!this.referencesModel) {
             return undefined;
         }

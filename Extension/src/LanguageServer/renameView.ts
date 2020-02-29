@@ -9,7 +9,7 @@ import { ReferencesModel, RenameResultCallback } from './referencesModel';
 import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
 
 export class RenameView {
-    private referencesModel: ReferencesModel | undefined;
+    private referencesModel?: ReferencesModel;
     private renamePendingTreeDataProvider: ReferencesTreeDataProvider;
     private renameCandidatesTreeDataProvider: ReferencesTreeDataProvider;
     private visible: boolean = false;

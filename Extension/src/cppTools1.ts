@@ -13,7 +13,7 @@ import { CppTools } from './cppTools';
  * but returns CppToolsTestExtension for v1 and later.
  */
 export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
-    private backupApi: CppTools | undefined;
+    private backupApi?: CppTools;
 
     private get BackupApi(): CppToolsTestApi {
         if (!this.backupApi) {

@@ -13,7 +13,7 @@ class PersistentStateBase<T> {
     private state?: vscode.Memento;
     private curvalue: T;
 
-    constructor(key: string, defaultValue: T, state: vscode.Memento | undefined) {
+    constructor(key: string, defaultValue: T, state?: vscode.Memento) {
         this.key = key;
         this.defaultvalue = defaultValue;
         this.state = state;

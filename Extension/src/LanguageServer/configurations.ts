@@ -106,23 +106,23 @@ export interface CompilerDefaults {
 
 export class CppProperties {
     private rootUri: vscode.Uri;
-    private propertiesFile: vscode.Uri | undefined = undefined;
+    private propertiesFile?: vscode.Uri;
     private readonly configFolder: string;
-    private configurationJson: ConfigurationJson | undefined;
+    private configurationJson?: ConfigurationJson;
     private currentConfigurationIndex: PersistentFolderState<number>;
     private configFileWatcher: vscode.FileSystemWatcher | null = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandFileWatchers: fs.FSWatcher[] = [];
     private defaultCompilerPath: string | null = null;
-    private knownCompilers: KnownCompiler[] | undefined;
+    private knownCompilers?: KnownCompiler[];
     private defaultCStandard: string | null = null;
     private defaultCppStandard: string | null = null;
     private defaultIncludes: string[] | null = null;
-    private defaultFrameworks: string[] | undefined;
+    private defaultFrameworks?: string[];
     private defaultWindowsSdkVersion: string | null = null;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
-    private defaultIntelliSenseMode: string | undefined;
+    private defaultIntelliSenseMode?: string;
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
@@ -131,7 +131,7 @@ export class CppProperties {
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
     private rootfs: string | null = null;
-    private settingsPanel: SettingsPanel | undefined = undefined;
+    private settingsPanel?: SettingsPanel;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -385,7 +385,7 @@ export class CppProperties {
         return this.configurationJson.configurations.length - 1;
     }
 
-    private getIntelliSenseModeForPlatform(name: string | undefined): string {
+    private getIntelliSenseModeForPlatform(name?: string): string {
         // Do the built-in configs first.
         if (name === "Linux") {
             return "gcc-x64";
@@ -497,7 +497,7 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
-    private resolveDefaults(entries: string[], defaultValue: string[] | undefined): string[] {
+    private resolveDefaults(entries: string[], defaultValue?: string[]): string[] {
         let result: string[] = [];
         entries.forEach(entry => {
             if (entry === "${default}") {
@@ -610,7 +610,7 @@ export class CppProperties {
         }
     }
 
-    private compileCommandsFileWatcherTimer: NodeJS.Timer | undefined;
+    private compileCommandsFileWatcherTimer?: NodeJS.Timer;
     private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
 
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.

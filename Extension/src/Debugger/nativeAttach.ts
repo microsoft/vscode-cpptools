@@ -13,7 +13,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class Process {
-    constructor(public name: string, public pid: string | undefined, public commandLine: string | undefined) { }
+    constructor(public name: string, public pid?: string, public commandLine?: string) { }
 
     public toAttachItem(): AttachItem {
         return {
@@ -165,7 +165,7 @@ export class PsProcessParser {
 /**
  * Originally from common.ts. Due to test code not having vscode, it was refactored to not have vscode.OutputChannel.
  */
-function execChildProcess(process: string, workingDirectory: string | undefined): Promise<string> {
+function execChildProcess(process: string, workingDirectory?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error |  null, stdout: string, stderr: string) => {
 

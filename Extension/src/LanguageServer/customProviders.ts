@@ -247,7 +247,7 @@ export function getCustomConfigProviders(): CustomConfigurationProviderCollectio
     return providerCollection;
 }
 
-export function isSameProviderExtensionId(settingExtensionId: string | undefined, providerExtensionId: string | undefined): boolean {
+export function isSameProviderExtensionId(settingExtensionId?: string, providerExtensionId?: string): boolean {
     if (!settingExtensionId && !providerExtensionId) {
         return true;
     }

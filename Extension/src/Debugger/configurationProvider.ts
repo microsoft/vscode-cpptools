@@ -39,9 +39,9 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         this.underlyingProvider = provider;
     }
 
-    async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+    async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
 
-        let provideDebugConfigurations: undefined | ((folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken) => vscode.ProviderResult<vscode.DebugConfiguration[]>) = this.underlyingProvider.provideDebugConfigurations;
+        let provideDebugConfigurations: undefined | ((folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken) => vscode.ProviderResult<vscode.DebugConfiguration[]>) = this.underlyingProvider.provideDebugConfigurations;
         let configs: vscode.DebugConfiguration[] | null | undefined = provideDebugConfigurations ? await provideDebugConfigurations(folder, token) : undefined;
         if (!configs) {
             configs = [];
@@ -110,7 +110,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     /**
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
-    async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+    async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         let buildTasks: vscode.Task[] = await getBuildTasks(true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
@@ -304,7 +304,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         return undefined;
     }
 
-    private resolveEnvFile(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder | undefined): void {
+    private resolveEnvFile(config: vscode.DebugConfiguration, folder?: vscode.WorkspaceFolder): void {
         if (config.envFile) {
             // replace ${env:???} variables
             let envFilePath: string = util.resolveVariables(config.envFile, undefined);

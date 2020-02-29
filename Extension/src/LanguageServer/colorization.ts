@@ -53,7 +53,7 @@ interface VersionedEdits {
 class ThemeStyle {
     foreground?: string;
     background?: string;
-    fontStyle: string | undefined;
+    fontStyle?: string;
 }
 
 export class ColorizationSettings {

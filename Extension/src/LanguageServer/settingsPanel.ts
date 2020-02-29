@@ -52,7 +52,7 @@ const elementId: { [key: string]: string } = {
 
 export class SettingsPanel {
     private telemetry: { [key: string]: number } = {};
-    private disposable: vscode.Disposable | undefined = undefined;
+    private disposable?: vscode.Disposable;
 
     // Events
     private settingsPanelActivated = new vscode.EventEmitter<void>();
@@ -67,8 +67,8 @@ export class SettingsPanel {
     private compilerPaths: string[] = [];
 
     // WebviewPanel objects
-    private panel: vscode.WebviewPanel | undefined;
-    private disposablesPanel: vscode.Disposable | undefined = undefined;
+    private panel?: vscode.WebviewPanel;
+    private disposablesPanel?: vscode.Disposable;
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
 
@@ -158,7 +158,7 @@ export class SettingsPanel {
         }
     }
 
-    public setKnownCompilers(knownCompilers: config.KnownCompiler[] | undefined, pathSeparator: string | undefined): void {
+    public setKnownCompilers(knownCompilers?: config.KnownCompiler[], pathSeparator?: string): void {
         if (knownCompilers && knownCompilers.length) {
             for (let compiler of knownCompilers) {
                 // Normalize path separators.

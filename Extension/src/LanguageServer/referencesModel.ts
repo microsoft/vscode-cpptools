@@ -119,7 +119,7 @@ export class ReferencesModel {
         return result;
     }
 
-    getReferenceNodes(filename: string | undefined, refType: ReferenceType | undefined, isRenameCandidate?: boolean): TreeNode[] {
+    getReferenceNodes(filename?: string, refType?: ReferenceType, isRenameCandidate?: boolean): TreeNode[] {
         if (this.isRename) {
             if (refType === undefined || refType === null) {
                 if (filename === undefined || filename === null) {

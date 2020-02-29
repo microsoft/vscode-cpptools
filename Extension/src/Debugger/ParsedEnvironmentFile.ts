@@ -16,19 +16,19 @@ export interface Environment {
 
 export class ParsedEnvironmentFile {
     public Env: Environment[];
-    public Warning: string | undefined;
+    public Warning?: string;
 
-    private constructor(env: Environment[], warning: string | undefined) {
+    private constructor(env: Environment[], warning?: string) {
         this.Env = env;
         this.Warning = warning;
     }
 
-    public static CreateFromFile(envFile: string, initialEnv: Environment[] | undefined): ParsedEnvironmentFile {
+    public static CreateFromFile(envFile: string, initialEnv?: Environment[]): ParsedEnvironmentFile {
         let content: string = fs.readFileSync(envFile, "utf8");
         return this.CreateFromContent(content, envFile, initialEnv);
     }
 
-    public static CreateFromContent(content: string, envFile: string, initialEnv: Environment[] | undefined): ParsedEnvironmentFile {
+    public static CreateFromContent(content: string, envFile: string, initialEnv?: Environment[]): ParsedEnvironmentFile {
 
         // Remove UTF-8 BOM if present
         if (content.charAt(0) === '\uFEFF') {

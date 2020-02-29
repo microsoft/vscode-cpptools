@@ -40,7 +40,7 @@ export class RemoteAttachPicker {
         this._channel = vscode.window.createOutputChannel('remote-attach');
     }
 
-    private _channel: vscode.OutputChannel | undefined;
+    private _channel?: vscode.OutputChannel;
 
     public ShowAttachEntries(config: any): Promise<string | undefined> {
         return util.isExtensionReady().then(ready => {

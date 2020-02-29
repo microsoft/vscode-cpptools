@@ -263,7 +263,7 @@ export function getLanguageConfig(languageId: string, resource?: vscode.Uri): vs
     return getLanguageConfigFromPatterns(languageId, patterns);
 }
 
-export function getLanguageConfigFromPatterns(languageId: string, patterns: (string | CommentPattern)[] | undefined): vscode.LanguageConfiguration {
+export function getLanguageConfigFromPatterns(languageId: string, patterns?: (string | CommentPattern)[]): vscode.LanguageConfiguration {
     let beginPatterns: string[] = [];       // avoid duplicate rules
     let continuePatterns: string[] = [];    // avoid duplicate rules
     let duplicates: boolean = false;
