@@ -53,7 +53,7 @@ export interface ConfigurationJson {
 }
 
 export interface Configuration {
-    name?: string;
+    name: string;
     compilerPath?: string;
     compilerArgs?: string[];
     cStandard?: string;
@@ -166,9 +166,7 @@ export class CppProperties {
         let result: string[] = [];
         if (this.configurationJson) {
             this.configurationJson.configurations.forEach((config: Configuration) => {
-                if (config.name) {
-                    result.push(config.name);
-                }
+                result.push(config.name);
             });
         }
         return result;

@@ -71,7 +71,8 @@ export class CppSettings extends Settings {
         }
     }
 
-    public get clangFormatPath(): string | undefined {
+    public get clangFormatPath(): string | undefined
+    {
         let path: string | undefined | null = super.Section.get<string>("clang_format_path");
         if (!path) {
             path = which.sync('clang-format', {nothrow: true});

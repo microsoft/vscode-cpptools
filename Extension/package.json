@@ -97,11 +97,7 @@
       "title": "C/C++",
       "properties": {
         "C_Cpp.clang_format_path": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
+          "type": "string",
           "description": "%c_cpp.configuration.clang_format_path.description%",
           "scope": "resource"
         },
@@ -390,6 +386,7 @@
         "C_Cpp.default.intelliSenseMode": {
           "type": "string",
           "enum": [
+            "",
             "msvc-x64",
             "gcc-x64",
             "clang-x64",
@@ -424,6 +421,7 @@
         "C_Cpp.default.cStandard": {
           "type": "string",
           "enum": [
+            "",
             "c89",
             "c99",
             "c11"
@@ -434,6 +432,7 @@
         "C_Cpp.default.cppStandard": {
           "type": "string",
           "enum": [
+            "",
             "c++98",
             "c++03",
             "c++11",

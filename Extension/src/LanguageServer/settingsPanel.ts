@@ -61,7 +61,7 @@ export class SettingsPanel {
     private addConfigRequested = new vscode.EventEmitter<string>();
 
     // Configuration data
-    private configValues: config.Configuration;
+    private configValues: config.Configuration = { name: "" };
     private isIntelliSenseModeDefined: boolean = false;
     private configIndexSelected: number = 0;
     private compilerPaths: string[] = [];
@@ -73,7 +73,6 @@ export class SettingsPanel {
     private static readonly title: string = 'C/C++ Configurations';
 
     constructor() {
-        this.configValues = { name: undefined };
         this.disposable = vscode.Disposable.from(
             this.settingsPanelActivated,
             this.configValuesChanged,
