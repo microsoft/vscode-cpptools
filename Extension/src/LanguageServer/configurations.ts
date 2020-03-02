@@ -156,7 +156,7 @@ export class CppProperties {
     public get KnownCompiler(): KnownCompiler[] | undefined { return this.knownCompilers; }
 
     public get CurrentConfigurationProvider(): string | undefined {
-        if (this.CurrentConfiguration && this.CurrentConfiguration.configurationProvider) {
+        if (this.CurrentConfiguration?.configurationProvider) {
             return this.CurrentConfiguration.configurationProvider;
         }
         return new CppSettings(this.rootUri).defaultConfigurationProvider;
