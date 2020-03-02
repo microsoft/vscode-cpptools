@@ -78,7 +78,7 @@ export class ClientCollection {
     }
 
     /**
-     * get a handle to a language client. returns null if the client was not found.
+     * get a handle to a language client. returns undefined if the client was not found.
      */
     public get(key: string): cpptools.Client | undefined {
         let client: cpptools.Client | undefined = this.languageClients.get(key);
