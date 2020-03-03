@@ -1336,6 +1336,7 @@ export class DefaultClient implements Client {
         }
     }
 
+    private registeredProviders: CustomConfigurationProvider1[] = [];
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
         let onRegistered: () => void = () => {
             // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
@@ -1345,6 +1346,10 @@ export class DefaultClient implements Client {
             }
         };
         return this.notifyWhenReady(() => {
+            if (this.registeredProviders.includes(provider)) {
+                return; // Prevent duplicate processing.
+            }
+            this.registeredProviders.push(provider);
             if (!this.RootPath) {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
             }
