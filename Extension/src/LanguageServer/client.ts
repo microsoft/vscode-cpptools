@@ -1076,7 +1076,7 @@ export class DefaultClient implements Client {
         let settings_autoComplete: (string | undefined)[] = [];
         let settings_formatting: (string | undefined)[] = [];
         let workspaceSettings: CppSettings = new CppSettings();
-        let workspaceOtherSettings: OtherSettings = new OtherSettings(null);
+        let workspaceOtherSettings: OtherSettings = new OtherSettings();
         {
             let settings: CppSettings[] = [];
             let otherSettings: OtherSettings[] = [];

@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { CppSettings } from './settings';
 import { getOutputChannel } from '../logger';
 import * as nls from 'vscode-nls';
+import { isString } from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -236,7 +237,7 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         patterns = [ "/**" ];
     }
     patterns.forEach(pattern => {
-        let c: CommentPattern = (typeof pattern === "string") ? { begin: pattern, continue: pattern.startsWith('/*') ? " * " : pattern } : <CommentPattern>pattern;
+        let c: CommentPattern = isString(pattern) ? { begin: pattern, continue: pattern.startsWith('/*') ? " * " : pattern } : <CommentPattern>pattern;
         let r: Rules = constructCommentRules(c, languageId);
         if (beginPatterns.indexOf(c.begin) < 0) {
             if (r.begin && r.begin.length > 0) {

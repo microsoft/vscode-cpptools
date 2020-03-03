@@ -204,7 +204,7 @@ function touchInstallLockFile(): Promise<void> {
 function handleError(error: any): void {
     let installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
-    installationInformation.telemetryProperties['stage'] = installationInformation.stage ? installationInformation.stage : "";
+    installationInformation.telemetryProperties['stage'] = installationInformation.stage || "";
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {

@@ -329,15 +329,9 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function resolveVariables(input: string | undefined, additionalEnvironment: undefined | {[key: string]: string | string[]}): string {
+export function resolveVariables(input: string | undefined, additionalEnvironment?: {[key: string]: string | string[]}): string {
     if (!input) {
         return "";
-    }
-    let additionalEnvironment2: {[key: string]: string | string[]};
-    if (!additionalEnvironment) {
-        additionalEnvironment2 = {};
-    } else {
-        additionalEnvironment2 = additionalEnvironment;
     }
 
     // Replace environment and configuration variables.
@@ -355,14 +349,16 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
             let newValue: string | undefined;
             switch (varType) {
                 case "env": {
-                    let v: string | string[] = additionalEnvironment2[name];
-                    if (isString(v)) {
-                        newValue = v;
-                    } else if (input === match && isArrayOfString(v)) {
-                        newValue = v.join(";");
-                    }
-                    if (!newValue) {
-                        newValue = process.env[name];
+                    if (additionalEnvironment) {
+                        let v: string | string[] = additionalEnvironment[name];
+                        if (isString(v)) {
+                            newValue = v;
+                        } else if (input === match && isArrayOfString(v)) {
+                            newValue = v.join(";");
+                        }
+                        if (!newValue) {
+                            newValue = process.env[name];
+                        }
                     }
                     break;
                 }
@@ -840,7 +836,7 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
 }
 
 export interface CompilerPathAndArgs {
-    compilerPath: string | undefined;
+    compilerPath?: string;
     compilerName: string;
     additionalArgs: string[];
 }

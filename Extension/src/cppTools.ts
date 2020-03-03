@@ -58,9 +58,8 @@ export class CppTools implements CppToolsTestApi {
     public registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
         if (providers.add(provider, this.version)) {
-            let addedMayBeUndefined: CustomConfigurationProvider1 | undefined = providers.get(provider);
-            if (addedMayBeUndefined) {
-                let added: CustomConfigurationProvider1 = addedMayBeUndefined;
+            const added: CustomConfigurationProvider1 | undefined = providers.get(provider);
+            if (added) {
                 let settings: CppSettings = new CppSettings();
                 if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
                     getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));

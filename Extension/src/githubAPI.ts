@@ -249,10 +249,7 @@ async function getRateLimit(): Promise<RateLimit | undefined> {
 
 async function rateLimitExceeded(): Promise<boolean> {
     const rateLimit: RateLimit | undefined = await getRateLimit();
-    if (!rateLimit) {
-        return false;
-    }
-    return rateLimit.rate.remaining <= 0;
+    return rateLimit !== undefined && rateLimit.rate.remaining <= 0;
 }
 
 /**
