@@ -141,9 +141,8 @@ export class ClientCollection {
         if (e !== undefined) {
             e.removed.forEach(folder => {
                 let path: string = util.asFolder(folder.uri);
-                let clientMayBeUndefined: cpptools.Client | undefined = this.languageClients.get(path);
-                if (clientMayBeUndefined) {
-                    let client: cpptools.Client = clientMayBeUndefined;
+                const client: cpptools.Client | undefined = this.languageClients.get(path);
+                if (client) {
                     this.languageClients.delete(path);  // Do this first so that we don't iterate on it during the ownership transfer process.
 
                     // Transfer ownership of the client's documents to another client.
