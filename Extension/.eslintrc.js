@@ -127,7 +127,8 @@ module.exports = {
                     "typedef": [
                         true,
                         "variable-declaration",
-                        "call-signature"
+                        "call-signature",
+                        "variable-declaration-ignore-function"
                     ],
                     "whitespace": [
                         true,
