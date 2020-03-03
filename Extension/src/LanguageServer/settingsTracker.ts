@@ -42,10 +42,7 @@ export class SettingsTracker {
 
         for (let key in settingsResourceScope) {
             let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-            if (curSetting === undefined) {
-                continue;
-            }
-            let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
+            let settings: vscode.WorkspaceConfiguration = (!curSetting || (curSetting.scope === "resource" || curSetting.scope === "machine-overridable")) ? settingsResourceScope : settingsNonScoped;
             let val: any = this.getSetting(settings, key);
             if (val === undefined) {
                 continue;
