@@ -50,7 +50,9 @@ export class SettingsTracker {
             if (val instanceof Object && !(val instanceof Array)) {
                 for (let subKey in val) {
                     let newKey: string = key + "." + subKey;
-                    let subVal: any = this.getSetting(settings, newKey);
+                    let newCurSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + newKey];
+                    let newSettings: vscode.WorkspaceConfiguration = (!newCurSetting || (newCurSetting.scope === "resource" || newCurSetting.scope === "machine-overridable")) ? settingsResourceScope : settingsNonScoped;
+                    let subVal: any = this.getSetting(newSettings, newKey);
                     if (subVal === undefined) {
                         continue;
                     }
