@@ -36,28 +36,28 @@ export class SettingsTracker {
     }
 
     private collectSettings(filter: FilterFunction): { [key: string]: string } {
-        let settingsResourceScope: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.resource);
-        let settingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+        const settingsResourceScope: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.resource);
+        const settingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+        const selectCorrectlyScopedSettings = (rawSetting: any): vscode.WorkspaceConfiguration =>
+            (!rawSetting || rawSetting.scope === "resource" || rawSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
         let result: { [key: string]: string } = {};
-
-        for (let key in settingsResourceScope) {
-            let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-            if (curSetting === null || curSetting === undefined) {
-                continue;
-            }
-            let settings: vscode.WorkspaceConfiguration = (curSetting.scope === "resource" || curSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
-            let val: any = this.getSetting(settings, key);
-            if (val === null || val === undefined) {
+        for (const key in settingsResourceScope) {
+            const rawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+            const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting);
+            const val: any = this.getSetting(correctlyScopedSettings, key);
+            if (val === undefined) {
                 continue;
             }
             if (val instanceof Object && !(val instanceof Array)) {
-                for (let subKey in val) {
-                    let newKey: string = key + "." + subKey;
-                    let subVal: any = this.getSetting(settings, newKey);
-                    if (subVal === null || subVal === undefined) {
+                for (const subKey in val) {
+                    const newKey: string = key + "." + subKey;
+                    const newRawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + newKey];
+                    const correctlyScopedSubSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(newRawSetting);
+                    const subVal: any = this.getSetting(correctlyScopedSubSettings, newKey);
+                    if (subVal === undefined) {
                         continue;
                     }
-                    let entry: KeyValuePair | undefined = this.filterAndSanitize(newKey, subVal, settings, filter);
+                    const entry: KeyValuePair | undefined = this.filterAndSanitize(newKey, subVal, correctlyScopedSubSettings, filter);
                     if (entry && entry.key && entry.value) {
                         result[entry.key] = entry.value;
                     }
@@ -65,7 +65,7 @@ export class SettingsTracker {
                 continue;
             }
 
-            let entry: KeyValuePair | undefined = this.filterAndSanitize(key, val, settings, filter);
+            const entry: KeyValuePair | undefined = this.filterAndSanitize(key, val, correctlyScopedSettings, filter);
             if (entry && entry.key && entry.value) {
                 result[entry.key] = entry.value;
             }

@@ -550,7 +550,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     }
 
     if (activeDocument !== event.textEditor.document.uri.toString()) {
-        // For some strange (buggy?) reason we don't reliably get onDidChangeActiveTextEditor callbacks.
+        // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
         activeDocument = event.textEditor.document.uri.toString();
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();

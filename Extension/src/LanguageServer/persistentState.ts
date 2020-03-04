@@ -60,7 +60,7 @@ export class PersistentWorkspaceState<T> extends PersistentStateBase<T> {
 
 export class PersistentFolderState<T> extends PersistentWorkspaceState<T> {
     constructor(key: string, defaultValue: T, folder: vscode.WorkspaceFolder) {
-        // Check for the old (buggy) key. If found, remove it and update the new key with the old value.
+        // Check for the old key. If found, remove it and update the new key with the old value.
         let old_key: string = key + (folder ? `-${path.basename(folder.uri.fsPath)}` : "-untitled");
         let old_val: T | undefined;
         if (util.extensionContext) {
