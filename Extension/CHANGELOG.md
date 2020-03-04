@@ -3,6 +3,7 @@
 ## Version 0.27.0-insiders2: March 4, 2019
 ### Bug Fixes
 * Fix the `Open File...` scenario (without a workspace folder). [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
+* Fix `browsePath` null reference that can occur with some configuration providers. [PR #5055](https://github.com/microsoft/vscode-cpptools/pull/5055)
 
 ## Version 0.27.0-insiders: March 3, 2019
 ### Enhancements
