@@ -204,7 +204,7 @@ function touchInstallLockFile(): Promise<void> {
 function handleError(error: any): void {
     let installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
-    installationInformation.telemetryProperties['stage'] = installationInformation.stage || "";
+    installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
@@ -261,7 +261,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
         util.setProgress(util.getProgressInstallSuccess());
     }
 
-    installBlob.telemetryProperties['osArchitecture'] = info.architecture ? info.architecture : "";
+    installBlob.telemetryProperties['osArchitecture'] = info.architecture ?? "";
 
     Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
 

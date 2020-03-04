@@ -2195,7 +2195,7 @@ export class DefaultClient implements Client {
                 this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
             }
         }
-        let configName: string | undefined = configurations[params.currentConfiguration].name || "";
+        let configName: string | undefined = configurations[params.currentConfiguration].name ?? "";
         this.model.activeConfigName.setValueIfActive(configName);
         let newProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {

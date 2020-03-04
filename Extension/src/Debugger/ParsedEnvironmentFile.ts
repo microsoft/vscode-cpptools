@@ -52,7 +52,7 @@ export class ParsedEnvironmentFile {
 
             if (r) {
                 const key: string = r[1];
-                let value: string = r[2] || "";
+                let value: string = r[2] ?? "";
                 if ((value.length > 0) && (value.charAt(0) === '"') && (value.charAt(value.length - 1) === '"')) {
                     value = value.replace(/\\n/gm, "\n");
                 }
