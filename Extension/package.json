@@ -573,7 +573,7 @@
           "type": "boolean",
           "default": false,
           "description": "%c_cpp.configuration.useBacktickCommandSubstitution.description%",
-          "scope": "resource"
+          "scope": "window"
         }
       }
     },
