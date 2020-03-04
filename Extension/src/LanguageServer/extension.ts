@@ -1318,8 +1318,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const process1: string = "cpptools-srv\t";
-    const process2: string = "cpptools\t";
+    const process1: string = "cpptools-srv\s+";
+    const process2: string = "cpptools\s+";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
         data = `${process1}${binaryVersion}\n${data}`;
@@ -1327,7 +1327,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
         data = data.replace(new RegExp(process2, "g"), "");
         data = `${process2}${binaryVersion}\n${data}`;
     } else {
-        return logCrashTelemetry("No process"); // Not expected, but just in case.
+        // Not expected, but just in case.
+        data = `cpptools?\t${binaryVersion}\n${data}`;
     }
 
     // Remove runtime lines because they can be different on different machines.
