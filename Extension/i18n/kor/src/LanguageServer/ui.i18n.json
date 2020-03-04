@@ -16,7 +16,7 @@
 	"none": "없음",
 	"disable.configuration.provider": "해당하는 경우 활성 구성 공급자를 사용하지 않도록 설정합니다.",
 	"select.compile.commands": "compile_commands.json 선택...",
-	"select.workspace": "Select a workspace folder...",
+	"select.workspace": "작업 영역 폴더 선택...",
 	"select.parsing.command": "구문 분석 명령 선택...",
 	"resume.parsing": "구문 분석 다시 시작",
 	"pause.parsing": "구문 분석 일시 중지"

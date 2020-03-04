@@ -6,6 +6,7 @@
 
 import * as util from '../common';
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 class PersistentStateBase<T> {
     private key: string;
@@ -51,7 +52,19 @@ export class PersistentWorkspaceState<T> extends PersistentStateBase<T> {
 
 export class PersistentFolderState<T> extends PersistentWorkspaceState<T> {
     constructor(key: string, defaultValue: T, folder: vscode.WorkspaceFolder) {
-        let newKey: string = key + (folder ? `-${util.getUniqueWorkspaceName(folder)}` : "-untitled");
+        // Check for the old key. If found, remove it and update the new key with the old value.
+        let old_key: string = key + (folder ? `-${path.basename(folder.uri.fsPath)}` : "-untitled");
+        let old_val: T;
+        if (util.extensionContext) {
+            old_val = util.extensionContext.workspaceState.get(old_key);
+            if (old_val !== undefined) {
+                util.extensionContext.workspaceState.update(old_key, undefined);
+            }
+        }
+        let newKey: string = key + (folder ? `-${folder.uri.fsPath}` : "-untitled");
         super(newKey, defaultValue);
+        if (old_val !== undefined) {
+            this.Value = old_val;
+        }
     }
 }
