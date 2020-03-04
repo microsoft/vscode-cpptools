@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.27.0-insiders2: March 4, 2019
+### Bug Fixes
+* Fix the open file scenario. [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
+
 ## Version 0.27.0-insiders: March 3, 2019
 ### Enhancements
 * Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multiroot%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
