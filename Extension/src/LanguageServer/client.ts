@@ -1022,9 +1022,11 @@ export class DefaultClient implements Client {
 
             settings.push(workspaceSettings);
             otherSettings.push(workspaceOtherSettings);
-            for (let workspaceFolder of vscode.workspace.workspaceFolders) {
-                settings.push(new CppSettings(workspaceFolder.uri));
-                otherSettings.push(new OtherSettings(workspaceFolder.uri));
+            if (vscode.workspace.workspaceFolders) {
+                for (let workspaceFolder of vscode.workspace.workspaceFolders) {
+                    settings.push(new CppSettings(workspaceFolder.uri));
+                    otherSettings.push(new OtherSettings(workspaceFolder.uri));
+                }
             }
 
             for (let setting of settings) {
