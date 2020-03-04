@@ -1454,6 +1454,9 @@ export class DefaultClient implements Client {
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
             task().then(async config => {
+                if (!config) {
+                    return;
+                }
                 // TODO: This is a hack to get around CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
                 let foundMatch: boolean = false;
                 for (let c of config.browsePath) {
