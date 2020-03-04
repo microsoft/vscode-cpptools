@@ -2,7 +2,7 @@
 
 ## Version 0.27.0-insiders2: March 4, 2019
 ### Bug Fixes
-* Fix the open file scenario. [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
+* Fix the `Open File...` scenario (without a workspace folder). [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
 
 ## Version 0.27.0-insiders: March 3, 2019
 ### Enhancements
