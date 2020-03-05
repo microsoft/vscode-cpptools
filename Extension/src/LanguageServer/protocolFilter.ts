@@ -15,7 +15,6 @@ import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension'
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
     let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
-    /* tslint:disable */
     // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
     let invoke2 = (a: any, b: any, callback: (a: any, b: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
     let invoke3 = (a: any, b: any, c: any, callback: (a: any, b: any, c: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
