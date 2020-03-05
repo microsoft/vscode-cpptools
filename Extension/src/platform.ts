@@ -75,8 +75,7 @@ export class PlatformInformation {
                         return 'arm64';
                     } else if (architecture.startsWith('armv')) {
                         return 'arm';
-                    } 
-
+                    }
                     return architecture.trim();
                 }
                 return null;
