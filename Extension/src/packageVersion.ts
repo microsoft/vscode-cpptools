@@ -35,7 +35,12 @@ export class PackageVersion {
             this.suffixVersion = 0;
         }
 
-        if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
+        if (this.major === undefined
+            || this.major === null
+            || this.minor === undefined
+            || this.minor === null
+            || this.patch === undefined
+            || this.patch === null) {
             throw new Error(`Failed to parse version string: ${version}`);
         }
     }
@@ -62,7 +67,10 @@ export class PackageVersion {
                 if (diff) {
                     return diff > 0;
                 } else if (this.suffix) {
-                    return (other.suffix && this.suffixVersion > other.suffixVersion);
+                    if (!other.suffix) {
+                        return false;
+                    }
+                    return (this.suffixVersion > other.suffixVersion);
                 } else {
                     return other.suffix ? true : false;
                 }

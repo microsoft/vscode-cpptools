@@ -61,7 +61,7 @@ export function deactivate(): Thenable<void> {
     disposables.forEach(d => d.dispose());
 
     if (languageServiceDisabled) {
-        return;
+        return Promise.resolve();
     }
     return LanguageServer.deactivate();
 }
@@ -185,7 +185,7 @@ function removeUnnecessaryFile(): Promise<void> {
     if (os.platform() !== 'win32') {
         let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException) => {
+            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
                 if (err) {
                     getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
                         'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
@@ -204,7 +204,7 @@ function touchInstallLockFile(): Promise<void> {
 function handleError(error: any): void {
     let installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
-    installationInformation.telemetryProperties['stage'] = installationInformation.stage;
+    installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
@@ -261,7 +261,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
         util.setProgress(util.getProgressInstallSuccess());
     }
 
-    installBlob.telemetryProperties['osArchitecture'] = info.architecture;
+    installBlob.telemetryProperties['osArchitecture'] = info.architecture ?? "";
 
     Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
 

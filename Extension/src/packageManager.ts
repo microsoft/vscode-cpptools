@@ -19,6 +19,7 @@ import * as Telemetry from './telemetry';
 import { IncomingMessage, ClientRequest } from 'http';
 import { Logger } from './logger';
 import * as nls from 'vscode-nls';
+import { Readable } from 'stream';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -57,7 +58,7 @@ export class PackageManagerError extends Error {
         public message: string,
         public localizedMessage: string,
         public methodName: string,
-        public pkg: IPackage = null,
+        public pkg: IPackage | null = null,
         public innerError: any = null,
         public errorCode: string = '') {
         super(message);
@@ -71,7 +72,7 @@ export class PackageManagerWebResponseError extends PackageManagerError {
         public message: string,
         public localizedMessage: string,
         public methodName: string,
-        public pkg: IPackage = null,
+        public pkg: IPackage | null = null,
         public innerError: any = null,
         public errorCode: string = '') {
         super(message, localizedMessage, methodName, pkg, innerError, errorCode);
@@ -79,7 +80,7 @@ export class PackageManagerWebResponseError extends PackageManagerError {
 }
 
 export class PackageManager {
-    private allPackages: IPackage[];
+    private allPackages?: IPackage[];
 
     public constructor(
         private platformInfo: PlatformInformation,
@@ -88,7 +89,7 @@ export class PackageManager {
         tmp.setGracefulCleanup();
     }
 
-    public DownloadPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    public DownloadPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void | null> {
         return this.GetPackages()
             .then((packages) => {
                 let count: number = 1;
@@ -100,7 +101,7 @@ export class PackageManager {
             });
     }
 
-    public InstallPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    public InstallPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void | null> {
         return this.GetPackages()
             .then((packages) => {
                 let count: number = 1;
@@ -115,8 +116,8 @@ export class PackageManager {
     /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
      *  Like Promise.all, but runs the promises in sequence rather than simultaneously.
      */
-    private BuildPromiseChain<TItem, TPromise>(items: TItem[], promiseBuilder: (TItem) => Promise<TPromise>): Promise<TPromise> {
-        let promiseChain: Promise<TPromise> = Promise.resolve<TPromise>(null);
+    private BuildPromiseChain<TItem, TPromise>(items: TItem[], promiseBuilder: (item: TItem) => Promise<TPromise>): Promise<TPromise | null> {
+        let promiseChain: Promise<TPromise | null> = Promise.resolve<TPromise | null>(null);
 
         for (let item of items) {
             promiseChain = promiseChain.then(() => promiseBuilder(item));
@@ -160,7 +161,7 @@ export class PackageManager {
     }
 
     private ArchitecturesMatch(value: IPackage): boolean {
-        return !value.architectures || value.architectures.indexOf(this.platformInfo.architecture) !== -1;
+        return !value.architectures || (this.platformInfo.architecture !== undefined && value.architectures.indexOf(this.platformInfo.architecture) !== -1);
     }
 
     private PlatformsMatch(value: IPackage): boolean {
@@ -168,17 +169,15 @@ export class PackageManager {
     }
 
     private VersionsMatch(value: IPackage): boolean {
-
-        // If we have a versionRegex but did not get a platformVersion
-        if (value.versionRegex && !this.platformInfo.version) {
-            // If we are expecting to match the versionRegex, return false since there was no version found.
-            //
-            // If we are expecting to not match the versionRegex, return true since we are expecting to
-            // not match the version string, the only match would be if versionRegex was not set.
-            return !value.matchVersion;
-        }
-
         if (value.versionRegex) {
+            // If we have a versionRegex but did not get a platformVersion
+            if (!this.platformInfo.version) {
+                // If we are expecting to match the versionRegex, return false since there was no version found.
+                //
+                // If we are expecting to not match the versionRegex, return true since we are expecting to
+                // not match the version string, the only match would be if versionRegex was not set.
+                return !value.matchVersion;
+            }
             const regex: RegExp = new RegExp(value.versionRegex);
 
             return (value.matchVersion ?
@@ -291,10 +290,16 @@ export class PackageManager {
                         if (typeof response.headers.location === "string") {
                             redirectUrl = response.headers.location;
                         } else {
+                            if (!response.headers.location) {
+                                return reject(new PackageManagerError('Invalid download location received', localize("invalid.download.location.received", 'Invalid download location received'), 'DownloadFile', pkg));
+                            }
                             redirectUrl = response.headers.location[0];
                         }
                         return resolve(this.DownloadFile(redirectUrl, pkg, 0, progress));
                     } else if (response.statusCode !== 200) {
+                        if (response.statusCode === undefined || response.statusCode === null) {
+                            return reject(new PackageManagerError('Invalid response code received', localize("invalid.response.code.received", 'Invalid response code received'), 'DownloadFile', pkg));
+                        }
                         // Download failed - print error message
                         let errorMessage: string = localize("failed.web.error", "failed (error code '{0}')", response.statusCode);
                         return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
@@ -304,12 +309,15 @@ export class PackageManager {
                         if (typeof response.headers['content-length'] === "string") {
                             contentLength = response.headers['content-length'];
                         } else {
+                            if (response.headers['content-length'] === undefined || response.headers['content-length'] === null) {
+                                return reject(new PackageManagerError('Invalid content length location received', localize("invalid.content.length.received", 'Invalid content length location received'), 'DownloadFile', pkg));
+                            }
                             contentLength = response.headers['content-length'][0];
                         }
                         let packageSize: number = parseInt(contentLength, 10);
                         let downloadPercentage: number = 0;
                         let dots: number = 0;
-                        let tmpFile: fs.WriteStream = fs.createWriteStream(null, { fd: pkg.tmpFile.fd });
+                        let tmpFile: fs.WriteStream = fs.createWriteStream("", { fd: pkg.tmpFile.fd });
 
                         this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `);
 
@@ -357,7 +365,7 @@ export class PackageManager {
             }
 
             yauzl.fromFd(pkg.tmpFile.fd, { lazyEntries: true }, (err, zipfile) => {
-                if (err) {
+                if (err || !zipfile) {
                     return reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err));
                 }
 
@@ -384,8 +392,8 @@ export class PackageManager {
                         util.checkFileExists(absoluteEntryPath).then((exists: boolean) => {
                             if (!exists) {
                                 // File - extract it
-                                zipfile.openReadStream(entry, (err, readStream: fs.ReadStream) => {
-                                    if (err) {
+                                zipfile.openReadStream(entry, (err, readStream: Readable | undefined) => {
+                                    if (err || !readStream) {
                                         return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
                                     }
 

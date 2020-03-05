@@ -35,7 +35,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     let configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
-    let vsdbgProvider: CppVsDbgConfigurationProvider = null;
+    let vsdbgProvider: CppVsDbgConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
         vsdbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
         disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(vsdbgProvider)));
@@ -44,7 +44,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
 
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugActiveFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
-        const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
             // Not enabled because we do not react to single-file mode correctly yet.
             // We get an ENOENT when the user's c_cpp_properties.json is attempted to be parsed.

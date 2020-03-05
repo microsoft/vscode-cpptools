@@ -28,7 +28,7 @@ import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -46,7 +46,7 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
-let buildInfoCache: BuildInfo | null = null;
+let buildInfoCache: BuildInfo | undefined;
 const taskSourceStr: string = "C/C++";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
@@ -58,7 +58,7 @@ let vcpkgDbPromise: Promise<vcpkgDatabase>;
 function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     return new Promise((resolve, reject) => {
         yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err? : Error, zipfile?: yauzl.ZipFile) => {
-            if (err) {
+            if (err || !zipfile) {
                 resolve({});
                 return;
             }
@@ -70,7 +70,7 @@ function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                 }
                 dbFound = true;
                 zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
-                    if (err) {
+                    if (err || !stream) {
                         resolve({});
                         return;
                     }
@@ -124,12 +124,12 @@ function getVcpkgClipboardInstallAction(port: string): vscode.CodeAction {
 
 async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number): Promise<string[]> {
     const matches: RegExpMatchArray | null = document.lineAt(line).text.match(/#include\s*[<"](?<includeFile>[^>"]*)[>"]/);
-    if (!matches || !matches.length) {
+    if (!matches || !matches.length || !matches.groups) {
         return [];
     }
     const missingHeader: string = matches.groups['includeFile'].replace(/\//g, '\\');
 
-    let portsWithHeader: string[];
+    let portsWithHeader: string[] | undefined;
     const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
     if (vcpkgDb) {
         portsWithHeader = vcpkgDb[missingHeader];
@@ -139,7 +139,10 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
 
 function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
     const missingIncludeCode: number = 1696;
-    return diagnostic.code && diagnostic.code === missingIncludeCode && diagnostic.source && diagnostic.source === 'C/C++';
+    if (diagnostic.code === null || diagnostic.code === undefined || !diagnostic.source) {
+        return false;
+    }
+    return diagnostic.code === missingIncludeCode && diagnostic.source === 'C/C++';
 }
 
 /**
@@ -170,7 +173,7 @@ export function activate(activationEventOccurred: boolean): void {
 
     taskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
         provideTasks: () => getBuildTasks(false),
-        resolveTask(task: vscode.Task): vscode.Task {
+        resolveTask(task: vscode.Task): vscode.Task | undefined {
             // Currently cannot implement because VS Code does not call this. Can implement custom output file directory when enabled.
             return undefined;
         }
@@ -241,7 +244,7 @@ export interface BuildTaskDefinition extends vscode.TaskDefinition {
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
 export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode.Task[]> {
-    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return [];
     }
@@ -285,24 +288,28 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
     }
 
     // Get user compiler path.
-    const userCompilerPathAndArgs: util.CompilerPathAndArgs = await activeClient.getCurrentCompilerPathAndArgs();
-    let userCompilerPath: string = userCompilerPathAndArgs.compilerPath;
-    if (userCompilerPath && userCompilerPathAndArgs.compilerName) {
-        userCompilerPath = userCompilerPath.trim();
-        if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
-            userCompilerPath = null;
-        } else {
-            userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
+    const userCompilerPathAndArgs: util.CompilerPathAndArgs | undefined = await activeClient.getCurrentCompilerPathAndArgs();
+    let userCompilerPath: string | undefined;
+    if (userCompilerPathAndArgs) {
+        userCompilerPath = userCompilerPathAndArgs.compilerPath;
+        if (userCompilerPath && userCompilerPathAndArgs.compilerName) {
+            userCompilerPath = userCompilerPath.trim();
+            if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
+                userCompilerPath = undefined;
+            } else {
+                userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
+            }
         }
     }
 
     // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
     // Filter them based on the file type to get a reduced list appropriate for the active file.
-    let knownCompilerPaths: string[];
-    let knownCompilers: configs.KnownCompiler[] = await activeClient.getKnownCompilers();
+    let knownCompilerPaths: string[] | undefined;
+    let knownCompilers: configs.KnownCompiler[]  | undefined = await activeClient.getKnownCompilers();
     if (knownCompilers) {
         knownCompilers = knownCompilers.filter(info =>
             ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+                userCompilerPathAndArgs &&
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
                 (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
         knownCompilerPaths = knownCompilers.map<string>(info => info.path);
@@ -360,7 +367,14 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
         }
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
-        const target: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(clients.ActiveClient.RootUri);
+        let uri: vscode.Uri | undefined = clients.ActiveClient.RootUri;
+        if (!uri) {
+            throw new Error("No client URI found in getBuildTasks()");
+        }
+        const target: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(uri);
+        if (!target) {
+            throw new Error("No target WorkspaceFolder found in getBuildTasks()");
+        }
         let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, isCl ? '$msCompile' : '$gcc');
         task.definition = kind; // The constructor for vscode.Task will consume the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
@@ -378,7 +392,7 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
 
     // Task for user compiler path setting
     if (userCompilerPath) {
-        let task: vscode.Task = createTask(userCompilerPath, userCompilerPathAndArgs.additionalArgs);
+        let task: vscode.Task = createTask(userCompilerPath, userCompilerPathAndArgs?.additionalArgs);
         buildTasks.push(task);
     }
 
@@ -509,15 +523,15 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
-export function onDidChangeActiveTextEditor(editor: vscode.TextEditor): void {
+export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
     if (clients === undefined) {
         return;
     }
 
-    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-    if (!activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
+    let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();
@@ -560,7 +574,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                         client.addFileAssociations(mappingString, false);
                     }
                 }
-                client.provideCustomConfiguration(document.uri, null);
+                client.provideCustomConfiguration(document.uri, undefined);
                 client.notifyWhenReady(() => {
                     client.takeOwnership(document);
                     client.onDidOpenTextDocument(document);
@@ -626,7 +640,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
-        const vsCodeScriptPath: string = function(platformInfo): string {
+        const vsCodeScriptPath: string | undefined = function(platformInfo): string | undefined {
             if (platformInfo.platform === 'win32') {
                 const vsCodeBinName: string = path.basename(process.execPath);
                 let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
@@ -709,11 +723,21 @@ function installVsix(vsixLocation: string): Thenable<void> {
             // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
             // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
             let sentOverride: boolean = false;
-            process.stdout.on('data', () => {
+            let stdout: Readable | null = process.stdout;
+            if (!stdout) {
+                reject(new Error("Failed to communicate with VS Code script process for installation"));
+                return;
+            }
+            stdout.on('data', () => {
                 if (sentOverride) {
                     return;
                 }
-                process.stdin.write('0\n');
+                let stdin: Writable | null = process.stdin;
+                if (!stdin) {
+                    reject(new Error("Failed to communicate with VS Code script process for installation"));
+                    return;
+                }
+                stdin.write('0\n');
                 sentOverride = true;
                 clearInterval(timer);
                 resolve();
@@ -728,7 +752,7 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!suggestInsiders.Value) {
         return;
     }
-    let buildInfo: BuildInfo;
+    let buildInfo: BuildInfo | undefined;
     try {
         buildInfo = await getTargetBuildInfo("Insiders");
     } catch (error) {
@@ -745,7 +769,7 @@ async function suggestInsidersChannel(): Promise<void> {
     const yes: string = localize("yes.button", "Yes");
     const askLater: string = localize("ask.me.later.button", "Ask Me Later");
     const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
-    let selection: string = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
+    let selection: string | undefined = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
             // Cache buildInfo.
@@ -776,13 +800,13 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
             // Thusly, the .catch call must also throw, as a return would simply return an unused promise
             // instead of returning early from this function scope
             let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-            let originalProxySupport: string = config.inspect<string>('http.proxySupport').globalValue;
+            let originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
             while (true) { // Might need to try again with a different http.proxySupport setting.
                 try {
                     await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
                 } catch {
                     // Try again with the proxySupport to "off".
-                    if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                    if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
                         config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
                         reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
                         return;
@@ -794,7 +818,7 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
                     reject(new Error('Failed to download VSIX package'));
                     return;
                 }
-                if (originalProxySupport !== config.inspect<string>('http.proxySupport').globalValue) {
+                if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
                     config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
                     telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
                 }
@@ -830,9 +854,9 @@ function applyUpdate(buildInfo: BuildInfo): Promise<void> {
  */
 async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
     // If we have buildInfo cache, we should use it.
-    let buildInfo: BuildInfo | null = buildInfoCache;
+    let buildInfo: BuildInfo | undefined = buildInfoCache;
     // clear buildInfo cache.
-    buildInfoCache = null;
+    buildInfoCache = undefined;
 
     if (!buildInfo) {
         try {
@@ -899,7 +923,7 @@ export function registerCommands(): void {
 
 function onSwitchHeaderSource(): void {
     onActivationEvent();
-    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
+    let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
         return;
     }
@@ -948,7 +972,7 @@ function selectClient(): Thenable<Client> {
     } else {
         return ui.showWorkspaces(clients.Names).then(key => {
             if (key !== "") {
-                let client: Client = clients.get(key);
+                let client: Client | undefined = clients.get(key);
                 if (client) {
                     return client;
                 } else {
@@ -987,7 +1011,7 @@ function onSelectConfigurationProvider(): void {
 
 function onEditConfigurationJSON(): void {
     onActivationEvent();
-    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, null);
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
@@ -997,7 +1021,7 @@ function onEditConfigurationJSON(): void {
 
 function onEditConfigurationUI(): void {
     onActivationEvent();
-    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, null);
+    telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
@@ -1102,7 +1126,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         const missingIncludeLocations: [vscode.TextDocument, number[]][] = [];
         vscode.languages.getDiagnostics().forEach(uriAndDiagnostics => {
             // Extract textDocument
-            const textDocument: vscode.TextDocument = vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === uriAndDiagnostics[0].fsPath);
+            const textDocument: vscode.TextDocument | undefined = vscode.workspace.textDocuments.find(doc => doc.uri.fsPath === uriAndDiagnostics[0].fsPath);
             if (!textDocument) {
                 return;
             }
@@ -1132,11 +1156,12 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
                 portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
             });
         });
-        ports = [].concat(...(await Promise.all(portsPromises)));
+        ports = ([] as string[]).concat(...(await Promise.all(portsPromises)));
         if (!ports.length) {
             return;
         }
-        ports = ports.filter((port: string, index: number) => ports.indexOf(port) === index);
+        let ports2: string[] = ports;
+        ports = ports2.filter((port: string, index: number) => ports2.indexOf(port) === index);
     }
 
     let installCommand: string = 'vcpkg install';
@@ -1150,7 +1175,7 @@ function onSetActiveConfigName(configurationName: string): Thenable<void> {
     return clients.ActiveClient.setCurrentConfigName(configurationName);
 }
 
-function onGetActiveConfigName(): Thenable<string> {
+function onGetActiveConfigName(): Thenable<string | undefined> {
     return clients.ActiveClient.getCurrentConfigName();
 }
 
@@ -1171,12 +1196,16 @@ function onShowRefCommand(arg?: TreeNode): void {
     const { node } = arg;
     if (node === NodeType.reference) {
         const { referenceLocation } = arg;
-        vscode.window.showTextDocument(referenceLocation.uri, {
-            selection: referenceLocation.range.with({ start: referenceLocation.range.start, end: referenceLocation.range.end })
-        });
+        if (referenceLocation) {
+            vscode.window.showTextDocument(referenceLocation.uri, {
+                selection: referenceLocation.range.with({ start: referenceLocation.range.start, end: referenceLocation.range.end })
+            });
+        }
     } else if (node === NodeType.fileWithPendingRef) {
         const { fileUri } = arg;
-        vscode.window.showTextDocument(fileUri);
+        if (fileUri) {
+            vscode.window.showTextDocument(fileUri);
+        }
     }
 }
 
@@ -1225,7 +1254,7 @@ function onRenameViewAddFile(arg?: TreeNode): void {
 }
 
 function onRenameViewAddReferenceType(arg?: TreeNode): void {
-    if (!arg) {
+    if (!arg || !arg.referenceType) {
         return;
     }
     arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
@@ -1234,13 +1263,17 @@ function onRenameViewAddReferenceType(arg?: TreeNode): void {
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
         prevCrashFile = "";
-        let crashFolder: string = path.resolve(process.env.HOME, "Library/Logs/DiagnosticReports");
+        const home: string | undefined = process.env.HOME;
+        if (!home) {
+            return;
+        }
+        let crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
             let crashObject: { [key: string]: string } = {};
-            if (err) {
+            if (err?.code) {
                 // If the directory isn't there, we have a problem...
                 crashObject["fs.stat: err.code"] = err.code;
-                telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
+                telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
                 return;
             }
 
@@ -1279,10 +1312,10 @@ function reportMacCrashes(): void {
 function logCrashTelemetry(data: string): void {
     let crashObject: { [key: string]: string } = {};
     crashObject["CrashingThreadCallStack"] = data;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, null);
+    telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
 }
 
-function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
+function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
     if (err) {
         return logCrashTelemetry("readFile: " + err.code);
     }
@@ -1293,7 +1326,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     let startVersion: number = data.indexOf("Version:");
     if (startVersion >= 0) {
         data = data.substr(startVersion);
-        const binaryVersionMatches: string[] = data.match(/^Version:\s*(\d*\.\d*\.\d*\.\d*|\d)/);
+        const binaryVersionMatches: string[] | null = data.match(/^Version:\s*(\d*\.\d*\.\d*\.\d*|\d)/);
         binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
     }
 

@@ -9,8 +9,8 @@ export enum InstallationType {
 }
 
 export class InstallationInformation {
-    stage: string;
-    type: InstallationType;
+    stage?: string;
+    type?: InstallationType;
     hasError: boolean;
     telemetryProperties: { [key: string]: string };
 
