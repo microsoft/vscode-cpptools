@@ -1322,10 +1322,10 @@ function handleCrashFileRead(err: NodeJS.ErrnoException, data: string): void {
     const process2: string = "cpptools\t";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1, "g"), "");
-        data = `${process1}${binaryVersion}\n${data}`;
+        data = `${process1}\t${binaryVersion}\n${data}`;
     } else if (data.includes(process2)) {
         data = data.replace(new RegExp(process2, "g"), "");
-        data = `${process2}${binaryVersion}\n${data}`;
+        data = `${process2}\t${binaryVersion}\n${data}`;
     } else {
         return logCrashTelemetry("No process"); // Not expected, but just in case.
     }
