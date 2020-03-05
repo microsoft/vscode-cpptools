@@ -106,7 +106,7 @@ export interface CompilerDefaults {
 
 export class CppProperties {
     private rootUri: vscode.Uri;
-    private propertiesFile?: vscode.Uri;
+    private propertiesFile: vscode.Uri | undefined | null = undefined; // undefined and null values are handled differently
     private readonly configFolder: string;
     private configurationJson?: ConfigurationJson;
     private currentConfigurationIndex: PersistentFolderState<number>;
@@ -189,7 +189,7 @@ export class CppProperties {
         if (this.rootUri !== null && fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
         } else {
-            this.propertiesFile = undefined;
+            this.propertiesFile = null;
         }
 
         let settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
@@ -201,7 +201,7 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidDelete(() => {
-            this.propertiesFile = undefined;
+            this.propertiesFile = null;
             this.resetToDefaultSettings(true);
             this.handleConfigurationChange();
         });
@@ -1503,7 +1503,7 @@ export class CppProperties {
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
                 if (this.propertiesFile) {
-                    this.propertiesFile = undefined; // File deleted.
+                    this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
                 }
