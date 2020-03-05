@@ -109,14 +109,14 @@ export class RemoteAttachPicker {
     private getRemoteProcessCommand(): string {
         let innerQuote: string = `'`;
         let outerQuote: string = `"`;
-        let substitutionBegin: string = `$(`;
-        let substitutionEnd: string = `)`;
+        let parameterBegin: string = `$(`;
+        let parameterEnd: string = `)`;
         let escapedQuote: string = `\\\"`;
 
         let settings: CppSettings = new CppSettings();
         if (settings.useBacktickCommandSubstitution) {
-            substitutionBegin = `\``;
-            substitutionEnd = `\``;
+            parameterBegin = `\``;
+            parameterEnd = `\``;
             escapedQuote = `\"`;
         }
 
@@ -127,8 +127,8 @@ export class RemoteAttachPicker {
             outerQuote = `'`;
         }
 
-        return `${outerQuote}sh -c ${innerQuote}uname && if [ ${substitutionBegin}uname${substitutionEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
-        `then ${PsProcessParser.psLinuxCommand} ; elif [ ${substitutionBegin}uname${substitutionEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
+        return `${outerQuote}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
+        `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
         `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
