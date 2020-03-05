@@ -1355,10 +1355,10 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
     const process2: string = "cpptools";
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1 + "\\s+", "g"), "");
-        data = `${process1}${binaryVersion}\n${data}`;
+        data = `${process1}\t${binaryVersion}\n${data}`;
     } else if (data.includes(process2)) {
         data = data.replace(new RegExp(process2 + "\\s+", "g"), "");
-        data = `${process2}${binaryVersion}\n${data}`;
+        data = `${process2}\t${binaryVersion}\n${data}`;
     } else {
         // Not expected, but just in case.
         data = `cpptools?\t${binaryVersion}\n${data}`;
