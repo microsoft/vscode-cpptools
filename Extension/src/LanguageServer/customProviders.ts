@@ -168,9 +168,9 @@ export class CustomConfigurationProviderCollection {
             return false;
         }
 
-        let exists: boolean = this.providers.has(wrapper.extensionId);
-        if (exists) {
-            let existing: CustomProviderWrapper = this.providers.get(wrapper.extensionId);
+        let exists: boolean = false;
+        let existing: CustomProviderWrapper | undefined = this.providers.get(wrapper.extensionId);
+        if (existing) {
             exists = (existing.version === Version.v0 && wrapper.version === Version.v0);
         }
 
@@ -182,7 +182,7 @@ export class CustomConfigurationProviderCollection {
         return !exists;
     }
 
-    public get(provider: string | CustomConfigurationProvider): CustomConfigurationProvider1 | null {
+    public get(provider: string | CustomConfigurationProvider): CustomConfigurationProvider1 | undefined {
         let id: string = this.getId(provider);
 
         if (this.providers.has(id)) {
@@ -200,7 +200,7 @@ export class CustomConfigurationProviderCollection {
                 return this.providers.get(id);
             }
         }
-        return null;
+        return undefined;
     }
 
     public forEach(func: (provider: CustomConfigurationProvider1) => void): void {
@@ -216,9 +216,9 @@ export class CustomConfigurationProviderCollection {
         }
     }
 
-    public checkId(providerId?: string): string {
+    public checkId(providerId?: string): string | undefined {
         if (!providerId) {
-            return providerId;
+            return undefined;
         }
         let found: CustomConfigurationProvider1[] = [];
         let noUpdate: boolean = false;
@@ -247,7 +247,7 @@ export function getCustomConfigProviders(): CustomConfigurationProviderCollectio
     return providerCollection;
 }
 
-export function isSameProviderExtensionId(settingExtensionId: string, providerExtensionId: string): boolean {
+export function isSameProviderExtensionId(settingExtensionId: string | undefined, providerExtensionId: string | undefined): boolean {
     if (!settingExtensionId && !providerExtensionId) {
         return true;
     }

@@ -31,9 +31,7 @@ export class TestHook implements CppToolsTestHook {
 
     public dispose(): void {
         this.intelliSenseStatusChangedEvent.dispose();
-        this.intelliSenseStatusChangedEvent = null;
         this.statusChangedEvent.dispose();
-        this.statusChangedEvent = null;
     }
 }
 
