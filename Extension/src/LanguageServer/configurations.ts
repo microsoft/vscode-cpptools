@@ -306,22 +306,22 @@ export class CppProperties {
         if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
             configuration.macFrameworkPath = this.defaultFrameworks;
         }
-        if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
+        if ((isUnset(settings.defaultWindowsSdkVersion) || settings.defaultWindowsSdkVersion === "") && this.defaultWindowsSdkVersion && process.platform === 'win32') {
             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
         }
         if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
-            isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
+            (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands === "") && !configuration.compileCommands) {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
             configuration.compilerPath = this.defaultCompilerPath;
         }
-        if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
+        if ((isUnset(settings.defaultCStandard) || settings.defaultCStandard === "") && this.defaultCStandard) {
             configuration.cStandard = this.defaultCStandard;
         }
-        if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
+        if ((isUnset(settings.defaultCppStandard) || settings.defaultCppStandard === "") && this.defaultCppStandard) {
             configuration.cppStandard = this.defaultCppStandard;
         }
-        if (isUnset(settings.defaultIntelliSenseMode)) {
+        if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
     }
