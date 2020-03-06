@@ -453,7 +453,7 @@ export interface Client {
     RootUri?: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string };
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
@@ -1236,13 +1236,13 @@ export class DefaultClient implements Client {
         });
     }
 
-    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
+    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } {
         this.sendDidChangeSettings();
         let changedSettings: { [key: string]: string };
         changedSettings = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
-            let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
-                || event.affectsConfiguration("editor.tokenColorCustomizations");
+            let colorizationNeedsReload: boolean = isFirstClient && (event.affectsConfiguration("workbench.colorTheme")
+                || event.affectsConfiguration("editor.tokenColorCustomizations"));
 
             let colorizationNeedsRefresh: boolean = colorizationNeedsReload
                 || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
@@ -1251,10 +1251,12 @@ export class DefaultClient implements Client {
                 || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
                 || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
 
-            let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
-            if (colorThemeChanged) {
-                let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
-                this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
+            if (isFirstClient) {
+                let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme");
+                if (colorThemeChanged) {
+                    let otherSettings: OtherSettings = new OtherSettings();
+                    this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
+                }
             }
 
             if (colorizationNeedsReload) {
@@ -2550,7 +2552,7 @@ class NullClient implements Client {
     RootUri?: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } { return {}; }
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void {}
     onDidCloseTextDocument(document: vscode.TextDocument): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}

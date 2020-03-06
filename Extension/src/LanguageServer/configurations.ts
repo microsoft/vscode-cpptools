@@ -106,7 +106,7 @@ export interface CompilerDefaults {
 
 export class CppProperties {
     private rootUri: vscode.Uri;
-    private propertiesFile?: vscode.Uri;
+    private propertiesFile: vscode.Uri | undefined | null = undefined; // undefined and null values are handled differently
     private readonly configFolder: string;
     private configurationJson?: ConfigurationJson;
     private currentConfigurationIndex: PersistentFolderState<number>;
@@ -189,7 +189,7 @@ export class CppProperties {
         if (this.rootUri !== null && fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
         } else {
-            this.propertiesFile = undefined;
+            this.propertiesFile = null;
         }
 
         let settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
@@ -201,7 +201,7 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidDelete(() => {
-            this.propertiesFile = undefined;
+            this.propertiesFile = null;
             this.resetToDefaultSettings(true);
             this.handleConfigurationChange();
         });
@@ -306,22 +306,22 @@ export class CppProperties {
         if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
             configuration.macFrameworkPath = this.defaultFrameworks;
         }
-        if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
+        if ((isUnset(settings.defaultWindowsSdkVersion) || settings.defaultWindowsSdkVersion === "") && this.defaultWindowsSdkVersion && process.platform === 'win32') {
             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
         }
         if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
-            isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
+            (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands === "") && !configuration.compileCommands) {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
             configuration.compilerPath = this.defaultCompilerPath;
         }
-        if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
+        if ((isUnset(settings.defaultCStandard) || settings.defaultCStandard === "") && this.defaultCStandard) {
             configuration.cStandard = this.defaultCStandard;
         }
-        if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
+        if ((isUnset(settings.defaultCppStandard) || settings.defaultCppStandard === "") && this.defaultCppStandard) {
             configuration.cppStandard = this.defaultCppStandard;
         }
-        if (isUnset(settings.defaultIntelliSenseMode)) {
+        if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
     }
@@ -1503,7 +1503,7 @@ export class CppProperties {
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
                 if (this.propertiesFile) {
-                    this.propertiesFile = undefined; // File deleted.
+                    this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
                 }
