@@ -1980,8 +1980,5 @@
       ],
       "binaries": []
     }
-  ],
-  "dependencies": {
-    "vsce": "^1.74.0"
-  }
+  ]
 }
