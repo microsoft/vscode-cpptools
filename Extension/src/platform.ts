@@ -15,13 +15,13 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class PlatformInformation {
-    constructor(public platform: string, public architecture: string, public distribution: LinuxDistribution, public version: string) { }
+    constructor(public platform: string, public architecture?: string, public distribution?: LinuxDistribution, public version?: string) { }
 
     public static GetPlatformInformation(): Promise<PlatformInformation> {
         let platform: string = os.platform();
-        let architecturePromise: Promise<string>;
-        let distributionPromise: Promise<LinuxDistribution> = Promise.resolve<LinuxDistribution>(null);
-        let versionPromise: Promise<string> = Promise.resolve<string>(null);
+        let architecturePromise: Promise<string | undefined>;
+        let distributionPromise: Promise<LinuxDistribution | undefined> = Promise.resolve<LinuxDistribution | undefined>(undefined);
+        let versionPromise: Promise<string | undefined> = Promise.resolve<string | undefined>(undefined);
 
         switch (platform) {
             case "win32":
@@ -37,10 +37,13 @@ export class PlatformInformation {
                 architecturePromise = PlatformInformation.GetUnixArchitecture();
                 versionPromise = PlatformInformation.GetDarwinVersion();
                 break;
+
+            default:
+                throw new Error(localize("unknown.os.platform", "Unknown OS platform"));
         }
 
-        return Promise.all<string | LinuxDistribution>([architecturePromise, distributionPromise, versionPromise])
-            .then(([arch, distro, version]: [string, LinuxDistribution, string]) =>
+        return Promise.all([architecturePromise, distributionPromise, versionPromise])
+            .then(([arch, distro, version]) =>
                 new PlatformInformation(platform, arch, distro, version)
             );
     }
@@ -67,13 +70,13 @@ export class PlatformInformation {
             }).catch((error) => PlatformInformation.GetUnknownArchitecture());
     }
 
-    private static GetUnixArchitecture(): Promise<string> {
+    private static GetUnixArchitecture(): Promise<string | undefined> {
         return util.execChildProcess('uname -m', util.packageJson.extensionFolderPath)
             .then((architecture) => {
                 if (architecture) {
                     return architecture.trim();
                 }
-                return null;
+                return undefined;
             });
     }
 

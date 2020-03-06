@@ -34,29 +34,38 @@ export class Logger {
         }
     }
 
-    public showInformationMessage(message: string, items?: string[]): Thenable<string> {
+    public showInformationMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 
+        if (!items) {
+            return vscode.window.showInformationMessage(message);
+        }
         return vscode.window.showInformationMessage(message, ...items);
     }
 
-    public showWarningMessage(message: string, items?: string[]): Thenable<string> {
+    public showWarningMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 
+        if (!items) {
+            return vscode.window.showWarningMessage(message);
+        }
         return vscode.window.showWarningMessage(message, ...items);
     }
 
-    public showErrorMessage(message: string, items?: string[]): Thenable<string> {
+    public showErrorMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 
+        if (!items) {
+            return vscode.window.showErrorMessage(message);
+        }
         return vscode.window.showErrorMessage(message, ...items);
     }
 }
 
-let outputChannel: vscode.OutputChannel;
+let outputChannel: vscode.OutputChannel | undefined;
 
 export function getOutputChannel(): vscode.OutputChannel {
-    if (outputChannel === undefined) {
+    if (!outputChannel) {
         outputChannel = vscode.window.createOutputChannel("C/C++");
     }
     return outputChannel;
@@ -66,7 +75,7 @@ export function showOutputChannel(): void {
     getOutputChannel().show();
 }
 
-let outputChannelLogger: Logger;
+let outputChannelLogger: Logger | undefined;
 
 export function getOutputChannelLogger(): Logger {
     if (!outputChannelLogger) {

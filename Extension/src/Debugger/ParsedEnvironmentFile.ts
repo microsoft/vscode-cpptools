@@ -16,19 +16,19 @@ export interface Environment {
 
 export class ParsedEnvironmentFile {
     public Env: Environment[];
-    public Warning: string | null;
+    public Warning?: string;
 
-    private constructor(env: Environment[], warning: string | null) {
+    private constructor(env: Environment[], warning?: string) {
         this.Env = env;
         this.Warning = warning;
     }
 
-    public static CreateFromFile(envFile: string, initialEnv: Environment[] | undefined): ParsedEnvironmentFile {
+    public static CreateFromFile(envFile: string, initialEnv?: Environment[]): ParsedEnvironmentFile {
         let content: string = fs.readFileSync(envFile, "utf8");
         return this.CreateFromContent(content, envFile, initialEnv);
     }
 
-    public static CreateFromContent(content: string, envFile: string, initialEnv: Environment[] | undefined): ParsedEnvironmentFile {
+    public static CreateFromContent(content: string, envFile: string, initialEnv?: Environment[]): ParsedEnvironmentFile {
 
         // Remove UTF-8 BOM if present
         if (content.charAt(0) === '\uFEFF') {
@@ -48,11 +48,11 @@ export class ParsedEnvironmentFile {
 
         content.split("\n").forEach(line => {
             // Split the line between key and value
-            const r: RegExpMatchArray = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
+            const r: RegExpMatchArray | null = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
 
-            if (r !== null) {
+            if (r) {
                 const key: string = r[1];
-                let value: string = r[2] || "";
+                let value: string = r[2] ?? "";
                 if ((value.length > 0) && (value.charAt(0) === '"') && (value.charAt(value.length - 1) === '"')) {
                     value = value.replace(/\\n/gm, "\n");
                 }
@@ -70,7 +70,7 @@ export class ParsedEnvironmentFile {
         });
 
         // show error message if single lines cannot get parsed
-        let warning: string = null;
+        let warning: string | undefined;
         if (parseErrors.length !== 0) {
             warning = localize("ignoring.lines.in.envfile", "Ignoring non-parseable lines in {0} {1}: ", "envFile", envFile);
             parseErrors.forEach(function (value, idx, array): void {

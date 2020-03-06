@@ -9,8 +9,9 @@
 		"sourceMap": true,
 		"rootDir": ".",
 		"removeComments": true,
-		"noImplicitUseStrict": true,
-		"noUnusedLocals": true
+		"noUnusedLocals": true,
+		"strictNullChecks": true,
+		"strict": true
 	},
 	"include": [
 		"src/**/*.ts",

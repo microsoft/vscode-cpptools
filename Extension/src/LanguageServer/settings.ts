@@ -38,11 +38,19 @@ class Settings {
         } else if (info.globalValue !== undefined) {
             return info.globalValue;
         }
-        let value: T = this.settings.get<T>(deprecatedSection);
+        let value: T | undefined = this.settings.get<T>(deprecatedSection);
         if (value !== undefined) {
             return value;
         }
         return info.defaultValue;
+    }
+
+    protected getWithNullAsUndefined<T>(section: string): T | undefined {
+        let result: T | undefined | null = this.settings.get<T>(section);
+        if (result === null) {
+            return undefined;
+        }
+        return result;
     }
 }
 
@@ -63,11 +71,13 @@ export class CppSettings extends Settings {
         }
     }
 
-    public get clangFormatPath(): string {
-        let path: string = super.Section.get<string>("clang_format_path");
+    public get clangFormatPath(): string | undefined {
+        let path: string | undefined | null = super.Section.get<string>("clang_format_path");
         if (!path) {
             path = which.sync('clang-format', {nothrow: true});
-            if (path) {
+            if (!path) {
+                return undefined;
+            } else {
                 // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
                 let clangFormatVersion: string;
                 try {
@@ -96,50 +106,56 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get clangFormatStyle(): string { return super.Section.get<string>("clang_format_style"); }
-    public get clangFormatFallbackStyle(): string { return super.Section.get<string>("clang_format_fallbackStyle"); }
-    public get clangFormatSortIncludes(): string { return super.Section.get<string>("clang_format_sortIncludes"); }
-    public get formatting(): string { return super.Section.get<string>("formatting"); }
-    public get experimentalFeatures(): string { return super.Section.get<string>("experimentalFeatures"); }
-    public get suggestSnippets(): boolean { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): string { return super.Section.get<string>("intelliSenseEngine"); }
-    public get intelliSenseEngineFallback(): string { return super.Section.get<string>("intelliSenseEngineFallback"); }
-    public get intelliSenseCachePath(): string { return super.Section.get<string>("intelliSenseCachePath"); }
-    public get intelliSenseCacheSize(): number { return super.Section.get<number>("intelliSenseCacheSize"); }
-    public get errorSquiggles(): string { return super.Section.get<string>("errorSquiggles"); }
-    public get inactiveRegionOpacity(): number { return super.Section.get<number>("inactiveRegionOpacity"); }
-    public get inactiveRegionForegroundColor(): string { return super.Section.get<string>("inactiveRegionForegroundColor"); }
-    public get inactiveRegionBackgroundColor(): string { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
-    public get autoComplete(): string { return super.Section.get<string>("autocomplete"); }
-    public get loggingLevel(): string { return super.Section.get<string>("loggingLevel"); }
-    public get autoAddFileAssociations(): boolean { return super.Section.get<boolean>("autoAddFileAssociations"); }
-    public get workspaceParsingPriority(): string { return super.Section.get<string>("workspaceParsingPriority"); }
-    public get workspaceSymbols(): string { return super.Section.get<string>("workspaceSymbols"); }
-    public get exclusionPolicy(): string { return super.Section.get<string>("exclusionPolicy"); }
-    public get commentContinuationPatterns(): (string | CommentPattern)[] { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
-    public get configurationWarnings(): string { return super.Section.get<string>("configurationWarnings"); }
-    public get preferredPathSeparator(): string { return super.Section.get<string>("preferredPathSeparator"); }
-    public get updateChannel(): string { return super.Section.get<string>("updateChannel"); }
-    public get vcpkgEnabled(): boolean { return super.Section.get<boolean>("vcpkg.enabled"); }
-    public get renameRequiresIdentifier(): boolean { return super.Section.get<boolean>("renameRequiresIdentifier"); }
-    public get defaultIncludePath(): string[] { return super.Section.get<string[]>("default.includePath"); }
-    public get defaultDefines(): string[] { return super.Section.get<string[]>("default.defines"); }
-    public get defaultMacFrameworkPath(): string[] { return super.Section.get<string[]>("default.macFrameworkPath"); }
-    public get defaultWindowsSdkVersion(): string { return super.Section.get<string>("default.windowsSdkVersion"); }
-    public get defaultCompileCommands(): string { return super.Section.get<string>("default.compileCommands"); }
-    public get defaultForcedInclude(): string[] { return super.Section.get<string[]>("default.forcedInclude"); }
-    public get defaultIntelliSenseMode(): string { return super.Section.get<string>("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string { return super.Section.get<string>("default.compilerPath"); }
-    public get defaultCompilerArgs(): string[] { return super.Section.get<string[]>("default.compilerArgs"); }
-    public get defaultCStandard(): string { return super.Section.get<string>("default.cStandard"); }
-    public get defaultCppStandard(): string { return super.Section.get<string>("default.cppStandard"); }
-    public get defaultConfigurationProvider(): string { return super.Section.get<string>("default.configurationProvider"); }
-    public get defaultBrowsePath(): string[] { return super.Section.get<string[]>("default.browse.path"); }
-    public get defaultDatabaseFilename(): string { return super.Section.get<string>("default.browse.databaseFilename"); }
-    public get defaultLimitSymbolsToIncludedHeaders(): boolean { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultSystemIncludePath(): string[] { return super.Section.get<string[]>("default.systemIncludePath"); }
-    public get defaultEnableConfigurationSquiggles(): boolean { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
-    public get useBacktickCommandSubstitution(): boolean { return super.Section.get<boolean>("useBacktickCommandSubstitution"); }
+    public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
+    public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
+    public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
+    public get formatting(): string | undefined { return super.Section.get<string>("formatting"); }
+    public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
+    public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
+    public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
+    public get intelliSenseEngineFallback(): string | undefined { return super.Section.get<string>("intelliSenseEngineFallback"); }
+    public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
+    public get intelliSenseCacheSize(): number | undefined { return super.Section.get<number>("intelliSenseCacheSize"); }
+    public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles"); }
+    public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
+    public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
+    public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
+    public get autoComplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
+    public get loggingLevel(): string | undefined { return super.Section.get<string>("loggingLevel"); }
+    public get autoAddFileAssociations(): boolean | undefined { return super.Section.get<boolean>("autoAddFileAssociations"); }
+    public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
+    public get workspaceSymbols(): string | undefined { return super.Section.get<string>("workspaceSymbols"); }
+    public get exclusionPolicy(): string | undefined { return super.Section.get<string>("exclusionPolicy"); }
+    public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
+    public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
+    public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
+    public get updateChannel(): string | undefined { return super.Section.get<string>("updateChannel"); }
+    public get vcpkgEnabled(): boolean | undefined { return super.Section.get<boolean>("vcpkg.enabled"); }
+    public get renameRequiresIdentifier(): boolean | undefined { return super.Section.get<boolean>("renameRequiresIdentifier"); }
+    public get defaultIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.includePath"); }
+    public get defaultDefines(): string[] | undefined { return super.Section.get<string[]>("default.defines"); }
+    public get defaultMacFrameworkPath(): string[] | undefined { return super.Section.get<string[]>("default.macFrameworkPath"); }
+    public get defaultWindowsSdkVersion(): string | undefined { return super.Section.get<string>("default.windowsSdkVersion"); }
+    public get defaultCompileCommands(): string | undefined { return super.Section.get<string>("default.compileCommands"); }
+    public get defaultForcedInclude(): string[] | undefined { return super.Section.get<string[]>("default.forcedInclude"); }
+    public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
+    public get defaultCompilerPath(): string | undefined {
+        let result: string | undefined | null = super.Section.get<string | null>("default.compilerPath");
+        if (result === null) {
+            return undefined;
+        }
+        return result;
+    }
+    public get defaultCompilerArgs(): string[] | undefined { return super.Section.get<string[]>("default.compilerArgs"); }
+    public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
+    public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }
+    public get defaultConfigurationProvider(): string | undefined { return super.Section.get<string>("default.configurationProvider"); }
+    public get defaultBrowsePath(): string[] | undefined { return super.Section.get<string[]>("default.browse.path"); }
+    public get defaultDatabaseFilename(): string | undefined { return super.Section.get<string>("default.browse.databaseFilename"); }
+    public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
+    public get defaultSystemIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.systemIncludePath"); }
+    public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
+    public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("useBacktickCommandSubstitution"); }
 
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
@@ -148,13 +164,13 @@ export class CppSettings extends Settings {
     }
 
     public get dimInactiveRegions(): boolean {
-        return super.Section.get<boolean>("dimInactiveRegions")
-        && super.Section.get<string>("intelliSenseEngine") === "Default"
+        return super.Section.get<boolean>("dimInactiveRegions") === true
+            && super.Section.get<string>("intelliSenseEngine") === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
-        let value: string = super.Section.get<string>(name);
+        let value: string | undefined = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
     }
 
@@ -164,9 +180,9 @@ export class CppSettings extends Settings {
 }
 
 export interface TextMateRuleSettings {
-    foreground: string | undefined;
-    background: string | undefined;
-    fontStyle: string | undefined;
+    foreground?: string;
+    background?: string;
+    fontStyle?: string;
 }
 
 export interface TextMateRule {
@@ -175,29 +191,29 @@ export interface TextMateRule {
 }
 
 export class OtherSettings {
-    private resource: vscode.Uri;
+    private resource: vscode.Uri | null;
 
-    constructor(resource?: vscode.Uri) {
+    constructor(resource?: vscode.Uri | null) {
         if (!resource) {
             resource = null;
         }
         this.resource = resource;
     }
 
-    public get editorTabSize(): number { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
+    public get editorTabSize(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files", null).get("associations"); }
     public set filesAssociations(value: any) {
         vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
     }
-    public get filesExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
-    public get searchExclude(): vscode.WorkspaceConfiguration { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get settingsEditor(): string { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+    public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
+    public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
+    public get settingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
-    public get colorTheme(): string { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
+    public get colorTheme(): string | undefined { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
 
-    public getCustomColorToken(colorTokenName: string): string { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<string>(colorTokenName); }
-    public getCustomThemeSpecificColorToken(themeName: string, colorTokenName: string): string { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<string>(colorTokenName); }
+    public getCustomColorToken(colorTokenName: string): string | undefined { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<string>(colorTokenName); }
+    public getCustomThemeSpecificColorToken(themeName: string, colorTokenName: string): string | undefined { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<string>(colorTokenName); }
 
-    public get customTextMateRules(): TextMateRule[] { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<TextMateRule[]>("textMateRules"); }
-    public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
+    public get customTextMateRules(): TextMateRule[] | undefined { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<TextMateRule[]>("textMateRules"); }
+    public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] | undefined { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
 }
