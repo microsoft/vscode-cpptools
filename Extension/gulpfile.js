@@ -484,14 +484,22 @@ gulp.task("generate-native-strings", (done) => {
         // Add to TypeScript switch
         // Skip empty strings, which can be used to prevent enum/index reordering
         if (stringTable[property] != "") {
-            typeScriptSwitchContent += `        case ${stringIndex}:\n            message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
-            let argIndex = 0;
-            for (;;) {
-                if (!stringValue.includes(`{${argIndex}}`)) {
-                    break;
+            // It's possible that a translation may skip "{#}" entries, so check for up to 20 of them.
+            let numArgs = 0;
+            for (let i = 0; i < 20; i++) {
+                if (stringValue.includes(`{${i}}`)) {
+                    numArgs = i + 1;
                 }
-                typeScriptSwitchContent += `, stringArgs[${argIndex}]`;
-                ++argIndex;
+            }
+            typeScriptSwitchContent += `        case ${stringIndex}:\n`;
+            if (numArgs != 0) {
+                typeScriptSwitchContent += `            if (!stringArgs) {\n`;
+                typeScriptSwitchContent += `                break;\n`;
+                typeScriptSwitchContent += `            }\n`;
+            }
+            typeScriptSwitchContent += `            message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
+            for (let i = 0; i < numArgs; i++) {
+                typeScriptSwitchContent += `, stringArgs[${i}]`;
             }
             typeScriptSwitchContent += ");\n            break;\n";
         }
@@ -513,10 +521,10 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export function lookupString(stringId: number, stringArgs?: string[]): string {
-    let message: string;
+    let message: string = "";
     switch (stringId) {
         case 0:
-            message = "";   // Special case for blank string
+            // Special case for blank string
             break;
 ${typeScriptSwitchContent}
         default:

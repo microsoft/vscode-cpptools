@@ -21,7 +21,7 @@ export class ClientCollection {
     private languageClients = new Map<string, cpptools.Client>();
     private defaultClient: cpptools.Client;
     private activeClient: cpptools.Client;
-    private activeDocument: vscode.TextDocument;
+    private activeDocument?: vscode.TextDocument;
 
     public get ActiveClient(): cpptools.Client { return this.activeClient; }
     public get Names(): ClientKey[] {
@@ -47,7 +47,11 @@ export class ClientCollection {
                 }
             });
             key = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
-            this.activeClient = this.languageClients.get(key);
+            let client: cpptools.Client | undefined = this.languageClients.get(key);
+            if (!client) {
+                throw new Error("Failed to construct default client");
+            }
+            this.activeClient = client;
         } else {
             this.activeClient = cpptools.createClient(this);
         }
@@ -74,14 +78,12 @@ export class ClientCollection {
     }
 
     /**
-     * get a handle to a language client. returns null if the client was not found.
+     * get a handle to a language client. returns undefined if the client was not found.
      */
-    public get(key: string): cpptools.Client | null {
-        if (this.languageClients.has(key)) {
-            return this.languageClients.get(key);
-        }
-        console.assert("key not found");
-        return null;
+    public get(key: string): cpptools.Client | undefined {
+        let client: cpptools.Client | undefined = this.languageClients.get(key);
+        console.assert(client, "key not found");
+        return client;
     }
 
     public forEach(callback: (client: cpptools.Client) => void): void {
@@ -96,8 +98,8 @@ export class ClientCollection {
     /**
      * creates a new client to replace one that crashed.
      */
-    public replace(client: cpptools.Client, transferFileOwnership: boolean): cpptools.Client {
-        let key: string;
+    public replace(client: cpptools.Client, transferFileOwnership: boolean): cpptools.Client | undefined {
+        let key: string | undefined;
         for (let pair of this.languageClients) {
             if (pair[1] === client) {
                 key = pair[0];
@@ -126,7 +128,7 @@ export class ClientCollection {
             return this.languageClients.get(key);
         } else {
             console.assert(key, "unable to locate language client");
-            return null;
+            return undefined;
         }
     }
 
@@ -139,7 +141,7 @@ export class ClientCollection {
         if (e !== undefined) {
             e.removed.forEach(folder => {
                 let path: string = util.asFolder(folder.uri);
-                let client: cpptools.Client = this.languageClients.get(path);
+                const client: cpptools.Client | undefined = this.languageClients.get(path);
                 if (client) {
                     this.languageClients.delete(path);  // Do this first so that we don't iterate on it during the ownership transfer process.
 
@@ -161,7 +163,7 @@ export class ClientCollection {
             });
             e.added.forEach(folder => {
                 let path: string = util.asFolder(folder.uri);
-                let client: cpptools.Client = this.languageClients.get(path);
+                let client: cpptools.Client | undefined = this.languageClients.get(path);
                 if (!client) {
                     let newClient: cpptools.Client = cpptools.createClient(this, folder);
                     this.languageClients.set(path, newClient);
@@ -181,19 +183,21 @@ export class ClientCollection {
     }
 
     public getClientFor(uri: vscode.Uri): cpptools.Client {
-        let folder: vscode.WorkspaceFolder = uri ? vscode.workspace.getWorkspaceFolder(uri) : null;
+        let folder: vscode.WorkspaceFolder | undefined = uri ? vscode.workspace.getWorkspaceFolder(uri) : undefined;
         if (!folder) {
             return this.defaultClient;
         } else {
             let key: string = util.asFolder(folder.uri);
-            if (!this.languageClients.has(key)) {
-                let newClient: cpptools.Client = cpptools.createClient(this, folder);
-                this.languageClients.set(key, newClient);
-                getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
-                let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
-                defaultClient.sendDidChangeSettings();
+            let client: cpptools.Client | undefined = this.languageClients.get(key);
+            if (client) {
+                return client;
             }
-            return this.languageClients.get(key);
+            let newClient: cpptools.Client = cpptools.createClient(this, folder);
+            this.languageClients.set(key, newClient);
+            getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
+            let defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
+            defaultClient.sendDidChangeSettings();
+            return newClient;
         }
     }
 
@@ -206,7 +210,6 @@ export class ClientCollection {
         this.disposables.forEach((d: vscode.Disposable) => d.dispose());
 
         // this.defaultClient is already in this.languageClients, so do not call dispose() on it.
-        this.defaultClient = undefined;
 
         this.languageClients.forEach(client => promises.push(client.dispose()));
         this.languageClients.clear();

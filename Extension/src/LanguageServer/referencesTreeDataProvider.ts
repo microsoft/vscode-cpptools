@@ -48,9 +48,9 @@ function getReferenceItemIconPath(type: ReferenceType, isCanceled: boolean): { l
 }
 
 export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
-    private referencesModel: ReferencesModel;
+    private referencesModel: ReferencesModel | undefined;
     private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeNode>();
-    readonly onDidChangeTreeData;
+    readonly onDidChangeTreeData: vscode.Event<TreeNode>;
 
     constructor(readonly isRenameCandidates: boolean) {
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -76,11 +76,14 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
     getTreeItem(element: TreeNode): vscode.TreeItem {
         if (!this.referencesModel) {
-            return;
+            throw new Error("Null or undefined RefrencesModel in getTreeItem()");
         }
 
         switch (element.node) {
             case NodeType.referenceType:
+                if (!element.referenceType) {
+                    throw new Error("Null or undefined referenceType in getTreeItem()");
+                }
                 const label: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled, true);
                 let resultRefType: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Expanded);
                 if (this.referencesModel.isRename) {
@@ -90,6 +93,9 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
             case NodeType.file:
             case NodeType.fileWithPendingRef:
+                if (!element.fileUri) {
+                    throw new Error("Null or undefined fileUri in getTreeItem()");
+                }
                 let resultFile: vscode.TreeItem = new vscode.TreeItem(element.fileUri);
                 resultFile.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                 resultFile.iconPath = vscode.ThemeIcon.File;
@@ -112,6 +118,12 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 return resultFile;
 
             case NodeType.reference:
+                if (!element.referenceText) {
+                    throw new Error("Null or undefined referenceText in getTreeItem()");
+                }
+                if (!element.referenceType) {
+                    throw new Error("Null or undefined referenceType in getTreeItem()");
+                }
                 let resultRef: vscode.TreeItem = new vscode.TreeItem(element.referenceText, vscode.TreeItemCollapsibleState.None);
                 resultRef.iconPath = getReferenceItemIconPath(element.referenceType, this.referencesModel.isCanceled);
                 let tag: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled);
@@ -128,16 +140,17 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
                 return resultRef;
         }
+        throw new Error("Invalid NoteType in getTreeItem()");
     }
 
-    getChildren(element?: TreeNode | undefined): TreeNode[] {
+    getChildren(element?: TreeNode): TreeNode[] | undefined {
         if (!this.referencesModel) {
-            return;
+            return undefined;
         }
 
         if (element instanceof TreeNode) {
             if (element.node === NodeType.file) {
-                let type: ReferenceType = null;
+                let type: ReferenceType | undefined;
 
                 // If this.referencesModel.groupByFile is false, or if not a rename pending view, group by reference
                 if (!this.referencesModel.groupByFile && (!this.referencesModel.isRename || this.isRenameCandidates)) {
