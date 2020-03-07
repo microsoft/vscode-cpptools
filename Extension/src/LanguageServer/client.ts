@@ -1386,15 +1386,17 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
-        if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
-            if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
-                if (textEditorVisibleRangesChangeEvent.visibleRanges.length === 1) {
-                    let visibleRangesLength: number = textEditorVisibleRangesChangeEvent.visibleRanges[0].end.line - textEditorVisibleRangesChangeEvent.visibleRanges[0].start.line;
-                    workspaceReferences.updateVisibleRange(visibleRangesLength);
+        this.notifyWhenReady(() => {
+            if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
+                if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
+                    if (textEditorVisibleRangesChangeEvent.visibleRanges.length === 1) {
+                        let visibleRangesLength: number = textEditorVisibleRangesChangeEvent.visibleRanges[0].end.line - textEditorVisibleRangesChangeEvent.visibleRanges[0].start.line;
+                        workspaceReferences.updateVisibleRange(visibleRangesLength);
+                    }
                 }
+                this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
             }
-            this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
-        }
+        });
     }
 
     private registeredProviders: CustomConfigurationProvider1[] = [];
