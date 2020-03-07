@@ -408,9 +408,7 @@ export class CppProperties {
     }
 
     private isCompilerIntelliSenseModeCompatible(configuration: Configuration): boolean {
-        // Check if intelliSenseMode and compilerPath are compatible
-        // cl.exe and msvc mode should be used together
-        // Ignore if compiler path is not set or intelliSenseMode is not set
+        // Ignore if compiler path is not set or intelliSenseMode is not set.
         if (configuration.compilerPath === undefined ||
             configuration.compilerPath === "" ||
             configuration.compilerPath === "${default}" ||
@@ -421,7 +419,18 @@ export class CppProperties {
         }
         let resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
-        return (compilerPathAndArgs.compilerName === "cl.exe") === (configuration.intelliSenseMode === "msvc-x64" || configuration.intelliSenseMode === "msvc-x86");
+        let isMsvc: boolean = configuration.intelliSenseMode.startsWith("msvc");
+        let isCl: boolean = compilerPathAndArgs.compilerName === "cl.exe";
+
+        // For now, we can only validate msvc mode and cl.exe combinations.
+        // Verify cl.exe arch matches intelliSenseMode arch or compilerPath is only cl.exe.
+        if (isMsvc && isCl) {
+            let msvcArch: string = configuration.intelliSenseMode.split('-')[1];
+            let compilerPathDir: string = path.dirname(compilerPathAndArgs.compilerPath);
+            return compilerPathDir.endsWith(msvcArch) || compilerPathAndArgs.compilerPath === "cl.exe";
+        }
+        // All other combinations are valid if intelliSenseMode is not msvc and compiler is not cl.exe.
+        return !isMsvc && !isCl;
     }
 
     public addToIncludePathCommand(path: string): void {
