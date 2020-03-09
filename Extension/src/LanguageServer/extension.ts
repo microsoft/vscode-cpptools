@@ -504,10 +504,10 @@ export function updateLanguageConfigurations(): void {
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     let activeClient: Client = clients.ActiveClient;
-    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event);
+    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event, true);
     clients.forEach(client => {
         if (client !== activeClient) {
-            client.onDidChangeSettings(event);
+            client.onDidChangeSettings(event, false);
         }
     });
 
