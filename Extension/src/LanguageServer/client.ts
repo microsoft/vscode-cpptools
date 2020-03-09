@@ -1880,14 +1880,18 @@ export class DefaultClient implements Client {
                 false /* ignoreChangeEvents */,
                 false /* ignoreDeleteEvents */);
 
+            let settings: CppSettings = new CppSettings(this.RootUri);
             this.rootPathFileWatcher.onDidCreate((uri) => {
+                if (settings.loggingLevel === "Debug") {
+                    log(localize("file.creation.detected", "File creation detected: {0}", uri.toString()));
+                }
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
             });
 
             // TODO: Handle new associations without a reload.
             this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
-            let settings: OtherSettings = new OtherSettings(this.RootUri);
-            let assocs: any = settings.filesAssociations;
+            let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
+            let assocs: any = otherSettings.filesAssociations;
             for (let assoc in assocs) {
                 let dotIndex: number = assoc.lastIndexOf('.');
                 if (dotIndex !== -1) {
@@ -1906,6 +1910,9 @@ export class DefaultClient implements Client {
                         let mtime: Date = fs.statSync(uri.fsPath).mtime;
                         let duration: number = Date.now() - mtime.getTime();
                         if (duration < 10000) {
+                            if (settings.loggingLevel === "Debug") {
+                                log(localize("file.change.detected", "File change detected: {0}", uri.toString()));
+                            }
                             this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() });
                         }
                     }
@@ -1913,6 +1920,9 @@ export class DefaultClient implements Client {
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
+                if (settings.loggingLevel === "Debug") {
+                    log(localize("file.deletion.detected", "File deletion detected: {0}", uri.toString()));
+                }
                 this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
             });
 
