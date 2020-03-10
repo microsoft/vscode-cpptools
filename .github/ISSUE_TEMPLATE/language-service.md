@@ -38,9 +38,9 @@ assignees: ''
 
 **Logs**
 <!-- Please provide the following logs that show diagnostics and debugging information about the language server.
- -->
 1. Logs from the command `C/C++: Log Diagnostics`
 2. Logs from [the language server](https://code.visualstudio.com/docs/cpp/enable-logging-cpp#_enable-logging-for-the-language-server)
+ -->
 
 **Screenshots**
 <!-- If applicable, add screenshots to help explain your problem. -->
