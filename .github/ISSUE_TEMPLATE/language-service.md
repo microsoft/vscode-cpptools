@@ -43,7 +43,7 @@ assignees: ''
 <details>
   <summary><strong>Logs<strong></summary>
 
-   <!-- Note: do not empty line after </summary> tag, otherwise the markdown/code blocks won't show correctly. -->
+<!-- Note: do not remove empty line after </summary> tag, otherwise the code blocks formatting won't show correctly. -->
 ```
 Insert logs here.
 ```
