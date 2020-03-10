@@ -1740,14 +1740,18 @@
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^4.1.1",
     "vscode-nls-dev": "^3.2.6",
-    "webpack": "^4.39.2",
+    "webpack": "^4.42.0",
     "webpack-cli": "^3.3.7",
     "which": "^2.0.2",
     "xml2js": "^0.4.19",
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "https-proxy-agent": "^2.2.4"
+    "https-proxy-agent": "^2.2.4",
+    "webpack/acorn": "^6.4.1",
+    "gulp-sourcemaps/acorn": "^5.7.4",
+    "eslint/acorn": "^7.1.1",
+    "gulp-eslint/acorn": "^7.1.1"
   },
   "runtimeDependencies": [
     {
