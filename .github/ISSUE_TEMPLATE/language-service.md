@@ -41,7 +41,7 @@ assignees: ''
 2. Logs from [the language server](https://code.visualstudio.com/docs/cpp/enable-logging-cpp#_enable-logging-for-the-language-server)
  -->
 <details>
-  <summary><strong>Logs<strong></summary>
+  <summary><strong>Logs</strong></summary>
 
 <!-- Note: do not remove empty line after </summary> tag, otherwise the code blocks formatting won't show correctly. -->
 ```
