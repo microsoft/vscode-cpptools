@@ -540,10 +540,10 @@
           "description": "%c_cpp.configuration.renameRequiresIdentifier.description%",
           "scope": "application"
         },
-        "C_Cpp.useBacktickCommandSubstitution": {
+        "C_Cpp.debugger.useBacktickCommandSubstitution": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.useBacktickCommandSubstitution.description%",
+          "description": "%c_cpp.configuration.debugger.useBacktickCommandSubstitution.description%",
           "scope": "window"
         }
       }
