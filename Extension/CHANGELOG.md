@@ -1,5 +1,17 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.27.0-insiders 3: March 11, 2019
+### Bug Fixes
+* Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
+  * @Helloimbob [PR #5053](https://github.com/microsoft/vscode-cpptools/pull/5053)
+* Fix Outline view not updating fast enough after switching branches. [#4894](https://github.com/microsoft/vscode-cpptools/issues/4894)
+* Fix extension randomly getting stuck while communicating with the IntelliSense process on Mac. [#4989](https://github.com/microsoft/vscode-cpptools/issues/4989)
+* Fix crashes that sometimes occur after adding multiple workspace folders. [#5059](https://github.com/microsoft/vscode-cpptools/issues/5059)
+* Fix crashes that sometimes occurs after switching color themes. [#5063](https://github.com/microsoft/vscode-cpptools/issues/5063)
+* Fix error after updating a document too soon after startup. [#5076](https://github.com/microsoft/vscode-cpptools/issues/5076)
+* Fix Pause (break all) not working on Mac with Attach debugging.
+* Other language server crash fixes.
+
 ## Version 0.27.0-insiders2: March 4, 2019
 ### Bug Fixes
 * Fix the `Open File...` scenario (without a workspace folder). [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
@@ -12,11 +24,12 @@
 * Rename language server processes to `cpptools` and `cpptools-srv` (IntelliSense process). [#4364](https://github.com/microsoft/vscode-cpptools/issues/4364)
 * Add support for `-iframework` in `compile_commands.json`. [#4819](https://github.com/microsoft/vscode-cpptools/issues/4819)
 * Add `cpptools.setActiveConfigName` command. [#4870](https://github.com/microsoft/vscode-cpptools/issues/4870)
-  * @aleksey-sergey [PR 4893](https://github.com/microsoft/vscode-cpptools/pull/4893)
+  * @aleksey-sergey [PR #4893](https://github.com/microsoft/vscode-cpptools/pull/4893)
 * Default to the bundled `clang-format` if its version is newer. [#4963](https://github.com/microsoft/vscode-cpptools/issues/4963)
 * Include only `lldb-mi` for macOS.
   * Fix visualization of standard library types in lldb. [#1768](https://github.com/microsoft/vscode-cpptools/issues/1768)
   * Enable debugging support on macOS Catalina. [#3829](https://github.com/microsoft/vscode-cpptools/issues/3829)
+* Support '`' in addition to '-exec' for sending gdb commands [PR MIEngine#967](https://github.com/microsoft/MIEngine/pull/976)
 
 ### Bug Fixes
 * Fix issue in which the user is not again prompted to use a custom configuration provider if settings files have been deleted. [#2346](https://github.com/microsoft/vscode-cpptools/issues/2346)
@@ -46,7 +59,7 @@
 * Fix custom configurations sometimes not being applied to headers. [#4649](https://github.com/microsoft/vscode-cpptools/issues/4649)
 * Fix headers opening into header-only TU's instead of TU's for candidate source files. [#4696](https://github.com/microsoft/vscode-cpptools/issues/4696)
 * Fix the missing description of `C_Cpp.clang_format_style`.
-  * @Enna1 [PR 4734](https://github.com/microsoft/vscode-cpptools/pull/4734)
+  * @Enna1 [PR #4734](https://github.com/microsoft/vscode-cpptools/pull/4734)
 * Fix Insiders channel not auto-downgrading after an Insiders vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
 * Fix compiler querying with more than 40 `compilerArgs`. [#4791](https://github.com/microsoft/vscode-cpptools/issues/4791)
 * Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed. [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
