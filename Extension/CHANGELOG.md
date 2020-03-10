@@ -2,6 +2,7 @@
 
 ## Version 0.27.0-insiders3: March 11, 2019
 ### Bug Fixes
+* Fix update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
 * Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
   * @Helloimbob [PR #5053](https://github.com/microsoft/vscode-cpptools/pull/5053)
 * Fix Outline view not updating fast enough after switching branches. [#4894](https://github.com/microsoft/vscode-cpptools/issues/4894)
