@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.27.0-insiders 3: March 11, 2019
+## Version 0.27.0-insiders3: March 11, 2019
 ### Bug Fixes
 * Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
   * @Helloimbob [PR #5053](https://github.com/microsoft/vscode-cpptools/pull/5053)
