@@ -40,9 +40,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
     }
 
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-
-        let provideDebugConfigurations: undefined | ((folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken) => vscode.ProviderResult<vscode.DebugConfiguration[]>) = this.underlyingProvider.provideDebugConfigurations;
-        let configs: vscode.DebugConfiguration[] | null | undefined = provideDebugConfigurations ? await provideDebugConfigurations(folder, token) : undefined;
+        let configs: vscode.DebugConfiguration[] | null | undefined = this.underlyingProvider.provideDebugConfigurations ? await this.underlyingProvider.provideDebugConfigurations(folder, token) : undefined;
         if (!configs) {
             configs = [];
         }
@@ -90,11 +88,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
     }
 
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        let resolveDebugConfigurations: undefined | ((folder: vscode.WorkspaceFolder | undefined, debugConfiguration: vscode.DebugConfiguration, token?: vscode.CancellationToken) => vscode.ProviderResult<vscode.DebugConfiguration>) = this.underlyingProvider.resolveDebugConfiguration;
-        if (!resolveDebugConfigurations) {
-            return undefined;
-        }
-        return resolveDebugConfigurations(folder, config, token);
+        return this.underlyingProvider.resolveDebugConfiguration ? this.underlyingProvider.resolveDebugConfiguration(folder, config, token) : undefined;
     }
 }
 
