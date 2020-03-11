@@ -1353,9 +1353,11 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
     // Get rid of the process names on each line and just add it to the start.
     const process1: string = "cpptools-srv";
     const process2: string = "cpptools";
+    let isSrv: boolean = false;
     if (data.includes(process1)) {
         data = data.replace(new RegExp(process1 + "\\s+", "g"), "");
         data = `${process1}\t${binaryVersion}\n${data}`;
+        isSrv = true;
     } else if (data.includes(process2)) {
         data = data.replace(new RegExp(process2 + "\\s+", "g"), "");
         data = `${process2}\t${binaryVersion}\n${data}`;
@@ -1364,11 +1366,15 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
         data = `cpptools?\t${binaryVersion}\n${data}`;
     }
 
+    // Logs with dyld::fastBindLazySymbol is a strange case, so skip the normal
+    // filtering in case that is able to show more info.
+    let bypassFilters: boolean = isSrv ? data.includes("dyld::fastBindLazySymbol") : false;
+
     // Remove runtime lines because they can be different on different machines.
     let lines: string[] = data.split("\n");
     data = "";
     lines.forEach((line: string) => {
-        if (!line.includes(".dylib") && !line.includes("???")) {
+        if (bypassFilters || (!line.includes(".dylib") && !line.includes("???"))) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
             line = line.replace(/std::__1::/g, "std::");  // __1:: is not helpful.
             data += (line + "\n");
