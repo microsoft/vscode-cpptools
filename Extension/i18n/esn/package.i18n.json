@@ -71,6 +71,7 @@
 	"c_cpp.configuration.enhancedColorization.description": "Si se habilita esta opción, el código se colorea de acuerdo con IntelliSense. Esta configuración no tiene efecto si IntelliSense está deshabilitado o si se utiliza el tema de contraste alto predeterminado.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Habilita los servicios de integración para el [administrador de dependencias de vcpkg] (https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Si es true, \"Cambiar el nombre del símbolo\" requerirá un identificador de C/C++ válido.",
+	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "If true, debugger shell command substitution will use obsolete backtick (`)",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: resultados de otras referencias",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "Cambio de nombre de C/C++",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "CAMBIO DE NOMBRE PENDIENTE",
