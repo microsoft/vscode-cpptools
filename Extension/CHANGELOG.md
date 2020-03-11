@@ -13,7 +13,7 @@
 * Fix crashes that sometimes occurs after switching color themes. [#5063](https://github.com/microsoft/vscode-cpptools/issues/5063)
 * Fix `clang_format_sortIncludes` setting not getting used. [#5068](https://github.com/microsoft/vscode-cpptools/issues/5068)
 * Fix error after updating a document too soon after startup. [#5076](https://github.com/microsoft/vscode-cpptools/issues/5076)
-* Fix IntelliSense process crashing on macOS 10.12 or older. [#5090](https://github.com/microsoft/vscode-cpptools/issues/5090)
+* Fix IntelliSense process crashing on macOS 10.12 or older after a settings change. [#5090](https://github.com/microsoft/vscode-cpptools/issues/5090)
 * Fix Pause (break all) not working on Mac with Attach debugging.
 * Other language server crash fixes.
 
