@@ -975,6 +975,26 @@ export class DefaultClient implements Client {
                         }
                     }
 
+                    class FoldingRangeProvider implements vscode.FoldingRangeProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+                        provideFoldingRanges(
+                            document: vscode.TextDocument,
+                            context: vscode.FoldingContext,
+                            token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
+                                    let params: GetFoldingRangesParams = {
+                                        uri: document.uri,
+
+                                    };
+                                    this.client.notifyWhenReady(() => {
+                                        ;
+                                    });
+                                };
+                        }
+                    }
+
                     this.registerFileWatcher();
 
                     if (firstClient) {
@@ -983,6 +1003,7 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
+                        this.disposables.push(vscode.languages.registerFoldingRangeProvider(documentSelector, new FoldingRangeProvider(this)));
 
                         // Listen for messages from the language server.
                         this.registerNotifications();
