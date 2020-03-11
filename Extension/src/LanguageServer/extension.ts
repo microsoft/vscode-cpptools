@@ -1366,8 +1366,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
         data = `cpptools?\t${binaryVersion}\n${data}`;
     }
 
-    // Logs with dyld::fastBindLazySymbol is a strange case, so skip the normal
-    // filtering in case that is able to show more info.
+    // Logs with dyld::fastBindLazySymbol are a strange case, so skip the normal
+    // filtering in case that is able to provide more info.
     let bypassFilters: boolean = isSrv ? data.includes("dyld::fastBindLazySymbol") : false;
 
     // Remove runtime lines because they can be different on different machines.
