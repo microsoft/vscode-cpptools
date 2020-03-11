@@ -12,5 +12,5 @@
 	"warning.debugging.not.tested": "Uyarı: Bu platform için hata ayıklama test edilmedi.",
 	"reload.workspace.for.changes": "Ayar değişikliklerinin etkili olması için çalışma alanını yeniden yükleyin.",
 	"reload.string": "Yeniden yükle",
-	"invalid.download.location.received": "Invalid download location received"
+	"invalid.download.location.received": "Geçersiz indirme konumu alındı"
 }
