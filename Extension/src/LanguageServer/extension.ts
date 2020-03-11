@@ -1331,7 +1331,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
             dyldEndIndex = data.length - 1; // Not expected, but just in case.
         }
         if (dyldEndIndex <= dyldStartIndex) {
-            dyldErrorMessage = "No dyldEndIndex";
+            dyldErrorMessage = "No dyldEndIndex\n";
         } else {
             dyldErrorMessage = data.substr(dyldStartIndex, dyldEndIndex - dyldStartIndex);
         }
