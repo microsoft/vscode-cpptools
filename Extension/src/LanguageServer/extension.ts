@@ -1320,6 +1320,23 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
         return logCrashTelemetry("readFile: " + err.code);
     }
 
+    // Extract any dyld error message.
+    const dyldErrorStartText: string = "Dyld Error Message:";
+    let dyldStartIndex: number = data.indexOf(dyldErrorStartText);
+    let dyldErrorMessage: string = "";
+    if (dyldStartIndex > 0) {
+        dyldStartIndex += dyldErrorStartText.length + 1; // Skip past dyldErrorStartText.
+        let dyldEndIndex: number = data.indexOf("Thread ", dyldStartIndex);
+        if (dyldEndIndex < 0) {
+            dyldEndIndex = data.length - 1; // Not expected, but just in case.
+        }
+        if (dyldEndIndex <= dyldStartIndex) {
+            dyldErrorMessage = "No dyldEndIndex";
+        } else {
+            dyldErrorMessage = data.substr(dyldStartIndex, dyldEndIndex - dyldStartIndex);
+        }
+    }
+
     // Extract the crashing process version, because the version might not match
     // if multiple VS Codes are running with different extension versions.
     let binaryVersion: string = "";
@@ -1372,7 +1389,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
 
     // Remove runtime lines because they can be different on different machines.
     let lines: string[] = data.split("\n");
-    data = "";
+    data = dyldErrorMessage;
     lines.forEach((line: string) => {
         if (bypassFilters || (!line.includes(".dylib") && !line.includes("???"))) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
