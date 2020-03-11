@@ -155,10 +155,10 @@
 	"cant_create_intellisense_client_for": "无法为 {0} 创建 IntelliSense 客户端",
 	"suffix_declaration": "声明",
 	"suffix_type_alias": "类型别名",
-	"fallback_to_32_bit_mode": "编译器不支持 64 位。请回退到 32 位 intelliSenseMode。",
-	"fallback_to_64_bit_mode": "编译器不支持 32 位。请回退到 64 位 intelliSenseMode。",
-	"fallback_to_32_bit_mode2": "未能查询编译器。请回退到 32 位 intelliSenseMode。",
-	"fallback_to_64_bit_mode2": "未能查询编译器。请回退到 64 位 intelliSenseMode。",
-	"fallback_to_no_bitness": "未能查询编译器。请回退到无位数。",
+	"fallback_to_32_bit_mode": "编译器不支持 64 位。正在回退到 32 位 intelliSenseMode。",
+	"fallback_to_64_bit_mode": "编译器不支持 32 位。正在回退到 64 位 intelliSenseMode。",
+	"fallback_to_32_bit_mode2": "未能查询编译器。正在回退到 32 位 intelliSenseMode。",
+	"fallback_to_64_bit_mode2": "未能查询编译器。正在回退到 64 位 intelliSenseMode。",
+	"fallback_to_no_bitness": "未能查询编译器。正在回退到无位数。",
 	"intellisense_client_creation_aborted": "已中止创建 IntelliSense 客户端: {0}"
 }
