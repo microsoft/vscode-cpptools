@@ -12,5 +12,5 @@
 	"warning.debugging.not.tested": "Ostrzeżenie: nie przetestowano debugowania dla tej platformy.",
 	"reload.workspace.for.changes": "Załaduj ponownie obszar roboczy, aby zmiany ustawień zostały zastosowane.",
 	"reload.string": "Załaduj ponownie",
-	"invalid.download.location.received": "Invalid download location received"
+	"invalid.download.location.received": "Odebrano nieprawidłową lokalizację pobierania"
 }

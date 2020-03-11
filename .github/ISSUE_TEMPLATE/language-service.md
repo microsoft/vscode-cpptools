@@ -36,11 +36,18 @@ assignees: ''
 **Expected behavior**
 <!-- A clear and concise description of what you expected to happen. -->
 
-**Logs**
 <!-- Please provide the following logs that show diagnostics and debugging information about the language server.
- -->
 1. Logs from the command `C/C++: Log Diagnostics`
 2. Logs from [the language server](https://code.visualstudio.com/docs/cpp/enable-logging-cpp#_enable-logging-for-the-language-server)
+ -->
+<details>
+  <summary><strong>Logs</strong></summary>
+
+<!-- Note: do not remove empty line after </summary> tag, otherwise the code blocks formatting won't show correctly. -->
+```
+Insert logs here.
+```
+</details>
 
 **Screenshots**
 <!-- If applicable, add screenshots to help explain your problem. -->
