@@ -1137,6 +1137,7 @@ export class DefaultClient implements Client {
                 formatting: settings_formatting,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
+                exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
                 storage_path: this.storagePath,
                 tabSize: settings_editorTabSize,
