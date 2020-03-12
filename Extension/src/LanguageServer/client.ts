@@ -335,6 +335,10 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
 }
 
+interface GetFoldingRangesParams {
+    uri: string;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -343,6 +347,7 @@ const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void>
 const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void> = new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void>('cpptools/getCodeActions');
 const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void>('cpptools/getDocumentSymbols');
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
+const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, Range[], void, void> = new RequestType<GetFoldingRangesParams, Range[], void, void>('cpptools/getFoldingRanges');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -985,13 +990,15 @@ export class DefaultClient implements Client {
                             context: vscode.FoldingContext,
                             token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
                                     let params: GetFoldingRangesParams = {
-                                        uri: document.uri,
-
+                                        uri: document.uri
                                     };
                                     this.client.notifyWhenReady(() => {
-                                        ;
+                                        return this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
+                                        .then((ranges) => {
+                                            ;
                                     });
-                                };
+                                });
+                            };
                         }
                     }
 
