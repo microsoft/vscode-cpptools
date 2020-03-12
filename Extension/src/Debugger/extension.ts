@@ -20,7 +20,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 let disposables: vscode.Disposable[] = [];
 
 export function buildAndDebugActiveFileStr(): string {
-    return " build and debug active file";
+    return ` - ${localize("build.and.debug.active.file", 'Build and debug active file')}`;
 }
 
 export function initialize(context: vscode.ExtensionContext): void {
@@ -35,7 +35,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     let configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
-    let vsdbgProvider: CppVsDbgConfigurationProvider = null;
+    let vsdbgProvider: CppVsDbgConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
         vsdbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
         disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(vsdbgProvider)));
@@ -44,7 +44,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
 
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugActiveFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
-        const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
             // Not enabled because we do not react to single-file mode correctly yet.
             // We get an ENOENT when the user's c_cpp_properties.json is attempted to be parsed.
@@ -58,14 +58,12 @@ export function initialize(context: vscode.ExtensionContext): void {
             return Promise.resolve();
         }
 
-        let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
-            return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
-        });
+        let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config =>
+            config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
 
         if (vsdbgProvider) {
-            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config => {
-                return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
-            });
+            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config =>
+                config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
             if (vsdbgConfigs) {
                 configs.push(...vsdbgConfigs);
             }
@@ -75,9 +73,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             configuration: vscode.DebugConfiguration;
         }
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => {
-            return {label: config.name, configuration: config};
-        });
+        const items: MenuItem[] = configs.map<MenuItem>(config => ({label: config.name, configuration: config}));
 
         vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.compiler", "Select a compiler"))}).then(async selection => {
             if (!selection) {

@@ -39,11 +39,16 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         this.underlyingProvider = provider;
     }
 
-    async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        const configs: vscode.DebugConfiguration[] = await this.underlyingProvider.provideDebugConfigurations(folder, token);
-        const defaultConfig: vscode.DebugConfiguration = configs.find(config => isDebugLaunchStr(config.name) && config.request === "launch");
-        console.assert(defaultConfig);
-        const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+    async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+        let configs: vscode.DebugConfiguration[] | null | undefined = this.underlyingProvider.provideDebugConfigurations ? await this.underlyingProvider.provideDebugConfigurations(folder, token) : undefined;
+        if (!configs) {
+            configs = [];
+        }
+        const defaultConfig: vscode.DebugConfiguration | undefined = configs.find(config => isDebugLaunchStr(config.name) && config.request === "launch");
+        if (!defaultConfig) {
+            throw new Error("Default config not found in provideDebugConfigurations()");
+        }
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor || !util.fileIsCOrCppSource(editor.document.fileName) || configs.length <= 1) {
             return [defaultConfig];
         }
@@ -60,7 +65,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
             return menuItem;
         });
 
-        const selection: MenuItem = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
+        const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
             throw new Error(); // User canceled it.
         }
@@ -83,7 +88,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
     }
 
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        return this.underlyingProvider.resolveDebugConfiguration(folder, config, token);
+        return this.underlyingProvider.resolveDebugConfiguration ? this.underlyingProvider.resolveDebugConfiguration(folder, config, token) : undefined;
     }
 }
 
@@ -99,14 +104,13 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     /**
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
-    async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+    async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         let buildTasks: vscode.Task[] = await getBuildTasks(true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
-        const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find(config => {
-            return isDebugLaunchStr(config.name) && config.request === "launch";
-        });
+        const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find((config: any) =>
+            isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig, "Could not find default debug configuration.");
 
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
@@ -194,7 +198,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
                 // Disable debug heap by default, enable if 'enableDebugHeap' is set.
                 if (!config.enableDebugHeap) {
-                    const disableDebugHeapEnvSetting : Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
+                    const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
 
                     if (config.environment && util.isArray(config.environment)) {
                         config.environment.push(disableDebugHeapEnvSetting);
@@ -213,7 +217,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             if (os.platform() === 'win32' &&
                 config.pipeTransport &&
                 config.pipeTransport.pipeProgram) {
-                let replacedPipeProgram: string = null;
+                let replacedPipeProgram: string | undefined;
                 const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
 
                 // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
@@ -231,15 +235,73 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     config.pipeTransport.pipeProgram = replacedPipeProgram;
                 }
             }
+
+            const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
+            const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
+
+            const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
+
+            // Validate LLDB-MI
+            if (os.platform() === 'darwin' && // Check for macOS
+                fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
+                (!macOSMIMode || macOSMIMode === 'lldb') &&
+                !macOSMIDebuggerPath // User did not provide custom lldb-mi
+            ) {
+                const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
+
+                if (!frameworkPath) {
+                    const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
+                    const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
+
+                    vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
+                        .then(value => {
+                            if (value === moreInfoButton) {
+                                let helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
+                                vscode.env.openExternal(vscode.Uri.parse(helpURL));
+                            }
+                        });
+
+                    return undefined;
+                }
+            }
         }
         // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213
         return config && config.type ? config : null;
     }
 
-    private resolveEnvFile(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder): void {
+    private getLLDBFrameworkPath(): string | undefined {
+        const LLDBFramework: string = "LLDB.framework";
+        // Note: When adding more search paths, make sure the shipped lldb-mi also has it. See Build/lldb-mi.yml and 'install_name_tool' commands.
+        let searchPaths: string[] = [
+            "/Library/Developer/CommandLineTools/Library/PrivateFrameworks", // XCode CLI
+            "/Applications/Xcode.app/Contents/SharedFrameworks" // App Store XCode
+        ];
+
+        for (const searchPath of searchPaths) {
+            if (fs.existsSync(path.join(searchPath, LLDBFramework))) {
+                // Found a framework that 'lldb-mi' can use.
+                return searchPath;
+            }
+        }
+
+        const outputChannel: logger.Logger = logger.getOutputChannelLogger();
+
+        outputChannel.appendLine(localize("lldb.find.failed", "Missing dependency '{0}' for lldb-mi executable.", LLDBFramework));
+        outputChannel.appendLine(localize("lldb.search.paths", "Searched in:"));
+        searchPaths.forEach(searchPath => {
+            outputChannel.appendLine(`\t${searchPath}`);
+        });
+        const xcodeCLIInstallCmd: string = "xcode-select --install";
+        outputChannel.appendLine(localize("lldb.install.help", "To resolve this issue, either install XCode through the Apple App Store or install the XCode Command Line Tools by running '{0}' in a Terminal window.", xcodeCLIInstallCmd));
+        logger.showOutputChannel();
+
+        return undefined;
+    }
+
+    private resolveEnvFile(config: vscode.DebugConfiguration, folder?: vscode.WorkspaceFolder): void {
         if (config.envFile) {
             // replace ${env:???} variables
-            let envFilePath: string = util.resolveVariables(config.envFile, null);
+            let envFilePath: string = util.resolveVariables(config.envFile, undefined);
 
             try {
                 if (folder && folder.uri && folder.uri.fsPath) {
@@ -271,8 +333,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 const sourceFileMapTarget: string = config.sourceFileMap[sourceFileMapSource];
 
                 // TODO: pass config.environment as 'additionalEnvironment' to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
-                const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, null);
-                const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, null);
+                const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
+                const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
 
                 let source: string = sourceFileMapSource;
                 let target: string = sourceFileMapTarget;
@@ -306,9 +368,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         }
     }
 
-    private static async showFileWarningAsync(message: string, fileName: string) : Promise<void> {
+    private static async showFileWarningAsync(message: string, fileName: string): Promise<void> {
         const openItem: vscode.MessageItem = { title: localize("open.envfile", "Open {0}", "envFile") };
-        let result: vscode.MessageItem = await vscode.window.showWarningMessage(message, openItem);
+        let result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(message, openItem);
         if (result && result.title === openItem.title) {
             let doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
             if (doc) {
@@ -351,7 +413,7 @@ export class ConfigurationAssetProviderFactory {
 }
 
 abstract class DefaultConfigurationProvider implements IConfigurationAssetProvider {
-    configurations: IConfiguration[];
+    configurations: IConfiguration[] = [];
 
     public getInitialConfigurations(debuggerType: DebuggerType): any {
         let configurationSnippet: IConfigurationSnippet[] = [];
@@ -398,7 +460,7 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
             new MIConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new PipeTransportConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
             new WindowsConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
-            new WSLConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock),
+            new WSLConfigurations(this.MIMode, this.executable, this.pipeProgram, this.setupCommandsBlock)
         ];
     }
 }
@@ -411,7 +473,7 @@ class OSXConfigurationProvider extends DefaultConfigurationProvider {
     constructor() {
         super();
         this.configurations = [
-            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram),
+            new MIConfigurations(this.MIMode, this.executable, this.pipeProgram)
         ];
     }
 }

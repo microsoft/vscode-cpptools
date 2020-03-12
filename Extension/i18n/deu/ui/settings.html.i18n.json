@@ -24,6 +24,7 @@
 	"compiler.path.description": "Der vollständige Pfad zum Compiler, den Sie zum Erstellen Ihres Projekts für mehr Genauigkeit bei IntelliSense verwenden (Beispiel: {0}). Die Erweiterung fragt den Compiler ab, um die Systemincludepfade und Standard-Define-Anweisungen für IntelliSense zu ermitteln.",
 	"specify.a.compiler": "Geben Sie einen Compilerpfad an, oder wählen Sie einen erkannten Compilerpfad aus der Dropdownliste aus.",
 	"no.compiler.paths.detected": "(Keine Compilerpfade erkannt)",
+	"compiler.args": "Compilerargumente",
 	"compiler.arguments": "Compilerargumente zum Ändern der verwendeten Include- oder Define-Anweisungen. Beispiel: \"{0}\", \"{1}\" usw.",
 	"one.argument.per.line": "Ein Argument pro Zeile.",
 	"intellisense.mode": "IntelliSense-Modus",

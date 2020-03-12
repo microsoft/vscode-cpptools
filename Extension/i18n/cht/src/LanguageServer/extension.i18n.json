@@ -6,7 +6,6 @@
 {
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 安裝此標頭的程式庫",
 	"copy.vcpkg.command": "將用於安裝 '{0}' 的 vcpkg 命令複製到剪貼簿",
-	"removed.use.instead": "已移除 \"{0}\"。請改用 \"{1}\"。",
 	"insiders.available": "測試人員版本 {0} 可用。要切換到測試人員通道並安裝此更新嗎?",
 	"yes.button": "是",
 	"ask.me.later.button": "稍後詢問我",

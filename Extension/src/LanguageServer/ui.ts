@@ -39,7 +39,7 @@ export class UI {
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
-    private configurationUIPromise: Thenable<ConfigurationResult>;
+    private configurationUIPromise?: Thenable<ConfigurationResult>;
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
 
     constructor() {
@@ -98,8 +98,8 @@ export class UI {
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
             (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
-            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
-            ReferencesCommandMode.Peek));
+                (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
+                    ReferencesCommandMode.Peek));
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {
@@ -116,24 +116,26 @@ export class UI {
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
 
-    private dbTimeout: NodeJS.Timeout;
+    private dbTimeout?: NodeJS.Timeout;
     private set ShowDBIcon(show: boolean) {
-        if (show && this.IsTagParsing) {
+        if (this.dbTimeout) {
             clearTimeout(this.dbTimeout);
+        }
+        if (show && this.IsTagParsing) {
             this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            clearTimeout(this.dbTimeout);
             this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }
 
-    private flameTimeout: NodeJS.Timeout;
+    private flameTimeout?: NodeJS.Timeout;
     private set ShowFlameIcon(show: boolean) {
-        if (show && this.IsUpdatingIntelliSense) {
+        if (this.flameTimeout) {
             clearTimeout(this.flameTimeout);
+        }
+        if (show && this.IsUpdatingIntelliSense) {
             this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.show(); }, this.iconDelayTime);
         } else {
-            clearTimeout(this.flameTimeout);
             this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.hide(); }, this.iconDelayTime);
         }
     }
@@ -155,13 +157,17 @@ export class UI {
     }
 
     public activeDocumentChanged(): void {
-        let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-        let isCpp: boolean = (activeEditor && activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
+        let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!activeEditor) {
+            this.ShowConfiguration = false;
+        } else {
+            let isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
-        // It's sometimes desirable to see the config and icons when making settings changes.
-        let isSettingsJson: boolean = (activeEditor && (activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
+            // It's sometimes desirable to see the config and icons when making settings changes.
+            let isSettingsJson: boolean = ((activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
 
-        this.ShowConfiguration = isCpp || isSettingsJson;
+            this.ShowConfiguration = isCpp || isSettingsJson;
+        }
     }
 
     public bind(client: Client): void {
@@ -187,7 +193,7 @@ export class UI {
             .then(selection => (selection) ? selection.index : -1);
     }
 
-    public showConfigurationProviders(currentProvider: string | null): Thenable<string | undefined> {
+    public showConfigurationProviders(currentProvider?: string): Thenable<string | undefined> {
         let options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
         let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
@@ -221,7 +227,7 @@ export class UI {
 
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
         let options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.workspace", "Select a Workspace...");
+        options.placeHolder = localize("select.workspace", "Select a workspace folder...");
 
         let items: KeyedQuickPickItem[] = [];
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
@@ -298,7 +304,7 @@ export class UI {
 }
 
 export function getUI(): UI {
-    if (ui === undefined) {
+    if (!ui) {
         ui = new UI();
     }
     return ui;

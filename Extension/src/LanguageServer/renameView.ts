@@ -9,7 +9,7 @@ import { ReferencesModel, RenameResultCallback } from './referencesModel';
 import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
 
 export class RenameView {
-    private referencesModel: ReferencesModel;
+    private referencesModel?: ReferencesModel;
     private renamePendingTreeDataProvider: ReferencesTreeDataProvider;
     private renameCandidatesTreeDataProvider: ReferencesTreeDataProvider;
     private visible: boolean = false;
@@ -32,8 +32,10 @@ export class RenameView {
             vscode.commands.executeCommand(`CppRenamePendingView.focus`);
         } else if (this.visible) {
             this.visible = false;
-            this.referencesModel.cancelRename();
-            this.referencesModel = null;
+            if (this.referencesModel) {
+                this.referencesModel.cancelRename();
+            }
+            this.referencesModel = undefined;
             this.clearData();
         }
     }

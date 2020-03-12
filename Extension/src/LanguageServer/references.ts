@@ -38,7 +38,7 @@ export interface ReferencesResult {
     isFinished: boolean;
 }
 
-export type ReferencesResultCallback = (result: ReferencesResult, doResolve: boolean) => void;
+export type ReferencesResultCallback = (result: ReferencesResult | null, doResolve: boolean) => void;
 
 export interface ReferencesResultMessage {
     referencesResult: ReferencesResult;
@@ -125,29 +125,29 @@ export class ReferencesManager {
     private client: DefaultClient;
     private disposables: vscode.Disposable[] = [];
 
-    private referencesChannel: vscode.OutputChannel;
-    private findAllRefsView: FindAllRefsView;
-    private renameView: RenameView;
+    private referencesChannel?: vscode.OutputChannel;
+    private findAllRefsView?: FindAllRefsView;
+    private renameView?: RenameView;
     private viewsInitialized: boolean = false;
 
     public symbolSearchInProgress: boolean = false;
-    private referencesCurrentProgress: ReportReferencesProgressNotification;
-    private referencesPrevProgressIncrement: number;
-    private referencesPrevProgressMessage: string;
+    private referencesCurrentProgress?: ReportReferencesProgressNotification;
+    private referencesPrevProgressIncrement: number = 0;
+    private referencesPrevProgressMessage: string = "";
     public referencesRequestHasOccurred: boolean = false;
     private referencesFinished: boolean = false;
     public referencesRequestPending: boolean = false;
     public referencesRefreshPending: boolean = false;
-    private referencesDelayProgress: NodeJS.Timeout;
-    private referencesProgressOptions: vscode.ProgressOptions;
+    private referencesDelayProgress?: NodeJS.Timeout;
+    private referencesProgressOptions?: vscode.ProgressOptions;
     public referencesCanceled: boolean = false;
-    public referencesCanceledWhilePreviewing: boolean;
-    private referencesStartedWhileTagParsing: boolean;
-    private referencesProgressMethod: (progress: vscode.Progress<{
+    public referencesCanceledWhilePreviewing?: boolean;
+    private referencesStartedWhileTagParsing?: boolean;
+    private referencesProgressMethod?: (progress: vscode.Progress<{
         message?: string;
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
-    private referencesCurrentProgressUICounter: number;
+    private referencesCurrentProgressUICounter: number = 0;
     private readonly referencesProgressUpdateInterval: number = 1000;
     private readonly referencesProgressDelayInterval: number = 2000;
 
@@ -156,9 +156,9 @@ export class ReferencesManager {
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
 
-    private resultsCallback: ReferencesResultCallback;
-    private currentUpdateProgressTimer: NodeJS.Timeout;
-    private currentUpdateProgressResolve: () => void;
+    private resultsCallback?: ReferencesResultCallback;
+    private currentUpdateProgressTimer?: NodeJS.Timeout;
+    private currentUpdateProgressResolve?: () => void;
     public groupByFile: PersistentState<boolean> = new PersistentState<boolean>("CPP.referencesGroupByFile", false);
 
     constructor(client: DefaultClient) {
@@ -180,8 +180,12 @@ export class ReferencesManager {
 
     public toggleGroupView(): void {
         this.groupByFile.Value = !this.groupByFile.Value;
-        this.findAllRefsView.setGroupBy(this.groupByFile.Value);
-        this.renameView.setGroupBy(this.groupByFile.Value);
+        if (this.findAllRefsView) {
+            this.findAllRefsView.setGroupBy(this.groupByFile.Value);
+        }
+        if (this.renameView) {
+            this.renameView.setGroupBy(this.groupByFile.Value);
+        }
     }
 
     public UpdateProgressUICounter(mode: ReferencesCommandMode): void {
@@ -200,73 +204,75 @@ export class ReferencesManager {
 
     private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean, mode: ReferencesCommandMode): void {
         const helpMessage: string = (mode !== ReferencesCommandMode.Find) ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
-        switch (this.referencesCurrentProgress.referencesProgress) {
-            case ReferencesProgress.Started:
-            case ReferencesProgress.StartedRename:
-                progress.report({ message: localize("started", "Started."), increment: 0 });
-                break;
-            case ReferencesProgress.ProcessingSource:
-                progress.report({ message: localize("processing.source", "Processing source."), increment: 0 });
-                break;
-            case ReferencesProgress.ProcessingTargets:
-                let numWaitingToLex: number = 0;
-                let numLexing: number = 0;
-                let numParsing: number = 0;
-                let numConfirmingReferences: number = 0;
-                let numFinishedWithoutConfirming: number = 0;
-                let numFinishedConfirming: number = 0;
-                for (let targetLocationProgress of this.referencesCurrentProgress.targetReferencesProgress) {
-                    switch (targetLocationProgress) {
-                        case TargetReferencesProgress.WaitingToLex:
-                            ++numWaitingToLex;
-                            break;
-                        case TargetReferencesProgress.Lexing:
-                            ++numLexing;
-                            break;
-                        case TargetReferencesProgress.WaitingToParse:
-                            // The count is derived.
-                            break;
-                        case TargetReferencesProgress.Parsing:
-                            ++numParsing;
-                            break;
-                        case TargetReferencesProgress.ConfirmingReferences:
-                            ++numConfirmingReferences;
-                            break;
-                        case TargetReferencesProgress.FinishedWithoutConfirming:
-                            ++numFinishedWithoutConfirming;
-                            break;
-                        case TargetReferencesProgress.FinishedConfirming:
-                            ++numFinishedConfirming;
-                            break;
-                        default:
-                            break;
+        if (this.referencesCurrentProgress) {
+            switch (this.referencesCurrentProgress.referencesProgress) {
+                case ReferencesProgress.Started:
+                case ReferencesProgress.StartedRename:
+                    progress.report({ message: localize("started", "Started."), increment: 0 });
+                    break;
+                case ReferencesProgress.ProcessingSource:
+                    progress.report({ message: localize("processing.source", "Processing source."), increment: 0 });
+                    break;
+                case ReferencesProgress.ProcessingTargets:
+                    let numWaitingToLex: number = 0;
+                    let numLexing: number = 0;
+                    let numParsing: number = 0;
+                    let numConfirmingReferences: number = 0;
+                    let numFinishedWithoutConfirming: number = 0;
+                    let numFinishedConfirming: number = 0;
+                    for (let targetLocationProgress of this.referencesCurrentProgress.targetReferencesProgress) {
+                        switch (targetLocationProgress) {
+                            case TargetReferencesProgress.WaitingToLex:
+                                ++numWaitingToLex;
+                                break;
+                            case TargetReferencesProgress.Lexing:
+                                ++numLexing;
+                                break;
+                            case TargetReferencesProgress.WaitingToParse:
+                                // The count is derived.
+                                break;
+                            case TargetReferencesProgress.Parsing:
+                                ++numParsing;
+                                break;
+                            case TargetReferencesProgress.ConfirmingReferences:
+                                ++numConfirmingReferences;
+                                break;
+                            case TargetReferencesProgress.FinishedWithoutConfirming:
+                                ++numFinishedWithoutConfirming;
+                                break;
+                            case TargetReferencesProgress.FinishedConfirming:
+                                ++numFinishedConfirming;
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                }
 
-                let currentMessage: string;
-                const numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
-                const numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
-                const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
-                if (numLexing >= numParsing && numFinishedConfirming === 0) {
-                    if (numTotalToLex === 0) {
-                        currentMessage = localize("searching.files", "Searching files."); // TODO: Prevent this from happening.
+                    let currentMessage: string;
+                    const numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
+                    const numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
+                    const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
+                    if (numLexing >= numParsing && numFinishedConfirming === 0) {
+                        if (numTotalToLex === 0) {
+                            currentMessage = localize("searching.files", "Searching files."); // TODO: Prevent this from happening.
+                        } else {
+                            currentMessage = localize("files.searched", "{0}/{1} files searched.{2}", numFinishedLexing, numTotalToLex, helpMessage);
+                        }
                     } else {
-                        currentMessage = localize("files.searched", "{0}/{1} files searched.{2}", numFinishedLexing, numTotalToLex, helpMessage);
+                        currentMessage = localize("files.confirmed", "{0}/{1} files confirmed.{2}", numFinishedConfirming, numTotalToParse, helpMessage);
                     }
-                } else {
-                    currentMessage = localize("files.confirmed", "{0}/{1} files confirmed.{2}", numFinishedConfirming, numTotalToParse, helpMessage);
-                }
-                const currentLexProgress: number = numFinishedLexing / numTotalToLex;
-                const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
-                const currentParseProgress: number = (numConfirmingReferences * confirmingWeight + numFinishedConfirming) / numTotalToParse;
-                const averageLexingPercent: number = 25;
-                const currentIncrement: number = currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent);
-                if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
-                    progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
-                    this.referencesPrevProgressIncrement = currentIncrement;
-                    this.referencesPrevProgressMessage = currentMessage;
-                }
-                break;
+                    const currentLexProgress: number = numFinishedLexing / numTotalToLex;
+                    const confirmingWeight: number = 0.5; // Count confirming as 50% of parsing time (even though it's a lot less) so that the progress bar change is more noticeable.
+                    const currentParseProgress: number = (numConfirmingReferences * confirmingWeight + numFinishedConfirming) / numTotalToParse;
+                    const averageLexingPercent: number = 25;
+                    const currentIncrement: number = currentLexProgress * averageLexingPercent + currentParseProgress * (100 - averageLexingPercent);
+                    if (forceUpdate || currentIncrement > this.referencesPrevProgressIncrement || currentMessage !== this.referencesPrevProgressMessage) {
+                        progress.report({ message: currentMessage, increment: currentIncrement - this.referencesPrevProgressIncrement });
+                        this.referencesPrevProgressIncrement = currentIncrement;
+                        this.referencesPrevProgressMessage = currentMessage;
+                    }
+                    break;
+            }
         }
     }
 
@@ -274,16 +280,16 @@ export class ReferencesManager {
         this.referencesStartedWhileTagParsing = this.client.IsTagParsing;
 
         let mode: ReferencesCommandMode =
-            (referencesProgress === ReferencesProgress.StartedRename) ? ReferencesCommandMode.Rename :
-            (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
-            ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
+                (referencesProgress === ReferencesProgress.StartedRename) ? ReferencesCommandMode.Rename :
+                    (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
+                        ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
         this.client.setReferencesCommandMode(mode);
 
         this.referencesPrevProgressIncrement = 0;
         this.referencesPrevProgressMessage = "";
         this.referencesCurrentProgressUICounter = 0;
-        this.currentUpdateProgressTimer = null;
-        this.currentUpdateProgressResolve = null;
+        this.currentUpdateProgressTimer = undefined;
+        this.currentUpdateProgressResolve = undefined;
         let referencePreviousProgressUICounter: number = 0;
 
         this.clearViews();
@@ -292,7 +298,6 @@ export class ReferencesManager {
 
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
             this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
-            // tslint:disable-next-line: promise-must-complete
                 new Promise((resolve) => {
                     this.currentUpdateProgressResolve = resolve;
                     this.reportProgress(progress, true, mode);
@@ -302,12 +307,16 @@ export class ReferencesManager {
                             this.referencesCanceled = true;
                         }
                         if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
-                            clearInterval(this.currentUpdateProgressTimer);
-                            this.currentUpdateProgressTimer = null;
+                            if (this.currentUpdateProgressTimer) {
+                                clearInterval(this.currentUpdateProgressTimer);
+                            }
+                            this.currentUpdateProgressTimer = undefined;
                             if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
                                 referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
                                 this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
-                                vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+                                if (this.referencesProgressOptions && this.referencesProgressMethod) {
+                                    vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+                                }
                             }
                             resolve();
                         } else {
@@ -316,7 +325,9 @@ export class ReferencesManager {
                     }, this.referencesProgressUpdateInterval);
                 });
             vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
-            clearInterval(this.referencesDelayProgress);
+            if (this.referencesDelayProgress) {
+                clearInterval(this.referencesDelayProgress);
+            }
         }, this.referencesProgressDelayInterval);
     }
 
@@ -345,7 +356,9 @@ export class ReferencesManager {
         this.referencesCanceledWhilePreviewing = false;
         if (this.referencesCanceled) {
             this.referencesCanceled = false;
-            this.resultsCallback(null, true);
+            if (this.resultsCallback) {
+                this.resultsCallback(null, true);
+            }
         } else {
             this.client.sendRenameNofication(params);
         }
@@ -359,7 +372,9 @@ export class ReferencesManager {
         this.referencesCanceledWhilePreviewing = false;
         if (this.referencesCanceled) {
             this.referencesCanceled = false;
-            this.resultsCallback(null, true);
+            if (this.resultsCallback) {
+                this.resultsCallback(null, true);
+            }
         } else {
             this.client.sendFindAllReferencesNotification(params);
         }
@@ -381,9 +396,11 @@ export class ReferencesManager {
             let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
                 referencesCommandModeToString(this.client.ReferencesCommandMode));
             if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
-                this.referencesChannel.appendLine(msg);
-                this.referencesChannel.appendLine("");
-                this.referencesChannel.show(true);
+                if (this.referencesChannel) {
+                    this.referencesChannel.appendLine(msg);
+                    this.referencesChannel.appendLine("");
+                    this.referencesChannel.show(true);
+                }
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 let logChannel: vscode.OutputChannel = logger.getOutputChannel();
                 logChannel.appendLine(msg);
@@ -403,12 +420,18 @@ export class ReferencesManager {
 
         if (referencesResult.isFinished) {
             this.symbolSearchInProgress = false;
-            clearInterval(this.referencesDelayProgress);
+            if (this.referencesDelayProgress) {
+                clearInterval(this.referencesDelayProgress);
+            }
             if (this.currentUpdateProgressTimer) {
-                clearInterval(this.currentUpdateProgressTimer);
-                this.currentUpdateProgressResolve();
-                this.currentUpdateProgressResolve = null;
-                this.currentUpdateProgressTimer = null;
+                if (this.currentUpdateProgressTimer) {
+                    clearInterval(this.currentUpdateProgressTimer);
+                }
+                if (this.currentUpdateProgressResolve) {
+                    this.currentUpdateProgressResolve();
+                }
+                this.currentUpdateProgressResolve = undefined;
+                this.currentUpdateProgressTimer = undefined;
             }
             this.client.setReferencesCommandMode(ReferencesCommandMode.None);
         }
@@ -416,36 +439,54 @@ export class ReferencesManager {
         if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
             if (!referencesCanceled) {
                 // If there are only Confirmed results, complete the rename immediately.
-                let foundUnconfirmed: ReferenceInfo = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
+                let foundUnconfirmed: ReferenceInfo | undefined = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
                 if (!foundUnconfirmed) {
-                    this.resultsCallback(referencesResult, true);
+                    if (this.resultsCallback) {
+                        this.resultsCallback(referencesResult, true);
+                    }
                 } else {
                     // Passing a null result and doResult of true to resultsCallback will cause
                     // the RenameProvider to resolve the promise, which causes the progress bar to be dismissed.
-                    this.resultsCallback(null, true);
-                    this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult) => {
-                        this.referencesCanceled = false;
-                        this.resultsCallback(result, false);
-                    });
-                    this.renameView.show(true);
+                    if (this.resultsCallback) {
+                        this.resultsCallback(null, true);
+                    }
+                    if (this.renameView) {
+                        this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult | null) => {
+                            this.referencesCanceled = false;
+                            if (this.resultsCallback) {
+                                this.resultsCallback(result, false);
+                            }
+                        });
+                        this.renameView.show(true);
+                    }
                 }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
-                this.resultsCallback(null, true);
+                if (this.resultsCallback) {
+                    this.resultsCallback(null, true);
+                }
             }
         } else {
-            this.findAllRefsView.setData(referencesResult, referencesCanceled, this.groupByFile.Value);
+            if (this.findAllRefsView) {
+                this.findAllRefsView.setData(referencesResult, referencesCanceled, this.groupByFile.Value);
+            }
 
             // Display data based on command mode: peek references OR find all references
             if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
                 let showConfirmedReferences: boolean = referencesCanceled;
-                let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
-                if (peekReferencesResults) {
-                    this.referencesChannel.appendLine(peekReferencesResults);
-                    this.referencesChannel.show(true);
+                if (this.findAllRefsView) {
+                    let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
+                    if (peekReferencesResults) {
+                        if (this.referencesChannel) {
+                            this.referencesChannel.appendLine(peekReferencesResults);
+                            this.referencesChannel.show(true);
+                        }
+                    }
                 }
             } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
-                this.findAllRefsView.show(true);
+                if (this.findAllRefsView) {
+                    this.findAllRefsView.show(true);
+                }
             }
             if (referencesResult.isFinished) {
                 this.lastResults = referencesResult;
@@ -456,13 +497,15 @@ export class ReferencesManager {
                     this.referencesRefreshPending = true;
                     vscode.commands.executeCommand("references-view.refresh");
                 } else {
-                    this.resultsCallback(referencesResult, !this.referencesCanceledWhilePreviewing);
+                    if (this.resultsCallback) {
+                        this.resultsCallback(referencesResult, !this.referencesCanceledWhilePreviewing);
+                    }
                 }
             }
         }
     }
 
-    public lastResults: ReferencesResult = null; // Saved for the final request after a preview occurs.
+    public lastResults: ReferencesResult | null = null; // Saved for the final request after a preview occurs.
 
     public setResultsCallback(callback: ReferencesResultCallback): void {
         this.symbolSearchInProgress = true;

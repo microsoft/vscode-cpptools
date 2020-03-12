@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as cpptoolsJsonUtils from './abTesting';
 import * as DebuggerExtension from './Debugger/extension';
 import * as fs from 'fs';
 import * as LanguageServer from './LanguageServer/extension';
@@ -21,6 +20,7 @@ import { PackageManager, PackageManagerError, IPackage } from './packageManager'
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
+import { CppSettings } from './LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -61,7 +61,7 @@ export function deactivate(): Thenable<void> {
     disposables.forEach(d => d.dispose());
 
     if (languageServiceDisabled) {
-        return;
+        return Promise.resolve();
     }
     return LanguageServer.deactivate();
 }
@@ -185,7 +185,7 @@ function removeUnnecessaryFile(): Promise<void> {
     if (os.platform() !== 'win32') {
         let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException) => {
+            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
                 if (err) {
                     getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
                         'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
@@ -204,7 +204,7 @@ function touchInstallLockFile(): Promise<void> {
 function handleError(error: any): void {
     let installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
-    installationInformation.telemetryProperties['stage'] = installationInformation.stage;
+    installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
@@ -261,7 +261,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
         util.setProgress(util.getProgressInstallSuccess());
     }
 
-    installBlob.telemetryProperties['osArchitecture'] = info.architecture;
+    installBlob.telemetryProperties['osArchitecture'] = info.architecture ?? "";
 
     Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
 
@@ -288,11 +288,12 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    if (vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+    let settings: CppSettings = new CppSettings();
+    if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
         disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") !== "Disabled") {
+            if (!reloadMessageShown && settings.intelliSenseEngine !== "Disabled") {
                 reloadMessageShown = true;
                 util.promptForReloadWindowDueToSettingsChange();
             }
@@ -300,45 +301,21 @@ async function finalizeExtensionActivation(): Promise<void> {
         return;
     }
     disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-        if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+        if (!reloadMessageShown && settings.intelliSenseEngine === "Disabled") {
             reloadMessageShown = true;
             util.promptForReloadWindowDueToSettingsChange();
         }
     }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
-    // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
-    // (this may result in rewriting the package.json file)
-
-    let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
     let packageJson: any = util.getRawPackageJson();
     let writePackageJson: boolean = false;
     let packageJsonPath: string = util.getExtensionFilePath("package.json");
-    if (!packageJsonPath.includes(".vscode-insiders") && !packageJsonPath.includes(".vscode-exploration")) {
-        let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
-        if (abTestSettings.UseDefaultIntelliSenseEngine) {
-            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
-        } else {
-            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
-        }
-        if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
-            writePackageJson = true;
-        }
-    } else {
+    if (packageJsonPath.includes(".vscode-insiders") || packageJsonPath.includes(".vscode-exploration")) {
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
             writePackageJson = true;
         }
-    }
-
-    let prevEnhancedColorizationDefault: any = packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default;
-    if (abTestSettings.UseEnhancedColorization) {
-        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Enabled";
-    } else {
-        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Disabled";
-    }
-    if (prevEnhancedColorizationDefault !== packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default) {
-        writePackageJson = true;
     }
 
     if (writePackageJson) {

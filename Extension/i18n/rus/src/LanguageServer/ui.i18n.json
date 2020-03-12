@@ -16,7 +16,7 @@
 	"none": "нет",
 	"disable.configuration.provider": "Отключите активный поставщик конфигурации (если применимо).",
 	"select.compile.commands": "Выберите compile_commands.json...",
-	"select.workspace": "Выберите рабочую область...",
+	"select.workspace": "Выберите папку рабочей области…",
 	"select.parsing.command": "Выберите команду анализа...",
 	"resume.parsing": "Возобновить анализ",
 	"pause.parsing": "Приостановить анализ"

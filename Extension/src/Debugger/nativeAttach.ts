@@ -13,7 +13,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class Process {
-    constructor(public name: string, public pid: string, public commandLine: string) { }
+    constructor(public name: string, public pid?: string, public commandLine?: string) { }
 
     public toAttachItem(): AttachItem {
         return {
@@ -102,9 +102,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
             default:
                 return Promise.reject<Process[]>(new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform())));
         }
-        return execChildProcess(processCmd, null).then(processes => {
-            return PsProcessParser.ParseProcessFromPs(processes);
-        });
+        return execChildProcess(processCmd, undefined).then(processes => PsProcessParser.ParseProcessFromPs(processes));
     }
 }
 
@@ -135,14 +133,16 @@ export class PsProcessParser {
                 continue;
             }
 
-            let processEntry: Process = PsProcessParser.parseLineFromPs(line);
-            processEntries.push(processEntry);
+            let processEntry: Process | undefined = PsProcessParser.parseLineFromPs(line);
+            if (processEntry) {
+                processEntries.push(processEntry);
+            }
         }
 
         return processEntries;
     }
 
-    private static parseLineFromPs(line: string): Process {
+    private static parseLineFromPs(line: string): Process | undefined {
         // Explanation of the regex:
         //   - any leading whitespace
         //   - PID
@@ -152,7 +152,7 @@ export class PsProcessParser {
         //   - whitespace
         //   - args (might be empty)
         const psEntry: RegExp = new RegExp(`^\\s*([0-9]+)\\s+(.{${PsProcessParser.secondColumnCharacters - 1}})\\s+(.*)$`);
-        const matches: RegExpExecArray = psEntry.exec(line);
+        const matches: RegExpExecArray | null = psEntry.exec(line);
         if (matches && matches.length === 4) {
             const pid: string = matches[1].trim();
             const executable: string = matches[2].trim();
@@ -165,9 +165,9 @@ export class PsProcessParser {
 /**
  * Originally from common.ts. Due to test code not having vscode, it was refactored to not have vscode.OutputChannel.
  */
-function execChildProcess(process: string, workingDirectory: string): Promise<string> {
+function execChildProcess(process: string, workingDirectory?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error, stdout: string, stderr: string) => {
+        child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error |  null, stdout: string, stderr: string) => {
 
             if (error) {
                 reject(error);
@@ -195,9 +195,7 @@ export class WmicAttachItemsProvider extends NativeAttachItemsProvider {
 
     protected getInternalProcessEntries(): Promise<Process[]> {
         const wmicCommand: string = 'wmic process get Name,ProcessId,CommandLine /FORMAT:list';
-        return execChildProcess(wmicCommand, null).then(processes => {
-            return WmicProcessParser.ParseProcessFromWmic(processes);
-        });
+        return execChildProcess(wmicCommand, undefined).then(processes => WmicProcessParser.ParseProcessFromWmic(processes));
     }
 }
 
@@ -209,7 +207,7 @@ export class WmicProcessParser {
     // Only public for tests.
     public static ParseProcessFromWmic(processes: string): Process[] {
         let lines: string[] = processes.split(os.EOL);
-        let currentProcess: Process = new Process(null, null, null);
+        let currentProcess: Process = new Process("current process", undefined, undefined);
         let processEntries: Process[] = [];
 
         for (let i: number = 0; i < lines.length; i++) {
@@ -223,7 +221,7 @@ export class WmicProcessParser {
             // Each entry of processes has ProcessId as the last line
             if (line.lastIndexOf(WmicProcessParser.wmicPidTitle, 0) === 0) {
                 processEntries.push(currentProcess);
-                currentProcess = new Process(null, null, null);
+                currentProcess = new Process("current process", undefined, undefined);
             }
         }
 

@@ -27,12 +27,12 @@ class RefreshButton implements vscode.QuickInputButton {
 }
 
 export interface AttachItem extends vscode.QuickPickItem {
-    id: string;
+    id?: string;
 }
 
-export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Promise<string> {
-    return getAttachItems().then(processEntries => {
-        return new Promise<string>((resolve, reject) => {
+export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Promise<string | undefined> {
+    return getAttachItems().then(processEntries =>
+        new Promise<string>((resolve, reject) => {
             let quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();
             quickPick.title = localize("attach.to.process", "Attach to process");
             quickPick.canSelectMany = false;
@@ -53,7 +53,7 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
                     reject(new Error(localize("process.not.selected", "Process not selected.")));
                 }
 
-                let selectedId: string = quickPick.selectedItems[0].id;
+                let selectedId: string | undefined = quickPick.selectedItems[0].id;
 
                 disposables.forEach(item => item.dispose());
                 quickPick.dispose();
@@ -69,6 +69,5 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
             }, undefined, disposables);
 
             quickPick.show();
-        });
-    });
+        }));
 }

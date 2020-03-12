@@ -10,39 +10,43 @@ import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import * as vscode from 'vscode';
 import { CppSettings } from './settings';
+import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
 
-export function createProtocolFilter(me: Client, clients: ClientCollection): Middleware {
+export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
-    /* tslint:disable */
-    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data) => void) => { if (clients.ActiveClient === me) {me.notifyWhenReady(() => callback(data));}};
+    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
     // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
-    let invoke2 = (a, b, callback: (a, b) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a, b)); } return null; };
-    let invoke3 = (a, b, c, callback: (a, b, c) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(() => callback(a, b, c)); } return null; };
-    let invoke4 = (a, b, c, d, callback: (a, b, c, d) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(() => callback(a, b, c, d)); } return null; };
-    let invoke5 = (a, b, c, d, e, callback: (a, b, c, d, e) => any) => { if (clients.ActiveClient === me)  { return me.requestWhenReady(() => callback(a, b, c, d, e)); } return null; };
+    let invoke2 = (a: any, b: any, callback: (a: any, b: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
+    let invoke3 = (a: any, b: any, c: any, callback: (a: any, b: any, c: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
+    let invoke4 = (a: any, b: any, c: any, d: any, callback: (a: any, b: any, c: any, d: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d));
+    let invoke5 = (a: any, b: any, c: any, d: any, e: any, callback: (a: any, b: any, c: any, d: any, e: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d, e));
     /* tslint:enable */
 
     return {
         didOpen: (document, sendMessage) => {
-            let editor: vscode.TextEditor = vscode.window.visibleTextEditors.find(e => e.document === document);
+            let editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
+                let me: Client = clients.getClientFor(document.uri);
                 if (clients.checkOwnership(me, document)) {
                     me.TrackedDocuments.add(document);
                     if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
-                        let cppSettings: CppSettings = new CppSettings(me.RootUri);
+                        let cppSettings: CppSettings = new CppSettings();
                         if (cppSettings.autoAddFileAssociations) {
                             const fileName: string = path.basename(document.uri.fsPath);
                             const mappingString: string = fileName + "@" + document.uri.fsPath;
                             me.addFileAssociations(mappingString, false);
                         }
                     }
-                    me.provideCustomConfiguration(document.uri, null);
+                    me.provideCustomConfiguration(document.uri, undefined);
                     me.notifyWhenReady(() => {
                         sendMessage(document);
                         me.onDidOpenTextDocument(document);
+                        if (editor && editor === vscode.window.activeTextEditor) {
+                            onDidChangeActiveTextEditor(editor);
+                        }
                     });
                 }
             } else {
@@ -56,21 +60,25 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
             }
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
-            if (clients.ActiveClient === me && me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
-                me.onDidChangeTextDocument(textDocumentChangeEvent);
-                me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
+            let me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
+            if (!me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
+                processDelayedDidOpen(textDocumentChangeEvent.document);
             }
+            me.onDidChangeTextDocument(textDocumentChangeEvent);
+            me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
         },
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
-            if (clients.ActiveClient === me && me.TrackedDocuments.has(event.document)) {
+            let me: Client = clients.getClientFor(event.document.uri);
+            if (me.TrackedDocuments.has(event.document)) {
                 return me.requestWhenReady(() => sendMessage(event));
             }
             return Promise.resolve([]);
         },
         didSave: defaultHandler,
         didClose: (document, sendMessage) => {
-            if (clients.ActiveClient === me && me.TrackedDocuments.has(document)) {
+            let me: Client = clients.getClientFor(document.uri);
+            if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
                 me.notifyWhenReady(() => sendMessage(document));
@@ -79,9 +87,10 @@ export function createProtocolFilter(me: Client, clients: ClientCollection): Mid
 
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: (document, position, token, next: (document, position, token) => any) => {
+        provideHover: (document, position, token, next: (document: any, position: any, token: any) => any) => {
+            let me: Client = clients.getClientFor(document.uri);
             if (clients.checkOwnership(me, document)) {
-                return me.requestWhenReady(() => next(document, position, token));
+                return clients.ActiveClient.requestWhenReady(() => next(document, position, token));
             }
             return null;
         },

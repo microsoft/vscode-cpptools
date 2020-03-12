@@ -23,17 +23,17 @@ abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdap
         this.context = context;
     }
 
-    abstract createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor>;
+    abstract createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor>;
 }
 
 export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-    public static DEBUG_TYPE : string = "cppdbg";
+    public static DEBUG_TYPE: string = "cppdbg";
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         return util.isExtensionReady().then(ready => {
             if (ready) {
                 let command: string = path.join(this.context.extensionPath, './debugAdapters/OpenDebugAD7');
@@ -52,13 +52,13 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
 }
 
 export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-    public static DEBUG_TYPE : string = "cppvsdbg";
+    public static DEBUG_TYPE: string = "cppvsdbg";
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         if (os.platform() !== 'win32') {
             vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not avaliable for non-Windows machines.", "cppvsdbg"));
             return null;

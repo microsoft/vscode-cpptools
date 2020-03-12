@@ -1,5 +1,55 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.27.0-insiders3: March 12, 2019
+### Bug Fixes
+* Fix update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
+* Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
+  * @Helloimbob [PR #5053](https://github.com/microsoft/vscode-cpptools/pull/5053)
+* Fix Outline view not updating fast enough after switching branches. [#4894](https://github.com/microsoft/vscode-cpptools/issues/4894)
+* Fix extension randomly getting stuck while communicating with the IntelliSense process on Mac. [#4989](https://github.com/microsoft/vscode-cpptools/issues/4989)
+* Fix completion results appearing after numeric literals. [#5019](https://github.com/microsoft/vscode-cpptools/issues/5019)
+* Fix crashes that sometimes occur after adding multiple workspace folders. [#5059](https://github.com/microsoft/vscode-cpptools/issues/5059)
+* Add URI's to the debug logging for messages (e.g. `fileChanged`). [#5062](https://github.com/microsoft/vscode-cpptools/issues/5062)
+* Fix crashes that sometimes occurs after switching color themes. [#5063](https://github.com/microsoft/vscode-cpptools/issues/5063)
+* Fix `clang_format_sortIncludes` setting not getting used. [#5068](https://github.com/microsoft/vscode-cpptools/issues/5068)
+* Fix error after updating a document too soon after startup. [#5076](https://github.com/microsoft/vscode-cpptools/issues/5076)
+* Fix IntelliSense process crashing on macOS 10.12 or older after a settings change. [#5090](https://github.com/microsoft/vscode-cpptools/issues/5090)
+* Fix Pause (break all) not working on Mac with Attach debugging.
+* Other language server crash fixes.
+
+## Version 0.27.0-insiders2: March 4, 2019
+### Bug Fixes
+* Fix the `Open File...` scenario (without a workspace folder). [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
+* Fix `browsePath` null reference that can occur with some configuration providers. [PR #5055](https://github.com/microsoft/vscode-cpptools/pull/5055)
+
+## Version 0.27.0-insiders: March 3, 2019
+### Enhancements
+* Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multiroot%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
+* Update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
+* Rename language server processes to `cpptools` and `cpptools-srv` (IntelliSense process). [#4364](https://github.com/microsoft/vscode-cpptools/issues/4364)
+* Add support for `-iframework` in `compile_commands.json`. [#4819](https://github.com/microsoft/vscode-cpptools/issues/4819)
+* Add `cpptools.setActiveConfigName` command. [#4870](https://github.com/microsoft/vscode-cpptools/issues/4870)
+  * @aleksey-sergey [PR #4893](https://github.com/microsoft/vscode-cpptools/pull/4893)
+* Default to the bundled `clang-format` if its version is newer. [#4963](https://github.com/microsoft/vscode-cpptools/issues/4963)
+* Include only `lldb-mi` for macOS.
+  * Fix visualization of standard library types in lldb. [#1768](https://github.com/microsoft/vscode-cpptools/issues/1768)
+  * Enable debugging support on macOS Catalina. [#3829](https://github.com/microsoft/vscode-cpptools/issues/3829)
+* Support '`' in addition to '-exec' for sending gdb commands [PR MIEngine#967](https://github.com/microsoft/MIEngine/pull/976)
+
+### Bug Fixes
+* Fix issue in which the user is not again prompted to use a custom configuration provider if settings files have been deleted. [#2346](https://github.com/microsoft/vscode-cpptools/issues/2346)
+* Fix "Unrecognized format of field "msg" in result" on macOS. [#2492](https://github.com/microsoft/vscode-cpptools/issues/2492)
+* Fix IntelliSense using too much CPU when switching branches. [#2806](https://github.com/microsoft/vscode-cpptools/issues/2806)
+* Fix for timeout on slow terminals while debugging. [#2889](https://github.com/microsoft/vscode-cpptools/issues/2889)
+  * @Epikem [PR MIEngine#965](https://github.com/microsoft/MIEngine/pull/965)
+* Fix non-localized text. [#4481](https://github.com/microsoft/vscode-cpptools/issues/4481), [#4879](https://github.com/microsoft/vscode-cpptools/issues/4879)
+* Fix issues with paths containing certain Unicode sequences on Mac. [#4712](https://github.com/microsoft/vscode-cpptools/issues/4712)
+* Fix IntelliSense parsing bugs and crashes. [#4717](https://github.com/microsoft/vscode-cpptools/issues/4717), [#4798](https://github.com/microsoft/vscode-cpptools/issues/4798)
+* Fix configuration UI disabling `compilerPath` if no default compiler is found. [#4727](https://github.com/microsoft/vscode-cpptools/issues/4727)
+* Fix issue with providing custom configurations for files specified using URIs schemes we do not recognize. [#4889](https://github.com/microsoft/vscode-cpptools/issues/4889)
+* Fix failure to detect CL.exe if VS Installer files are stored on a drive other than the system drive. [#4929](https://github.com/microsoft/vscode-cpptools/issues/4929)
+* Fix issue with cancellation of a `Rename` operation causing subsequent `Find All References` and `Rename` operations to fail.  [#5022](https://github.com/microsoft/vscode-cpptools/issues/5022)
+
 ## Version 0.26.3: January 22, 2020
 ### Bug Fixes
 * IntelliSense bug fixes. [#2774](https://github.com/microsoft/vscode-cpptools/issues/2774)
@@ -14,7 +64,7 @@
 * Fix custom configurations sometimes not being applied to headers. [#4649](https://github.com/microsoft/vscode-cpptools/issues/4649)
 * Fix headers opening into header-only TU's instead of TU's for candidate source files. [#4696](https://github.com/microsoft/vscode-cpptools/issues/4696)
 * Fix the missing description of `C_Cpp.clang_format_style`.
-  * @Enna1 [PR 4734](https://github.com/microsoft/vscode-cpptools/pull/4734)
+  * @Enna1 [PR #4734](https://github.com/microsoft/vscode-cpptools/pull/4734)
 * Fix Insiders channel not auto-downgrading after an Insiders vsix is unpublished. [#4760](https://github.com/microsoft/vscode-cpptools/issues/4760)
 * Fix compiler querying with more than 40 `compilerArgs`. [#4791](https://github.com/microsoft/vscode-cpptools/issues/4791)
 * Fix an issue in which files may be unnecessarily removed from the tag parser database on startup, if using a custom configuration provider, resulting in a large number of files being reparsed. [#4802](https://github.com/microsoft/vscode-cpptools/issues/4802)
@@ -432,7 +482,7 @@
 * Don't show `includePath` code actions if compile commands or custom configuration providers are used. [#2334](https://github.com/Microsoft/vscode-cpptools/issues/2334)
 * Fix `C_Cpp.clang_format_path` not accepting environment variables. [#2344](https://github.com/Microsoft/vscode-cpptools/issues/2344)
 * Fix IntelliSense not working with non-ASCII characters in the WSL install path. [#2351](https://github.com/Microsoft/vscode-cpptools/issues/2351)
-* Filter out buggy IntelliSense error `"= delete" can only appear on the first declaration of a function`. [#2352](https://github.com/Microsoft/vscode-cpptools/issues/2352)
+* Filter out incorrect IntelliSense error `"= delete" can only appear on the first declaration of a function`. [#2352](https://github.com/Microsoft/vscode-cpptools/issues/2352)
 * Fix IntelliSense failing with WSL if gcc is installed bug g++ isn't. [#2360](https://github.com/Microsoft/vscode-cpptools/issues/2360)
 * Fix WSL paths starting with `/mnt/` failing to get symbols parsed. [#2361](https://github.com/Microsoft/vscode-cpptools/issues/2361)
 * Fix IntelliSense process crash when hovering over a designated initializer list with an anonymous struct. [#2370](https://github.com/Microsoft/vscode-cpptools/issues/2370)
