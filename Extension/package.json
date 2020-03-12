@@ -313,7 +313,6 @@
         },
         "C_Cpp.intelliSenseCachePath": {
           "type": "string",
-          "default": null,
           "description": "%c_cpp.configuration.intelliSenseCachePath.description%",
           "scope": "resource"
         },
