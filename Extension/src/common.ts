@@ -174,7 +174,7 @@ export function getVcpkgPathDescriptorFile(): string {
 
 let vcpkgRoot: string;
 export function getVcpkgRoot(): string {
-    if (!vcpkgRoot && vcpkgRoot !== "") {
+    if (!vcpkgRoot) {
         vcpkgRoot = "";
         // Check for vcpkg instance.
         if (fs.existsSync(getVcpkgPathDescriptorFile())) {
