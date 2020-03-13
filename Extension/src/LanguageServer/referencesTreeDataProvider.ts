@@ -118,7 +118,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 return resultFile;
 
             case NodeType.reference:
-                if (!element.referenceText) {
+                if (element.referenceText === undefined) {
                     throw new Error("Null or undefined referenceText in getTreeItem()");
                 }
                 if (element.referenceType === undefined) {

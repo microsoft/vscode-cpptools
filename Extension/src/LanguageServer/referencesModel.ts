@@ -277,7 +277,7 @@ export class ReferencesModel {
         let referenceInfos: ReferenceInfo[] = [];
         this.nodes.forEach(n => {
             if (!n.isRenameCandidate) {
-                if (!n.filename || !n.referenceLocation || !n.referenceText || n.referenceType === undefined) {
+                if (!n.filename || !n.referenceLocation || n.referenceText === undefined || n.referenceType === undefined) {
                     throw new Error("Invalid TreeNode detected in completeRename()");
                 }
                 let referenceInfo: ReferenceInfo = {
