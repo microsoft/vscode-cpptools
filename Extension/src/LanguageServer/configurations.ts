@@ -1291,7 +1291,7 @@ export class CppProperties {
                     if (isWindows && compilerPathAndArgs.compilerName === "cl.exe") {
                         continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
                     }
-                    if (!compilerPathAndArgs.compilerPath) {
+                    if (compilerPathAndArgs.compilerPath === undefined) {
                         continue;
                     }
                     // Squiggle when the compiler's path has spaces without quotes but args are used.
