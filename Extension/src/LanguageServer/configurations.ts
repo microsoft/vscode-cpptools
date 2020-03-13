@@ -426,7 +426,7 @@ export class CppProperties {
         // Verify cl.exe arch matches intelliSenseMode arch or compilerPath is only cl.exe.
         if (isMsvc && isCl) {
             let msvcArch: string = configuration.intelliSenseMode.split('-')[1];
-            let compilerPathDir: string = path.dirname(compilerPathAndArgs.compilerPath);
+            let compilerPathDir: string = path.dirname(resolvedCompilerPath);
             return compilerPathDir.endsWith(msvcArch) || compilerPathAndArgs.compilerPath === "cl.exe";
         }
         // All other combinations are valid if intelliSenseMode is not msvc and compiler is not cl.exe.
