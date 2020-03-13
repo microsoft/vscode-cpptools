@@ -1,17 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.27.0-insiders3: March 11, 2019
+## Version 0.27.0-insiders3: March 12, 2019
 ### Bug Fixes
 * Fix update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
 * Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
   * @Helloimbob [PR #5053](https://github.com/microsoft/vscode-cpptools/pull/5053)
 * Fix Outline view not updating fast enough after switching branches. [#4894](https://github.com/microsoft/vscode-cpptools/issues/4894)
 * Fix extension randomly getting stuck while communicating with the IntelliSense process on Mac. [#4989](https://github.com/microsoft/vscode-cpptools/issues/4989)
+* Fix completion results appearing after numeric literals. [#5019](https://github.com/microsoft/vscode-cpptools/issues/5019)
 * Fix crashes that sometimes occur after adding multiple workspace folders. [#5059](https://github.com/microsoft/vscode-cpptools/issues/5059)
 * Add URI's to the debug logging for messages (e.g. `fileChanged`). [#5062](https://github.com/microsoft/vscode-cpptools/issues/5062)
 * Fix crashes that sometimes occurs after switching color themes. [#5063](https://github.com/microsoft/vscode-cpptools/issues/5063)
 * Fix `clang_format_sortIncludes` setting not getting used. [#5068](https://github.com/microsoft/vscode-cpptools/issues/5068)
 * Fix error after updating a document too soon after startup. [#5076](https://github.com/microsoft/vscode-cpptools/issues/5076)
+* Fix IntelliSense process crashing on macOS 10.12 or older after a settings change. [#5090](https://github.com/microsoft/vscode-cpptools/issues/5090)
 * Fix Pause (break all) not working on Mac with Attach debugging.
 * Other language server crash fixes.
 
