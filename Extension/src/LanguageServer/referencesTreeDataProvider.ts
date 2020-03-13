@@ -75,7 +75,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
     }
 
     getTreeItem(element: TreeNode): vscode.TreeItem {
-        if (!this.referencesModel) {
+        if (this.referencesModel === undefined) {
             throw new Error("Null or undefined RefrencesModel in getTreeItem()");
         }
 
@@ -121,7 +121,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 if (!element.referenceText) {
                     throw new Error("Null or undefined referenceText in getTreeItem()");
                 }
-                if (!element.referenceType) {
+                if (element.referenceType === undefined) {
                     throw new Error("Null or undefined referenceType in getTreeItem()");
                 }
                 let resultRef: vscode.TreeItem = new vscode.TreeItem(element.referenceText, vscode.TreeItemCollapsibleState.None);
