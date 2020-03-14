@@ -172,7 +172,7 @@ export function getVcpkgPathDescriptorFile(): string {
     }
 }
 
-let vcpkgRoot: string;
+let vcpkgRoot: string | undefined;
 export function getVcpkgRoot(): string {
     if (!vcpkgRoot && vcpkgRoot !== "") {
         vcpkgRoot = "";

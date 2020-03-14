@@ -593,6 +593,7 @@ export class DefaultClient implements Client {
                 storagePath = path;
             }
         }
+
         if (!storagePath) {
             storagePath = path.join(this.RootPath, "/.vscode");
         }
