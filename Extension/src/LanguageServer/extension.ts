@@ -10,7 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { TreeNode, NodeType, getCurrentRenameModel } from './referencesModel';
+import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';

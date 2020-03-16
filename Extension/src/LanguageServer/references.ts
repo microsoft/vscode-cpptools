@@ -477,19 +477,6 @@ export class ReferencesManager {
                 if (this.resultsCallback) {
                     this.resultsCallback(referencesResult, true);
                 }
-                // // If there are only Confirmed results, complete the rename immediately.
-                // let foundUnconfirmed: ReferenceInfo | undefined = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
-                // if (!foundUnconfirmed) {
-                //     if (this.resultsCallback) {
-                //        this.resultsCallback(referencesResult, true);
-                //     }
-                // } else {
-                //     // Passing a null result and doResult of true to resultsCallback will cause
-                //     // the RenameProvider to resolve the promise, which causes the progress bar to be dismissed.
-                //     if (this.resultsCallback) {
-                //         this.resultsCallback(null, true);
-                //     }
-                // }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
                 if (this.resultsCallback) {
@@ -543,7 +530,7 @@ export class ReferencesManager {
     }
 
     public clearViews(): void {
-        // Rename should not clear the Find All References view, as it's in a different view container
+        // Rename should not clear the Find All References view
         if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
             if (this.referencesChannel) {
                 this.referencesChannel.clear();
