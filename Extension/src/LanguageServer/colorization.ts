@@ -386,10 +386,18 @@ export class ColorizationState {
         if (settings.dimInactiveRegions) {
             let opacity: number | undefined = settings.inactiveRegionOpacity;
             if (opacity !== null && opacity !== undefined) {
+                let backgroundColor: string | undefined = settings.inactiveRegionBackgroundColor;
+                if (backgroundColor === "") {
+                    backgroundColor = undefined;
+                }
+                let color: string | undefined = settings.inactiveRegionForegroundColor;
+                if (color === "") {
+                    color = undefined;
+                }
                 this.inactiveDecoration = vscode.window.createTextEditorDecorationType({
                     opacity: opacity.toString(),
-                    backgroundColor: settings.inactiveRegionBackgroundColor,
-                    color: settings.inactiveRegionForegroundColor,
+                    backgroundColor: backgroundColor,
+                    color: color,
                     rangeBehavior: vscode.DecorationRangeBehavior.OpenOpen
                 });
             }
