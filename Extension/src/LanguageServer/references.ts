@@ -11,6 +11,7 @@ import * as nls from 'vscode-nls';
 import { RenameView } from './renameView';
 import * as logger from '../logger';
 import { PersistentState } from './persistentState';
+import * as util from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -119,6 +120,47 @@ function getReferenceCanceledString(upperCase?: boolean): string {
 
 export function getReferenceTagString(referenceType: ReferenceType, referenceCanceled: boolean, upperCase?: boolean): string {
     return referenceCanceled && referenceType === ReferenceType.ConfirmationInProgress ? getReferenceCanceledString(upperCase) : convertReferenceTypeToString(referenceType, upperCase);
+}
+
+export function getReferenceTypeIconPath(referenceType: ReferenceType): { light: vscode.Uri; dark: vscode.Uri } {
+    const assetsFolder: string = "assets/";
+    const postFixLight: string = "-light.svg";
+    const postFixDark: string = "-dark.svg";
+    let basePath: string = "ref-cannot-confirm";
+
+    switch (referenceType) {
+        case ReferenceType.Confirmed: basePath = "ref-confirmed"; break;
+        case ReferenceType.Comment: basePath = "ref-comment"; break;
+        case ReferenceType.String: basePath = "ref-string"; break;
+        case ReferenceType.Inactive: basePath = "ref-inactive"; break;
+        case ReferenceType.CannotConfirm: basePath = "ref-cannot-confirm"; break;
+        case ReferenceType.NotAReference: basePath = "ref-not-a-reference"; break;
+        case ReferenceType.ConfirmationInProgress: basePath = "ref-confirmation-in-progress"; break;
+    }
+
+    let lightPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixLight);
+    let lightPathUri: vscode.Uri = vscode.Uri.file(lightPath);
+    let darkPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixDark);
+    let darkPathUri: vscode.Uri = vscode.Uri.file(darkPath);
+    return {
+        light: lightPathUri,
+        dark: darkPathUri
+    };
+}
+
+function getReferenceCanceledIconPath(): { light: vscode.Uri; dark: vscode.Uri } {
+    let lightPath: string = util.getExtensionFilePath("assets/ref-canceled-light.svg");
+    let lightPathUri: vscode.Uri = vscode.Uri.file(lightPath);
+    let darkPath: string = util.getExtensionFilePath("assets/ref-canceled-dark.svg");
+    let darkPathUri: vscode.Uri = vscode.Uri.file(darkPath);
+    return {
+        light: lightPathUri,
+        dark: darkPathUri
+    };
+}
+
+export function getReferenceItemIconPath(type: ReferenceType, isCanceled: boolean): { light: vscode.Uri; dark: vscode.Uri } {
+    return (isCanceled && type === ReferenceType.ConfirmationInProgress) ? getReferenceCanceledIconPath() : getReferenceTypeIconPath(type);
 }
 
 export class ReferencesManager {
@@ -438,28 +480,31 @@ export class ReferencesManager {
 
         if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
             if (!referencesCanceled) {
-                // If there are only Confirmed results, complete the rename immediately.
-                let foundUnconfirmed: ReferenceInfo | undefined = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
-                if (!foundUnconfirmed) {
-                    if (this.resultsCallback) {
-                        this.resultsCallback(referencesResult, true);
-                    }
-                } else {
-                    // Passing a null result and doResult of true to resultsCallback will cause
-                    // the RenameProvider to resolve the promise, which causes the progress bar to be dismissed.
-                    if (this.resultsCallback) {
-                        this.resultsCallback(null, true);
-                    }
-                    if (this.renameView) {
-                        this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult | null) => {
-                            this.referencesCanceled = false;
-                            if (this.resultsCallback) {
-                                this.resultsCallback(result, false);
-                            }
-                        });
-                        this.renameView.show(true);
-                    }
+                if (this.resultsCallback) {
+                    this.resultsCallback(referencesResult, true);
                 }
+                // // If there are only Confirmed results, complete the rename immediately.
+                // let foundUnconfirmed: ReferenceInfo | undefined = referencesResult.referenceInfos.find(e => e.type !== ReferenceType.Confirmed);
+                // if (!foundUnconfirmed) {
+                //     if (this.resultsCallback) {
+                //        this.resultsCallback(referencesResult, true);
+                //     }
+                // } else {
+                //     // Passing a null result and doResult of true to resultsCallback will cause
+                //     // the RenameProvider to resolve the promise, which causes the progress bar to be dismissed.
+                //     if (this.resultsCallback) {
+                //         this.resultsCallback(null, true);
+                //     }
+                //     if (this.renameView) {
+                //         this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult | null) => {
+                //             this.referencesCanceled = false;
+                //             if (this.resultsCallback) {
+                //                 this.resultsCallback(result, false);
+                //             }
+                //         });
+                //         this.renameView.show(true);
+                //     }
+                // }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
                 if (this.resultsCallback) {

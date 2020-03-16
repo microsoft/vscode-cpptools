@@ -934,7 +934,15 @@ export class DefaultClient implements Client {
                                                         for (let reference of referencesResult.referenceInfos) {
                                                             let uri: vscode.Uri = vscode.Uri.file(reference.file);
                                                             let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
-                                                            workspaceEdit.replace(uri, range, newName);
+                                                            let metadata: vscode.WorkspaceEditEntryMetadata = {
+                                                                needsConfirmation: reference.type !== refs.ReferenceType.Confirmed,
+                                                                label: refs.getReferenceTagString(reference.type, false, true),
+                                                                // description: refs.getReferenceTagString(reference.type, false, true),
+                                                                iconPath: refs.getReferenceItemIconPath(reference.type, false)
+                                                            };
+                                                            workspaceEdit.replace(uri, range, newName, metadata);
+
+                                                            // workspaceEdit.replace(uri, range, newName);
                                                         }
                                                     }
                                                     workspaceReferences.closeRenameUI();
