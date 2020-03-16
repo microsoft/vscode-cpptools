@@ -483,11 +483,8 @@
           "scope": "resource"
         },
         "C_Cpp.default.enableConfigurationSquiggles": {
-          "type": [
-            "boolean",
-            "null"
-          ],
-          "default": null,
+          "type": "boolean",
+          "default": false,
           "description": "%c_cpp.configuration.default.enableConfigurationSquiggles.description%",
           "scope": "resource"
         },
