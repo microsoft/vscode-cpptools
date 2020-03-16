@@ -476,7 +476,7 @@
         },
         "C_Cpp.default.enableConfigurationSquiggles": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.default.enableConfigurationSquiggles.description%",
           "scope": "resource"
         },
