@@ -8,7 +8,6 @@ import { DefaultClient, RenameParams, FindAllReferencesParams } from './client';
 import { FindAllRefsView } from './referencesView';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
-import { RenameView } from './renameView';
 import * as logger from '../logger';
 import { PersistentState } from './persistentState';
 import * as util from '../common';
@@ -169,7 +168,6 @@ export class ReferencesManager {
 
     private referencesChannel?: vscode.OutputChannel;
     private findAllRefsView?: FindAllRefsView;
-    private renameView?: RenameView;
     private viewsInitialized: boolean = false;
 
     public symbolSearchInProgress: boolean = false;
@@ -210,7 +208,6 @@ export class ReferencesManager {
     initializeViews(): void {
         if (!this.viewsInitialized) {
             this.findAllRefsView = new FindAllRefsView();
-            this.renameView = new RenameView();
             this.viewsInitialized = true;
         }
     }
@@ -224,9 +221,6 @@ export class ReferencesManager {
         this.groupByFile.Value = !this.groupByFile.Value;
         if (this.findAllRefsView) {
             this.findAllRefsView.setGroupBy(this.groupByFile.Value);
-        }
-        if (this.renameView) {
-            this.renameView.setGroupBy(this.groupByFile.Value);
         }
     }
 
@@ -495,15 +489,6 @@ export class ReferencesManager {
                 //     if (this.resultsCallback) {
                 //         this.resultsCallback(null, true);
                 //     }
-                //     if (this.renameView) {
-                //         this.renameView.setData(referencesResult, this.groupByFile.Value, (result: ReferencesResult | null) => {
-                //             this.referencesCanceled = false;
-                //             if (this.resultsCallback) {
-                //                 this.resultsCallback(result, false);
-                //             }
-                //         });
-                //         this.renameView.show(true);
-                //     }
                 // }
             } else {
                 // Do nothing when rename is canceled while searching for references was in progress.
@@ -557,17 +542,7 @@ export class ReferencesManager {
         this.resultsCallback = callback;
     }
 
-    public closeRenameUI(): void {
-        if (this.renameView) {
-            this.renameView.show(false);
-        }
-    }
-
     public clearViews(): void {
-        if (this.renameView) {
-            this.renameView.show(false);
-        }
-
         // Rename should not clear the Find All References view, as it's in a different view container
         if (this.client.ReferencesCommandMode !== ReferencesCommandMode.Rename) {
             if (this.referencesChannel) {

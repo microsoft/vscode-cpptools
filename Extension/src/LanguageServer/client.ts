@@ -853,7 +853,6 @@ export class DefaultClient implements Client {
                                             workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -941,11 +940,8 @@ export class DefaultClient implements Client {
                                                                 iconPath: refs.getReferenceItemIconPath(reference.type, false)
                                                             };
                                                             workspaceEdit.replace(uri, range, newName, metadata);
-
-                                                            // workspaceEdit.replace(uri, range, newName);
                                                         }
                                                     }
-                                                    workspaceReferences.closeRenameUI();
                                                 }
                                                 if (doResolve) {
                                                     if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
@@ -975,7 +971,6 @@ export class DefaultClient implements Client {
                                             workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -2520,7 +2515,6 @@ export class DefaultClient implements Client {
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
                 languageClient.sendNotification(CancelReferencesNotification);
-                workspaceReferences.closeRenameUI();
             }
         }
     }
