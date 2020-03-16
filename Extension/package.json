@@ -184,20 +184,12 @@
           "maximum": 1
         },
         "C_Cpp.inactiveRegionForegroundColor": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
+          "type": "string",
           "description": "%c_cpp.configuration.inactiveRegionForegroundColor.description%",
           "scope": "resource"
         },
         "C_Cpp.inactiveRegionBackgroundColor": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
+          "type": "string",
           "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
           "scope": "resource"
         },
