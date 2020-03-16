@@ -163,20 +163,12 @@
           "maximum": 1
         },
         "C_Cpp.inactiveRegionForegroundColor": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
+          "type": "string",
           "description": "%c_cpp.configuration.inactiveRegionForegroundColor.description%",
           "scope": "resource"
         },
         "C_Cpp.inactiveRegionBackgroundColor": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null,
+          "type": "string",
           "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
           "scope": "resource"
         },
@@ -462,11 +454,8 @@
           "scope": "resource"
         },
         "C_Cpp.default.enableConfigurationSquiggles": {
-          "type": [
-            "boolean",
-            "null"
-          ],
-          "default": null,
+          "type": "boolean",
+          "default": true,
           "description": "%c_cpp.configuration.default.enableConfigurationSquiggles.description%",
           "scope": "resource"
         },
@@ -1534,7 +1523,7 @@
     "https-proxy-agent": "^2.2.4",
     "jsonc-parser": "^2.1.1",
     "minimatch": "^3.0.4",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "mkdirp": "^0.5.1",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
