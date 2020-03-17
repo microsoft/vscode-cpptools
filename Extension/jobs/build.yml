@@ -41,10 +41,14 @@ jobs:
   - script: 'yarn run unitTests'
     displayName: 'Run unit tests'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
+    env:
+      DISPLAY: :10
 
   - script: 'yarn run integrationTests'
     displayName: 'Run languageServer integration tests'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
+    env:
+      DISPLAY: :10
 
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
