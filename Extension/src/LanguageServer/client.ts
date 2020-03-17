@@ -602,9 +602,6 @@ export class DefaultClient implements Client {
         }
         this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
-        if (!rootUri) {
-            throw new Error("Empty URI in client constructor");
-        }
         this.settingsTracker = getTracker(rootUri);
         this.colorizationSettings = new ColorizationSettings(rootUri);
         try {
@@ -624,9 +621,6 @@ export class DefaultClient implements Client {
             this.queueBlockingTask(() => languageClient.onReady().then(
                 () => {
                     let workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
-                    if (!workspaceFolder) {
-                        throw new Error("Empty URI in client constructor");
-                    }
                     this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
                     this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                     this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
