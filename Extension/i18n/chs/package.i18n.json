@@ -71,7 +71,7 @@
 	"c_cpp.configuration.enhancedColorization.description": "如果启用了 IntelliSense，则基于 IntelliSense 对代码进行着色。如果禁用了 IntelliSense 或使用默认高对比度主题，则此设置不起任何作用。",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "为 [vcpkg 依赖关系管理器] 启用集成服务(https://aka.ms/vcpkg/)。",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "如果为 true，则“重命名符号”将需要有效的 C/C++ 标识符。",
-	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "If true, debugger shell command substitution will use obsolete backtick (`)",
+	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "如果为 true，调试器 shell 命令替换将使用过时的反引号(`)",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 其他引用结果",
 	"c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title": "C/C++ 重命名",
 	"c_cpp.contributes.views.cppRenamePendingView.title": "正在等待重命名",
