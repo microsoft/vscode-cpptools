@@ -350,13 +350,13 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
             switch (varType) {
                 case "env": {
                     if (additionalEnvironment) {
-                        let v: string | string[] = additionalEnvironment[name];
+                        let v: string | string[] | undefined = additionalEnvironment[name];
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
                             newValue = v.join(";");
                         }
-                        if (!newValue) {
+                        if (newValue === undefined) {
                             newValue = process.env[name];
                         }
                     }
@@ -383,7 +383,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                 }
                 default: { assert.fail("unknown varType matched"); }
             }
-            return newValue ? newValue : match;
+            return newValue !== undefined ? newValue : match;
         });
     }
 
