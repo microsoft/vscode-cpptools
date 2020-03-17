@@ -57,7 +57,7 @@ class ThemeStyle {
 }
 
 export class ColorizationSettings {
-    private uri: vscode.Uri;
+    private uri: vscode.Uri | undefined;
     private pendingTask?: util.BlockingTask<any>;
     private editorBackground?: string;
 
@@ -76,7 +76,7 @@ export class ColorizationSettings {
         ["variable", "variables"]
     ]);
 
-    constructor(uri: vscode.Uri) {
+    constructor(uri: vscode.Uri | undefined) {
         this.uri = uri;
     }
 
