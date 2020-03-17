@@ -37,10 +37,6 @@ jobs:
     displayName: 'Run unit tests'
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
-  - script: 'yarn run unitTests'
-    displayName: 'Run unit tests'
-    workingDirectory: '$(Build.SourcesDirectory)\Extension'
-
   - script: 'yarn run integrationTests'
     displayName: 'Run languageServer integration tests'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
