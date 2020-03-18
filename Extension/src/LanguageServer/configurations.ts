@@ -137,7 +137,7 @@ export class CppProperties {
     // we want to track when the default includes have been added to it.
     private configurationIncomplete: boolean = true;
 
-    constructor(rootUri: vscode.Uri | undefined, workspaceFolder: vscode.WorkspaceFolder | undefined) {
+    constructor(rootUri?: vscode.Uri, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootUri = rootUri;
         let rootPath: string = rootUri ? rootUri.fsPath : "";
         if (workspaceFolder) {
