@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.27.0-insiders3: March 12, 2019
+## Version 0.27.0-insiders3: March 13, 2020
 ### Bug Fixes
 * Fix update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
 * Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
@@ -17,12 +17,12 @@
 * Fix Pause (break all) not working on Mac with Attach debugging.
 * Other language server crash fixes.
 
-## Version 0.27.0-insiders2: March 4, 2019
+## Version 0.27.0-insiders2: March 4, 2020
 ### Bug Fixes
 * Fix the `Open File...` scenario (without a workspace folder). [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
 * Fix `browsePath` null reference that can occur with some configuration providers. [PR #5055](https://github.com/microsoft/vscode-cpptools/pull/5055)
 
-## Version 0.27.0-insiders: March 3, 2019
+## Version 0.27.0-insiders: March 3, 2020
 ### Enhancements
 * Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multiroot%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
 * Update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)

@@ -1254,7 +1254,7 @@ function onRenameViewAddFile(arg?: TreeNode): void {
 }
 
 function onRenameViewAddReferenceType(arg?: TreeNode): void {
-    if (!arg || !arg.referenceType) {
+    if (!arg || arg.referenceType === undefined) {
         return;
     }
     arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);

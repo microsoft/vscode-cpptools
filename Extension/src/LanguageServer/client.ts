@@ -593,6 +593,7 @@ export class DefaultClient implements Client {
                 storagePath = path;
             }
         }
+
         if (!storagePath) {
             storagePath = path.join(this.RootPath, "/.vscode");
         }
@@ -601,9 +602,6 @@ export class DefaultClient implements Client {
         }
         this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
-        if (!rootUri) {
-            throw new Error("Empty URI in client constructor");
-        }
         this.settingsTracker = getTracker(rootUri);
         this.colorizationSettings = new ColorizationSettings(rootUri);
         try {
@@ -623,9 +621,6 @@ export class DefaultClient implements Client {
             this.queueBlockingTask(() => languageClient.onReady().then(
                 () => {
                     let workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
-                    if (!workspaceFolder) {
-                        throw new Error("Empty URI in client constructor");
-                    }
                     this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
                     this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                     this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
@@ -1077,13 +1072,14 @@ export class DefaultClient implements Client {
             let settings: CppSettings[] = [];
             let otherSettings: OtherSettings[] = [];
 
-            settings.push(workspaceSettings);
-            otherSettings.push(workspaceOtherSettings);
             if (vscode.workspace.workspaceFolders) {
                 for (let workspaceFolder of vscode.workspace.workspaceFolders) {
                     settings.push(new CppSettings(workspaceFolder.uri));
                     otherSettings.push(new OtherSettings(workspaceFolder.uri));
                 }
+            } else {
+                settings.push(workspaceSettings);
+                otherSettings.push(workspaceOtherSettings);
             }
 
             for (let setting of settings) {
