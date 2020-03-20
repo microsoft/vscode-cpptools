@@ -10,8 +10,7 @@
     "-D_MSC_VER=1924",
     "-D_MSC_FULL_VER=192428314",
     "-D_MSC_BUILD=0",
-    "-D_M_IX86=600",
-    "-D_M_IX86_FP=2"
+    "-D_M_ARM=7"
   ],
   "defaults_op": "merge"
 }

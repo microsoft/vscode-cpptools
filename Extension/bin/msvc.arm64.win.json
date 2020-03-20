@@ -7,11 +7,11 @@
     "1924",
     "--pack_alignment",
     "8",
+    "-D_CPPUNWIND=1",
     "-D_MSC_VER=1924",
     "-D_MSC_FULL_VER=192428314",
     "-D_MSC_BUILD=0",
-    "-D_M_IX86=600",
-    "-D_M_IX86_FP=2"
+    "-D_M_ARM64=1"
   ],
   "defaults_op": "merge"
 }
