@@ -1,6 +1,21 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.27.0-insiders3: March 13, 2020
+## Version 0.27.0-insiders4: March 23, 2019
+### Bug Fixes
+* Fix `Go to Symbol in Workspace` not applying `search.exclude` settings. [#5099](https://github.com/microsoft/vscode-cpptools/issues/5099)
+* Fix some settings not being editable in the UI. [PR #5126](https://github.com/microsoft/vscode-cpptools/pull/5126)
+* Fix `cpp_properties.json` error squiggles not appearing. [#5131](https://github.com/microsoft/vscode-cpptools/issues/5131)
+* Fix the wrong workspace folder settings being used. [#5134](https://github.com/microsoft/vscode-cpptools/issues/5134)
+* Fix the "Open File…" scenario without a workspace folder (again). [#5136](https://github.com/microsoft/vscode-cpptools/issues/5136)
+* Fix changes to `files.exclude` having no effect if they're identical to the previous workspace folder's. [#5138](https://github.com/microsoft/vscode-cpptools/issues/5138)
+* Fix the debugger not working for macOS High Sierra or older. [#5146](https://github.com/microsoft/vscode-cpptools/issues/5146)
+* Fix configuration UI showing errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
+* Fix `search.exclude` not applying if there are > 1 symbols matching in the excluded file. [#5152](https://github.com/microsoft/vscode-cpptools/issues/5152)
+* Fix a race condition that could cause the Outline, `Find All References`, etc. to stop working.
+* Fix `Rescan Workspace` running an extra time per workspace folder.
+* Fix a random crash after settings change.
+
+## Version 0.27.0-insiders3: March 16, 2019
 ### Bug Fixes
 * Fix update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
 * Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
