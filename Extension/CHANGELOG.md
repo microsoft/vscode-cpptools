@@ -9,7 +9,7 @@
 * Fix the "Open File…" scenario without a workspace folder (again). [#5136](https://github.com/microsoft/vscode-cpptools/issues/5136)
 * Fix changes to `files.exclude` having no effect if they're identical to the previous workspace folder's. [#5138](https://github.com/microsoft/vscode-cpptools/issues/5138)
 * Fix the debugger not working for macOS High Sierra or older. [#5146](https://github.com/microsoft/vscode-cpptools/issues/5146)
-* Fix configuration UI showing errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
+* Fix the configuration UI showing errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
 * Fix `search.exclude` not applying if there are > 1 symbols matching in the excluded file. [#5152](https://github.com/microsoft/vscode-cpptools/issues/5152)
 * Fix a race condition that could cause the Outline, `Find All References`, etc. to stop working.
 * Fix `Rescan Workspace` running an extra time per workspace folder.
