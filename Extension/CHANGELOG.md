@@ -10,7 +10,7 @@
 * Fix changes to `files.exclude` having no effect if they're identical to the previous workspace folder's. [#5138](https://github.com/microsoft/vscode-cpptools/issues/5138)
 * Fix the debugger not working for macOS High Sierra or older. [#5146](https://github.com/microsoft/vscode-cpptools/issues/5146)
 * Fix `search.exclude` not applying if there are > 1 symbols matching in the excluded file. [#5152](https://github.com/microsoft/vscode-cpptools/issues/5152)
-* Fix tag parsing (workspace symbol searching) to fail on Windows 7. [#5155](https://github.com/microsoft/vscode-cpptools/issues/5155)
+* Fix tag parsing (workspace symbol searching) not working on Windows 7. [#5155](https://github.com/microsoft/vscode-cpptools/issues/5155)
 * Fix a race condition that could cause the Outline, `Find All References`, etc. to stop working.
 * Fix `Rescan Workspace` running an extra time per workspace folder.
 * Fix a random crash after settings change.
