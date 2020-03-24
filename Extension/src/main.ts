@@ -177,6 +177,12 @@ function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boole
            VersionsMatch(pkg, info);
 }
 
+function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolean {
+    return PlatformsMatch(pkg, info) &&
+           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
+           !VersionsMatch(pkg, info);
+}
+
 function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
     let promises: Thenable<void>[] = [];
     let packages: IPackage[] = util.packageJson["runtimeDependencies"];
@@ -196,7 +202,7 @@ function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
 
     packages.forEach(p => {
         if (p.binaries && p.binaries.length > 0 &&
-            !packageMatchesPlatform(p, info)) {
+            invalidPackageVersion(p, info)) {
             p.binaries.forEach(binary => {
                 const path: string = util.getExtensionFilePath(binary);
                 if (fs.existsSync(path)) {
