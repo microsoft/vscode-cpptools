@@ -153,41 +153,11 @@ export class PackageManager {
         return this.GetPackageList()
             .then((list) =>
                 list.filter((value, index, array) =>
-                    this.ArchitecturesMatch(value) &&
-                        this.PlatformsMatch(value) &&
-                        this.VersionsMatch(value)
+                    ArchitecturesMatch(value, this.platformInfo) &&
+                        PlatformsMatch(value, this.platformInfo) &&
+                        VersionsMatch(value, this.platformInfo)
                 )
             );
-    }
-
-    private ArchitecturesMatch(value: IPackage): boolean {
-        return !value.architectures || (this.platformInfo.architecture !== undefined && value.architectures.indexOf(this.platformInfo.architecture) !== -1);
-    }
-
-    private PlatformsMatch(value: IPackage): boolean {
-        return !value.platforms || value.platforms.indexOf(this.platformInfo.platform) !== -1;
-    }
-
-    private VersionsMatch(value: IPackage): boolean {
-        if (value.versionRegex) {
-            // If we have a versionRegex but did not get a platformVersion
-            if (!this.platformInfo.version) {
-                // If we are expecting to match the versionRegex, return false since there was no version found.
-                //
-                // If we are expecting to not match the versionRegex, return true since we are expecting to
-                // not match the version string, the only match would be if versionRegex was not set.
-                return !value.matchVersion;
-            }
-            const regex: RegExp = new RegExp(value.versionRegex);
-
-            return (value.matchVersion ?
-                regex.test(this.platformInfo.version) :
-                !regex.test(this.platformInfo.version)
-            );
-        }
-
-        // No versionRegex provided.
-        return true;
     }
 
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
@@ -466,4 +436,34 @@ export class PackageManager {
             this.outputChannel.appendLine(text);
         }
     }
+}
+
+export function VersionsMatch(pkg: IPackage, info: PlatformInformation): boolean {
+    if (pkg.versionRegex) {
+        // If we have a versionRegex but did not get a platformVersion
+        if (!info.version) {
+            // If we are expecting to match the versionRegex, return false since there was no version found.
+            //
+            // If we are expecting to not match the versionRegex, return true since we are expecting to
+            // not match the version string, the only match would be if versionRegex was not set.
+            return !pkg.matchVersion;
+        }
+        const regex: RegExp = new RegExp(pkg.versionRegex);
+
+        return (pkg.matchVersion ?
+            regex.test(info.version) :
+            !regex.test(info.version)
+        );
+    }
+
+    // No versionRegex provided.
+    return true;
+}
+
+export function ArchitecturesMatch(value: IPackage, info: PlatformInformation): boolean {
+    return !value.architectures || (info.architecture !== undefined && value.architectures.indexOf(info.architecture) !== -1);
+}
+
+export function PlatformsMatch(value: IPackage, info: PlatformInformation): boolean {
+    return !value.platforms || value.platforms.indexOf(info.platform) !== -1;
 }

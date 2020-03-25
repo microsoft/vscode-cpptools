@@ -18,9 +18,9 @@ let cache: SettingsTracker;
 
 export class SettingsTracker {
     private previousCppSettings: { [key: string]: any } = {};
-    private resource: vscode.Uri;
+    private resource: vscode.Uri | undefined;
 
-    constructor(resource: vscode.Uri) {
+    constructor(resource: vscode.Uri | undefined) {
         this.resource = resource;
         this.collectSettings(() => true);
     }
@@ -185,7 +185,7 @@ export class SettingsTracker {
     }
 }
 
-export function getTracker(resource: vscode.Uri): SettingsTracker {
+export function getTracker(resource: vscode.Uri | undefined): SettingsTracker {
     if (!cache) {
         cache = new SettingsTracker(resource);
     }

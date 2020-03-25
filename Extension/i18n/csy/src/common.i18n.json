@@ -12,5 +12,5 @@
 	"warning.debugging.not.tested": "Upozornění: Ladění se pro tuto platformu netestovalo.",
 	"reload.workspace.for.changes": "Načtěte pracovní prostor znovu, aby se změna nastavení projevila.",
 	"reload.string": "Načíst znovu",
-	"invalid.download.location.received": "Invalid download location received"
+	"invalid.download.location.received": "Přijato neplatné umístění pro stahování"
 }

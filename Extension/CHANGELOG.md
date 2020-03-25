@@ -1,26 +1,43 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.27.0-insiders3: March 11, 2019
+## Version 0.27.0-insiders4: March 23, 2019
+### Bug Fixes
+* Fix `Go to Symbol in Workspace` not applying `search.exclude` settings. [#5099](https://github.com/microsoft/vscode-cpptools/issues/5099)
+* Fix some settings not being editable in the UI. [PR #5126](https://github.com/microsoft/vscode-cpptools/pull/5126)
+* Fix `cpp_properties.json` error squiggles not appearing. [#5131](https://github.com/microsoft/vscode-cpptools/issues/5131)
+* Fix the wrong workspace folder settings being used. [#5134](https://github.com/microsoft/vscode-cpptools/issues/5134)
+* Fix the "Open File…" scenario without a workspace folder (again). [#5136](https://github.com/microsoft/vscode-cpptools/issues/5136)
+* Fix changes to `files.exclude` having no effect if they're identical to the previous workspace folder's. [#5138](https://github.com/microsoft/vscode-cpptools/issues/5138)
+* Fix the debugger not working for macOS High Sierra or older. [#5146](https://github.com/microsoft/vscode-cpptools/issues/5146)
+* Fix the configuration UI showing errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
+* Fix `search.exclude` not applying if there are > 1 symbols matching in the excluded file. [#5152](https://github.com/microsoft/vscode-cpptools/issues/5152)
+* Fix a race condition that could cause the Outline, `Find All References`, etc. to stop working.
+* Fix `Rescan Workspace` running an extra time per workspace folder.
+* Fix a random crash after settings change.
+
+## Version 0.27.0-insiders3: March 16, 2019
 ### Bug Fixes
 * Fix update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
 * Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
   * @Helloimbob [PR #5053](https://github.com/microsoft/vscode-cpptools/pull/5053)
 * Fix Outline view not updating fast enough after switching branches. [#4894](https://github.com/microsoft/vscode-cpptools/issues/4894)
 * Fix extension randomly getting stuck while communicating with the IntelliSense process on Mac. [#4989](https://github.com/microsoft/vscode-cpptools/issues/4989)
+* Fix completion results appearing after numeric literals. [#5019](https://github.com/microsoft/vscode-cpptools/issues/5019)
 * Fix crashes that sometimes occur after adding multiple workspace folders. [#5059](https://github.com/microsoft/vscode-cpptools/issues/5059)
 * Add URI's to the debug logging for messages (e.g. `fileChanged`). [#5062](https://github.com/microsoft/vscode-cpptools/issues/5062)
 * Fix crashes that sometimes occurs after switching color themes. [#5063](https://github.com/microsoft/vscode-cpptools/issues/5063)
 * Fix `clang_format_sortIncludes` setting not getting used. [#5068](https://github.com/microsoft/vscode-cpptools/issues/5068)
 * Fix error after updating a document too soon after startup. [#5076](https://github.com/microsoft/vscode-cpptools/issues/5076)
+* Fix IntelliSense process crashing on macOS 10.12 or older after a settings change. [#5090](https://github.com/microsoft/vscode-cpptools/issues/5090)
 * Fix Pause (break all) not working on Mac with Attach debugging.
 * Other language server crash fixes.
 
-## Version 0.27.0-insiders2: March 4, 2019
+## Version 0.27.0-insiders2: March 4, 2020
 ### Bug Fixes
 * Fix the `Open File...` scenario (without a workspace folder). [#5049](https://github.com/microsoft/vscode-cpptools/issues/5049)
 * Fix `browsePath` null reference that can occur with some configuration providers. [PR #5055](https://github.com/microsoft/vscode-cpptools/pull/5055)
 
-## Version 0.27.0-insiders: March 3, 2019
+## Version 0.27.0-insiders: March 3, 2020
 ### Enhancements
 * Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multiroot%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
 * Update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)

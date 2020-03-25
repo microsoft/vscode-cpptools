@@ -1186,7 +1186,7 @@ function onLogDiagnostics(): void {
 
 function onRescanWorkspace(): void {
     onActivationEvent();
-    clients.forEach(client => client.rescanFolder());
+    clients.ActiveClient.rescanFolder();
 }
 
 function onShowRefCommand(arg?: TreeNode): void {
@@ -1254,7 +1254,7 @@ function onRenameViewAddFile(arg?: TreeNode): void {
 }
 
 function onRenameViewAddReferenceType(arg?: TreeNode): void {
-    if (!arg || !arg.referenceType) {
+    if (!arg || arg.referenceType === undefined) {
         return;
     }
     arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
