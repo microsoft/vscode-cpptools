@@ -595,7 +595,7 @@ export class DefaultClient implements Client {
         }
 
         if (!storagePath) {
-            storagePath = path.join(this.RootPath, "/.vscode");
+            storagePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
         }
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
