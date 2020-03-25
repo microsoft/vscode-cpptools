@@ -847,7 +847,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
     let additionalArgs: string[] = [];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
-        if (compilerPath === "cl.exe") {
+        if (compilerPath.endsWith("\\cl.exe") || compilerPath.endsWith("/cl.exe") || compilerPath === "cl.exe") {
             // Input is only compiler name, this is only for cl.exe
             compilerName = compilerPath;
 
@@ -881,6 +881,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                     additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
                     compilerPath = potentialCompilerPath;
                 }
+                compilerName = path.basename(compilerPath);
             }
             // Get compiler name if there are no args but path is valid or a valid path was found with args.
             if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {
