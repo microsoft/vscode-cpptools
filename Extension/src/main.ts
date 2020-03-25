@@ -16,7 +16,7 @@ import * as nls from 'vscode-nls';
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
-import { PackageManager, PackageManagerError, IPackage } from './packageManager';
+import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
@@ -103,6 +103,9 @@ async function offlineInstallation(): Promise<void> {
     setInstallationType(InstallationType.Offline);
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
+    setInstallationStage('cleanUpUnusedBinaries');
+    await cleanUpUnusedBinaries(info);
+
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
 
@@ -168,14 +171,45 @@ function makeBinariesExecutable(): Promise<void> {
     return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
+function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
+    return PlatformsMatch(pkg, info) &&
+           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
+           VersionsMatch(pkg, info);
+}
+
+function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolean {
+    return PlatformsMatch(pkg, info) &&
+           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
+           !VersionsMatch(pkg, info);
+}
+
 function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
     let promises: Thenable<void>[] = [];
     let packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
         if (p.binaries && p.binaries.length > 0 &&
-            p.platforms.findIndex(plat => plat === info.platform) !== -1 &&
-            (p.architectures === undefined || p.architectures.findIndex(arch => arch === info.architecture) !== - 1)) {
+            packageMatchesPlatform(p, info)) {
             p.binaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
+        }
+    });
+    return Promise.all(promises).then(() => { });
+}
+
+function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
+    let promises: Thenable<void>[] = [];
+    let packages: IPackage[] = util.packageJson["runtimeDependencies"];
+    const logger: Logger = getOutputChannelLogger();
+
+    packages.forEach(p => {
+        if (p.binaries && p.binaries.length > 0 &&
+            invalidPackageVersion(p, info)) {
+            p.binaries.forEach(binary => {
+                const path: string = util.getExtensionFilePath(binary);
+                if (fs.existsSync(path)) {
+                    logger.appendLine(`deleting: ${path}`);
+                    promises.push(util.deleteFile(path));
+                }
+            });
         }
     });
     return Promise.all(promises).then(() => { });
