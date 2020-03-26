@@ -25,6 +25,11 @@
 * Fix `Rescan Workspace` running an extra time per workspace folder.
 * Fix a random crash after settings change.
 
+### Known Issues
+* The configuration UI and json shows errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
+* The debugger doesn't work until the extension is reinstalled after macOS High Sierra or older is upgraded to a newer OS. [#5171](https://github.com/microsoft/vscode-cpptools/issues/5171)
+* The Outline view may sometimes be incorrect for files outside the workspace. [#3949](https://github.com/microsoft/vscode-cpptools/issues/3949)
+
 ## Version 0.27.0-insiders3: March 16, 2019
 ### Bug Fixes
 * Fix update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
