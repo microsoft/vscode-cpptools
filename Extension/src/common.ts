@@ -849,7 +849,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
     if (compilerPath) {
         if (compilerPath.endsWith("\\cl.exe") || compilerPath.endsWith("/cl.exe") || compilerPath === "cl.exe") {
             // Input is only compiler name, this is only for cl.exe
-            compilerName = compilerPath;
+            compilerName = path.basename(compilerPath);
 
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
