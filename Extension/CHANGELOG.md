@@ -8,6 +8,7 @@
 * Fix `updateChannel` being settable per-workspace. [PR #5185](https://github.com/microsoft/vscode-cpptools/pull/5185)
 * Fix opened files external to the workspace folder being removed from the database during loading. [#5190](https://github.com/microsoft/vscode-cpptools/issues/5190)
 * Fix crash for workspaces with no workspace folders. [#5192](https://github.com/microsoft/vscode-cpptools/issues/5192)
+* Fix environment variables used for the RunInTerminal Request. [MIEngine#979](https://github.com/microsoft/MIEngine/issues/979)
 
 ## Version 0.27.0-insiders4: March 23, 2019
 ### Bug Fixes
