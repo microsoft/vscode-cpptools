@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.27.0-insiders5: March 26, 2019
+* Fix the configuration UI showing errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
+* Fix tag parsing not working on Windows 7 without SP1. [#5155](https://github.com/microsoft/vscode-cpptools/issues/5155)
+* Fix the `Open File…` scenario without a workspace showing "Tag Parser initializing" (all symbol operations fail). [#5176](https://github.com/microsoft/vscode-cpptools/issues/5176)
+* Fix `updateChannel` being settable per-workspace. [PR #5185](https://github.com/microsoft/vscode-cpptools/pull/5185)
+* Fix opened files external to the workspace folder being removed from the database during loading. [#5190](https://github.com/microsoft/vscode-cpptools/issues/5190)
+* Fix crash for workspaces with no workspace folders. [#5192](https://github.com/microsoft/vscode-cpptools/issues/5192)
+
 ## Version 0.27.0-insiders4: March 23, 2019
 ### Bug Fixes
 * Fix `Go to Symbol in Workspace` not applying `search.exclude` settings. [#5099](https://github.com/microsoft/vscode-cpptools/issues/5099)
@@ -9,8 +17,8 @@
 * Fix the "Open File…" scenario without a workspace folder (again). [#5136](https://github.com/microsoft/vscode-cpptools/issues/5136)
 * Fix changes to `files.exclude` having no effect if they're identical to the previous workspace folder's. [#5138](https://github.com/microsoft/vscode-cpptools/issues/5138)
 * Fix the debugger not working for macOS High Sierra or older. [#5146](https://github.com/microsoft/vscode-cpptools/issues/5146)
-* Fix the configuration UI showing errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
 * Fix `search.exclude` not applying if there are > 1 symbols matching in the excluded file. [#5152](https://github.com/microsoft/vscode-cpptools/issues/5152)
+* Fix tag parsing (workspace symbol searching) not working on Windows 7. [#5155](https://github.com/microsoft/vscode-cpptools/issues/5155)
 * Fix a race condition that could cause the Outline, `Find All References`, etc. to stop working.
 * Fix `Rescan Workspace` running an extra time per workspace folder.
 * Fix a random crash after settings change.
