@@ -3,6 +3,7 @@
 ## Version 0.27.0-insiders5: March 26, 2019
 * Fix the configuration UI showing errors when an older version of `cl.exe` is set in the `compilerPath`. [#5151](https://github.com/microsoft/vscode-cpptools/issues/5151)
 * Fix tag parsing not working on Windows 7 without SP1. [#5155](https://github.com/microsoft/vscode-cpptools/issues/5155)
+* Fix debugger not working until the extension is reinstalled after macOS High Sierra or older is upgraded to a newer OS. [#5171](https://github.com/microsoft/vscode-cpptools/issues/5171)
 * Fix the `Open File…` scenario without a workspace showing "Tag Parser initializing" (all symbol operations fail). [#5176](https://github.com/microsoft/vscode-cpptools/issues/5176)
 * Fix `updateChannel` being settable per-workspace. [PR #5185](https://github.com/microsoft/vscode-cpptools/pull/5185)
 * Fix opened files external to the workspace folder being removed from the database during loading. [#5190](https://github.com/microsoft/vscode-cpptools/issues/5190)
