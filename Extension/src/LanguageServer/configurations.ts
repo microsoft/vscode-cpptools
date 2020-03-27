@@ -1036,7 +1036,7 @@ export class CppProperties {
             // Error when the compiler's path has spaces without quotes but args are used.
             // Except, exclude cl.exe paths because it could be for an older preview build.
             let compilerPathNeedsQuotes: boolean =
-                compilerPathAndArgs.additionalArgs &&
+                (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath !== undefined &&
                 compilerPathAndArgs.compilerPath.includes(" ");
