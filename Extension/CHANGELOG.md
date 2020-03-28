@@ -39,7 +39,7 @@
 * Fix tag parsing not working on Windows 7 without SP1. [#5155](https://github.com/microsoft/vscode-cpptools/issues/5155)
 * Fix `updateChannel` being settable per-workspace. [PR #5185](https://github.com/microsoft/vscode-cpptools/pull/5185)
 * Fix opened files external to the workspace folder being removed from the database during loading. [#5190](https://github.com/microsoft/vscode-cpptools/issues/5190)
-* Fix invalid `c_cpp_properties.json` warning `Compiler path with spaces and arguments is missing double quotes`. [#5215](https://github.com/microsoft/vscode-cpptools/issues/5215)
+* Fix invalid `c_cpp_properties.json` and configuration UI warning `Compiler path with spaces and arguments is missing double quotes`. [#5215](https://github.com/microsoft/vscode-cpptools/issues/5215)
 * Fix environment variables used for the RunInTerminal Request. [MIEngine#979](https://github.com/microsoft/MIEngine/issues/979)
 * Fix a race condition that could cause the Outline, `Find All References`, etc. to stop working.
 
