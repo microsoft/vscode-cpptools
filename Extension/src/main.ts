@@ -12,11 +12,12 @@ import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { PersistentState } from './LanguageServer/persistentState';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
-import { PackageManager, PackageManagerError, IPackage } from './packageManager';
+import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
@@ -69,17 +70,44 @@ export function deactivate(): Thenable<void> {
 async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
-    if (installLockExists) {
+    setInstallationStage('getPlatformInfo');
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+
+    let forceOnlineInstall: boolean = false;
+    if (info.platform === "darwin" && info.version) {
+        const darwinVersion: PersistentState<string | undefined> = new PersistentState("Cpp.darwinVersion", info.version);
+
+        // macOS version has changed
+        if (darwinVersion.Value !== info.version) {
+            const highSierraOrLowerRegex: RegExp = new RegExp('10\\.(1[0-3]|[0-9])(\\..*)*$');
+            const lldbMiFolderPath: string = util.getExtensionFilePath('./debugAdapters/lldb-mi');
+
+            // For macOS and if a user has upgraded their OS, check to see if we are on Mojave or later
+            // and that the debugAdapters/lldb-mi folder exists. This will force a online install to get the correct binaries.
+            if (!highSierraOrLowerRegex.test(info.version) &&
+                !fs.existsSync(lldbMiFolderPath)) {
+
+                forceOnlineInstall = true;
+
+                setInstallationStage('cleanUpUnusedBinaries');
+                await cleanUpUnusedBinaries(info);
+            }
+        }
+    }
+
+    const doOfflineInstall: boolean = installLockExists && !forceOnlineInstall;
+
+    if (doOfflineInstall) {
         // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
         if (util.packageJson.activationEvents && util.packageJson.activationEvents.length === 1) {
             try {
-                await offlineInstallation();
+                await offlineInstallation(info);
             } catch (error) {
                 getOutputChannelLogger().showErrorMessage(localize('initialization.failed', 'The installation of the C/C++ extension failed. Please see the output window for more information.'));
                 showOutputChannel();
 
                 // Send the failure telemetry since postInstall will not be called.
-                sendTelemetry(await PlatformInformation.GetPlatformInformation());
+                sendTelemetry(info);
             }
         } else {
             // The extension has been installed and activated before.
@@ -88,20 +116,21 @@ async function processRuntimeDependencies(): Promise<void> {
     } else {
         // No lock file, need to download and install dependencies.
         try {
-            await onlineInstallation();
+            await onlineInstallation(info);
         } catch (error) {
             handleError(error);
 
             // Send the failure telemetry since postInstall will not be called.
-            sendTelemetry(await PlatformInformation.GetPlatformInformation());
+            sendTelemetry(info);
         }
     }
 }
 
-async function offlineInstallation(): Promise<void> {
-    setInstallationStage('getPlatformInfo');
+async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationType(InstallationType.Offline);
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+
+    setInstallationStage('cleanUpUnusedBinaries');
+    await cleanUpUnusedBinaries(info);
 
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
@@ -119,10 +148,8 @@ async function offlineInstallation(): Promise<void> {
     await postInstall(info);
 }
 
-async function onlineInstallation(): Promise<void> {
-    setInstallationStage('getPlatformInfo');
+async function onlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationType(InstallationType.Online);
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     await downloadAndInstallPackages(info);
 
@@ -168,14 +195,45 @@ function makeBinariesExecutable(): Promise<void> {
     return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
+function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
+    return PlatformsMatch(pkg, info) &&
+           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
+           VersionsMatch(pkg, info);
+}
+
+function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolean {
+    return PlatformsMatch(pkg, info) &&
+           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
+           !VersionsMatch(pkg, info);
+}
+
 function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
     let promises: Thenable<void>[] = [];
     let packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
         if (p.binaries && p.binaries.length > 0 &&
-            p.platforms.findIndex(plat => plat === info.platform) !== -1 &&
-            (p.architectures === undefined || p.architectures.findIndex(arch => arch === info.architecture) !== - 1)) {
+            packageMatchesPlatform(p, info)) {
             p.binaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
+        }
+    });
+    return Promise.all(promises).then(() => { });
+}
+
+function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
+    let promises: Thenable<void>[] = [];
+    let packages: IPackage[] = util.packageJson["runtimeDependencies"];
+    const logger: Logger = getOutputChannelLogger();
+
+    packages.forEach(p => {
+        if (p.binaries && p.binaries.length > 0 &&
+            invalidPackageVersion(p, info)) {
+            p.binaries.forEach(binary => {
+                const path: string = util.getExtensionFilePath(binary);
+                if (fs.existsSync(path)) {
+                    logger.appendLine(`deleting: ${path}`);
+                    promises.push(util.deleteFile(path));
+                }
+            });
         }
     });
     return Promise.all(promises).then(() => { });
