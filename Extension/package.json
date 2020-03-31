@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.27.0-master",
+  "version": "0.27.1-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -39,7 +39,28 @@
     "Snippets"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onCommand:extension.pickNativeProcess",
+    "onCommand:extension.pickRemoteNativeProcess",
+    "onCommand:C_Cpp.BuildAndDebugActiveFile",
+    "onCommand:C_Cpp.ConfigurationEditJSON",
+    "onCommand:C_Cpp.ConfigurationEditUI",
+    "onCommand:C_Cpp.ConfigurationSelect",
+    "onCommand:C_Cpp.ConfigurationProviderSelect",
+    "onCommand:C_Cpp.SwitchHeaderSource",
+    "onCommand:C_Cpp.EnableErrorSquiggles",
+    "onCommand:C_Cpp.DisableErrorSquiggles",
+    "onCommand:C_Cpp.ToggleIncludeFallback",
+    "onCommand:C_Cpp.ToggleDimInactiveRegions",
+    "onCommand:C_Cpp.ResetDatabase",
+    "onCommand:C_Cpp.TakeSurvey",
+    "onCommand:C_Cpp.LogDiagnostics",
+    "onCommand:C_Cpp.RescanWorkspace",
+    "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
+    "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
+    "onDebug",
+    "workspaceContains:/.vscode/c_cpp_properties.json"
   ],
   "main": "./dist/main",
   "contributes": {
@@ -1752,7 +1773,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116522",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125055",
       "platforms": [
         "linux"
       ],
@@ -1766,7 +1787,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116454",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125145",
       "platforms": [
         "linux"
       ],
@@ -1782,7 +1803,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116453",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125057",
       "platforms": [
         "darwin"
       ],
@@ -1793,7 +1814,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116521",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125056",
       "platforms": [
         "win32"
       ],
