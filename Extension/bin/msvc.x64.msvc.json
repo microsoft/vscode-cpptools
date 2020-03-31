@@ -8,8 +8,8 @@
       "--pack_alignment",
       "8",
       "-D_CPPUNWIND=1",
-      "-D_MSC_VER=1924",
-      "-D_MSC_FULL_VER=192428314",
+      "-D_MSC_VER=1926",
+      "-D_MSC_FULL_VER=192628619",
       "-D_MSC_BUILD=0",
       "-D_M_X64=100",
       "-D_M_AMD64=100"
