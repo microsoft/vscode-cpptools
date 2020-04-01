@@ -77,13 +77,47 @@
 			"preLaunchTask": "TypeScript Compile Watch",
 		},
 		{
-			"name": "Launch Tests",
+			"name": "Launch Unit Tests",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/unitTests"
+				"--extensionTestsPath=${workspaceFolder}/out/test/unitTests/index"
+			],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/test/**/*.js"
+			],
+			"preLaunchTask": "Pretest"
+		},
+		{
+			"name": "Launch Integration Tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"${workspaceFolder}/test/integrationTests/testAssets/SimpleCppProject",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/languageServer/index"
+			],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/out/test/**/*.js"
+			],
+			"preLaunchTask": "Pretest",
+		},
+		{
+			"name": "Launch E2E IntelliSense features tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"C:/git/Vcls-vscode-test/SingleRootProject",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/IntelliSenseFeatures/index"
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
@@ -97,40 +131,6 @@
 			"type": "node",
 			"request": "attach",
 			"port": 5858
-		},
-		{
-			"name": "Launch Integration Tests",
-			"type": "extensionHost",
-			"request": "launch",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-				"${workspaceFolder}/test/integrationTests/testAssets/SimpleCppProject",
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/languageServer"
-			],
-			"stopOnEntry": false,
-			"sourceMaps": true,
-			"outFiles": [
-				"${workspaceFolder}/out/test/**/*.js"
-			],
-			"preLaunchTask": "Pretest"
-		},
-		{
-			"name": "Launch E2E IntelliSense features tests",
-			"type": "extensionHost",
-			"request": "launch",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-				"C:/git/Vcls-vscode-test/SingleRootProject",
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/IntelliSenseFeatures"
-			],
-			"stopOnEntry": false,
-			"sourceMaps": true,
-			"outFiles": [
-				"${workspaceFolder}/out/test/**/*.js"
-			],
-			"preLaunchTask": "Pretest"
 		},
 	]
 }

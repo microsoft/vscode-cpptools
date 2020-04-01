@@ -10,7 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { TreeNode, NodeType, getCurrentRenameModel } from './referencesModel';
+import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -429,7 +429,7 @@ function realActivation(): void {
         let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
-            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean =>
+            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
                 extension.isActive && extension.id === "mitaki28.vscode-clang");
             if (clangCommandAdapterActive) {
                 telemetry.logLanguageServerEvent("conflictingExtension");
@@ -905,15 +905,6 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByType', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.cancel', onRenameViewCancel));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.done', onRenameViewDone));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.remove', onRenameViewRemove));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.add', onRenameViewAdd));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.removeAll', onRenameViewRemoveAll));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.addAll', onRenameViewAddAll));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.removeFile', onRenameViewRemoveFile));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.addFile', onRenameViewAddFile));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.addReferenceType', onRenameViewAddReferenceType));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -1207,57 +1198,6 @@ function onShowRefCommand(arg?: TreeNode): void {
             vscode.window.showTextDocument(fileUri);
         }
     }
-}
-
-function onRenameViewCancel(arg?: any): void {
-    getCurrentRenameModel().cancelRename();
-}
-
-function onRenameViewDone(arg?: any): void {
-    getCurrentRenameModel().completeRename();
-}
-
-function onRenameViewRemove(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setRenameCandidate(arg);
-}
-
-function onRenameViewAdd(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setRenamePending(arg);
-}
-
-function onRenameViewRemoveAll(arg?: any): void {
-    getCurrentRenameModel().setAllRenamesCandidates();
-}
-
-function onRenameViewAddAll(arg?: any): void {
-    getCurrentRenameModel().setAllRenamesPending();
-}
-
-function onRenameViewRemoveFile(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setFileRenamesCandidates(arg);
-}
-
-function onRenameViewAddFile(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setFileRenamesPending(arg);
-}
-
-function onRenameViewAddReferenceType(arg?: TreeNode): void {
-    if (!arg || arg.referenceType === undefined) {
-        return;
-    }
-    arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
 }
 
 function reportMacCrashes(): void {

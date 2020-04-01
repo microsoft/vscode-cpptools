@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.30.0"
+    "vscode": "^1.42.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -43,33 +43,12 @@
   ],
   "main": "./dist/main",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "CppRenameActivityBar",
-          "title": "%c_cpp.contributes.viewsContainers.activitybar.CppRenameActivityBar.title%",
-          "icon": "assets/cpp-rename-icon.svg"
-        }
-      ]
-    },
     "views": {
       "references-view": [
         {
           "id": "CppReferencesView",
           "name": "%c_cpp.contributes.views.cppReferencesView.title%",
           "when": "cppReferenceTypes:hasResults && reference-list.hasResult"
-        }
-      ],
-      "CppRenameActivityBar": [
-        {
-          "id": "CppRenamePendingView",
-          "name": "%c_cpp.contributes.views.cppRenamePendingView.title%",
-          "when": "cppRename:hasResults"
-        },
-        {
-          "id": "CppRenameCandidatesView",
-          "name": "%c_cpp.contributes.views.cppRenameCandidatesView.title%",
-          "when": "cppRename:hasResults"
         }
       ]
     },
@@ -616,87 +595,6 @@
         "command": "C_Cpp.VcpkgOnlineHelpSuggested",
         "title": "%c_cpp.command.vcpkgOnlineHelpSuggested.title%",
         "category": "C/C++"
-      },
-      {
-        "command": "CppRenameView.remove",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.remove.title%",
-        "icon": {
-          "light": "assets/minus-light.svg",
-          "dark": "assets/minus-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.add",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.add.title%",
-        "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.removeAll",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.removeAll.title%",
-        "icon": {
-          "light": "assets/minus-light.svg",
-          "dark": "assets/minus-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.addAll",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.addAll.title%",
-        "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.removeFile",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.removeFile.title%",
-        "icon": {
-          "light": "assets/minus-light.svg",
-          "dark": "assets/minus-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.addFile",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.addFile.title%",
-        "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.addReferenceType",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.addReferenceType.title%",
-        "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.cancel",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.cancel.title%",
-        "icon": {
-          "light": "assets/cancel-light.svg",
-          "dark": "assets/cancel-dark.svg"
-        }
-      },
-      {
-        "command": "CppRenameView.done",
-        "category": "C/C++",
-        "title": "%c_cpp.command.CppRenameView.done.title%",
-        "icon": {
-          "light": "assets/check-light.svg",
-          "dark": "assets/check-dark.svg"
-        }
       },
       {
         "command": "C_Cpp.referencesViewGroupByType",
@@ -1503,63 +1401,6 @@
           "command": "C_Cpp.referencesViewUngroupByType",
           "when": "view == CppReferencesView && !refView.isGroupedByFile",
           "group": "navigation"
-        },
-        {
-          "command": "C_Cpp.referencesViewGroupByType",
-          "when": "view == CppRenameCandidatesView && refView.isGroupedByFile",
-          "group": "navigation@1"
-        },
-        {
-          "command": "C_Cpp.referencesViewUngroupByType",
-          "when": "view == CppRenameCandidatesView && !refView.isGroupedByFile",
-          "group": "navigation@1"
-        },
-        {
-          "command": "CppRenameView.removeAll",
-          "when": "view == CppRenamePendingView && cppRename:hasResults",
-          "group": "navigation@1"
-        },
-        {
-          "command": "CppRenameView.done",
-          "when": "view == CppRenamePendingView && cppRename:hasResults",
-          "group": "navigation@2"
-        },
-        {
-          "command": "CppRenameView.cancel",
-          "when": "view == CppRenamePendingView && cppRename:hasResults",
-          "group": "navigation@3"
-        },
-        {
-          "command": "CppRenameView.addAll",
-          "when": "view == CppRenameCandidatesView && cppRename:hasResults",
-          "group": "navigation@2"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "CppRenameView.remove",
-          "when": "view == CppRenamePendingView && viewItem == pendingItem",
-          "group": "inline"
-        },
-        {
-          "command": "CppRenameView.add",
-          "when": "view == CppRenameCandidatesView && viewItem == candidateItem",
-          "group": "inline"
-        },
-        {
-          "command": "CppRenameView.removeFile",
-          "when": "view == CppRenamePendingView && viewItem == pendingFile",
-          "group": "inline"
-        },
-        {
-          "command": "CppRenameView.addFile",
-          "when": "view == CppRenameCandidatesView && viewItem == candidateFile",
-          "group": "inline"
-        },
-        {
-          "command": "CppRenameView.addReferenceType",
-          "when": "view == CppRenameCandidatesView && viewItem == candidateReferenceType",
-          "group": "inline"
         }
       ],
       "editor/context": [
@@ -1606,48 +1447,12 @@
       ],
       "commandPalette": [
         {
-          "command": "CppRenameView.remove",
-          "when": "never"
-        },
-        {
-          "command": "CppRenameView.add",
-          "when": "never"
-        },
-        {
-          "command": "CppRenameView.removeAll",
-          "when": "cppRename:hasResults"
-        },
-        {
-          "command": "CppRenameView.addAll",
-          "when": "cppRename:hasResults"
-        },
-        {
-          "command": "CppRenameView.removeFile",
-          "when": "never"
-        },
-        {
-          "command": "CppRenameView.addFile",
-          "when": "never"
-        },
-        {
-          "command": "CppRenameView.addReferenceType",
-          "when": "never"
-        },
-        {
-          "command": "CppRenameView.cancel",
-          "when": "cppRename:hasResults"
-        },
-        {
-          "command": "CppRenameView.done",
-          "when": "cppRename:hasResults"
-        },
-        {
           "command": "C_Cpp.referencesViewGroupByType",
-          "when": "cppRename:hasResults || cppReferenceTypes:hasResults"
+          "when": "cppReferenceTypes:hasResults"
         },
         {
           "command": "C_Cpp.referencesViewUngroupByType",
-          "when": "cppRename:hasResults || cppReferenceTypes:hasResults"
+          "when": "cppReferenceTypes:hasResults"
         }
       ]
     },
@@ -1677,10 +1482,11 @@
     "translations-generate": "node ./tools/prepublish.js && gulp translations-generate",
     "translations-import": "node ./tools/prepublish.js && gulp translations-import",
     "prepublishjs": "node ./tools/prepublish.js",
-    "pretest": "node ./tools/prepublish.js && tsc -p test.tsconfig.json",
-    "pr-check": "node ./tools/prepublish.js && gulp pr-check",
-    "lint": "node ./tools/prepublish.js && gulp lint",
-    "unitTests": "node ./tools/prepublish.js && gulp unitTests",
+    "pretest": "tsc -p test.tsconfig.json",
+    "pr-check": "gulp pr-check",
+    "lint": "gulp lint",
+    "unitTests": "tsc -p test.tsconfig.json && node ./out/test/unitTests/runTest.js",
+    "integrationTests": "tsc -p test.tsconfig.json && node ./out/test/integrationTests/languageServer/runTest.js",
     "import-edge-strings": "node ./import_edge_strings.js"
   },
   "devDependencies": {
@@ -1692,6 +1498,7 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
+    "@types/vscode": "1.43.0",
     "@types/webpack": "^4.39.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
@@ -1706,6 +1513,7 @@
     "eslint-plugin-jsdoc": "^21.0.0",
     "event-stream": "^4.0.1",
     "fs-extra": "^8.1.0",
+    "glob": "^7.1.6",
     "gulp": "^4.0.2",
     "gulp-env": "^0.4.0",
     "gulp-eslint": "^6.0.0",
@@ -1719,6 +1527,7 @@
     "minimatch": "^3.0.4",
     "minimist": "^1.2.5",
     "mkdirp": "^0.5.1",
+    "mocha": "^4.0.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
     "plist": "^3.0.1",
@@ -1726,7 +1535,6 @@
     "ts-loader": "^6.0.4",
     "tslint": "^5.19.0",
     "typescript": "^3.5.3",
-    "vscode": "^1.1.36",
     "vscode-cpptools": "^3.1.0",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
@@ -1734,6 +1542,7 @@
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^4.1.1",
     "vscode-nls-dev": "^3.2.6",
+    "vscode-test": "^1.3.0",
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.7",
     "which": "^2.0.2",
