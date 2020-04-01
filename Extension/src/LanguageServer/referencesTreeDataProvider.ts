@@ -120,7 +120,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
         }
 
         if (this.referencesModel.groupByFile) {
-            return this.referencesModel.getFileNodes(undefined);
+            return this.referencesModel.getFileNodes();
         } else {
             return this.referencesModel.getReferenceTypeNodes();
         }

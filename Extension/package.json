@@ -1527,7 +1527,7 @@
     "minimatch": "^3.0.4",
     "minimist": "^1.2.5",
     "mkdirp": "^0.5.1",
-    "mocha": "4",
+    "mocha": "^4.0.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
     "plist": "^3.0.1",

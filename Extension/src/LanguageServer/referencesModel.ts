@@ -18,7 +18,7 @@ export class ReferencesModel {
         let results: ReferenceInfo[] = resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed);
 
         // Build a single flat list of all leaf nodes
-        // Currently, the hierachy is built each time referencesTreeDataProvider requests nodes.
+        // Currently, the hierarchy is built each time referencesTreeDataProvider requests nodes.
         for (let r of results) {
             // Add reference to file
             let noReferenceLocation: boolean = (r.position.line === 0 && r.position.character === 0);
@@ -61,7 +61,7 @@ export class ReferencesModel {
         return result;
     }
 
-    getFileNodes(refType: ReferenceType | undefined): TreeNode[] {
+    getFileNodes(refType?: ReferenceType): TreeNode[] {
         let result: TreeNode[] = [];
         let filteredFiles: TreeNode[] = [];
 
