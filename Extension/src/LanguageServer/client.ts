@@ -980,20 +980,26 @@ export class DefaultClient implements Client {
                         constructor(client: DefaultClient) {
                             this.client = client;
                         }
-                        provideFoldingRanges(
-                            document: vscode.TextDocument,
-                            context: vscode.FoldingContext,
+                        provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
                             token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-                                    let params: GetFoldingRangesParams = {
-                                        uri: document.uri
-                                    };
-                                    this.client.notifyWhenReady(() => {
-                                        return this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
-                                        .then((ranges) => {
-                                            ;
-                                    });
-                                });
+                            let params: GetFoldingRangesParams = {
+                                uri: document.uri.toString()
                             };
+                            return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
+                                        .then((ranges) => {
+                                            let result: vscode.FoldingRange[] = [];
+                                            ranges.forEach((range) => {
+                                                result.push({
+                                                    start: range.start.line,
+                                                    end: range.end.line
+                                                });
+                                            });
+                                            resolve(result);
+                                        });
+                                });
+                            });
                         }
                     }
 
