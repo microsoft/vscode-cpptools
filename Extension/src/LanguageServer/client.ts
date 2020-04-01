@@ -595,7 +595,7 @@ export class DefaultClient implements Client {
         }
 
         if (!storagePath) {
-            storagePath = path.join(this.RootPath, "/.vscode");
+            storagePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
         }
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
@@ -1062,7 +1062,7 @@ export class DefaultClient implements Client {
             let settings: CppSettings[] = [];
             let otherSettings: OtherSettings[] = [];
 
-            if (vscode.workspace.workspaceFolders) {
+            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
                 for (let workspaceFolder of vscode.workspace.workspaceFolders) {
                     settings.push(new CppSettings(workspaceFolder.uri));
                     otherSettings.push(new OtherSettings(workspaceFolder.uri));
@@ -1123,6 +1123,7 @@ export class DefaultClient implements Client {
                 formatting: settings_formatting,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
+                exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
                 storage_path: this.storagePath,
                 tabSize: settings_editorTabSize,

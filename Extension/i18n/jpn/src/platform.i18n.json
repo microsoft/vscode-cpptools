@@ -6,5 +6,5 @@
 {
 	"unknown.os.platform": "不明な OS プラットフォーム",
 	"missing.plist.productversion": "SystemVersion.plist から ProduceVersion を取得できませんでした",
-	"missing.darwin.systemversion.file": "{0} で SystemVersion plist が見つかりませんでした。"
+	"missing.darwin.systemversion.file": "{0} で SystemVersion.plist が見つかりませんでした。"
 }
