@@ -1177,7 +1177,7 @@ function onLogDiagnostics(): void {
 
 function onRescanWorkspace(): void {
     onActivationEvent();
-    clients.forEach(client => client.rescanFolder());
+    clients.ActiveClient.rescanFolder();
 }
 
 function onShowRefCommand(arg?: TreeNode): void {

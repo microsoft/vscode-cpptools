@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.27.0-master",
+  "version": "0.27.1-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -467,7 +467,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "window"
+          "scope": "application"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
@@ -1525,7 +1525,7 @@
     "https-proxy-agent": "^2.2.4",
     "jsonc-parser": "^2.1.1",
     "minimatch": "^3.0.4",
-    "minimist": "^1.2.2",
+    "minimist": "^1.2.5",
     "mkdirp": "^0.5.1",
     "mocha": "4",
     "parse5": "^5.1.0",
@@ -1554,12 +1554,14 @@
     "webpack/acorn": "^6.4.1",
     "gulp-sourcemaps/acorn": "^5.7.4",
     "eslint/acorn": "^7.1.1",
-    "gulp-eslint/acorn": "^7.1.1"
+    "gulp-eslint/acorn": "^7.1.1",
+    "**/mkdirp/minimist": "^0.2.1",
+    "yargs-parser": "^13.1.2"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116522",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125055",
       "platforms": [
         "linux"
       ],
@@ -1573,7 +1575,7 @@
     },
     {
       "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116454",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125145",
       "platforms": [
         "linux"
       ],
@@ -1589,7 +1591,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116453",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125057",
       "platforms": [
         "darwin"
       ],
@@ -1600,7 +1602,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116521",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2125056",
       "platforms": [
         "win32"
       ],
