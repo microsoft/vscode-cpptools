@@ -523,8 +523,9 @@ export class CppProperties {
         let result: string[] = [];
         if (paths) {
             paths = this.resolveDefaults(paths, defaultValue);
+            let delimiter: string = (process.platform === 'win32') ? ";" : ":";
             paths.forEach(entry => {
-                let entries: string[] = util.resolveVariables(entry, env).split(";").filter(e => e);
+                let entries: string[] = util.resolveVariables(entry, env).split(delimiter).filter(e => e);
                 result = result.concat(entries);
             });
         }
@@ -1036,7 +1037,7 @@ export class CppProperties {
             // Error when the compiler's path has spaces without quotes but args are used.
             // Except, exclude cl.exe paths because it could be for an older preview build.
             let compilerPathNeedsQuotes: boolean =
-                compilerPathAndArgs.additionalArgs &&
+                (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath !== undefined &&
                 compilerPathAndArgs.compilerPath.includes(" ");
@@ -1315,7 +1316,7 @@ export class CppProperties {
                         continue;
                     }
                     // Squiggle when the compiler's path has spaces without quotes but args are used.
-                    compilerPathNeedsQuotes = compilerPathAndArgs.additionalArgs
+                    compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
                         && !resolvedPath.startsWith('"')
                         && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
