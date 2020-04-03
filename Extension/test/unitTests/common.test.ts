@@ -39,7 +39,7 @@ suite("Common Utility validation", () => {
         test("solo env input with empty array env value", () => {
             resolveVariablesWithInput("${empty}")
                 .withEnvironment({
-                    "empty": []
+                    empty: []
                 })
                 .shouldResolveTo("");
         });

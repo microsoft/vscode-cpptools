@@ -5,3 +5,9 @@ browse*.db*
 *.pdb
 *.exe
 *.ilk
+
+# ignore exported localization xlf directory
+vscode-extensions-localization-export
+
+# ignore imported localization xlf directory
+vscode-translations-import

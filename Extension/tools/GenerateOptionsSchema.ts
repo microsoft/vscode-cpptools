@@ -95,7 +95,7 @@ function replaceReferences(definitions: any, objects: any): any {
     return objects;
 }
 
-export function generateOptionsSchema(): void {
+function generateOptionsSchema(): void {
     let packageJSON: any = JSON.parse(fs.readFileSync('package.json').toString());
     let schemaJSON: any = JSON.parse(fs.readFileSync('tools/OptionsSchema.json').toString());
 

@@ -14,7 +14,7 @@ export class PackageVersion {
     constructor(version: string) {
         const tokens: string[] = version.split(new RegExp('[-\\.]', 'g')); // Match against dots and dashes
         if (tokens.length < 3) {
-            throw new Error('Failed to parse version string: ' + version);
+            throw new Error(`Failed to parse version string: ${version}`);
         }
 
         this.major = parseInt(tokens[0]);
@@ -35,9 +35,19 @@ export class PackageVersion {
             this.suffixVersion = 0;
         }
 
-        if (this.major === undefined || this.minor === undefined || this.patch === undefined) {
-            throw new Error('Failed to parse version string: ' + version);
+        if (this.major === undefined
+            || this.major === null
+            || this.minor === undefined
+            || this.minor === null
+            || this.patch === undefined
+            || this.patch === null) {
+            throw new Error(`Failed to parse version string: ${version}`);
         }
+    }
+
+    public isEqual(other: PackageVersion): boolean {
+        return this.major === other.major && this.minor === other.minor && this.patch === other.patch &&
+            this.suffix === other.suffix && this.suffixVersion === other.suffixVersion;
     }
 
     public isGreaterThan(other: PackageVersion, suffixStr: string = 'insiders'): boolean {
@@ -57,7 +67,10 @@ export class PackageVersion {
                 if (diff) {
                     return diff > 0;
                 } else if (this.suffix) {
-                    return (other.suffix && this.suffixVersion > other.suffixVersion);
+                    if (!other.suffix) {
+                        return false;
+                    }
+                    return (this.suffixVersion > other.suffixVersion);
                 } else {
                     return other.suffix ? true : false;
                 }

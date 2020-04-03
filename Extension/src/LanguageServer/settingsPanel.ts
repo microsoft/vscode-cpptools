@@ -24,6 +24,7 @@ const elementId: { [key: string]: string } = {
     compilerPath: "compilerPath",
     compilerPathInvalid: "compilerPathInvalid",
     knownCompilers: "knownCompilers",
+    compilerArgs: "compilerArgs",
 
     intelliSenseMode: "intelliSenseMode",
     intelliSenseModeInvalid: "intelliSenseModeInvalid",
@@ -51,7 +52,7 @@ const elementId: { [key: string]: string } = {
 
 export class SettingsPanel {
     private telemetry: { [key: string]: number } = {};
-    private disposable: vscode.Disposable = undefined;
+    private disposable?: vscode.Disposable;
 
     // Events
     private settingsPanelActivated = new vscode.EventEmitter<void>();
@@ -60,19 +61,18 @@ export class SettingsPanel {
     private addConfigRequested = new vscode.EventEmitter<string>();
 
     // Configuration data
-    private configValues: config.Configuration;
+    private configValues: config.Configuration = { name: "" };
     private isIntelliSenseModeDefined: boolean = false;
     private configIndexSelected: number = 0;
     private compilerPaths: string[] = [];
 
     // WebviewPanel objects
-    private panel: vscode.WebviewPanel;
-    private disposablesPanel: vscode.Disposable = undefined;
+    private panel?: vscode.WebviewPanel;
+    private disposablesPanel?: vscode.Disposable;
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
 
     constructor() {
-        this.configValues = { name: undefined };
         this.disposable = vscode.Disposable.from(
             this.settingsPanelActivated,
             this.configValuesChanged,
@@ -82,9 +82,9 @@ export class SettingsPanel {
     }
 
     public createOrShow(configSelection: string[], activeConfiguration: config.Configuration, errors: config.ConfigurationErrors): void {
-        const column: vscode.ViewColumn = vscode.window.activeTextEditor
-                ? vscode.window.activeTextEditor.viewColumn
-                : undefined;
+        const column: vscode.ViewColumn | undefined = vscode.window.activeTextEditor
+            ? vscode.window.activeTextEditor.viewColumn
+            : undefined;
 
         // Show existing panel
         if (this.panel) {
@@ -152,14 +152,14 @@ export class SettingsPanel {
         return this.configValues;
     }
 
-    public updateConfigUI(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
+    public updateConfigUI(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         if (this.panel) {
             this.updateWebview(configSelection, configuration, errors);
         }
     }
 
-    public setKnownCompilers(knownCompilers: config.KnownCompiler[], pathSeparator: string): void {
-        if (knownCompilers.length > 0) {
+    public setKnownCompilers(knownCompilers?: config.KnownCompiler[], pathSeparator?: string): void {
+        if (knownCompilers && knownCompilers.length) {
             for (let compiler of knownCompilers) {
                 // Normalize path separators.
                 let path: string = compiler.path;
@@ -184,12 +184,14 @@ export class SettingsPanel {
 
     public dispose(): void {
         // Log any telemetry
-        if (Object.keys(this.telemetry).length > 0) {
-            telemetry.logLanguageServerEvent("ConfigUI", null, this.telemetry);
+        if (Object.keys(this.telemetry).length) {
+            telemetry.logLanguageServerEvent("ConfigUI", undefined, this.telemetry);
         }
 
         // Clean up resources
-        this.panel.dispose();
+        if (this.panel) {
+            this.panel.dispose();
+        }
 
         if (this.disposable) {
             this.disposable.dispose();
@@ -207,15 +209,15 @@ export class SettingsPanel {
         }
     }
 
-    private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors|null): void {
+    private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         this.configValues = {...configuration}; // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel) {
-            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths});
-            this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected});
-            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues});
+            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
+            this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });
+            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues });
             if (errors !== null) {
-                this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+                this.panel.webview.postMessage({ command: 'updateErrors', errors: errors });
             }
         }
     }
@@ -233,7 +235,7 @@ export class SettingsPanel {
     }
 
     private onMessageReceived(message: any): void {
-        if (message === null) {
+        if (message === null || message === undefined) {
             return;
         }
         switch (message.command) {
@@ -272,9 +274,7 @@ export class SettingsPanel {
     }
 
     private updateConfig(message: any): void {
-        let splitEntries: (input: any) => string[] = (input: any) => {
-            return input.split("\n").filter((e: string) => e);
-        };
+        let splitEntries: (input: any) => string[] = (input: any) => input.split("\n").filter((e: string) => e);
 
         switch (message.key) {
             case elementId.configName:
@@ -282,6 +282,9 @@ export class SettingsPanel {
                 break;
             case elementId.compilerPath:
                 this.configValues.compilerPath = message.value;
+                break;
+            case elementId.compilerArgs:
+                this.configValues.compilerArgs = splitEntries(message.value);
                 break;
             case elementId.includePath:
                 this.configValues.includePath = splitEntries(message.value);
@@ -318,15 +321,21 @@ export class SettingsPanel {
                 this.configValues.forcedInclude = splitEntries(message.value);
                 break;
             case elementId.browsePath:
-                this.initializeBrowseProperties();
+                if (!this.configValues.browse) {
+                    this.configValues.browse = {};
+                }
                 this.configValues.browse.path = splitEntries(message.value);
                 break;
             case elementId.limitSymbolsToIncludedHeaders:
-                this.initializeBrowseProperties();
+                if (!this.configValues.browse) {
+                    this.configValues.browse = {};
+                }
                 this.configValues.browse.limitSymbolsToIncludedHeaders = message.value;
                 break;
             case elementId.databaseFilename:
-                this.initializeBrowseProperties();
+                if (!this.configValues.browse) {
+                    this.configValues.browse = {};
+                }
                 this.configValues.browse.databaseFilename = message.value;
                 break;
         }
@@ -342,21 +351,16 @@ export class SettingsPanel {
         this.telemetry[elementId]++;
     }
 
-    private initializeBrowseProperties(): void {
-        if (this.configValues.browse === undefined) {
-            this.configValues.browse = {};
-        }
-    }
-
     private getHtml(): string {
         let content: string | undefined;
-        content = fs.readFileSync(util.getExtensionFilePath("ui/settings.html")).toString();
+
+        content = fs.readFileSync(util.getLocalizedHtmlPath("ui/settings.html")).toString();
 
         content = content.replace(
             /{{root}}/g,
             vscode.Uri.file(util.extensionPath)
-            .with({ scheme: 'vscode-resource' })
-            .toString());
+                .with({ scheme: 'vscode-resource' })
+                .toString());
 
         content = content.replace(
             /{{nonce}}/g,
@@ -366,7 +370,7 @@ export class SettingsPanel {
     }
 
     private getNonce(): string {
-        let nonce: string;
+        let nonce: string = "";
         const possible: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for (let i: number = 0; i < 32; i++) {
             nonce += possible.charAt(Math.floor(Math.random() * possible.length));

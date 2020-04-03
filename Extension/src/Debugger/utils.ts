@@ -9,10 +9,10 @@ export enum ArchType {
 }
 
 export class ArchitectureReplacer {
-    public static checkAndReplaceWSLPipeProgram(pipeProgramStr: string, expectedArch: ArchType): string {
-        let replacedPipeProgram: string = null;
-        const winDir: string = process.env.WINDIR ? process.env.WINDIR.toLowerCase() : null;
-        const winDirAltDirSep: string =  process.env.WINDIR ? process.env.WINDIR.replace('\\', '/').toLowerCase() : null;
+    public static checkAndReplaceWSLPipeProgram(pipeProgramStr: string, expectedArch: ArchType): string | undefined {
+        let replacedPipeProgram: string | undefined;
+        const winDir: string | undefined = process.env.WINDIR ? process.env.WINDIR.toLowerCase() : undefined;
+        const winDirAltDirSep: string | undefined =  process.env.WINDIR ? process.env.WINDIR.replace('\\', '/').toLowerCase() : undefined;
         const winDirEnv: string = "${env:windir}";
 
         if (winDir && winDirAltDirSep && (pipeProgramStr.indexOf(winDir) === 0 || pipeProgramStr.indexOf(winDirAltDirSep) === 0 || pipeProgramStr.indexOf(winDirEnv) === 0)) {
@@ -34,8 +34,8 @@ export class ArchitectureReplacer {
         return replacedPipeProgram;
     }
 
-    // Checks to see if the folder name is in the path using both win and unix style path seperators.
-    // Returns the path seperator it detected if the folder is in the path.
+    // Checks to see if the folder name is in the path using both win and unix style path separators.
+    // Returns the path separator it detected if the folder is in the path.
     // Or else it returns empty string to indicate it did not find it in the path.
     public static checkForFolderInPath(path: string, folder: string): string {
         if (path.indexOf(`/${folder}/`) >= 0) {

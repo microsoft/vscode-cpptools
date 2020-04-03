@@ -11,12 +11,16 @@ import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppV
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
 import * as util from '../common';
 import * as Telemetry from '../telemetry';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
 let disposables: vscode.Disposable[] = [];
 
 export function buildAndDebugActiveFileStr(): string {
-    return " build and debug active file";
+    return ` - ${localize("build.and.debug.active.file", 'Build and debug active file')}`;
 }
 
 export function initialize(context: vscode.ExtensionContext): void {
@@ -31,7 +35,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     let configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
-    let vsdbgProvider: CppVsDbgConfigurationProvider = null;
+    let vsdbgProvider: CppVsDbgConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
         vsdbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
         disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(vsdbgProvider)));
@@ -40,7 +44,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
 
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugActiveFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
-        const folder: vscode.WorkspaceFolder = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
             // Not enabled because we do not react to single-file mode correctly yet.
             // We get an ENOENT when the user's c_cpp_properties.json is attempted to be parsed.
@@ -50,18 +54,16 @@ export function initialize(context: vscode.ExtensionContext): void {
         }
 
         if (!util.fileIsCOrCppSource(textEditor.document.uri.fsPath)) {
-            vscode.window.showErrorMessage('Cannot build and debug because the active file is not a C or C++ source file.');
+            vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
             return Promise.resolve();
         }
 
-        let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config => {
-            return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
-        });
+        let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config =>
+            config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
 
         if (vsdbgProvider) {
-            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config => {
-                return config.name.indexOf(buildAndDebugActiveFileStr()) !== -1;
-            });
+            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config =>
+                config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
             if (vsdbgConfigs) {
                 configs.push(...vsdbgConfigs);
             }
@@ -71,17 +73,15 @@ export function initialize(context: vscode.ExtensionContext): void {
             configuration: vscode.DebugConfiguration;
         }
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => {
-            return {label: config.name, configuration: config};
-        });
+        const items: MenuItem[] = configs.map<MenuItem>(config => ({label: config.name, configuration: config}));
 
-        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? "No compiler found" : "Select a compiler")}).then(async selection => {
+        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.compiler", "Select a compiler"))}).then(async selection => {
             if (!selection) {
                 return; // User canceled it.
             }
             if (selection.label.startsWith("cl.exe")) {
                 if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-                    vscode.window.showErrorMessage('cl.exe build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.');
+                    vscode.window.showErrorMessage(localize("cl.exe.not.available", '{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.', "cl.exe"));
                     return;
                 }
             }

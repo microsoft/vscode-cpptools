@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as cpptoolsJsonUtils from './abTesting';
 import * as DebuggerExtension from './Debugger/extension';
 import * as fs from 'fs';
 import * as LanguageServer from './LanguageServer/extension';
@@ -12,23 +11,38 @@ import * as os from 'os';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+import { PersistentState } from './LanguageServer/persistentState';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
 import { PlatformInformation } from './platform';
-import { PackageManager, PackageManagerError, IPackage } from './packageManager';
-import { PersistentState } from './LanguageServer/persistentState';
+import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
-import { CppTools1 } from './cppTools1';
+import { CppTools1, NullCppTools } from './cppTools1';
+import { CppSettings } from './LanguageServer/settings';
 
-const releaseNotesVersion: number = 5;
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
 let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    let errMsg: string = "";
+    if (process.arch !== 'ia32' && process.arch !== 'x64') {
+        errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(process.arch));
+    } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
+        errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
+    }
+    if (errMsg) {
+        vscode.window.showErrorMessage(errMsg);
+        return new NullCppTools();
+    }
+
     util.setExtensionContext(context);
     initializeTemporaryCommandRegistrar();
     Telemetry.activate();
@@ -48,7 +62,7 @@ export function deactivate(): Thenable<void> {
     disposables.forEach(d => d.dispose());
 
     if (languageServiceDisabled) {
-        return;
+        return Promise.resolve();
     }
     return LanguageServer.deactivate();
 }
@@ -56,39 +70,67 @@ export function deactivate(): Thenable<void> {
 async function processRuntimeDependencies(): Promise<void> {
     const installLockExists: boolean = await util.checkInstallLockFile();
 
-    if (installLockExists) {
+    setInstallationStage('getPlatformInfo');
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+
+    let forceOnlineInstall: boolean = false;
+    if (info.platform === "darwin" && info.version) {
+        const darwinVersion: PersistentState<string | undefined> = new PersistentState("Cpp.darwinVersion", info.version);
+
+        // macOS version has changed
+        if (darwinVersion.Value !== info.version) {
+            const highSierraOrLowerRegex: RegExp = new RegExp('10\\.(1[0-3]|[0-9])(\\..*)*$');
+            const lldbMiFolderPath: string = util.getExtensionFilePath('./debugAdapters/lldb-mi');
+
+            // For macOS and if a user has upgraded their OS, check to see if we are on Mojave or later
+            // and that the debugAdapters/lldb-mi folder exists. This will force a online install to get the correct binaries.
+            if (!highSierraOrLowerRegex.test(info.version) &&
+                !fs.existsSync(lldbMiFolderPath)) {
+
+                forceOnlineInstall = true;
+
+                setInstallationStage('cleanUpUnusedBinaries');
+                await cleanUpUnusedBinaries(info);
+            }
+        }
+    }
+
+    const doOfflineInstall: boolean = installLockExists && !forceOnlineInstall;
+
+    if (doOfflineInstall) {
         // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
         if (util.packageJson.activationEvents && util.packageJson.activationEvents.length === 1) {
             try {
-                await offlineInstallation();
+                await offlineInstallation(info);
             } catch (error) {
-                getOutputChannelLogger().showErrorMessage('The installation of the C/C++ extension failed. Please see the output window for more information.');
+                getOutputChannelLogger().showErrorMessage(localize('initialization.failed', 'The installation of the C/C++ extension failed. Please see the output window for more information.'));
                 showOutputChannel();
 
                 // Send the failure telemetry since postInstall will not be called.
-                sendTelemetry(await PlatformInformation.GetPlatformInformation());
+                sendTelemetry(info);
             }
-        // The extension have been installed and activated before.
         } else {
+            // The extension has been installed and activated before.
             await finalizeExtensionActivation();
         }
-    // No lock file, need to download and install dependencies.
     } else {
+        // No lock file, need to download and install dependencies.
         try {
-            await onlineInstallation();
+            await onlineInstallation(info);
         } catch (error) {
             handleError(error);
 
             // Send the failure telemetry since postInstall will not be called.
-            sendTelemetry(await PlatformInformation.GetPlatformInformation());
+            sendTelemetry(info);
         }
     }
 }
 
-async function offlineInstallation(): Promise<void> {
-    setInstallationStage('getPlatformInfo');
+async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationType(InstallationType.Offline);
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+
+    setInstallationStage('cleanUpUnusedBinaries');
+    await cleanUpUnusedBinaries(info);
 
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
@@ -106,10 +148,8 @@ async function offlineInstallation(): Promise<void> {
     await postInstall(info);
 }
 
-async function onlineInstallation(): Promise<void> {
-    setInstallationStage('getPlatformInfo');
+async function onlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationType(InstallationType.Online);
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
     await downloadAndInstallPackages(info);
 
@@ -131,7 +171,7 @@ async function onlineInstallation(): Promise<void> {
 
 async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
     let outputChannelLogger: Logger = getOutputChannelLogger();
-    outputChannelLogger.appendLine("Updating C/C++ dependencies...");
+    outputChannelLogger.appendLine(localize("updating.dependencies", "Updating C/C++ dependencies..."));
 
     let packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
 
@@ -155,14 +195,45 @@ function makeBinariesExecutable(): Promise<void> {
     return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
+function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
+    return PlatformsMatch(pkg, info) &&
+           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
+           VersionsMatch(pkg, info);
+}
+
+function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolean {
+    return PlatformsMatch(pkg, info) &&
+           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
+           !VersionsMatch(pkg, info);
+}
+
 function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
     let promises: Thenable<void>[] = [];
     let packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
         if (p.binaries && p.binaries.length > 0 &&
-            p.platforms.findIndex(plat => plat === info.platform) !== -1 &&
-            (p.architectures === undefined || p.architectures.findIndex(arch => arch === info.architecture) !== - 1)) {
+            packageMatchesPlatform(p, info)) {
             p.binaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
+        }
+    });
+    return Promise.all(promises).then(() => { });
+}
+
+function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
+    let promises: Thenable<void>[] = [];
+    let packages: IPackage[] = util.packageJson["runtimeDependencies"];
+    const logger: Logger = getOutputChannelLogger();
+
+    packages.forEach(p => {
+        if (p.binaries && p.binaries.length > 0 &&
+            invalidPackageVersion(p, info)) {
+            p.binaries.forEach(binary => {
+                const path: string = util.getExtensionFilePath(binary);
+                if (fs.existsSync(path)) {
+                    logger.appendLine(`deleting: ${path}`);
+                    promises.push(util.deleteFile(path));
+                }
+            });
         }
     });
     return Promise.all(promises).then(() => { });
@@ -172,9 +243,10 @@ function removeUnnecessaryFile(): Promise<void> {
     if (os.platform() !== 'win32') {
         let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException) => {
+            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
                 if (err) {
-                    getOutputChannelLogger().appendLine(`ERROR: fs.rename failed with "${err.message}". Delete ${sourcePath} manually to enable debugging.`);
+                    getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
+                        'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
                 }
             });
         }
@@ -190,7 +262,7 @@ function touchInstallLockFile(): Promise<void> {
 function handleError(error: any): void {
     let installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
-    installationInformation.telemetryProperties['stage'] = installationInformation.stage;
+    installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
@@ -203,7 +275,7 @@ function handleError(error: any): void {
             errorMessage = packageError.innerError.toString();
             installationInformation.telemetryProperties['error.innerError'] = util.removePotentialPII(errorMessage);
         } else {
-            errorMessage = packageError.message;
+            errorMessage = packageError.localizedMessageText;
         }
 
         if (packageError.pkg) {
@@ -224,10 +296,10 @@ function handleError(error: any): void {
         outputChannelLogger.appendLine("");
     }
     // Show the actual message and not the sanitized one
-    outputChannelLogger.appendLine(`Failed at stage: ${installationInformation.stage}`);
+    outputChannelLogger.appendLine(localize('failed.at.stage', "Failed at stage: {0}", installationInformation.stage));
     outputChannelLogger.appendLine(errorMessage);
     outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine(`If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.`);
+    outputChannelLogger.appendLine(localize('failed.at.stage2', 'If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.'));
     showOutputChannel();
 }
 
@@ -245,16 +317,9 @@ function sendTelemetry(info: PlatformInformation): boolean {
 
     if (success) {
         util.setProgress(util.getProgressInstallSuccess());
-        let versionShown: PersistentState<number> = new PersistentState<number>("CPP.ReleaseNotesVersion", -1);
-        if (versionShown.Value < releaseNotesVersion) {
-            if (versionShown.Value !== versionShown.DefaultValue) {
-                util.showReleaseNotes();
-            }
-            versionShown.Value = releaseNotesVersion;
-        }
     }
 
-    installBlob.telemetryProperties['osArchitecture'] = info.architecture;
+    installBlob.telemetryProperties['osArchitecture'] = info.architecture ?? "";
 
     Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
 
@@ -264,7 +329,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
 async function postInstall(info: PlatformInformation): Promise<void> {
     let outputChannelLogger: Logger = getOutputChannelLogger();
     outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine("Finished installing dependencies");
+    outputChannelLogger.appendLine(localize('finished.installing.dependencies', "Finished installing dependencies"));
     outputChannelLogger.appendLine("");
 
     const installSuccess: boolean = sendTelemetry(info);
@@ -273,7 +338,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
     if (!installSuccess) {
         return Promise.reject<void>("");
     } else {
-        // Notify user's if debugging may not be supported on their OS.
+        // Notify users if debugging may not be supported on their OS.
         util.checkDistro(info);
 
         return finalizeExtensionActivation();
@@ -281,11 +346,12 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    if (vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+    let settings: CppSettings = new CppSettings();
+    if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
         disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") !== "Disabled") {
+            if (!reloadMessageShown && settings.intelliSenseEngine !== "Disabled") {
                 reloadMessageShown = true;
                 util.promptForReloadWindowDueToSettingsChange();
             }
@@ -293,45 +359,21 @@ async function finalizeExtensionActivation(): Promise<void> {
         return;
     }
     disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-        if (!reloadMessageShown && vscode.workspace.getConfiguration("C_Cpp", null).get<string>("intelliSenseEngine") === "Disabled") {
+        if (!reloadMessageShown && settings.intelliSenseEngine === "Disabled") {
             reloadMessageShown = true;
             util.promptForReloadWindowDueToSettingsChange();
         }
     }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
-    // Update default for C_Cpp.intelliSenseEngine based on A/B testing settings.
-    // (this may result in rewriting the package.json file)
-
-    let abTestSettings: cpptoolsJsonUtils.ABTestSettings = cpptoolsJsonUtils.getABTestSettings();
     let packageJson: any = util.getRawPackageJson();
     let writePackageJson: boolean = false;
     let packageJsonPath: string = util.getExtensionFilePath("package.json");
-    if (!packageJsonPath.includes(".vscode-insiders") && !packageJsonPath.includes(".vscode-exploration")) {
-        let prevIntelliSenseEngineDefault: any = packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default;
-        if (abTestSettings.UseDefaultIntelliSenseEngine) {
-            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Default";
-        } else {
-            packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default = "Tag Parser";
-        }
-        if (prevIntelliSenseEngineDefault !== packageJson.contributes.configuration.properties["C_Cpp.intelliSenseEngine"].default) {
-            writePackageJson = true;
-        }
-    } else {
+    if (packageJsonPath.includes(".vscode-insiders") || packageJsonPath.includes(".vscode-exploration")) {
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
             writePackageJson = true;
         }
-    }
-
-    let prevEnhancedColorizationDefault: any = packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default;
-    if (abTestSettings.UseEnhancedColorization) {
-        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Enabled";
-    } else {
-        packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default = "Disabled";
-    }
-    if (prevEnhancedColorizationDefault !== packageJson.contributes.configuration.properties["C_Cpp.enhancedColorization"].default) {
-        writePackageJson = true;
     }
 
     if (writePackageJson) {
@@ -354,21 +396,16 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.ConfigurationSelect",
         "onCommand:C_Cpp.ConfigurationProviderSelect",
         "onCommand:C_Cpp.SwitchHeaderSource",
-        "onCommand:C_Cpp.Navigate",
-        "onCommand:C_Cpp.GoToDeclaration",
-        "onCommand:C_Cpp.PeekDeclaration",
         "onCommand:C_Cpp.EnableErrorSquiggles",
         "onCommand:C_Cpp.DisableErrorSquiggles",
         "onCommand:C_Cpp.ToggleIncludeFallback",
         "onCommand:C_Cpp.ToggleDimInactiveRegions",
-        "onCommand:C_Cpp.ShowReleaseNotes",
         "onCommand:C_Cpp.ResetDatabase",
-        "onCommand:C_Cpp.PauseParsing",
-        "onCommand:C_Cpp.ResumeParsing",
-        "onCommand:C_Cpp.ShowParsingCommands",
         "onCommand:C_Cpp.TakeSurvey",
         "onCommand:C_Cpp.LogDiagnostics",
         "onCommand:C_Cpp.RescanWorkspace",
+        "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
+        "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
         "onDebug",
         "workspaceContains:/.vscode/c_cpp_properties.json"
     ];

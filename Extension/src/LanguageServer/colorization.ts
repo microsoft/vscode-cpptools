@@ -51,15 +51,15 @@ interface VersionedEdits {
 }
 
 class ThemeStyle {
-    foreground: string;
-    background: string;
-    fontStyle: string;
+    foreground?: string;
+    background?: string;
+    fontStyle?: string;
 }
 
 export class ColorizationSettings {
-    private uri: vscode.Uri;
-    private pendingTask: util.BlockingTask<any>;
-    private editorBackground: string;
+    private uri: vscode.Uri | undefined;
+    private pendingTask?: util.BlockingTask<any>;
+    private editorBackground?: string;
 
     public themeStyleCMap: ThemeStyle[] = [];
     public themeStyleCppMap: ThemeStyle[] = [];
@@ -76,9 +76,8 @@ export class ColorizationSettings {
         ["variable", "variables"]
     ]);
 
-    constructor(uri: vscode.Uri) {
+    constructor(uri: vscode.Uri | undefined) {
         this.uri = uri;
-        this.reload();
     }
 
     // Given a TextMate rule 'settings' node, update a ThemeStyle to include any color or style information
@@ -86,7 +85,7 @@ export class ColorizationSettings {
         if (textMateRuleSettings.foreground) {
             baseStyle.foreground = textMateRuleSettings.foreground;
         }
-        if (textMateRuleSettings.background && textMateRuleSettings.background.toUpperCase() !== this.editorBackground.toUpperCase()) {
+        if (!this.editorBackground || textMateRuleSettings.background && textMateRuleSettings.background.toUpperCase() !== this.editorBackground.toUpperCase()) {
             baseStyle.background = textMateRuleSettings.background;
         }
         // Any (even empty) string for fontStyle removes inherited value
@@ -98,9 +97,9 @@ export class ColorizationSettings {
     }
 
     // If the scope can be found in a set of TextMate rules, apply it to both C and Cpp ThemeStyle's
-    private findThemeStyleForScope(baseCStyle: ThemeStyle, baseCppStyle: ThemeStyle, scope: string, textMateRules: TextMateRule[]): void {
+    private findThemeStyleForScope(baseCStyle: ThemeStyle | undefined, baseCppStyle: ThemeStyle | undefined, scope: string, textMateRules: TextMateRule[] | undefined): void {
         if (textMateRules) {
-            let match: TextMateRule = textMateRules.find(e => e.settings && (e.scope === scope || ((e.scope instanceof Array) && e.scope.indexOf(scope) > -1)));
+            let match: TextMateRule | undefined = textMateRules.find(e => e.settings && (e.scope === scope || ((e.scope instanceof Array) && e.scope.indexOf(scope) > -1)));
             if (match) {
                 if (baseCStyle) {
                     this.updateStyleFromTextMateRuleSettings(baseCStyle, match.settings);
@@ -137,7 +136,7 @@ export class ColorizationSettings {
     }
 
     // For a specific scope cascase all potential sources of style information to create a final ThemeStyle
-    private calculateThemeStyleForScope(baseCStyle: ThemeStyle, baseCppStyle: ThemeStyle, scope: string, themeName: string, themeTextMateRules: TextMateRule[][]): void {
+    private calculateThemeStyleForScope(baseCStyle: ThemeStyle | undefined, baseCppStyle: ThemeStyle | undefined, scope: string, themeName: string, themeTextMateRules: TextMateRule[][]): void {
         // Search for settings with this scope in current theme
         themeTextMateRules.forEach((rules) => {
             this.findThemeStyleForScope(baseCStyle, baseCppStyle, scope, rules);
@@ -148,7 +147,7 @@ export class ColorizationSettings {
         // Next in priority would be a global user override of token color of the equivilent scope
         let colorTokenName: string | undefined = ColorizationSettings.scopeToTokenColorNameMap.get(scope);
         if (colorTokenName) {
-            let settingValue: string = otherSettings.getCustomColorToken(colorTokenName);
+            let settingValue: string | undefined = otherSettings.getCustomColorToken(colorTokenName);
             if (settingValue) {
                 if (baseCStyle) {
                     baseCStyle.foreground = settingValue;
@@ -164,7 +163,7 @@ export class ColorizationSettings {
 
         // Next in priority would be a theme-specific user override of token color of the equivilent scope
         if (colorTokenName) {
-            let settingValue: string = otherSettings.getCustomThemeSpecificColorToken(colorTokenName, themeName);
+            let settingValue: string | undefined = otherSettings.getCustomThemeSpecificColorToken(colorTokenName, themeName);
             if (settingValue) {
                 if (baseCStyle) {
                     baseCStyle.foreground = settingValue;
@@ -176,7 +175,7 @@ export class ColorizationSettings {
         }
 
         // Next in priority would be a theme-specific user override of this scope in textMateRules
-        let textMateRules: TextMateRule[] = otherSettings.getCustomThemeSpecificTextMateRules(themeName);
+        let textMateRules: TextMateRule[] | undefined = otherSettings.getCustomThemeSpecificTextMateRules(themeName);
         this.findThemeStyleForScope(baseCStyle, baseCppStyle, scope, textMateRules);
     }
 
@@ -188,8 +187,8 @@ export class ColorizationSettings {
         for (let i: number = 0; i < parts.length; i++) {
             accumulatedScope += parts[i];
             this.calculateThemeStyleForScope(this.themeStyleCMap[tokenKind], this.themeStyleCppMap[tokenKind], accumulatedScope, themeName, themeTextMateRules);
-            this.calculateThemeStyleForScope(this.themeStyleCMap[tokenKind], null, accumulatedScope + ".c", themeName, themeTextMateRules);
-            this.calculateThemeStyleForScope(null, this.themeStyleCppMap[tokenKind], accumulatedScope + ".cpp", themeName, themeTextMateRules);
+            this.calculateThemeStyleForScope(this.themeStyleCMap[tokenKind], undefined, accumulatedScope + ".c", themeName, themeTextMateRules);
+            this.calculateThemeStyleForScope(undefined, this.themeStyleCppMap[tokenKind], accumulatedScope + ".cpp", themeName, themeTextMateRules);
             accumulatedScope += ".";
         }
     }
@@ -213,26 +212,26 @@ export class ColorizationSettings {
         this.calculateStyleForToken(TokenKind.GlobalVariable, "variable.other.global", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.LocalVariable, "variable.other.local", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Parameter, "variable.parameter", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Type, "entity.name.type", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.RefType, "entity.name.class.reference", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.ValueType, "entity.name.class.value", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.Type, "entity.name.type.class", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.RefType, "entity.name.type.class.reference", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.ValueType, "entity.name.type.class.value", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Function, "entity.name.function", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.MemberFunction, "entity.name.function.member", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.MemberField, "variable.other.member", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.MemberField, "variable.other.property", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.StaticMemberFunction, "entity.name.function.member.static", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.StaticMemberField, "variable.other.member.static", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Property, "variable.other.property", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.StaticMemberField, "variable.other.property.static", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.Property, "variable.other.property.cli", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Event, "variable.other.event", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.ClassTemplate, "entity.name.class.template", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.GenericType, "entity.name.class.generic", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.FunctionTemplate, "entity.name.function.template", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.Namespace, "entity.name.type.namespace", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.ClassTemplate, "entity.name.type.class.templated", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.GenericType, "entity.name.type.class.generic", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.FunctionTemplate, "entity.name.function.templated", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.Namespace, "entity.name.namespace", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.Label, "entity.name.label", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.UdlRaw, "entity.name.user-defined-literal", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.UdlNumber, "entity.name.user-defined-literal.number", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.UdlString, "entity.name.user-defined-literal.string", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.UdlRaw, "entity.name.operator.custom-literal", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.UdlNumber, "entity.name.operator.custom-literal.number", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.UdlString, "entity.name.operator.custom-literal.string", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.OperatorFunction, "entity.name.function.operator", themeName, textMateRules);
-        this.calculateStyleForToken(TokenKind.MemberOperator, "keyword.operator.member", themeName, textMateRules);
+        this.calculateStyleForToken(TokenKind.MemberOperator, "entity.name.function.operator.member", themeName, textMateRules);
         this.calculateStyleForToken(TokenKind.NewDelete, "keyword.operator.new", themeName, textMateRules);
     }
 
@@ -241,7 +240,7 @@ export class ColorizationSettings {
         if (await util.checkFileExists(themePath)) {
             let themeContentText: string = await util.readFileText(themePath);
             let themeContent: any;
-            let textMateRules: TextMateRule[];
+            let textMateRules: TextMateRule[] | undefined;
             if (themePath.endsWith("tmTheme")) {
                 themeContent = plist.parse(themeContentText);
                 if (themeContent) {
@@ -288,27 +287,28 @@ export class ColorizationSettings {
     public reload(): void {
         let f: () => void = async () => {
             let otherSettings: OtherSettings = new OtherSettings(this.uri);
-            let themeName: string = otherSettings.colorTheme;
-
-            // Enumerate through all extensions, looking for this theme.  (Themes are implemented as extensions - even the default ones)
-            // Open each package.json to check for a theme path
-            for (let i: number = 0; i < vscode.extensions.all.length; i++) {
-                let extensionPath: string = vscode.extensions.all[i].extensionPath;
-                let extensionPackageJsonPath: string = path.join(extensionPath, "package.json");
-                if (!await util.checkFileExists(extensionPackageJsonPath)) {
-                    continue;
-                }
-                let packageJsonText: string = await util.readFileText(extensionPackageJsonPath);
-                let packageJson: any = jsonc.parse(packageJsonText);
-                if (packageJson.contributes && packageJson.contributes.themes) {
-                    let foundTheme: any = packageJson.contributes.themes.find(e => e.id === themeName || e.label === themeName);
-                    if (foundTheme) {
-                        let themeRelativePath: string = foundTheme.path;
-                        let themeFullPath: string = path.join(extensionPath, themeRelativePath);
-                        let defaultStyle: ThemeStyle = new ThemeStyle();
-                        let rulesSet: TextMateRule[][] = await this.loadTheme(themeFullPath, defaultStyle);
-                        this.updateStyles(themeName, defaultStyle, rulesSet);
-                        return;
+            let themeName: string | undefined = otherSettings.colorTheme;
+            if (themeName) {
+                // Enumerate through all extensions, looking for this theme.  (Themes are implemented as extensions - even the default ones)
+                // Open each package.json to check for a theme path
+                for (let i: number = 0; i < vscode.extensions.all.length; i++) {
+                    let extensionPath: string = vscode.extensions.all[i].extensionPath;
+                    let extensionPackageJsonPath: string = path.join(extensionPath, "package.json");
+                    if (!await util.checkFileExists(extensionPackageJsonPath)) {
+                        continue;
+                    }
+                    let packageJsonText: string = await util.readFileText(extensionPackageJsonPath);
+                    let packageJson: any = jsonc.parse(packageJsonText);
+                    if (packageJson.contributes && packageJson.contributes.themes) {
+                        let foundTheme: any = packageJson.contributes.themes.find((e: any) => e.id === themeName || e.label === themeName);
+                        if (foundTheme) {
+                            let themeRelativePath: string = foundTheme.path;
+                            let themeFullPath: string = path.join(extensionPath, themeRelativePath);
+                            let defaultStyle: ThemeStyle = new ThemeStyle();
+                            let rulesSet: TextMateRule[][] = await this.loadTheme(themeFullPath, defaultStyle);
+                            this.updateStyles(themeName, defaultStyle, rulesSet);
+                            return;
+                        }
                     }
                 }
             }
@@ -316,7 +316,7 @@ export class ColorizationSettings {
         this.syncWithLoadingSettings(f);
     }
 
-    public static createDecorationFromThemeStyle(themeStyle: ThemeStyle): vscode.TextEditorDecorationType {
+    public static createDecorationFromThemeStyle(themeStyle: ThemeStyle): vscode.TextEditorDecorationType | undefined {
         if (themeStyle && (themeStyle.foreground || themeStyle.background || themeStyle.fontStyle)) {
             let options: vscode.DecorationRenderOptions = {};
             options.rangeBehavior = vscode.DecorationRangeBehavior.OpenOpen;
@@ -347,16 +347,16 @@ export class ColorizationSettings {
             return vscode.window.createTextEditorDecorationType(options);
         }
 
-        return null;
+        return undefined;
     }
 }
 
 export class ColorizationState {
     private uri: vscode.Uri;
     private colorizationSettings: ColorizationSettings;
-    private decorations: vscode.TextEditorDecorationType[] = new Array<vscode.TextEditorDecorationType>(TokenKind.Count);
+    private decorations: (vscode.TextEditorDecorationType | undefined)[] = new Array<vscode.TextEditorDecorationType | undefined>(TokenKind.Count);
     private semanticRanges: vscode.Range[][] = new Array<vscode.Range[]>(TokenKind.Count);
-    private inactiveDecoration: vscode.TextEditorDecorationType = null;
+    private inactiveDecoration: vscode.TextEditorDecorationType | undefined;
     private inactiveRanges: vscode.Range[] = [];
     private versionedEdits: VersionedEdits[] = [];
     private currentSemanticVersion: number = 0;
@@ -384,12 +384,23 @@ export class ColorizationState {
             }
         }
         if (settings.dimInactiveRegions) {
-            this.inactiveDecoration = vscode.window.createTextEditorDecorationType({
-                opacity: settings.inactiveRegionOpacity.toString(),
-                backgroundColor: settings.inactiveRegionBackgroundColor,
-                color: settings.inactiveRegionForegroundColor,
-                rangeBehavior: vscode.DecorationRangeBehavior.OpenOpen
-            });
+            let opacity: number | undefined = settings.inactiveRegionOpacity;
+            if (opacity !== null && opacity !== undefined) {
+                let backgroundColor: string | undefined = settings.inactiveRegionBackgroundColor;
+                if (backgroundColor === "") {
+                    backgroundColor = undefined;
+                }
+                let color: string | undefined = settings.inactiveRegionForegroundColor;
+                if (color === "") {
+                    color = undefined;
+                }
+                this.inactiveDecoration = vscode.window.createTextEditorDecorationType({
+                    opacity: opacity.toString(),
+                    backgroundColor: backgroundColor,
+                    color: color,
+                    rangeBehavior: vscode.DecorationRangeBehavior.OpenOpen
+                });
+            }
         }
     }
 
@@ -397,12 +408,13 @@ export class ColorizationState {
         // Dispose of all old decorations
         if (this.inactiveDecoration) {
             this.inactiveDecoration.dispose();
-            this.inactiveDecoration = null;
+            this.inactiveDecoration = undefined;
         }
         for (let i: number = 0; i < TokenKind.Count; i++) {
-            if (this.decorations[i]) {
-                this.decorations[i].dispose();
-                this.decorations[i] = null;
+            let decoration: vscode.TextEditorDecorationType | undefined = this.decorations[i];
+            if (decoration) {
+                decoration.dispose();
+                this.decorations[i] = undefined;
             }
         }
     }
@@ -415,10 +427,11 @@ export class ColorizationState {
         let settings: CppSettings = new CppSettings(this.uri);
         if (settings.enhancedColorization) {
             for (let i: number = 0; i < TokenKind.Count; i++) {
-                if (this.decorations[i]) {
+                let decoration: vscode.TextEditorDecorationType | undefined = this.decorations[i];
+                if (decoration) {
                     let ranges: vscode.Range[] = this.semanticRanges[i];
                     if (ranges && ranges.length > 0) {
-                        e.setDecorations(this.decorations[i], ranges);
+                        e.setDecorations(decoration, ranges);
                     }
                 }
             }
@@ -508,7 +521,7 @@ export class ColorizationState {
     }
 
     // Utility function to adjust a range to account for an insert and/or replace
-    private fixRange(range: vscode.Range, removeInsertStartPosition: vscode.Position, removeEndPosition: vscode.Position, insertEndPosition: vscode.Position): vscode.Range {
+    private fixRange(range: vscode.Range, removeInsertStartPosition: vscode.Position, removeEndPosition: vscode.Position, insertEndPosition: vscode.Position): vscode.Range | undefined {
         // If the replace/insert starts after this range ends, no adjustment is needed.
         if (removeInsertStartPosition.isAfterOrEqual(range.end)) {
             return range;
@@ -520,7 +533,7 @@ export class ColorizationState {
 
             // If replace consumes the entire range, remove it
             if (removeEndPosition.isAfterOrEqual(range.end)) {
-                return null;
+                return undefined;
             }
 
             // If replace ends within this range, we need to trim it before we shift it
@@ -562,8 +575,8 @@ export class ColorizationState {
                 let newRanges: vscode.Range[] = [];
                 let insertRange: vscode.Range = this.textToRange(change.text, change.range.start);
                 for (let i: number = 0; i < ranges.length; i++) {
-                    let newRange: vscode.Range = this.fixRange(ranges[i], change.range.start, change.range.end, insertRange.end);
-                    if (newRange !== null) {
+                    let newRange: vscode.Range | undefined = this.fixRange(ranges[i], change.range.start, change.range.end, insertRange.end);
+                    if (newRange) {
                         newRanges.push(newRange);
                     }
                 }
@@ -583,7 +596,7 @@ export class ColorizationState {
     }
 
     // Apply any pending edits to the currently cached tokens
-    private applyEdits() : void {
+    private applyEdits(): void {
         this.versionedEdits.forEach((edit) => {
             if (edit.editVersion > this.currentSemanticVersion) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
@@ -616,9 +629,9 @@ export class ColorizationState {
             // likely due to a race with UI updates.  Here we set aside the existing decorators to be
             // disposed of after the new decorators have been applied, so there is not a gap
             // in which decorators are not applied.
-            let oldInactiveDecoration: vscode.TextEditorDecorationType = this.inactiveDecoration;
-            let oldDecorations: vscode.TextEditorDecorationType[] = this.decorations;
-            this.inactiveDecoration = null;
+            let oldInactiveDecoration: vscode.TextEditorDecorationType | undefined = this.inactiveDecoration;
+            let oldDecorations: (vscode.TextEditorDecorationType | undefined)[] = this.decorations;
+            this.inactiveDecoration = undefined;
             this.decorations =  new Array<vscode.TextEditorDecorationType>(TokenKind.Count);
 
             let isCpp: boolean = util.isEditorFileCpp(uri);
@@ -636,8 +649,9 @@ export class ColorizationState {
             }
             if (oldDecorations) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
-                    if (oldDecorations[i]) {
-                        oldDecorations[i].dispose();
+                    let oldDecoration: vscode.TextEditorDecorationType | undefined = oldDecorations[i];
+                    if (oldDecoration) {
+                        oldDecoration.dispose();
                     }
                 }
             }
@@ -646,7 +660,7 @@ export class ColorizationState {
     }
 
     public updateSemantic(uri: string, semanticRanges: vscode.Range[][], inactiveRanges: vscode.Range[], editVersion: number): void {
-       this.inactiveRanges = inactiveRanges;
+        this.inactiveRanges = inactiveRanges;
         for (let i: number = 0; i < TokenKind.Count; i++) {
             this.semanticRanges[i] = semanticRanges[i];
         }

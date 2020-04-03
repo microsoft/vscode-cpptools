@@ -17,6 +17,9 @@ export interface CustomConfigurationProvider1 extends CustomConfigurationProvide
     readonly version: Version;
 }
 
+const oldCmakeToolsExtensionId: string = "vector-of-bool.cmake-tools";
+const newCmakeToolsExtensionId: string = "ms-vscode.cmake-tools";
+
 /**
  * Wraps the incoming CustomConfigurationProvider so that we can treat all of them as if they were the same version (e.g. latest)
  */
@@ -50,6 +53,9 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
         if (valid && this._version > Version.v1) {
             valid = !!(this.provider.canProvideBrowseConfiguration && this.provider.provideBrowseConfiguration);
         }
+        if (valid && this._version > Version.v2) {
+            valid = !!(this.provider.canProvideBrowseConfigurationsPerFolder && this.provider.provideFolderBrowseConfiguration);
+        }
         return valid;
     }
 
@@ -80,6 +86,15 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
     public provideBrowseConfiguration(token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
         console.assert(this._version >= Version.v2);
         return this._version < Version.v2 ? Promise.resolve({browsePath: []}) : this.provider.provideBrowseConfiguration(token);
+    }
+
+    public canProvideBrowseConfigurationsPerFolder(token?: vscode.CancellationToken): Thenable<boolean> {
+        return this._version < Version.v3 ? Promise.resolve(false) : this.provider.canProvideBrowseConfigurationsPerFolder(token);
+    }
+
+    public provideFolderBrowseConfiguration(uri: vscode.Uri, token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
+        console.assert(this._version >= Version.v3);
+        return this._version < Version.v3 ? Promise.resolve({browsePath: []}) : this.provider.provideFolderBrowseConfiguration(uri, token);
     }
 
     public dispose(): void {
@@ -115,10 +130,16 @@ export class CustomConfigurationProviderCollection {
         if (version >= Version.v2 && !provider.provideBrowseConfiguration) {
             missing.push("'provideBrowseConfiguration'");
         }
+        if (version >= Version.v3 && !provider.canProvideBrowseConfigurationsPerFolder) {
+            missing.push("'canProvideBrowseConfigurationsPerFolder'");
+        }
+        if (version >= Version.v3 && !provider.provideFolderBrowseConfiguration) {
+            missing.push("'provideFolderBrowseConfiguration'");
+        }
         console.error(`CustomConfigurationProvider was not registered. The following properties are missing from the implementation: ${missing.join(", ")}.`);
     }
 
-    private getId(provider: string|CustomConfigurationProvider): string {
+    private getId(provider: string | CustomConfigurationProvider): string {
         if (typeof provider === "string") {
             return provider;
         } else if (provider.extensionId) {
@@ -137,7 +158,7 @@ export class CustomConfigurationProviderCollection {
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
         if (new CppSettings().intelliSenseEngine === "Disabled") {
-            console.warn("IntelliSense is disabled. Provider will not be registered.");
+            console.warn("Language service is disabled. Provider will not be registered.");
             return false;
         }
 
@@ -147,9 +168,9 @@ export class CustomConfigurationProviderCollection {
             return false;
         }
 
-        let exists: boolean = this.providers.has(wrapper.extensionId);
-        if (exists) {
-            let existing: CustomProviderWrapper = this.providers.get(wrapper.extensionId);
+        let exists: boolean = false;
+        let existing: CustomProviderWrapper | undefined = this.providers.get(wrapper.extensionId);
+        if (existing) {
             exists = (existing.version === Version.v0 && wrapper.version === Version.v0);
         }
 
@@ -161,13 +182,25 @@ export class CustomConfigurationProviderCollection {
         return !exists;
     }
 
-    public get(provider: string|CustomConfigurationProvider): CustomConfigurationProvider1|null {
+    public get(provider: string | CustomConfigurationProvider): CustomConfigurationProvider1 | undefined {
         let id: string = this.getId(provider);
 
         if (this.providers.has(id)) {
             return this.providers.get(id);
         }
-        return null;
+
+        if (typeof provider === "string") {
+            // Consider old and new names for cmake-tools as equivalent
+            if (provider === newCmakeToolsExtensionId) {
+                id = oldCmakeToolsExtensionId;
+            } else if (provider === oldCmakeToolsExtensionId) {
+                id = newCmakeToolsExtensionId;
+            }
+            if (this.providers.has(id)) {
+                return this.providers.get(id);
+            }
+        }
+        return undefined;
     }
 
     public forEach(func: (provider: CustomConfigurationProvider1) => void): void {
@@ -183,9 +216,9 @@ export class CustomConfigurationProviderCollection {
         }
     }
 
-    public checkId(providerId?: string): string {
+    public checkId(providerId?: string): string | undefined {
         if (!providerId) {
-            return providerId;
+            return undefined;
         }
         let found: CustomConfigurationProvider1[] = [];
         let noUpdate: boolean = false;
@@ -212,4 +245,19 @@ let providerCollection: CustomConfigurationProviderCollection = new CustomConfig
 
 export function getCustomConfigProviders(): CustomConfigurationProviderCollection {
     return providerCollection;
+}
+
+export function isSameProviderExtensionId(settingExtensionId: string | undefined, providerExtensionId: string | undefined): boolean {
+    if (!settingExtensionId && !providerExtensionId) {
+        return true;
+    }
+    if (settingExtensionId === providerExtensionId) {
+        return true;
+    }
+    // Consider old and new names for cmake-tools as equivalent
+    if ((settingExtensionId === newCmakeToolsExtensionId && providerExtensionId === oldCmakeToolsExtensionId)
+        || (settingExtensionId === oldCmakeToolsExtensionId && providerExtensionId === newCmakeToolsExtensionId)) {
+        return true;
+    }
+    return false;
 }

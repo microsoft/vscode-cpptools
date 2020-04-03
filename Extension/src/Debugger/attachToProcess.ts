@@ -5,6 +5,7 @@
 
 import { PsProcessParser } from './nativeAttach';
 import { AttachItem, showQuickPick } from './attachQuickPick';
+import { CppSettings } from '../LanguageServer/settings';
 
 import * as debugUtils from './utils';
 import * as fs from 'fs';
@@ -12,6 +13,10 @@ import * as os from 'os';
 import * as path from 'path';
 import * as util from '../common';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface AttachItemsProvider {
     getAttachItems(): Promise<AttachItem[]>;
@@ -20,7 +25,7 @@ export interface AttachItemsProvider {
 export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
-    public ShowAttachEntries(): Promise<string> {
+    public ShowAttachEntries(): Promise<string | undefined> {
         return util.isExtensionReady().then(ready => {
             if (!ready) {
                 util.displayExtensionNotReadyPrompt();
@@ -36,28 +41,28 @@ export class RemoteAttachPicker {
         this._channel = vscode.window.createOutputChannel('remote-attach');
     }
 
-    private _channel: vscode.OutputChannel = null;
+    private _channel: vscode.OutputChannel;
 
-    public ShowAttachEntries(config: any): Promise<string> {
+    public ShowAttachEntries(config: any): Promise<string | undefined> {
         return util.isExtensionReady().then(ready => {
             if (!ready) {
                 util.displayExtensionNotReadyPrompt();
             } else {
                 this._channel.clear();
 
-                let pipeTransport: any = config ? config.pipeTransport : null;
+                let pipeTransport: any = config ? config.pipeTransport : undefined;
 
-                if (pipeTransport === null) {
-                    return Promise.reject<string>(new Error("Chosen debug configuration does not contain pipeTransport"));
+                if (!pipeTransport) {
+                    return Promise.reject<string>(new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport")));
                 }
 
-                let pipeProgram: string = null;
+                let pipeProgram: string | undefined;
 
                 if (os.platform() === 'win32' &&
                     pipeTransport.pipeProgram &&
                     !fs.existsSync(pipeTransport.pipeProgram)) {
                     const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
-                    const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch];
+                    const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
 
                     // Check for pipeProgram
                     if (!fs.existsSync(config.pipeTransport.pipeProgram)) {
@@ -90,13 +95,11 @@ export class RemoteAttachPicker {
                         let attachPickOptions: vscode.QuickPickOptions = {
                             matchOnDetail: true,
                             matchOnDescription: true,
-                            placeHolder: "Select the process to attach to"
+                            placeHolder: localize("select.process.attach", "Select the process to attach to")
                         };
 
                         return vscode.window.showQuickPick(processes, attachPickOptions)
-                            .then(item => {
-                                return item ? item.id : Promise.reject<string>(new Error("Process not selected."));
-                            });
+                            .then(item => item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected."))));
                     });
             }
         });
@@ -106,6 +109,16 @@ export class RemoteAttachPicker {
     private getRemoteProcessCommand(): string {
         let innerQuote: string = `'`;
         let outerQuote: string = `"`;
+        let parameterBegin: string = `$(`;
+        let parameterEnd: string = `)`;
+        let escapedQuote: string = `\\\"`;
+
+        let settings: CppSettings = new CppSettings();
+        if (settings.useBacktickCommandSubstitution) {
+            parameterBegin = `\``;
+            parameterEnd = `\``;
+            escapedQuote = `\"`;
+        }
 
         // Must use single quotes around the whole command and double quotes for the argument to `sh -c` because Linux evaluates $() inside of double quotes.
         // Having double quotes for the outerQuote will have $(uname) replaced before it is sent to the remote machine.
@@ -114,7 +127,8 @@ export class RemoteAttachPicker {
             outerQuote = `'`;
         }
 
-        return `${outerQuote}sh -c ${innerQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
+        return `${outerQuote}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
+        `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
         `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
@@ -122,13 +136,13 @@ export class RemoteAttachPicker {
         // Do not add any quoting in execCommand.
         const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
 
-        return util.execChildProcess(execCommand, null, this._channel).then(output => {
+        return util.execChildProcess(execCommand, undefined, this._channel).then(output => {
             // OS will be on first line
             // Processes will follow if listed
             let lines: string[] = output.split(/\r?\n/);
 
             if (lines.length === 0) {
-                return Promise.reject<AttachItem[]>(new Error("Pipe transport failed to get OS and processes."));
+                return Promise.reject<AttachItem[]>(new Error(localize("pipe.failed", "Pipe transport failed to get OS and processes.")));
             } else {
                 let remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
@@ -138,7 +152,7 @@ export class RemoteAttachPicker {
 
                 // Only got OS from uname
                 if (lines.length === 1) {
-                    return Promise.reject<AttachItem[]>(new Error("Transport attach could not obtain processes list."));
+                    return Promise.reject<AttachItem[]>(new Error(localize("no.process.list", "Transport attach could not obtain processes list.")));
                 } else {
                     let processes: string[] = lines.slice(1);
                     return PsProcessParser.ParseProcessFromPsArray(processes)

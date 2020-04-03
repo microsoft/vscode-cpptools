@@ -25,7 +25,7 @@ suite("ParsedEnvironmentFile", () => {
         const fakeConfig : Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning = null, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
     });
 
@@ -34,7 +34,7 @@ suite("ParsedEnvironmentFile", () => {
         const fakeConfig : Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning === null, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
     });
 
@@ -43,7 +43,7 @@ suite("ParsedEnvironmentFile", () => {
         const fakeConfig : Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning === null, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
     });
 
@@ -56,7 +56,7 @@ MyName2=Value2
         const fakeConfig : Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning === null, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });
@@ -73,7 +73,7 @@ MyName2=Value2
 
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", initialEnv);
 
-        assert(result.Warning === null, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "ThisShouldNotChange", "StillHere");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
@@ -88,7 +88,7 @@ MyName2=Value2
         const fakeConfig : Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning === null, `Failed to assert that Warning was empty: ${result.Warning}`);
+        assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });

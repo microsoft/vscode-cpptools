@@ -10,10 +10,10 @@ import * as util from './common';
 interface IPackageInfo {
     name: string;
     version: string;
-    aiKey: string;
 }
 
-let telemetryReporter: TelemetryReporter;
+let telemetryReporter: TelemetryReporter | null;
+const appInsightsKey: string = "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217";
 
 export function activate(): void {
     try {
@@ -43,11 +43,11 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
     }
 }
 
-function createReporter(): TelemetryReporter {
+function createReporter(): TelemetryReporter | null {
     if (util.extensionContext) {
         let packageInfo: IPackageInfo = getPackageInfo();
-        if (packageInfo && packageInfo.aiKey) {
-            return new TelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey);
+        if (packageInfo) {
+            return new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey);
         }
     }
     return null;
@@ -56,7 +56,6 @@ function createReporter(): TelemetryReporter {
 function getPackageInfo(): IPackageInfo {
     return {
         name: util.packageJson.publisher + "." + util.packageJson.name,
-        version: util.packageJson.version,
-        aiKey: util.packageJson.contributes.debuggers[0].aiKey
+        version: util.packageJson.version
     };
 }

@@ -16,6 +16,11 @@ import { getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
 const configVersion: number = 4;
 
 type Environment = { [key: string]: string | string[] };
@@ -50,7 +55,7 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPath?: string;
-    knownCompilers?: KnownCompiler[];
+    compilerArgs?: string[];
     cStandard?: string;
     cppStandard?: string;
     includePath?: string[];
@@ -88,6 +93,7 @@ export interface KnownCompiler {
 
 export interface CompilerDefaults {
     compilerPath: string;
+    compilerArgs: string[];
     knownCompilers: KnownCompiler[];
     cStandard: string;
     cppStandard: string;
@@ -99,24 +105,24 @@ export interface CompilerDefaults {
 }
 
 export class CppProperties {
-    private rootUri: vscode.Uri;
-    private propertiesFile: vscode.Uri = undefined;
+    private rootUri: vscode.Uri | undefined;
+    private propertiesFile: vscode.Uri | undefined | null = undefined; // undefined and null values are handled differently
     private readonly configFolder: string;
-    private configurationJson: ConfigurationJson = null;
-    private currentConfigurationIndex: PersistentFolderState<number>;
-    private configFileWatcher: vscode.FileSystemWatcher = null;
+    private configurationJson?: ConfigurationJson;
+    private currentConfigurationIndex: PersistentFolderState<number> | undefined;
+    private configFileWatcher: vscode.FileSystemWatcher | null = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandFileWatchers: fs.FSWatcher[] = [];
-    private defaultCompilerPath: string = null;
-    private knownCompilers: KnownCompiler[] = null;
-    private defaultCStandard: string = null;
-    private defaultCppStandard: string = null;
-    private defaultIncludes: string[] = null;
-    private defaultFrameworks: string[] = null;
-    private defaultWindowsSdkVersion: string = null;
+    private defaultCompilerPath: string | null = null;
+    private knownCompilers?: KnownCompiler[];
+    private defaultCStandard: string | null = null;
+    private defaultCppStandard: string | null = null;
+    private defaultIncludes: string[] | null = null;
+    private defaultFrameworks?: string[];
+    private defaultWindowsSdkVersion: string | null = null;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
-    private defaultIntelliSenseMode: string = null;
+    private defaultIntelliSenseMode?: string;
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
@@ -124,18 +130,19 @@ export class CppProperties {
     private compileCommandsChanged = new vscode.EventEmitter<string>();
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
-    private rootfs: string = null;
-    private settingsPanel: SettingsPanel = undefined;
+    private rootfs: string | null = null;
+    private settingsPanel?: SettingsPanel;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
     private configurationIncomplete: boolean = true;
 
-    constructor(rootUri: vscode.Uri) {
-        console.assert(rootUri !== undefined);
+    constructor(rootUri?: vscode.Uri, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootUri = rootUri;
         let rootPath: string = rootUri ? rootUri.fsPath : "";
-        this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, rootPath);
+        if (workspaceFolder) {
+            this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, workspaceFolder);
+        }
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();
@@ -145,22 +152,25 @@ export class CppProperties {
     public get ConfigurationsChanged(): vscode.Event<Configuration[]> { return this.configurationsChanged.event; }
     public get SelectionChanged(): vscode.Event<number> { return this.selectionChanged.event; }
     public get CompileCommandsChanged(): vscode.Event<string> { return this.compileCommandsChanged.event; }
-    public get Configurations(): Configuration[] { return this.configurationJson ? this.configurationJson.configurations : null; }
-    public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex.Value; }
-    public get CurrentConfiguration(): Configuration { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : null; }
-    public get CompilerPath(): string { return this.CurrentConfiguration ? this.CurrentConfiguration.compilerPath : null; }
-    public get KnownCompiler(): KnownCompiler[] { return this.knownCompilers; }
+    public get Configurations(): Configuration[] | undefined { return this.configurationJson ? this.configurationJson.configurations : undefined; }
+    public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex === undefined ? 0 : this.currentConfigurationIndex.Value; }
+    public get CurrentConfiguration(): Configuration | undefined { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : undefined; }
+    public get KnownCompiler(): KnownCompiler[] | undefined { return this.knownCompilers; }
 
-    public get CurrentConfigurationProvider(): string|null {
-        if (this.CurrentConfiguration.configurationProvider) {
+    public get CurrentConfigurationProvider(): string | undefined {
+        if (this.CurrentConfiguration?.configurationProvider) {
             return this.CurrentConfiguration.configurationProvider;
         }
         return new CppSettings(this.rootUri).defaultConfigurationProvider;
     }
 
-    public get ConfigurationNames(): string[] {
+    public get ConfigurationNames(): string[] | undefined {
         let result: string[] = [];
-        this.configurationJson.configurations.forEach((config: Configuration) => result.push(config.name));
+        if (this.configurationJson) {
+            this.configurationJson.configurations.forEach((config: Configuration) => {
+                result.push(config.name);
+            });
+        }
         return result;
     }
 
@@ -178,7 +188,7 @@ export class CppProperties {
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
         let configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
-        if (fs.existsSync(configFilePath)) {
+        if (this.rootUri !== null && fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
         } else {
             this.propertiesFile = null;
@@ -254,25 +264,32 @@ export class CppProperties {
         this.configurationJson = getDefaultCppProperties();
         if (resetIndex || this.CurrentConfigurationIndex < 0 ||
             this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
-            this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
+            let index: number | undefined = this.getConfigIndexForPlatform(this.configurationJson);
+            if (this.currentConfigurationIndex !== undefined) {
+                if (index === undefined) {
+                    this.currentConfigurationIndex.setDefault();
+                } else {
+                    this.currentConfigurationIndex.Value = index;
+                }
+            }
         }
         this.configurationIncomplete = true;
     }
 
-     private applyDefaultIncludePathsAndFrameworks(): void {
+    private applyDefaultIncludePathsAndFrameworks(): void {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
-            let configuration: Configuration = this.CurrentConfiguration;
-            this.applyDefaultConfigurationValues(configuration);
-            this.configurationIncomplete = false;
+            let configuration: Configuration | undefined = this.CurrentConfiguration;
+            if (configuration) {
+                this.applyDefaultConfigurationValues(configuration);
+                this.configurationIncomplete = false;
+            }
         }
     }
 
     private applyDefaultConfigurationValues(configuration: Configuration): void {
         let settings: CppSettings = new CppSettings(this.rootUri);
-        let isUnset: (input: any) => boolean = (input: any) => {
-                // default values for "default" config settings is null.
-                return input === null;
-        };
+        // default values for "default" config settings is null.
+        let isUnset: (input: any) => boolean = (input: any) => input === null || input === undefined;
 
         // Anything that has a vscode setting for it will be resolved in updateServerOnFolderSettingsChange.
         // So if a property is currently unset, but has a vscode setting, don't set it yet, otherwise the linkage
@@ -293,32 +310,29 @@ export class CppProperties {
         if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
             configuration.macFrameworkPath = this.defaultFrameworks;
         }
-        if (isUnset(settings.defaultWindowsSdkVersion) && this.defaultWindowsSdkVersion && process.platform === 'win32') {
+        if ((isUnset(settings.defaultWindowsSdkVersion) || settings.defaultWindowsSdkVersion === "") && this.defaultWindowsSdkVersion && process.platform === 'win32') {
             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
         }
         if (isUnset(settings.defaultCompilerPath) && this.defaultCompilerPath &&
-            isUnset(settings.defaultCompileCommands) && !configuration.compileCommands) {
+            (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands === "") && !configuration.compileCommands) {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
             configuration.compilerPath = this.defaultCompilerPath;
         }
-        if (this.knownCompilers) {
-            configuration.knownCompilers = this.knownCompilers;
-        }
-        if (isUnset(settings.defaultCStandard) && this.defaultCStandard) {
+        if ((isUnset(settings.defaultCStandard) || settings.defaultCStandard === "") && this.defaultCStandard) {
             configuration.cStandard = this.defaultCStandard;
         }
-        if (isUnset(settings.defaultCppStandard) && this.defaultCppStandard) {
+        if ((isUnset(settings.defaultCppStandard) || settings.defaultCppStandard === "") && this.defaultCppStandard) {
             configuration.cppStandard = this.defaultCppStandard;
         }
-        if (isUnset(settings.defaultIntelliSenseMode)) {
+        if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
     }
 
     private get ExtendedEnvironment(): Environment {
         let result: Environment = {};
-        if (this.configurationJson.env) {
+        if (this.configurationJson?.env) {
             Object.assign(result, this.configurationJson.env);
         }
 
@@ -355,7 +369,10 @@ export class CppProperties {
         }
     }
 
-    private getConfigIndexForPlatform(config: any): number {
+    private getConfigIndexForPlatform(config: any): number | undefined {
+        if (!this.configurationJson) {
+            return undefined;
+        }
         let plat: string;
         if (process.platform === 'darwin') {
             plat = "Mac";
@@ -372,7 +389,7 @@ export class CppProperties {
         return this.configurationJson.configurations.length - 1;
     }
 
-    private getIntelliSenseModeForPlatform(name: string): string {
+    private getIntelliSenseModeForPlatform(name?: string): string {
         // Do the built-in configs first.
         if (name === "Linux") {
             return "gcc-x64";
@@ -402,22 +419,25 @@ export class CppProperties {
             configuration.intelliSenseMode === "${default}") {
             return true;
         }
-        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(configuration.compilerPath);
-        return (compilerPathAndArgs.compilerName === "cl.exe") === (configuration.intelliSenseMode === "msvc-x64");
+        let resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
+        let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
+        return (compilerPathAndArgs.compilerName === "cl.exe") === (configuration.intelliSenseMode === "msvc-x64" || configuration.intelliSenseMode === "msvc-x86");
     }
 
     public addToIncludePathCommand(path: string): void {
         this.handleConfigurationEditCommand(() => {
-            telemetry.logLanguageServerEvent("addToIncludePath");
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-            let config: Configuration = this.CurrentConfiguration;
-            if (config.includePath === undefined) {
-                config.includePath = ["${default}"];
+            let config: Configuration | undefined = this.CurrentConfiguration;
+            if (config) {
+                telemetry.logLanguageServerEvent("addToIncludePath");
+                if (config.includePath === undefined) {
+                    config.includePath = ["${default}"];
+                }
+                config.includePath.splice(config.includePath.length, 0, path);
+                this.writeToJson();
+                this.handleConfigurationChange();
             }
-            config.includePath.splice(config.includePath.length, 0, path);
-            this.writeToJson();
-            this.handleConfigurationChange();
-        }, null);
+        }, () => {});
     }
 
     public updateCustomConfigurationProvider(providerId: string): Thenable<void> {
@@ -425,16 +445,18 @@ export class CppProperties {
             if (this.propertiesFile) {
                 this.handleConfigurationEditJSONCommand(() => {
                     this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-                    let config: Configuration = this.CurrentConfiguration;
-                    if (providerId) {
-                        config.configurationProvider = providerId;
-                    } else {
-                        delete config.configurationProvider;
+                    let config: Configuration | undefined = this.CurrentConfiguration;
+                    if (config) {
+                        if (providerId) {
+                            config.configurationProvider = providerId;
+                        } else {
+                            delete config.configurationProvider;
+                        }
+                        this.writeToJson();
+                        this.handleConfigurationChange();
                     }
-                    this.writeToJson();
-                    this.handleConfigurationChange();
                     resolve();
-                }, null);
+                }, () => {});
             } else {
                 let settings: CppSettings = new CppSettings(this.rootUri);
                 if (providerId) {
@@ -442,7 +464,10 @@ export class CppProperties {
                 } else {
                     settings.update("default.configurationProvider", undefined); // delete the setting
                 }
-                this.CurrentConfiguration.configurationProvider = providerId;
+                let config: Configuration | undefined = this.CurrentConfiguration;
+                if (config) {
+                    config.configurationProvider = providerId;
+                }
                 resolve();
             }
         });
@@ -451,34 +476,40 @@ export class CppProperties {
     public setCompileCommands(path: string): void {
         this.handleConfigurationEditJSONCommand(() => {
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-            let config: Configuration = this.CurrentConfiguration;
-            config.compileCommands = path;
-            this.writeToJson();
-            this.handleConfigurationChange();
-        }, null);
+            let config: Configuration | undefined = this.CurrentConfiguration;
+            if (config) {
+                config.compileCommands = path;
+                this.writeToJson();
+                this.handleConfigurationChange();
+            }
+        }, () => {});
     }
 
-    public select(index: number): Configuration {
-        if (index === this.configurationJson.configurations.length) {
-            this.handleConfigurationEditUICommand(null, vscode.window.showTextDocument);
-            return;
-        }
-        if (index === this.configurationJson.configurations.length + 1) {
-            this.handleConfigurationEditJSONCommand(null, vscode.window.showTextDocument);
-            return;
+    public select(index: number): Configuration | undefined {
+        if (this.configurationJson) {
+            if (index === this.configurationJson.configurations.length) {
+                this.handleConfigurationEditUICommand(() => {}, vscode.window.showTextDocument);
+                return;
+            }
+            if (index === this.configurationJson.configurations.length + 1) {
+                this.handleConfigurationEditJSONCommand(() => {}, vscode.window.showTextDocument);
+                return;
+            }
         }
 
-        this.currentConfigurationIndex.Value = index;
+        if (this.currentConfigurationIndex !== undefined) {
+            this.currentConfigurationIndex.Value = index;
+        }
         this.onSelectionChanged();
     }
 
-    private resolveDefaults(entries: string[], defaultValue: string[]): string[] {
+    private resolveDefaults(entries: string[], defaultValue?: string[]): string[] {
         let result: string[] = [];
         entries.forEach(entry => {
             if (entry === "${default}") {
                 // package.json default values for string[] properties is null.
                 // If no default is set, return an empty array instead of an array with `null` in it.
-                if (defaultValue !== null) {
+                if (defaultValue) {
                     result = result.concat(defaultValue);
                 }
             } else {
@@ -488,44 +519,50 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[], env: Environment): string[] {
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] {
         let result: string[] = [];
         if (paths) {
             paths = this.resolveDefaults(paths, defaultValue);
+            let delimiter: string = (process.platform === 'win32') ? ";" : ":";
             paths.forEach(entry => {
-                let entries: string[] = util.resolveVariables(entry, env).split(";").filter(e => e);
+                let entries: string[] = util.resolveVariables(entry, env).split(delimiter).filter(e => e);
                 result = result.concat(entries);
             });
         }
         return result;
     }
 
-    private resolveVariables(input: string | boolean, defaultValue: string | boolean, env: Environment): string | boolean {
-        if (input === undefined || input === "${default}") {
-            input = defaultValue;
+    private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
+        if (!property || property === "${default}") {
+            property = defaultValue;
         }
-        if (typeof input === "boolean") {
-            return input;
+        if (!property || (acceptBlank !== true && property === "")) {
+            return undefined;
         }
-        return util.resolveVariables(input, env);
+        return util.resolveVariables(property, env);
     }
 
-    private updateConfiguration(property: string[], defaultValue: string[], env: Environment): string[];
-    private updateConfiguration(property: string, defaultValue: string, env: Environment): string;
-    private updateConfiguration(property: string | boolean, defaultValue: boolean, env: Environment): boolean;
-    private updateConfiguration(property, defaultValue, env): any {
-        if (util.isString(property) || util.isString(defaultValue)) {
-            return this.resolveVariables(property, defaultValue, env);
-        } else if (util.isBoolean(property) || util.isBoolean(defaultValue)) {
-            return this.resolveVariables(property, defaultValue, env);
-        } else if (util.isArrayOfString(property) || util.isArrayOfString(defaultValue)) {
-            if (property) {
-                return this.resolveAndSplit(property, defaultValue, env);
-            } else if (property === undefined && defaultValue) {
-                return this.resolveAndSplit(defaultValue, [], env);
-            }
+    private updateConfigurationStringArray(property: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] | undefined {
+        if (property) {
+            return this.resolveAndSplit(property, defaultValue, env);
+        }
+        if (!property && defaultValue) {
+            return this.resolveAndSplit(defaultValue, [], env);
         }
         return property;
+    }
+
+    private updateConfigurationStringOrBoolean(property: string | boolean | undefined | null, defaultValue: boolean | undefined | null, env: Environment): string | boolean | undefined {
+        if (!property || property === "${default}") {
+            property = defaultValue;
+        }
+        if (!property || property === "") {
+            return undefined;
+        }
+        if (typeof property === "boolean") {
+            return property;
+        }
+        return util.resolveVariables(property, env);
     }
 
     private updateServerOnFolderSettingsChange(): void {
@@ -537,17 +574,18 @@ export class CppProperties {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             let configuration: Configuration = this.configurationJson.configurations[i];
 
-            configuration.includePath = this.updateConfiguration(configuration.includePath, settings.defaultIncludePath, env);
-            configuration.defines = this.updateConfiguration(configuration.defines, settings.defaultDefines, env);
-            configuration.macFrameworkPath = this.updateConfiguration(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
-            configuration.windowsSdkVersion = this.updateConfiguration(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
-            configuration.forcedInclude = this.updateConfiguration(configuration.forcedInclude, settings.defaultForcedInclude, env);
-            configuration.compileCommands = this.updateConfiguration(configuration.compileCommands, settings.defaultCompileCommands, env);
-            configuration.compilerPath = this.updateConfiguration(configuration.compilerPath, settings.defaultCompilerPath, env);
-            configuration.cStandard = this.updateConfiguration(configuration.cStandard, settings.defaultCStandard, env);
-            configuration.cppStandard = this.updateConfiguration(configuration.cppStandard, settings.defaultCppStandard, env);
-            configuration.intelliSenseMode = this.updateConfiguration(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
-            configuration.configurationProvider = this.updateConfiguration(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
+            configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
+            configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
+            configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
+            configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
+            configuration.forcedInclude = this.updateConfigurationStringArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
+            configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
+            configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
+            configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
+            configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
+            configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
+            configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
+            configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
             if (!configuration.browse) {
                 configuration.browse = {};
@@ -566,11 +604,11 @@ export class CppProperties {
                     }
                 }
             } else {
-                configuration.browse.path = this.updateConfiguration(configuration.browse.path, settings.defaultBrowsePath, env);
+                configuration.browse.path = this.updateConfigurationStringArray(configuration.browse.path, settings.defaultBrowsePath, env);
             }
 
-            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfiguration(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
-            configuration.browse.databaseFilename = this.updateConfiguration(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
+            configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
+            configuration.browse.databaseFilename = this.updateConfigurationString(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
         }
 
         this.updateCompileCommandsFileWatchers();
@@ -579,52 +617,79 @@ export class CppProperties {
         }
     }
 
+    private compileCommandsFileWatcherTimer?: NodeJS.Timer;
+    private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
+
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
     // paths are expected to have variables resolved already
     public updateCompileCommandsFileWatchers(): void {
-        this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-        this.compileCommandFileWatchers = []; //reset it
-        let filePaths: Set<string> = new Set<string>();
-        this.configurationJson.configurations.forEach(c => {
-            if (c.compileCommands !== undefined && fs.existsSync(c.compileCommands)) {
-                filePaths.add(c.compileCommands);
-            }
-        });
-        try {
-            filePaths.forEach((path: string) => {
-                this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                    if (event !== "rename") {
-                        this.onCompileCommandsChanged(path);
+        if (this.configurationJson) {
+            this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
+            this.compileCommandFileWatchers = []; // reset it
+            let filePaths: Set<string> = new Set<string>();
+            this.configurationJson.configurations.forEach(c => {
+                if (c.compileCommands) {
+                    let fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands, os.platform() === "win32");
+                    if (fs.existsSync(fileSystemCompileCommandsPath)) {
+                        filePaths.add(fileSystemCompileCommandsPath);
                     }
-                }));
-            });
-        } catch (e) {
-            // The file watcher limit is hit.
-            // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
-        }
-    }
-
-    public handleConfigurationEditCommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
-        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
-        if (otherSettings.settingsEditor === "ui") {
-            this.handleConfigurationEditUICommand(onCreation, showDocument);
-        } else {
-            this.handleConfigurationEditJSONCommand(onCreation, showDocument);
-        }
-    }
-
-    public handleConfigurationEditJSONCommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
-        this.ensurePropertiesFile().then(() => {
-            console.assert(this.propertiesFile);
-            if (onCreation) {
-                onCreation();
-            }
-            // Directly open the json file
-            vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                if (showDocument) {
-                    showDocument(document);
                 }
             });
+            try {
+                filePaths.forEach((path: string) => {
+                    this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
+                        if (event === "rename") {
+                            return;
+                        }
+                        // Wait 1 second after a change to allow time for the write to finish.
+                        if (this.compileCommandsFileWatcherTimer) {
+                            clearInterval(this.compileCommandsFileWatcherTimer);
+                        }
+                        this.compileCommandsFileWatcherFiles.add(path);
+                        this.compileCommandsFileWatcherTimer = setTimeout(() => {
+                            this.compileCommandsFileWatcherFiles.forEach((path: string) => {
+                                this.onCompileCommandsChanged(path);
+                            });
+                            if (this.compileCommandsFileWatcherTimer) {
+                                clearInterval(this.compileCommandsFileWatcherTimer);
+                            }
+                            this.compileCommandsFileWatcherFiles.clear();
+                            this.compileCommandsFileWatcherTimer = undefined;
+                        }, 1000);
+                    }));
+                });
+            } catch (e) {
+                // The file watcher limit is hit.
+                // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
+            }
+        }
+    }
+
+    // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
+    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
+        let otherSettings: OtherSettings = new OtherSettings(this.rootUri);
+        if (otherSettings.settingsEditor === "ui") {
+            this.handleConfigurationEditUICommand(onBeforeOpen, showDocument);
+        } else {
+            this.handleConfigurationEditJSONCommand(onBeforeOpen, showDocument);
+        }
+    }
+
+    // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
+    public handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
+        this.ensurePropertiesFile().then(() => {
+            console.assert(this.propertiesFile);
+            if (onBeforeOpen) {
+                onBeforeOpen();
+            }
+            // Directly open the json file
+            if (this.propertiesFile) {
+                vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                    if (showDocument) {
+                        showDocument(document);
+                    }
+                });
+            }
         });
     }
 
@@ -641,20 +706,25 @@ export class CppProperties {
         }
     }
 
-    public handleConfigurationEditUICommand(onCreation: () => void, showDocument: (document: vscode.TextDocument) => void): void {
+    // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
+    public handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
         this.ensurePropertiesFile().then(() => {
             if (this.propertiesFile) {
-                if (onCreation) {
-                    onCreation();
+                if (onBeforeOpen) {
+                    onBeforeOpen();
                 }
                 if (this.parsePropertiesFile()) {
                     this.ensureSettingsPanelInitlialized();
-
-                    // Use the active configuration as the default selected configuration to load on UI editor
-                    this.settingsPanel.selectedConfigIndex = this.currentConfigurationIndex.Value;
-                    this.settingsPanel.createOrShow(this.ConfigurationNames,
-                        this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                        this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                    if (this.settingsPanel) {
+                        let configNames: string[] | undefined = this.ConfigurationNames;
+                        if (configNames && this.configurationJson) {
+                            // Use the active configuration as the default selected configuration to load on UI editor
+                            this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
+                            this.settingsPanel.createOrShow(configNames,
+                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                        }
+                    }
                 } else {
                     // Parse failed, open json file
                     vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
@@ -672,17 +742,20 @@ export class CppProperties {
             this.ensurePropertiesFile().then(() => {
                 if (this.propertiesFile) {
                     if (this.parsePropertiesFile()) {
-                        // The settings UI became visible or active.
-                        // Ensure settingsPanel has copy of latest current configuration
-                        if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
-                            this.settingsPanel.selectedConfigIndex = this.currentConfigurationIndex.Value;
+                        let configNames: string[] | undefined = this.ConfigurationNames;
+                        if (configNames && this.settingsPanel && this.configurationJson) {
+                            // The settings UI became visible or active.
+                            // Ensure settingsPanel has copy of latest current configuration
+                            if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
+                                this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
+                            }
+                            this.settingsPanel.updateConfigUI(configNames,
+                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                        } else {
+                            // Parse failed, open json file
+                            vscode.workspace.openTextDocument(this.propertiesFile);
                         }
-                        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
-                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-                    } else {
-                        // Parse failed, open json file
-                        vscode.workspace.openTextDocument(this.propertiesFile);
                     }
                 }
             });
@@ -691,16 +764,21 @@ export class CppProperties {
 
     private saveConfigurationUI(): void {
         this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
-        let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
-        this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
-        this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-        this.writeToJson();
+        if (this.settingsPanel && this.configurationJson) {
+            let config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
+            this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+            this.writeToJson();
+        }
     }
 
     private onConfigSelectionChanged(): void {
-        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
-            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+        let configNames: string[] | undefined = this.ConfigurationNames;
+        if (configNames && this.settingsPanel && this.configurationJson) {
+            this.settingsPanel.updateConfigUI(configNames,
+                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+        }
     }
 
     private onAddConfigRequested(configName: string): void {
@@ -709,17 +787,19 @@ export class CppProperties {
         // Create default config and add to list of configurations
         let newConfig: Configuration = { name: configName };
         this.applyDefaultConfigurationValues(newConfig);
-        delete newConfig.knownCompilers;
-        this.configurationJson.configurations.push(newConfig);
+        let configNames: string[] | undefined = this.ConfigurationNames;
+        if (configNames && this.settingsPanel && this.configurationJson) {
+            this.configurationJson.configurations.push(newConfig);
 
-        // Update UI
-        this.settingsPanel.selectedConfigIndex = this.configurationJson.configurations.length - 1;
-        this.settingsPanel.updateConfigUI(this.ConfigurationNames,
-            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-            null);
+            // Update UI
+            this.settingsPanel.selectedConfigIndex = this.configurationJson.configurations.length - 1;
+            this.settingsPanel.updateConfigUI(configNames,
+                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                null);
 
-        // Save new config to file
-        this.writeToJson();
+            // Save new config to file
+            this.writeToJson();
+        }
     }
 
     private handleConfigurationChange(): void {
@@ -735,7 +815,14 @@ export class CppProperties {
                 if (this.CurrentConfigurationIndex < 0 ||
                     this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
                     // If the index is out of bounds (during initialization or due to removal of configs), fix it.
-                    this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(this.configurationJson);
+                    let index: number | undefined = this.getConfigIndexForPlatform(this.configurationJson);
+                    if (this.currentConfigurationIndex !== undefined) {
+                        if (!index) {
+                            this.currentConfigurationIndex.setDefault();
+                        } else {
+                            this.currentConfigurationIndex.Value = index;
+                        }
+                    }
                 }
             }
         }
@@ -764,56 +851,68 @@ export class CppProperties {
                 this.applyDefaultIncludePathsAndFrameworks();
                 let settings: CppSettings = new CppSettings(this.rootUri);
                 if (settings.defaultConfigurationProvider) {
-                    this.configurationJson.configurations.forEach(config => {
-                        config.configurationProvider = settings.defaultConfigurationProvider;
-                    });
+                    if (this.configurationJson) {
+                        this.configurationJson.configurations.forEach(config => {
+                            config.configurationProvider = settings.defaultConfigurationProvider ? settings.defaultConfigurationProvider : undefined;
+                        });
+                    }
                     settings.update("default.configurationProvider", undefined); // delete the setting
                 }
-                let savedKnownCompilers: KnownCompiler[] = this.configurationJson.configurations[0].knownCompilers;
-                delete this.configurationJson.configurations[0].knownCompilers;
 
                 await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, 4));
-                this.configurationJson.configurations[0].knownCompilers = savedKnownCompilers;
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
             } catch (err) {
-                vscode.window.showErrorMessage(`Failed to create "${this.configFolder}": ${err.message}`);
+                let failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', this.configFolder);
+                vscode.window.showErrorMessage(`${failedToCreate}: ${err.message}`);
             }
         }
         return;
     }
 
     private parsePropertiesFile(): boolean {
+        if (!this.propertiesFile) {
+            return false;
+        }
         let success: boolean = true;
         try {
             let readResults: string = fs.readFileSync(this.propertiesFile.fsPath, 'utf8');
             if (readResults === "") {
-                return; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
+                return false; // Repros randomly when the file is initially created. The parse will get called again after the file is written.
             }
 
             // Try to use the same configuration as before the change.
             let newJson: ConfigurationJson = JSON.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
-                throw { message: "Invalid configuration file. There must be at least one configuration present in the array." };
+                throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
             }
             if (!this.configurationIncomplete && this.configurationJson && this.configurationJson.configurations &&
                 this.CurrentConfigurationIndex >= 0 && this.CurrentConfigurationIndex < this.configurationJson.configurations.length) {
                 for (let i: number = 0; i < newJson.configurations.length; i++) {
                     if (newJson.configurations[i].name === this.configurationJson.configurations[this.CurrentConfigurationIndex].name) {
-                        this.currentConfigurationIndex.Value = i;
+                        if (this.currentConfigurationIndex !== undefined) {
+                            this.currentConfigurationIndex.Value = i;
+                        }
                         break;
                     }
                 }
             }
             this.configurationJson = newJson;
             if (this.CurrentConfigurationIndex < 0 || this.CurrentConfigurationIndex >= newJson.configurations.length) {
-                this.currentConfigurationIndex.Value = this.getConfigIndexForPlatform(newJson);
+                let index: number | undefined = this.getConfigIndexForPlatform(newJson);
+                if (this.currentConfigurationIndex !== undefined) {
+                    if (index === undefined) {
+                        this.currentConfigurationIndex.setDefault();
+                    } else {
+                        this.currentConfigurationIndex.Value = index;
+                    }
+                }
             }
 
             let dirty: boolean = false;
             for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-                let newId: string = getCustomConfigProviders().checkId(this.configurationJson.configurations[i].configurationProvider);
+                let newId: string | undefined = getCustomConfigProviders().checkId(this.configurationJson.configurations[i].configurationProvider);
                 if (newId !== this.configurationJson.configurations[i].configurationProvider) {
                     dirty = true;
                     this.configurationJson.configurations[i].configurationProvider = newId;
@@ -846,22 +945,30 @@ export class CppProperties {
                     this.updateToVersion4();
                 } else {
                     this.configurationJson.version = configVersion;
-                    vscode.window.showErrorMessage('Unknown version number found in c_cpp_properties.json. Some features may not work as expected.');
+                    vscode.window.showErrorMessage(localize("unknown.properties.version", 'Unknown version number found in c_cpp_properties.json. Some features may not work as expected.'));
                 }
             }
+
+            this.configurationJson.configurations.forEach(e => {
+                if ((<any>e).knownCompilers) {
+                    delete (<any>e).knownCompilers;
+                    dirty = true;
+                }
+            });
 
             if (dirty) {
                 try {
                     this.writeToJson();
                 } catch (err) {
                     // Ignore write errors, the file may be under source control. Updated settings will only be modified in memory.
-                    vscode.window.showWarningMessage(`Attempt to update "${this.propertiesFile.fsPath}" failed (do you have write access?)`);
+                    vscode.window.showWarningMessage(localize('update.properties.failed', 'Attempt to update "{0}" failed (do you have write access?)', this.propertiesFile.fsPath));
                     success = false;
                 }
             }
 
         } catch (err) {
-            vscode.window.showErrorMessage(`Failed to parse "${this.propertiesFile.fsPath}": ${err.message}`);
+            let failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
+            vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
         }
 
@@ -872,7 +979,7 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(path: string, isWindows: boolean): string {
+    private resolvePath(path: string | undefined, isWindows: boolean): string {
         if (!path || path === "${default}") {
             return "";
         }
@@ -881,11 +988,13 @@ export class CppProperties {
 
         // first resolve variables
         result = util.resolveVariables(path, this.ExtendedEnvironment);
-        if (result.includes("${workspaceFolder}")) {
-            result = result.replace("${workspaceFolder}", this.rootUri.fsPath);
-        }
-        if (result.includes("${workspaceRoot}")) {
-            result = result.replace("${workspaceRoot}", this.rootUri.fsPath);
+        if (this.rootUri) {
+            if (result.includes("${workspaceFolder}")) {
+                result = result.replace("${workspaceFolder}", this.rootUri.fsPath);
+            }
+            if (result.includes("${workspaceRoot}")) {
+                result = result.replace("${workspaceRoot}", this.rootUri.fsPath);
+            }
         }
         if (result.includes("${vcpkgRoot}") && util.getVcpkgRoot()) {
             result = result.replace("${vcpkgRoot}", util.getVcpkgRoot());
@@ -911,11 +1020,14 @@ export class CppProperties {
 
     private getErrorsForConfigUI(configIndex: number): ConfigurationErrors {
         let errors: ConfigurationErrors = {};
+        if (!this.configurationJson) {
+            return errors;
+        }
         const isWindows: boolean = os.platform() === 'win32';
         let config: Configuration = this.configurationJson.configurations[configIndex];
 
         // Validate compilerPath
-        let resolvedCompilerPath: string = this.resolvePath(config.compilerPath, isWindows);
+        let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         if (resolvedCompilerPath &&
             // Don't error cl.exe paths because it could be for an older preview build.
@@ -925,53 +1037,55 @@ export class CppProperties {
             // Error when the compiler's path has spaces without quotes but args are used.
             // Except, exclude cl.exe paths because it could be for an older preview build.
             let compilerPathNeedsQuotes: boolean =
-                compilerPathAndArgs.additionalArgs &&
+                (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
+                compilerPathAndArgs.compilerPath !== undefined &&
                 compilerPathAndArgs.compilerPath.includes(" ");
 
             let compilerPathErrors: string[] = [];
             if (compilerPathNeedsQuotes) {
-                compilerPathErrors.push(`Compiler path with spaces and arguments is missing double quotes " around the path.`);
+                compilerPathErrors.push(localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.'));
             }
 
             // Get compiler path without arguments before checking if it exists
             resolvedCompilerPath = compilerPathAndArgs.compilerPath;
-
-            let pathExists: boolean = true;
-            let existsWithExeAdded: (path: string) => boolean = (path: string) => {
-                return isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
-            };
-            if (!fs.existsSync(resolvedCompilerPath)) {
-                if (existsWithExeAdded(resolvedCompilerPath)) {
-                    resolvedCompilerPath += ".exe";
-                } else {
-                    // Check again for a relative path.
-                    const relativePath: string = this.rootUri.fsPath + path.sep + resolvedCompilerPath;
-                    if (!fs.existsSync(relativePath)) {
-                        if (existsWithExeAdded(resolvedCompilerPath)) {
-                            resolvedCompilerPath += ".exe";
-                        } else {
-                            pathExists = false;
-                        }
+            if (resolvedCompilerPath) {
+                let pathExists: boolean = true;
+                let existsWithExeAdded: (path: string) => boolean = (path: string) => isWindows && !path.startsWith("/") && fs.existsSync(path + ".exe");
+                if (!fs.existsSync(resolvedCompilerPath)) {
+                    if (existsWithExeAdded(resolvedCompilerPath)) {
+                        resolvedCompilerPath += ".exe";
+                    } else if (!this.rootUri) {
+                        pathExists = false;
                     } else {
-                        resolvedCompilerPath = relativePath;
+                        // Check again for a relative path.
+                        const relativePath: string = this.rootUri.fsPath + path.sep + resolvedCompilerPath;
+                        if (!fs.existsSync(relativePath)) {
+                            if (existsWithExeAdded(resolvedCompilerPath)) {
+                                resolvedCompilerPath += ".exe";
+                            } else {
+                                pathExists = false;
+                            }
+                        } else {
+                            resolvedCompilerPath = relativePath;
+                        }
                     }
                 }
-            }
 
-            if (!pathExists) {
-                let message: string = `Cannot find: ${resolvedCompilerPath}`;
-                compilerPathErrors.push(message);
-            } else if (compilerPathAndArgs.compilerPath === "") {
-                let message: string = `Invalid input, cannot resolve compiler path`;
-                compilerPathErrors.push(message);
-            } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
-                let message: string = `Path is not a file: ${resolvedCompilerPath}`;
-                compilerPathErrors.push(message);
-            }
+                if (!pathExists) {
+                    let message: string = localize('cannot.find', "Cannot find: {0}", resolvedCompilerPath);
+                    compilerPathErrors.push(message);
+                } else if (compilerPathAndArgs.compilerPath === "") {
+                    let message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
+                    compilerPathErrors.push(message);
+                } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
+                    let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
+                    compilerPathErrors.push(message);
+                }
 
-            if (compilerPathErrors.length > 0) {
-                errors.compilerPath = compilerPathErrors.join('\n');
+                if (compilerPathErrors.length > 0) {
+                    errors.compilerPath = compilerPathErrors.join('\n');
+                }
             }
         }
 
@@ -987,19 +1101,19 @@ export class CppProperties {
 
         // Validate intelliSenseMode
         if (isWindows && !this.isCompilerIntelliSenseModeCompatible(config)) {
-            errors.intelliSenseMode = `IntelliSense mode ${config.intelliSenseMode} is incompatible with compiler path.`;
+            errors.intelliSenseMode = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", config.intelliSenseMode);
         }
 
         return errors;
     }
 
-    private validatePath(input: string|string[], isDirectory: boolean = true): string {
+    private validatePath(input: string | string[] | undefined, isDirectory: boolean = true): string | undefined {
         if (!input) {
             return undefined;
         }
 
         const isWindows: boolean = os.platform() === 'win32';
-        let errorMsg: string;
+        let errorMsg: string | undefined;
         let errors: string[] = [];
         let paths: string[] = [];
 
@@ -1008,6 +1122,9 @@ export class CppProperties {
         } else {
             paths = input;
         }
+
+        // Resolve and split any environment variables
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
 
         for (let p of paths) {
             let pathExists: boolean = true;
@@ -1018,27 +1135,31 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                // Check for relative path if resolved path does not exists
-                const relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
-                if (!fs.existsSync(relativePath)) {
+                if (!this.rootUri) {
                     pathExists = false;
                 } else {
-                    resolvedPath = relativePath;
+                    // Check for relative path if resolved path does not exists
+                    const relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
+                    if (!fs.existsSync(relativePath)) {
+                        pathExists = false;
+                    } else {
+                        resolvedPath = relativePath;
+                    }
                 }
             }
 
             if (!pathExists) {
-                let message: string = `Cannot find: ${resolvedPath}`;
+                let message: string = localize('cannot.find', "Cannot find: {0}", resolvedPath);
                 errors.push(message);
                 continue;
             }
 
             // Check if path is a directory or file
             if (isDirectory && !util.checkDirectoryExistsSync(resolvedPath)) {
-                let message: string = `Path is not a directory: ${resolvedPath}`;
+                let message: string = localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
                 errors.push(message);
             } else if (!isDirectory && !util.checkFileExistsSync(resolvedPath)) {
-                let message: string = `Path is not a file: ${resolvedPath}`;
+                let message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
                 errors.push(message);
             }
         }
@@ -1055,17 +1176,18 @@ export class CppProperties {
             return;
         }
 
-        if (!this.configurationJson.enableConfigurationSquiggles) {
-            this.diagnosticCollection.clear();
-            return;
-        }
-
+        // Disable squiggles if
+        // this.configurationJson.enableConfigurationSquiggles is false OR
+        // this.configurationJson.enableConfigurationSquiggles is undefined and settings.defaultEnableConfigurationSquiggles is false.
         const settings: CppSettings = new CppSettings(this.rootUri);
-        if (!settings.defaultEnableConfigurationSquiggles) {
+        if (!this.configurationJson) {
+            return;
+        }
+        if ((this.configurationJson.enableConfigurationSquiggles !== undefined && !this.configurationJson.enableConfigurationSquiggles) ||
+            (this.configurationJson.enableConfigurationSquiggles === undefined && !settings.defaultEnableConfigurationSquiggles)) {
             this.diagnosticCollection.clear();
             return;
         }
-
         vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
             let diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 
@@ -1082,6 +1204,15 @@ export class CppProperties {
             if (!currentConfiguration.name) {
                 return;
             }
+
+            // Get env text
+            let envText: string;
+            const envStart: number = curText.search(/\"env\"\s*:\s*\{/);
+            const envEnd: number = envStart === -1 ? -1 : curText.indexOf("},", envStart);
+            envText = curText.substr(envStart, envEnd);
+            const envTextStartOffSet: number = envStart + 1;
+
+            // Get current config text
             const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
@@ -1102,8 +1233,8 @@ export class CppProperties {
                 }
                 curText = curText.substr(0, nextNameStart2);
             }
-            if (this.prevSquiggleMetrics[currentConfiguration.name] === undefined) {
-                this.prevSquiggleMetrics[currentConfiguration.name] = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+            if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
+                this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
             }
             let newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
             const isWindows: boolean = os.platform() === 'win32';
@@ -1119,7 +1250,7 @@ export class CppProperties {
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
                     if (!this.isCompilerIntelliSenseModeCompatible(currentConfiguration)) {
-                        let message: string = `intelliSenseMode ${currentConfiguration.intelliSenseMode} is incompatible with compilerPath.`;
+                        let message: string = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", currentConfiguration.intelliSenseMode);
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
@@ -1131,23 +1262,26 @@ export class CppProperties {
             }
 
             // Check for path-related squiggles.
-            let paths: Set<string> = new Set<string>();
+            let paths: string[] = [];
             for (let pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
                 currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
                 if (pathArray) {
                     for (let curPath of pathArray) {
-                        paths.add(`${curPath}`);
+                        paths.push(`${curPath}`);
                     }
                 }
             }
             if (currentConfiguration.compileCommands) {
-                paths.add(`${currentConfiguration.compileCommands}`);
+                paths.push(`${currentConfiguration.compileCommands}`);
             }
 
             if (currentConfiguration.compilerPath) {
                 // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
-                paths.add(`${currentConfiguration.compilerPath}`);
+                paths.push(`${currentConfiguration.compilerPath}`);
             }
+
+            // Resolve and split any environment variables
+            paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
 
             // Get the start/end for properties that are file-only.
             const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1157,6 +1291,7 @@ export class CppProperties {
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
+            // Validate paths
             for (let curPath of paths) {
                 const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
                 // Resolve special path cases.
@@ -1170,8 +1305,6 @@ export class CppProperties {
                     continue;
                 }
 
-                // TODO: Invalid paths created from environment variables are not detected.
-
                 let compilerPathNeedsQuotes: boolean = false;
                 if (isCompilerPath) {
                     resolvedPath = resolvedPath.trim();
@@ -1179,19 +1312,24 @@ export class CppProperties {
                     if (isWindows && compilerPathAndArgs.compilerName === "cl.exe") {
                         continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
                     }
+                    if (compilerPathAndArgs.compilerPath === undefined) {
+                        continue;
+                    }
                     // Squiggle when the compiler's path has spaces without quotes but args are used.
-                    compilerPathNeedsQuotes = compilerPathAndArgs.additionalArgs && !resolvedPath.startsWith('"') && compilerPathAndArgs.compilerPath.includes(" ");
+                    compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
+                        && !resolvedPath.startsWith('"')
+                        && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
                 }
 
                 const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
                 let pathExists: boolean = true;
-                let existsWithExeAdded: (path: string) => boolean = (path: string) => {
-                    return isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
-                };
+                let existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
                 if (!fs.existsSync(resolvedPath)) {
                     if (existsWithExeAdded(resolvedPath)) {
                         resolvedPath += ".exe";
+                    } else if (!this.rootUri) {
+                        pathExists = false;
                     } else {
                         // Check again for a relative path.
                         const relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
@@ -1224,16 +1362,16 @@ export class CppProperties {
                 // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
                 // and extend that pattern to the next quote before and next quote after it.
                 let pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
-                let matches: string[] = curText.match(pattern);
-                if (matches) {
+                let configMatches: string[] | null = curText.match(pattern);
+                if (configMatches) {
                     let curOffset: number = 0;
                     let endOffset: number = 0;
-                    for (let curMatch of matches) {
+                    for (let curMatch of configMatches) {
                         curOffset = curText.substr(endOffset).search(pattern) + endOffset;
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = `Cannot find "${resolvedPath}".`;
+                            message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                             newSquiggleMetrics.PathNonExistent++;
                         } else {
                             // Check for file versus path mismatches.
@@ -1241,20 +1379,20 @@ export class CppProperties {
                                 (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
                                 (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
                                 if (compilerPathNeedsQuotes) {
-                                    message = `Compiler path with spaces and arguments is missing \\" around the path.`;
+                                    message = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
                                     newSquiggleMetrics.CompilerPathMissingQuotes++;
                                 } else {
                                     if (util.checkFileExistsSync(resolvedPath)) {
                                         continue;
                                     }
-                                    message = `Path is not a file: "${resolvedPath}".`;
+                                    message = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
                                     newSquiggleMetrics.PathNotAFile++;
                                 }
                             } else {
                                 if (util.checkDirectoryExistsSync(resolvedPath)) {
                                     continue;
                                 }
-                                message = `Path is not a directory: "${resolvedPath}".`;
+                                message =  localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
                                 newSquiggleMetrics.PathNotADirectory++;
                             }
                         }
@@ -1264,8 +1402,35 @@ export class CppProperties {
                             message, vscode.DiagnosticSeverity.Warning);
                         diagnostics.push(diagnostic);
                     }
+                } else if (envText) {
+                    let envMatches: string[] | null = envText.match(pattern);
+                    if (envMatches) {
+                        let curOffset: number = 0;
+                        let endOffset: number = 0;
+                        for (let curMatch of envMatches) {
+                            curOffset = envText.substr(endOffset).search(pattern) + endOffset;
+                            endOffset = curOffset + curMatch.length;
+                            let message: string;
+                            if (!pathExists) {
+                                message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                                newSquiggleMetrics.PathNonExistent++;
+                            } else {
+                                if (util.checkDirectoryExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+                                message = localize("path.is.not.a.directory2", "Path is not a directory: \"{0}\"", resolvedPath);
+                                newSquiggleMetrics.PathNotADirectory++;
+                            }
+                            let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                                new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
+                                    document.positionAt(envTextStartOffSet + endOffset)),
+                                message, vscode.DiagnosticSeverity.Warning);
+                            diagnostics.push(diagnostic);
+                        }
+                    }
                 }
             }
+
             if (diagnostics.length !== 0) {
                 this.diagnosticCollection.set(document.uri, diagnostics);
             } else {
@@ -1274,77 +1439,85 @@ export class CppProperties {
 
             // Send telemetry on squiggle changes.
             let changedSquiggleMetrics: { [key: string]: number } = {};
-            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics[currentConfiguration.name].PathNonExistent) {
+            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNonExistent) {
                 changedSquiggleMetrics.PathNonExistent = newSquiggleMetrics.PathNonExistent;
             }
-            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics[currentConfiguration.name].PathNotAFile) {
+            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotAFile) {
                 changedSquiggleMetrics.PathNotAFile = newSquiggleMetrics.PathNotAFile;
             }
-            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics[currentConfiguration.name].PathNotADirectory) {
+            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotADirectory) {
                 changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
             }
-            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics[currentConfiguration.name].CompilerPathMissingQuotes) {
+            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerPathMissingQuotes) {
                 changedSquiggleMetrics.CompilerPathMissingQuotes = newSquiggleMetrics.CompilerPathMissingQuotes;
             }
-            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics[currentConfiguration.name].CompilerModeMismatch) {
+            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerModeMismatch) {
                 changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
             }
             if (Object.keys(changedSquiggleMetrics).length > 0) {
-                telemetry.logLanguageServerEvent("ConfigSquiggles", null, changedSquiggleMetrics);
+                telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);
             }
-            this.prevSquiggleMetrics[currentConfiguration.name] = newSquiggleMetrics;
+            this.prevSquiggleMetrics.set(currentConfiguration.name, newSquiggleMetrics);
         });
     }
 
     private updateToVersion2(): void {
-        this.configurationJson.version = 2;
-        // no-op. We don't automatically populate the browse.path anymore.
-        // We use includePath if browse.path is not present which is what this code used to do.
+        if (this.configurationJson) {
+            this.configurationJson.version = 2;
+            // no-op. We don't automatically populate the browse.path anymore.
+            // We use includePath if browse.path is not present which is what this code used to do.
+        }
     }
 
     private updateToVersion3(): void {
-        this.configurationJson.version = 3;
-        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            let config: Configuration = this.configurationJson.configurations[i];
-            // Look for Mac configs and extra configs on Mac systems
-            if (config.name === "Mac" || (process.platform === 'darwin' && config.name !== "Win32" && config.name !== "Linux")) {
-                if (config.macFrameworkPath === undefined) {
-                    config.macFrameworkPath = [
-                        "/System/Library/Frameworks",
-                        "/Library/Frameworks"
-                    ];
+        if (this.configurationJson) {
+            this.configurationJson.version = 3;
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                let config: Configuration = this.configurationJson.configurations[i];
+                // Look for Mac configs and extra configs on Mac systems
+                if (config.name === "Mac" || (process.platform === 'darwin' && config.name !== "Win32" && config.name !== "Linux")) {
+                    if (config.macFrameworkPath === undefined) {
+                        config.macFrameworkPath = [
+                            "/System/Library/Frameworks",
+                            "/Library/Frameworks"
+                        ];
+                    }
                 }
             }
         }
     }
 
     private updateToVersion4(): void {
-        this.configurationJson.version = 4;
-        // Update intelliSenseMode, compilerPath, cStandard, and cppStandard with the defaults if they're missing.
-        // If VS Code settings exist for these properties, don't add them to c_cpp_properties.json
-        let settings: CppSettings = new CppSettings(this.rootUri);
-        for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            let config: Configuration = this.configurationJson.configurations[i];
+        if (this.configurationJson) {
+            this.configurationJson.version = 4;
+            // Update intelliSenseMode, compilerPath, cStandard, and cppStandard with the defaults if they're missing.
+            // If VS Code settings exist for these properties, don't add them to c_cpp_properties.json
+            let settings: CppSettings = new CppSettings(this.rootUri);
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                let config: Configuration = this.configurationJson.configurations[i];
 
-            if (config.intelliSenseMode === undefined && !settings.defaultIntelliSenseMode) {
-                config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
-            }
-            // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
-            if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && !settings.defaultCompilerPath) {
-                config.compilerPath = this.defaultCompilerPath;
-            }
-            if (!config.cStandard && this.defaultCStandard && !settings.defaultCStandard) {
-                config.cStandard = this.defaultCStandard;
-            }
-            if (!config.cppStandard && this.defaultCppStandard && !settings.defaultCppStandard) {
-                config.cppStandard = this.defaultCppStandard;
+                if (config.intelliSenseMode === undefined && !settings.defaultIntelliSenseMode) {
+                    config.intelliSenseMode = this.getIntelliSenseModeForPlatform(config.name);
+                }
+                // Don't set the default if compileCommands exist, until it is fixed to have the correct value.
+                if (config.compilerPath === undefined && this.defaultCompilerPath && !config.compileCommands && !settings.defaultCompilerPath) {
+                    config.compilerPath = this.defaultCompilerPath;
+                }
+                if (!config.cStandard && this.defaultCStandard && !settings.defaultCStandard) {
+                    config.cStandard = this.defaultCStandard;
+                }
+                if (!config.cppStandard && this.defaultCppStandard && !settings.defaultCppStandard) {
+                    config.cppStandard = this.defaultCppStandard;
+                }
             }
         }
     }
 
     private writeToJson(): void {
         console.assert(this.propertiesFile);
-        fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+        if (this.propertiesFile) {
+            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+        }
     }
 
     public checkCppProperties(): void {
@@ -1371,7 +1544,7 @@ export class CppProperties {
         this.disposables = [];
 
         this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-        this.compileCommandFileWatchers = []; //reset it
+        this.compileCommandFileWatchers = []; // reset it
 
         this.diagnosticCollection.dispose();
     }

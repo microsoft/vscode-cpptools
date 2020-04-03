@@ -404,10 +404,10 @@
     <div style="height: 90px; display: block">
         <table>
             <td>
-              <img src="{{root}}/LanguageCCPP_color_128x.png" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px">
+              <img src="{{root}}/LanguageCCPP_color_128x.png" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px" data-loc-id-title="microsoft.c.cpp.extension">
             </td>
             <td>
-                <div style="font-size: 20px; font-weight: 400; line-height: 24px">Microsoft<br>C/C++ Extension</div>
+                <div style="font-size: 20px; font-weight: 400; line-height: 24px">Microsoft<br><span data-loc-id="c.cpp.extension">C/C++ Extension</span></div>
             </td>
           </table>
     </div>
@@ -416,13 +416,13 @@
     <div style="height: 30px; display: block"></div>
 
     <div style="padding-right: 10px; color: var(--vscode-foreground);">
-        Open this editor by using the command:<br>
-        <code>C/C++: Edit configurations (UI)</code>
+        <span data-loc-id="open.this.editor">Open this editor by using the command:</span><br>
+        <code data-loc-id="edit.configurations.ui">C/C++: Edit configurations (UI)</code>
 
         <div style="height: 30px; display: block"></div>
 
-        Switch to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file by clicking on the file link or using the command:<br> 
-        <code>C/C++: Edit configurations (JSON)</code>
+        <span data-loc-id="switch.to.json">Switch to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id-title="edit.configurations.in.json">c_cpp_properties.json</a> file by clicking on the file link or using the command:</span><br> 
+        <code data-loc-id="edit.configurations.json">C/C++: Edit configurations (JSON)</code>
     </div>
 
   </div> <!-- sidebar end -->
@@ -432,11 +432,9 @@
 
     <!-- title -->
     <div style=" height: 90px; display: inline-block;">
-      <div class="main-title">IntelliSense Configurations</div>
+      <div class="main-title" data-loc-id="intellisense.configurations">IntelliSense Configurations</div>
       <div style="color: var(--vscode-foreground);">
-        Use this editor to edit basic IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a> file.
-        Changes made in this editor only apply to the selected configuration. 
-        To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file">c_cpp_properties.json</a>.
+        <span data-loc-id="intellisense.configurations.description">Use this editor to edit IntelliSense settings defined in the underlying <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id-title="edit.configurations.in.json">c_cpp_properties.json</a> file. Changes made in this editor only apply to the selected configuration. To edit multiple configurations at once go to <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id-title="edit.configurations.in.json">c_cpp_properties.json</a>.</span>
       </div>
     </div>
 
@@ -445,13 +443,10 @@
 
     <!-- sections -->
     <div class="section">
-      <div class="section-title">Configuration name</div>
-      <div class="section-text">
-        A friendly name that identifies a configuration. <code>Linux</code>, <code>Mac</code>, and <code>Win32</code> are special identifiers 
-        for configurations that will be auto-selected on those platforms.
-      </div>
+      <div class="section-title" data-loc-id="configuration.name">Configuration name</div>
+      <div class="section-text" data-loc-id="configuration.name.description">A friendly name that identifies a configuration. <code>Linux</code>, <code>Mac</code>, and <code>Win32</code> are special identifiers for configurations that will be auto-selected on those platforms.</div>
       <div>
-        <div class="section-note">Select a configuration set to edit.</div>
+        <div class="section-note" data-loc-id="select.configuration.to.edit">Select a configuration set to edit.</div>
         <table>
             <tr>
             <!-- select configuration name -->
@@ -464,87 +459,87 @@
             <!-- input configuration name -->
             <td style="vertical-align: middle;">
                 <div id=addConfigDiv style="display: block">
-                    <button id=addConfigBtn >Add Configuration</button>
+                    <button id=addConfigBtn data-loc-id="add.configuration.button">Add Configuration</button>
                 </div>
                 <div id=addConfigInputDiv style="display: none; width: 400px;">
-                    <input id=addConfigName type=text style="width: 200px; margin-right: 6px" placeholder="Configuration name..."/> 
-                    <button id=addConfigOk style="margin-right: 6px">OK</button>
-                    <button id=addConfigCancel>CANCEL</button>
+                    <input id=addConfigName type=text style="width: 200px; margin-right: 6px" placeholder="Configuration name..." data-loc-id-placeholder="configuration.name.input"/> 
+                    <button id=addConfigOk style="margin-right: 6px" data-loc-id="ok.button">OK</button>
+                    <button id=addConfigCancel data-loc-id="cancel.button">CANCEL</button>
                 </div>
             </td>
         </tr>
         </table>
-      </div> 
+      </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Compiler path</div>
+        <div class="section-title" data-loc-id="compiler.path">Compiler path</div>
         <div class="section-text">
-            The full path to the compiler you use to build your project, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense.
-            Arguments can be added to modify the includes/defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc., 
-            but paths with spaces must be surrounded by double quotes <code>"</code> if arguments are used. 
-            The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.
+            <span data-loc-id="compiler.path.description">The full path to the compiler you use to build your project, e.g. <code>/usr/bin/gcc</code>, to enable more accurate IntelliSense. The extension will query the compiler to determine the system include paths and default defines to use for IntelliSense.</span>
         </div>
         <!-- input compilerPath -->
-        <div class="section-note">Specify a compiler path or select a detected compiler path from the drop-down list.</div>
+        <div class="section-note" data-loc-id="specify.a.compiler">Specify a compiler path or select a detected compiler path from the drop-down list.</div>
             <div class="select-editable">
-                <select id="knownCompilers" style="width: 810px"></select>
-                <input name="inputValue" id="compilerPath" style="width: 777px" type="text"/>
+                <span id="noCompilerPathsDetected" style="display: none" data-loc-id="no.compiler.paths.detected">(No compiler paths detected)</span>
+                <select id="knownCompilers" style="width: 810px; display: none"></select>
+                <input name="inputValue" id="compilerPath" style="width: 777px; display: none" type="text"/>
             </div>
         <div id="compilerPathInvalid" class="error" style="width: 800px"></div>
         <!-- input compilerPath end -->
     </div>
 
     <div class="section">
-        <div class="section-title">IntelliSense mode</div>
+        <div class="section-title" data-loc-id="compiler.args">Compiler arguments</div>
+        <div class="section-text" data-loc-id="compiler.arguments">Compiler arguments to modify the includes or defines used, e.g. <code>-nostdinc++</code>, <code>-m32</code>, etc.</div>
+        <div>
+            <div class="section-note" data-loc-id="one.argument.per.line">One argument per line.</div>
+            <textarea name="inputValue" id="compilerArgs" rows="4" cols="93" style="width: 800px"></textarea>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title" data-loc-id="intellisense.mode">IntelliSense mode</div>
         <div class="section-text">
-            The IntelliSense mode used by the IntelliSense engine. <code>msvc-x64</code> maps to Visual Studio mode with 64-bit pointer sizes. 
-            <code>clang-x64</code> maps to CLang mode with 64-bit pointer sizes. <code>gcc-x64</code> maps to GCC mode with 64-bit pointer sizes. 
-            The <code>${default}</code> mode will choose the default for that platform. 
-            Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and macOS defaults to <code>clang-x64</code>. 
-            Select a specific IntelliSense mode to override the <code>${default}</code> mode.
+            <span data-loc-id="intellisense.mode.description">The IntelliSense mode to use that maps to an architecture-specific variant of MSVC, gcc, or Clang. If not set or if set to <code>${default}</code>, the extension will choose the default for that platform. Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and macOS defaults to <code>clang-x64</code>. Select a specific IntelliSense mode to override the <code>${default}</code> mode.</span>
         </div>
         <div>
           <select name="inputValue" id="intelliSenseMode" class="select-default">
             <option value="${default}">${default}</option>
-            <option value="msvc-x64">msvc-x64</option>
-            <option value="gcc-x64">gcc-x64</option>
+            <option value="clang-x86">clang-x86</option>
             <option value="clang-x64">clang-x64</option>
+            <option value="gcc-x86">gcc-x86</option>
+            <option value="gcc-x64">gcc-x64</option>
+            <option value="msvc-x86">msvc-x86</option>
+            <option value="msvc-x64">msvc-x64</option>
           </select>
         </div>
         <div id="intelliSenseModeInvalid" class="error" style="width: 290px"></div>
     </div>
 
     <div class="section">
-        <div class="section-title">Include path</div>
+        <div class="section-title" data-loc-id="include.path">Include path</div>
         <div class="section-text">
-            An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. 
-            Specify a list paths for the IntelliSense engine to use while searching for included header files. 
-            If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for header files starting from that directory. 
-            If on Windows with Visual Studio installed, or if a compiler is specified in the <code>compilerPath</code> setting, 
-            it is not necessary to list the system include paths in this list.
+            <span data-loc-id="include.path.description">An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. Specify a list paths for the IntelliSense engine to use while searching for included header files. If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for header files starting from that directory. If on Windows with Visual Studio installed, or if a compiler is specified in the <code>compilerPath</code> setting, it is not necessary to list the system include paths in this list.</span>
         </div>
         <div>
-          <div class="section-note">One include path per line.</div>
+          <div class="section-note" data-loc-id="one.include.path.per.line">One include path per line.</div>
           <textarea name="inputValue" id="includePath" rows="4" cols="93" style="width: 800px"></textarea>
           <div id="includePathInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Defines</div>
-        <div class="section-text">
-            A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use <code>=</code> to set a value, e.g. <code>VERSION=1</code>.
-        </div>
+        <div class="section-title" data-loc-id="defines">Defines</div>
+        <div class="section-text" data-loc-id="defines.description">A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use <code>=</code> to set a value, e.g. <code>VERSION=1</code>.</div>
         <div>
-            <div class="section-note">One definition per line.</div>
+            <div class="section-note" data-loc-id="one.definition.per.line">One definition per line.</div>
             <textarea name="inputValue" id="defines" rows="4" cols="39"></textarea>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">C standard</div>
-        <div class="section-text">The version of the C language standard to use for IntelliSense.</div>
+        <div class="section-title" data-loc-id="c.standard">C standard</div>
+        <div class="section-text" data-loc-id="c.standard.description">The version of the C language standard to use for IntelliSense.</div>
         <div>
             <select name="inputValue" id="cStandard" class="select-default">
                 <option value="c11">c11</option>
@@ -555,8 +550,8 @@
     </div>
 
     <div class="section">
-        <div class="section-title">C++ standard</div>
-        <div class="section-text">The version of the C++ language standard to use for IntelliSense.</div>
+        <div class="section-title" data-loc-id="cpp.standard">C++ standard</div>
+        <div class="section-text" data-loc-id="cpp.standard.description">The version of the C++ language standard to use for IntelliSense.</div>
         <div>
             <select name="inputValue" id="cppStandard" class="select-default">
                 <option value="c++20">c++20</option>
@@ -570,65 +565,51 @@
     </div>
 
     <hr>
-    <button id=showAdvanced class="headerBtn" style="margin-top: 5px; font-size: 20px; font-weight: 500; width: 100%; text-align: left">
-        Advanced Settings
-    </button>
+    <button id=showAdvanced class="headerBtn" style="margin-top: 5px; font-size: 20px; font-weight: 500; width: 100%; text-align: left" data-loc-id="advanced.settings">Advanced Settings</button>
     <div style="height: 30px; display: block"></div>
 
     <div id=advancedSection>
 
         <div class="section">
-            <div class="section-title">Configuration provider</div>
-            <div class="section-text">
-                The ID of a VS Code extension that can provide IntelliSense configuration information for source files. For example, use the VS Code extension ID
-                <code>vector-of-bool.cmake-tools</code> to provide configuration information from the CMake Tools extension.
-            </div>
+            <div class="section-title" data-loc-id="configuration.provider">Configuration provider</div>
+            <div class="section-text" data-loc-id="configuration.provider.description">The ID of a VS Code extension that can provide IntelliSense configuration information for source files. For example, use the VS Code extension ID <code>ms-vscode.cmake-tools</code> to provide configuration information from the CMake Tools extension.</div>
             <div>
                 <input name="inputValue" id="configurationProvider" style="width: 290px"></input>
             </div>
         </div>
 
         <div class="section">
-            <div class="section-title">Windows SDK version</div>
-            <div class="section-text">
-                The version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.
-            </div>
+            <div class="section-title" data-loc-id="windows.sdk.version">Windows SDK version</div>
+            <div class="section-text" data-loc-id="windows.sdk.version.description">The version of the Windows SDK include path to use on Windows, e.g. <code>10.0.17134.0</code>.</div>
             <div>
                 <input name="inputValue" id="windowsSdkVersion" style="width: 290px"></input>
             </div>
         </div>
 
         <div class="section">
-            <div class="section-title">Mac framework path</div>
-            <div class="section-text">
-                A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on configurations for macOS.
-            </div>
+            <div class="section-title" data-loc-id="mac.framework.path">Mac framework path</div>
+            <div class="section-text" data-loc-id="mac.framework.path.description">A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on configurations for macOS.</div>
             <div>
-                <div class="section-note">One path per line.</div>
+                <div class="section-note" data-loc-id="one.path.per.line">One path per line.</div>
                 <textarea name="inputValue" id="macFrameworkPath" rows="4" cols="93" style="width: 800px"></textarea>
                 <div id="macFrameworkPathInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
             </div>
         </div>
 
         <div class="section">
-            <div class="section-title">Forced include</div>
-            <div class="section-text">
-                A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.
-            </div>
+            <div class="section-title" data-loc-id="forced.include">Forced include</div>
+            <div class="section-text" data-loc-id="forced.include.description">A list of files that should be included before any other characters in the source file are processed. Files are included in the order listed.</div>
             <div>
-                <div class="section-note">One file per line.</div>
+                <div class="section-note" data-loc-id="one.file.per.line">One file per line.</div>
                 <textarea name="inputValue" id="forcedInclude" rows="4" cols="93" style="width: 800px"></textarea>
                 <div id="forcedIncludeInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
             </div>
         </div>
 
         <div class="section">
-            <div class="section-title">Compile commands</div>
+            <div class="section-title" data-loc-id="compile.commands">Compile commands</div>
             <div class="section-text">
-                The full path to the <code>compile_commands.json</code> file for the workspace. The include paths and defines discovered in this file will 
-                be used instead of the values set for <code>includePath</code> and <code>defines</code> settings. If the compile commands database 
-                does not contain an entry for the translation unit that corresponds to the file you opened in the editor, 
-                then a warning message will appear and the extension will use the <code>includePath</code> and <code>defines</code> settings instead.
+                <span data-loc-id="compile.commands.description">The full path to the <code>compile_commands.json</code> file for the workspace. The include paths and defines discovered in this file will be used instead of the values set for <code>includePath</code> and <code>defines</code> settings. If the compile commands database does not contain an entry for the translation unit that corresponds to the file you opened in the editor, then a warning message will appear and the extension will use the <code>includePath</code> and <code>defines</code> settings instead.</span>
             </div>
             <div>
                 <input name="inputValue" id="compileCommands" style="width: 798px"></input>
@@ -637,37 +618,30 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Browse: path</div>
+            <div class="section-title" data-loc-id="browse.path">Browse: path</div>
             <div class="section-text">
-                A list of paths for the Tag Parser to search for headers included by your source files. If omitted, <code>includePath</code> will be used as the <code>path</code>. 
-                Searching on these paths is recursive by default. Specify <code>*</code> to indicate non-recursive search. 
-                For example: <code>/usr/include</code> will search through all subdirectories while <code>/usr/include/*</code> will not.
+                <span data-loc-id="browse.path.description">A list of paths for the Tag Parser to search for headers included by your source files. If omitted, <code>includePath</code> will be used as the <code>path</code>. Searching on these paths is recursive by default. Specify <code>*</code> to indicate non-recursive search. For example: <code>/usr/include</code> will search through all subdirectories while <code>/usr/include/*</code> will not.</span>
             </div>
             <div>
-                <div class="section-note">One browse path per line.</div>
+                <div class="section-note" data-loc-id="one.browse.path.per.line">One browse path per line.</div>
                 <textarea name="inputValue" id="browsePath" rows="4" cols="93" style="width: 800px"></textarea>
                 <div id="browsePathInvalid" class="error" style="margin-top: -4px; width: 794px"></div>
             </div>
         </div>
 
         <div class="section">
-            <div class="section-title">Browse: limit symbols to included headers</div>
+            <div class="section-title" data-loc-id="limit.symbols">Browse: limit symbols to included headers</div>
             <div>
-            <input type="checkbox" id="limitSymbolsToIncludedHeaders" style="vertical-align: middle; transform: scale(1.5)">
-                When true (or checked), the Tag Parser will only parse code files that have been directly or indirectly included by a source file 
-                in <code>${workspaceFolder}</code>. When false (or not checked), the Tag Parser will parse all code files found in the paths specified 
-                in the <code>Browse: path</code> list.
-            </input>
+                <input type="checkbox" id="limitSymbolsToIncludedHeaders" style="vertical-align: middle; transform: scale(1.5)">
+                    <span data-loc-id="limit.symbols.checkbox">When true (or checked), the Tag Parser will only parse code files that have been directly or indirectly included by a source file in <code>${workspaceFolder}</code>. When false (or not checked), the Tag Parser will parse all code files found in the paths specified in the <code>Browse: path</code> list.</span>
+                </input>
             </div>
         </div>
 
         <div class="section">
-            <div class="section-title">Browse: database filename</div>
+            <div class="section-title" data-loc-id="database.filename">Browse: database filename</div>
             <div class="section-text">
-                The path to the generated symbol database. This instructs the extension to save the Tag Parser's symbol database somewhere other than 
-                the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, 
-                not the workspace folder itself. The <code>${workspaceFolder}</code> variable can be used to specify a path relative to the workspace folder 
-                (e.g. <code>${workspaceFolder}/.vscode/browse.vc.db</code>)
+                <span data-loc-id="database.filename.description">The path to the generated symbol database. This instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The <code>${workspaceFolder}</code> variable can be used to specify a path relative to the workspace folder (e.g. <code>${workspaceFolder}/.vscode/browse.vc.db</code>)</span>
             </div>
             <div>
                 <input name="inputValue" id="databaseFilename" style="width: 798px"></input>

@@ -21,12 +21,9 @@ let compile = function(tsPath) {
     cp.execSync("tsc " + tsPath + " --outDir out/" + folderName, {stdio:[0, 1, 2]});
 };
 
-if (!process.env.CPPTOOLS_DEV && fs.existsSync('./node_modules')) {
-    console.warn("WARNING: Skipping npm install since it appears to have been executed already.");
-} else {
-    console.log(">> npm install");
-    cp.execSync("npm install", { stdio: [0, 1, 2] });
-}
+console.log(">> yarn install");
+cp.execSync("yarn install", { stdio: [0, 1, 2] });
+
 
 const tscCompileListStr = fs.readFileSync("./tscCompileList.txt").toString();
 

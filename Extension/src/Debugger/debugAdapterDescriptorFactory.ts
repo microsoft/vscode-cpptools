@@ -7,6 +7,10 @@ import * as vscode from "vscode";
 import * as util from '../common';
 import * as path from 'path';
 import * as os from 'os';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 // Registers DebugAdapterDescriptorFactory for `cppdbg` and `cppvsdbg`. If it is not ready, it will prompt a wait for the download dialog.
 // NOTE: This file is not automatically tested.
@@ -19,17 +23,17 @@ abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdap
         this.context = context;
     }
 
-    abstract createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor>;
+    abstract createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor>;
 }
 
 export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-    public static DEBUG_TYPE : string = "cppdbg";
+    public static DEBUG_TYPE: string = "cppdbg";
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         return util.isExtensionReady().then(ready => {
             if (ready) {
                 let command: string = path.join(this.context.extensionPath, './debugAdapters/OpenDebugAD7');
@@ -48,15 +52,15 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
 }
 
 export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-    public static DEBUG_TYPE : string = "cppvsdbg";
+    public static DEBUG_TYPE: string = "cppvsdbg";
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         if (os.platform() !== 'win32') {
-            vscode.window.showErrorMessage("Debugger type 'cppvsdbg' is not avaliable for non-Windows machines.");
+            vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not avaliable for non-Windows machines.", "cppvsdbg"));
             return null;
         } else {
             return util.isExtensionReady().then(ready => {

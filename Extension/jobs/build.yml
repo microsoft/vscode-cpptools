@@ -8,23 +8,23 @@ jobs:
 
   steps:
   - task: NodeTool@0
-    displayName: 'Use Node 8.x'
+    displayName: 'Use Node 10.16.x'
     inputs:
-      versionSpec: 8.x
+      versionSpec: 10.16.x
 
-  - script: npm install
+  - script: yarn install
     displayName: "Install Dependencies"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
-  - script: npm run compile
+  - script: yarn run compile
     displayName: "Compile Sources"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
-  - script: npm run pr-check
+  - script: yarn run pr-check
     displayName: 'Validate Extension/package.json'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
-  - script: npm run tslint
+  - script: yarn run lint
     displayName: 'Run Linter'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
@@ -34,23 +34,21 @@ jobs:
       disown -ar
     displayName: 'Start xvfb'
 
-  - script: npm run pretest
+  - script: yarn run pretest
     displayName: "Compile Test Sources"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
 
-  - script: 'npm run unitTests'
+  - script: 'yarn run unitTests'
     displayName: 'Run unit tests'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
+    env:
+      DISPLAY: :10
 
-  - script: 'node node_modules/vscode/bin/test'
+  - script: 'yarn run integrationTests'
     displayName: 'Run languageServer integration tests'
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
     env:
       DISPLAY: :10
-      CODE_TESTS_PATH: '$(Build.SourcesDirectory)/Extension/out/test/integrationTests/languageServer'
-      CODE_EXTENSIONS_PATH: '$(Build.SourcesDirectory)/Extension'
-      CODE_TESTS_WORKSPACE: '$(Build.SourcesDirectory)/Extension/test/integrationTests/testAssets/SimpleCppProject'
-      CODE_DISABLE_EXTENSIONS: 1
 
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'

@@ -9,11 +9,13 @@
 		"sourceMap": true,
 		"rootDir": ".",
 		"removeComments": true,
-		"noImplicitUseStrict": true
+		"noUnusedLocals": true,
+		"strictNullChecks": true,
+		"strict": true
 	},
 	"include": [
 		"src/**/*.ts",
 		"./node_modules/vscode/vscode.d.ts",
-		"./node_modules/vscode/lib/*",
+		"./node_modules/vscode/lib/*"
 	]
 }

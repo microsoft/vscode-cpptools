@@ -8,6 +8,7 @@ import { PackageVersion } from './packageVersion';
 import * as util from './common';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
+import * as vscode from 'vscode';
 
 const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
 
@@ -34,11 +35,10 @@ interface Build {
 * @return The download URL of the VSIX
 */
 function getVsixDownloadUrl(build: Build, vsixName: string): string {
-    const downloadUrl: string = build.assets.find(asset => {
-        return asset.name === vsixName;
-    }).browser_download_url;
+    const asset: Asset | undefined = build.assets.find(asset => asset.name === vsixName);
+    const downloadUrl: string | null = (asset) ? asset.browser_download_url : null;
     if (!downloadUrl) {
-        throw new Error('Failed to find VSIX: ' + vsixName + ' in build: ' + build.name);
+        throw new Error(`Failed to find VSIX: ${vsixName} in build: ${build.name}`);
     }
     return downloadUrl;
 }
@@ -96,7 +96,7 @@ function isArrayOfBuilds(input: any): input is Build[] {
  * @return VSIX filename for the extension's releases matched to the user's platform.
  */
 function vsixNameForPlatform(info: PlatformInformation): string {
-    const vsixName: string = function(platformInfo): string {
+    const vsixName: string | undefined = function(platformInfo): string | undefined {
         switch (platformInfo.platform) {
             case 'win32': return 'cpptools-win32.vsix';
             case 'darwin': return 'cpptools-osx.vsix';
@@ -111,7 +111,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
         }
     }(info);
     if (!vsixName) {
-        throw new Error('Failed to match VSIX name for: ' + info.platform + ':' + info.architecture);
+        throw new Error(`Failed to match VSIX name for: ${info.platform}: ${info.architecture}`);
     }
     return vsixName;
 }
@@ -130,7 +130,7 @@ export interface BuildInfo {
  * @return Download URL for the extension VSIX package that the user should install. If the user
  * does not need to update, resolves to undefined.
  */
-export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo> {
+export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo | undefined> {
     return getReleaseJson()
         .then(builds => {
             if (!builds || builds.length === 0) {
@@ -141,7 +141,7 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
             // Allows testing pre-releases without accidentally downgrading to the latest version
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
             const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-            if (!testingInsidersVsixInstall && (userVersion.isGreaterThan(latestVersion) || (userVersion.suffix && userVersion.suffix !== 'insiders'))) {
+            if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion)))) {
                 return undefined;
             }
 
@@ -155,6 +155,9 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
                 const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
                 const vsixName: string = vsixNameForPlatform(platformInfo);
                 const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
+                if (!downloadUrl) {
+                    return undefined;
+                }
                 return { downloadUrl: downloadUrl, name: build.name };
             } catch (error) {
                 return Promise.reject(error);
@@ -169,12 +172,16 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
  * @param updateChannel The user's updateChannel setting.
  * @return The Build if the user should update to it, otherwise undefined.
  */
-function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build {
+function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build | undefined {
+    if (!vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+        return undefined;
+    }
+
     // Get predicates to determine the build to install, if any
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
-        needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || target.isGreaterThan(installed);
+        needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
         useBuild = (build: Build): boolean => true;
     } else if (updateChannel === 'Default') {
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
@@ -184,7 +191,7 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
     }
 
     // Get the build to install
-    const targetBuild: Build = builds.find(useBuild);
+    const targetBuild: Build | undefined = builds.find(useBuild);
     if (!targetBuild) {
         throw new Error('Failed to determine installation candidate');
     }
@@ -213,7 +220,7 @@ function isRateLimit(input: any): input is RateLimit {
     return input && isRate(input.rate);
 }
 
-async function getRateLimit(): Promise<RateLimit> {
+async function getRateLimit(): Promise<RateLimit | undefined> {
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
     const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
         .catch((error) => {
@@ -223,7 +230,7 @@ async function getRateLimit(): Promise<RateLimit> {
             }
         });
     if (!data) {
-        return Promise.resolve(null);
+        return Promise.resolve(undefined);
     }
 
     let rateLimit: any;
@@ -241,15 +248,15 @@ async function getRateLimit(): Promise<RateLimit> {
 }
 
 async function rateLimitExceeded(): Promise<boolean> {
-    const rateLimit: RateLimit = await getRateLimit();
-    return rateLimit && rateLimit.rate.remaining <= 0;
+    const rateLimit: RateLimit | undefined = await getRateLimit();
+    return rateLimit !== undefined && rateLimit.rate.remaining <= 0;
 }
 
 /**
  * Download and parse the release list JSON from the GitHub API into a Build[].
  * @return Information about the released builds of the C/C++ extension.
  */
-async function getReleaseJson(): Promise<Build[]> {
+async function getReleaseJson(): Promise<Build[] | undefined> {
     if (await rateLimitExceeded()) {
         throw new Error('Failed to stay within GitHub API rate limit');
     }
@@ -266,7 +273,7 @@ async function getReleaseJson(): Promise<Build[]> {
             }
         });
     if (!data) {
-        return Promise.resolve(null);
+        return Promise.resolve(undefined);
     }
 
     // Parse the file

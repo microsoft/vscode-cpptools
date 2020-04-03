@@ -18,44 +18,46 @@ let cache: SettingsTracker;
 
 export class SettingsTracker {
     private previousCppSettings: { [key: string]: any } = {};
-    private resource: vscode.Uri;
+    private resource: vscode.Uri | undefined;
 
-    constructor(resource: vscode.Uri) {
+    constructor(resource: vscode.Uri | undefined) {
         this.resource = resource;
         this.collectSettings(() => true);
     }
 
     public getUserModifiedSettings(): { [key: string]: string } {
-        let filter: FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => {
-            return !this.areEqual(val, settings.inspect(key).defaultValue);
-        };
+        let filter: FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => !this.areEqual(val, settings.inspect(key)?.defaultValue);
         return this.collectSettings(filter);
     }
 
     public getChangedSettings(): { [key: string]: string } {
-        let filter: FilterFunction = (key: string, val: string) => {
-            return !(key in this.previousCppSettings) || !this.areEqual(val, this.previousCppSettings[key]);
-        };
+        let filter: FilterFunction = (key: string, val: string) => !(key in this.previousCppSettings) || !this.areEqual(val, this.previousCppSettings[key]);
         return this.collectSettings(filter);
     }
 
     private collectSettings(filter: FilterFunction): { [key: string]: string } {
-        let settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.resource);
+        const settingsResourceScope: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.resource);
+        const settingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
+        const selectCorrectlyScopedSettings = (rawSetting: any): vscode.WorkspaceConfiguration =>
+            (!rawSetting || rawSetting.scope === "resource" || rawSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
         let result: { [key: string]: string } = {};
-
-        for (let key in settings) {
-            let val: any = this.getSetting(settings, key);
+        for (const key in settingsResourceScope) {
+            const rawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+            const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting);
+            const val: any = this.getSetting(correctlyScopedSettings, key);
             if (val === undefined) {
                 continue;
             }
             if (val instanceof Object && !(val instanceof Array)) {
-                for (let subKey in val) {
-                    let newKey: string = key + "." + subKey;
-                    let subVal: any = this.getSetting(settings, newKey);
+                for (const subKey in val) {
+                    const newKey: string = key + "." + subKey;
+                    const newRawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + newKey];
+                    const correctlyScopedSubSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(newRawSetting);
+                    const subVal: any = this.getSetting(correctlyScopedSubSettings, newKey);
                     if (subVal === undefined) {
                         continue;
                     }
-                    let entry: KeyValuePair = this.filterAndSanitize(newKey, subVal, settings, filter);
+                    const entry: KeyValuePair | undefined = this.filterAndSanitize(newKey, subVal, correctlyScopedSubSettings, filter);
                     if (entry && entry.key && entry.value) {
                         result[entry.key] = entry.value;
                     }
@@ -63,7 +65,7 @@ export class SettingsTracker {
                 continue;
             }
 
-            let entry: KeyValuePair = this.filterAndSanitize(key, val, settings, filter);
+            const entry: KeyValuePair | undefined = this.filterAndSanitize(key, val, correctlyScopedSettings, filter);
             if (entry && entry.key && entry.value) {
                 result[entry.key] = entry.value;
             }
@@ -74,7 +76,7 @@ export class SettingsTracker {
 
     private getSetting(settings: vscode.WorkspaceConfiguration, key: string): any {
         // Ignore methods and settings that don't exist
-        if (settings.inspect(key).defaultValue !== undefined) {
+        if (settings.inspect(key)?.defaultValue !== undefined) {
             let val: any = settings.get(key);
             if (val instanceof Object) {
                 return val; // It's a sub-section.
@@ -83,7 +85,7 @@ export class SettingsTracker {
             // Only return values that match the setting's type and enum (if applicable).
             let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
             if (curSetting) {
-                let type: string = this.typeMatch(val, curSetting["type"]);
+                let type: string | undefined = this.typeMatch(val, curSetting["type"]);
                 if (type) {
                     if (type !== "string") {
                         return val;
@@ -99,7 +101,7 @@ export class SettingsTracker {
         return undefined;
     }
 
-    private typeMatch(value: any, type?: string | string[]): string {
+    private typeMatch(value: any, type?: string | string[]): string | undefined {
         if (type) {
             if (type instanceof Array) {
                 for (let i: number = 0; i < type.length; i++) {
@@ -123,7 +125,7 @@ export class SettingsTracker {
         return undefined;
     }
 
-    private filterAndSanitize(key: string, val: any, settings: vscode.WorkspaceConfiguration, filter: FilterFunction): KeyValuePair {
+    private filterAndSanitize(key: string, val: any, settings: vscode.WorkspaceConfiguration, filter: FilterFunction): KeyValuePair | undefined {
         if (filter(key, val, settings)) {
             let value: string;
             this.previousCppSettings[key] = val;
@@ -156,12 +158,12 @@ export class SettingsTracker {
                     break;
                 }
                 case "commentContinuationPatterns": {
-                    value = this.areEqual(val, settings.inspect(key).defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
+                    value = this.areEqual(val, settings.inspect(key)?.defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     break;
                 }
                 default: {
                     if (key === "clang_format_path" || key === "intelliSenseCachePath" || key.startsWith("default.")) {
-                        value = this.areEqual(val, settings.inspect(key).defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
+                        value = this.areEqual(val, settings.inspect(key)?.defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     } else {
                         value = String(this.previousCppSettings[key]);
                     }
@@ -172,6 +174,7 @@ export class SettingsTracker {
             }
             return {key: key, value: value};
         }
+        return undefined;
     }
 
     private areEqual(value1: any, value2: any): boolean {
@@ -182,7 +185,7 @@ export class SettingsTracker {
     }
 }
 
-export function getTracker(resource: vscode.Uri): SettingsTracker {
+export function getTracker(resource: vscode.Uri | undefined): SettingsTracker {
     if (!cache) {
         cache = new SettingsTracker(resource);
     }
