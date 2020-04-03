@@ -58,7 +58,7 @@
         "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
-          "relative",
+          "autoDetect",
           "${workspaceFolder}"
         ],
         "pattern": {
