@@ -1,8 +1,7 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 import { Environment, ParsedEnvironmentFile } from '../../src/Debugger/ParsedEnvironmentFile';
 import * as assert from 'assert';
 
@@ -22,7 +21,7 @@ function assertEnvironmentEqual(env: Environment[], name: string, value: string)
 suite("ParsedEnvironmentFile", () => {
     test("Add single variable", () => {
         const content: string = `MyName=VALUE`;
-        const fakeConfig : Environment[] = [];
+        const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
@@ -31,7 +30,7 @@ suite("ParsedEnvironmentFile", () => {
 
     test("Handle quoted values", () => {
         const content: string = `MyName="VALUE"`;
-        const fakeConfig : Environment[] = [];
+        const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
@@ -40,7 +39,7 @@ suite("ParsedEnvironmentFile", () => {
 
     test("Handle BOM", () => {
         const content: string = "\uFEFFMyName=VALUE";
-        const fakeConfig : Environment[] = [];
+        const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
@@ -53,7 +52,7 @@ MyName1=Value1
 MyName2=Value2
 
 `;
-        const fakeConfig : Environment[] = [];
+        const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
@@ -67,7 +66,7 @@ MyName1=Value1
 MyName2=Value2
 
 `;
-        const initialEnv : Environment[] = [];
+        const initialEnv: Environment[] = [];
         initialEnv.push({name : "MyName1", value: "Value7"});
         initialEnv.push({name : "ThisShouldNotChange", value : "StillHere"});
 
@@ -85,7 +84,7 @@ MyName1=Value1
 # This is a comment in the middle of the file
 MyName2=Value2
 `;
-        const fakeConfig : Environment[] = [];
+        const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
@@ -100,7 +99,7 @@ MyName1=Value1
 MyName2=Value2
 
 `;
-        const fakeConfig : Environment[] = [];
+        const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
         assert(result.Warning.startsWith("Ignoring non-parseable lines in envFile TestEnvFileName"), 'Checking if warning exists');
