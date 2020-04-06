@@ -10,7 +10,7 @@ async function main() {
 
         // The path to the extension test script
         // Passed to --extensionTestsPath
-        const extensionTestsPath  = path.resolve(__dirname, './index');
+        const extensionTestsPath = path.resolve(__dirname, './index');
 
         const launchArgs = [ "--disable-extensions" ];
 
