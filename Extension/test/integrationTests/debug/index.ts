@@ -9,7 +9,7 @@ export function run(): Promise<void> {
     });
     mocha.useColors(true);
 
-    const testsRoot  = __dirname;
+    const testsRoot = __dirname;
 
     return new Promise((c, e) => {
         glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
