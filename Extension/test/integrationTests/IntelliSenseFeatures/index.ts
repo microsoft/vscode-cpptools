@@ -1,19 +1,15 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All Rights Reserved.
- * See 'LICENSE' in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
 
 export function run(): Promise<void> {
     // Create the mocha test
-    const mocha: Mocha = new Mocha({
+    const mocha = new Mocha({
         ui: 'tdd'
     });
     mocha.useColors(true);
 
-    const testsRoot: string  = __dirname;
+    const testsRoot  = __dirname;
 
     return new Promise((c, e) => {
         glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
