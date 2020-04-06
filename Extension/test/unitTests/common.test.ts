@@ -2,7 +2,6 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-
 import * as assert from "assert";
 import { resolveVariables, escapeForSquiggles } from "../../src/common";
 
@@ -24,15 +23,15 @@ suite("Common Utility validation", () => {
 
         test("env input with tilde", () => {
             inputAndEnvironment("${path}/test", {
-                    path: home
-                })
+                path: home
+            })
                 .shouldResolveTo(`${home}/test`);
         });
 
         test("solo env input resulting in array", () => {
             inputAndEnvironment("${test}", {
-                    test: ["foo", "bar"]
-                })
+                test: ["foo", "bar"]
+            })
                 .shouldResolveTo("foo;bar");
         });
 
@@ -227,9 +226,7 @@ suite("Common Utility validation", () => {
 
         function resolveVariablesWithInput(input: string): ResolveTestFlowEnvironment {
             return {
-                withEnvironment: (additionalEnvironment: {[key: string]: string | string[]}) => {
-                    return inputAndEnvironment(input, additionalEnvironment);
-                },
+                withEnvironment: (additionalEnvironment: {[key: string]: string | string[]}) => inputAndEnvironment(input, additionalEnvironment),
                 shouldLookupSymbol: (symbol: string) => {
                     const environment: {[key: string]: string | string[]} = {};
                     environment[symbol] = success;
@@ -241,7 +238,7 @@ suite("Common Utility validation", () => {
 
         function inputAndEnvironment(input: string, additionalEnvironment: {[key: string]: string | string[]}): ResolveTestFlowAssert {
             return {
-                    shouldResolveTo: (expected: string) => {
+                shouldResolveTo: (expected: string) => {
                     const actual: string = resolveVariables(input, additionalEnvironment);
                     const msg: string = `Expected ${expected}. Got ${actual} with input ${input} and environment ${JSON.stringify(additionalEnvironment)}.`;
                     assert.equal(actual, expected, msg);
