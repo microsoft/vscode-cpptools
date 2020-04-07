@@ -1,8 +1,7 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getLanguageConfigFromPatterns } from '../../../src/LanguageServer/languageConfig';
@@ -78,7 +77,7 @@ suite("multiline comment setting tests", function(): void {
 
 });
 
-/******************************************************************************/
+/* **************************************************************************** */
 
 function cppPropertiesPath(): string {
     return vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json";
@@ -93,7 +92,7 @@ async function changeCppProperties(cppProperties: config.ConfigurationJson, disp
     return new Promise(r => setTimeout(r, 4000));
 }
 
-/******************************************************************************/
+/* **************************************************************************** */
 
 suite("extensibility tests v3", function(): void {
     let cpptools: apit.CppToolsTestApi;
@@ -162,10 +161,10 @@ suite("extensibility tests v3", function(): void {
         disposables.push(cpptools);
 
         await changeCppProperties({
-                configurations: [ {name: "test3", configurationProvider: provider.extensionId} ],
-                version: 4
-            },
-            disposables);
+            configurations: [ {name: "test3", configurationProvider: provider.extensionId} ],
+            version: 4
+        },
+        disposables);
     });
 
     suiteTeardown(function(): void {
@@ -198,7 +197,7 @@ suite("extensibility tests v3", function(): void {
     });
 });
 
-/******************************************************************************/
+/* **************************************************************************** */
 
 suite("extensibility tests v2", function(): void {
     let cpptools: apit.CppToolsTestApi;
@@ -255,10 +254,10 @@ suite("extensibility tests v2", function(): void {
         disposables.push(cpptools);
 
         await changeCppProperties({
-                configurations: [ {name: "test2", configurationProvider: provider.extensionId} ],
-                version: 4
-            },
-            disposables);
+            configurations: [ {name: "test2", configurationProvider: provider.extensionId} ],
+            version: 4
+        },
+        disposables);
     });
 
     suiteTeardown(function(): void {
@@ -292,7 +291,7 @@ suite("extensibility tests v2", function(): void {
     });
 });
 
-/******************************************************************************/
+/* **************************************************************************** */
 
 suite("extensibility tests v1", function(): void {
     let cpptools: apit.CppToolsTestApi;
@@ -334,10 +333,10 @@ suite("extensibility tests v1", function(): void {
         disposables.push(cpptools);
 
         await changeCppProperties({
-                configurations: [ {name: "test1", configurationProvider: provider.extensionId} ],
-                version: 4
-            },
-            disposables);
+            configurations: [ {name: "test1", configurationProvider: provider.extensionId} ],
+            version: 4
+        },
+        disposables);
     });
 
     suiteTeardown(function(): void {
@@ -369,7 +368,7 @@ suite("extensibility tests v1", function(): void {
     });
 });
 
-/******************************************************************************/
+/* **************************************************************************** */
 
 suite("extensibility tests v0", function(): void {
     let cpptools: apit.CppToolsTestApi;
