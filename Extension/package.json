@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.42.0"
+    "vscode": "^1.43.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -58,7 +58,7 @@
         "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
-          "relative",
+          "autoDetect",
           "${workspaceFolder}"
         ],
         "pattern": {
@@ -1556,7 +1556,8 @@
     "eslint/acorn": "^7.1.1",
     "gulp-eslint/acorn": "^7.1.1",
     "**/mkdirp/minimist": "^0.2.1",
-    "yargs-parser": "^13.1.2"
+    "yargs-parser": "^13.1.2",
+    "mocha/diff": "^3.5.0"
   },
   "runtimeDependencies": [
     {
