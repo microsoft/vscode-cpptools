@@ -337,6 +337,16 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
 
 interface GetFoldingRangesParams {
     uri: string;
+    id: number;
+}
+
+interface GetFoldingRangesResult {
+    canceled: boolean;
+    ranges: Range[];
+}
+
+interface AbortRequestParams {
+    id: number;
 }
 
 // Requests
@@ -347,7 +357,7 @@ const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void>
 const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void> = new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void>('cpptools/getCodeActions');
 const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void>('cpptools/getDocumentSymbols');
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
-const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, Range[], void, void> = new RequestType<GetFoldingRangesParams, Range[], void, void>('cpptools/getFoldingRanges');
+const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -377,6 +387,7 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
+const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -407,6 +418,8 @@ interface ReferencesCancellationState {
 }
 
 let referencesPendingCancellations: ReferencesCancellationState[] = [];
+
+let abortRequestId: number = 0;
 
 class ClientModel {
     public isTagParsing: DataBinding<boolean>;
@@ -972,22 +985,29 @@ export class DefaultClient implements Client {
                         }
                         provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
                             token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
+                            let id: number = ++abortRequestId;
                             let params: GetFoldingRangesParams = {
+                                id: id,
                                 uri: document.uri.toString()
                             };
                             return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
                                     this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
                                         .then((ranges) => {
-                                            let result: vscode.FoldingRange[] = [];
-                                            ranges.forEach((range) => {
-                                                result.push({
-                                                    start: range.start.line,
-                                                    end: range.end.line
+                                            if (ranges.canceled) {
+                                                reject();
+                                            } else {
+                                                let result: vscode.FoldingRange[] = [];
+                                                ranges.ranges.forEach((range) => {
+                                                    result.push({
+                                                        start: range.start.line,
+                                                        end: range.end.line
+                                                    });
                                                 });
-                                            });
-                                            resolve(result);
+                                                resolve(result);
+                                            }
                                         });
+                                    token.onCancellationRequested(e => this.client.abortRequest(id));
                                 });
                             });
                         }
@@ -2546,6 +2566,13 @@ export class DefaultClient implements Client {
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
         this.model.referencesCommandMode.Value = mode;
+    }
+
+    private abortRequest(id: number): void {
+        let params: AbortRequestParams = {
+            id: id
+        };
+        languageClient.sendNotification(AbortRequestNotification, params);
     }
 }
 
