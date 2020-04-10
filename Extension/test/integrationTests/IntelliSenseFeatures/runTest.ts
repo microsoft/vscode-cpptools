@@ -4,12 +4,9 @@ import { runTests } from 'vscode-test';
 
 async function main() {
     try {
-        console.log("__dirname: " + __dirname);
-
         // The folder containing the Extension Manifest package.json
         // Passed to `--extensionDevelopmentPath`
         const extensionDevelopmentPath = path.resolve(__dirname, '../../../../');
-        console.log("extensionDevelopmentPath: " + extensionDevelopmentPath);
 
         // The path to the extension test script
         // Passed to --extensionTestsPath
@@ -21,7 +18,7 @@ async function main() {
         if (!testWorkspace) {
             console.error("Unable to read process.env.TESTS_WORKSPACE");
         } else {
-            console.log("testWorkspace: " + testWorkspace);
+            console.log("TESTS_WORKSPACE: " + testWorkspace);
         }
 
         const launchArgs = [ "--disable-extensions", testWorkspace ];
