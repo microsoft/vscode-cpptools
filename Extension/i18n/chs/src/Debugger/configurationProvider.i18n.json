@@ -11,7 +11,7 @@
 	"lldb.framework.install.xcode": "详细信息",
 	"lldb.framework.not.found": "找不到用于 lldb-mi 的 \"LLDB.framework\"。请安装 XCode 或 XCode 命令行工具。",
 	"lldb.find.failed": "缺少 lldb-mi 可执行文件的依赖项“{0}”。",
-	"lldb.search.paths": "已搜索范围:",
+	"lldb.search.paths": "搜索范围:",
 	"lldb.install.help": "要解决此问题，请通过 Apple App Store 安装 XCode，或通过在终端窗口运行“{0}”来安装 XCode 命令行工具。",
 	"envfale.failed": "未能使用 {0}。原因: {1}",
 	"replacing.sourcepath": "正在将 {0}“{1}”替换为“{2}”。",
