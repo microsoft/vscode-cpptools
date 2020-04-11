@@ -12,7 +12,16 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './index');
 
-        const launchArgs = [ "--disable-extensions" ];
+        // Note, when running tests locally, replace testWorkspace with local path to "~/Vcls-vscode-test/SingleRootProject"
+        // in the Launch.json file.
+        let testWorkspace: string | undefined = process.env.TESTS_WORKSPACE;
+        if (!testWorkspace) {
+            console.error("Unable to read process.env.TESTS_WORKSPACE");
+        } else {
+            console.log("TESTS_WORKSPACE: " + testWorkspace);
+        }
+
+        const launchArgs = [ "--disable-extensions", testWorkspace ];
 
         // Download VS Code, unzip it and run the integration test
         await runTests({ launchArgs, extensionDevelopmentPath, extensionTestsPath });
