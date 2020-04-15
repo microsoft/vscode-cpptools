@@ -44,6 +44,7 @@ const configProviderTimeout: number = 2000;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
+let languageClientCrashedNeedsRestart: boolean = false;
 let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
@@ -606,7 +607,10 @@ export class DefaultClient implements Client {
         this.colorizationSettings = new ColorizationSettings(rootUri);
         try {
             let firstClient: boolean = false;
-            if (!languageClient) {
+            if (!languageClient || languageClientCrashedNeedsRestart) {
+                if (languageClientCrashedNeedsRestart) {
+                    languageClientCrashedNeedsRestart = false;
+                }
                 languageClient = this.createLanguageClient(allClients);
                 clientCollection = allClients;
                 languageClient.registerProposedFeatures();
@@ -1155,6 +1159,7 @@ export class DefaultClient implements Client {
                 error: () => ErrorAction.Continue,
                 closed: () => {
                     this.crashTimes.push(Date.now());
+                    languageClientCrashedNeedsRestart = true;
                     if (this.crashTimes.length < 5) {
                         let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
                         newClient.crashTimes = this.crashTimes;
@@ -2449,7 +2454,7 @@ export class DefaultClient implements Client {
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
-        if (this.languageClient !== undefined && this.configuration !== undefined) {
+        if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
         }
