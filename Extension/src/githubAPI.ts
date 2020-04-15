@@ -15,7 +15,7 @@ const testingInsidersVsixInstall: boolean = false; // Change this to true to ena
 /**
  * The object representation of a Build Asset. Each Asset corresponds to information about a release file on GitHub.
  */
-interface Asset {
+export interface Asset {
     name: string;
     browser_download_url: string;
 }
@@ -24,7 +24,7 @@ interface Asset {
  * The object representation of a release in the GitHub API's release JSON.
  * Named Build so as to reduce confusion between a "Release" release and "Insiders" release.
  */
-interface Build {
+export interface Build {
     name: string;
     assets: Asset[];
 }
@@ -172,8 +172,12 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
  * @param updateChannel The user's updateChannel setting.
  * @return The Build if the user should update to it, otherwise undefined.
  */
-function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build | undefined {
+export function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build | undefined {
     if (!vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+        return undefined;
+    }
+    const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
+    if ((updateChannel === 'Insiders') && (userVersion.suffix && userVersion.suffix === 'insiders') && (userVersion.isGreaterThan(latestVersion))) {
         return undefined;
     }
 
