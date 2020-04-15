@@ -35,7 +35,7 @@
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "控制非活动预处理程序块的字体颜色。输入的格式为十六进制颜色代码或有效的主题颜色。如果未设置，则默认为编辑器的语法颜色方案。此设置仅在启用非活动区域变暗时适用。",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "控制非活动预处理程序块的背景颜色。输入的格式为十六进制颜色代码或有效的主题颜色。如果未设置，则默认为透明。此设置仅在启用了非活动区域变暗时适用。",
 	"c_cpp.configuration.formatting.description": "“默认”启用代码格式设置。“已禁用”禁用代码格式设置。",
-	"c_cpp.configuration.loggingLevel.description": "输出面板中日志记录的详细程度。从最低详细程度到最高详细程度的顺序为: None < Error < Warning < Information < Debug。",
+	"c_cpp.configuration.loggingLevel.description": "输出面板中日志记录的详细程度。从最低详细程度到最高详细程度的顺序为: None < Error < Warning < Information < Debug.",
 	"c_cpp.configuration.autoAddFileAssociations.description": "控制当文件是来自 C/C++ 文件的导航操作的目标时，是否将文件自动添加到 files.associations。",
 	"c_cpp.configuration.workspaceParsingPriority.description": "控制在分析非活动工作区文件时是否使用休眠以避免 CPU 使用率达到 100%。最高/高/中等/低的值约对应于 100/75/50/25% 的 CPU 使用率。",
 	"c_cpp.configuration.workspaceSymbols.description": "调用“转到工作区中的符号”时要包含在查询结果中的符号",
