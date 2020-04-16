@@ -1562,15 +1562,15 @@ export class DefaultClient implements Client {
                 if (!config) {
                     return;
                 }
-                // TODO: This is a hack to get around CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
-                let foundMatch: boolean = false;
-                for (let c of config.browsePath) {
-                    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
-                        foundMatch = true;
-                        break;
+                if (currentProvider.version < Version.v3) {
+                    // This is to get around the (fixed) CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
+                    for (let c of config.browsePath) {
+                        if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
+                            this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                            break;
+                        }
                     }
-                }
-                if (foundMatch) {
+                } else {
                     this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
                 }
                 if (!hasCompleted) {

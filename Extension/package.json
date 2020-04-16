@@ -1487,6 +1487,7 @@
     "lint": "gulp lint",
     "unitTests": "tsc -p test.tsconfig.json && node ./out/test/unitTests/runTest.js",
     "integrationTests": "tsc -p test.tsconfig.json && node ./out/test/integrationTests/languageServer/runTest.js",
+    "intelliSenseFeaturesTests": "tsc -p test.tsconfig.json && node ./out/test/integrationTests/IntelliSenseFeatures/runTest.js",
     "import-edge-strings": "node ./import_edge_strings.js"
   },
   "devDependencies": {
