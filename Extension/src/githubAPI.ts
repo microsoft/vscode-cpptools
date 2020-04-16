@@ -9,6 +9,7 @@ import * as util from './common';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
 import * as vscode from 'vscode';
+import * as telemetry from './telemetry';
 
 const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
 
@@ -145,7 +146,18 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
                 return undefined;
             }
 
-            return getTargetBuild(builds, userVersion, updateChannel);
+            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+            if (targetBuild === undefined) {
+                // no oction
+                telemetry.logLanguageServerEvent("NoUPgradeDowngrade");
+            } else if (userVersion.isGreaterThan(new PackageVersion(targetBuild.name))) {
+                // downgrade
+                telemetry.logLanguageServerEvent("DowngradeUserVersion");
+            } else {
+                // upgrade
+                telemetry.logLanguageServerEvent("UpradeUserVersion");
+            }
+            return targetBuild;
         })
         .then(async build => {
             if (!build) {
@@ -186,9 +198,11 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
         needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
-        useBuild = (build: Build): boolean => true;
+        // check if the assetes are available (insider)
+        useBuild = isBuild;
     } else if (updateChannel === 'Default') {
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
+        // look for the latest released build (not insider)
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
     } else {
         throw new Error('Incorrect updateChannel setting provided');
@@ -203,6 +217,8 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     // Check current version against target's version to determine if the installation should happen
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
     if (needsUpdate(userVersion, targetVersion)) {
+        if (targetVersion.isEqual(userVersion)) {
+            return undefined; }
         return targetBuild;
     }
     return undefined;
