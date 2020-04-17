@@ -1423,12 +1423,12 @@ export class CppProperties {
                             if (!pathExists) {
                                 message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                                 newSquiggleMetrics.PathNonExistent++;
+                                let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                                    new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
+                                        document.positionAt(envTextStartOffSet + endOffset)),
+                                    message, vscode.DiagnosticSeverity.Warning);
+                                diagnostics.push(diagnostic);
                             }
-                            let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                                new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
-                                    document.positionAt(envTextStartOffSet + endOffset)),
-                                message, vscode.DiagnosticSeverity.Warning);
-                            diagnostics.push(diagnostic);
                         }
                     }
                 }
