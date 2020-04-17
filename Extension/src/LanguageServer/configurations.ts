@@ -1300,8 +1300,16 @@ export class CppProperties {
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
+            let processedPaths: Set<string> = new Set<string>();
+
             // Validate paths
             for (let curPath of paths) {
+                if (processedPaths.has(curPath)) {
+                    // Avoid duplicate squiggles for the same line.
+                    // Squiggles for the same path on different lines are already handled below.
+                    continue;
+                }
+                processedPaths.add(curPath);
                 const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
                 // Resolve special path cases.
                 if (curPath === "${default}") {
