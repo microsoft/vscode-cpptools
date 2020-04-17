@@ -394,7 +394,12 @@
             "",
             "c89",
             "c99",
-            "c11"
+            "c11",
+            "c17",
+            "gnu89",
+            "gnu99",
+            "gnu11",
+            "gnu17"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
           "scope": "resource"
@@ -408,7 +413,13 @@
             "c++11",
             "c++14",
             "c++17",
-            "c++20"
+            "c++20",
+            "gnu++98",
+            "gnu++03",
+            "gnu++11",
+            "gnu++14",
+            "gnu++17",
+            "gnu++20"
           ],
           "description": "%c_cpp.configuration.default.cppStandard.description%",
           "scope": "resource"
