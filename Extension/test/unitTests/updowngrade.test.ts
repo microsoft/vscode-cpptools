@@ -8,10 +8,7 @@ import { resolveVariables, escapeForSquiggles } from "../../src/common";
 import { Build, Asset, getTargetBuild } from "../../src/githubAPI";
 import { PackageVersion } from '../../src/packageVersion';
 
-
 suite("UpgradeDowngrade", () => {
-
-    const updateChannel: string = "Insiders";
 
     const asset_win32: Asset = {name: "cpptools-win32.vsix", browser_download_url: "https://github.com/microsoft/vscode-cpptools/releases/download/0.27.0/cpptools-win32.vsix"};
     const asset_linux: Asset = {name: "cpptools-linux.vsix", browser_download_url: "https://github.com/microsoft/vscode-cpptools/releases/download/0.27.0/cpptools-linux.vsix"};
@@ -25,117 +22,156 @@ suite("UpgradeDowngrade", () => {
     const insider1: string = "0.27.1-insiders";
     const release0: string = "0.27.0";
 
-    suite("Downgrade", () => {
-        suite("Internal Testing, no Downgrade", () => {
-            test("Insider to Release", () => {
+    suite("DefaultChannel", () => {
+        const updateChannel: string = "Default";
+        const extra_insider2: string = "0.27.2-insiders2";
+        const extra_insider1: string = "0.27.2-insiders";
+        suite("Automatic Upgrade", () => {
+            test("Release to Release", () => {
                 const builds: Build[] = [{
-                    name: release0, assets: four_assets}];
-
-                const userVersion: PackageVersion = new PackageVersion(insider1);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild, undefined);
-            });
-
-            test("Insider to Insider", () => {
-                const builds: Build[] = [{
+                    name: extra_insider2, assets: []}, {
+                    name: extra_insider1, assets: four_assets}, {
+                    name: release1, assets: four_assets}, {
+                    name: insider3, assets: four_assets}, {
                     name: insider2, assets: four_assets}, {
                     name: insider1, assets: four_assets}, {
                     name: release0, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(insider3);
+                const userVersion: PackageVersion = new PackageVersion(release0);
                 const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild, undefined);
-            });
-        });
-        suite("Insider Users, Downgrade", () => {
-            test("Insider to Release", () => {
-                const builds: Build[] = [{
-                    name: insider1, assets: []}, {
-                    name: release0, assets: four_assets}];
-
-                const userVersion: PackageVersion = new PackageVersion(insider1);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild.name, release0);
-            });
-
-            test("Insider to Insider", () => {
-                const builds: Build[] = [{
-                    name: insider2, assets: []}, {
-                    name: insider1, assets: four_assets}, {
-                    name: release0, assets: four_assets}];
-
-                const userVersion: PackageVersion = new PackageVersion(insider2);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild.name, insider1);
+                assert.equal(targetBuild.name, release1);
             });
         });
     });
 
-    suite("Upgrade", () => {
-        suite("Automatic Upgrade", () => {
-            test("Release to Release", () => {
-                const builds: Build[] = [{
-                    name: release1, assets: four_assets}, {
-                    name: insider3, assets: four_assets}, {
-                    name: insider2, assets: four_assets}];
+    suite("InsidersChannel", () => {
+        const updateChannel: string = "Insiders";
+        suite("Downgrade", () => {
+            suite("Internal Testing, no Downgrade", () => {
+                test("Insider to Release", () => {
+                    const builds: Build[] = [{
+                        name: release0, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(release0);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild.name, release1);
+                    const userVersion: PackageVersion = new PackageVersion(insider1);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild, undefined);
+                });
+                test("Insider to Insider", () => {
+                    const builds: Build[] = [{
+                        name: insider2, assets: four_assets}, {
+                        name: insider1, assets: four_assets}, {
+                        name: release0, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(insider3);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild, undefined);
+                });
+                test("Release to Insider", () => {
+                    const builds: Build[] = [{
+                        name: insider3, assets: four_assets}, {
+                        name: insider2, assets: four_assets}, {
+                        name: insider1, assets: four_assets}, {
+                        name: release0, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(release1);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild, undefined);
+                });
             });
-            test("Insider to Release", () => {
-                const builds: Build[] = [{
-                    name: release1, assets: four_assets}, {
-                    name: insider3, assets: four_assets}, {
-                    name: insider2, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(insider3);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild.name, release1);
+            suite("Insider Users, Downgrade", () => {
+                test("Insider to Release", () => {
+                    const builds: Build[] = [{
+                        name: insider3, assets: []}, {
+                        name: insider2, assets: []}, {
+                        name: insider1, assets: []}, {
+                        name: release0, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(insider3);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild.name, release0);
+                });
+                test("Insider to Insider", () => {
+                    const builds: Build[] = [{
+                        name: insider3, assets: []}, {
+                        name: insider2, assets: []}, {
+                        name: insider1, assets: four_assets}, {
+                        name: release0, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(insider3);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild.name, insider1);
+                });
             });
         });
-        suite("Asset Checking Upgrade", () => {
-            test("Release to Insider, Upgrade", () => {
-                const builds: Build[] = [{
-                    name: insider1, assets: four_assets}, {
-                    name: release0, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(release0);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild.name, insider1);
+        suite("Upgrade", () => {
+            suite("Automatic Upgrade", () => {
+                test("Release to Release", () => {
+                    const builds: Build[] = [{
+                        name: release1, assets: four_assets}, {
+                        name: insider3, assets: four_assets}, {
+                        name: insider2, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(release0);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild.name, release1);
+                });
+                test("Insider to Release", () => {
+                    const builds: Build[] = [{
+                        name: release1, assets: four_assets}, {
+                        name: insider3, assets: four_assets}, {
+                        name: insider2, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(insider2);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild.name, release1);
+                });
             });
-            test("Release to Insider, no Upgrade", () => {
-                const builds: Build[] = [{
-                    name: insider2, assets: []}, {
-                    name: insider1, assets: []}, {
-                    name: release0, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(release0);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild, undefined);
-            });
-            test("Insider to Insider, Upgrade", () => {
-                const builds: Build[] = [{
-                    name: insider3, assets: []}, {
-                    name: insider2, assets: four_assets}, {
-                    name: insider1, assets: four_assets}, {
-                    name: release0, assets: four_assets}];
+            suite("Asset Checking Upgrade", () => {
+                test("Release to Insider, Upgrade", () => {
+                    const builds: Build[] = [{
+                        name: insider2, assets: []}, {
+                        name: insider1, assets: four_assets}, {
+                        name: release0, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(insider1);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild.name, insider2);
-            });
-            test("Insider to Insider, no Upgrade", () => {
-                const builds: Build[] = [{
-                    name: insider3, assets: []}, {
-                    name: insider2, assets: four_assets}, {
-                    name: release0, assets: four_assets}];
+                    const userVersion: PackageVersion = new PackageVersion(release0);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild.name, insider1);
+                });
+                test("Release to Insider, no Upgrade", () => {
+                    const builds: Build[] = [{
+                        name: insider2, assets: []}, {
+                        name: insider1, assets: []}, {
+                        name: release0, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(insider2);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild, undefined);
+                    const userVersion: PackageVersion = new PackageVersion(release0);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild, undefined);
+                });
+                test("Insider to Insider, Upgrade", () => {
+                    const builds: Build[] = [{
+                        name: insider3, assets: []}, {
+                        name: insider2, assets: four_assets}, {
+                        name: insider1, assets: four_assets}, {
+                        name: release0, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(insider1);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild.name, insider2);
+                });
+                test("Insider to Insider, no Upgrade", () => {
+                    const builds: Build[] = [{
+                        name: insider3, assets: []}, {
+                        name: insider2, assets: four_assets}, {
+                        name: release0, assets: four_assets}];
+
+                    const userVersion: PackageVersion = new PackageVersion(insider2);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    assert.equal(targetBuild, undefined);
+                });
             });
         });
     });
 });
-

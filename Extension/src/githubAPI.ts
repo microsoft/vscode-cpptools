@@ -139,7 +139,6 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
             }
 
             // If the user version is greater than or incomparable to the latest available verion then there is no need to update
-            // Allows testing pre-releases without accidentally downgrading to the latest version
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
             const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
             if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion)))) {
@@ -148,14 +147,14 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
 
             const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
             if (targetBuild === undefined) {
-                // no oction
-                telemetry.logLanguageServerEvent("NoUPgradeDowngrade");
+                // no action
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
             } else if (userVersion.isGreaterThan(new PackageVersion(targetBuild.name))) {
                 // downgrade
-                telemetry.logLanguageServerEvent("DowngradeUserVersion");
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "version": targetBuild.name });
             } else {
                 // upgrade
-                telemetry.logLanguageServerEvent("UpradeUserVersion");
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "version": targetBuild.name });
             }
             return targetBuild;
         })
@@ -189,7 +188,8 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         return undefined;
     }
     const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-    if ((updateChannel === 'Insiders') && (userVersion.suffix && userVersion.suffix === 'insiders') && (userVersion.isGreaterThan(latestVersion))) {
+    // Allows testing pre-releases without accidentally downgrading to the latest version
+    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion))) {
         return undefined;
     }
 
@@ -201,7 +201,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         // check if the assetes are available (insider)
         useBuild = isBuild;
     } else if (updateChannel === 'Default') {
-        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
+        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return target.isGreaterThan(installed); };
         // look for the latest released build (not insider)
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
     } else {
@@ -218,10 +218,13 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
     if (needsUpdate(userVersion, targetVersion)) {
         if (targetVersion.isEqual(userVersion)) {
-            return undefined; }
-        return targetBuild;
+            return undefined;
+        } else {
+            return targetBuild;
+        }
+    } else {
+        return undefined;
     }
-    return undefined;
 }
 
 interface Rate {
