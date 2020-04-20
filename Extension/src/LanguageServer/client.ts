@@ -44,6 +44,8 @@ const configProviderTimeout: number = 2000;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
+let languageClientCrashedNeedsRestart: boolean = false;
+let languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
@@ -513,7 +515,6 @@ export class DefaultClient implements Client {
     private rootFolder?: vscode.WorkspaceFolder;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
-    private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
     private openFileVersions = new Map<string, number>();
@@ -606,7 +607,10 @@ export class DefaultClient implements Client {
         this.colorizationSettings = new ColorizationSettings(rootUri);
         try {
             let firstClient: boolean = false;
-            if (!languageClient) {
+            if (!languageClient || languageClientCrashedNeedsRestart) {
+                if (languageClientCrashedNeedsRestart) {
+                    languageClientCrashedNeedsRestart = false;
+                }
                 languageClient = this.createLanguageClient(allClients);
                 clientCollection = allClients;
                 languageClient.registerProposedFeatures();
@@ -1154,23 +1158,18 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: () => ErrorAction.Continue,
                 closed: () => {
-                    this.crashTimes.push(Date.now());
-                    if (this.crashTimes.length < 5) {
-                        let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
-                        newClient.crashTimes = this.crashTimes;
+                    languageClientCrashTimes.push(Date.now());
+                    languageClientCrashedNeedsRestart = true;
+                    if (languageClientCrashTimes.length < 5) {
+                        allClients.forEach(client => { allClients.replace(client, true); });
                     } else {
-                        let elapsed: number = this.crashTimes[this.crashTimes.length - 1] - this.crashTimes[0];
+                        let elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
-                            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-                                vscode.window.showErrorMessage(localize('server.crashed', "The language server for '{0}' crashed 5 times in the last 3 minutes. It will not be restarted.", serverName));
-                            } else {
-                                vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            }
-                            allClients.replace(this, false);
+                            vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
+                            allClients.forEach(client => { allClients.replace(client, false); });
                         } else {
-                            this.crashTimes.shift();
-                            let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
-                            newClient.crashTimes = this.crashTimes;
+                            languageClientCrashTimes.shift();
+                            allClients.forEach(client => { allClients.replace(client, true); });
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -2449,7 +2448,7 @@ export class DefaultClient implements Client {
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
-        if (this.languageClient !== undefined && this.configuration !== undefined) {
+        if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
         }
