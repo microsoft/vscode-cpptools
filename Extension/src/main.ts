@@ -48,6 +48,24 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     Telemetry.activate();
     util.setProgress(0);
 
+    // check if the correct offline/insiders vsix is installed on the correct platform
+    let installedPlatform: string = await util.getInstalledBinaryPlatform();
+    if (process.platform !== installedPlatform) {
+        let helpURL: string = "https://github.com/Microsoft/vscode-cpptools/releases";
+        errMsg = localize("native.binaries.not.supported", "The installed VSIX is incompatible with {0}. Download the {0} VSIX from: {1}.", process.platform, helpURL);
+        const download_link: string = localize("download.button", "Go to Download Page");
+        let selection: string | undefined = await vscode.window.showErrorMessage(errMsg, download_link);
+        switch (selection) {
+            case download_link:
+                // open the Github release page
+                window.open(helpURL);
+                break;
+            default:
+                break;
+        }
+        return new NullCppTools();
+    }
+
     // Initialize the DebuggerExtension and register the related commands and providers.
     DebuggerExtension.initialize(context);
 
