@@ -34,7 +34,7 @@ interface Build {
 * @param vsixName The name of the VSIX to search for
 * @return The download URL of the VSIX
 */
-function getVsixDownloadUrl(build: Build, vsixName: string): string {
+export function getVsixDownloadUrl(build: Build, vsixName: string): string {
     const asset: Asset | undefined = build.assets.find(asset => asset.name === vsixName);
     const downloadUrl: string | null = (asset) ? asset.browser_download_url : null;
     if (!downloadUrl) {
@@ -95,7 +95,7 @@ function isArrayOfBuilds(input: any): input is Build[] {
  * @param info Information about the user's operating system.
  * @return VSIX filename for the extension's releases matched to the user's platform.
  */
-function vsixNameForPlatform(info: PlatformInformation): string {
+export function vsixNameForPlatform(info: PlatformInformation): string {
     const vsixName: string | undefined = function(platformInfo): string | undefined {
         switch (platformInfo.platform) {
             case 'win32': return 'cpptools-win32.vsix';

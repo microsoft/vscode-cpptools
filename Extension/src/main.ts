@@ -22,6 +22,7 @@ import { getInstallationInformation, InstallationInformation, setInstallationSta
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
+import { vsixNameForPlatform, getVsixDownloadUrl } from './githubAPI';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -51,14 +52,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // check if the correct offline/insiders vsix is installed on the correct platform
     let installedPlatform: string = await util.getInstalledBinaryPlatform();
     if (process.platform !== installedPlatform) {
-        let helpURL: string = "https://github.com/Microsoft/vscode-cpptools/releases";
-        errMsg = localize("native.binaries.not.supported", "The installed VSIX is incompatible with {0}. Download the {0} VSIX from: {1}.", process.platform, helpURL);
-        const download_link: string = localize("download.button", "Go to Download Page");
+        const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+        const vsixName: string = vsixNameForPlatform(platformInfo);
+        const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
+        errMsg = localize("native.binaries.not.supported", "The installed VSIX is incompatible with {0}. Download {1} VSIX from: {2}.", process.platform, vsixName, downloadUrl);
+        const downloadLink: string = localize("download.button", "Go to Download Page");
         let selection: string | undefined = await vscode.window.showErrorMessage(errMsg, download_link);
         switch (selection) {
-            case download_link:
+            case downloadLink:
                 // open the Github release page
-                window.open(helpURL);
+                window.open(downloadUrl);
                 break;
             default:
                 break;
