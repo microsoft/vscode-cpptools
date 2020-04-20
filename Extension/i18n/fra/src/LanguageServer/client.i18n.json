@@ -9,7 +9,6 @@
 	"unable.to.locate.selected.symbol": "La définition du symbole sélectionné est introuvable.",
 	"unable.to.start": "Impossible de démarrer le serveur de langage C/C++. Les fonctionnalités IntelliSense sont désactivées. Erreur : {0}",
 	"check.permissions": "EPERM : Vérifier les autorisations de '{0}'",
-	"server.crashed": "Le serveur de langage pour '{0}' s'est bloqué 5 fois au cours des 3 dernières minutes. Il n'est pas redémarré.",
 	"server.crashed2": "Le serveur de langage s'est bloqué 5 fois au cours des 3 dernières minutes. Il n'est pas redémarré.",
 	"provider.configure.folder": "{0} veut configurer IntelliSense pour le dossier '{1}'.",
 	"provider.configure.this.folder": "{0} veut configurer IntelliSense pour ce dossier.",
