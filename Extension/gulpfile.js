@@ -6,9 +6,7 @@
 'use strict';
 
 const gulp = require('gulp');
-const env = require('gulp-env')
 const eslint = require('gulp-eslint');
-const mocha = require('gulp-mocha');
 const fs = require('fs');
 const nls = require('vscode-nls-dev');
 const path = require('path');
@@ -52,38 +50,12 @@ const languages = [
     { id: "pl", folderName: "plk" }
 ];
 
-gulp.task('unitTests', (done) => {
-    env.set({
-            CODE_TESTS_PATH: "./out/test/unitTests",
-        });
-
-    return gulp.src('./test/runVsCodeTestsWithAbsolutePaths.js', {read: false})
-        .pipe(mocha({ ui: "tdd" }))
-        .once('error', err => {
-            done();
-            process.exit(1);
-        })
-        .once('end', () => {
-            done();
-            process.exit();
-        });
-});
-
 /// Misc Tasks
 const allTypeScript = [
     'src/**/*.ts',
     '!**/*.d.ts',
     '!**/typings**'
 ];
-
-const lintReporter = (output, file, options) => {
-    //emits: src/helloWorld.c:5:3: warning: implicit declaration of function ‘prinft’
-    let relativeBase = file.base.substring(file.cwd.length + 1).replace('\\', '/');
-    output.forEach(e => {
-        let message = relativeBase + e.name + ':' + (e.startPosition.line + 1) + ':' + (e.startPosition.character + 1) + ': ' + e.failure;
-        console.log('[lint] ' + message);
-    });
-};
 
 gulp.task('lint', function () {
     return gulp.src(allTypeScript)

@@ -5,6 +5,7 @@
 
 import { PsProcessParser } from './nativeAttach';
 import { AttachItem, showQuickPick } from './attachQuickPick';
+import { CppSettings } from '../LanguageServer/settings';
 
 import * as debugUtils from './utils';
 import * as fs from 'fs';
@@ -108,6 +109,16 @@ export class RemoteAttachPicker {
     private getRemoteProcessCommand(): string {
         let innerQuote: string = `'`;
         let outerQuote: string = `"`;
+        let parameterBegin: string = `$(`;
+        let parameterEnd: string = `)`;
+        let escapedQuote: string = `\\\"`;
+
+        let settings: CppSettings = new CppSettings();
+        if (settings.useBacktickCommandSubstitution) {
+            parameterBegin = `\``;
+            parameterEnd = `\``;
+            escapedQuote = `\"`;
+        }
 
         // Must use single quotes around the whole command and double quotes for the argument to `sh -c` because Linux evaluates $() inside of double quotes.
         // Having double quotes for the outerQuote will have $(uname) replaced before it is sent to the remote machine.
@@ -116,7 +127,8 @@ export class RemoteAttachPicker {
             outerQuote = `'`;
         }
 
-        return `${outerQuote}sh -c ${innerQuote}uname && if [ $(uname) = \\\"Linux\\\" ] ; then ${PsProcessParser.psLinuxCommand} ; elif [ $(uname) = \\\"Darwin\\\" ] ; ` +
+        return `${outerQuote}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
+        `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
         `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 

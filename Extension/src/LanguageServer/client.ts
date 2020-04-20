@@ -44,6 +44,8 @@ const configProviderTimeout: number = 2000;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
+let languageClientCrashedNeedsRestart: boolean = false;
+let languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
@@ -453,7 +455,7 @@ export interface Client {
     RootUri?: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
-    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string };
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
@@ -513,7 +515,6 @@ export class DefaultClient implements Client {
     private rootFolder?: vscode.WorkspaceFolder;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
-    private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
     private openFileVersions = new Map<string, number>();
@@ -593,22 +594,23 @@ export class DefaultClient implements Client {
                 storagePath = path;
             }
         }
+
         if (!storagePath) {
-            storagePath = path.join(this.RootPath, "/.vscode");
+            storagePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
         }
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
         this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
-        if (!rootUri) {
-            throw new Error("Empty URI in client constructor");
-        }
         this.settingsTracker = getTracker(rootUri);
         this.colorizationSettings = new ColorizationSettings(rootUri);
         try {
             let firstClient: boolean = false;
-            if (!languageClient) {
+            if (!languageClient || languageClientCrashedNeedsRestart) {
+                if (languageClientCrashedNeedsRestart) {
+                    languageClientCrashedNeedsRestart = false;
+                }
                 languageClient = this.createLanguageClient(allClients);
                 clientCollection = allClients;
                 languageClient.registerProposedFeatures();
@@ -623,9 +625,6 @@ export class DefaultClient implements Client {
             this.queueBlockingTask(() => languageClient.onReady().then(
                 () => {
                     let workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
-                    if (!workspaceFolder) {
-                        throw new Error("Empty URI in client constructor");
-                    }
                     this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
                     this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                     this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
@@ -852,7 +851,6 @@ export class DefaultClient implements Client {
                                             workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -903,50 +901,42 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult | null, doResolve: boolean) => {
-                                            if (doResolve && referencesResult === null && referencesPendingCancellations.length === 0) {
-                                                // The result callback will be called with doResult of true and a null result when the Find All References
-                                                // portion of the rename is complete.  We complete the promise with an empty edit at this point,
-                                                // to cause the progress indicator to be dismissed.
-                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                                resolve(workspaceEdit);
-                                            } else {
-                                                referencesRequestPending = false;
-                                                --renameRequestsPending;
-                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                                let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                                if (cancelling) {
-                                                    while (referencesPendingCancellations.length > 1) {
-                                                        let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
-                                                        referencesPendingCancellations.pop();
-                                                        pendingCancel.reject();
-                                                    }
+                                            referencesRequestPending = false;
+                                            --renameRequestsPending;
+                                            let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                            let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                            if (cancelling) {
+                                                while (referencesPendingCancellations.length > 1) {
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
                                                     referencesPendingCancellations.pop();
-                                                    pendingCancel.callback();
-                                                } else {
-                                                    if (renameRequestsPending === 0) {
-                                                        renamePending = false;
-                                                    }
-                                                    // If rename UI was canceled, we will get a null result.
-                                                    // If null, return an empty list to avoid Rename failure dialog.
-                                                    if (referencesResult) {
-                                                        for (let reference of referencesResult.referenceInfos) {
-                                                            let uri: vscode.Uri = vscode.Uri.file(reference.file);
-                                                            let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
-                                                            workspaceEdit.replace(uri, range, newName);
-                                                        }
-                                                    }
-                                                    workspaceReferences.closeRenameUI();
+                                                    pendingCancel.reject();
                                                 }
-                                                if (doResolve) {
-                                                    if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
-                                                        vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
+                                                let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                referencesPendingCancellations.pop();
+                                                pendingCancel.callback();
+                                            } else {
+                                                if (renameRequestsPending === 0) {
+                                                    renamePending = false;
+                                                }
+                                                // If rename UI was canceled, we will get a null result.
+                                                // If null, return an empty list to avoid Rename failure dialog.
+                                                if (referencesResult) {
+                                                    for (let reference of referencesResult.referenceInfos) {
+                                                        let uri: vscode.Uri = vscode.Uri.file(reference.file);
+                                                        let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
+                                                        let metadata: vscode.WorkspaceEditEntryMetadata = {
+                                                            needsConfirmation: reference.type !== refs.ReferenceType.Confirmed,
+                                                            label: refs.getReferenceTagString(reference.type, false, true),
+                                                            iconPath: refs.getReferenceItemIconPath(reference.type, false)
+                                                        };
+                                                        workspaceEdit.replace(uri, range, newName, metadata);
                                                     }
-                                                    resolve(workspaceEdit);
-                                                } else if (workspaceEdit.size > 0) {
-                                                    vscode.workspace.applyEdit(workspaceEdit);
                                                 }
                                             }
+                                            if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
+                                                vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
+                                            }
+                                            resolve(workspaceEdit);
                                         });
                                         workspaceReferences.startRename(params);
                                     });
@@ -966,7 +956,6 @@ export class DefaultClient implements Client {
                                             workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -1077,13 +1066,14 @@ export class DefaultClient implements Client {
             let settings: CppSettings[] = [];
             let otherSettings: OtherSettings[] = [];
 
-            settings.push(workspaceSettings);
-            otherSettings.push(workspaceOtherSettings);
-            if (vscode.workspace.workspaceFolders) {
+            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
                 for (let workspaceFolder of vscode.workspace.workspaceFolders) {
                     settings.push(new CppSettings(workspaceFolder.uri));
                     otherSettings.push(new OtherSettings(workspaceFolder.uri));
                 }
+            } else {
+                settings.push(workspaceSettings);
+                otherSettings.push(workspaceOtherSettings);
             }
 
             for (let setting of settings) {
@@ -1137,6 +1127,7 @@ export class DefaultClient implements Client {
                 formatting: settings_formatting,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
+                exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
                 storage_path: this.storagePath,
                 tabSize: settings_editorTabSize,
@@ -1167,23 +1158,18 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: () => ErrorAction.Continue,
                 closed: () => {
-                    this.crashTimes.push(Date.now());
-                    if (this.crashTimes.length < 5) {
-                        let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
-                        newClient.crashTimes = this.crashTimes;
+                    languageClientCrashTimes.push(Date.now());
+                    languageClientCrashedNeedsRestart = true;
+                    if (languageClientCrashTimes.length < 5) {
+                        allClients.forEach(client => { allClients.replace(client, true); });
                     } else {
-                        let elapsed: number = this.crashTimes[this.crashTimes.length - 1] - this.crashTimes[0];
+                        let elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
-                            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-                                vscode.window.showErrorMessage(localize('server.crashed', "The language server for '{0}' crashed 5 times in the last 3 minutes. It will not be restarted.", serverName));
-                            } else {
-                                vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            }
-                            allClients.replace(this, false);
+                            vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
+                            allClients.forEach(client => { allClients.replace(client, false); });
                         } else {
-                            this.crashTimes.shift();
-                            let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
-                            newClient.crashTimes = this.crashTimes;
+                            languageClientCrashTimes.shift();
+                            allClients.forEach(client => { allClients.replace(client, true); });
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -1236,13 +1222,13 @@ export class DefaultClient implements Client {
         });
     }
 
-    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
+    public onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } {
         this.sendDidChangeSettings();
         let changedSettings: { [key: string]: string };
         changedSettings = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
-            let colorizationNeedsReload: boolean = event.affectsConfiguration("workbench.colorTheme")
-                || event.affectsConfiguration("editor.tokenColorCustomizations");
+            let colorizationNeedsReload: boolean = isFirstClient && (event.affectsConfiguration("workbench.colorTheme")
+                || event.affectsConfiguration("editor.tokenColorCustomizations"));
 
             let colorizationNeedsRefresh: boolean = colorizationNeedsReload
                 || event.affectsConfiguration("C_Cpp.enhancedColorization", this.RootUri)
@@ -1251,10 +1237,12 @@ export class DefaultClient implements Client {
                 || event.affectsConfiguration("C_Cpp.inactiveRegionForegroundColor", this.RootUri)
                 || event.affectsConfiguration("C_Cpp.inactiveRegionBackgroundColor", this.RootUri);
 
-            let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme", this.RootUri);
-            if (colorThemeChanged) {
-                let otherSettings: OtherSettings = new OtherSettings(this.RootUri);
-                this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
+            if (isFirstClient) {
+                let colorThemeChanged: boolean = event.affectsConfiguration("workbench.colorTheme");
+                if (colorThemeChanged) {
+                    let otherSettings: OtherSettings = new OtherSettings();
+                    this.languageClient.sendNotification(ColorThemeChangedNotification, { name: otherSettings.colorTheme });
+                }
             }
 
             if (colorizationNeedsReload) {
@@ -1384,15 +1372,17 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeTextEditorVisibleRanges(textEditorVisibleRangesChangeEvent: vscode.TextEditorVisibleRangesChangeEvent): void {
-        if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
-            if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
-                if (textEditorVisibleRangesChangeEvent.visibleRanges.length === 1) {
-                    let visibleRangesLength: number = textEditorVisibleRangesChangeEvent.visibleRanges[0].end.line - textEditorVisibleRangesChangeEvent.visibleRanges[0].start.line;
-                    workspaceReferences.updateVisibleRange(visibleRangesLength);
+        this.notifyWhenReady(() => {
+            if (textEditorVisibleRangesChangeEvent.textEditor.document.uri.scheme === "file") {
+                if (vscode.window.activeTextEditor === textEditorVisibleRangesChangeEvent.textEditor) {
+                    if (textEditorVisibleRangesChangeEvent.visibleRanges.length === 1) {
+                        let visibleRangesLength: number = textEditorVisibleRangesChangeEvent.visibleRanges[0].end.line - textEditorVisibleRangesChangeEvent.visibleRanges[0].start.line;
+                        workspaceReferences.updateVisibleRange(visibleRangesLength);
+                    }
                 }
+                this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
             }
-            this.sendVisibleRanges(textEditorVisibleRangesChangeEvent.textEditor.document.uri);
-        }
+        });
     }
 
     private registeredProviders: CustomConfigurationProvider1[] = [];
@@ -1517,15 +1507,15 @@ export class DefaultClient implements Client {
                 if (!config) {
                     return;
                 }
-                // TODO: This is a hack to get around CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
-                let foundMatch: boolean = false;
-                for (let c of config.browsePath) {
-                    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
-                        foundMatch = true;
-                        break;
+                if (currentProvider.version < Version.v3) {
+                    // This is to get around the (fixed) CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
+                    for (let c of config.browsePath) {
+                        if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
+                            this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                            break;
+                        }
                     }
-                }
-                if (foundMatch) {
+                } else {
                     this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
                 }
                 if (!hasCompleted) {
@@ -2458,7 +2448,7 @@ export class DefaultClient implements Client {
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
-        if (this.languageClient !== undefined && this.configuration !== undefined) {
+        if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
         }
@@ -2507,7 +2497,6 @@ export class DefaultClient implements Client {
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
                 languageClient.sendNotification(CancelReferencesNotification);
-                workspaceReferences.closeRenameUI();
             }
         }
     }
@@ -2550,7 +2539,7 @@ class NullClient implements Client {
     RootUri?: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
-    onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } { return {}; }
+    onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void {}
     onDidCloseTextDocument(document: vscode.TextDocument): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}

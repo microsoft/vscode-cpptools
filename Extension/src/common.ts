@@ -172,7 +172,7 @@ export function getVcpkgPathDescriptorFile(): string {
     }
 }
 
-let vcpkgRoot: string;
+let vcpkgRoot: string | undefined;
 export function getVcpkgRoot(): string {
     if (!vcpkgRoot && vcpkgRoot !== "") {
         vcpkgRoot = "";
@@ -350,13 +350,13 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
             switch (varType) {
                 case "env": {
                     if (additionalEnvironment) {
-                        let v: string | string[] = additionalEnvironment[name];
+                        let v: string | string[] | undefined = additionalEnvironment[name];
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
                             newValue = v.join(";");
                         }
-                        if (!newValue) {
+                        if (newValue === undefined) {
                             newValue = process.env[name];
                         }
                     }
@@ -383,7 +383,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                 }
                 default: { assert.fail("unknown varType matched"); }
             }
-            return newValue ? newValue : match;
+            return newValue !== undefined ? newValue : match;
         });
     }
 
@@ -847,9 +847,9 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
     let additionalArgs: string[] = [];
     let isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
-        if (compilerPath === "cl.exe") {
+        if (compilerPath.endsWith("\\cl.exe") || compilerPath.endsWith("/cl.exe") || compilerPath === "cl.exe") {
             // Input is only compiler name, this is only for cl.exe
-            compilerName = compilerPath;
+            compilerName = path.basename(compilerPath);
 
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
@@ -881,6 +881,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                     additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
                     compilerPath = potentialCompilerPath;
                 }
+                compilerName = path.basename(compilerPath);
             }
             // Get compiler name if there are no args but path is valid or a valid path was found with args.
             if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {

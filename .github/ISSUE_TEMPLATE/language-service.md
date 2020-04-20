@@ -1,6 +1,9 @@
 ---
 name: Language Service
 about: 'Issues pertaining to IntelliSense, autocomplete, code editing, etc. '
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
@@ -19,10 +22,11 @@ about: 'Issues pertaining to IntelliSense, autocomplete, code editing, etc. '
 - VS Code Version:
 - C/C++ Extension Version:
 - Other extensions you installed (and if the issue persists after disabling them):
-- A clear and concise description of what the bug is.
+- Does this issue involve using SSH remote to run the extension on a remote machine?:
+- A clear and concise description of what the bug is, including information about the workspace (i.e. is the workspace a single project or multiple projects, size of the project, etc).
 
-**To Reproduce**
-<!-- Steps to reproduce the behavior: -->
+**Steps to reproduce**
+<!-- Provide clear steps to reproduce the behavior: -->
 <!-- *The most actionable issue reports include a code sample including configuration files such as c_cpp_properties.json* -->
 1. Go to '...'
 2. Click on '....'
@@ -32,11 +36,23 @@ about: 'Issues pertaining to IntelliSense, autocomplete, code editing, etc. '
 **Expected behavior**
 <!-- A clear and concise description of what you expected to happen. -->
 
+<!-- Please provide the following logs that show diagnostics and debugging information about the language server.
+1. Logs from the command `C/C++: Log Diagnostics`
+2. Logs from [the language server](https://code.visualstudio.com/docs/cpp/enable-logging-cpp#_enable-logging-for-the-language-server)
+ -->
+<details>
+  <summary><strong>Logs</strong></summary>
+
+<!-- Note: do not remove empty line after </summary> tag, otherwise the code blocks formatting won't show correctly. -->
+```
+Insert logs here.
+```
+</details>
+
 **Screenshots**
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 **Additional context**
 <!--
 * Call Stacks: For bugs like crashes, deadlocks, infinite loops, etc. that we are not able to repro and for which the call stack may be useful, please attach a debugger and/or create a dmp and provide the call stacks. Windows binaries have symbols available in VS Code by setting your "symbolSearchPath" to "https://msdl.microsoft.com/download/symbols".
-* Add any other context about the problem here including log messages in your Output window ("C_Cpp.loggingLevel": "Debug" in settings.json).
 -->

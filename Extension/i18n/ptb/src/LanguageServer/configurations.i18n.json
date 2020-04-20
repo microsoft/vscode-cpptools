@@ -15,6 +15,5 @@
 	"path.is.not.a.file": "O caminho não é um arquivo: {0}",
 	"incompatible.intellisense.mode": "O modo do IntelliSense {0} é incompatível com o caminho do compilador.",
 	"path.is.not.a.directory": "O caminho não é um diretório: {0}",
-	"cannot.find2": "Não é possível localizar \"{0}\".",
-	"path.is.not.a.directory2": "O caminho não é um diretório: \"{0}\""
+	"cannot.find2": "Não é possível localizar \"{0}\"."
 }
