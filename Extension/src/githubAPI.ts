@@ -198,7 +198,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
         needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
-        // check if the assetes are available (insider)
+        // check if the assets are available (insider)
         useBuild = isBuild;
     } else if (updateChannel === 'Default') {
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return target.isGreaterThan(installed); };
