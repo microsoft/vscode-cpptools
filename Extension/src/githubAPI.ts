@@ -201,8 +201,9 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         // check if the assets are available (insider)
         useBuild = isBuild;
     } else if (updateChannel === 'Default') {
-        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return target.isGreaterThan(installed); };
-        // look for the latest released build (not insider)
+        // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
+        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
+        // look for the latest non-insiders released build
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
     } else {
         throw new Error('Incorrect updateChannel setting provided');
@@ -217,11 +218,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     // Check current version against target's version to determine if the installation should happen
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
     if (needsUpdate(userVersion, targetVersion)) {
-        if (targetVersion.isEqual(userVersion)) {
-            return undefined;
-        } else {
-            return targetBuild;
-        }
+        return targetBuild;
     } else {
         return undefined;
     }

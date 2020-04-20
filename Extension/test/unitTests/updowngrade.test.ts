@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as assert from "assert";
-import { resolveVariables, escapeForSquiggles } from "../../src/common";
 import { Build, Asset, getTargetBuild } from "../../src/githubAPI";
 import { PackageVersion } from '../../src/packageVersion';
 
@@ -24,22 +23,17 @@ suite("UpgradeDowngrade", () => {
 
     suite("DefaultChannel", () => {
         const updateChannel: string = "Default";
-        const extra_insider2: string = "0.27.2-insiders2";
-        const extra_insider1: string = "0.27.2-insiders";
-        suite("Automatic Upgrade", () => {
-            test("Release to Release", () => {
+        suite("Automatic Downgrade", () => {
+            test("Insiders to Release", () => {
                 const builds: Build[] = [{
-                    name: extra_insider2, assets: []}, {
-                    name: extra_insider1, assets: four_assets}, {
-                    name: release1, assets: four_assets}, {
-                    name: insider3, assets: four_assets}, {
+                    name: insider3, assets: []}, {
                     name: insider2, assets: four_assets}, {
                     name: insider1, assets: four_assets}, {
                     name: release0, assets: four_assets}];
 
-                const userVersion: PackageVersion = new PackageVersion(release0);
+                const userVersion: PackageVersion = new PackageVersion(insider2);
                 const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
-                assert.equal(targetBuild.name, release1);
+                assert.equal(targetBuild.name, release0);
             });
         });
     });
