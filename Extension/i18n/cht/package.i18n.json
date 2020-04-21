@@ -104,7 +104,7 @@
 	"c_cpp.debuggers.cppvsdbg.visualizerFile.description": "偵錯此處理序時要使用的 .natvis 檔案。",
 	"c_cpp.debuggers.showDisplayString.description": "指定 visualizerFile 時，showDisplayString 會啟用顯示字串。開啟此選項可能會導致偵錯期間的效能變慢。",
 	"c_cpp.debuggers.environment.description": "要新增至程式環境的環境變數。範例: [ { \"name\": \"squid\", \"value\": \"clam\" } ]。",
-	"c_cpp.debuggers.envFile.description": "包含環境變數定義之檔案的絕對路徑。此檔案具有以等號分隔每行的索引鍵值組。例如 KEY=VALUE",
+	"c_cpp.debuggers.envFile.description": "包含環境變數定義之檔案的絕對路徑。此檔案具有以等號分隔每行的索引鍵值組。例如「鍵=值」",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": "要用於搜尋 .so 檔案的目錄清單 (以分號分隔)。範例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.MIMode.description": "表示 MIDebugEngine 將連線的主控台偵錯工具。允許的值為 \"gdb\" \"lldb\"。",
 	"c_cpp.debuggers.miDebuggerPath.description": "MI 偵錯工具 (例如 gdb) 的路徑。若未指定，會先搜尋偵錯工具的路徑。",

@@ -104,7 +104,7 @@
 	"c_cpp.debuggers.cppvsdbg.visualizerFile.description": "File con estensione natvis da usare durante il debug di questo processo.",
 	"c_cpp.debuggers.showDisplayString.description": "Quando si specifica un oggetto visualizerFile, showDisplayString abilita la stringa di visualizzazione. L'attivazione di questa opzione può comportare un rallentamento delle prestazioni durante il debug.",
 	"c_cpp.debuggers.environment.description": "Variabili di ambiente da aggiungere all'ambiente per il programma. Esempio: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
-	"c_cpp.debuggers.envFile.description": "Percorso assoluto di un file contenente le definizioni delle variabili di ambiente. Questo file contiene su ogni riga coppie chiave-valore separate da un segno di uguale, ad esempio KEY=VALUE",
+	"c_cpp.debuggers.envFile.description": "Percorso assoluto di un file contenente le definizioni delle variabili di ambiente. Questo file contiene su ogni riga coppie chiave-valore separate da un segno di uguale, ad esempio CHIAVE=VALORE",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": "Elenco di directory delimitate da punto e virgola da usare per la ricerca di file con estensione so. Esempio: \"c:\\dir1;c:\\dir2\".",
 	"c_cpp.debuggers.MIMode.description": "Indica il debugger della console a cui si connetterà MIDebugEngine. I valori consentiti sono \"gdb\" e \"lldb\".",
 	"c_cpp.debuggers.miDebuggerPath.description": "Percorso del debugger MI, ad esempio gdb. Se non viene specificato, il debugger verrà cercato prima in PATH.",
