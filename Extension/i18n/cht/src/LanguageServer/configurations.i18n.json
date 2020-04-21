@@ -15,6 +15,5 @@
 	"path.is.not.a.file": "路徑不是檔案: {0}",
 	"incompatible.intellisense.mode": "IntelliSense 模式 {0} 與編譯器路徑不相容。",
 	"path.is.not.a.directory": "路徑不是目錄: {0}",
-	"cannot.find2": "找不到 \"{0}\"。",
-	"path.is.not.a.directory2": "路徑不是目錄: \"{0}\""
+	"cannot.find2": "找不到 \"{0}\"。"
 }

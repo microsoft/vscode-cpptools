@@ -20,7 +20,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.limitSymbolsToIncludedHeaders": "yalnızca doğrudan veya dolaylı olarak üst bilgi olarak dahil edilen dosyaları işlemek için true, belirtilen ekleme yolları altındaki tüm dosyaları işlemek için false.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.databaseFilename": "Oluşturulan sembol veritabanının yolu. Göreli bir yol belirtilirse, çalışma alanının varsayılan depolama konumuna göreli hale getirilir.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.path": "Etiket ayrıştırıcısının eklenen üst bilgileri ararken kullanacağı yol listesi. Bu yollarda arama varsayılan olarak özyinelemelidir. Özyinelemeli olmayan aramayı göstermek için '*' belirtin. Örneğin: '/usr/include' tüm alt dizinlerde arar ancak '/usr/include/*' aramaz.",
-	"c_cpp_properties.schema.json.definitions.env": "${variable} veya ${env:variable} söz dizimi kullanılarak bu dosyada herhangi bir yerde yeniden kullanılabilen özel değişkenler.",
+	"c_cpp_properties.schema.json.definitions.env": "${değişken} veya ${env:değişken} söz dizimi kullanılarak bu dosyada herhangi bir yerde yeniden kullanılabilen özel değişkenler.",
 	"c_cpp_properties.schema.json.definitions.version": "Yapılandırma dosyasının sürümü. Bu özellik uzantı tarafından yönetilir. Lütfen değiştirmeyin.",
 	"c_cpp_properties.schema.json.definitions.enableConfigurationSquiggles": "Uzantının c_cpp_properties.json dosyasında algılanan hataları bildirip bildirmeyeceğini denetler."
 }
