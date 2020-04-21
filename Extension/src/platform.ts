@@ -74,6 +74,11 @@ export class PlatformInformation {
         return util.execChildProcess('uname -m', util.packageJson.extensionFolderPath)
             .then((architecture) => {
                 if (architecture) {
+                    if (architecture.startsWith('arm64') || architecture.startsWith('aarch64')) {
+                        return 'arm64';
+                    } else if (architecture.startsWith('armv')) {
+                        return 'arm';
+                    }
                     return architecture.trim();
                 }
                 return undefined;

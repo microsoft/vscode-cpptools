@@ -9,13 +9,14 @@ import * as util from './common';
 import { PlatformInformation } from './platform';
 import { OutgoingHttpHeaders } from 'http';
 import * as vscode from 'vscode';
+import * as telemetry from './telemetry';
 
 const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
 
 /**
  * The object representation of a Build Asset. Each Asset corresponds to information about a release file on GitHub.
  */
-interface Asset {
+export interface Asset {
     name: string;
     browser_download_url: string;
 }
@@ -24,7 +25,7 @@ interface Asset {
  * The object representation of a release in the GitHub API's release JSON.
  * Named Build so as to reduce confusion between a "Release" release and "Insiders" release.
  */
-interface Build {
+export interface Build {
     name: string;
     assets: Asset[];
 }
@@ -138,14 +139,24 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
             }
 
             // If the user version is greater than or incomparable to the latest available verion then there is no need to update
-            // Allows testing pre-releases without accidentally downgrading to the latest version
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
             const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
             if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion)))) {
                 return undefined;
             }
 
-            return getTargetBuild(builds, userVersion, updateChannel);
+            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+            if (targetBuild === undefined) {
+                // no action
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
+            } else if (userVersion.isGreaterThan(new PackageVersion(targetBuild.name))) {
+                // downgrade
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "version": targetBuild.name });
+            } else {
+                // upgrade
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "version": targetBuild.name });
+            }
+            return targetBuild;
         })
         .then(async build => {
             if (!build) {
@@ -172,8 +183,13 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
  * @param updateChannel The user's updateChannel setting.
  * @return The Build if the user should update to it, otherwise undefined.
  */
-function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build | undefined {
+export function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build | undefined {
     if (!vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+        return undefined;
+    }
+    const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
+    // Allows testing pre-releases without accidentally downgrading to the latest version
+    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion))) {
         return undefined;
     }
 
@@ -182,9 +198,12 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
         needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
-        useBuild = (build: Build): boolean => true;
+        // check if the assets are available (insider)
+        useBuild = isBuild;
     } else if (updateChannel === 'Default') {
+        // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
+        // look for the latest non-insiders released build
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
     } else {
         throw new Error('Incorrect updateChannel setting provided');
@@ -200,8 +219,9 @@ function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChan
     const targetVersion: PackageVersion = new PackageVersion(targetBuild.name);
     if (needsUpdate(userVersion, targetVersion)) {
         return targetBuild;
+    } else {
+        return undefined;
     }
-    return undefined;
 }
 
 interface Rate {

@@ -15,6 +15,5 @@
 	"path.is.not.a.file": "경로가 파일이 아닙니다. {0}",
 	"incompatible.intellisense.mode": "IntelliSense 모드 {0}은(는) 컴파일러 경로와 호환되지 않습니다.",
 	"path.is.not.a.directory": "경로가 디렉터리가 아닙니다. {0}",
-	"cannot.find2": "\"{0}\"을(를) 찾을 수 없습니다.",
-	"path.is.not.a.directory2": "경로가 디렉터리가 아님: \"{0}\""
+	"cannot.find2": "\"{0}\"을(를) 찾을 수 없습니다."
 }

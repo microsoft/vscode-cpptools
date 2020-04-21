@@ -1694,6 +1694,32 @@
       ]
     },
     {
+      "description": "Mono Runtime (Linux / armhf)",
+      "url": "https://aka.ms/mono-runtime-linux-arm",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./debugAdapters/mono.linux-armhf"
+      ]
+    },
+    {
+      "description": "Mono Runtime (Linux / arm64)",
+      "url": "https://aka.ms/mono-runtime-linux-arm64",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./debugAdapters/mono.linux-arm64"
+      ]
+    },
+    {
       "description": "Mono Runtime (OS X)",
       "url": "https://go.microsoft.com/fwlink/?LinkId=2027403",
       "platforms": [
