@@ -395,11 +395,11 @@
             "c89",
             "c99",
             "c11",
-            "c17",
+            "c18",
             "gnu89",
             "gnu99",
             "gnu11",
-            "gnu17"
+            "gnu18"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
           "scope": "resource"

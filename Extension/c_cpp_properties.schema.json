@@ -26,22 +26,22 @@
                         }
                     },
                     "cStandard": {
-                        "description": "Version of the C language standard to use for IntelliSense.",
+                        "description": "Version of the C language standard to use for IntelliSense. Note: GNU standards are only used to query the set compiler to get GNU defines and IntelliSense will emulate the equivalent C standard version.",
                         "type": "string",
                         "enum": [
                             "c89",
                             "c99",
                             "c11",
-                            "c17",
+                            "c18",
                             "gnu89",
                             "gnu99",
                             "gnu11",
-                            "gnu17",
+                            "gnu18",
                             "${default}"
                         ]
                     },
                     "cppStandard": {
-                        "description": "Version of the C++ language standard to use for IntelliSense.",
+                        "description": "Version of the C++ language standard to use for IntelliSense. Note: GNU standards are only used to query the set compiler to get GNU defines and IntelliSense will emulate the equivalent C++ standard version.",
                         "type": "string",
                         "enum": [
                             "c++98",
