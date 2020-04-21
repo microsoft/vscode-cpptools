@@ -55,7 +55,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
         const downloadUrl: string = getOfflineDownloadUrl();
-        errMsg = localize("native.binaries.not.supported", "The \"{0}\" version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOsName(installedPlatform), vsixName);
+        errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOsName(installedPlatform), vsixName);
         const downloadLink: string = localize("download.button", "Go to Download Page");
         let selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
         if (selection === downloadLink) {
