@@ -104,7 +104,7 @@
 	"c_cpp.debuggers.cppvsdbg.visualizerFile.description": "Fichier .natvis à utiliser pendant le débogage de ce processus.",
 	"c_cpp.debuggers.showDisplayString.description": "Quand un visualizerFile est spécifié, showDisplayString active la chaîne d'affichage. Si vous activez cette option, les performances peuvent être ralenties pendant le débogage.",
 	"c_cpp.debuggers.environment.description": "Variables d'environnement à ajouter à l'environnement du programme. Exemple : [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
-	"c_cpp.debuggers.envFile.description": "Chemin absolu d'un fichier contenant des définitions de variable d'environnement. Ce fichier a des paires clé-valeur séparées par un signe égal par ligne. Par exemple, KEY=VALUE",
+	"c_cpp.debuggers.envFile.description": "Chemin absolu d'un fichier contenant des définitions de variable d'environnement. Ce fichier a des paires clé-valeur séparées par un signe égal par ligne. Par exemple, CLÉ=VALEUR",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": "Liste de répertoires séparés par des points-virgules à utiliser pour rechercher des fichiers .so. Exemple : \"c:\\dir1;c:\\dir2\".",
 	"c_cpp.debuggers.MIMode.description": "Indique le débogueur de console auquel MIDebugEngine se connecte. Les valeurs autorisées sont \"gdb\" \"lldb\".",
 	"c_cpp.debuggers.miDebuggerPath.description": "Chemin du débogueur MI (par exemple gdb). Si aucune valeur n'est spécifiée, le chemin du débogueur est recherché en premier lieu.",
