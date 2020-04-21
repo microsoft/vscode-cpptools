@@ -340,9 +340,21 @@ interface GetFoldingRangesParams {
     id: number;
 }
 
+export enum FoldingRangeKind {
+    None = 0,
+    Comment = 1,
+    Imports = 2,
+    Region = 3
+}
+
+interface FoldingRange {
+    kind: FoldingRangeKind;
+    range: Range;
+};
+
 interface GetFoldingRangesResult {
     canceled: boolean;
-    ranges: Range[];
+    ranges: FoldingRange[];
 }
 
 interface AbortRequestParams {
@@ -998,11 +1010,25 @@ export class DefaultClient implements Client {
                                                 reject();
                                             } else {
                                                 let result: vscode.FoldingRange[] = [];
-                                                ranges.ranges.forEach((range) => {
-                                                    result.push({
-                                                        start: range.start.line,
-                                                        end: range.end.line
-                                                    });
+                                                ranges.ranges.forEach((r) => {
+                                                    let foldingRange: vscode.FoldingRange = {
+                                                        start: r.range.start.line,
+                                                        end: r.range.end.line
+                                                    };
+                                                    switch (r.kind) {
+                                                        case FoldingRangeKind.Comment:
+                                                            foldingRange.kind = vscode.FoldingRangeKind.Comment;
+                                                            break;
+                                                        case FoldingRangeKind.Imports:
+                                                            foldingRange.kind = vscode.FoldingRangeKind.Imports;
+                                                            break;
+                                                        case FoldingRangeKind.Region:
+                                                            foldingRange.kind = vscode.FoldingRangeKind.Region;
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    result.push(foldingRange);
                                                 });
                                                 resolve(result);
                                             }
