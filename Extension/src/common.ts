@@ -535,30 +535,26 @@ export function checkInstallLockFile(): Promise<boolean> {
 }
 
 /** Get the platform that the installed binaries belong to.*/
-export function getInstalledBinaryPlatform(): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-        // the debugAdapters folder is utilized to identify the platform
-        const path_to_check: string = getExtensionFilePath("debugAdapters");
-        let installedPlatform: string = "";
-        if (checkDirectoryExists(path_to_check)) {
-            const files: string[] = await readDir(path_to_check);
-            installedPlatform = "win32";
-            if (files !== undefined) {
-                (files).forEach((element: string) => {
-                    if (element.includes(".osx")) {
-                        installedPlatform = "darwin";
-                    } else if (element.includes("linux-x86_64")) {
-                        installedPlatform = "linux";
-                    } else if (element.includes("linux-x86")) {
-                        installedPlatform = "linux32";
-                    }
-                });
-            }
-            resolve (installedPlatform);
-        } else {
-            reject(installedPlatform);
+export async function getInstalledBinaryPlatform(): Promise<string | undefined> {
+    // the debugAdapters folder is utilized to identify the platform
+    const path_to_check: string = getExtensionFilePath("debugAdapters");
+    let installedPlatform: string = "";
+    if (checkDirectoryExists(path_to_check)) {
+        const files: string[] = await readDir(path_to_check);
+        installedPlatform = "win32";
+        if (files !== undefined) {
+            (files).forEach((element: string) => {
+                if (element.includes(".osx")) {
+                    installedPlatform = "darwin";
+                } else if (element.includes("linux-x86_64")) {
+                    installedPlatform = "linux";
+                } else if (element.includes("linux-x86")) {
+                    installedPlatform = "linux32";
+                }
+            });
         }
-    });
+    }
+    return installedPlatform;
 }
 
 /** Reads the content of a text file */

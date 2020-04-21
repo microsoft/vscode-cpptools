@@ -16,13 +16,13 @@ import { PersistentState } from './LanguageServer/persistentState';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
-import { PlatformInformation } from './platform';
+import { PlatformInformation, GetOsName } from './platform';
 import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
-import { vsixNameForPlatform, getVsixDownloadUrl } from './githubAPI';
+import { vsixNameForPlatform, getOfflineDownloadUrl } from './githubAPI';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -50,21 +50,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.setProgress(0);
 
     // check if the correct offline/insiders vsix is installed on the correct platform
-    let installedPlatform: string = await util.getInstalledBinaryPlatform();
-    if (process.platform !== installedPlatform) {
+    let installedPlatform: string | undefined = await util.getInstalledBinaryPlatform();
+    if (!installedPlatform || (process.platform !== installedPlatform)) {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
-        const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
-        errMsg = localize("native.binaries.not.supported", "The installed VSIX is incompatible with {0}. Download {1} VSIX from: {2}.", process.platform, vsixName, downloadUrl);
+        const downloadUrl: string = getOfflineDownloadUrl();
+        errMsg = localize("native.binaries.not.supported", "The \"{0}\" version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOsName(installedPlatform), vsixName);
         const downloadLink: string = localize("download.button", "Go to Download Page");
-        let selection: string | undefined = await vscode.window.showErrorMessage(errMsg, download_link);
-        switch (selection) {
-            case downloadLink:
-                // open the Github release page
-                window.open(downloadUrl);
-                break;
-            default:
-                break;
+        let selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
+        if (selection === downloadLink) {
+            vscode.env.openExternal(vscode.Uri.parse(downloadUrl));
         }
         return new NullCppTools();
     }
