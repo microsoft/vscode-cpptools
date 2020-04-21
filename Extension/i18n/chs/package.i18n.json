@@ -104,7 +104,7 @@
 	"c_cpp.debuggers.cppvsdbg.visualizerFile.description": "调试此进程时要使用的 .natvis 文件。",
 	"c_cpp.debuggers.showDisplayString.description": "指定了 visualizerFile 时，showDisplayString 将启用显示字符串。启用此选项可能会导致调试期间的性能下降。",
 	"c_cpp.debuggers.environment.description": "要添加到程序环境的环境变量。示例: [ { \"name\": \"squid\", \"value\": \"clam\" } ]。",
-	"c_cpp.debuggers.envFile.description": "包含环境变量定义的文件的绝对路径。此文件具有每行由等号分隔的键值对。例如: KEY=VALUE",
+	"c_cpp.debuggers.envFile.description": "包含环境变量定义的文件的绝对路径。此文件具有每行由等号分隔的键值对。例如: 键=值",
 	"c_cpp.debuggers.additionalSOLibSearchPath.description": "要用于搜索 .so 文件的目录列表(以分号分隔)。示例: \"c:\\dir1;c:\\dir2\"。",
 	"c_cpp.debuggers.MIMode.description": "指示 MIDebugEngine 要连接到的控制台调试程序。允许的值为 \"gdb\"、\"lldb\"。",
 	"c_cpp.debuggers.miDebuggerPath.description": "MI 调试程序(如 gdb)的路径。如果未指定，将首先在路径中搜索调试程序。",
