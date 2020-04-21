@@ -44,6 +44,9 @@ export function getVsixDownloadUrl(build: Build, vsixName: string): string {
     return downloadUrl;
 }
 
+export function getOfflineDownloadUrl(): string {
+    return "https://github.com/microsoft/vscode-cpptools/releases";
+}
 /**
  * Determine whether an object is of type Asset.
  * @param input Incoming object.

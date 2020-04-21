@@ -14,6 +14,16 @@ import * as nls from 'vscode-nls';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
+export function GetOsName(processPlatform: string | undefined): string | undefined {
+    switch (processPlatform) {
+        case "win32": return "Windows";
+        case "darwin": return "MacOS";
+        case "linux32": return "Linux(32 bit)";
+        case "linux": return "Linux(64 bit)";
+        default: return undefined;
+    }
+}
+
 export class PlatformInformation {
     constructor(public platform: string, public architecture?: string, public distribution?: LinuxDistribution, public version?: string) { }
 
