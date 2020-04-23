@@ -1468,7 +1468,79 @@
       "[Log]": {
         "editor.wordWrap": "off"
       }
-    }
+    },
+    "semanticTokenTypes": [
+      {
+        "id": "referenceType",
+        "superType": "type",
+        "description": "A C++/CLI reference type."
+      },
+      {
+        "id": "cliProperty",
+        "superType": "property",
+        "description": "A C++/CLI property."
+      },
+      {
+        "id": "genericType",
+        "superType": "type",
+        "description": "A C++/CLI generic type."
+      },
+      {
+        "id": "valueType",
+        "superType": "type",
+        "description": "A C++/CLI value type."
+      },
+      {
+        "id": "templateFunction",
+        "superType": "function",
+        "description": "A template function."
+      },
+      {
+        "id": "templateType",
+        "superType": "type",
+        "description": "A template type."
+      },
+      {
+        "id": "operatorOverload",
+        "superType": "operator",
+        "description": "An overloaded operator."
+      },
+      {
+        "id": "memberOperatorOverload",
+        "superType": "operator",
+        "description": "An overloaded operator member function."
+      },
+      {
+        "id": "newOperator",
+        "superType": "operator",
+        "description": "A C++ new or delete operator."
+      },
+      {
+        "id": "customLiteral",
+        "superType": "number",
+        "description": "A user-defined literal."
+      },
+      {
+        "id": "numberLiteral",
+        "superType": "number",
+        "description": "A user-defined literal number."
+      },
+      {
+        "id": "stringLiteral",
+        "superType": "string",
+        "description": "A user-defined literal string."
+      }
+    ],
+    "semanticTokenModifiers": [
+      {
+        "id": "global",
+        "description": "Annotates a symbol that is declared in global scope."
+      },
+      {
+        "id": "local",
+        "description": "Annotates a symbol that is declared in local scope."
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
