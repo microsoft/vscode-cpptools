@@ -469,23 +469,6 @@ function realActivation(): void {
         checkAndApplyUpdate(settings.updateChannel);
     }
 
-    // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
-    class SchemaProvider implements vscode.TextDocumentContentProvider {
-        public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-            console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
-            let fileName: string = uri.path.substr(1);
-            let locale: string = util.getLocaleId();
-            let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
-            const fileExists: boolean = await util.checkFileExists(localizedFilePath);
-            if (!fileExists) {
-                localizedFilePath = util.getExtensionFilePath(fileName);
-            }
-            return util.readFileText(localizedFilePath);
-        }
-    }
-
-    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
-
     clients.ActiveClient.notifyWhenReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
