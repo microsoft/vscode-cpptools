@@ -56,12 +56,12 @@ function isAsset(input: any): input is Asset {
 
 /**
  * Determine whether an object is of type Build. Note that earlier releases of the extension
- * do not have 4 or greater Assets (Mac, Win, Linux 32/64). Only call this on more recent Builds.
+ * do not have 3 or greater Assets (Mac, Win, Linux). Only call this on more recent Builds.
  * @param input Incoming object.
  * @return Whether input is of type Build.
  */
 function isBuild(input: any): input is Build {
-    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 4;
+    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 3;
 }
 
 /**
