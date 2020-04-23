@@ -6,12 +6,15 @@
 
 This preview release of the C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
 
-## Overview and getting started
+## Overview and tutorials
 * [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
-* [Get Started with C++ and Windows Subsystem for Linux (WSL)](https://code.visualstudio.com/docs/cpp/config-wsl)
-* [Get Started with C++ and Mingw-w64](https://code.visualstudio.com/docs/cpp/config-mingw)
-* [Get Started with C++ and Clang/LLVM on macOS](https://code.visualstudio.com/docs/cpp/config-clang-mac)
-* [Get Started with C++ and Microsoft C++ compiler (MSVC)](https://code.visualstudio.com/docs/cpp/config-msvc)
+
+C/C++ extension tutorials per compiler and platform
+* [Microsoft C++ compiler (MSVC) on Windows](https://code.visualstudio.com/docs/cpp/config-msvc)
+* [GCC and Mingw-w64 on Windows](https://code.visualstudio.com/docs/cpp/config-mingw)
+* [GCC on Windows Subsystem for Linux (WSL)](https://code.visualstudio.com/docs/cpp/config-wsl)
+* [GCC on Linux](https://code.visualstudio.com/docs/cpp/config-linux)
+* [Clang on macOS](https://code.visualstudio.com/docs/cpp/config-clang-mac)
 
 ## Quick links
 * [Editing features (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide) 
@@ -49,7 +52,7 @@ The extension has platform-specific binary dependencies, therefore installation 
  Package | Platform
 :--- | :---
 `cpptools-linux.vsix` | Linux 64-bit
-`cpptools-linux32.vsix` | Linux 32-bit
+`cpptools-linux32.vsix` | Linux 32-bit ([available up to version 0.27.0](https://github.com/microsoft/vscode-cpptools/issues/5346))
 `cpptools-osx.vsix` | macOS
 `cpptools-win32.vsix` | Windows 64-bit & 32-bit
 
