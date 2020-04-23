@@ -523,7 +523,7 @@ enum class localized_string_id
     blank = 0,
 ${nativeEnumContent}};
 
-inline static const char* localizable_strings[] = {
+inline static const char *localizable_strings[] = {
     "",
 ${nativeStringTableContent}};
 `;

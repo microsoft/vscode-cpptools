@@ -337,6 +337,32 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
 }
 
+interface GetFoldingRangesParams {
+    uri: string;
+    id: number;
+}
+
+export enum FoldingRangeKind {
+    None = 0,
+    Comment = 1,
+    Imports = 2,
+    Region = 3
+}
+
+interface FoldingRange {
+    kind: FoldingRangeKind;
+    range: Range;
+};
+
+interface GetFoldingRangesResult {
+    canceled: boolean;
+    ranges: FoldingRange[];
+}
+
+interface AbortRequestParams {
+    id: number;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -345,6 +371,7 @@ const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void>
 const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void> = new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void>('cpptools/getCodeActions');
 const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void>('cpptools/getDocumentSymbols');
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
+const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -374,6 +401,7 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
+const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -404,6 +432,8 @@ interface ReferencesCancellationState {
 }
 
 let referencesPendingCancellations: ReferencesCancellationState[] = [];
+
+let abortRequestId: number = 0;
 
 class ClientModel {
     public isTagParsing: DataBinding<boolean>;
@@ -964,13 +994,67 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+                    class FoldingRangeProvider implements vscode.FoldingRangeProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
                             this.client = client;
                         }
+                        provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
+                            token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
+                            let id: number = ++abortRequestId;
+                            let params: GetFoldingRangesParams = {
+                                id: id,
+                                uri: document.uri.toString()
+                            };
+                            return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
+                                        .then((ranges) => {
+                                            if (ranges.canceled) {
+                                                reject();
+                                            } else {
+                                                let result: vscode.FoldingRange[] = [];
+                                                ranges.ranges.forEach((r) => {
+                                                    let foldingRange: vscode.FoldingRange = {
+                                                        start: r.range.start.line,
+                                                        end: r.range.end.line
+                                                    };
+                                                    switch (r.kind) {
+                                                        case FoldingRangeKind.Comment:
+                                                            foldingRange.kind = vscode.FoldingRangeKind.Comment;
+                                                            break;
+                                                        case FoldingRangeKind.Imports:
+                                                            foldingRange.kind = vscode.FoldingRangeKind.Imports;
+                                                            break;
+                                                        case FoldingRangeKind.Region:
+                                                            foldingRange.kind = vscode.FoldingRangeKind.Region;
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    result.push(foldingRange);
+                                                });
+                                                resolve(result);
+                                            }
+                                        });
+                                    token.onCancellationRequested(e => this.client.abortRequest(id));
+                                });
+                            });
+                        }
+                    }
 
-                        public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+                    class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+                            private client: DefaultClient;
+                            constructor(client: DefaultClient) {
+                                this.client = client;
+                            }
+                            public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+                                return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
+                                    this.client.notifyWhenReady(() => {
+                                        reject();
+                                    });
+                                });
+                            }
                         }
                     }
 
@@ -982,6 +1066,7 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
+                        this.disposables.push(vscode.languages.registerFoldingRangeProvider(documentSelector, new FoldingRangeProvider(this)));
 
                         const tokenTypes: Map<string, number> = new Map<string, number>();
                         const tokenModifiers: Map<string, number> = new Map<string, number>();
@@ -2543,6 +2628,13 @@ export class DefaultClient implements Client {
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
         this.model.referencesCommandMode.Value = mode;
+    }
+
+    private abortRequest(id: number): void {
+        let params: AbortRequestParams = {
+            id: id
+        };
+        languageClient.sendNotification(AbortRequestNotification, params);
     }
 }
 
