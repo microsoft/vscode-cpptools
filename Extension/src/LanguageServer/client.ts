@@ -964,6 +964,16 @@ export class DefaultClient implements Client {
                         }
                     }
 
+                    class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+
+                        public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+                        }
+                    }
+
                     this.registerFileWatcher();
 
                     if (firstClient) {
@@ -972,6 +982,28 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
+
+                        const tokenTypes: Map<string, number> = new Map<string, number>();
+                        const tokenModifiers: Map<string, number> = new Map<string, number>();
+
+                        const legend: vscode.SemanticTokensLegend = (() => {
+                            const tokenTypesLegend: string[] = [
+                                'templateClass', 'enummember', 'event', 'function', 'templateFunction', 'genericClass',
+                                'variable', 'label', 'property', 'member', 'namespace', 'newOperator', 'operatorOverload',
+                                'memberOperatorOverload', 'parameter', 'cliProperty', 'referenceClass', 'class',
+                                'numberLiteral', 'customLiteral', 'stringLiteral', 'valueClass'
+                            ];
+                            tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
+
+                            const tokenModifiersLegend: string[] = [
+                                'global', 'local', 'static'
+                            ];
+                            tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
+
+                            return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
+                        })();
+
+                        this.disposables.push(vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, new SemanticTokensProvider(this), legend));
 
                         // Listen for messages from the language server.
                         this.registerNotifications();
