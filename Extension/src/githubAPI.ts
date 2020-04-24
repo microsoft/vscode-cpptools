@@ -104,9 +104,7 @@ function vsixNameForPlatform(info: PlatformInformation): string {
             default: {
                 switch (platformInfo.architecture) {
                     case 'x86_64': return 'cpptools-linux.vsix';
-                    case 'x86':
-                    case 'i386':
-                    case 'i686': return 'cpptools-linux32.vsix';
+                    default: throw new Error(`Unexpected Linux architecture: ${platformInfo.architecture}`);
                 }
             }
         }
