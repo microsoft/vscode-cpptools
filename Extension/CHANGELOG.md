@@ -1,5 +1,31 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.28.0-insiders: April 27, 2020
+### New Features
+* Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
+* Add ARM and ARM64 IntelliSense modes. [#4271](https://github.com/microsoft/vscode-cpptools/issues/4271), [PR #5250](https://github.com/microsoft/vscode-cpptools/pull/5250)
+
+### Enhancements
+* Change the `gcc` problem matcher to use `autoDetect` for `fileLocation` . [#1915](https://github.com/microsoft/vscode-cpptools/issues/1915)
+* Add support for IntelliSense-based `Go to Definition` on `#include` statements. [#2564](https://github.com/microsoft/vscode-cpptools/issues/2564)
+* Support relative paths with `forcedInclude`. [#2780](https://github.com/microsoft/vscode-cpptools/issues/2780)
+* Add support for more C++20 features, such as concepts. [#4195](https://github.com/microsoft/vscode-cpptools/issues/4195)
+* Process the "std" and bitness (-m64/-m32) compiler args. [#4726](https://github.com/microsoft/vscode-cpptools/issues/4726)
+* Switch from our custom Rename UI to VS Code's Refactor Preview. [#4990](https://github.com/microsoft/vscode-cpptools/issues/4990)
+
+### Bug Fixes
+* Process "$CPATH" on non-Windows OS's. [#3940](https://github.com/microsoft/vscode-cpptools/issues/3940)
+* Fix compiler querying for compilers that output non-English strings. [#4542](https://github.com/microsoft/vscode-cpptools/issues/4542)
+* Fix compiler querying when the '-include' argument is used. [#4655](https://github.com/microsoft/vscode-cpptools/issues/4655)
+* Fix the "Unable to load schema" error for `c_cpp_properties.json`. [#4841](https://github.com/microsoft/vscode-cpptools/issues/4841)
+* Change "Visual Studio" `clang_format_fallback_style` setting to use NamespaceIndentation All. [#5124](https://github.com/microsoft/vscode-cpptools/issues/5124)
+* Fix "C++98" and "C++0x" modes. [#5157](https://github.com/microsoft/vscode-cpptools/issues/5157), [#5225](https://github.com/microsoft/vscode-cpptools/issues/5225)
+* Improve the error message for multiroot projects using `compile_commands.json`. [#5160](https://github.com/microsoft/vscode-cpptools/issues/5160)
+* Fix some cpptools process crashes. [#5280](https://github.com/microsoft/vscode-cpptools/issues/5280)
+* Fix incorrect translations. [PR #5300](https://github.com/microsoft/vscode-cpptools/pull/5300)
+* Fix cpptools auto-restarting after a crash. [#5303](https://github.com/microsoft/vscode-cpptools/issues/5303)
+* Fix incorrect `c_cpp_properties.json` squiggles. [#5314](https://github.com/microsoft/vscode-cpptools/issues/5314), [#5322](https://github.com/microsoft/vscode-cpptools/issues/5322)
+
 ## Version 0.27.0: March 30, 2020
 ### Enhancements
 * Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multiroot%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
