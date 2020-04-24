@@ -14,7 +14,7 @@ import * as nls from 'vscode-nls';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-export function GetOsName(processPlatform: string | undefined): string | undefined {
+export function GetOSName(processPlatform: string | undefined): string | undefined {
     switch (processPlatform) {
         case "win32": return "Windows";
         case "darwin": return "MacOS";

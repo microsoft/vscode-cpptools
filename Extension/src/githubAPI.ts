@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 import * as telemetry from './telemetry';
 
 const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
-
+export const releaseDownloadUrl: string = "https://github.com/microsoft/vscode-cpptools/releases";
 /**
  * The object representation of a Build Asset. Each Asset corresponds to information about a release file on GitHub.
  */
@@ -35,7 +35,7 @@ export interface Build {
 * @param vsixName The name of the VSIX to search for
 * @return The download URL of the VSIX
 */
-export function getVsixDownloadUrl(build: Build, vsixName: string): string {
+function getVsixDownloadUrl(build: Build, vsixName: string): string {
     const asset: Asset | undefined = build.assets.find(asset => asset.name === vsixName);
     const downloadUrl: string | null = (asset) ? asset.browser_download_url : null;
     if (!downloadUrl) {
@@ -44,9 +44,6 @@ export function getVsixDownloadUrl(build: Build, vsixName: string): string {
     return downloadUrl;
 }
 
-export function getOfflineDownloadUrl(): string {
-    return "https://github.com/microsoft/vscode-cpptools/releases";
-}
 /**
  * Determine whether an object is of type Asset.
  * @param input Incoming object.

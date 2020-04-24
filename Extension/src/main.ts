@@ -16,13 +16,13 @@ import { PersistentState } from './LanguageServer/persistentState';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
-import { PlatformInformation, GetOsName } from './platform';
+import { PlatformInformation, GetOSName } from './platform';
 import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
-import { vsixNameForPlatform, getOfflineDownloadUrl } from './githubAPI';
+import { vsixNameForPlatform, releaseDownloadUrl } from './githubAPI';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -54,12 +54,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     if (!installedPlatform || (process.platform !== installedPlatform)) {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
-        const downloadUrl: string = getOfflineDownloadUrl();
-        errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOsName(installedPlatform), vsixName);
+        errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
         const downloadLink: string = localize("download.button", "Go to Download Page");
         let selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
         if (selection === downloadLink) {
-            vscode.env.openExternal(vscode.Uri.parse(downloadUrl));
+            vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
         }
         return new NullCppTools();
     }
@@ -315,7 +314,7 @@ function handleError(error: any): void {
     outputChannelLogger.appendLine(localize('failed.at.stage', "Failed at stage: {0}", installationInformation.stage));
     outputChannelLogger.appendLine(errorMessage);
     outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine(localize('failed.at.stage2', 'If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.'));
+    outputChannelLogger.appendLine(localize('failed.at.stage2', 'If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the "Install from VSIX" command in VS Code to install it.', releaseDownloadUrl));
     showOutputChannel();
 }
 
