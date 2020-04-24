@@ -34,7 +34,7 @@ let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     let errMsg: string = "";
-    if (process.arch !== 'ia32' && process.arch !== 'x64') {
+    if (process.arch !== 'x64' && (process.platform !== 'win32' || process.arch !== 'ia32')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(process.arch));
     } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
         errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");

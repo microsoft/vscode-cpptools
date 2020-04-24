@@ -1576,22 +1576,6 @@
       ]
     },
     {
-      "description": "C/C++ language components (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2125145",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "x86",
-        "i686",
-        "i386"
-      ],
-      "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
-      ]
-    },
-    {
       "description": "C/C++ language components (OS X)",
       "url": "https://go.microsoft.com/fwlink/?linkid=2125057",
       "platforms": [
@@ -1624,21 +1608,6 @@
       ]
     },
     {
-      "description": "ClangFormat (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117145",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "x86",
-        "i686",
-        "i386"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format"
-      ]
-    },
-    {
       "description": "ClangFormat (OS X)",
       "url": "https://go.microsoft.com/fwlink/?LinkID=2117146",
       "platforms": [
@@ -1664,21 +1633,6 @@
         "darwin"
       ],
       "binaries": []
-    },
-    {
-      "description": "Mono Runtime (Linux / x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=2027410",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "x86",
-        "i686",
-        "i386"
-      ],
-      "binaries": [
-        "./debugAdapters/mono.linux-x86"
-      ]
     },
     {
       "description": "Mono Runtime (Linux / x86_64)",
