@@ -8,6 +8,7 @@ import * as DebuggerExtension from './Debugger/extension';
 import * as fs from 'fs';
 import * as LanguageServer from './LanguageServer/extension';
 import * as os from 'os';
+import * as path from 'path';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
@@ -33,7 +34,7 @@ let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     let errMsg: string = "";
-    if (process.arch !== 'ia32' && process.arch !== 'x64') {
+    if (process.arch !== 'x64' && (process.platform !== 'win32' || process.arch !== 'ia32')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(process.arch));
     } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
         errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
@@ -47,6 +48,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     initializeTemporaryCommandRegistrar();
     Telemetry.activate();
     util.setProgress(0);
+
+    // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
+    class SchemaProvider implements vscode.TextDocumentContentProvider {
+        public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+            console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
+            let fileName: string = uri.path.substr(1);
+            let locale: string = util.getLocaleId();
+            let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
+            const fileExists: boolean = await util.checkFileExists(localizedFilePath);
+            if (!fileExists) {
+                localizedFilePath = util.getExtensionFilePath(fileName);
+            }
+            return util.readFileText(localizedFilePath);
+        }
+    }
+
+    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
     // Initialize the DebuggerExtension and register the related commands and providers.
     DebuggerExtension.initialize(context);
@@ -407,7 +425,8 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
         "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
         "onDebug",
-        "workspaceContains:/.vscode/c_cpp_properties.json"
+        "workspaceContains:/.vscode/c_cpp_properties.json",
+        "onFileSystem:cpptools-schema"
     ];
 
     return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
