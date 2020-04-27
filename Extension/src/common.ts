@@ -535,24 +535,15 @@ export function checkInstallLockFile(): Promise<boolean> {
 }
 
 /** Get the platform that the installed binaries belong to.*/
-export async function getInstalledBinaryPlatform(): Promise<string | undefined> {
-    // the debugAdapters folder is utilized to identify the platform
-    const path_to_check: string = getExtensionFilePath("debugAdapters");
+export function getInstalledBinaryPlatform(): string | undefined {
+    // the LLVM/bin folder is utilized to identify the platform
     let installedPlatform: string = "";
-    if (checkDirectoryExists(path_to_check)) {
-        const files: string[] = await readDir(path_to_check);
+    if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
         installedPlatform = "win32";
-        if (files !== undefined) {
-            (files).forEach((element: string) => {
-                if (element.includes(".osx")) {
-                    installedPlatform = "darwin";
-                } else if (element.includes("linux-x86_64")) {
-                    installedPlatform = "linux";
-                } else if (element.includes("linux-x86")) {
-                    installedPlatform = "linux32";
-                }
-            });
-        }
+    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
+        installedPlatform = "darwin";
+    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
+        installedPlatform = "linux";
     }
     return installedPlatform;
 }

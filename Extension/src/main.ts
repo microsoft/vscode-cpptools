@@ -50,7 +50,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.setProgress(0);
 
     // check if the correct offline/insiders vsix is installed on the correct platform
-    let installedPlatform: string | undefined = await util.getInstalledBinaryPlatform();
+    let installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
     if (!installedPlatform || (process.platform !== installedPlatform)) {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);

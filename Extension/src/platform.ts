@@ -18,8 +18,7 @@ export function GetOSName(processPlatform: string | undefined): string | undefin
     switch (processPlatform) {
         case "win32": return "Windows";
         case "darwin": return "MacOS";
-        case "linux32": return "Linux(32 bit)";
-        case "linux": return "Linux(64 bit)";
+        case "linux": return "Linux";
         default: return undefined;
     }
 }
