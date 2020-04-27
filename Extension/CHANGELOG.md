@@ -9,6 +9,7 @@
 * Change the `gcc` problem matcher to use `autoDetect` for `fileLocation` . [#1915](https://github.com/microsoft/vscode-cpptools/issues/1915)
 * Add support for IntelliSense-based `Go to Definition` on `#include` statements. [#2564](https://github.com/microsoft/vscode-cpptools/issues/2564)
 * Support relative paths with `forcedInclude`. [#2780](https://github.com/microsoft/vscode-cpptools/issues/2780)
+* Make the `Visual Studio` formatting style respect the C++ standard (e.g. `> >` for C++03 or earlier). [#3578](https://github.com/microsoft/vscode-cpptools/issues/3578)
 * Add support for more C++20 features, such as concepts. [#4195](https://github.com/microsoft/vscode-cpptools/issues/4195)
 * Process the "std" and bitness (-m64/-m32) compiler args. [#4726](https://github.com/microsoft/vscode-cpptools/issues/4726)
 * Switch from our custom Rename UI to VS Code's Refactor Preview. [#4990](https://github.com/microsoft/vscode-cpptools/issues/4990)
