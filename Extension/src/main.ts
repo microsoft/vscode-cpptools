@@ -57,10 +57,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         const vsixName: string = vsixNameForPlatform(platformInfo);
         errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
         const downloadLink: string = localize("download.button", "Go to Download Page");
-        let selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
-        if (selection === downloadLink) {
-            vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
-        }
+        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+            if (selection === downloadLink) {
+                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+            }
+        });
     }
 
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
