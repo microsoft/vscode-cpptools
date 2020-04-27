@@ -61,7 +61,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         if (selection === downloadLink) {
             vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
         }
-        return new NullCppTools();
     }
 
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
