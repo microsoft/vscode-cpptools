@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.27.1: April 27, 2020
+## Version 0.27.1: April 28, 2020
 ### Bug Fix
 * Disable Insiders `updateChannel` for 32-bit Linux and VS Code older than 1.43.0.
 
