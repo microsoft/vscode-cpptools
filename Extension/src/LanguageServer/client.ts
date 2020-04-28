@@ -342,7 +342,7 @@ interface GetFoldingRangesParams {
     id: number;
 }
 
-export enum FoldingRangeKind {
+enum FoldingRangeKind {
     None = 0,
     Comment = 1,
     Imports = 2,
@@ -352,7 +352,7 @@ export enum FoldingRangeKind {
 interface FoldingRange {
     kind: FoldingRangeKind;
     range: Range;
-};
+}
 
 interface GetFoldingRangesResult {
     canceled: boolean;
@@ -361,6 +361,58 @@ interface GetFoldingRangesResult {
 
 interface AbortRequestParams {
     id: number;
+}
+
+interface GetSemanticTokensParams {
+    uri: string;
+    id: number;
+}
+
+interface SemanticToken {
+    line: number;
+    character: number;
+    length: number;
+    type: number;
+    modifiers?: number;
+}
+
+interface GetSemanticTokensResult {
+    canceled: boolean;
+    tokens: SemanticToken[];
+}
+
+enum SemanticTokenTypes {
+    // These are camelCase as the enum names are used directly as strings in our legend.
+    macro = 0,
+    enumMember = 1,
+    variable = 2,
+    parameter = 3,
+    type = 4,
+    referenceType = 5,
+    valueType = 6,
+    function = 7,
+    member = 8,
+    property = 9,
+    cliProperty = 10,
+    event = 11,
+    genericType = 12,
+    templateFunction = 13,
+    templateType = 14,
+    namespace = 15,
+    label = 16,
+    customLiteral = 17,
+    numberLiteral = 18,
+    stringLiteral = 19,
+    operatorOverload = 20,
+    memberOperatorOverload = 21,
+    newOperator = 22
+}
+
+enum SemanticTokenModifiers {
+    // These are camelCase as the enum names are used directly as strings in our legend.
+    static = (1 << 0),
+    global = (1 << 1),
+    local = (1 << 2)
 }
 
 // Requests
@@ -372,6 +424,7 @@ const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeAction
 const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void>('cpptools/getDocumentSymbols');
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
+const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -551,8 +604,8 @@ export class DefaultClient implements Client {
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
-    private tokenTypes: Map<string, number> = new Map<string, number>();
-    private tokenModifiers: Map<string, number> = new Map<string, number>();
+    // private tokenTypes: Map<string, number> = new Map<string, number>();
+    // private tokenModifiers: Map<string, number> = new Map<string, number>();
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -1045,22 +1098,42 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    const legend: vscode.SemanticTokensLegend = (() => {
-                        const tokenTypesLegend: string[] = [
-                            'macro', 'enumMember', 'variable', 'parameter', 'type', 'referenceType', 'valueType', 'function',
-                            'member', 'property', 'cliProperty', 'event', 'genericType', 'templateFunction', 'templateType',
-                            'namespace', 'label', 'customLiteral', 'numberLiteral', 'stringLiteral', 'operatorOverload',
-                            'memberOperatorOverload', 'newOperator'
-                        ];
-                        tokenTypesLegend.forEach((tokenType, index) => this.tokenTypes.set(tokenType, index));
+                    // Semantic token types are identified by indexes in this list of types, in the legend.
+                    let tokenTypesLegend: string[] = [];
+                    for (let e in SemanticTokenTypes) {
+                        // An enum is actually a set of mappings from key <=> value.  Enumerate over only the names.
+                        // This allow us to represent the constants using an enum, which we can match in native code.
+                        if (isNaN(Number(e))) {
+                            tokenTypesLegend.push(e);
+                        }
+                    }
+                    // Semantic token modifiers are bit indexes corresponding to the indexes in this list of modifiers in the legend.
+                    let tokenModifiersLegend: string[] = [];
+                    for (let e in SemanticTokenModifiers) {
+                        if (isNaN(Number(e))) {
+                            tokenModifiersLegend.push(e);
+                        }
+                    }
+                    const legend: vscode.SemanticTokensLegend = new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 
-                        const tokenModifiersLegend: string[] = [
-                            'static', 'global', 'local'
-                        ];
-                        tokenModifiersLegend.forEach((tokenModifier, index) => this.tokenModifiers.set(tokenModifier, index));
-
-                        return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
-                    })();
+                    // // Semantic token types are identified by indexes in this list of types, in the legend.
+                    // const legend: vscode.SemanticTokensLegend = (() => {
+                    //     const tokenTypesLegend: string[] = [
+                    //         'macro', 'enumMember', 'variable', 'parameter', 'type', 'referenceType', 'valueType', 'function',
+                    //         'member', 'property', 'cliProperty', 'event', 'genericType', 'templateFunction', 'templateType',
+                    //         'namespace', 'label', 'customLiteral', 'numberLiteral', 'stringLiteral', 'operatorOverload',
+                    //         'memberOperatorOverload', 'newOperator'
+                    //     ];
+                    //     //tokenTypesLegend.forEach((tokenType, index) => this.tokenTypes.set(tokenType, index));
+                    //
+                    //     // Semantic token modifiers are bit indexes corresponding to the indexes in this list of modifiers in the legend.
+                    //     const tokenModifiersLegend: string[] = [
+                    //         'static', 'global', 'local'
+                    //     ];
+                    //     //tokenModifiersLegend.forEach((tokenModifier, index) => this.tokenModifiers.set(tokenModifier, index));
+                    //
+                    //     return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
+                    // })();
 
                     class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
                         private client: DefaultClient;
@@ -1068,39 +1141,27 @@ export class DefaultClient implements Client {
                             this.client = client;
                         }
 
-                        private _encodeTokenType(tokenType: string): number {
-                            let type: number | undefined = this.client.tokenTypes.get(tokenType);
-                            return type ? type : 0;
-                        }
-
-                        private _encodeTokenModifiers(strTokenModifiers: string[]): number {
-                            let result: number = 0;
-                            for (let i: number = 0; i < strTokenModifiers.length; i++) {
-                                const tokenModifier: string = strTokenModifiers[i];
-                                if (this.client.tokenModifiers.has(tokenModifier)) {
-                                    const shift: number | undefined = this.client.tokenModifiers.get(tokenModifier);
-                                    if (shift) {
-                                        // eslint-disable-next-line no-bitwise
-                                        result = result | (1 << shift);
-                                    }
-                                }
-                            }
-                            return result;
-                        }
-
                         public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
                             return new Promise<vscode.SemanticTokens>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
-
-                                    // const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder();
-                                    // allTokens.forEach((token) => {
-                                    //     builder.push(token.line, token.startCharacter, token.length,
-                                    //         this._encodeTokenType(token.tokenType),
-                                    //         this._encodeTokenModifiers(token.tokenModifiers));
-                                    // });
-                                    // return builder.build();
-
-                                    reject();
+                                    let id: number = ++abortRequestId;
+                                    let params: GetSemanticTokensParams = {
+                                        id: id,
+                                        uri: document.uri.toString()
+                                    };
+                                    this.client.languageClient.sendRequest(GetSemanticTokensRequest, params)
+                                        .then((tokensResult) => {
+                                            if (tokensResult.canceled) {
+                                                reject();
+                                            } else {
+                                                let builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(legend);
+                                                tokensResult.tokens.forEach((token) => {
+                                                    builder.push(token.line, token.character, token.length, token.type, token.modifiers);
+                                                });
+                                                resolve(builder.build());
+                                            }
+                                        });
+                                    token.onCancellationRequested(e => this.client.abortRequest(id));
                                 });
                             });
                         }
