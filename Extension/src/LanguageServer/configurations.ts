@@ -1539,7 +1539,7 @@ export class CppProperties {
         let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
-                if (this.propertiesFile) {
+                if (err.code === "ENOENT" && this.propertiesFile) {
                     this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
