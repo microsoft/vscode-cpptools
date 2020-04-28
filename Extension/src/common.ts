@@ -534,6 +534,20 @@ export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());
 }
 
+/** Get the platform that the installed binaries belong to.*/
+export function getInstalledBinaryPlatform(): string | undefined {
+    // the LLVM/bin folder is utilized to identify the platform
+    let installedPlatform: string = "";
+    if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
+        installedPlatform = "win32";
+    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
+        installedPlatform = "darwin";
+    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
+        installedPlatform = "linux";
+    }
+    return installedPlatform;
+}
+
 /** Reads the content of a text file */
 export function readFileText(filePath: string, encoding: string = "utf8"): Promise<string> {
     return new Promise<string>((resolve, reject) => {

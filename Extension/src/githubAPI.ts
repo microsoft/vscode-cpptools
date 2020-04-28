@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 import * as telemetry from './telemetry';
 
 const testingInsidersVsixInstall: boolean = false; // Change this to true to enable testing of the Insiders vsix installation.
-
+export const releaseDownloadUrl: string = "https://github.com/microsoft/vscode-cpptools/releases";
 /**
  * The object representation of a Build Asset. Each Asset corresponds to information about a release file on GitHub.
  */
@@ -96,7 +96,7 @@ function isArrayOfBuilds(input: any): input is Build[] {
  * @param info Information about the user's operating system.
  * @return VSIX filename for the extension's releases matched to the user's platform.
  */
-function vsixNameForPlatform(info: PlatformInformation): string {
+export function vsixNameForPlatform(info: PlatformInformation): string {
     const vsixName: string | undefined = function(platformInfo): string | undefined {
         switch (platformInfo.platform) {
             case 'win32': return 'cpptools-win32.vsix';
