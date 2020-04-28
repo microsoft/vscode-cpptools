@@ -470,8 +470,8 @@ function realActivation(): void {
 			let vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
 			let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.42.1");
 			if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
-    			if (settings.updateChannel === 'Default') {
-        			suggestInsidersChannel();
+				if (settings.updateChannel === 'Default') {
+					suggestInsidersChannel();
 				} else if (settings.updateChannel === 'Insiders') {
 					checkAndApplyUpdate(settings.updateChannel);
 				}
