@@ -41,11 +41,12 @@ let ui: UI;
 let disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
+let insiderUpdateEnabled: boolean = false;
 let insiderUpdateTimer: NodeJS.Timer;
+const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
-const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
 let buildInfoCache: BuildInfo | undefined;
 const taskSourceStr: string = "C/C++";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
@@ -462,12 +463,24 @@ function realActivation(): void {
 
     vcpkgDbPromise = initVcpkgDatabase();
 
-    if (settings.updateChannel === 'Default') {
-        suggestInsidersChannel();
-    } else if (settings.updateChannel === 'Insiders') {
-        insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
-        checkAndApplyUpdate(settings.updateChannel);
-    }
+    PlatformInformation.GetPlatformInformation().then(info => {
+        // Skip Insiders processing for 32-bit Linux.
+        if (info.platform !== "linux" || info.architecture === "x86_64") {
+            // Skip Insiders processing for VS Code newer than 1.42.1.
+            // TODO: Change this to not require the hardcoded version to be updated.
+            let vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
+            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.42.1");
+            if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
+                insiderUpdateEnabled = true;
+                if (settings.updateChannel === 'Default') {
+                    suggestInsidersChannel();
+                } else if (settings.updateChannel === 'Insiders') {
+                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+                    checkAndApplyUpdate(settings.updateChannel);
+                }
+            }
+        }
+    });
 
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
     class SchemaProvider implements vscode.TextDocumentContentProvider {
@@ -511,15 +524,17 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
         }
     });
 
-    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
-    if (newUpdateChannel) {
-        if (newUpdateChannel === 'Default') {
-            clearInterval(insiderUpdateTimer);
-        } else if (newUpdateChannel === 'Insiders') {
-            insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
-        }
+    if (insiderUpdateEnabled) {
+        const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
+        if (newUpdateChannel) {
+            if (newUpdateChannel === 'Default') {
+                clearInterval(insiderUpdateTimer);
+            } else if (newUpdateChannel === 'Insiders') {
+                insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+            }
 
-        checkAndApplyUpdate(newUpdateChannel);
+            checkAndApplyUpdate(newUpdateChannel);
+        }
     }
 }
 
