@@ -465,8 +465,19 @@ function realActivation(): void {
     if (settings.updateChannel === 'Default') {
         suggestInsidersChannel();
     } else if (settings.updateChannel === 'Insiders') {
-        insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
-        checkAndApplyUpdate(settings.updateChannel);
+		PlatformInformation.GetPlatformInformation().then(info => {
+			// Skip Insiders updates for 32-bit Linux.
+			if (info.platform !== "linux" || info.architecture === "x86_64") {
+				// Skip Insiders updates for VS Code newer than 1.42.1.
+				// TODO: Change this to not require the hardcoded version to be updated.
+				let vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
+				let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.42.1");
+				if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
+					insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
+					checkAndApplyUpdate(settings.updateChannel);
+				}
+			}
+		});
     }
 
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
