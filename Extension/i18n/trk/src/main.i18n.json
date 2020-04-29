@@ -6,10 +6,12 @@
 {
 	"architecture.not.supported": "{0} mimarisi desteklemiyor.",
 	"apline.containers.not.supported": "Alpine kapsayıcıları desteklenmiyor.",
+	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
+	"download.button": "Go to Download Page",
 	"initialization.failed": "C/C++ uzantısının yüklenmesi başarısız oldu. Daha fazla bilgi için lütfen çıkış penceresine bakın.",
 	"updating.dependencies": "C/C++ bağımlılıkları güncelleştiriliyor...",
 	"rename.failed.delete.manually": "HATA: fs.rename, \"{0}\" ile başarısız oldu. Hata ayıklamayı etkinleştirmek için {1} dosyasını kendiniz silin.",
 	"failed.at.stage": "Şu aşamada başarısız oldu: {0}",
-	"failed.at.stage2": "Çevrimdışı bir ortamda çalışıyorsanız veya bu hatayı sürekli olarak görüyorsanız, uzantının önceden eklenmiş tüm bağımlılıklara sahip bir sürümünü https://github.com/Microsoft/vscode-cpptools/releases adresinden indirmeyi deneyin ve sonra VS Code'da \"VSIX'ten yükle\" komutunu kullanarak uzantıyı yükleyin.",
+	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
 	"finished.installing.dependencies": "Bağımlılıkların yüklenmesi tamamlandı"
 }
