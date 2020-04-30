@@ -3170,7 +3170,7 @@
   "預設比較運算子參數的類型 %t 不正確 (必須是 'reference to const X'，其中 X 是外層類別類型)",
   "預設比較運算子的傳回型別必須是 'bool'",
   "預設的成員比較運算子必須是 'const'",
-  "這個類別中定義了多個預設 spaceship 運算子",
+  null,
   "協同程式的 Promise 類型 %t 不能同時設有 'return_void' 和 'return_value'",
   "'return_value' 已宣告 %p",
   "'return_void' 已宣告 %p",
@@ -3291,5 +3291,11 @@
   "等位、指標或成員指標類型 %t 會防止 __builtin_bit_cast 的 constexpr 評估",
   "%npT (透過使用 decl %p 繼承)",
   "無法執行用於繼承建構函式的 %t 子物件建構 -- 已刪除隱含的預設建構函式",
-  "%n 必須傳回 void"
+  "%n 必須傳回 void",
+  "成員宣告開頭無效",
+  "必須為 'auto'",
+  "目前不允許此運算子; 請以括號括住前面的 new 運算式",
+  "概念使用無效",
+  "預設的成員比較運算子不可限定為 '&&'",
+  "預設 constexpr 比較函式會呼叫非 constexpr 函式 %nd"
 ]
