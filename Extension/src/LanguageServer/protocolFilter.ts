@@ -43,7 +43,6 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                     me.provideCustomConfiguration(document.uri, undefined);
                     me.notifyWhenReady(() => {
                         sendMessage(document);
-                        me.onDidOpenTextDocument(document);
                         if (editor && editor === vscode.window.activeTextEditor) {
                             onDidChangeActiveTextEditor(editor);
                         }
@@ -53,7 +52,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                 // NO-OP
                 // If the file is not opened into an editor (such as in response for a control-hover),
                 // we do not actually load a translation unit for it.  When we receive a didOpen, the file
-                // may not yet be visible.  So, we defer creation of the  translation until we receive a
+                // may not yet be visible.  So, we defer creation of the translation until we receive a
                 // call to onDidChangeVisibleTextEditors(), in extension.ts.  A file is only loaded when
                 // it is actually opened in the editor (not in response to control-hover, which sends a
                 // didOpen), and first becomes visible.
@@ -79,7 +78,6 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         didClose: (document, sendMessage) => {
             let me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
-                me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
                 me.notifyWhenReady(() => sendMessage(document));
             }
