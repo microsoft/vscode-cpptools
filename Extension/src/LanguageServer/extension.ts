@@ -559,6 +559,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 client.provideCustomConfiguration(document.uri, undefined);
                 client.notifyWhenReady(() => {
                     client.takeOwnership(document);
+                    client.onDidOpenTextDocument(document);
                 });
             }
         }

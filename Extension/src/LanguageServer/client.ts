@@ -498,6 +498,8 @@ export interface Client {
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
+    onDidOpenTextDocument(document: vscode.TextDocument): void;
+    onDidCloseTextDocument(document: vscode.TextDocument): void;
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
@@ -556,6 +558,7 @@ export class DefaultClient implements Client {
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
+    private openFileVersions = new Map<string, number>();
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
 
@@ -1076,19 +1079,18 @@ export class DefaultClient implements Client {
                         public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
                             return new Promise<vscode.SemanticTokens>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
-                                    let uri: vscode.Uri = document.uri;
+                                    let uriString: string = document.uri.toString();
                                     let id: number = ++abortRequestId;
                                     let params: GetSemanticTokensParams = {
                                         id: id,
-                                        uri: uri.toString()
+                                        uri: uriString
                                     };
                                     this.client.languageClient.sendRequest(GetSemanticTokensRequest, params)
                                         .then((tokensResult) => {
                                             if (tokensResult.canceled) {
                                                 reject();
                                             } else {
-                                                let editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri === uri);
-                                                if (!editor || editor.document.version !== tokensResult.fileVersion) {
+                                                if (tokensResult.fileVersion !== this.client.openFileVersions.get(uriString)) {
                                                     reject();
                                                 } else {
                                                     let builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(legend);
@@ -1400,8 +1402,24 @@ export class DefaultClient implements Client {
                 if (renamePending) {
                     this.cancelReferences();
                 }
+
+                let oldVersion: number | undefined = this.openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
+                let newVersion: number = textDocumentChangeEvent.document.version;
+                if (oldVersion === undefined || newVersion > oldVersion) {
+                    this.openFileVersions.set(textDocumentChangeEvent.document.uri.toString(), newVersion);
+                }
             }
         }
+    }
+
+    public onDidOpenTextDocument(document: vscode.TextDocument): void {
+        if (document.uri.scheme === "file") {
+            this.openFileVersions.set(document.uri.toString(), document.version);
+        }
+    }
+
+    public onDidCloseTextDocument(document: vscode.TextDocument): void {
+        this.openFileVersions.delete(document.uri.toString());
     }
 
     private registeredProviders: CustomConfigurationProvider1[] = [];
@@ -2097,16 +2115,11 @@ export class DefaultClient implements Client {
                 };
                 this.inactiveRegionsDecorations.set(params.uri, toInsert);
             }
-            if (settings.dimInactiveRegions) {
+            if (settings.dimInactiveRegions && params.fileVersion === this.openFileVersions.get(params.uri)) {
                 // Apply the decorations to all *visible* text editors
                 let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
-                if (editors.length > 0) {
-                    // Check one of the editors to ensure the file version matches
-                    if (editors[0].document.version === params.fileVersion) {
-                        for (let e of editors) {
-                            e.setDecorations(decoration, ranges);
-                        }
-                    }
+                for (let e of editors) {
+                    e.setDecorations(decoration, ranges);
                 }
             }
         }
@@ -2620,6 +2633,8 @@ class NullClient implements Client {
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } { return {}; }
+    onDidOpenTextDocument(document: vscode.TextDocument): void {}
+    onDidCloseTextDocument(document: vscode.TextDocument): void {}
     onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {}
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }

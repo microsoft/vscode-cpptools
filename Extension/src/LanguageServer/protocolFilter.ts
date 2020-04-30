@@ -43,6 +43,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                     me.provideCustomConfiguration(document.uri, undefined);
                     me.notifyWhenReady(() => {
                         sendMessage(document);
+                        me.onDidOpenTextDocument(document);
                         if (editor && editor === vscode.window.activeTextEditor) {
                             onDidChangeActiveTextEditor(editor);
                         }
@@ -78,6 +79,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         didClose: (document, sendMessage) => {
             let me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
+                me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
                 me.notifyWhenReady(() => sendMessage(document));
             }
