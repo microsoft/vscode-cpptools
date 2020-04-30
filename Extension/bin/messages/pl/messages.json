@@ -3170,7 +3170,7 @@
   "nieprawidłowy typ %t parametru domyślnego operatora porównania (wymagany jest typ „reference to const X”, gdzie X jest typem klasy otaczającej)",
   "zwracanym typem domyślnego operatora porównania musi być „bool”",
   "domyślny operator porównania elementu członkowskiego musi mieć wartość „const”",
-  "w tej klasie zdefiniowano więcej niż jeden domyślny operator spaceship",
+  null,
   "Typ obietnicy %t koprocedury nie może mieć ustawionej jednocześnie metody „return_void” i metody „return_value”",
   "metoda „return_value” zadeklarowała element %p",
   "metoda „return_void” zadeklarowała element %p",
@@ -3291,5 +3291,11 @@
   "typ unii, wskaźnika lub wskaźnika do składowej %t uniemożliwia ocenę wyrażenia constexpr dla elementu __builtin_bit_cast",
   "%npT (odziedziczone za pomocą deklaracji %p)",
   "nie można wykonać konstrukcji podobiektu %t na potrzeby dziedziczenia konstruktorów — niejawny konstruktor domyślny został usunięty",
-  "Element %n musi zwracać wartość void"
+  "Element %n musi zwracać wartość void",
+  "nieprawidłowy początek deklaracji członkowskiej",
+  "oczekiwano wartości „auto”",
+  "ten operator jest niedozwolony w tym miejscu; umieść w nawiasie poprzednie nowe wyrażenie",
+  "nieprawidłowe użycie koncepcji",
+  "domyślny operator porównania elementu członkowskiego nie może być kwalifikowany przez element „&&”",
+  "domyślna funkcja porównywania constexpr wywołuje funkcję non-constexpr %nd"
 ]

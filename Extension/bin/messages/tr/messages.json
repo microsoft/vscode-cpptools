@@ -3170,7 +3170,7 @@
   "varsayılan olarak ayarlanan karşılaştırma işlecinin parametresi için %t türü hatalı ('const X başvurusu' olmalıdır; burada X, kapsayan sınıf türüdür)",
   "varsayılan olarak ayarlanan karşılaştırma işlecinin dönüş türü 'bool' olmalıdır",
   "varsayılan olarak ayarlanan üye karşılaştırma işleci 'const' olmalıdır",
-  "bu sınıfta varsayılan olarak ayarlanan birden fazla birleştirilmiş karşılaştırma işleci tanımlandı",
+  null,
   "eş yordama ait %t promise türünde hem 'return_void' hem de 'return_value' ayarlanmış olamaz",
   "'return_value' tarafından bildirilen %p",
   "'return_void' tarafından bildirilen %p",
@@ -3291,5 +3291,11 @@
   "bir Union, işaretçi veya üye işaretçisi türü %t __builtin_bit_cast constexpr değerlendirmesine engel olur",
   "%npT (decl %p kullanılarak devralındı)",
   "devralma oluşturucuları için %t alt nesne oluşturma gerçekleştirilemiyor; örtük varsayılan Oluşturucu silindi",
-  "%n void döndürmesi gerekir"
+  "%n void döndürmesi gerekir",
+  "üye bildiriminin başlangıcı geçersiz",
+  "'auto' bekleniyor",
+  "bu işlece bu noktada izin verilmiyor; önceki yeni ifadeyi parantez içine alın",
+  "kavram kullanımı geçersiz",
+  "varsayılan olarak ayarlanan üye karşılaştırma işleci tam '&&' ile nitelenemez",
+  "varsayılan constexpr karşılaştırma işlevi constexpr olmayan %nd işlevini çağırıyor"
 ]
