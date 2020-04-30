@@ -6,10 +6,12 @@
 {
 	"architecture.not.supported": "Não há suporte para a arquitetura {0}. ",
 	"apline.containers.not.supported": "Não há suporte para os contêineres do Alpine.",
+	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
+	"download.button": "Go to Download Page",
 	"initialization.failed": "Falha na instalação da extensão C/C++. Para obter mais informações, confira a janela de saída.",
 	"updating.dependencies": "Atualizando dependências de C/C++...",
 	"rename.failed.delete.manually": "ERRO: o fs.rename falhou com \"{0}\". Exclua {1} manualmente para habilitar a depuração.",
 	"failed.at.stage": "Falha na fase: {0}",
-	"failed.at.stage2": "Se você trabalha em um ambiente offline ou vê este erro repetidamente, tente baixar uma versão da extensão com todas as dependências pré-incluídas de https://github.com/Microsoft/vscode-cpptools/releases e usar o comando \"Instalar do VSIX\" no VS Code para instalá-lo.",
+	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
 	"finished.installing.dependencies": "Concluída a instalação de dependências"
 }

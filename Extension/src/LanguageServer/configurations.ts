@@ -407,30 +407,29 @@ export class CppProperties {
         }
     }
 
-    private isCompilerIntelliSenseModeCompatible(configuration: Configuration): boolean {
-        // Ignore if compiler path is not set or intelliSenseMode is not set.
+    private validateIntelliSenseMode(configuration: Configuration): string {
+        // Validate whether IntelliSenseMode is compatible with compiler.
+        // Do not validate if compiler path is not set or intelliSenseMode is not set.
         if (configuration.compilerPath === undefined ||
             configuration.compilerPath === "" ||
             configuration.compilerPath === "${default}" ||
             configuration.intelliSenseMode === undefined ||
             configuration.intelliSenseMode === "" ||
             configuration.intelliSenseMode === "${default}") {
-            return true;
+            return "";
         }
         let resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
-        let isMsvc: boolean = configuration.intelliSenseMode.startsWith("msvc");
-        let isCl: boolean = compilerPathAndArgs.compilerName === "cl.exe";
 
-        // For now, we can only validate msvc mode and cl.exe combinations.
-        // Verify cl.exe arch matches intelliSenseMode arch or compilerPath is only cl.exe.
-        if (isMsvc && isCl) {
-            let msvcArch: string = configuration.intelliSenseMode.split('-')[1];
-            let compilerPathDir: string = path.dirname(resolvedCompilerPath);
-            return compilerPathDir.endsWith(msvcArch) || compilerPathAndArgs.compilerPath === "cl.exe";
+        // Valid compiler + IntelliSenseMode combinations:
+        // 1. compiler is cl/clang-cl and IntelliSenseMode is MSVC
+        // 2. compiler is not cl/clang-cl and IntelliSenseMode is not MSVC
+        let isValid: boolean = compilerPathAndArgs.compilerName.endsWith("cl.exe") === configuration.intelliSenseMode.startsWith("msvc");
+        if (isValid) {
+            return "";
+        } else {
+            return localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", configuration.intelliSenseMode);
         }
-        // All other combinations are valid if intelliSenseMode is not msvc and compiler is not cl.exe.
-        return !isMsvc && !isCl;
     }
 
     public addToIncludePathCommand(path: string): void {
@@ -1109,8 +1108,11 @@ export class CppProperties {
         errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
         // Validate intelliSenseMode
-        if (isWindows && !this.isCompilerIntelliSenseModeCompatible(config)) {
-            errors.intelliSenseMode = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", config.intelliSenseMode);
+        if (isWindows) {
+            let intelliSenesModeError: string = this.validateIntelliSenseMode(config);
+            if (intelliSenesModeError.length > 0) {
+                errors.intelliSenseMode = intelliSenesModeError;
+            }
         }
 
         return errors;
@@ -1258,8 +1260,9 @@ export class CppProperties {
                     const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
-                    if (!this.isCompilerIntelliSenseModeCompatible(currentConfiguration)) {
-                        let message: string = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", currentConfiguration.intelliSenseMode);
+                    let intelliSenseModeError: string = this.validateIntelliSenseMode(currentConfiguration);
+                    if (intelliSenseModeError.length > 0) {
+                        let message: string = intelliSenseModeError;
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
@@ -1536,7 +1539,7 @@ export class CppProperties {
         let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
-                if (this.propertiesFile) {
+                if (err.code === "ENOENT" && this.propertiesFile) {
                     this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
