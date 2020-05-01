@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.28.0-insiders2: May 4, 2020
+### New Features
+* Add GNU (and C18) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
+
+### Bug Fixes
+* Fix some cpptools and cpptools-srv crash regressions.
+* Fix an issue with squiggle updates not occurring when a dependent file is created, deleted, or renamed. [#3670](https://github.com/microsoft/vscode-cpptools/issues/3670)
+* Avoid `<…>` truncation on hover. [#5291](https://github.com/microsoft/vscode-cpptools/issues/5291)
+* Fix `compilerPath` set to `""` not working. [#5392](https://github.com/microsoft/vscode-cpptools/issues/5392)
+
 ## Version 0.28.0-insiders: April 27, 2020
 ### New Features
 * Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)

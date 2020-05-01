@@ -3170,7 +3170,7 @@
   "Chybný typ %t pro parametr výchozího operátoru porovnání (musí to být odkaz na const X, kde X je uzavírající typ třídy)",
   "Návratový typ výchozího operátoru porovnání musí být bool.",
   "Výchozí operátor porovnání členů musí být const.",
-  "V této třídě je více než jeden definovaný výchozí třícestný operátor.",
+  null,
   "Typ příslibu korutiny %t nemůže mít nastavené return_void a return_value zároveň.",
   "return_value deklarované v %p",
   "return_void deklarovalo %p.",
@@ -3291,5 +3291,11 @@
   "Typ sjednocení, ukazatele nebo ukazatele na člen %t brání vyhodnocování constexpr v __builtin_bit_cast.",
   "%npT (zděděno prostřednictvím decl %p)",
   "Podobjekt %t pro dědící konstruktory se nedá vytvořit -- implicitní výchozí konstruktor se odstranil.",
-  "%n musí vracet void."
+  "%n musí vracet void.",
+  "Neplatný začátek deklarace členu",
+  "Očekává se klíčové slovo auto.",
+  "Tento operátor se na tomto místě nepodporuje. Uzavřete předchozí výraz new do závorek.",
+  "Neplatné použití konceptu",
+  "Výchozí operátor porovnání členů nemůže být kvalifikovaný jako &&.",
+  "Výchozí funkce pro porovnání constexpr volá funkci %nd, která constexpr není."
 ]

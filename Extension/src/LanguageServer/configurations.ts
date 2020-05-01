@@ -541,10 +541,10 @@ export class CppProperties {
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
-        if (!property || property === "${default}") {
+        if (property === null || property === undefined || property === "${default}") {
             property = defaultValue;
         }
-        if (!property || (acceptBlank !== true && property === "")) {
+        if (property === null || property === undefined || (acceptBlank !== true && property === "")) {
             return undefined;
         }
         return util.resolveVariables(property, env);

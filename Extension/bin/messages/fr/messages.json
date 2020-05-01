@@ -3170,7 +3170,7 @@
   "type %t incorrect pour le paramètre de l'opérateur de comparaison par défaut (il doit s'agir d'une 'référence à const X' où X est le type classe englobant)",
   "le type de retour de l'opérateur de comparaison par défaut doit être 'bool'",
   "un opérateur de comparaison de membres par défaut doit être 'const'",
-  "plusieurs opérateurs vaisseau spatial par défaut définis dans cette classe",
+  null,
   "le type de promesse %t d'une coroutine ne peut pas avoir à la fois 'return_void' et 'return_value' définis",
   "'return_value' déclaré dans %p",
   "'return_void' déclaré %p",
@@ -3291,5 +3291,11 @@
   "un type union, pointeur ou pointeur vers membre %t empêche l'évaluation de constexpr de __builtin_bit_cast",
   "%npT (hérité via l'utilisation de decl %p)",
   "la construction de sous-objet de %t pour l'héritage de constructeurs ne peut pas être effectuée -- le constructeur par défaut implicite est supprimé",
-  "%n doit retourner void"
+  "%n doit retourner void",
+  "début de déclaration de membre non valide",
+  "'auto' attendu",
+  "cet opérateur n'est pas autorisé à ce stade ; mettez entre parenthèses l'expression new précédente",
+  "utilisation non valide du concept",
+  "un opérateur de comparaison de membres par défaut ne peut pas être qualifié en tant que '&&'",
+  "la fonction de comparaison constexpr par défaut appelle la fonction non constexpr %nd"
 ]

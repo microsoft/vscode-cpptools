@@ -3170,7 +3170,7 @@
   "il tipo %t per il parametro dell'operatore di confronto impostato come predefinito non è valido. Deve essere 'reference to const X' dove X è il tipo della classe contenitore",
   "il tipo restituito dell'operatore di confronto impostato come predefinito deve essere 'bool'",
   "un operatore di confronto membri impostato come predefinito non può essere 'const'",
-  "in questa classe sono stati definiti più operatori di confronto combinato impostati come predefiniti",
+  null,
   "non è possibile impostare sia 'return_void' che 'return_value' per il tipo di promessa %t di una coroutine",
   "'return_value' ha dichiarato %p",
   "'return_void' ha dichiarato %p",
@@ -3291,5 +3291,11 @@
   "un tipo unione, puntatore o puntatore a membro %t impedisce la valutazione constexpr di __builtin_bit_cast",
   "%npT (ereditato tramite l'uso di decl %p)",
   "non è possibile costruire oggetti secondari di %t per ereditare costruttori. Il costruttore predefinito implicito è stato eliminato",
-  "%n deve restituire void"
+  "%n deve restituire void",
+  "l'inizio della dichiarazione di membro non è valido",
+  "è previsto 'auto'",
+  "questo operatore non è consentito in questo punto. Racchiudere tra parentesi l'espressione new precedente",
+  "uso del concetto non valido",
+  "un operatore di confronto membri impostato come predefinito non può essere qualificato con '&&'",
+  "la funzione di confronto constexpr predefinita chiama la funzione non constexpr %nd"
 ]
