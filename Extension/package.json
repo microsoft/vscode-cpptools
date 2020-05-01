@@ -84,13 +84,13 @@
           "type": "string",
           "default": "file",
           "description": "%c_cpp.configuration.clang_format_style.description%",
-          "scope": "resource"
+          "scope": "machine-overridable"
         },
         "C_Cpp.clang_format_fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
           "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
-          "scope": "resource"
+          "scope": "machine-overridable"
         },
         "C_Cpp.clang_format_sortIncludes": {
           "type": [
