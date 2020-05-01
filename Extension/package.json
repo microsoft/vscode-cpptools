@@ -78,7 +78,7 @@
         "C_Cpp.clang_format_path": {
           "type": "string",
           "description": "%c_cpp.configuration.clang_format_path.description%",
-          "scope": "resource"
+          "scope": "machine-overridable"
         },
         "C_Cpp.clang_format_style": {
           "type": "string",
