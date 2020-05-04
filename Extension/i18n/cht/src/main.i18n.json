@@ -7,7 +7,7 @@
 	"architecture.not.supported": "不支援架構 {0}。 ",
 	"apline.containers.not.supported": "不支援 Alpine 容器。",
 	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
-	"download.button": "Go to Download Page",
+	"download.button": "前往 &#91;下載&#92; 頁面",
 	"initialization.failed": "C/C + + 延伸模組安裝失敗。如需詳細資訊，請查看 [輸出] 視窗。",
 	"updating.dependencies": "正在更新 C/C + + 相依性...",
 	"rename.failed.delete.manually": "錯誤: fs.rename 失敗，\"{0}\"。請手動刪除 {1} 以啟用偵錯。",

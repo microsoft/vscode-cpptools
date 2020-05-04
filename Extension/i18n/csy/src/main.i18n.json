@@ -7,7 +7,7 @@
 	"architecture.not.supported": "Architektura {0} se nepodporuje. ",
 	"apline.containers.not.supported": "Kontejnery Alpine se nepodporují.",
 	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
-	"download.button": "Go to Download Page",
+	"download.button": "Přejít na stránku stahování",
 	"initialization.failed": "Nepovedlo se nainstalovat rozšíření C/C++. Další informace najdete v okně výstupu.",
 	"updating.dependencies": "Aktualizují se závislosti C/C++...",
 	"rename.failed.delete.manually": "CHYBA: Operace fs.rename neproběhla úspěšně s chybou {0}. Pokud chcete povolit ladění, odstraňte {1} ručně.",
