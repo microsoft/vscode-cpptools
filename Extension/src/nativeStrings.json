@@ -9,6 +9,7 @@
     "include_errors_update_include_path_squiggles_disables": "#include errors detected. Please update your includePath. Squiggles are disabled for this translation unit ({0}).",
     "include_errors_update_include_path_intellisense_disabled": "#include errors detected. Please update your includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
     "include_errors_update_compile_commands_or_include_path_intellisense_disabled": "#include errors detected. Consider updating your compile_commands.json or includePath. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+    "include_errors_tag_parser_provide_intellisense_features": "#include errors detected. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
     "could_not_parse_compile_commands": "\"{0}\" could not be parsed. 'includePath' from c_cpp_properties.json in folder '{1}' will be used instead.",
     "could_not_find_compile_commands": "\"{0}\" could not be found. 'includePath' from c_cpp_properties.json in folder '{1}' will be used instead.",
     "file_not_found_in_path": "\"{0}\" not found in \"{1}\". 'includePath' from c_cpp_properties.json in folder '{2}' will be used for this file instead.",
