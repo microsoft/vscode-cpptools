@@ -7,7 +7,7 @@
 	"architecture.not.supported": "L'architettura {0} non è supportata. ",
 	"apline.containers.not.supported": "I contenitori Alpine non sono supportati.",
 	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
-	"download.button": "Go to Download Page",
+	"download.button": "Vai alla pagina di download",
 	"initialization.failed": "L'installazione dell'estensione C/C++ non è riuscita. Per altre informazioni, vedere la finestra di output.",
 	"updating.dependencies": "Aggiornamento delle dipendenze di C/C++...",
 	"rename.failed.delete.manually": "ERRORE: fs.rename non riuscito con \"{0}\". Per abilitare il debug, eliminare manualmente {1}.",
