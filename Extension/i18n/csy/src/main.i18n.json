@@ -6,12 +6,12 @@
 {
 	"architecture.not.supported": "Architektura {0} se nepodporuje. ",
 	"apline.containers.not.supported": "Kontejnery Alpine se nepodporují.",
-	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
+	"native.binaries.not.supported": "Tato verze rozšíření {0} není kompatibilní s vaším operačním systémem. Stáhněte a nainstalujte si prosím verzi rozšíření {1}.",
 	"download.button": "Přejít na stránku stahování",
 	"initialization.failed": "Nepovedlo se nainstalovat rozšíření C/C++. Další informace najdete v okně výstupu.",
 	"updating.dependencies": "Aktualizují se závislosti C/C++...",
 	"rename.failed.delete.manually": "CHYBA: Operace fs.rename neproběhla úspěšně s chybou {0}. Pokud chcete povolit ladění, odstraňte {1} ručně.",
 	"failed.at.stage": "Chyba ve fázi: {0}",
-	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
+	"failed.at.stage2": "Pokud pracujete v offline prostředí nebo se vám tato chyba zobrazuje opakovaně, zkuste si z {0} stáhnout verzi rozšíření, která už má všechny závislosti předem zahrnuté, a pak ji nainstalujte v nástroji VS Code pomocí příkazu Nainstalovat z VSIX.",
 	"finished.installing.dependencies": "Dokončila se instalace závislostí."
 }
