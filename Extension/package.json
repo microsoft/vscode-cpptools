@@ -362,7 +362,13 @@
             "clang-x64",
             "msvc-x86",
             "gcc-x86",
-            "clang-x86"
+            "clang-x86",
+            "msvc-arm64",
+            "gcc-arm64",
+            "clang-arm64",
+            "msvc-arm",
+            "gcc-arm",
+            "clang-arm"
           ],
           "description": "%c_cpp.configuration.default.intelliSenseMode.description%",
           "scope": "resource"
