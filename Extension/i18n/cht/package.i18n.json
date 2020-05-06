@@ -31,7 +31,7 @@
 	"c_cpp.configuration.autocomplete.description": "控制自動完成提供者。\"Default\" 會使用現有的 IntelliSense 引擎。\"Disabled\" 會使用 Visual Studio Code 所提供的文字式完成。",
 	"c_cpp.configuration.errorSquiggles.description": "控制 IntelliSense 引擎偵測到的可疑編譯錯誤是否會回報回編輯器。標籤剖析器引擎會忽略此設定。",
 	"c_cpp.configuration.dimInactiveRegions.description": "控制非作用中前置處理器區塊的色彩是否與作用中程式碼不同。如果 IntelliSense 停用或使用預設高對比佈景主題，則此設定沒有效果。",
-	"c_cpp.configuration.inactiveRegionOpacity.description": "控制非作用中前置處理器區塊的不透明度。在 0.1 與 1.0 之間調整規模。只有在啟用非作用中區域變暗時，才會套用此設定。",
+	"c_cpp.configuration.inactiveRegionOpacity.description": "控制非作用中前置處理器區塊的不透明度。在 0.1 與 1.0 之間縮放。只有在啟用非作用中區域變暗時，才會套用此設定。",
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "控制非作用中前置處理器區塊的前景色彩。輸入的格式為十六進位色彩代碼或有效的佈景主題色彩。若未設定，會預設為編輯器的語法著色配置。只有在啟用非作用中區域變暗時，才會套用此設定。",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "控制非作用中前置處理器區塊的背景色彩。輸入的格式為十六進位色彩代碼或有效的佈景主題色彩。若未設定，會預設為透明。只有在啟用非作用中區域變暗時，才會套用此設定。",
 	"c_cpp.configuration.formatting.description": "\"Default\" 會啟用程式碼格式設定。\"Disabled\" 會停用程式碼格式設定。",
