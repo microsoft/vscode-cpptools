@@ -1043,19 +1043,7 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    this.registerFileWatcher();
-
                     if (firstClient) {
-                        this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
-                        this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
-                        this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
-                        this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
-                        this.disposables.push(vscode.languages.registerFoldingRangeProvider(documentSelector, new FoldingRangeProvider(this)));
-
-                        // Listen for messages from the language server.
-                        this.registerNotifications();
-
                         workspaceReferences = new refs.ReferencesManager(this);
 
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
@@ -1064,9 +1052,21 @@ export class DefaultClient implements Client {
                             compilerDefaults = inputCompilerDefaults;
                             this.configuration.CompilerDefaults = compilerDefaults;
 
-                            // Only register the real commands after the extension has finished initializing,
+                            // Only register file watchers, providers, and the real commands after the extension has finished initializing,
                             // e.g. prevents empty c_cpp_properties.json from generation.
                             registerCommands();
+
+                            this.registerFileWatcher();
+
+                            this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
+                            this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
+                            this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+                            this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
+                            this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
+                            this.disposables.push(vscode.languages.registerFoldingRangeProvider(documentSelector, new FoldingRangeProvider(this)));
+
+                            // Listen for messages from the language server.
+                            this.registerNotifications();
                         });
                     } else {
                         this.configuration.CompilerDefaults = compilerDefaults;
