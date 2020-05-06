@@ -357,18 +357,18 @@
           "type": "string",
           "enum": [
             "",
-            "msvc-x64",
-            "gcc-x64",
-            "clang-x64",
-            "msvc-x86",
-            "gcc-x86",
             "clang-x86",
-            "msvc-arm64",
-            "gcc-arm64",
+            "clang-x64",
+            "clang-arm",
             "clang-arm64",
-            "msvc-arm",
+            "gcc-x86",
+            "gcc-x64",
             "gcc-arm",
-            "clang-arm"
+            "gcc-arm64",
+            "msvc-x86",
+            "msvc-x64",
+            "msvc-arm",
+            "msvc-arm64"
           ],
           "description": "%c_cpp.configuration.default.intelliSenseMode.description%",
           "scope": "resource"
