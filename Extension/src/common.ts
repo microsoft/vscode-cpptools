@@ -777,11 +777,11 @@ export function promptReloadWindow(message: string): void {
     });
 }
 
-export async function CreateTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
+export function CreateTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
     return new Promise<tmp.FileResult>((resolve, reject) => {
         tmp.file({ postfix: postfix }, (err, path, fd, cleanupCallback) => {
             if (err) {
-                return reject();
+                return reject(err);
             }
             return resolve(<tmp.FileResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
         });

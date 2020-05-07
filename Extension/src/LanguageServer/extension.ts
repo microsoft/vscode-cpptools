@@ -21,7 +21,6 @@ import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
-import * as tmp from 'tmp';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
@@ -771,11 +770,13 @@ async function suggestInsidersChannel(): Promise<void> {
 }
 
 async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
-    const tempVSIX: tmp.FileResult = await util.CreateTempFileWithPostfix('.vsix');
-    if (!tempVSIX) {
-        telemetry.logLanguageServerEvent('installVsix', { 'error': 'Failed to create VSIX file.', 'success': 'false' });
+    const tempVSIX: any = await util.CreateTempFileWithPostfix('.vsix').catch(error => {
+        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
+            error.message = "Potential PII hidden";
+        }
+        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         return;
-    }
+    });
 
     try {
         // Try to download VSIX
