@@ -1240,6 +1240,7 @@ export class DefaultClient implements Client {
                 closed: () => {
                     languageClientCrashTimes.push(Date.now());
                     languageClientCrashedNeedsRestart = true;
+                    telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
                         allClients.forEach(client => { allClients.replace(client, true); });
                     } else {
