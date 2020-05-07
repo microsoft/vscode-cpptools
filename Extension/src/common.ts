@@ -777,7 +777,7 @@ export function promptReloadWindow(message: string): void {
     });
 }
 
-export function CreateTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
+export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
     return new Promise<tmp.FileResult>((resolve, reject) => {
         tmp.file({ postfix: postfix }, (err, path, fd, cleanupCallback) => {
             if (err) {

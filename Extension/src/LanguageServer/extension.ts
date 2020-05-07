@@ -770,15 +770,10 @@ async function suggestInsidersChannel(): Promise<void> {
 }
 
 async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
-    const tempVSIX: any = await util.CreateTempFileWithPostfix('.vsix').catch(error => {
-        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
-            error.message = "Potential PII hidden";
-        }
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-        return;
-    });
-
+    let tempVSIX: any;
     try {
+        tempVSIX = await util.createTempFileWithPostfix('.vsix');
+
         // Try to download VSIX
         let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
         let originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
@@ -828,7 +823,9 @@ async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
     }
 
     // Delete temp VSIX file
-    tempVSIX.removeCallback();
+    if (!tempVSIX) {
+        tempVSIX.removeCallback();
+    }
 }
 
 /**
