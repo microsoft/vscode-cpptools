@@ -31,7 +31,7 @@
 	"c_cpp.configuration.autocomplete.description": "オートコンプリート プロバイダーを制御します。\"Default\" の場合、アクティブな IntelliSense エンジンが使用されます。\"Disabled\" の場合、Visual Studio Code が提供する単語ベースの補完が使用されます。",
 	"c_cpp.configuration.errorSquiggles.description": "IntelliSense エンジンによって検出された疑わしいコンパイル エラーを、エディターに報告するかどうかを制御します。この設定はタグ パーサー エンジンでは無視されます。",
 	"c_cpp.configuration.dimInactiveRegions.description": "アクティブではないプリプロセッサ ブロックを、アクティブ コードと違う色づけにするかどうかを制御します。この設定は、IntelliSense が無効になっている場合、または既定のハイ コントラスト テーマを使用している場合は効果がありません。",
-	"c_cpp.configuration.inactiveRegionOpacity.description": "アクティブではないプリプロセッサ ブロックの不透明度を制御します。0.1 から 1.0 の範囲で指定します。この設定は、アクティブでない領域の暗転が有効な場合にのみ適用されます。",
+	"c_cpp.configuration.inactiveRegionOpacity.description": "アクティブではないプリプロセッサ ブロックの不透明度を制御します。0.1 から 1.0 の範囲でスケーリングします。この設定は、アクティブでない領域の暗転が有効な場合にのみ適用されます。",
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "アクティブでないプリプロセッサ ブロックのフォントの色を制御します。入力の形式は 16 進数の色コードまたは有効なテーマの色です。設定しない場合、既定ではエディターの構文カラー スキームになります。この設定は、アクティブでない領域の暗転が有効な場合にのみ適用されます。",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "アクティブでないプリプロセッサ ブロックの背景色を制御します。入力の形式は 16 進数の色コードまたは有効なテーマの色です。設定しない場合、既定では透明になります。この設定は、アクティブでない領域の暗転が有効な場合にのみ適用されます。",
 	"c_cpp.configuration.formatting.description": "\"Default\" の場合、コードの書式設定が有効になります。\"Disabled\" の場合、コードの書式設定が無効になります。",
