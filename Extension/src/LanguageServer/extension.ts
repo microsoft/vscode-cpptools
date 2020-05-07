@@ -823,7 +823,7 @@ async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
     }
 
     // Delete temp VSIX file
-    if (!tempVSIX) {
+    if (tempVSIX) {
         tempVSIX.removeCallback();
     }
 }
