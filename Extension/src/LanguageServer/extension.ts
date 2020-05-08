@@ -21,7 +21,6 @@ import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
-import * as tmp from 'tmp';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
@@ -770,64 +769,63 @@ async function suggestInsidersChannel(): Promise<void> {
     }
 }
 
-function applyUpdate(buildInfo: BuildInfo): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
-            if (err) {
-                reject(new Error('Failed to create vsix file'));
-                return;
-            }
+async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
+    let tempVSIX: any;
+    try {
+        tempVSIX = await util.createTempFileWithPostfix('.vsix');
 
-            // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
-            // then the .catch call will return a resolved promise
-            // Thusly, the .catch call must also throw, as a return would simply return an unused promise
-            // instead of returning early from this function scope
-            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-            let originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
-            while (true) { // Might need to try again with a different http.proxySupport setting.
-                try {
-                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
-                } catch {
-                    // Try again with the proxySupport to "off".
-                    if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
-                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                        reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
-                        return;
-                    }
-                    if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
-                        config.update('http.proxySupport', "off", true);
-                        continue;
-                    }
-                    reject(new Error('Failed to download VSIX package'));
-                    return;
-                }
+        // Try to download VSIX
+        let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+        let originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
+        while (true) { // Might need to try again with a different http.proxySupport setting.
+            try {
+                await util.downloadFileToDestination(buildInfo.downloadUrl, tempVSIX.name);
+            } catch {
+                // Try again with the proxySupport to "off".
                 if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
                     config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                    telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
+                    throw new Error('Failed to download VSIX package with proxySupport off'); // Changing the proxySupport didn't help.
                 }
-                break;
+                if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
+                    config.update('http.proxySupport', "off", true);
+                    continue;
+                }
+                throw new Error('Failed to download VSIX package');
             }
-            try {
-                await installVsix(vsixPath);
-            } catch (error) {
-                reject(error);
-                return;
+            if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
+                config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
             }
-            clearInterval(insiderUpdateTimer);
-            const message: string = localize("extension.updated",
-                "The C/C++ Extension has been updated to version {0}. Please reload the window for the changes to take effect.",
-                buildInfo.name);
-            util.promptReloadWindow(message);
-            telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
-            resolve();
-        });
-    }).catch(error => {
+            break;
+        }
+
+        // Install VSIX
+        try {
+            await installVsix(tempVSIX.name);
+        } catch (error) {
+            throw new Error('Failed to install VSIX package');
+        }
+
+        // Installation successful
+        clearInterval(insiderUpdateTimer);
+        const message: string = localize("extension.updated",
+            "The C/C++ Extension has been updated to version {0}. Please reload the window for the changes to take effect.",
+            buildInfo.name);
+        util.promptReloadWindow(message);
+        telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
+
+    } catch (error) {
         console.error(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
         }
         telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-    });
+    }
+
+    // Delete temp VSIX file
+    if (tempVSIX) {
+        tempVSIX.removeCallback();
+    }
 }
 
 /**

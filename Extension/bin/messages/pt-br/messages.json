@@ -3170,7 +3170,7 @@
   "tipo incorreto %t para o parâmetro do operador de comparação usado como padrão (precisa ser 'referência à const X', em que X é o tipo de classe delimitadora)",
   "o tipo de retorno do operador de comparação usado como padrão precisa ser 'bool'",
   "um operador de comparação de membros usado como padrão precisa ser 'const'",
-  "mais de um operador \"espaçonave\" usado como padrão definido nesta classe",
+  null,
   "o tipo de promessa de corrotina %t não pode ter 'return_void' e 'return_value' definidos",
   "%p declarado de 'return_value'",
   "'return_void' declarou %p",
@@ -3291,5 +3291,11 @@
   "um tipo de união, ponteiro ou ponteiro para membro %t impede a avaliação constexpr de __builtin_bit_cast",
   "%npT (herdado pelo uso de decl %p)",
   "a construção de subobjeto de %t para construtores herdados não pode ser executada. O construtor padrão implícito foi excluído",
-  "%n precisa retornar nulo"
+  "%n precisa retornar nulo",
+  "declaração de início de membro inválida",
+  "'auto' esperado",
+  "este operador não é permitido neste ponto; coloque parênteses na nova expressão anterior",
+  "uso inválido do conceito",
+  "um operador de comparação de membros usado como padrão não pode ser qualificado por '&&'",
+  "a função de comparação constexpr padrão chama a função não constexpr %nd"
 ]
