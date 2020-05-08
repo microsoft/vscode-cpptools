@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.28.0: May 11, 2020
+## Version 0.28.0-insiders3: May 8, 2020
 ### New Features
 * Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
 * Add GNU (and C18) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
@@ -33,6 +33,7 @@
 * Fix incorrect translations. [PR #5300](https://github.com/microsoft/vscode-cpptools/pull/5300)
 * Fix cpptools auto-restarting after a crash. [#5303](https://github.com/microsoft/vscode-cpptools/issues/5303)
 * Fix incorrect `c_cpp_properties.json` squiggles. [#5314](https://github.com/microsoft/vscode-cpptools/issues/5314), [#5322](https://github.com/microsoft/vscode-cpptools/issues/5322)
+* Fix error `The task provider for "C/C++" tasks unexpectedly provided a task of type "shell".` [#5388](https://github.com/microsoft/vscode-cpptools/issues/5388)
 * Fix `compilerPath` set to `""` not working. [#5392](https://github.com/microsoft/vscode-cpptools/issues/5392)
 * Fix IntelliSense sometimes not working on a header file (or giving "Cannot Confirm Reference") if an existing TU is chosen that doesn't actually contain the header file.
 * Fix random crashes after a settings change.
