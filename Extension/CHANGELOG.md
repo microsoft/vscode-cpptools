@@ -1,5 +1,43 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.28.0: May 11, 2020
+### New Features
+* Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
+* Add GNU (and C18) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
+* Add ARM and ARM64 IntelliSense modes. [#4271](https://github.com/microsoft/vscode-cpptools/issues/4271), [PR #5250](https://github.com/microsoft/vscode-cpptools/pull/5250)
+
+### Enhancements
+* Change the `gcc` problem matcher to use `autoDetect` for `fileLocation` . [#1915](https://github.com/microsoft/vscode-cpptools/issues/1915)
+* Add support for IntelliSense-based `Go to Definition` on `#include` statements. [#2564](https://github.com/microsoft/vscode-cpptools/issues/2564)
+* Support relative paths with `forcedInclude`. [#2780](https://github.com/microsoft/vscode-cpptools/issues/2780)
+* Make the `Visual Studio` formatting style respect the C++ standard (e.g. `> >` for C++03 or earlier). [#3578](https://github.com/microsoft/vscode-cpptools/issues/3578)
+* Add support for more C++20 features, such as concepts. [#4195](https://github.com/microsoft/vscode-cpptools/issues/4195)
+* Process the "std" and bitness (-m64/-m32) compiler args. [#4726](https://github.com/microsoft/vscode-cpptools/issues/4726)
+* Switch from our custom Rename UI to VS Code's Refactor Preview. [#4990](https://github.com/microsoft/vscode-cpptools/issues/4990)
+
+### Bug Fixes
+* Fix `browse.path` not getting set correctly when `compileCommands` is used. [#1163](https://github.com/microsoft/vscode-cpptools/issues/1163)
+* Fix an issue with squiggle updates not occurring when a dependent file is created, deleted, or renamed. [#3670](https://github.com/microsoft/vscode-cpptools/issues/3670)
+* Fix temporary VSIX files not getting deleted after installation [#3923](https://github.com/microsoft/vscode-cpptools/issues/3923)
+* Process "$CPATH" on non-Windows OS's. [#3940](https://github.com/microsoft/vscode-cpptools/issues/3940)
+* Fix missing include message when a configuration provider is used. [#3971](https://github.com/microsoft/vscode-cpptools/issues/3971)
+* Change machine-dependent settings to use remote settings instead of user settings. [#4121](https://github.com/microsoft/vscode-cpptools/issues/4121)
+* Fix compiler querying for compilers that output non-English strings. [#4542](https://github.com/microsoft/vscode-cpptools/issues/4542)
+* Fix compiler querying when the '-include' argument is used. [#4655](https://github.com/microsoft/vscode-cpptools/issues/4655)
+* Fix the "Unable to load schema" error for `c_cpp_properties.json`. [#4841](https://github.com/microsoft/vscode-cpptools/issues/4841)
+* Change "Visual Studio" `clang_format_fallback_style` setting to use NamespaceIndentation All. [#5124](https://github.com/microsoft/vscode-cpptools/issues/5124)
+* Fix "C++98" and "C++0x" modes. [#5157](https://github.com/microsoft/vscode-cpptools/issues/5157), [#5225](https://github.com/microsoft/vscode-cpptools/issues/5225)
+* Improve the error message for multiroot projects using `compile_commands.json`. [#5160](https://github.com/microsoft/vscode-cpptools/issues/5160)
+* Fix some cpptools process crashes. [#5280](https://github.com/microsoft/vscode-cpptools/issues/5280)
+* Avoid `<…>` truncation on hover. [#5291](https://github.com/microsoft/vscode-cpptools/issues/5291)
+* Fix incorrect translations. [PR #5300](https://github.com/microsoft/vscode-cpptools/pull/5300)
+* Fix cpptools auto-restarting after a crash. [#5303](https://github.com/microsoft/vscode-cpptools/issues/5303)
+* Fix incorrect `c_cpp_properties.json` squiggles. [#5314](https://github.com/microsoft/vscode-cpptools/issues/5314), [#5322](https://github.com/microsoft/vscode-cpptools/issues/5322)
+* Fix `compilerPath` set to `""` not working. [#5392](https://github.com/microsoft/vscode-cpptools/issues/5392)
+* Fix IntelliSense sometimes not working on a header file (or giving "Cannot Confirm Reference") if an existing TU is chosen that doesn't actually contain the header file.
+* Fix random crashes after a settings change.
+* Fix redundant squiggle updates.
+
 ## Version 0.27.1: April 28, 2020
 ### Bug Fix
 * Disable Insiders `updateChannel` for 32-bit Linux and VS Code older than 1.43.0.

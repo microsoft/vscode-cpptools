@@ -8,6 +8,7 @@ import * as DebuggerExtension from './Debugger/extension';
 import * as fs from 'fs';
 import * as LanguageServer from './LanguageServer/extension';
 import * as os from 'os';
+import * as path from 'path';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
@@ -16,12 +17,13 @@ import { PersistentState } from './LanguageServer/persistentState';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
-import { PlatformInformation } from './platform';
+import { PlatformInformation, GetOSName } from './platform';
 import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
 import { CppTools1, NullCppTools } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
+import { vsixNameForPlatform, releaseDownloadUrl } from './githubAPI';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -33,7 +35,7 @@ let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     let errMsg: string = "";
-    if (process.arch !== 'ia32' && process.arch !== 'x64') {
+    if (process.arch !== 'x64' && (process.platform !== 'win32' || process.arch !== 'ia32')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(process.arch));
     } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
         errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
@@ -47,6 +49,37 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     initializeTemporaryCommandRegistrar();
     Telemetry.activate();
     util.setProgress(0);
+
+    // check if the correct offline/insiders vsix is installed on the correct platform
+    let installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
+    if (!installedPlatform || (process.platform !== installedPlatform)) {
+        const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+        const vsixName: string = vsixNameForPlatform(platformInfo);
+        errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
+        const downloadLink: string = localize("download.button", "Go to Download Page");
+        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+            if (selection === downloadLink) {
+                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+            }
+        });
+    }
+
+    // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
+    class SchemaProvider implements vscode.TextDocumentContentProvider {
+        public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+            console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
+            let fileName: string = uri.path.substr(1);
+            let locale: string = util.getLocaleId();
+            let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
+            const fileExists: boolean = await util.checkFileExists(localizedFilePath);
+            if (!fileExists) {
+                localizedFilePath = util.getExtensionFilePath(fileName);
+            }
+            return util.readFileText(localizedFilePath);
+        }
+    }
+
+    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
     // Initialize the DebuggerExtension and register the related commands and providers.
     DebuggerExtension.initialize(context);
@@ -302,7 +335,7 @@ function handleError(error: any): void {
     outputChannelLogger.appendLine(localize('failed.at.stage', "Failed at stage: {0}", installationInformation.stage));
     outputChannelLogger.appendLine(errorMessage);
     outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine(localize('failed.at.stage2', 'If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from https://github.com/Microsoft/vscode-cpptools/releases, then use the "Install from VSIX" command in VS Code to install it.'));
+    outputChannelLogger.appendLine(localize('failed.at.stage2', 'If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the "Install from VSIX" command in VS Code to install it.', releaseDownloadUrl));
     showOutputChannel();
 }
 
@@ -410,7 +443,8 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
         "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
         "onDebug",
-        "workspaceContains:/.vscode/c_cpp_properties.json"
+        "workspaceContains:/.vscode/c_cpp_properties.json",
+        "onFileSystem:cpptools-schema"
     ];
 
     return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));

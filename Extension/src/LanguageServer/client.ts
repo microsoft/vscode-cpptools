@@ -44,6 +44,8 @@ const configProviderTimeout: number = 2000;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
+let languageClientCrashedNeedsRestart: boolean = false;
+let languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
@@ -335,6 +337,32 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
 }
 
+interface GetFoldingRangesParams {
+    uri: string;
+    id: number;
+}
+
+export enum FoldingRangeKind {
+    None = 0,
+    Comment = 1,
+    Imports = 2,
+    Region = 3
+}
+
+interface FoldingRange {
+    kind: FoldingRangeKind;
+    range: Range;
+};
+
+interface GetFoldingRangesResult {
+    canceled: boolean;
+    ranges: FoldingRange[];
+}
+
+interface AbortRequestParams {
+    id: number;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -343,6 +371,7 @@ const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void>
 const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void> = new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void>('cpptools/getCodeActions');
 const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void>('cpptools/getDocumentSymbols');
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
+const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -372,6 +401,7 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
+const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -402,6 +432,8 @@ interface ReferencesCancellationState {
 }
 
 let referencesPendingCancellations: ReferencesCancellationState[] = [];
+
+let abortRequestId: number = 0;
 
 class ClientModel {
     public isTagParsing: DataBinding<boolean>;
@@ -505,21 +537,74 @@ export function createNullClient(): Client {
     return new NullClient();
 }
 
+class FoldingRangeProvider implements vscode.FoldingRangeProvider {
+    private client: DefaultClient;
+    constructor(client: DefaultClient) {
+        this.client = client;
+    }
+    provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
+        token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
+        let id: number = ++abortRequestId;
+        let params: GetFoldingRangesParams = {
+            id: id,
+            uri: document.uri.toString()
+        };
+        return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
+            this.client.notifyWhenReady(() => {
+                this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
+                    .then((ranges) => {
+                        if (ranges.canceled) {
+                            reject();
+                        } else {
+                            let result: vscode.FoldingRange[] = [];
+                            ranges.ranges.forEach((r) => {
+                                let foldingRange: vscode.FoldingRange = {
+                                    start: r.range.start.line,
+                                    end: r.range.end.line
+                                };
+                                switch (r.kind) {
+                                    case FoldingRangeKind.Comment:
+                                        foldingRange.kind = vscode.FoldingRangeKind.Comment;
+                                        break;
+                                    case FoldingRangeKind.Imports:
+                                        foldingRange.kind = vscode.FoldingRangeKind.Imports;
+                                        break;
+                                    case FoldingRangeKind.Region:
+                                        foldingRange.kind = vscode.FoldingRangeKind.Region;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                result.push(foldingRange);
+                            });
+                            resolve(result);
+                        }
+                    });
+                token.onCancellationRequested(e => this.client.abortRequest(id));
+            });
+        });
+    }
+}
+
 export class DefaultClient implements Client {
     private innerLanguageClient?: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
+    private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
-    private crashTimes: number[] = [];
     private isSupported: boolean = true;
     private colorizationSettings: ColorizationSettings;
     private openFileVersions = new Map<string, number>();
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
+    private documentSelector: DocumentFilter[] = [
+        { scheme: 'file', language: 'cpp' },
+        { scheme: 'file', language: 'c' }
+    ];
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -555,7 +640,7 @@ export class DefaultClient implements Client {
         return this.model.referencesCommandMode.Value;
     }
 
-    private get languageClient(): LanguageClient {
+    public get languageClient(): LanguageClient {
         if (!this.innerLanguageClient) {
             throw new Error("Attempting to use languageClient before initialized");
         }
@@ -606,7 +691,10 @@ export class DefaultClient implements Client {
         this.colorizationSettings = new ColorizationSettings(rootUri);
         try {
             let firstClient: boolean = false;
-            if (!languageClient) {
+            if (!languageClient || languageClientCrashedNeedsRestart) {
+                if (languageClientCrashedNeedsRestart) {
+                    languageClientCrashedNeedsRestart = false;
+                }
                 languageClient = this.createLanguageClient(allClients);
                 clientCollection = allClients;
                 languageClient.registerProposedFeatures();
@@ -630,11 +718,6 @@ export class DefaultClient implements Client {
                     this.innerLanguageClient = languageClient;
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
-
-                    let documentSelector: DocumentFilter[] = [
-                        { scheme: 'file', language: 'cpp' },
-                        { scheme: 'file', language: 'c' }
-                    ];
 
                     class CodeActionProvider implements vscode.CodeActionProvider {
                         private client: DefaultClient;
@@ -847,7 +930,6 @@ export class DefaultClient implements Client {
                                             workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -898,50 +980,42 @@ export class DefaultClient implements Client {
                                         }
                                         referencesRequestPending = true;
                                         workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult | null, doResolve: boolean) => {
-                                            if (doResolve && referencesResult === null && referencesPendingCancellations.length === 0) {
-                                                // The result callback will be called with doResult of true and a null result when the Find All References
-                                                // portion of the rename is complete.  We complete the promise with an empty edit at this point,
-                                                // to cause the progress indicator to be dismissed.
-                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                                resolve(workspaceEdit);
-                                            } else {
-                                                referencesRequestPending = false;
-                                                --renameRequestsPending;
-                                                let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                                                let cancelling: boolean = referencesPendingCancellations.length > 0;
-                                                if (cancelling) {
-                                                    while (referencesPendingCancellations.length > 1) {
-                                                        let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
-                                                        referencesPendingCancellations.pop();
-                                                        pendingCancel.reject();
-                                                    }
+                                            referencesRequestPending = false;
+                                            --renameRequestsPending;
+                                            let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                                            let cancelling: boolean = referencesPendingCancellations.length > 0;
+                                            if (cancelling) {
+                                                while (referencesPendingCancellations.length > 1) {
                                                     let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
                                                     referencesPendingCancellations.pop();
-                                                    pendingCancel.callback();
-                                                } else {
-                                                    if (renameRequestsPending === 0) {
-                                                        renamePending = false;
-                                                    }
-                                                    // If rename UI was canceled, we will get a null result.
-                                                    // If null, return an empty list to avoid Rename failure dialog.
-                                                    if (referencesResult) {
-                                                        for (let reference of referencesResult.referenceInfos) {
-                                                            let uri: vscode.Uri = vscode.Uri.file(reference.file);
-                                                            let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
-                                                            workspaceEdit.replace(uri, range, newName);
-                                                        }
-                                                    }
-                                                    workspaceReferences.closeRenameUI();
+                                                    pendingCancel.reject();
                                                 }
-                                                if (doResolve) {
-                                                    if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
-                                                        vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
+                                                let pendingCancel: ReferencesCancellationState = referencesPendingCancellations[0];
+                                                referencesPendingCancellations.pop();
+                                                pendingCancel.callback();
+                                            } else {
+                                                if (renameRequestsPending === 0) {
+                                                    renamePending = false;
+                                                }
+                                                // If rename UI was canceled, we will get a null result.
+                                                // If null, return an empty list to avoid Rename failure dialog.
+                                                if (referencesResult) {
+                                                    for (let reference of referencesResult.referenceInfos) {
+                                                        let uri: vscode.Uri = vscode.Uri.file(reference.file);
+                                                        let range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
+                                                        let metadata: vscode.WorkspaceEditEntryMetadata = {
+                                                            needsConfirmation: reference.type !== refs.ReferenceType.Confirmed,
+                                                            label: refs.getReferenceTagString(reference.type, false, true),
+                                                            iconPath: refs.getReferenceItemIconPath(reference.type, false)
+                                                        };
+                                                        workspaceEdit.replace(uri, range, newName, metadata);
                                                     }
-                                                    resolve(workspaceEdit);
-                                                } else if (workspaceEdit.size > 0) {
-                                                    vscode.workspace.applyEdit(workspaceEdit);
                                                 }
                                             }
+                                            if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
+                                                vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
+                                            }
+                                            resolve(workspaceEdit);
                                         });
                                         workspaceReferences.startRename(params);
                                     });
@@ -961,7 +1035,6 @@ export class DefaultClient implements Client {
                                             workspaceReferences.referencesCanceledWhilePreviewing = true;
                                         }
                                         this.client.languageClient.sendNotification(CancelReferencesNotification);
-                                        workspaceReferences.closeRenameUI();
                                     }
                                 } else {
                                     callback();
@@ -970,18 +1043,7 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    this.registerFileWatcher();
-
                     if (firstClient) {
-                        this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
-                        this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
-                        this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
-                        this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
-
-                        // Listen for messages from the language server.
-                        this.registerNotifications();
-
                         workspaceReferences = new refs.ReferencesManager(this);
 
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
@@ -990,9 +1052,24 @@ export class DefaultClient implements Client {
                             compilerDefaults = inputCompilerDefaults;
                             this.configuration.CompilerDefaults = compilerDefaults;
 
-                            // Only register the real commands after the extension has finished initializing,
+                            // Only register file watchers, providers, and the real commands after the extension has finished initializing,
                             // e.g. prevents empty c_cpp_properties.json from generation.
                             registerCommands();
+
+                            this.registerFileWatcher();
+
+                            this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
+                            this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
+                            this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+                            this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
+                            this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
+                            let settings: CppSettings = new CppSettings();
+                            if (settings.codeFolding) {
+                                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                            }
+
+                            // Listen for messages from the language server.
+                            this.registerNotifications();
                         });
                     } else {
                         this.configuration.CompilerDefaults = compilerDefaults;
@@ -1164,23 +1241,19 @@ export class DefaultClient implements Client {
             errorHandler: {
                 error: () => ErrorAction.Continue,
                 closed: () => {
-                    this.crashTimes.push(Date.now());
-                    if (this.crashTimes.length < 5) {
-                        let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
-                        newClient.crashTimes = this.crashTimes;
+                    languageClientCrashTimes.push(Date.now());
+                    languageClientCrashedNeedsRestart = true;
+                    telemetry.logLanguageServerEvent("languageClientCrash");
+                    if (languageClientCrashTimes.length < 5) {
+                        allClients.forEach(client => { allClients.replace(client, true); });
                     } else {
-                        let elapsed: number = this.crashTimes[this.crashTimes.length - 1] - this.crashTimes[0];
+                        let elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
-                            if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-                                vscode.window.showErrorMessage(localize('server.crashed', "The language server for '{0}' crashed 5 times in the last 3 minutes. It will not be restarted.", serverName));
-                            } else {
-                                vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            }
-                            allClients.replace(this, false);
+                            vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
+                            allClients.forEach(client => { allClients.replace(client, false); });
                         } else {
-                            this.crashTimes.shift();
-                            let newClient: DefaultClient = <DefaultClient>allClients.replace(this, true);
-                            newClient.crashTimes = this.crashTimes;
+                            languageClientCrashTimes.shift();
+                            allClients.forEach(client => { allClients.replace(client, true); });
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -1279,6 +1352,15 @@ export class DefaultClient implements Client {
             if (Object.keys(changedSettings).length > 0) {
                 if (changedSettings["commentContinuationPatterns"]) {
                     updateLanguageConfigurations();
+                }
+                if (changedSettings["codeFolding"]) {
+                    let settings: CppSettings = new CppSettings();
+                    if (settings.codeFolding) {
+                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                    } else if (this.codeFoldingProviderDisposable) {
+                        this.codeFoldingProviderDisposable.dispose();
+                        this.codeFoldingProviderDisposable = undefined;
+                    }
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -1518,15 +1600,15 @@ export class DefaultClient implements Client {
                 if (!config) {
                     return;
                 }
-                // TODO: This is a hack to get around CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
-                let foundMatch: boolean = false;
-                for (let c of config.browsePath) {
-                    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
-                        foundMatch = true;
-                        break;
+                if (currentProvider.version < Version.v3) {
+                    // This is to get around the (fixed) CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
+                    for (let c of config.browsePath) {
+                        if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
+                            this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                            break;
+                        }
                     }
-                }
-                if (foundMatch) {
+                } else {
                     this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
                 }
                 if (!hasCompleted) {
@@ -2459,7 +2541,7 @@ export class DefaultClient implements Client {
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
-        if (this.languageClient !== undefined && this.configuration !== undefined) {
+        if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
         }
@@ -2470,6 +2552,10 @@ export class DefaultClient implements Client {
         return promise.then(() => {
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
+            if (this.codeFoldingProviderDisposable) {
+                this.codeFoldingProviderDisposable.dispose();
+                this.codeFoldingProviderDisposable = undefined;
+            }
             this.model.dispose();
         });
     }
@@ -2508,7 +2594,6 @@ export class DefaultClient implements Client {
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
                 languageClient.sendNotification(CancelReferencesNotification);
-                workspaceReferences.closeRenameUI();
             }
         }
     }
@@ -2523,6 +2608,13 @@ export class DefaultClient implements Client {
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
         this.model.referencesCommandMode.Value = mode;
+    }
+
+    public abortRequest(id: number): void {
+        let params: AbortRequestParams = {
+            id: id
+        };
+        languageClient.sendNotification(AbortRequestNotification, params);
     }
 }
 

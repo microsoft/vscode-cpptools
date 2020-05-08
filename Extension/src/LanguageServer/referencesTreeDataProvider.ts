@@ -4,55 +4,19 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import * as util from '../common';
 import { ReferencesModel, TreeNode, NodeType } from './referencesModel';
-import { ReferenceType, getReferenceTagString } from './references';
+import { ReferenceType, getReferenceTagString, getReferenceItemIconPath } from './references';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-
-export function getReferenceTypeIconPath(referenceType: ReferenceType): { light: string; dark: string } {
-    const assetsFolder: string = "assets/";
-    const postFixLight: string = "-light.svg";
-    const postFixDark: string = "-dark.svg";
-    let basePath: string = "ref-cannot-confirm";
-
-    switch (referenceType) {
-        case ReferenceType.Confirmed: basePath = "ref-confirmed"; break;
-        case ReferenceType.Comment: basePath = "ref-comment"; break;
-        case ReferenceType.String: basePath = "ref-string"; break;
-        case ReferenceType.Inactive: basePath = "ref-inactive"; break;
-        case ReferenceType.CannotConfirm: basePath = "ref-cannot-confirm"; break;
-        case ReferenceType.NotAReference: basePath = "ref-not-a-reference"; break;
-        case ReferenceType.ConfirmationInProgress: basePath = "ref-confirmation-in-progress"; break;
-    }
-
-    let lightPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixLight);
-    let darkPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixDark);
-    return {
-        light: lightPath,
-        dark: darkPath
-    };
-}
-
-function getReferenceCanceledIconPath(): { light: string; dark: string } {
-    return {
-        light: util.getExtensionFilePath("assets/ref-canceled-light.svg"),
-        dark: util.getExtensionFilePath("assets/ref-canceled-dark.svg")
-    };
-}
-
-function getReferenceItemIconPath(type: ReferenceType, isCanceled: boolean): { light: string; dark: string } {
-    return (isCanceled && type === ReferenceType.ConfirmationInProgress) ? getReferenceCanceledIconPath() : getReferenceTypeIconPath(type);
-}
 
 export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     private referencesModel: ReferencesModel | undefined;
     private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeNode>();
     readonly onDidChangeTreeData: vscode.Event<TreeNode>;
 
-    constructor(readonly isRenameCandidates: boolean) {
+    constructor() {
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     }
 
@@ -86,9 +50,6 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 }
                 const label: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled, true);
                 let resultRefType: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Expanded);
-                if (this.referencesModel.isRename) {
-                    resultRefType.contextValue = "candidateReferenceType";
-                }
                 return resultRefType;
 
             case NodeType.file:
@@ -100,9 +61,6 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 resultFile.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                 resultFile.iconPath = vscode.ThemeIcon.File;
                 resultFile.description = true;
-                if (this.referencesModel.isRename) {
-                    resultFile.contextValue = this.isRenameCandidates ? "candidateFile" : "pendingFile";
-                }
 
                 if (element.node === NodeType.fileWithPendingRef) {
                     resultFile.command = {
@@ -128,9 +86,6 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 resultRef.iconPath = getReferenceItemIconPath(element.referenceType, this.referencesModel.isCanceled);
                 let tag: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled);
                 resultRef.tooltip = `[${tag}]\n${element.referenceText}`;
-                if (this.referencesModel.isRename) {
-                    resultRef.contextValue = this.isRenameCandidates ? "candidateItem" : "pendingItem";
-                }
 
                 resultRef.command = {
                     title: localize("goto.reference", "Go to reference"),
@@ -152,34 +107,22 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
             if (element.node === NodeType.file) {
                 let type: ReferenceType | undefined;
 
-                // If this.referencesModel.groupByFile is false, or if not a rename pending view, group by reference
-                if (!this.referencesModel.groupByFile && (!this.referencesModel.isRename || this.isRenameCandidates)) {
+                // If this.referencesModel.groupByFile is false, group by reference
+                if (!this.referencesModel.groupByFile) {
                     type = element.referenceType;
                 }
 
-                return this.referencesModel.getReferenceNodes(element.filename, type, this.isRenameCandidates);
+                return this.referencesModel.getReferenceNodes(element.filename, type);
             }
             if (element.node === NodeType.referenceType) {
-                return this.referencesModel.getFileNodes(element.referenceType, this.isRenameCandidates);
+                return this.referencesModel.getFileNodes(element.referenceType);
             }
         }
 
-        if (this.referencesModel.isRename) {
-            if (this.isRenameCandidates) {
-                if (this.referencesModel.groupByFile) {
-                    return this.referencesModel.getRenameCandidateFiles();
-                } else {
-                    return this.referencesModel.getRenameCandidateReferenceTypes();
-                }
-            } else {
-                return this.referencesModel.getRenamePendingFiles();
-            }
+        if (this.referencesModel.groupByFile) {
+            return this.referencesModel.getFileNodes();
         } else {
-            if (this.referencesModel.groupByFile) {
-                return this.referencesModel.getFileNodes(undefined, false);
-            } else {
-                return this.referencesModel.getReferenceTypeNodes();
-            }
+            return this.referencesModel.getReferenceTypeNodes();
         }
     }
 }

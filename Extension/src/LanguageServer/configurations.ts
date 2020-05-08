@@ -407,21 +407,29 @@ export class CppProperties {
         }
     }
 
-    private isCompilerIntelliSenseModeCompatible(configuration: Configuration): boolean {
-        // Check if intelliSenseMode and compilerPath are compatible
-        // cl.exe and msvc mode should be used together
-        // Ignore if compiler path is not set or intelliSenseMode is not set
+    private validateIntelliSenseMode(configuration: Configuration): string {
+        // Validate whether IntelliSenseMode is compatible with compiler.
+        // Do not validate if compiler path is not set or intelliSenseMode is not set.
         if (configuration.compilerPath === undefined ||
             configuration.compilerPath === "" ||
             configuration.compilerPath === "${default}" ||
             configuration.intelliSenseMode === undefined ||
             configuration.intelliSenseMode === "" ||
             configuration.intelliSenseMode === "${default}") {
-            return true;
+            return "";
         }
         let resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
         let compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
-        return (compilerPathAndArgs.compilerName === "cl.exe") === (configuration.intelliSenseMode === "msvc-x64" || configuration.intelliSenseMode === "msvc-x86");
+
+        // Valid compiler + IntelliSenseMode combinations:
+        // 1. compiler is cl/clang-cl and IntelliSenseMode is MSVC
+        // 2. compiler is not cl/clang-cl and IntelliSenseMode is not MSVC
+        let isValid: boolean = compilerPathAndArgs.compilerName.endsWith("cl.exe") === configuration.intelliSenseMode.startsWith("msvc");
+        if (isValid) {
+            return "";
+        } else {
+            return localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", configuration.intelliSenseMode);
+        }
     }
 
     public addToIncludePathCommand(path: string): void {
@@ -523,8 +531,9 @@ export class CppProperties {
         let result: string[] = [];
         if (paths) {
             paths = this.resolveDefaults(paths, defaultValue);
+            let delimiter: string = (process.platform === 'win32') ? ";" : ":";
             paths.forEach(entry => {
-                let entries: string[] = util.resolveVariables(entry, env).split(";").filter(e => e);
+                let entries: string[] = util.resolveVariables(entry, env).split(delimiter).filter(e => e);
                 result = result.concat(entries);
             });
         }
@@ -532,10 +541,10 @@ export class CppProperties {
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
-        if (!property || property === "${default}") {
+        if (property === null || property === undefined || property === "${default}") {
             property = defaultValue;
         }
-        if (!property || (acceptBlank !== true && property === "")) {
+        if (property === null || property === undefined || (acceptBlank !== true && property === "")) {
             return undefined;
         }
         return util.resolveVariables(property, env);
@@ -1099,8 +1108,11 @@ export class CppProperties {
         errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
         // Validate intelliSenseMode
-        if (isWindows && !this.isCompilerIntelliSenseModeCompatible(config)) {
-            errors.intelliSenseMode = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", config.intelliSenseMode);
+        if (isWindows) {
+            let intelliSenesModeError: string = this.validateIntelliSenseMode(config);
+            if (intelliSenesModeError.length > 0) {
+                errors.intelliSenseMode = intelliSenesModeError;
+            }
         }
 
         return errors;
@@ -1248,8 +1260,9 @@ export class CppProperties {
                     const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
                     const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
 
-                    if (!this.isCompilerIntelliSenseModeCompatible(currentConfiguration)) {
-                        let message: string = localize("incompatible.intellisense.mode", "IntelliSense mode {0} is incompatible with compiler path.", currentConfiguration.intelliSenseMode);
+                    let intelliSenseModeError: string = this.validateIntelliSenseMode(currentConfiguration);
+                    if (intelliSenseModeError.length > 0) {
+                        let message: string = intelliSenseModeError;
                         let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                             new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
                                 document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
@@ -1290,8 +1303,16 @@ export class CppProperties {
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
 
+            let processedPaths: Set<string> = new Set<string>();
+
             // Validate paths
             for (let curPath of paths) {
+                if (processedPaths.has(curPath)) {
+                    // Avoid duplicate squiggles for the same line.
+                    // Squiggles for the same path on different lines are already handled below.
+                    continue;
+                }
+                processedPaths.add(curPath);
                 const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
                 // Resolve special path cases.
                 if (curPath === "${default}") {
@@ -1413,18 +1434,12 @@ export class CppProperties {
                             if (!pathExists) {
                                 message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                                 newSquiggleMetrics.PathNonExistent++;
-                            } else {
-                                if (util.checkDirectoryExistsSync(resolvedPath)) {
-                                    continue;
-                                }
-                                message = localize("path.is.not.a.directory2", "Path is not a directory: \"{0}\"", resolvedPath);
-                                newSquiggleMetrics.PathNotADirectory++;
+                                let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                                    new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
+                                        document.positionAt(envTextStartOffSet + endOffset)),
+                                    message, vscode.DiagnosticSeverity.Warning);
+                                diagnostics.push(diagnostic);
                             }
-                            let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                                new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
-                                    document.positionAt(envTextStartOffSet + endOffset)),
-                                message, vscode.DiagnosticSeverity.Warning);
-                            diagnostics.push(diagnostic);
                         }
                     }
                 }
@@ -1524,7 +1539,7 @@ export class CppProperties {
         let propertiesFile: string = path.join(this.configFolder, "c_cpp_properties.json");
         fs.stat(propertiesFile, (err, stats) => {
             if (err) {
-                if (this.propertiesFile) {
+                if (err.code === "ENOENT" && this.propertiesFile) {
                     this.propertiesFile = null; // File deleted.
                     this.resetToDefaultSettings(true);
                     this.handleConfigurationChange();
