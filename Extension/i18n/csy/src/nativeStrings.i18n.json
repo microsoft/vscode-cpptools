@@ -160,5 +160,7 @@
 	"fallback_to_32_bit_mode2": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k 32bitovému režimu intelliSenseMode.",
 	"fallback_to_64_bit_mode2": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k 64bitovému režimu intelliSenseMode.",
 	"fallback_to_no_bitness": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k režimu bez bitové verze.",
-	"intellisense_client_creation_aborted": "Vytváření klienta IntelliSense se přerušilo: {0}"
+	"intellisense_client_creation_aborted": "Vytváření klienta IntelliSense se přerušilo: {0}",
+	"include_errors_tag_parser_provide_intellisense_features": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+	"include_errors_tag_parser_provide_intellisense_features_squiggles_disabled": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser. Squiggles are disabled for this translation unit."
 }

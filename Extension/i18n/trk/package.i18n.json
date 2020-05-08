@@ -69,6 +69,7 @@
 	"c_cpp.configuration.experimentalFeatures.description": "\"Deneysel\" özelliklerin kullanılabilir olup olmadığını denetler.",
 	"c_cpp.configuration.suggestSnippets.description": "Değer true ise, kod parçacıkları dil sunucusu tarafından sağlanır.",
 	"c_cpp.configuration.enhancedColorization.description": "Etkinleştirilirse, kod IntelliSense'e göre renklendirilir. IntelliSense devre dışı bırakılmışsa veya Varsayılan Yüksek Karşıtlık teması kullanılıyorsa bu ayarın bir etkisi olmaz.",
+	"c_cpp.configuration.codeFolding.description": "If enabled, code folding ranges are provided by the language server.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg bağımlılık yöneticisi](https://aka.ms/vcpkg/) için tümleştirme hizmetlerini etkinleştirin.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "True ise, 'Sembolü Yeniden Adlandır' işlemi için geçerli bir C/C++ tanımlayıcısı gerekir.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "True ise, hata ayıklayıcı kabuk komut değiştirme eski kesme işaretini (`) kullanır",

@@ -160,5 +160,7 @@
 	"fallback_to_32_bit_mode2": "컴파일러를 쿼리하지 못했습니다. 32비트 intelliSenseMode로 대체하는 중입니다.",
 	"fallback_to_64_bit_mode2": "컴파일러를 쿼리하지 못했습니다. 64비트 intelliSenseMode로 대체하는 중입니다.",
 	"fallback_to_no_bitness": "컴파일러를 쿼리하지 못했습니다. 0비트로 대체하는 중입니다.",
-	"intellisense_client_creation_aborted": "IntelliSense 클라이언트 만들기가 중단되었습니다. {0}"
+	"intellisense_client_creation_aborted": "IntelliSense 클라이언트 만들기가 중단되었습니다. {0}",
+	"include_errors_tag_parser_provide_intellisense_features": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+	"include_errors_tag_parser_provide_intellisense_features_squiggles_disabled": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser. Squiggles are disabled for this translation unit."
 }
