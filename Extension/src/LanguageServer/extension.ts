@@ -47,7 +47,7 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 let buildInfoCache: BuildInfo | undefined;
-const taskSourceStr: string = "C/C++";
+const taskSourceStr: string = "shell";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 let codeActionProvider: vscode.Disposable;
@@ -468,7 +468,7 @@ function realActivation(): void {
             // Skip Insiders processing for unsupported VS Code versions.
             // TODO: Change this to not require the hardcoded version to be updated.
             let vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.43.2");
+            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.42.1");
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {
