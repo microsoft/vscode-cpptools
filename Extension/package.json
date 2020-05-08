@@ -529,6 +529,16 @@
           "default": false,
           "description": "%c_cpp.configuration.debugger.useBacktickCommandSubstitution.description%",
           "scope": "window"
+        },
+        "C_Cpp.codeFolding": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled"
+          ],
+          "default": "Enabled",
+          "description": "%c_cpp.configuration.codeFolding.description%",
+          "scope": "resource"
         }
       }
     },
