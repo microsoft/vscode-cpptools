@@ -465,10 +465,10 @@ function realActivation(): void {
     PlatformInformation.GetPlatformInformation().then(info => {
         // Skip Insiders processing for 32-bit Linux.
         if (info.platform !== "linux" || info.architecture === "x86_64") {
-            // Skip Insiders processing for VS Code newer than 1.42.1.
+            // Skip Insiders processing for unsupported VS Code versions.
             // TODO: Change this to not require the hardcoded version to be updated.
             let vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.42.1");
+            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.43.2");
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {
