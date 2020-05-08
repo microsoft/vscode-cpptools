@@ -537,9 +537,59 @@ export function createNullClient(): Client {
     return new NullClient();
 }
 
+class FoldingRangeProvider implements vscode.FoldingRangeProvider {
+    private client: DefaultClient;
+    constructor(client: DefaultClient) {
+        this.client = client;
+    }
+    provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
+        token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
+        let id: number = ++abortRequestId;
+        let params: GetFoldingRangesParams = {
+            id: id,
+            uri: document.uri.toString()
+        };
+        return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
+            this.client.notifyWhenReady(() => {
+                this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
+                    .then((ranges) => {
+                        if (ranges.canceled) {
+                            reject();
+                        } else {
+                            let result: vscode.FoldingRange[] = [];
+                            ranges.ranges.forEach((r) => {
+                                let foldingRange: vscode.FoldingRange = {
+                                    start: r.range.start.line,
+                                    end: r.range.end.line
+                                };
+                                switch (r.kind) {
+                                    case FoldingRangeKind.Comment:
+                                        foldingRange.kind = vscode.FoldingRangeKind.Comment;
+                                        break;
+                                    case FoldingRangeKind.Imports:
+                                        foldingRange.kind = vscode.FoldingRangeKind.Imports;
+                                        break;
+                                    case FoldingRangeKind.Region:
+                                        foldingRange.kind = vscode.FoldingRangeKind.Region;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                result.push(foldingRange);
+                            });
+                            resolve(result);
+                        }
+                    });
+                token.onCancellationRequested(e => this.client.abortRequest(id));
+            });
+        });
+    }
+}
+
 export class DefaultClient implements Client {
     private innerLanguageClient?: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
+    private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
@@ -551,6 +601,10 @@ export class DefaultClient implements Client {
     private visibleRanges = new Map<string, Range[]>();
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
+    private documentSelector: DocumentFilter[] = [
+        { scheme: 'file', language: 'cpp' },
+        { scheme: 'file', language: 'c' }
+    ];
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -586,7 +640,7 @@ export class DefaultClient implements Client {
         return this.model.referencesCommandMode.Value;
     }
 
-    private get languageClient(): LanguageClient {
+    public get languageClient(): LanguageClient {
         if (!this.innerLanguageClient) {
             throw new Error("Attempting to use languageClient before initialized");
         }
@@ -664,11 +718,6 @@ export class DefaultClient implements Client {
                     this.innerLanguageClient = languageClient;
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
-
-                    let documentSelector: DocumentFilter[] = [
-                        { scheme: 'file', language: 'cpp' },
-                        { scheme: 'file', language: 'c' }
-                    ];
 
                     class CodeActionProvider implements vscode.CodeActionProvider {
                         private client: DefaultClient;
@@ -994,55 +1043,6 @@ export class DefaultClient implements Client {
                         }
                     }
 
-                    class FoldingRangeProvider implements vscode.FoldingRangeProvider {
-                        private client: DefaultClient;
-                        constructor(client: DefaultClient) {
-                            this.client = client;
-                        }
-                        provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
-                            token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-                            let id: number = ++abortRequestId;
-                            let params: GetFoldingRangesParams = {
-                                id: id,
-                                uri: document.uri.toString()
-                            };
-                            return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
-                                this.client.notifyWhenReady(() => {
-                                    this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
-                                        .then((ranges) => {
-                                            if (ranges.canceled) {
-                                                reject();
-                                            } else {
-                                                let result: vscode.FoldingRange[] = [];
-                                                ranges.ranges.forEach((r) => {
-                                                    let foldingRange: vscode.FoldingRange = {
-                                                        start: r.range.start.line,
-                                                        end: r.range.end.line
-                                                    };
-                                                    switch (r.kind) {
-                                                        case FoldingRangeKind.Comment:
-                                                            foldingRange.kind = vscode.FoldingRangeKind.Comment;
-                                                            break;
-                                                        case FoldingRangeKind.Imports:
-                                                            foldingRange.kind = vscode.FoldingRangeKind.Imports;
-                                                            break;
-                                                        case FoldingRangeKind.Region:
-                                                            foldingRange.kind = vscode.FoldingRangeKind.Region;
-                                                            break;
-                                                        default:
-                                                            break;
-                                                    }
-                                                    result.push(foldingRange);
-                                                });
-                                                resolve(result);
-                                            }
-                                        });
-                                    token.onCancellationRequested(e => this.client.abortRequest(id));
-                                });
-                            });
-                        }
-                    }
-
                     if (firstClient) {
                         workspaceReferences = new refs.ReferencesManager(this);
 
@@ -1058,12 +1058,15 @@ export class DefaultClient implements Client {
 
                             this.registerFileWatcher();
 
-                            this.disposables.push(vscode.languages.registerRenameProvider(documentSelector, new RenameProvider(this)));
-                            this.disposables.push(vscode.languages.registerReferenceProvider(documentSelector, new FindAllReferencesProvider(this)));
+                            this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
+                            this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
                             this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                            this.disposables.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, new DocumentSymbolProvider(this), undefined));
-                            this.disposables.push(vscode.languages.registerCodeActionsProvider(documentSelector, new CodeActionProvider(this), undefined));
-                            this.disposables.push(vscode.languages.registerFoldingRangeProvider(documentSelector, new FoldingRangeProvider(this)));
+                            this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
+                            this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
+                            let settings: CppSettings = new CppSettings();
+                            if (settings.codeFolding) {
+                                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                            }
 
                             // Listen for messages from the language server.
                             this.registerNotifications();
@@ -1349,6 +1352,15 @@ export class DefaultClient implements Client {
             if (Object.keys(changedSettings).length > 0) {
                 if (changedSettings["commentContinuationPatterns"]) {
                     updateLanguageConfigurations();
+                }
+                if (changedSettings["codeFolding"]) {
+                    let settings: CppSettings = new CppSettings();
+                    if (settings.codeFolding) {
+                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                    } else if (this.codeFoldingProviderDisposable) {
+                        this.codeFoldingProviderDisposable.dispose();
+                        this.codeFoldingProviderDisposable = undefined;
+                    }
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2540,6 +2552,10 @@ export class DefaultClient implements Client {
         return promise.then(() => {
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
+            if (this.codeFoldingProviderDisposable) {
+                this.codeFoldingProviderDisposable.dispose();
+                this.codeFoldingProviderDisposable = undefined;
+            }
             this.model.dispose();
         });
     }
@@ -2594,7 +2610,7 @@ export class DefaultClient implements Client {
         this.model.referencesCommandMode.Value = mode;
     }
 
-    private abortRequest(id: number): void {
+    public abortRequest(id: number): void {
         let params: AbortRequestParams = {
             id: id
         };
