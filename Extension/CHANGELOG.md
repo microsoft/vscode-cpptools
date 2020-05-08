@@ -17,6 +17,7 @@
 
 ### Bug Fixes
 * Fix `browse.path` not getting set correctly when `compileCommands` is used. [#1163](https://github.com/microsoft/vscode-cpptools/issues/1163)
+  * Note: Some paths are still missing in certain cases. We plan to fix that in the "next" update.
 * Fix an issue with squiggle updates not occurring when a dependent file is created, deleted, or renamed. [#3670](https://github.com/microsoft/vscode-cpptools/issues/3670)
 * Fix temporary VSIX files not getting deleted after installation [#3923](https://github.com/microsoft/vscode-cpptools/issues/3923)
 * Process "$CPATH" on non-Windows OS's. [#3940](https://github.com/microsoft/vscode-cpptools/issues/3940)
