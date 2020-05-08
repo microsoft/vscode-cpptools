@@ -14,6 +14,15 @@ import * as nls from 'vscode-nls';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
+export function GetOSName(processPlatform: string | undefined): string | undefined {
+    switch (processPlatform) {
+        case "win32": return "Windows";
+        case "darwin": return "MacOS";
+        case "linux": return "Linux";
+        default: return undefined;
+    }
+}
+
 export class PlatformInformation {
     constructor(public platform: string, public architecture?: string, public distribution?: LinuxDistribution, public version?: string) { }
 
@@ -74,6 +83,11 @@ export class PlatformInformation {
         return util.execChildProcess('uname -m', util.packageJson.extensionFolderPath)
             .then((architecture) => {
                 if (architecture) {
+                    if (architecture.startsWith('arm64') || architecture.startsWith('aarch64')) {
+                        return 'arm64';
+                    } else if (architecture.startsWith('armv')) {
+                        return 'arm';
+                    }
                     return architecture.trim();
                 }
                 return undefined;

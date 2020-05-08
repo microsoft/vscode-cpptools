@@ -1,8 +1,7 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as os from 'os';
@@ -50,7 +49,7 @@ suite("[Quick info test]", function(): void {
 
         let expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nvoid myfunction(int var1, std::string var2, std::string var3)\n\`\`\``);
-        expectedMap.set("linux", `\`\`\`cpp\nvoid myfunction(int var1, std::__cxx11::string var2, std::__cxx11::string var3)\n\`\`\``);
+        expectedMap.set("linux", `\`\`\`cpp\nvoid myfunction(int var1, std::string var2, std::string var3)\n\`\`\``);
         expectedMap.set("darwin", `\`\`\`cpp\nvoid myfunction(int var1, std::__cxx11::string var2, std::__cxx11::string var3)\n\`\`\``);
 
         let expected1: string = expectedMap.get(platform);
@@ -66,7 +65,7 @@ suite("[Quick info test]", function(): void {
 
         let expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
-        expectedMap.set("linux", `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``);
+        expectedMap.set("linux", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
         expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``);
 
         let expected: string = expectedMap.get(platform);
@@ -79,7 +78,7 @@ suite("[Quick info test]", function(): void {
 
         let expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n`);
-        expectedMap.set("linux", `\`\`\`cpp\nstd::__cxx11::string::basic_string(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+16 overloads\n`);
+        expectedMap.set("linux", `\`\`\`cpp\nstd::string::basic_string<...>(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+17 overloads\n`);
         expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string::basic_string<...>(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+17 overloads\n`);
 
         let expected: string = expectedMap.get(platform);

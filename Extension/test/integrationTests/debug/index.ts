@@ -1,43 +1,38 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All Rights Reserved.
- * See 'LICENSE' in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
-
-import * as fs from "fs";
 import * as path from 'path';
+import * as Mocha from 'mocha';
+import * as glob from 'glob';
 
-import { subscribeToAllLoggers } from "../../../src/logger";
+export function run(): Promise<void> {
+    // Create the mocha test
+    const mocha = new Mocha({
+        ui: 'tdd'
+    });
+    mocha.useColors(true);
 
-//
-// PLEASE DO NOT MODIFY / DELETE UNLESS YOU KNOW WHAT YOU ARE DOING
-//
-// This file is providing the test runner to use when running extension tests.
-// By default the test runner in use is Mocha based.
-// git status
+    const testsRoot = __dirname;
 
-// You can provide your own test runner if you want to override it by exporting
-// a function run(testRoot: string, clb: (error:Error) => void) that the extension
-// host can call to run the tests. The test runner is expected to use console.log
-// to report the results back to the caller. When the tests are finished, return
-// a possible error to the callback or null if none.
+    return new Promise((c, e) => {
+        glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
+            if (err) {
+                return e(err);
+            }
 
-import testRunner = require('vscode/lib/testrunner');
+            // Add files to the test suite
+            files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
-// You can directly control Mocha options by uncommenting the following lines
-// See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for more info
-testRunner.configure({
-    ui: 'tdd', 		// the TDD UI is being used in *.test.ts (suite, test, etc.)
-    useColors: true, // colored output from test results
-    fullStackTrace: true,
-    timeout: 60000
-});
-
-const logFolder: string = path.join(__dirname, ".logs");
-
-if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder);
+            try {
+                // Run the mocha test
+                mocha.timeout(100000);
+                mocha.run(failures => {
+                    if (failures > 0) {
+                        e(new Error(`${failures} tests failed.`));
+                    } else {
+                        c();
+                    }
+                });
+            } catch (err) {
+                e(err);
+            }
+        });
+    });
 }
-const logFilePath: string = path.join(logFolder, "integrationTests.log");
-subscribeToAllLoggers(message => fs.appendFileSync(logFilePath, message));
-
-module.exports = testRunner;

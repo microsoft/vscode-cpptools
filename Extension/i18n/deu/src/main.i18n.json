@@ -6,10 +6,12 @@
 {
 	"architecture.not.supported": "Die Architektur \"{0}\" wird nicht unterstützt. ",
 	"apline.containers.not.supported": "Alpine-Container werden nicht unterstützt.",
+	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
+	"download.button": "Gehe zu Downloadseite",
 	"initialization.failed": "Fehler bei der Installation der C/C++-Erweiterung. Weitere Informationen finden Sie im Ausgabefenster.",
 	"updating.dependencies": "C/C++-Abhängigkeiten werden aktualisiert...",
 	"rename.failed.delete.manually": "FEHLER bei \"fs.rename\": {0}. Löschen Sie \"{1}\" manuell, um das Debugging zu aktivieren.",
 	"failed.at.stage": "Fehler in Stufe: {0}",
-	"failed.at.stage2": "Wenn Sie in einer Offlineumgebung arbeiten oder dieser Fehler wiederholt angezeigt wird, versuchen Sie, eine Version der Erweiterung von \"https://github.com/Microsoft/vscode-cpptools/releases\" herunterzuladen, in die bereits alle Abhängigkeiten eingebunden sind. Verwenden Sie dann den Befehl \"Aus VSIX installieren\" in VS Code zur Installation dieser Version.",
+	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
 	"finished.installing.dependencies": "Installation der Abhängigkeiten abgeschlossen"
 }

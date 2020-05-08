@@ -10,7 +10,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { TreeNode, NodeType, getCurrentRenameModel } from './referencesModel';
+import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
@@ -21,7 +21,6 @@ import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
-import * as tmp from 'tmp';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
@@ -430,7 +429,7 @@ function realActivation(): void {
         let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
-            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: vscode.Extension<any>[]): boolean =>
+            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
                 extension.isActive && extension.id === "mitaki28.vscode-clang");
             if (clangCommandAdapterActive) {
                 telemetry.logLanguageServerEvent("conflictingExtension");
@@ -466,10 +465,10 @@ function realActivation(): void {
     PlatformInformation.GetPlatformInformation().then(info => {
         // Skip Insiders processing for 32-bit Linux.
         if (info.platform !== "linux" || info.architecture === "x86_64") {
-            // Skip Insiders processing for VS Code newer than 1.42.1.
+            // Skip Insiders processing for unsupported VS Code versions.
             // TODO: Change this to not require the hardcoded version to be updated.
             let vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.42.1");
+            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.43.2");
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {
@@ -481,23 +480,6 @@ function realActivation(): void {
             }
         }
     });
-
-    // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
-    class SchemaProvider implements vscode.TextDocumentContentProvider {
-        public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-            console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
-            let fileName: string = uri.path.substr(1);
-            let locale: string = util.getLocaleId();
-            let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
-            const fileExists: boolean = await util.checkFileExists(localizedFilePath);
-            if (!fileExists) {
-                localizedFilePath = util.getExtensionFilePath(fileName);
-            }
-            return util.readFileText(localizedFilePath);
-        }
-    }
-
-    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
     clients.ActiveClient.notifyWhenReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
@@ -802,64 +784,63 @@ async function suggestInsidersChannel(): Promise<void> {
     }
 }
 
-function applyUpdate(buildInfo: BuildInfo): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        tmp.file({postfix: '.vsix'}, async (err, vsixPath, fd, cleanupCallback) => {
-            if (err) {
-                reject(new Error('Failed to create vsix file'));
-                return;
-            }
+async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
+    let tempVSIX: any;
+    try {
+        tempVSIX = await util.createTempFileWithPostfix('.vsix');
 
-            // Place in try/catch as the .catch call catches a rejection in downloadFileToDestination
-            // then the .catch call will return a resolved promise
-            // Thusly, the .catch call must also throw, as a return would simply return an unused promise
-            // instead of returning early from this function scope
-            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-            let originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
-            while (true) { // Might need to try again with a different http.proxySupport setting.
-                try {
-                    await util.downloadFileToDestination(buildInfo.downloadUrl, vsixPath);
-                } catch {
-                    // Try again with the proxySupport to "off".
-                    if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
-                        config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                        reject(new Error('Failed to download VSIX package with proxySupport off')); // Changing the proxySupport didn't help.
-                        return;
-                    }
-                    if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
-                        config.update('http.proxySupport', "off", true);
-                        continue;
-                    }
-                    reject(new Error('Failed to download VSIX package'));
-                    return;
-                }
+        // Try to download VSIX
+        let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+        let originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
+        while (true) { // Might need to try again with a different http.proxySupport setting.
+            try {
+                await util.downloadFileToDestination(buildInfo.downloadUrl, tempVSIX.name);
+            } catch {
+                // Try again with the proxySupport to "off".
                 if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
                     config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                    telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
+                    throw new Error('Failed to download VSIX package with proxySupport off'); // Changing the proxySupport didn't help.
                 }
-                break;
+                if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
+                    config.update('http.proxySupport', "off", true);
+                    continue;
+                }
+                throw new Error('Failed to download VSIX package');
             }
-            try {
-                await installVsix(vsixPath);
-            } catch (error) {
-                reject(error);
-                return;
+            if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
+                config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
+                telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
             }
-            clearInterval(insiderUpdateTimer);
-            const message: string = localize("extension.updated",
-                "The C/C++ Extension has been updated to version {0}. Please reload the window for the changes to take effect.",
-                buildInfo.name);
-            util.promptReloadWindow(message);
-            telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
-            resolve();
-        });
-    }).catch(error => {
+            break;
+        }
+
+        // Install VSIX
+        try {
+            await installVsix(tempVSIX.name);
+        } catch (error) {
+            throw new Error('Failed to install VSIX package');
+        }
+
+        // Installation successful
+        clearInterval(insiderUpdateTimer);
+        const message: string = localize("extension.updated",
+            "The C/C++ Extension has been updated to version {0}. Please reload the window for the changes to take effect.",
+            buildInfo.name);
+        util.promptReloadWindow(message);
+        telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
+
+    } catch (error) {
         console.error(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
         }
         telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-    });
+    }
+
+    // Delete temp VSIX file
+    if (tempVSIX) {
+        tempVSIX.removeCallback();
+    }
 }
 
 /**
@@ -920,15 +901,6 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByType', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.cancel', onRenameViewCancel));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.done', onRenameViewDone));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.remove', onRenameViewRemove));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.add', onRenameViewAdd));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.removeAll', onRenameViewRemoveAll));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.addAll', onRenameViewAddAll));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.removeFile', onRenameViewRemoveFile));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.addFile', onRenameViewAddFile));
-    disposables.push(vscode.commands.registerCommand('CppRenameView.addReferenceType', onRenameViewAddReferenceType));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -1222,57 +1194,6 @@ function onShowRefCommand(arg?: TreeNode): void {
             vscode.window.showTextDocument(fileUri);
         }
     }
-}
-
-function onRenameViewCancel(arg?: any): void {
-    getCurrentRenameModel().cancelRename();
-}
-
-function onRenameViewDone(arg?: any): void {
-    getCurrentRenameModel().completeRename();
-}
-
-function onRenameViewRemove(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setRenameCandidate(arg);
-}
-
-function onRenameViewAdd(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setRenamePending(arg);
-}
-
-function onRenameViewRemoveAll(arg?: any): void {
-    getCurrentRenameModel().setAllRenamesCandidates();
-}
-
-function onRenameViewAddAll(arg?: any): void {
-    getCurrentRenameModel().setAllRenamesPending();
-}
-
-function onRenameViewRemoveFile(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setFileRenamesCandidates(arg);
-}
-
-function onRenameViewAddFile(arg?: TreeNode): void {
-    if (!arg) {
-        return;
-    }
-    arg.model.setFileRenamesPending(arg);
-}
-
-function onRenameViewAddReferenceType(arg?: TreeNode): void {
-    if (!arg || arg.referenceType === undefined) {
-        return;
-    }
-    arg.model.setAllReferenceTypeRenamesPending(arg.referenceType);
 }
 
 function reportMacCrashes(): void {

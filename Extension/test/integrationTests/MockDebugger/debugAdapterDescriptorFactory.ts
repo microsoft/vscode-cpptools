@@ -2,7 +2,6 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-
 import * as vscode from "vscode";
 import * as path from 'path';
 
@@ -19,7 +18,7 @@ abstract class AbstractDebugAdapterDescriptorFactory implements vscode.DebugAdap
 }
 
 export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-    public static DEBUG_TYPE : string = "cppdbg";
+    public static DEBUG_TYPE: string = "cppdbg";
 
     constructor(context: vscode.ExtensionContext) {
         super(context);
@@ -33,7 +32,7 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
 }
 
 export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDescriptorFactory {
-    public static DEBUG_TYPE : string = "cppvsdbg";
+    public static DEBUG_TYPE: string = "cppvsdbg";
 
     constructor(context: vscode.ExtensionContext) {
         super(context);

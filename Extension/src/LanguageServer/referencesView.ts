@@ -13,7 +13,7 @@ export class FindAllRefsView {
     private referenceViewProvider: ReferencesTreeDataProvider;
 
     constructor() {
-        this.referenceViewProvider = new ReferencesTreeDataProvider(false);
+        this.referenceViewProvider = new ReferencesTreeDataProvider();
         vscode.window.createTreeView(
             'CppReferencesView',
             { treeDataProvider: this.referenceViewProvider, showCollapseAll: true });
@@ -31,7 +31,7 @@ export class FindAllRefsView {
     }
 
     setData(results: ReferencesResult, isCanceled: boolean, groupByFile: boolean): void {
-        this.referencesModel = new ReferencesModel(results, false, isCanceled, groupByFile, null, () => { this.referenceViewProvider.refresh(); });
+        this.referencesModel = new ReferencesModel(results, isCanceled, groupByFile, () => { this.referenceViewProvider.refresh(); });
         this.referenceViewProvider.setModel(this.referencesModel);
     }
 

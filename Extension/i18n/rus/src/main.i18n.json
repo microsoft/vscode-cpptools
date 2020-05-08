@@ -6,10 +6,12 @@
 {
 	"architecture.not.supported": "Архитектура {0} не поддерживается. ",
 	"apline.containers.not.supported": "Контейнеры Alpine не поддерживаются.",
+	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
+	"download.button": "Перейти к странице скачивания",
 	"initialization.failed": "Не удалось установить расширение C/C++. Дополнительные сведения см. в окне вывода.",
 	"updating.dependencies": "Обновление зависимостей C/C++...",
 	"rename.failed.delete.manually": "Ошибка: сбой fs.rename с \"{0}\". Удалите {1} вручную, чтобы включить отладку.",
 	"failed.at.stage": "Сбой на этапе: {0}",
-	"failed.at.stage2": "Если вы работаете в автономной среде или постоянно видите эту ошибку, попробуйте скачать версию расширения, куда уже включены все зависимости, по адресу https://github.com/Microsoft/vscode-cpptools/releases, а затем используйте команду \"Установить из VSIX\" в VS Code для установки.",
+	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
 	"finished.installing.dependencies": "Завершена установка зависимостей"
 }

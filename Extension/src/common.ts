@@ -15,6 +15,7 @@ import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
 import * as https from 'https';
+import * as tmp from 'tmp';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { getBuildTasks } from './LanguageServer/extension';
 import { OtherSettings } from './LanguageServer/settings';
@@ -534,6 +535,20 @@ export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());
 }
 
+/** Get the platform that the installed binaries belong to.*/
+export function getInstalledBinaryPlatform(): string | undefined {
+    // the LLVM/bin folder is utilized to identify the platform
+    let installedPlatform: string = "";
+    if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
+        installedPlatform = "win32";
+    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
+        installedPlatform = "darwin";
+    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
+        installedPlatform = "linux";
+    }
+    return installedPlatform;
+}
+
 /** Reads the content of a text file */
 export function readFileText(filePath: string, encoding: string = "utf8"): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -759,6 +774,17 @@ export function promptReloadWindow(message: string): void {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
+    });
+}
+
+export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
+    return new Promise<tmp.FileResult>((resolve, reject) => {
+        tmp.file({ postfix: postfix }, (err, path, fd, cleanupCallback) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(<tmp.FileResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
+        });
     });
 }
 

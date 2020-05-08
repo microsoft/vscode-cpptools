@@ -9,7 +9,6 @@
 	"unable.to.locate.selected.symbol": "選択されたシンボルの定義が見つかりませんでした。",
 	"unable.to.start": "C/C++ 言語サーバーを起動できません。IntelliSense 機能は無効になります。エラー: {0}",
 	"check.permissions": "EPERM: '{0}' のアクセス許可を確認してください",
-	"server.crashed": "'{0}' の言語サーバーが過去 3 分間に 5 回クラッシュしました。再起動されません。",
 	"server.crashed2": "言語サーバーが過去 3 分間に 5 回クラッシュしました。再起動されません。",
 	"provider.configure.folder": "{0} が '{1}' フォルダーに対して IntelliSense を構成しようとしています。",
 	"provider.configure.this.folder": "{0} がこのフォルダーに対して IntelliSense を構成しようとしています。",
