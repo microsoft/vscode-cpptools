@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.28.0-insiders3: May 8, 2020
+## Version 0.28.0: May 11, 2020
 ### New Features
 * Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
 * Add GNU (and C18) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
@@ -11,13 +11,12 @@
 * Add support for IntelliSense-based `Go to Definition` on `#include` statements. [#2564](https://github.com/microsoft/vscode-cpptools/issues/2564)
 * Support relative paths with `forcedInclude`. [#2780](https://github.com/microsoft/vscode-cpptools/issues/2780)
 * Make the `Visual Studio` formatting style respect the C++ standard (e.g. `> >` for C++03 or earlier). [#3578](https://github.com/microsoft/vscode-cpptools/issues/3578)
-* Add support for more C++20 features, such as concepts. [#4195](https://github.com/microsoft/vscode-cpptools/issues/4195)
+* Add support for more C++20 features, such as concepts (not 100% complete yet). [#4195](https://github.com/microsoft/vscode-cpptools/issues/4195)
 * Process the "std" and bitness (-m64/-m32) compiler args. [#4726](https://github.com/microsoft/vscode-cpptools/issues/4726)
 * Switch from our custom Rename UI to VS Code's Refactor Preview. [#4990](https://github.com/microsoft/vscode-cpptools/issues/4990)
 
 ### Bug Fixes
 * Fix `browse.path` not getting set correctly when `compileCommands` is used. [#1163](https://github.com/microsoft/vscode-cpptools/issues/1163)
-  * Note: Some paths are still missing in certain cases. We plan to fix that in the "next" update.
 * Fix an issue with squiggle updates not occurring when a dependent file is created, deleted, or renamed. [#3670](https://github.com/microsoft/vscode-cpptools/issues/3670)
 * Fix temporary VSIX files not getting deleted after installation [#3923](https://github.com/microsoft/vscode-cpptools/issues/3923)
 * Process "$CPATH" on non-Windows OS's. [#3940](https://github.com/microsoft/vscode-cpptools/issues/3940)
