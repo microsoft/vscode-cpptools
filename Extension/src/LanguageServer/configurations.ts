@@ -67,6 +67,7 @@ export interface Configuration {
     forcedInclude?: string[];
     configurationProvider?: string;
     browse?: Browse;
+    properties?: {[key: string]: string};
 }
 
 export interface ConfigurationErrors {

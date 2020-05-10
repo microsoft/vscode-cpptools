@@ -142,6 +142,16 @@
                             }
                         },
                         "additionalProperties": false
+                    },
+                    "properties": {
+                        "type": "object",
+                        "description": "Custom properties that can be queried through the command ${cpptools:getCurrentConfigurationProperty}.",
+                        "patternProperties": {
+                            "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^workspaceFolderBasename$)(?!^default$)(^.+$)": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
                     }
                 },
                 "additionalProperties": false
