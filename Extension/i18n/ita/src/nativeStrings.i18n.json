@@ -161,6 +161,6 @@
 	"fallback_to_64_bit_mode2": "Non è stato possibile eseguire una query sul compilatore. Verrà eseguito il fallback a intelliSenseMode a 64 bit.",
 	"fallback_to_no_bitness": "Non è stato possibile eseguire una query sul compilatore. Verrà eseguito il fallback alla modalità senza numero di bit.",
 	"intellisense_client_creation_aborted": "La creazione del client IntelliSense è stata interrotta: {0}",
-	"include_errors_tag_parser_provide_intellisense_features": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-	"include_errors_tag_parser_provide_intellisense_features_squiggles_disabled": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser. Squiggles are disabled for this translation unit."
+	"include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+	"include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
 }

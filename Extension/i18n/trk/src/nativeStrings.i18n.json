@@ -161,6 +161,6 @@
 	"fallback_to_64_bit_mode2": "Derleyici sorgulanamadı. 64 bit intelliSenseMode'a geri dönülüyor.",
 	"fallback_to_no_bitness": "Derleyici sorgulanamadı. Bit genişliği yok durumuna geri dönülüyor.",
 	"intellisense_client_creation_aborted": "IntelliSense istemcisi oluşturma işlemi durduruldu: {0}",
-	"include_errors_tag_parser_provide_intellisense_features": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-	"include_errors_tag_parser_provide_intellisense_features_squiggles_disabled": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser. Squiggles are disabled for this translation unit."
+	"include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+	"include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
 }
