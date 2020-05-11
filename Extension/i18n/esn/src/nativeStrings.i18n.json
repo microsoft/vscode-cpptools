@@ -161,6 +161,6 @@
 	"fallback_to_64_bit_mode2": "No se pudo consultar el compilador. Revirtiendo a intelliSenseMode de 64 bits.",
 	"fallback_to_no_bitness": "No se pudo consultar el compilador. Revirtiendo para no establecer ningún valor de bits.",
 	"intellisense_client_creation_aborted": "Se anuló la creación del cliente de IntelliSense: {0}",
-	"include_errors_tag_parser_provide_intellisense_features": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-	"include_errors_tag_parser_provide_intellisense_features_squiggles_disabled": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser. Squiggles are disabled for this translation unit."
+	"include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+	"include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
 }
