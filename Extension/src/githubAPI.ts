@@ -129,7 +129,7 @@ export interface BuildInfo {
  * @return Download URL for the extension VSIX package that the user should install. If the user
  * does not need to update, resolves to undefined.
  */
-export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo | undefined> {
+export async function getTargetBuildInfo(updateChannel: string, isFromSettingsChange: boolean): Promise<BuildInfo | undefined> {
     return getReleaseJson()
         .then(builds => {
             if (!builds || builds.length === 0) {
@@ -143,7 +143,7 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
                 return undefined;
             }
 
-            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
             if (targetBuild === undefined) {
                 // no action
                 telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
@@ -181,8 +181,8 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
  * @param updateChannel The user's updateChannel setting.
  * @return The Build if the user should update to it, otherwise undefined.
  */
-export function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build | undefined {
-    if (!vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+export function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string, isFromSettingsChange: boolean): Build | undefined {
+    if (!isFromSettingsChange && !vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
         return undefined;
     }
     const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
