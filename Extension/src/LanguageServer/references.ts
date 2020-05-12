@@ -288,7 +288,7 @@ export class ReferencesManager {
                     const numTotalToLex: number = this.referencesCurrentProgress.targetReferencesProgress.length;
                     const numFinishedLexing: number = numTotalToLex - numWaitingToLex - numLexing;
                     const numTotalToParse: number = this.referencesCurrentProgress.targetReferencesProgress.length - numFinishedWithoutConfirming;
-                    if (numLexing >= numParsing && numFinishedConfirming === 0) {
+                    if (numLexing >= (numParsing + numConfirmingReferences) && numFinishedConfirming === 0) {
                         if (numTotalToLex === 0) {
                             currentMessage = localize("searching.files", "Searching files."); // TODO: Prevent this from happening.
                         } else {

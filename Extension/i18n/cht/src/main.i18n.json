@@ -6,12 +6,12 @@
 {
 	"architecture.not.supported": "不支援架構 {0}。 ",
 	"apline.containers.not.supported": "不支援 Alpine 容器。",
-	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
-	"download.button": "Go to Download Page",
+	"native.binaries.not.supported": "此 {0} 版本的延伸模組與您的 OS 不相容。請下載並安裝 \"{1}\" 版本的延伸模組。",
+	"download.button": "前往 &#91;下載&#92; 頁面",
 	"initialization.failed": "C/C + + 延伸模組安裝失敗。如需詳細資訊，請查看 [輸出] 視窗。",
 	"updating.dependencies": "正在更新 C/C + + 相依性...",
 	"rename.failed.delete.manually": "錯誤: fs.rename 失敗，\"{0}\"。請手動刪除 {1} 以啟用偵錯。",
 	"failed.at.stage": "在階段 {0} 失敗",
-	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
+	"failed.at.stage2": "如果在離線環境中作業，或重複看到此錯誤，請嘗試下載具備 {0} 所有預先內含之相依性的延伸模組版本，然後在 VS Code 中使用 \"Install from VSIX\" 命令加以安裝。",
 	"finished.installing.dependencies": "已完成安裝相依性"
 }

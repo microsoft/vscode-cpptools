@@ -6,12 +6,12 @@
 {
 	"architecture.not.supported": "体系结构 {0} 不受支持。",
 	"apline.containers.not.supported": "Alpine 容器不受支持。",
-	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
-	"download.button": "Go to Download Page",
+	"native.binaries.not.supported": "扩展的此 {0} 版本与你的操作系统不兼容。请下载并安装扩展的“{1}”版本。",
+	"download.button": "转到下载页",
 	"initialization.failed": "C/C++ 扩展安装失败。有关详细信息，请查看输出窗口。",
 	"updating.dependencies": "正在更新 C/C++ 依赖项...",
 	"rename.failed.delete.manually": "错误: fs.rename 失败，原因为“{0}”。请手动删除 {1} 以启用调试。",
 	"failed.at.stage": "在阶段 {0} 失败",
-	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
+	"failed.at.stage2": "如果在脱机环境中工作或反复看到此错误，请尝试从 {0} 下载预包含了所有依赖项的扩展版本，然后使用 VS Code 中的“从 VSIX 安装”命令来安装它。",
 	"finished.installing.dependencies": "已完成安装依赖项"
 }

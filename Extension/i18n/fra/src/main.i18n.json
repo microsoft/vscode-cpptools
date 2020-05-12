@@ -6,12 +6,12 @@
 {
 	"architecture.not.supported": "L'architecture {0} n'est pas prise en charge. ",
 	"apline.containers.not.supported": "Les conteneurs Alpine ne sont pas pris en charge.",
-	"native.binaries.not.supported": "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.",
-	"download.button": "Go to Download Page",
+	"native.binaries.not.supported": "Cette version {0} de l'extension est incompatible avec votre système d'exploitation. Téléchargez et installez la version \"{1}\" de l'extension.",
+	"download.button": "Accéder à la page de téléchargement",
 	"initialization.failed": "L'installation de l'extension C/C++ a échoué. Pour plus d'informations, consultez la fenêtre Sortie.",
 	"updating.dependencies": "Mise à jour des dépendances C/C++...",
 	"rename.failed.delete.manually": "ERREUR : fs.rename a échoué avec \"{0}\". Supprimez {1} manuellement pour activer le débogage.",
 	"failed.at.stage": "Échec à l'étape {0}",
-	"failed.at.stage2": "If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the \"Install from VSIX\" command in VS Code to install it.",
+	"failed.at.stage2": "Si vous travaillez dans un environnement hors connexion ou si vous voyez cette erreur à plusieurs reprises, essayez de télécharger une version de l'extension avec toutes les dépendances préalablement incluses à partir de {0}, puis utilisez la commande \"Installer depuis un VSIX\" dans VS Code pour effectuer l'installation.",
 	"finished.installing.dependencies": "Installation des dépendances terminée"
 }
