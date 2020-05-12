@@ -50,20 +50,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     Telemetry.activate();
     util.setProgress(0);
 
-    // check if the correct offline/insiders vsix is installed on the correct platform
-    let installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
-    if (!installedPlatform || (process.platform !== installedPlatform)) {
-        const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-        const vsixName: string = vsixNameForPlatform(platformInfo);
-        errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
-        const downloadLink: string = localize("download.button", "Go to Download Page");
-        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
-            if (selection === downloadLink) {
-                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
-            }
-        });
-    }
-
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
     class SchemaProvider implements vscode.TextDocumentContentProvider {
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
@@ -85,6 +71,20 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     DebuggerExtension.initialize(context);
 
     await processRuntimeDependencies();
+
+    // check if the correct offline/insiders vsix is installed on the correct platform
+    let installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
+    if (!installedPlatform || (process.platform !== installedPlatform)) {
+        const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+        const vsixName: string = vsixNameForPlatform(platformInfo);
+        errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
+        const downloadLink: string = localize("download.button", "Go to Download Page");
+        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+            if (selection === downloadLink) {
+                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+            }
+        });
+    }
 
     return cppTools;
 }

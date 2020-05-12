@@ -160,5 +160,7 @@
 	"fallback_to_32_bit_mode2": "Fehler beim Abfragen des Compilers. Es wird ein Fallback auf den 32-Bit-intelliSenseMode durchgeführt.",
 	"fallback_to_64_bit_mode2": "Fehler beim Abfragen des Compilers. Es wird ein Fallback auf den 64-Bit-intelliSenseMode durchgeführt.",
 	"fallback_to_no_bitness": "Fehler beim Abfragen des Compilers. Es wird ein Fallback auf keine Bitanzahl durchgeführt.",
-	"intellisense_client_creation_aborted": "IntelliSense-Clienterstellung abgebrochen: {0}"
+	"intellisense_client_creation_aborted": "IntelliSense-Clienterstellung abgebrochen: {0}",
+	"include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
+	"include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
 }
