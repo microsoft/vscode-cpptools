@@ -69,6 +69,7 @@
 	"c_cpp.configuration.experimentalFeatures.description": "Contrôle si les fonctionnalités \"expérimentales\" sont utilisables.",
 	"c_cpp.configuration.suggestSnippets.description": "Si la valeur est true, des extraits de code sont fournis par le serveur de langage.",
 	"c_cpp.configuration.enhancedColorization.description": "Si cette option est activée, la couleur du code est déterminée par IntelliSense. Ce paramètre n'a pas d'effet si IntelliSense est désactivé ou utilise le thème Contraste élevé par défaut.",
+	"c_cpp.configuration.codeFolding.description": "If enabled, code folding ranges are provided by the language server.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Activez les services d'intégration pour le [gestionnaire de dépendances vcpkg] (https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Si la valeur est true, l'opération Renommer le symbole nécessite un identificateur C/C++ valide.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Si la valeur est true, le remplacement de la commande shell du débogueur utilise un accent grave (`) obsolète",

@@ -69,6 +69,7 @@
 	"c_cpp.configuration.experimentalFeatures.description": "Określa, czy można używać funkcji „eksperymentalnych”.",
 	"c_cpp.configuration.suggestSnippets.description": "Jeśli wartość to true, fragmenty kodu są udostępniane przez serwer języka.",
 	"c_cpp.configuration.enhancedColorization.description": "Jeśli to ustawienie jest włączone, kod jest kolorowany na podstawie funkcji IntelliSense. To ustawienie nie ma żadnego efektu, jeśli funkcja IntelliSense jest wyłączona lub jest używana domyślna kompozycja z dużym kontrastem.",
+	"c_cpp.configuration.codeFolding.description": "Jeśli ta opcja jest włączona, zakresy składania kodu są dostarczane przez serwer języka.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Włącz usługi integracji dla elementu [vcpkg dependency manager](https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Jeśli ma wartość true, operacja „Zmień nazwę symbolu” będzie wymagać prawidłowego identyfikatora C/C++.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Jeśli wartość będzie równa true, podstawianie poleceń powłoki debugera będzie używać przestarzałego grawisa (`)",
