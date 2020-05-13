@@ -553,10 +553,11 @@ class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             this.client.notifyWhenReady(() => {
                 this.client.languageClient.sendRequest(GetFoldingRangesRequest, params)
                     .then((ranges) => {
+                        let result: vscode.FoldingRange[] = [];
                         if (ranges.canceled) {
-                            reject();
+                            // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                            resolve(result);
                         } else {
-                            let result: vscode.FoldingRange[] = [];
                             ranges.ranges.forEach((r) => {
                                 let foldingRange: vscode.FoldingRange = {
                                     start: r.range.start.line,
