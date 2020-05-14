@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.28.0: May 11, 2020
+## Version 0.28.0: May 12, 2020
 ### New Features
 * Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
 * Add GNU (and C18) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
@@ -11,7 +11,7 @@
 * Add support for IntelliSense-based `Go to Definition` on `#include` statements. [#2564](https://github.com/microsoft/vscode-cpptools/issues/2564)
 * Support relative paths with `forcedInclude`. [#2780](https://github.com/microsoft/vscode-cpptools/issues/2780)
 * Make the `Visual Studio` formatting style respect the C++ standard (e.g. `> >` for C++03 or earlier). [#3578](https://github.com/microsoft/vscode-cpptools/issues/3578)
-* Add support for more C++20 features, such as concepts. [#4195](https://github.com/microsoft/vscode-cpptools/issues/4195)
+* Add support for more C++20 features, such as concepts (not 100% complete yet). [#4195](https://github.com/microsoft/vscode-cpptools/issues/4195)
 * Process the "std" and bitness (-m64/-m32) compiler args. [#4726](https://github.com/microsoft/vscode-cpptools/issues/4726)
 * Switch from our custom Rename UI to VS Code's Refactor Preview. [#4990](https://github.com/microsoft/vscode-cpptools/issues/4990)
 
@@ -33,6 +33,7 @@
 * Fix incorrect translations. [PR #5300](https://github.com/microsoft/vscode-cpptools/pull/5300)
 * Fix cpptools auto-restarting after a crash. [#5303](https://github.com/microsoft/vscode-cpptools/issues/5303)
 * Fix incorrect `c_cpp_properties.json` squiggles. [#5314](https://github.com/microsoft/vscode-cpptools/issues/5314), [#5322](https://github.com/microsoft/vscode-cpptools/issues/5322)
+* Fix error `The task provider for "C/C++" tasks unexpectedly provided a task of type "shell".` [#5388](https://github.com/microsoft/vscode-cpptools/issues/5388)
 * Fix `compilerPath` set to `""` not working. [#5392](https://github.com/microsoft/vscode-cpptools/issues/5392)
 * Fix IntelliSense sometimes not working on a header file (or giving "Cannot Confirm Reference") if an existing TU is chosen that doesn't actually contain the header file.
 * Fix random crashes after a settings change.
