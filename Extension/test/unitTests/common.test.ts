@@ -9,6 +9,7 @@ suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
         const success: string = "success";
         const home: string = process.env.HOME || process.env.USERPROFILE;
+        const delimiter: string = (process.platform === 'win32') ? ";" : ":";
 
         test("raw input", () => {
             const input: string = "test";
@@ -32,7 +33,7 @@ suite("Common Utility validation", () => {
             inputAndEnvironment("${test}", {
                 test: ["foo", "bar"]
             })
-                .shouldResolveTo("foo;bar");
+                .shouldResolveTo(`foo${delimiter}bar`);
         });
 
         test("solo env input with empty array env value", () => {
