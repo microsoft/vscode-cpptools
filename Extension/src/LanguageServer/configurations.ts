@@ -531,7 +531,7 @@ export class CppProperties {
         let result: string[] = [];
         if (paths) {
             paths = this.resolveDefaults(paths, defaultValue);
-            let delimiter: string = (process.platform === 'win32') ? ";" : ":";
+            const delimiter: string = (process.platform === 'win32') ? ";" : ":";
             paths.forEach(entry => {
                 let entries: string[] = util.resolveVariables(entry, env).split(delimiter).filter(e => e);
                 result = result.concat(entries);
