@@ -339,6 +339,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder)(\.|:))?(.*?)\}/g;
     let ret: string = input;
     let cycleCache: Set<string> = new Set();
+    const delimiter: string = (process.platform === 'win32') ? ";" : ":";
     while (!cycleCache.has(ret)) {
         cycleCache.add(ret);
         ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
@@ -355,7 +356,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
-                            newValue = v.join(";");
+                            newValue = v.join(delimiter);
                         }
                         if (newValue === undefined) {
                             newValue = process.env[name];
