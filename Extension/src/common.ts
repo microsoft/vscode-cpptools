@@ -868,6 +868,7 @@ export interface CompilerPathAndArgs {
 }
 
 function extractArgs(argsString: string): string[] {
+    let isWindows: boolean = os.platform() === 'win32';
     let result: string[] = [];
     let currentArg: string = "";
     let isWithinDoubleQuote: boolean = false;
@@ -890,8 +891,11 @@ function extractArgs(argsString: string): string[] {
                 isWithinDoubleQuote = !isWithinDoubleQuote;
             }
         } else if (c === '\'') {
-            if (!isWithinDoubleQuote) {
-                isWithinSingleQuote = !isWithinSingleQuote;
+            // On Windows, a single quote string is not allowed to join multiple args into a single arg
+            if (!isWindows) {
+                if (!isWithinDoubleQuote) {
+                    isWithinSingleQuote = !isWithinSingleQuote;
+                }
             }
         } else if (c === ' ') {
             if (!isWithinDoubleQuote && !isWithinSingleQuote) {
