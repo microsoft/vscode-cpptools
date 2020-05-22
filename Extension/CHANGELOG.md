@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.28.1: May 20, 2020
+### Bug Fixes
+* Fix errors not appearing after switching between a WSL and non-WSL config on Windows. [#5474](https://github.com/microsoft/vscode-cpptools/issues/5474)
+* Fix cpptools crash when gcc is not in $PATH in a Docker container. [#5484](https://github.com/microsoft/vscode-cpptools/issues/5484)
+* Fix top IntelliSense crash regression. [#5486](https://github.com/microsoft/vscode-cpptools/issues/5486)
+* Fix squiggles appearing too soon (while typing). [#5531](https://github.com/microsoft/vscode-cpptools/issues/5531)
+
 ## Version 0.28.0: May 12, 2020
 ### New Features
 * Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
