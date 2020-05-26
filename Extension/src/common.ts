@@ -867,6 +867,53 @@ export interface CompilerPathAndArgs {
     additionalArgs: string[];
 }
 
+function extractArgs(argsString: string): string[] {
+    let isWindows: boolean = os.platform() === 'win32';
+    let result: string[] = [];
+    let currentArg: string = "";
+    let isWithinDoubleQuote: boolean = false;
+    let isWithinSingleQuote: boolean = false;
+    for (let i: number = 0; i < argsString.length; i++) {
+        let c: string = argsString[i];
+        if (c === '\\') {
+            currentArg += c;
+            if (++i === argsString.length) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                }
+                return result;
+            }
+            currentArg += argsString[i];
+            continue;
+        }
+        if (c === '"') {
+            if (!isWithinSingleQuote) {
+                isWithinDoubleQuote = !isWithinDoubleQuote;
+            }
+        } else if (c === '\'') {
+            // On Windows, a single quote string is not allowed to join multiple args into a single arg
+            if (!isWindows) {
+                if (!isWithinDoubleQuote) {
+                    isWithinSingleQuote = !isWithinSingleQuote;
+                }
+            }
+        } else if (c === ' ') {
+            if (!isWithinDoubleQuote && !isWithinSingleQuote) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                    currentArg = "";
+                }
+                continue;
+            }
+        }
+        currentArg += c;
+    }
+    if (currentArg !== "") {
+        result.push(currentArg);
+    }
+    return result;
+}
+
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
@@ -881,8 +928,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
             // Input has quotes around compiler path
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
-                additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
-                additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
+                additionalArgs = extractArgs(compilerPath.substr(endQuote + 1));
                 compilerPath = compilerPath.substr(1, endQuote - 1);
                 compilerName = path.basename(compilerPath);
             }
@@ -903,8 +949,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                 }
                 if (compilerPath !== potentialCompilerPath) {
                     // Found a valid compilerPath and args.
-                    additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
-                    additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
+                    additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
                     compilerPath = potentialCompilerPath;
                 }
                 compilerName = path.basename(compilerPath);

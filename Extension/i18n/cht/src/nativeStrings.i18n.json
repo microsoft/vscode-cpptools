@@ -161,6 +161,6 @@
 	"fallback_to_64_bit_mode2": "無法查詢編譯器。請回復成 64 位元 intelliSenseMode。",
 	"fallback_to_no_bitness": "無法查詢編譯器。請回復成沒有位元。",
 	"intellisense_client_creation_aborted": "已中止建立 IntelliSense 用戶端: {0}",
-	"include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-	"include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
+	"include_errors_config_provider_intellisense_disabled ": "根據 configurationProvider 設定提供的資訊，偵測到 #include 錯誤。此編譯單位 ({0}) 的 IntelliSense 功能將由標籤剖析器提供。",
+	"include_errors_config_provider_squiggles_disabled ": "根據 configurationProvider 設定提供的資訊，偵測到 #include 錯誤。已停用此編譯單位 ({0}) 的波浪線。"
 }
