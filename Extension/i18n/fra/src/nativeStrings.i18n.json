@@ -161,6 +161,6 @@
 	"fallback_to_64_bit_mode2": "Échec de l'interrogation du compilateur. Retour au intelliSenseMode 64 bits.",
 	"fallback_to_no_bitness": "Échec de l'interrogation du compilateur. Retour au mode sans nombre de bits.",
 	"intellisense_client_creation_aborted": "Abandon de la création du client IntelliSense : {0}",
-	"include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-	"include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
+	"include_errors_config_provider_intellisense_disabled ": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les fonctionnalités IntelliSense de cette unité de traduction ({0}) sont fournies par l'analyseur de balises.",
+	"include_errors_config_provider_squiggles_disabled ": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les tildes sont désactivés pour cette unité de traduction ({0})."
 }

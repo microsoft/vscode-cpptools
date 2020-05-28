@@ -161,6 +161,6 @@
 	"fallback_to_64_bit_mode2": "コンパイラを照会できませんでした。64 ビットの intelliSenseMode に戻しています。",
 	"fallback_to_no_bitness": "コンパイラを照会できませんでした。ビットなしに戻ります。",
 	"intellisense_client_creation_aborted": "IntelliSense クライアントの作成が中止されました: {0}",
-	"include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-	"include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
+	"include_errors_config_provider_intellisense_disabled ": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) の IntelliSense 機能は、タグ パーサーによって提供されます。",
+	"include_errors_config_provider_squiggles_disabled ": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) では、波線が無効になっています。"
 }
