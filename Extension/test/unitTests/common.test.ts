@@ -3,13 +3,12 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
-import { resolveVariables, escapeForSquiggles } from "../../src/common";
+import { envDelimiter, resolveVariables, escapeForSquiggles } from "../../src/common";
 
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
         const success: string = "success";
         const home: string = process.env.HOME || process.env.USERPROFILE;
-        const delimiter: string = (process.platform === 'win32') ? ";" : ":";
 
         test("raw input", () => {
             const input: string = "test";
@@ -33,7 +32,7 @@ suite("Common Utility validation", () => {
             inputAndEnvironment("${test}", {
                 test: ["foo", "bar"]
             })
-                .shouldResolveTo(`foo${delimiter}bar`);
+                .shouldResolveTo(`foo${envDelimiter}bar`);
         });
 
         test("solo env input with empty array env value", () => {
