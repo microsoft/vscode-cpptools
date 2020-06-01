@@ -6,7 +6,7 @@
 {
 	"architecture.not.supported": "Die Architektur \"{0}\" wird nicht unterstützt. ",
 	"apline.containers.not.supported": "Alpine-Container werden nicht unterstützt.",
-	"native.binaries.not.supported": "Diese Version ({0}) der Erweiterung ist nicht mit Ihrem Betriebssystem kompatibel. Laden Sie Version {1} der Erweiterung herunter, und installieren Sie sie.",
+	"native.binaries.not.supported": "Diese Version für {0} der Erweiterung ist nicht mit Ihrem Betriebssystem kompatibel. Laden Sie Version {1} der Erweiterung herunter, und installieren Sie sie.",
 	"download.button": "Gehe zu Downloadseite",
 	"initialization.failed": "Fehler bei der Installation der C/C++-Erweiterung. Weitere Informationen finden Sie im Ausgabefenster.",
 	"updating.dependencies": "C/C++-Abhängigkeiten werden aktualisiert...",
