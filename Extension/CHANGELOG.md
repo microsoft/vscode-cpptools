@@ -1,12 +1,25 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.28.2: June 1, 2020
+### Regression Bug Fixes
+* Fix string arrays in `env` not being joined properly. [#5509](https://github.com/microsoft/vscode-cpptools/issues/5509)
+  * Krishna Ersson (@kersson) [PR #5510](https://github.com/microsoft/vscode-cpptools/pull/5510)
+* Fix `shell` being used as the C/C++ build task source instead of `C/C++`. [vscode-docs#3724](https://github.com/microsoft/vscode-docs/issues/3724)
+
+### Other Bug Fixes
+* Fix `problemMatcher` not being added to C/C++ build tasks. [#3295](https://github.com/microsoft/vscode-cpptools/issues/3295)
+* Fix `/usr/bin` being used as the default `cwd` (instead of `${workspaceFolder}`) for C/C++ build tasks. [#4761](https://github.com/microsoft/vscode-cpptools/issues/4761)
+* Fix processing of quoted arguments with spaces in `compilerPath`. [PR #5513](https://github.com/microsoft/vscode-cpptools/pull/5513)
+* Fix inconsistent task `label` and `preLaunchTask` being used for C/C++ build tasks. [#5561](https://github.com/microsoft/vscode-cpptools/issues/5561)
+
 ## Version 0.28.1: May 20, 2020
 ### Bug Fixes
 * Fix errors not appearing after switching between a WSL and non-WSL config on Windows. [#5474](https://github.com/microsoft/vscode-cpptools/issues/5474)
 * Fix cpptools crash when gcc is not in $PATH in a Docker container. [#5484](https://github.com/microsoft/vscode-cpptools/issues/5484)
 * Fix top IntelliSense crash regression. [#5486](https://github.com/microsoft/vscode-cpptools/issues/5486)
+* Fix squiggles appearing too soon (while typing). [#5531](https://github.com/microsoft/vscode-cpptools/issues/5531)
 
-## Version 0.28.0: May 11, 2020
+## Version 0.28.0: May 12, 2020
 ### New Features
 * Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
 * Add GNU (and C18) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
