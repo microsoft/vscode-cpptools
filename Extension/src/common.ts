@@ -96,7 +96,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         return;
     }
 
-    const buildTasks: vscode.Task[] = await getBuildTasks(false);
+    const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
     if (!selectedTask) {
@@ -107,7 +107,12 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     let selectedTask2: vscode.Task = selectedTask;
     if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-        rawTasksJson.tasks.push(selectedTask2.definition);
+        let task: any = {
+            ...selectedTask2.definition,
+            problemMatcher: selectedTask2.problemMatchers,
+            group: { kind: "build", "isDefault": true }
+        };
+        rawTasksJson.tasks.push(task);
     }
 
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
