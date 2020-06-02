@@ -31,6 +31,9 @@ export type Mutable<T> = {
     -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
 };
 
+// Platform-specific environment variable delimiter
+export const envDelimiter: string = (process.platform === 'win32') ? ";" : ":";
+
 export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext | undefined;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -93,7 +96,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         return;
     }
 
-    const buildTasks: vscode.Task[] = await getBuildTasks(false);
+    const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
     if (!selectedTask) {
@@ -104,7 +107,12 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     let selectedTask2: vscode.Task = selectedTask;
     if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-        rawTasksJson.tasks.push(selectedTask2.definition);
+        let task: any = {
+            ...selectedTask2.definition,
+            problemMatcher: selectedTask2.problemMatchers,
+            group: { kind: "build", "isDefault": true }
+        };
+        rawTasksJson.tasks.push(task);
     }
 
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
@@ -355,7 +363,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
-                            newValue = v.join(";");
+                            newValue = v.join(envDelimiter);
                         }
                         if (newValue === undefined) {
                             newValue = process.env[name];
@@ -867,6 +875,53 @@ export interface CompilerPathAndArgs {
     additionalArgs: string[];
 }
 
+function extractArgs(argsString: string): string[] {
+    let isWindows: boolean = os.platform() === 'win32';
+    let result: string[] = [];
+    let currentArg: string = "";
+    let isWithinDoubleQuote: boolean = false;
+    let isWithinSingleQuote: boolean = false;
+    for (let i: number = 0; i < argsString.length; i++) {
+        let c: string = argsString[i];
+        if (c === '\\') {
+            currentArg += c;
+            if (++i === argsString.length) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                }
+                return result;
+            }
+            currentArg += argsString[i];
+            continue;
+        }
+        if (c === '"') {
+            if (!isWithinSingleQuote) {
+                isWithinDoubleQuote = !isWithinDoubleQuote;
+            }
+        } else if (c === '\'') {
+            // On Windows, a single quote string is not allowed to join multiple args into a single arg
+            if (!isWindows) {
+                if (!isWithinDoubleQuote) {
+                    isWithinSingleQuote = !isWithinSingleQuote;
+                }
+            }
+        } else if (c === ' ') {
+            if (!isWithinDoubleQuote && !isWithinSingleQuote) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                    currentArg = "";
+                }
+                continue;
+            }
+        }
+        currentArg += c;
+    }
+    if (currentArg !== "") {
+        result.push(currentArg);
+    }
+    return result;
+}
+
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
@@ -881,8 +936,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
             // Input has quotes around compiler path
             let endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
-                additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
-                additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
+                additionalArgs = extractArgs(compilerPath.substr(endQuote + 1));
                 compilerPath = compilerPath.substr(1, endQuote - 1);
                 compilerName = path.basename(compilerPath);
             }
@@ -903,8 +957,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                 }
                 if (compilerPath !== potentialCompilerPath) {
                     // Found a valid compilerPath and args.
-                    additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
-                    additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
+                    additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
                     compilerPath = potentialCompilerPath;
                 }
                 compilerName = path.basename(compilerPath);
