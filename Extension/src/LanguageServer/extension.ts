@@ -346,9 +346,10 @@ export async function getBuildTasks(returnCompilerPath: boolean, appendSourceToN
     let createTask: (compilerPath: string, compilerArgs?: string []) => vscode.Task = (compilerPath: string, compilerArgs?: string []) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
+        const compilerPathDir: string = path.dirname(compilerPath);
         const taskName: string = (appendSourceToName ? taskSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
-        const cwd: string = "${workspaceFolder}";
+        const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(compilerPathDir) ? compilerPathDir : "${workspaceFolder}";
         let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
         if (compilerArgs && compilerArgs.length > 0) {
             args = args.concat(compilerArgs);
