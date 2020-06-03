@@ -7,7 +7,8 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getBuildTasks, BuildTaskDefinition } from '../LanguageServer/extension';
+import { BuildTaskDefinition } from '../LanguageServer/extension';
+import { CppBuildTaskProvider } from '../LanguageServer/cppbuildTaskProvider';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
@@ -106,6 +107,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         let buildTasks: vscode.Task[] = await getBuildTasks(true, true);
+        let buildTasks: vscode.Task[] = await new CppBuildTaskProvider().provideTasks();
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }

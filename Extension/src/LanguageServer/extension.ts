@@ -22,13 +22,13 @@ import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn, execSync } from 'child_process';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
-import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
 import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
 import * as nls from 'vscode-nls';
+import { CppBuildTaskProvider } from './cppbuildTaskProvider';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -49,10 +49,11 @@ let activatedPreviously: PersistentWorkspaceState<boolean>;
 let buildInfoCache: BuildInfo | undefined;
 const taskTypeStr: string = "shell";
 const taskSourceStr: string = "C/C++";
+export const taskSourceStr: string = "shell";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 let codeActionProvider: vscode.Disposable;
-const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
+export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
 type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<vcpkgDatabase>;
@@ -174,11 +175,16 @@ export function activate(activationEventOccurred: boolean): void {
 
     taskProvider = vscode.tasks.registerTaskProvider(taskTypeStr, {
         provideTasks: () => getBuildTasks(false, false),
+    /* taskProvidertaskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
+        provideTasks: () => getBuildTasks(false),
         resolveTask(task: vscode.Task): vscode.Task | undefined {
             // Currently cannot implement because VS Code does not call this. Can implement custom output file directory when enabled.
             return undefined;
         }
-    });
+    });*/
+
+    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, new CppBuildTaskProvider());
+
     vscode.tasks.onDidStartTask(event => {
         if (event.execution.task.source === taskSourceStr) {
             telemetry.logLanguageServerEvent('buildTaskStarted');

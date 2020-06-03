@@ -17,7 +17,7 @@ import * as assert from 'assert';
 import * as https from 'https';
 import * as tmp from 'tmp';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
-import { getBuildTasks } from './LanguageServer/extension';
+import { CppBuildTaskProvider } from './LanguageServer/cppbuildTaskProvider';
 import { OtherSettings } from './LanguageServer/settings';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
@@ -97,6 +97,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     }
 
     const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
+    const buildTasks: vscode.Task[] = await new CppBuildTaskProvider().provideTasks();
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
     if (!selectedTask) {
