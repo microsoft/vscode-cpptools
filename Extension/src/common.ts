@@ -96,7 +96,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         return;
     }
 
-    const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
+    // const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
     const buildTasks: vscode.Task[] = await new CppBuildTaskProvider().provideTasks();
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
