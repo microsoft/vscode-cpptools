@@ -47,7 +47,8 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 let buildInfoCache: BuildInfo | undefined;
-const taskSourceStr: string = "shell";
+const taskTypeStr: string = "shell";
+const taskSourceStr: string = "C/C++";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 let codeActionProvider: vscode.Disposable;
@@ -171,8 +172,8 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    taskProvider = vscode.tasks.registerTaskProvider(taskSourceStr, {
-        provideTasks: () => getBuildTasks(false),
+    taskProvider = vscode.tasks.registerTaskProvider(taskTypeStr, {
+        provideTasks: () => getBuildTasks(false, false),
         resolveTask(task: vscode.Task): vscode.Task | undefined {
             // Currently cannot implement because VS Code does not call this. Can implement custom output file directory when enabled.
             return undefined;
@@ -243,7 +244,7 @@ export interface BuildTaskDefinition extends vscode.TaskDefinition {
 /**
  * Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
  */
-export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode.Task[]> {
+export async function getBuildTasks(returnCompilerPath: boolean, appendSourceToName: boolean): Promise<vscode.Task[]> {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return [];
@@ -345,20 +346,21 @@ export async function getBuildTasks(returnCompilerPath: boolean): Promise<vscode
     let createTask: (compilerPath: string, compilerArgs?: string []) => vscode.Task = (compilerPath: string, compilerArgs?: string []) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
-        const taskName: string = compilerPathBase + " build active file";
+        const compilerPathDir: string = path.dirname(compilerPath);
+        const taskName: string = (appendSourceToName ? taskSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
-        const cwd: string = isCl ? "" : path.dirname(compilerPath);
+        const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(compilerPathDir) ? compilerPathDir : "${workspaceFolder}";
         let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
         if (compilerArgs && compilerArgs.length > 0) {
             args = args.concat(compilerArgs);
         }
 
         let kind: vscode.TaskDefinition = {
-            type: 'shell',
+            type: taskTypeStr,
             label: taskName,
             command: isCl ? compilerPathBase : compilerPath,
             args: args,
-            options: isCl ? undefined : {"cwd": cwd}
+            options: { "cwd": cwd }
         };
 
         if (returnCompilerPath) {

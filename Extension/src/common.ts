@@ -31,6 +31,9 @@ export type Mutable<T> = {
     -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
 };
 
+// Platform-specific environment variable delimiter
+export const envDelimiter: string = (process.platform === 'win32') ? ";" : ":";
+
 export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext | undefined;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -93,7 +96,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         return;
     }
 
-    const buildTasks: vscode.Task[] = await getBuildTasks(false);
+    const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
     if (!selectedTask) {
@@ -104,7 +107,12 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     let selectedTask2: vscode.Task = selectedTask;
     if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-        rawTasksJson.tasks.push(selectedTask2.definition);
+        let task: any = {
+            ...selectedTask2.definition,
+            problemMatcher: selectedTask2.problemMatchers,
+            group: { kind: "build", "isDefault": true }
+        };
+        rawTasksJson.tasks.push(task);
     }
 
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
@@ -355,7 +363,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
-                            newValue = v.join(";");
+                            newValue = v.join(envDelimiter);
                         }
                         if (newValue === undefined) {
                             newValue = process.env[name];
