@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.28.3: June 9, 2020
+### Enhancements
+* Update version of vscode-cpptools API to 4.0.1 [PR #5624](https://github.com/microsoft/vscode-cpptools/pull/5624)
+
 ## Version 0.28.2: June 1, 2020
 ### Regression Bug Fixes
 * Fix string arrays in `env` not being joined properly. [#5509](https://github.com/microsoft/vscode-cpptools/issues/5509)
