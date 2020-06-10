@@ -7,8 +7,7 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { BuildTaskDefinition } from '../LanguageServer/extension';
-import { CppBuildTaskProvider } from '../LanguageServer/cppbuildTaskProvider';
+import { CppBuildTaskProvider, CppBuildTaskDefinition} from '../LanguageServer/cppbuildTaskProvider';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
@@ -106,8 +105,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        // let buildTasks: vscode.Task[] = await getBuildTasks(true, true);
-        let buildTasks: vscode.Task[] = await new CppBuildTaskProvider().provideTasks();
+        let buildTasks: vscode.Task[] = await new CppBuildTaskProvider().getTasks(true, true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
@@ -135,7 +133,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
-            const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
+            const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
             const compilerName: string = path.basename(definition.compilerPath);
 
             let newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties

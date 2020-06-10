@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.43.0"
+    "vscode": "^1.44.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -43,6 +43,32 @@
   ],
   "main": "./dist/main",
   "contributes": {
+    "taskDefinitions": [
+			{
+				"type": "cppbuild",
+				"required": [
+					"command"
+				],
+				"properties": {
+          "label": {
+						"type": "string",
+						"description": "Task's name."
+					},
+					"command": {
+						"type": "string",
+						"description": "The compiler path."
+					},
+					"flags": {
+						"type": "array",
+						"description": "Additional build flags."
+          },
+          "options": {
+						"type": "object",
+						"description": "Current working directory."
+					}
+				}
+			}
+		],
     "views": {
       "references-view": [
         {

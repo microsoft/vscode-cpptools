@@ -47,9 +47,6 @@ let realActivationOccurred: boolean = false;
 let tempCommands: vscode.Disposable[] = [];
 let activatedPreviously: PersistentWorkspaceState<boolean>;
 let buildInfoCache: BuildInfo | undefined;
-// const taskTypeStr: string = "shell";
-export const taskSourceStr: string = "C/C++";
-// export const taskSourceStr: string = "shell";
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 let codeActionProvider: vscode.Disposable;
@@ -173,18 +170,10 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    /* taskProvidertaskProvider = vscode.tasks.registerTaskProvider(taskTypeStr, {
-        provideTasks: () => getBuildTasks(false, false),
-        resolveTask(task: vscode.Task): vscode.Task | undefined {
-            // Currently cannot implement because VS Code does not call this. Can implement custom output file directory when enabled.
-            return undefined;
-        }
-    });*/
-
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, new CppBuildTaskProvider());
 
     vscode.tasks.onDidStartTask(event => {
-        if (event.execution.task.source === taskSourceStr) {
+        if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
     });
@@ -239,10 +228,6 @@ export function activate(activationEventOccurred: boolean): void {
             }
         }
     }
-}
-
-export interface BuildTaskDefinition extends vscode.TaskDefinition {
-    compilerPath: string;
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {

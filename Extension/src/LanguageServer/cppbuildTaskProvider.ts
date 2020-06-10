@@ -10,9 +10,11 @@ import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
 import * as ext from './extension';
+import { exec } from "child_process";
 
-interface CppBuildTaskDefinition extends vscode.TaskDefinition {
-    type: string; // shell
+
+export interface CppBuildTaskDefinition extends vscode.TaskDefinition {
+    type: string;
     label: string;
     command: string;
     args: string[];
@@ -21,12 +23,13 @@ interface CppBuildTaskDefinition extends vscode.TaskDefinition {
 
 export class CppBuildTaskProvider implements vscode.TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
+    static CppBuildSourceStr: string = "C/C++";
     private tasks: vscode.Task[] | undefined;
 
     constructor() {}
 
     public async provideTasks(): Promise<vscode.Task[]> {
-        return this.getTasks();
+        return this.getTasks(false, false);
     }
 
     public resolveTask(_task: vscode.Task): vscode.Task | undefined {
@@ -34,13 +37,13 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         const command: string = _task.definition.command;
         if (command) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
-            return this.getTask(definition.command, definition.args ? definition.args : [], definition);
+            return this.getTask(definition.command, false, false, definition.args ? definition.args : [], definition);
         }
         return undefined;
     }
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
-    public async getTasks(): Promise<vscode.Task[]> {
+    public async getTasks(returnCompilerPath: boolean, appendSourceToName: boolean): Promise<vscode.Task[]> {
         this.tasks = [];
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor) {
@@ -123,22 +126,22 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
-            this.tasks  = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, undefined));
+            this.tasks  = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, returnCompilerPath, appendSourceToName, undefined));
         }
 
         // Task for user compiler path setting
         if (userCompilerPath) {
-            this.tasks.push(this.getTask(userCompilerPath, userCompilerPathAndArgs?.additionalArgs));
+            this.tasks.push(this.getTask(userCompilerPath, returnCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
         }
 
         return this.tasks;
     }
 
-    private getTask: (compilerPath: string, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => {
+    private getTask: (compilerPath: string, returnCompilerPath: boolean, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, returnCompilerPath: boolean, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => {
 
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
-        const taskName: string = compilerPathBase + " build and debug active file";
+        const taskName: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
         const isWindows: boolean = os.platform() === 'win32';
         const cwd: string = isCl ? "" : path.dirname(compilerPath);
@@ -147,20 +150,23 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             args = args.concat(compilerArgs);
         }
 
-        let kind: CppBuildTaskDefinition = {
-            type: CppBuildTaskProvider.CppBuildScriptType, // shell
-            label: taskName,
-            command: isCl ? compilerPathBase : compilerPath,
-            args: args,
-            options: isCl ? undefined : {"cwd": cwd}
-        };
+        if (definition === undefined) {
+            definition = {
+                type: CppBuildTaskProvider.CppBuildScriptType,
+                label: taskName,
+                command: isCl ? compilerPathBase : compilerPath,
+                args: args,
+                options: isCl ? undefined : {"cwd": cwd}
+            };
+        }
 
-        /* if (returnCompilerPath) {
-            kind = kind as CppBuildTaskDefinition;
-            kind.compilerPath = isCl ? compilerPathBase : compilerPath;
-        }*/
+        if (returnCompilerPath) {
+            definition = definition as CppBuildTaskDefinition;
+            definition.compilerPath = isCl ? compilerPathBase : compilerPath;
+        }
 
-        const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
+        // const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
+        const command: string = compilerPath + args.join(" ");
         let activeClient: Client = ext.getActiveClient();
         let uri: vscode.Uri | undefined = activeClient.RootUri;
         if (!uri) {
@@ -170,12 +176,67 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (!target) {
             throw new Error("No target WorkspaceFolder found in getBuildTasks()");
         }
-        let task: vscode.Task = new vscode.Task(kind, target, taskName, ext.taskSourceStr, command, isCl ? '$msCompile' : '$gcc');
-        task.definition = kind; // The constructor for vscode.Task will consume the definition. Reset it by reassigning.
+
+        let task: vscode.Task =  new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
+            new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> =>
+            // When the task is executed, this callback will run. Here, we setup for running the task.
+			 new CustomBuildTaskTerminal(command)
+            ), isCl ? '$msCompile' : '$gcc');
+
+        /* let task: vscode.Task = new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
+            command, isCl ? '$msCompile' : '$gcc');*/
         task.group = vscode.TaskGroup.Build;
 
         return task;
     };
 }
 
+class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
+    private writeEmitter  = new vscode.EventEmitter<string>();
+    // eslint-disable-next-line no-invalid-this
+    onDidWrite: vscode.Event<string> = this.writeEmitter.event;
+    private closeEmitter = new vscode.EventEmitter<void>();
+    // eslint-disable-next-line no-invalid-this
+    onDidClose?: vscode.Event<void> = this.closeEmitter.event;
 
+    private fileWatcher: vscode.FileSystemWatcher | undefined;
+
+    private shellCommand: string;
+
+    constructor(command: string) {
+        this.shellCommand = command;
+    }
+
+
+    open(initialDimensions: vscode.TerminalDimensions | undefined): void {
+        telemetry.logLanguageServerEvent('cppBuildTaskStarted');
+        // At this point we can start using the terminal.
+        this.writeEmitter.fire('Starting build...\r\n');
+        this.doBuild();
+    }
+
+    close(): void {
+        // The terminal has been closed. Shutdown the build.
+        if (this.fileWatcher) {
+            this.fileWatcher.dispose();
+        }
+    }
+
+    private async doBuild(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            // build
+            exec(this.shellCommand, (_error, stdout, stderr) => {
+                this.writeEmitter.fire(stdout);
+                this.writeEmitter.fire(stderr);
+                if (stderr) {
+                    telemetry.logLanguageServerEvent('cppBuildTaskError');
+                    this.writeEmitter.fire('Build finished with error.\r\n');
+                } else {
+                    this.writeEmitter.fire('Build finished successfully.\r\n');
+                }
+            });
+            this.closeEmitter.fire();
+        });
+
+    }
+}
