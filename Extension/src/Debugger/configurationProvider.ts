@@ -57,7 +57,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            let menuItem: MenuItem = {label: config.name, configuration: config};
+            const menuItem: MenuItem = {label: config.name, configuration: config};
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -132,11 +132,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
-        let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
+        const configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
             const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
             const compilerName: string = path.basename(definition.compilerPath);
 
-            let newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
+            const newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
@@ -256,7 +256,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
                         .then(value => {
                             if (value === moreInfoButton) {
-                                let helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
+                                const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
                                 vscode.env.openExternal(vscode.Uri.parse(helpURL));
                             }
                         });
@@ -272,7 +272,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private getLLDBFrameworkPath(): string | undefined {
         const LLDBFramework: string = "LLDB.framework";
         // Note: When adding more search paths, make sure the shipped lldb-mi also has it. See Build/lldb-mi.yml and 'install_name_tool' commands.
-        let searchPaths: string[] = [
+        const searchPaths: string[] = [
             "/Library/Developer/CommandLineTools/Library/PrivateFrameworks", // XCode CLI
             "/Applications/Xcode.app/Contents/SharedFrameworks" // App Store XCode
         ];
@@ -326,7 +326,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     }
 
     private resolveSourceFileMapVariables(config: vscode.DebugConfiguration): void {
-        let messages: string[] = [];
+        const messages: string[] = [];
         if (config.sourceFileMap) {
             for (const sourceFileMapSource of Object.keys(config.sourceFileMap)) {
                 let message: string = "";
@@ -370,9 +370,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
     private static async showFileWarningAsync(message: string, fileName: string): Promise<void> {
         const openItem: vscode.MessageItem = { title: localize("open.envfile", "Open {0}", "envFile") };
-        let result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(message, openItem);
+        const result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(message, openItem);
         if (result && result.title === openItem.title) {
-            let doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
+            const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
             if (doc) {
                 vscode.window.showTextDocument(doc);
             }
@@ -416,14 +416,14 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
     configurations: IConfiguration[] = [];
 
     public getInitialConfigurations(debuggerType: DebuggerType): any {
-        let configurationSnippet: IConfigurationSnippet[] = [];
+        const configurationSnippet: IConfigurationSnippet[] = [];
 
         // Only launch configurations are initial configurations
         this.configurations.forEach(configuration => {
             configurationSnippet.push(configuration.GetLaunchConfiguration());
         });
 
-        let initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
+        const initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
             .map(snippet => JSON.parse(snippet.bodyText));
 
         // If configurations is empty, then it will only have an empty configurations array in launch.json. Users can still add snippets.
@@ -431,7 +431,7 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
     }
 
     public getConfigurationSnippets(): vscode.CompletionItem[] {
-        let completionItems: vscode.CompletionItem[] = [];
+        const completionItems: vscode.CompletionItem[] = [];
 
         this.configurations.forEach(configuration => {
             completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetLaunchConfiguration()));
@@ -500,7 +500,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
 }
 
 function convertConfigurationSnippetToCompetionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
-    let item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
 
     item.insertText = snippet.bodyText;
 
