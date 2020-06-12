@@ -10,8 +10,12 @@ import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
 import * as ext from './extension';
+import * as fs from 'fs';
+import * as nls from 'vscode-nls';
 import { exec } from "child_process";
 
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
 
 export interface CppBuildTaskDefinition extends vscode.TaskDefinition {
     type: string;
@@ -150,11 +154,18 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             args = args.concat(compilerArgs);
         }
 
+        // Double-quote the command if it is not already double-quoted.
+        let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
+        if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"")) {
+            resolvedcompilerPath = "\"" + resolvedcompilerPath + "\"";
+        }
+        const command: string = resolvedcompilerPath + " " + args.join(" ");
+
         if (definition === undefined) {
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskName,
-                command: isCl ? compilerPathBase : compilerPath,
+                command: command,
                 args: args,
                 options: isCl ? undefined : {"cwd": cwd}
             };
@@ -165,8 +176,6 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             definition.compilerPath = isCl ? compilerPathBase : compilerPath;
         }
 
-        // const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
-        const command: string = compilerPath + args.join(" ");
         let activeClient: Client = ext.getActiveClient();
         let uri: vscode.Uri | undefined = activeClient.RootUri;
         if (!uri) {
@@ -183,8 +192,9 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 			 new CustomBuildTaskTerminal(command)
             ), isCl ? '$msCompile' : '$gcc');
 
-        /* let task: vscode.Task = new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
-            command, isCl ? '$msCompile' : '$gcc');*/
+        /* const normalcommand: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
+        let task: vscode.Task = new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
+            normalcommand, isCl ? '$msCompile' : '$gcc');*/
         task.group = vscode.TaskGroup.Build;
 
         return task;
@@ -225,8 +235,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     private async doBuild(): Promise<void> {
         return new Promise<void>((resolve) => {
             // Do build.
-            const activeCommand: string = this.resolveCommand(this.command);
-            exec("echo \"...\"");
+            const activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
             exec(activeCommand, (_error, stdout, stderr) => {
                 this.writeEmitter.fire(stdout);
                 this.writeEmitter.fire(stderr);
@@ -237,30 +246,58 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                     this.writeEmitter.fire("Build finished successfully.\r\n");
                 }
             });
+            this.writeEmitter.fire("\r\n");
             // Set timeout to give enough time to the writeEmitter to print all messages.
-            setTimeout(() => {resolve(); }, 1000);
-            this.closeEmitter.fire();
+            setTimeout(() => {this.closeEmitter.fire(); }, 3000);
         });
-
     }
 
-    private resolveCommand(command: string): string {
+    private get AdditionalEnvironment(): { [key: string]: string | string[] } | undefined {
 
-        let result: string = "";
-        // first resolve variables
-        result = util.resolveVariables(command);
-        let file: string | undefined = vscode.window.activeTextEditor?.document.uri.fsPath;
-        if (file) {
-            if (result.includes("${file}")) {
-                result = result.replace("${file}", file);
-            }
-            if (result.includes("${fileDirname}")) {
-                result = result.replace("${fileDirname}", path.dirname(file));
-            }
-            if (result.includes("${fileBasenameNoExtension}")) {
-                result = result.replace("${fileBasenameNoExtension}", path.parse(file).name);
-            }
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!editor) {
+            return undefined;
         }
-        return result;
+        const fileDir: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+        if (!fileDir) {
+            return undefined;
+        }
+        const file: string = editor.document.fileName;
+        return { "file": file, "fileDirname": fileDir.uri.fsPath, "fileBasenameNoExtension": path.parse(file).name};
     }
+}
+
+export function getRawTasksJson(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+        const path: string | undefined = getTasksJsonPath();
+        if (!path) {
+            return resolve({});
+        }
+        fs.exists(path, exists => {
+            if (!exists) {
+                return resolve({});
+            }
+            let fileContents: string = fs.readFileSync(path).toString();
+            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
+            let rawTasks: any = {};
+            try {
+                rawTasks = JSON.parse(fileContents);
+            } catch (error) {
+                return reject(new Error(failedToParseTasksJson));
+            }
+            resolve(rawTasks);
+        });
+    });
+}
+
+export function getTasksJsonPath(): string | undefined {
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!editor) {
+        return undefined;
+    }
+    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    if (!folder) {
+        return undefined;
+    }
+    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
 }

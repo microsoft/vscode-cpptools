@@ -9,6 +9,7 @@ import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachT
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
+import { failedToParseTasksJson } from '../LanguageServer/cppbuildTaskProvider';
 import * as util from '../common';
 import * as Telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
@@ -91,8 +92,8 @@ export function initialize(context: vscode.ExtensionContext): void {
                         await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                         Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
                     } catch (e) {
-                        if (e && e.message === util.failedToParseTasksJson) {
-                            vscode.window.showErrorMessage(util.failedToParseTasksJson);
+                        if (e && e.message === failedToParseTasksJson) {
+                            vscode.window.showErrorMessage(failedToParseTasksJson);
                         }
                         return Promise.resolve();
                     }

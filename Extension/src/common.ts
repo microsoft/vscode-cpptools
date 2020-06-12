@@ -17,7 +17,7 @@ import * as assert from 'assert';
 import * as https from 'https';
 import * as tmp from 'tmp';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
-import { CppBuildTaskProvider } from './LanguageServer/cppbuildTaskProvider';
+import { getRawTasksJson, getTasksJsonPath, CppBuildTaskProvider } from './LanguageServer/cppbuildTaskProvider';
 import { OtherSettings } from './LanguageServer/settings';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
@@ -44,8 +44,6 @@ export function setExtensionPath(path: string): void {
     extensionPath = path;
 }
 
-export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
-
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
@@ -60,28 +58,6 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
-export function getRawTasksJson(): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-        const path: string | undefined = getTasksJsonPath();
-        if (!path) {
-            return resolve({});
-        }
-        fs.exists(path, exists => {
-            if (!exists) {
-                return resolve({});
-            }
-            let fileContents: string = fs.readFileSync(path).toString();
-            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
-            let rawTasks: any = {};
-            try {
-                rawTasks = JSON.parse(fileContents);
-            } catch (error) {
-                return reject(new Error(failedToParseTasksJson));
-            }
-            resolve(rawTasks);
-        });
-    });
-}
 
 export async function ensureBuildTaskExists(taskName: string): Promise<void> {
     let rawTasksJson: any = await getRawTasksJson();
@@ -151,18 +127,6 @@ export function getExtensionFilePath(extensionfile: string): string {
 
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
-}
-
-export function getTasksJsonPath(): string | undefined {
-    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!editor) {
-        return undefined;
-    }
-    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
-    if (!folder) {
-        return undefined;
-    }
-    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
 }
 
 export function getVcpkgPathDescriptorFile(): string {
@@ -387,26 +351,6 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (folder) {
                             newValue = folder.uri.fsPath;
                         }
-                    }
-                    break;
-                }
-                case "file": {
-                    newValue = vscode.window.activeTextEditor?.document.uri.toString();
-                    break;
-                }
-                case "fileDirname": {
-                    if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
-                        let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-                        if (folder) {
-                            newValue = folder.uri.fsPath;
-                        }
-                    }
-                    break;
-                }
-                case "fileBasenameNoExtension": {
-                    let fileBaseName: string | undefined = vscode.window.activeTextEditor?.document.uri.toString();
-                    if (fileBaseName) {
-                        newValue = path.parse(fileBaseName).name;
                     }
                     break;
                 }
