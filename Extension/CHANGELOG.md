@@ -1,5 +1,21 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.28.3: June 9, 2020
+### Enhancements
+* Update version of vscode-cpptools API to 4.0.1 [PR #5624](https://github.com/microsoft/vscode-cpptools/pull/5624)
+
+## Version 0.28.2: June 1, 2020
+### Regression Bug Fixes
+* Fix string arrays in `env` not being joined properly. [#5509](https://github.com/microsoft/vscode-cpptools/issues/5509)
+  * Krishna Ersson (@kersson) [PR #5510](https://github.com/microsoft/vscode-cpptools/pull/5510)
+* Fix `shell` being used as the C/C++ build task source instead of `C/C++`. [vscode-docs#3724](https://github.com/microsoft/vscode-docs/issues/3724)
+
+### Other Bug Fixes
+* Fix `problemMatcher` not being added to C/C++ build tasks. [#3295](https://github.com/microsoft/vscode-cpptools/issues/3295)
+* Fix `/usr/bin` being used as the default `cwd` (instead of `${workspaceFolder}`) for C/C++ build tasks. [#4761](https://github.com/microsoft/vscode-cpptools/issues/4761)
+* Fix processing of quoted arguments with spaces in `compilerPath`. [PR #5513](https://github.com/microsoft/vscode-cpptools/pull/5513)
+* Fix inconsistent task `label` and `preLaunchTask` being used for C/C++ build tasks. [#5561](https://github.com/microsoft/vscode-cpptools/issues/5561)
+
 ## Version 0.28.1: May 20, 2020
 ### Bug Fixes
 * Fix errors not appearing after switching between a WSL and non-WSL config on Windows. [#5474](https://github.com/microsoft/vscode-cpptools/issues/5474)

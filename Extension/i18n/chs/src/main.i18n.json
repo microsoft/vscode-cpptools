@@ -6,7 +6,7 @@
 {
 	"architecture.not.supported": "体系结构 {0} 不受支持。",
 	"apline.containers.not.supported": "Alpine 容器不受支持。",
-	"native.binaries.not.supported": "扩展的此 {0} 版本与你的操作系统不兼容。请下载并安装扩展的“{1}”版本。",
+	"native.binaries.not.supported": "扩展的此 {0} 版本与你的 OS 不兼容。请下载并安装扩展的“{1}”版本。",
 	"download.button": "转到下载页",
 	"initialization.failed": "C/C++ 扩展安装失败。有关详细信息，请查看输出窗口。",
 	"updating.dependencies": "正在更新 C/C++ 依赖项...",

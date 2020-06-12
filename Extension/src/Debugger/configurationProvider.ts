@@ -105,7 +105,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await getBuildTasks(true);
+        let buildTasks: vscode.Task[] = await getBuildTasks(true, true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
@@ -119,11 +119,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         // Filter out build tasks that don't match the currently selected debug configuration type.
         buildTasks = buildTasks.filter((task: vscode.Task) => {
             if (defaultConfig.name.startsWith("(Windows) ")) {
-                if (task.name.startsWith("cl.exe")) {
+                if (task.name.startsWith("C/C++: cl.exe")) {
                     return true;
                 }
             } else {
-                if (!task.name.startsWith("cl.exe")) {
+                if (!task.name.startsWith("C/C++: cl.exe")) {
                     return true;
                 }
             }
