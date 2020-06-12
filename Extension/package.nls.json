@@ -60,6 +60,7 @@
     "c_cpp.configuration.default.browse.limitSymbolsToIncludedHeaders.description": "The value to use in a configuration if \"browse.limitSymbolsToIncludedHeaders\" is either not specified or set to \"${default}\".",
     "c_cpp.configuration.default.systemIncludePath.description": "The value to use for the system include path. If set, it overrides the system include path acquired via \"compilerPath\" and \"compileCommands\" settings.",
     "c_cpp.configuration.default.enableConfigurationSquiggles.description": "Controls whether the extension will report errors detected in c_cpp_properties.json.",
+    "c_cpp.configuration.default.properties.description": "The value to use in a configuration if \"property\" is not set, or the values to insert if \"${default}\" is present as a key in \"property\".",
     "c_cpp.configuration.updateChannel.description": "Set to \"Insiders\" to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
     "c_cpp.configuration.experimentalFeatures.description": "Controls whether \"experimental\" features are usable.",
     "c_cpp.configuration.suggestSnippets.description": "If true, snippets are provided by the language server.",

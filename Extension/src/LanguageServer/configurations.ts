@@ -124,6 +124,7 @@ export class CppProperties {
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode?: string;
+    private defaultProperties?: { [key: string]: string };
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
@@ -329,6 +330,9 @@ export class CppProperties {
         if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
+        if (isUnset(settings.defaultProperties) || settings.defaultProperties === {}) {
+            configuration.properties = this.defaultProperties;
+        }
     }
 
     private get ExtendedEnvironment(): Environment {
@@ -528,6 +532,25 @@ export class CppProperties {
         return result;
     }
 
+    private resolveDefaultsDictionary(entries: { [key: string] : string }, defaultValue: { [key: string] : string } | undefined, env: Environment): { [key: string] : string } {
+        let result: { [key: string] : string } = {};
+        for (const property in entries) {
+            if (property === "${default}") {
+                if (defaultValue) {
+                    for (const defaultProperty in defaultValue) {
+                        if (!(defaultProperty in entries))
+                        {
+                            result[defaultProperty] = util.resolveVariables(defaultValue[defaultProperty], env);
+                        }
+                    }
+                }
+            } else {
+                result[property] = util.resolveVariables(entries[property], env);
+            }
+        }
+        return result;
+    }
+
     private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] {
         let result: string[] = [];
         if (paths) {
@@ -573,6 +596,16 @@ export class CppProperties {
         return util.resolveVariables(property, env);
     }
 
+    private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
+        if (!property || property === {}) {
+            property = defaultValue;
+        }
+        if (!property || property === {}) {
+            return undefined;
+        }
+        return this.resolveDefaultsDictionary(property, defaultValue, env);
+    }
+
     private updateServerOnFolderSettingsChange(): void {
         if (!this.configurationJson) {
             return;
@@ -593,6 +626,7 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
+            configuration.properties = this.updateConfigurationStringDictionary(configuration.properties, settings.defaultProperties, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
             if (!configuration.browse) {
