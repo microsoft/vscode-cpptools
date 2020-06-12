@@ -143,9 +143,9 @@
                         },
                         "additionalProperties": false
                     },
-                    "properties": {
+                    "customConfigurationVariables": {
                         "type": "object",
-                        "description": "Custom properties that can be queried through the command ${cpptools:activeConfigProperty}.",
+                        "description": "Custom properties that can be queried through the command ${cpptools:activeConfigCustomVariable}.",
                         "patternProperties": {
                             "(^.+$)": {
                                 "type": "string"

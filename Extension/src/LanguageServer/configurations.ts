@@ -67,7 +67,7 @@ export interface Configuration {
     forcedInclude?: string[];
     configurationProvider?: string;
     browse?: Browse;
-    properties?: {[key: string]: string};
+    customConfigurationVariables?: {[key: string]: string};
 }
 
 export interface ConfigurationErrors {
@@ -124,7 +124,7 @@ export class CppProperties {
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode?: string;
-    private defaultProperties?: { [key: string]: string };
+    private defaultCustomConfigurationVariables?: { [key: string]: string };
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
     private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
@@ -330,8 +330,8 @@ export class CppProperties {
         if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
-        if (isUnset(settings.defaultProperties) || settings.defaultProperties === {}) {
-            configuration.properties = this.defaultProperties;
+        if (isUnset(settings.defaultCustomConfigurationVariables) || settings.defaultCustomConfigurationVariables === {}) {
+            configuration.customConfigurationVariables = this.defaultCustomConfigurationVariables;
         }
     }
 
@@ -626,7 +626,7 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
-            configuration.properties = this.updateConfigurationStringDictionary(configuration.properties, settings.defaultProperties, env);
+            configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
             if (!configuration.browse) {
