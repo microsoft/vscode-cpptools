@@ -950,6 +950,13 @@
                     },
                     "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
+                  },
+                  "quoteArgs": {
+                    "exceptions": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.logging.quoteArgs.description%",
+                      "default": true
+                    }
                   }
                 }
               },
@@ -1136,6 +1143,13 @@
                     },
                     "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
+                  },
+                  "quoteArgs": {
+                    "exceptions": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.logging.quoteArgs.description%",
+                      "default": true
+                    }
                   }
                 }
               },
