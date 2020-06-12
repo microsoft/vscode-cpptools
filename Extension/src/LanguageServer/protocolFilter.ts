@@ -9,7 +9,7 @@ import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import * as vscode from 'vscode';
-import { CppSettings } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
@@ -32,22 +32,33 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                 let me: Client = clients.getClientFor(document.uri);
                 if (clients.checkOwnership(me, document)) {
                     me.TrackedDocuments.add(document);
+                    let finishDidOpen = (doc: vscode.TextDocument) => {
+                        me.provideCustomConfiguration(doc.uri, undefined);
+                        me.notifyWhenReady(() => {
+                            sendMessage(doc);
+                            me.onDidOpenTextDocument(doc);
+                            if (editor && editor === vscode.window.activeTextEditor) {
+                                onDidChangeActiveTextEditor(editor);
+                            }
+                        });
+                    };
+                    let languageChanged: boolean = false;
                     if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
                         let cppSettings: CppSettings = new CppSettings();
                         if (cppSettings.autoAddFileAssociations) {
                             const fileName: string = path.basename(document.uri.fsPath);
                             const mappingString: string = fileName + "@" + document.uri.fsPath;
                             me.addFileAssociations(mappingString, false);
+                            me.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                            vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
+                                finishDidOpen(newDoc);
+                            });
+                            languageChanged = true;
                         }
                     }
-                    me.provideCustomConfiguration(document.uri, undefined);
-                    me.notifyWhenReady(() => {
-                        sendMessage(document);
-                        me.onDidOpenTextDocument(document);
-                        if (editor && editor === vscode.window.activeTextEditor) {
-                            onDidChangeActiveTextEditor(editor);
-                        }
-                    });
+                    if (!languageChanged) {
+                        finishDidOpen(document);
+                    }
                 }
             } else {
                 // NO-OP

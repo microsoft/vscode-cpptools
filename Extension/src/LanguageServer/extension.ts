@@ -14,7 +14,7 @@ import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
-import { CppSettings } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -563,6 +563,14 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
                 client.TrackedDocuments.add(document);
+                let finishDidOpen = (doc: vscode.TextDocument) => {
+                    client.provideCustomConfiguration(doc.uri, undefined);
+                    client.notifyWhenReady(() => {
+                        client.takeOwnership(doc);
+                        client.onDidOpenTextDocument(doc);
+                    });
+                };
+                let languageChanged: boolean = false;
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
                     let cppSettings: CppSettings = new CppSettings();
@@ -570,13 +578,16 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                         const fileName: string = path.basename(document.uri.fsPath);
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
                         client.addFileAssociations(mappingString, false);
+                        client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                        vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
+                            finishDidOpen(newDoc);
+                        });
+                        languageChanged = true;
                     }
                 }
-                client.provideCustomConfiguration(document.uri, undefined);
-                client.notifyWhenReady(() => {
-                    client.takeOwnership(document);
-                    client.onDidOpenTextDocument(document);
-                });
+                if (!languageChanged) {
+                    finishDidOpen(document);
+                }
             }
         }
     }
