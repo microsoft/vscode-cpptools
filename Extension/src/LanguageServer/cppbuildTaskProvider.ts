@@ -201,17 +201,17 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
 
     private fileWatcher: vscode.FileSystemWatcher | undefined;
 
-    private shellCommand: string;
+    private command: string;
 
     constructor(command: string) {
-        this.shellCommand = command;
+        this.command = command;
     }
 
 
     open(initialDimensions: vscode.TerminalDimensions | undefined): void {
-        telemetry.logLanguageServerEvent('cppBuildTaskStarted');
+        telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
-        this.writeEmitter.fire('Starting build...\r\n');
+        this.writeEmitter.fire("Starting build...\r\n");
         this.doBuild();
     }
 
@@ -224,19 +224,43 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
 
     private async doBuild(): Promise<void> {
         return new Promise<void>((resolve) => {
-            // build
-            exec(this.shellCommand, (_error, stdout, stderr) => {
+            // Do build.
+            const activeCommand: string = this.resolveCommand(this.command);
+            exec("echo \"...\"");
+            exec(activeCommand, (_error, stdout, stderr) => {
                 this.writeEmitter.fire(stdout);
                 this.writeEmitter.fire(stderr);
-                if (stderr) {
-                    telemetry.logLanguageServerEvent('cppBuildTaskError');
-                    this.writeEmitter.fire('Build finished with error.\r\n');
+                if (_error) {
+                    telemetry.logLanguageServerEvent("cppBuildTaskError");
+                    this.writeEmitter.fire("Build finished with error.\r\n");
                 } else {
-                    this.writeEmitter.fire('Build finished successfully.\r\n');
+                    this.writeEmitter.fire("Build finished successfully.\r\n");
                 }
             });
+            // Set timeout to give enough time to the writeEmitter to print all messages.
+            setTimeout(() => {resolve(); }, 1000);
             this.closeEmitter.fire();
         });
 
+    }
+
+    private resolveCommand(command: string): string {
+
+        let result: string = "";
+        // first resolve variables
+        result = util.resolveVariables(command);
+        let file: string | undefined = vscode.window.activeTextEditor?.document.uri.fsPath;
+        if (file) {
+            if (result.includes("${file}")) {
+                result = result.replace("${file}", file);
+            }
+            if (result.includes("${fileDirname}")) {
+                result = result.replace("${fileDirname}", path.dirname(file));
+            }
+            if (result.includes("${fileBasenameNoExtension}")) {
+                result = result.replace("${fileBasenameNoExtension}", path.parse(file).name);
+            }
+        }
+        return result;
     }
 }

@@ -344,7 +344,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     }
 
     // Replace environment and configuration variables.
-    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder)(\.|:))?(.*?)\}/g;
+    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension)(\.|:))?(.*?)\}/g;
     let ret: string = input;
     let cycleCache: Set<string> = new Set();
     while (!cycleCache.has(ret)) {
@@ -387,6 +387,26 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (folder) {
                             newValue = folder.uri.fsPath;
                         }
+                    }
+                    break;
+                }
+                case "file": {
+                    newValue = vscode.window.activeTextEditor?.document.uri.toString();
+                    break;
+                }
+                case "fileDirname": {
+                    if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
+                        let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+                        if (folder) {
+                            newValue = folder.uri.fsPath;
+                        }
+                    }
+                    break;
+                }
+                case "fileBasenameNoExtension": {
+                    let fileBaseName: string | undefined = vscode.window.activeTextEditor?.document.uri.toString();
+                    if (fileBaseName) {
+                        newValue = path.parse(fileBaseName).name;
                     }
                     break;
                 }
