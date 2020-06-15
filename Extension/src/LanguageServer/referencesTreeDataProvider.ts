@@ -49,7 +49,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                     throw new Error("Undefined referenceType in getTreeItem()");
                 }
                 const label: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled, true);
-                let resultRefType: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Expanded);
+                const resultRefType: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Expanded);
                 return resultRefType;
 
             case NodeType.file:
@@ -57,7 +57,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 if (element.fileUri === undefined) {
                     throw new Error("Undefined fileUri in getTreeItem()");
                 }
-                let resultFile: vscode.TreeItem = new vscode.TreeItem(element.fileUri);
+                const resultFile: vscode.TreeItem = new vscode.TreeItem(element.fileUri);
                 resultFile.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                 resultFile.iconPath = vscode.ThemeIcon.File;
                 resultFile.description = true;
@@ -68,7 +68,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                         command: 'C_Cpp.ShowReferenceItem',
                         arguments: [element]
                     };
-                    let tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled);
+                    const tag: string = getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled);
                     resultFile.tooltip = `[${tag}]\n${element.filename}`;
                     resultFile.collapsibleState = vscode.TreeItemCollapsibleState.None;
                 }
@@ -82,9 +82,9 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
                 if (element.referenceType === undefined) {
                     throw new Error("Undefined referenceType in getTreeItem()");
                 }
-                let resultRef: vscode.TreeItem = new vscode.TreeItem(element.referenceText, vscode.TreeItemCollapsibleState.None);
+                const resultRef: vscode.TreeItem = new vscode.TreeItem(element.referenceText, vscode.TreeItemCollapsibleState.None);
                 resultRef.iconPath = getReferenceItemIconPath(element.referenceType, this.referencesModel.isCanceled);
-                let tag: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled);
+                const tag: string = getReferenceTagString(element.referenceType, this.referencesModel.isCanceled);
                 resultRef.tooltip = `[${tag}]\n${element.referenceText}`;
 
                 resultRef.command = {
