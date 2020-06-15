@@ -917,6 +917,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
@@ -1177,6 +1178,10 @@ function onSetActiveConfigName(configurationName: string): Thenable<void> {
 
 function onGetActiveConfigName(): Thenable<string | undefined> {
     return clients.ActiveClient.getCurrentConfigName();
+}
+
+function onGetActiveConfigCustomVariable(variableName: string): Thenable<string> {
+    return clients.ActiveClient.getCurrentConfigCustomVariable(variableName);
 }
 
 function onLogDiagnostics(): void {
