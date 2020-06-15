@@ -108,7 +108,7 @@ export class CustomConfigurationProviderCollection {
     private providers: Map<string, CustomProviderWrapper> = new Map<string, CustomProviderWrapper>();
 
     private logProblems(provider: CustomConfigurationProvider, version: Version): void {
-        let missing: string[] = [];
+        const missing: string[] = [];
         if (!provider.name) {
             missing.push("'name'");
         }
@@ -162,14 +162,14 @@ export class CustomConfigurationProviderCollection {
             return false;
         }
 
-        let wrapper: CustomProviderWrapper = new CustomProviderWrapper(provider, version);
+        const wrapper: CustomProviderWrapper = new CustomProviderWrapper(provider, version);
         if (!wrapper.isValid) {
             this.logProblems(provider, version);
             return false;
         }
 
         let exists: boolean = false;
-        let existing: CustomProviderWrapper | undefined = this.providers.get(wrapper.extensionId);
+        const existing: CustomProviderWrapper | undefined = this.providers.get(wrapper.extensionId);
         if (existing) {
             exists = (existing.version === Version.v0 && wrapper.version === Version.v0);
         }
@@ -208,7 +208,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public remove(provider: CustomConfigurationProvider): void {
-        let id: string = this.getId(provider);
+        const id: string = this.getId(provider);
         if (this.providers.has(id)) {
             this.providers.delete(id);
         } else {
@@ -220,7 +220,7 @@ export class CustomConfigurationProviderCollection {
         if (!providerId) {
             return undefined;
         }
-        let found: CustomConfigurationProvider1[] = [];
+        const found: CustomConfigurationProvider1[] = [];
         let noUpdate: boolean = false;
         this.forEach(provider => {
             if (provider.extensionId === providerId) {
@@ -241,7 +241,7 @@ export class CustomConfigurationProviderCollection {
     }
 }
 
-let providerCollection: CustomConfigurationProviderCollection = new CustomConfigurationProviderCollection();
+const providerCollection: CustomConfigurationProviderCollection = new CustomConfigurationProviderCollection();
 
 export function getCustomConfigProviders(): CustomConfigurationProviderCollection {
     return providerCollection;
