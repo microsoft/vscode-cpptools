@@ -198,8 +198,8 @@ suite("Common Utility validation", () => {
         });
 
         test("escapeForSquiggles:", () => {
-            let testEscapeForSquigglesScenario: any = (input: string, expectedOutput: string) => {
-                let result: string = escapeForSquiggles(input);
+            const testEscapeForSquigglesScenario: any = (input: string, expectedOutput: string) => {
+                const result: string = escapeForSquiggles(input);
                 if (result !== expectedOutput) {
                     throw new Error(`escapeForSquiggles failure: for \"${input}\", \"${result}\" !== \"${expectedOutput}\"`);
                 }

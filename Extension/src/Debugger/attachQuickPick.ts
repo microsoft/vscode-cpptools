@@ -33,7 +33,7 @@ export interface AttachItem extends vscode.QuickPickItem {
 export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Promise<string | undefined> {
     return getAttachItems().then(processEntries =>
         new Promise<string>((resolve, reject) => {
-            let quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();
+            const quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();
             quickPick.title = localize("attach.to.process", "Attach to process");
             quickPick.canSelectMany = false;
             quickPick.matchOnDescription = true;
@@ -42,7 +42,7 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
             quickPick.items = processEntries;
             quickPick.buttons = [new RefreshButton()];
 
-            let disposables: vscode.Disposable[] = [];
+            const disposables: vscode.Disposable[] = [];
 
             quickPick.onDidTriggerButton(button => {
                 getAttachItems().then(processEntries => quickPick.items = processEntries);
@@ -53,7 +53,7 @@ export function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Prom
                     reject(new Error(localize("process.not.selected", "Process not selected.")));
                 }
 
-                let selectedId: string | undefined = quickPick.selectedItems[0].id;
+                const selectedId: string | undefined = quickPick.selectedItems[0].id;
 
                 disposables.forEach(item => item.dispose());
                 quickPick.dispose();
