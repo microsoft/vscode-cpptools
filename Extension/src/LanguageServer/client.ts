@@ -500,6 +500,7 @@ export interface Client {
     toggleReferenceResultsView(): void;
     setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string | undefined>;
+    getCurrentConfigCustomVariable(variableName: string): Thenable<string>;
     getVcpkgInstalled(): Thenable<boolean>;
     getVcpkgEnabled(): Thenable<boolean>;
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
@@ -1778,6 +1779,10 @@ export class DefaultClient implements Client {
         return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration?.name));
     }
 
+    public getCurrentConfigCustomVariable(variableName: string): Thenable<string> {
+        return this.queueTask(() => Promise.resolve(this.configuration.CurrentConfiguration?.customConfigurationVariables?.[variableName] || ''));
+    }
+
     public setCurrentConfigName(configurationName: string): Thenable<void> {
         return this.queueTask(() => new Promise((resolve, reject) => {
             let configurations: configs.Configuration[] = this.configuration.Configurations || [];
@@ -2658,6 +2663,7 @@ class NullClient implements Client {
     toggleReferenceResultsView(): void {}
     setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
+    getCurrentConfigCustomVariable(variableName: string): Thenable<string> { return Promise.resolve(""); }
     getVcpkgInstalled(): Thenable<boolean> { return Promise.resolve(false); }
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
