@@ -532,14 +532,13 @@ export class CppProperties {
         return result;
     }
 
-    private resolveDefaultsDictionary(entries: { [key: string] : string }, defaultValue: { [key: string] : string } | undefined, env: Environment): { [key: string] : string } {
-        let result: { [key: string] : string } = {};
+    private resolveDefaultsDictionary(entries: { [key: string]: string }, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } {
+        const result: { [key: string]: string } = {};
         for (const property in entries) {
             if (property === "${default}") {
                 if (defaultValue) {
                     for (const defaultProperty in defaultValue) {
-                        if (!(defaultProperty in entries))
-                        {
+                        if (!(defaultProperty in entries)) {
                             result[defaultProperty] = util.resolveVariables(defaultValue[defaultProperty], env);
                         }
                     }
