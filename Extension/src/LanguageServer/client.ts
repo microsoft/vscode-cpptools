@@ -607,9 +607,9 @@ class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
         return new Promise<vscode.SemanticTokens>((resolve, reject) => {
             this.client.notifyWhenReady(() => {
-                let uriString: string = document.uri.toString();
-                let id: number = ++abortRequestId;
-                let params: GetSemanticTokensParams = {
+                const uriString: string = document.uri.toString();
+                const id: number = ++abortRequestId;
+                const params: GetSemanticTokensParams = {
                     id: id,
                     uri: uriString
                 };
@@ -621,7 +621,7 @@ class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
                             if (tokensResult.fileVersion !== this.client.openFileVersions.get(uriString)) {
                                 reject();
                             } else {
-                                let builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
+                                const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
                                 tokensResult.tokens.forEach((token) => {
                                     builder.push(token.line, token.character, token.length, token.type, token.modifiers);
                                 });
@@ -1093,8 +1093,8 @@ export class DefaultClient implements Client {
                     }
 
                     // Semantic token types are identified by indexes in this list of types, in the legend.
-                    let tokenTypesLegend: string[] = [];
-                    for (let e in SemanticTokenTypes) {
+                    const tokenTypesLegend: string[] = [];
+                    for (const e in SemanticTokenTypes) {
                         // An enum is actually a set of mappings from key <=> value.  Enumerate over only the names.
                         // This allow us to represent the constants using an enum, which we can match in native code.
                         if (isNaN(Number(e))) {
@@ -1102,8 +1102,8 @@ export class DefaultClient implements Client {
                         }
                     }
                     // Semantic token modifiers are bit indexes corresponding to the indexes in this list of modifiers in the legend.
-                    let tokenModifiersLegend: string[] = [];
-                    for (let e in SemanticTokenModifiers) {
+                    const tokenModifiersLegend: string[] = [];
+                    for (const e in SemanticTokenModifiers) {
                         if (isNaN(Number(e))) {
                             tokenModifiersLegend.push(e);
                         }
@@ -1398,7 +1398,7 @@ export class DefaultClient implements Client {
                     }
                 }
                 if (changedSettings["enhancedColorization"]) {
-                    let settings: CppSettings = new CppSettings();
+                    const settings: CppSettings = new CppSettings();
                     if (settings.enhancedColorization && this.semanticTokensLegend) {
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
                     } else if (this.semanticTokensProviderDisposable) {
@@ -1414,11 +1414,11 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
-        let settings: CppSettings = new CppSettings(this.RootUri);
+        const settings: CppSettings = new CppSettings(this.RootUri);
         if (settings.dimInactiveRegions) {
             // Apply text decorations to inactive regions
-            for (let e of editors) {
-                let valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(e.document.uri.toString());
+            for (const e of editors) {
+                const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(e.document.uri.toString());
                 if (valuePair) {
                     e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
                 }
@@ -2107,8 +2107,8 @@ export class DefaultClient implements Client {
     }
 
     private updateInactiveRegions(params: InactiveRegionParams): void {
-        let settings: CppSettings = new CppSettings(this.RootUri);
-        let opacity: number | undefined = settings.inactiveRegionOpacity;
+        const settings: CppSettings = new CppSettings(this.RootUri);
+        const opacity: number | undefined = settings.inactiveRegionOpacity;
         if (opacity !== null && opacity !== undefined) {
             let backgroundColor: string | undefined = settings.inactiveRegionBackgroundColor;
             if (backgroundColor === "") {
@@ -2118,20 +2118,20 @@ export class DefaultClient implements Client {
             if (color === "") {
                 color = undefined;
             }
-            let decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
+            const decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
                 opacity: opacity.toString(),
                 backgroundColor: backgroundColor,
                 color: color,
                 rangeBehavior: vscode.DecorationRangeBehavior.OpenOpen
             });
             // We must convert to vscode.Ranges in order to make use of the API's
-            let ranges: vscode.Range[] = [];
+            const ranges: vscode.Range[] = [];
             params.regions.forEach(element => {
-                let newRange: vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
+                const newRange: vscode.Range = new vscode.Range(element.startLine, 0, element.endLine, 0);
                 ranges.push(newRange);
             });
             // Find entry for cached file and act accordingly
-            let valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(params.uri);
+            const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(params.uri);
             if (valuePair) {
                 // Disposing of and resetting the decoration will undo previously applied text decorations
                 valuePair.decoration.dispose();
@@ -2139,7 +2139,7 @@ export class DefaultClient implements Client {
                 // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
                 valuePair.ranges = ranges;
             } else { // The entry does not exist. Make a new one
-                let toInsert: DecorationRangesPair = {
+                const toInsert: DecorationRangesPair = {
                     decoration: decoration,
                     ranges: ranges
                 };
@@ -2147,8 +2147,8 @@ export class DefaultClient implements Client {
             }
             if (settings.dimInactiveRegions && params.fileVersion === this.openFileVersions.get(params.uri)) {
                 // Apply the decorations to all *visible* text editors
-                let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
-                for (let e of editors) {
+                const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
+                for (const e of editors) {
                     e.setDecorations(decoration, ranges);
                 }
             }
