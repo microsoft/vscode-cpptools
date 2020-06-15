@@ -477,6 +477,20 @@
           "description": "%c_cpp.configuration.default.systemIncludePath.description%",
           "scope": "machine-overridable"
         },
+        "C_Cpp.default.customConfigurationVariables": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "patternProperties": {
+            "(^.+$)": {
+              "type": "string"
+            }
+          },
+          "description": "%c_cpp.configuration.default.customConfigurationVariables.description%",
+          "scope": "machine-overridable"
+        },
         "C_Cpp.default.enableConfigurationSquiggles": {
           "type": "boolean",
           "default": true,
