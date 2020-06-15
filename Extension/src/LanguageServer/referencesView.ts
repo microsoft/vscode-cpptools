@@ -48,14 +48,14 @@ export class FindAllRefsView {
 
     getResultsAsText(includeConfirmedReferences: boolean): string {
         let results: string[] = [];
-        let confirmedRefs: string[] = [];
-        let otherRefs: string[] = [];
-        let fileRefs: string[] = [];
+        const confirmedRefs: string[] = [];
+        const otherRefs: string[] = [];
+        const fileRefs: string[] = [];
 
         if (!this.referencesModel) {
             throw new Error("Missiung ReferencesModel in getResultsAsText()");
         }
-        for (let ref of this.referencesModel.getAllReferenceNodes()) {
+        for (const ref of this.referencesModel.getAllReferenceNodes()) {
             let line: string = "";
             if (ref.referenceType !== null && ref.referenceType !== undefined) {
                 line = "[" + getReferenceTagString(ref.referenceType, this.referencesModel.isCanceled) + "] ";
@@ -73,9 +73,9 @@ export class FindAllRefsView {
         }
 
         // Get files with pending references items (location of reference is pending)
-        let fileReferences: TreeNode[] = this.referencesModel.getAllFilesWithPendingReferenceNodes();
-        for (let fileRef of fileReferences) {
-            let line: string =
+        const fileReferences: TreeNode[] = this.referencesModel.getAllFilesWithPendingReferenceNodes();
+        for (const fileRef of fileReferences) {
+            const line: string =
                 ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
                 + fileRef.filename);
             fileRefs.push(line);

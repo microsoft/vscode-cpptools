@@ -31,6 +31,9 @@ export type Mutable<T> = {
     -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
 };
 
+// Platform-specific environment variable delimiter
+export const envDelimiter: string = (process.platform === 'win32') ? ";" : ":";
+
 export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext | undefined;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -81,7 +84,7 @@ export function getRawTasksJson(): Promise<any> {
 }
 
 export async function ensureBuildTaskExists(taskName: string): Promise<void> {
-    let rawTasksJson: any = await getRawTasksJson();
+    const rawTasksJson: any = await getRawTasksJson();
 
     // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
     if (!rawTasksJson.tasks) {
@@ -93,7 +96,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         return;
     }
 
-    const buildTasks: vscode.Task[] = await getBuildTasks(false);
+    const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
     selectedTask = buildTasks.find(task => task.name === taskName);
     console.assert(selectedTask);
     if (!selectedTask) {
@@ -102,14 +105,19 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     rawTasksJson.version = "2.0.0";
 
-    let selectedTask2: vscode.Task = selectedTask;
+    const selectedTask2: vscode.Task = selectedTask;
     if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-        rawTasksJson.tasks.push(selectedTask2.definition);
+        const task: any = {
+            ...selectedTask2.definition,
+            problemMatcher: selectedTask2.problemMatchers,
+            group: { kind: "build", "isDefault": true }
+        };
+        rawTasksJson.tasks.push(task);
     }
 
     // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
-    let settings: OtherSettings = new OtherSettings();
-    let tasksJsonPath: string | undefined = getTasksJsonPath();
+    const settings: OtherSettings = new OtherSettings();
+    const tasksJsonPath: string | undefined = getTasksJsonPath();
     if (!tasksJsonPath) {
         throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
     }
@@ -123,7 +131,7 @@ export function fileIsCOrCppSource(file: string): boolean {
 }
 
 export function isEditorFileCpp(file: string): boolean {
-    let editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
+    const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
     if (!editor) {
         return false;
     }
@@ -159,13 +167,13 @@ export function getTasksJsonPath(): string | undefined {
 
 export function getVcpkgPathDescriptorFile(): string {
     if (process.platform === 'win32') {
-        let pathPrefix: string | undefined = process.env.LOCALAPPDATA;
+        const pathPrefix: string | undefined = process.env.LOCALAPPDATA;
         if (!pathPrefix) {
             throw new Error("Unable to read process.env.LOCALAPPDATA");
         }
         return path.join(pathPrefix, "vcpkg/vcpkg.path.txt");
     } else {
-        let pathPrefix: string | undefined = process.env.HOME;
+        const pathPrefix: string | undefined = process.env.HOME;
         if (!pathPrefix) {
             throw new Error("Unable to read process.env.HOME");
         }
@@ -195,7 +203,7 @@ export function getVcpkgRoot(): string {
  * @param document The document to check.
  */
 export function isHeader(uri: vscode.Uri): boolean {
-    let ext: string = path.extname(uri.fsPath);
+    const ext: string = path.extname(uri.fsPath);
     return !ext || ext.startsWith(".h") || ext.startsWith(".H");
 }
 
@@ -234,8 +242,8 @@ const progressIntelliSenseNoSquiggles: number = 1000;
 // Might add more IntelliSense progress measurements later.
 // IntelliSense progress is separate from the install progress, because parse root can occur afterwards.
 
-let installProgressStr: string = "CPP." + packageJson.version + ".Progress";
-let intelliSenseProgressStr: string = "CPP." + packageJson.version + ".IntelliSenseProgress";
+const installProgressStr: string = "CPP." + packageJson.version + ".Progress";
+const intelliSenseProgressStr: string = "CPP." + packageJson.version + ".IntelliSenseProgress";
 
 export function getProgress(): number {
     return extensionContext ? extensionContext.globalState.get<number>(installProgressStr, -1) : -1;
@@ -248,7 +256,7 @@ export function getIntelliSenseProgress(): number {
 export function setProgress(progress: number): void {
     if (extensionContext && getProgress() < progress) {
         extensionContext.globalState.update(installProgressStr, progress);
-        let telemetryProperties: { [key: string]: string } = {};
+        const telemetryProperties: { [key: string]: string } = {};
         let progressName: string | undefined;
         switch (progress) {
             case 0: progressName = "install started"; break;
@@ -267,7 +275,7 @@ export function setProgress(progress: number): void {
 export function setIntelliSenseProgress(progress: number): void {
     if (extensionContext && getIntelliSenseProgress() < progress) {
         extensionContext.globalState.update(intelliSenseProgressStr, progress);
-        let telemetryProperties: { [key: string]: string } = {};
+        const telemetryProperties: { [key: string]: string } = {};
         let progressName: string | undefined;
         switch (progress) {
             case progressIntelliSenseNoSquiggles: progressName = "IntelliSense no squiggles"; break;
@@ -338,7 +346,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     // Replace environment and configuration variables.
     let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder)(\.|:))?(.*?)\}/g;
     let ret: string = input;
-    let cycleCache: Set<string> = new Set();
+    const cycleCache: Set<string> = new Set();
     while (!cycleCache.has(ret)) {
         cycleCache.add(ret);
         ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
@@ -351,11 +359,11 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
             switch (varType) {
                 case "env": {
                     if (additionalEnvironment) {
-                        let v: string | string[] | undefined = additionalEnvironment[name];
+                        const v: string | string[] | undefined = additionalEnvironment[name];
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
-                            newValue = v.join(";");
+                            newValue = v.join(envDelimiter);
                         }
                         if (newValue === undefined) {
                             newValue = process.env[name];
@@ -364,7 +372,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                     break;
                 }
                 case "config": {
-                    let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+                    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
                     if (config) {
                         newValue = config.get<string>(name);
                     }
@@ -375,7 +383,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                     // We may consider doing replacement of ${workspaceFolder} here later, but we would have to update the language server and also
                     // intercept messages with paths in them and add the ${workspaceFolder} variable back in (e.g. for light bulb suggestions)
                     if (name && vscode.workspace && vscode.workspace.workspaceFolders) {
-                        let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+                        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.workspaceFolders.find(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase());
                         if (folder) {
                             newValue = folder.uri.fsPath;
                         }
@@ -391,7 +399,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     // Resolve '~' at the start of the path.
     regexp = () => /^\~/g;
     ret = ret.replace(regexp(), (match: string, name: string) => {
-        let newValue: string | undefined = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
+        const newValue: string | undefined = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
         return newValue ? newValue : match;
     });
 
@@ -433,13 +441,13 @@ export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
     }
 
     // Basic sanity checking on proxy url
-    let proxyUrl: any = url.parse(proxy);
+    const proxyUrl: any = url.parse(proxy);
     if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:") {
         return undefined;
     }
 
-    let strictProxy: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
-    let proxyOptions: any = {
+    const strictProxy: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
+    const proxyOptions: any = {
         host: proxyUrl.hostname,
         port: parseInt(proxyUrl.port, 10),
         auth: proxyUrl.auth,
@@ -655,14 +663,14 @@ export function spawnChildProcess(process: string, args: string[], workingDirect
     return new Promise<void>(function (resolve, reject): void {
         const child: child_process.ChildProcess = child_process.spawn(process, args, { cwd: workingDirectory });
 
-        let stdout: Readable | null = child.stdout;
+        const stdout: Readable | null = child.stdout;
         if (stdout) {
             stdout.on('data', (data) => {
                 dataCallback(`${data}`);
             });
         }
 
-        let stderr: Readable | null = child.stderr;
+        const stderr: Readable | null = child.stderr;
         if (stderr) {
             stderr.on('data', (data) => {
                 errorCallback(`${data}`);
@@ -722,9 +730,9 @@ export function allowExecution(file: string): Promise<void> {
 }
 
 export function removePotentialPII(str: string): string {
-    let words: string[] = str.split(" ");
+    const words: string[] = str.split(" ");
     let result: string = "";
-    for (let word of words) {
+    for (const word of words) {
         if (word.indexOf(".") === -1 && word.indexOf("/") === -1 && word.indexOf("\\") === -1 && word.indexOf(":") === -1) {
             result += word + " ";
         } else {
@@ -769,7 +777,7 @@ export function promptForReloadWindowDueToSettingsChange(): void {
 }
 
 export function promptReloadWindow(message: string): void {
-    let reload: string = localize("reload.string", "Reload");
+    const reload: string = localize("reload.string", "Reload");
     vscode.window.showInformationMessage(message, reload).then((value?: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
@@ -790,8 +798,8 @@ export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResu
 
 export function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        let parsedUrl: url.Url = url.parse(urlStr);
-        let request: ClientRequest = https.request({
+        const parsedUrl: url.Url = url.parse(urlStr);
+        const request: ClientRequest = https.request({
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: getHttpsProxyAgent(),
@@ -815,7 +823,7 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
                 return reject();
             }
             // Write file using downloaded data
-            let createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
+            const createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
             createdFile.on('finish', () => { resolve(); });
             response.on('error', (error) => { reject(error); });
             response.pipe(createdFile);
@@ -827,8 +835,8 @@ export function downloadFileToDestination(urlStr: string, destinationPath: strin
 
 export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders): Promise<any> {
     return new Promise<string>((resolve, reject) => {
-        let parsedUrl: url.Url = url.parse(urlStr);
-        let request: ClientRequest = https.request({
+        const parsedUrl: url.Url = url.parse(urlStr);
+        const request: ClientRequest = https.request({
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: getHttpsProxyAgent(),
@@ -867,11 +875,58 @@ export interface CompilerPathAndArgs {
     additionalArgs: string[];
 }
 
+function extractArgs(argsString: string): string[] {
+    const isWindows: boolean = os.platform() === 'win32';
+    const result: string[] = [];
+    let currentArg: string = "";
+    let isWithinDoubleQuote: boolean = false;
+    let isWithinSingleQuote: boolean = false;
+    for (let i: number = 0; i < argsString.length; i++) {
+        const c: string = argsString[i];
+        if (c === '\\') {
+            currentArg += c;
+            if (++i === argsString.length) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                }
+                return result;
+            }
+            currentArg += argsString[i];
+            continue;
+        }
+        if (c === '"') {
+            if (!isWithinSingleQuote) {
+                isWithinDoubleQuote = !isWithinDoubleQuote;
+            }
+        } else if (c === '\'') {
+            // On Windows, a single quote string is not allowed to join multiple args into a single arg
+            if (!isWindows) {
+                if (!isWithinDoubleQuote) {
+                    isWithinSingleQuote = !isWithinSingleQuote;
+                }
+            }
+        } else if (c === ' ') {
+            if (!isWithinDoubleQuote && !isWithinSingleQuote) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                    currentArg = "";
+                }
+                continue;
+            }
+        }
+        currentArg += c;
+    }
+    if (currentArg !== "") {
+        result.push(currentArg);
+    }
+    return result;
+}
+
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let additionalArgs: string[] = [];
-    let isWindows: boolean = os.platform() === 'win32';
+    const isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
         if (compilerPath.endsWith("\\cl.exe") || compilerPath.endsWith("/cl.exe") || compilerPath === "cl.exe") {
             // Input is only compiler name, this is only for cl.exe
@@ -879,10 +934,9 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
 
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
-            let endQuote: number = compilerPath.substr(1).search("\"") + 1;
+            const endQuote: number = compilerPath.substr(1).search("\"") + 1;
             if (endQuote !== -1) {
-                additionalArgs = compilerPath.substr(endQuote + 1).split(" ");
-                additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
+                additionalArgs = extractArgs(compilerPath.substr(endQuote + 1));
                 compilerPath = compilerPath.substr(1, endQuote - 1);
                 compilerName = path.basename(compilerPath);
             }
@@ -903,8 +957,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                 }
                 if (compilerPath !== potentialCompilerPath) {
                     // Found a valid compilerPath and args.
-                    additionalArgs = compilerPath.substr(spaceStart + 1).split(" ");
-                    additionalArgs = additionalArgs.filter((arg: string) => arg.trim().length !== 0); // Remove empty args.
+                    additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
                     compilerPath = potentialCompilerPath;
                 }
                 compilerName = path.basename(compilerPath);
@@ -965,10 +1018,10 @@ export class BlockingTask<T> {
             this.promise = task();
         } else {
             this.promise = new Promise<T>((resolve, reject) => {
-                let f1: () => void = () => {
+                const f1: () => void = () => {
                     task().then(resolve, reject);
                 };
-                let f2: (err: any) => void = (err) => {
+                const f2: (err: any) => void = (err) => {
                     console.log(err);
                     task().then(resolve, reject);
                 };
@@ -997,9 +1050,9 @@ interface VSCodeNlsConfig {
 export function getLocaleId(): string {
     // This replicates the language detection used by initializeSettings() in vscode-nls
     if (isString(process.env.VSCODE_NLS_CONFIG)) {
-        let vscodeOptions: VSCodeNlsConfig = JSON.parse(process.env.VSCODE_NLS_CONFIG) as VSCodeNlsConfig;
+        const vscodeOptions: VSCodeNlsConfig = JSON.parse(process.env.VSCODE_NLS_CONFIG) as VSCodeNlsConfig;
         if (vscodeOptions.availableLanguages) {
-            let value: any = vscodeOptions.availableLanguages['*'];
+            const value: any = vscodeOptions.availableLanguages['*'];
             if (isString(value)) {
                 return value;
             }
@@ -1012,8 +1065,8 @@ export function getLocaleId(): string {
 }
 
 export function getLocalizedHtmlPath(originalPath: string): string {
-    let locale: string = getLocaleId();
-    let localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
+    const locale: string = getLocaleId();
+    const localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
     if (!fs.existsSync(localizedFilePath)) {
         return getExtensionFilePath(originalPath);
     }
@@ -1040,9 +1093,9 @@ export function getLocalizedString(params: LocalizeStringParams): string {
 }
 
 function decodeUCS16(input: string): number[] {
-    let output: number[] = [];
+    const output: number[] = [];
     let counter: number = 0;
-    let length: number = input.length;
+    const length: number = input.length;
     let value: number;
     let extra: number;
     while (counter < length) {
@@ -1065,7 +1118,7 @@ function decodeUCS16(input: string): number[] {
     return output;
 }
 
-let allowedIdentifierUnicodeRanges: number[][] = [
+const allowedIdentifierUnicodeRanges: number[][] = [
     [0x0030, 0x0039], // digits
     [0x0041, 0x005A], // upper case letters
     [0x005F, 0x005F], // underscore
@@ -1114,7 +1167,7 @@ let allowedIdentifierUnicodeRanges: number[][] = [
     [0xE0000, 0xEFFFD]  // LANGUAGE TAG (U+E0001) - VARIATION SELECTOR-256 (U+E01EF)
 ];
 
-let disallowedFirstCharacterIdentifierUnicodeRanges: number[][] = [
+const disallowedFirstCharacterIdentifierUnicodeRanges: number[][] = [
     [0x0030, 0x0039], // digits
     [0x0300, 0x036F], // COMBINING GRAVE ACCENT - COMBINING LATIN SMALL LETTER X
     [0x1DC0, 0x1DFF], // COMBINING DOTTED GRAVE ACCENT - COMBINING RIGHT ARROWHEAD AND DOWN ARROWHEAD BELOW
@@ -1126,14 +1179,14 @@ export function isValidIdentifier(candidate: string): boolean {
     if (!candidate) {
         return false;
     }
-    let decoded: number[] = decodeUCS16(candidate);
+    const decoded: number[] = decodeUCS16(candidate);
     if (!decoded || !decoded.length) {
         return false;
     }
 
     // Reject if first character is disallowed
     for (let i: number = 0; i < disallowedFirstCharacterIdentifierUnicodeRanges.length; i++) {
-        let disallowedCharacters: number[] = disallowedFirstCharacterIdentifierUnicodeRanges[i];
+        const disallowedCharacters: number[] = disallowedFirstCharacterIdentifierUnicodeRanges[i];
         if (decoded[0] >= disallowedCharacters[0] && decoded[0] <= disallowedCharacters[1]) {
             return false;
         }
@@ -1142,7 +1195,7 @@ export function isValidIdentifier(candidate: string): boolean {
     for (let position: number = 0; position < decoded.length; position++) {
         let found: boolean = false;
         for (let i: number = 0; i < allowedIdentifierUnicodeRanges.length; i++) {
-            let allowedCharacters: number[] = allowedIdentifierUnicodeRanges[i];
+            const allowedCharacters: number[] = allowedIdentifierUnicodeRanges[i];
             if (decoded[position] >= allowedCharacters[0] && decoded[position] <= allowedCharacters[1]) {
                 found = true;
                 break;
@@ -1156,7 +1209,7 @@ export function isValidIdentifier(candidate: string): boolean {
 }
 
 function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, addSubfolder: boolean): string {
-    let workspaceFolderName: string = workspaceFolder ? workspaceFolder.name : "untitled";
+    const workspaceFolderName: string = workspaceFolder ? workspaceFolder.name : "untitled";
     if (!workspaceFolder || workspaceFolder.index < 1) {
         return workspaceFolderName; // No duplicate names to search for.
     }

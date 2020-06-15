@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.28.0-master",
+  "version": "0.29.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -52,6 +52,13 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "debug",
+        "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
+        "when": "debugStartLanguage == cpp || debugStartLanguage == c"
+      }
+    ],
     "problemMatchers": [
       {
         "name": "gcc",
@@ -658,6 +665,10 @@
       {
         "type": "cppdbg",
         "label": "C++ (GDB/LLDB)",
+        "languages": [
+          "c",
+          "cpp"
+        ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
           "pickRemoteProcess": "extension.pickRemoteNativeProcess"
@@ -950,6 +961,13 @@
                     },
                     "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
+                  },
+                  "quoteArgs": {
+                    "exceptions": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.logging.quoteArgs.description%",
+                      "default": true
+                    }
                   }
                 }
               },
@@ -1136,6 +1154,13 @@
                     },
                     "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
+                  },
+                  "quoteArgs": {
+                    "exceptions": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.logging.quoteArgs.description%",
+                      "default": true
+                    }
                   }
                 }
               },
@@ -1192,6 +1217,10 @@
       {
         "type": "cppvsdbg",
         "label": "C++ (Windows)",
+        "languages": [
+          "c",
+          "cpp"
+        ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
         },
@@ -1590,7 +1619,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2125055",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2131982",
       "platforms": [
         "linux"
       ],
@@ -1604,7 +1633,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2125057",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2132316",
       "platforms": [
         "darwin"
       ],
@@ -1615,7 +1644,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2125056",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2132317",
       "platforms": [
         "win32"
       ],

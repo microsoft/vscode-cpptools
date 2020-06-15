@@ -15,15 +15,15 @@ export class ReferencesModel {
         this.originalSymbol = resultsInput.text;
         this.groupByFile = groupByFile;
 
-        let results: ReferenceInfo[] = resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed);
+        const results: ReferenceInfo[] = resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed);
 
         // Build a single flat list of all leaf nodes
         // Currently, the hierarchy is built each time referencesTreeDataProvider requests nodes.
-        for (let r of results) {
+        for (const r of results) {
             // Add reference to file
-            let noReferenceLocation: boolean = (r.position.line === 0 && r.position.character === 0);
+            const noReferenceLocation: boolean = (r.position.line === 0 && r.position.character === 0);
             if (noReferenceLocation) {
-                let node: TreeNode = new TreeNode(this, NodeType.fileWithPendingRef);
+                const node: TreeNode = new TreeNode(this, NodeType.fileWithPendingRef);
                 node.fileUri = vscode.Uri.file(r.file);
                 node.filename = r.file;
                 node.referenceType = r.type;
@@ -32,7 +32,7 @@ export class ReferencesModel {
                 const range: vscode.Range = new vscode.Range(r.position.line, r.position.character, r.position.line, r.position.character + this.originalSymbol.length);
                 const uri: vscode.Uri = vscode.Uri.file(r.file);
                 const location: vscode.Location = new vscode.Location(uri, range);
-                let node: TreeNode = new TreeNode(this, NodeType.reference);
+                const node: TreeNode = new TreeNode(this, NodeType.reference);
                 node.fileUri = uri;
                 node.filename = r.file;
                 node.referencePosition = r.position;
@@ -49,11 +49,11 @@ export class ReferencesModel {
     }
 
     getReferenceTypeNodes(): TreeNode[] {
-        let result: TreeNode[] = [];
-        for (let n of this.nodes) {
-            let i: number = result.findIndex(e => e.referenceType === n.referenceType);
+        const result: TreeNode[] = [];
+        for (const n of this.nodes) {
+            const i: number = result.findIndex(e => e.referenceType === n.referenceType);
             if (i < 0) {
-                let node: TreeNode = new TreeNode(this, NodeType.referenceType);
+                const node: TreeNode = new TreeNode(this, NodeType.referenceType);
                 node.referenceType = n.referenceType;
                 result.push(node);
             }
@@ -62,7 +62,7 @@ export class ReferencesModel {
     }
 
     getFileNodes(refType?: ReferenceType): TreeNode[] {
-        let result: TreeNode[] = [];
+        const result: TreeNode[] = [];
         let filteredFiles: TreeNode[] = [];
 
         // Get files by reference type if refType is specified.
@@ -73,11 +73,11 @@ export class ReferencesModel {
         }
 
         // Create new nodes per unique file
-        for (let n of filteredFiles) {
-            let i: number = result.findIndex(item => item.filename === n.filename);
+        for (const n of filteredFiles) {
+            const i: number = result.findIndex(item => item.filename === n.filename);
             if (i < 0) {
-                let nodeType: NodeType = (n.node === NodeType.fileWithPendingRef ? NodeType.fileWithPendingRef : NodeType.file);
-                let node: TreeNode = new TreeNode(this, nodeType);
+                const nodeType: NodeType = (n.node === NodeType.fileWithPendingRef ? NodeType.fileWithPendingRef : NodeType.file);
+                const node: TreeNode = new TreeNode(this, nodeType);
                 node.filename = n.filename;
                 node.fileUri = n.fileUri;
                 node.referenceType = refType;
@@ -118,7 +118,7 @@ export class ReferencesModel {
     }
 
     getAllFilesWithPendingReferenceNodes(): TreeNode[] {
-        let result: TreeNode[] = this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
+        const result: TreeNode[] = this.nodes.filter(i => i.node === NodeType.fileWithPendingRef);
         result.sort((a, b) => {
             if (a.filename === undefined) {
                 if (b.filename === undefined) {

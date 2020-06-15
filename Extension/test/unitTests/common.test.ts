@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
-import { resolveVariables, escapeForSquiggles } from "../../src/common";
+import { envDelimiter, resolveVariables, escapeForSquiggles } from "../../src/common";
 
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
@@ -32,7 +32,7 @@ suite("Common Utility validation", () => {
             inputAndEnvironment("${test}", {
                 test: ["foo", "bar"]
             })
-                .shouldResolveTo("foo;bar");
+                .shouldResolveTo(`foo${envDelimiter}bar`);
         });
 
         test("solo env input with empty array env value", () => {
@@ -198,8 +198,8 @@ suite("Common Utility validation", () => {
         });
 
         test("escapeForSquiggles:", () => {
-            let testEscapeForSquigglesScenario: any = (input: string, expectedOutput: string) => {
-                let result: string = escapeForSquiggles(input);
+            const testEscapeForSquigglesScenario: any = (input: string, expectedOutput: string) => {
+                const result: string = escapeForSquiggles(input);
                 if (result !== expectedOutput) {
                     throw new Error(`escapeForSquiggles failure: for \"${input}\", \"${result}\" !== \"${expectedOutput}\"`);
                 }
