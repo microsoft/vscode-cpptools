@@ -52,6 +52,13 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "debug",
+        "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
+        "when": "debugStartLanguage == cpp || debugStartLanguage == c"
+      }
+    ],
     "problemMatchers": [
       {
         "name": "gcc",
@@ -658,6 +665,10 @@
       {
         "type": "cppdbg",
         "label": "C++ (GDB/LLDB)",
+        "languages": [
+          "c",
+          "cpp"
+        ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
           "pickRemoteProcess": "extension.pickRemoteNativeProcess"
@@ -1206,6 +1217,10 @@
       {
         "type": "cppvsdbg",
         "label": "C++ (Windows)",
+        "languages": [
+          "c",
+          "cpp"
+        ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
         },

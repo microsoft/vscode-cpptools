@@ -439,7 +439,9 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.RescanWorkspace",
         "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
         "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
-        "onDebug",
+        "onDebugInitialConfigurations",
+        "onDebugResolve:cppdbg",
+        "onDebugResolve:cppvsdbg",
         "workspaceContains:/.vscode/c_cpp_properties.json",
         "onFileSystem:cpptools-schema"
     ];
