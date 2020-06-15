@@ -156,7 +156,7 @@ class SettingsApp {
         }
 
         const configName: HTMLInputElement = <HTMLInputElement>document.getElementById(elementId.configName);
-        let list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
+        const list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
 
         if (configName.value === "") {
             (<HTMLInputElement>document.getElementById(elementId.configName)).value = list.options[list.selectedIndex].value;
@@ -247,9 +247,7 @@ class SettingsApp {
     private updateConfig(config: any): void {
         this.updating = true;
         try {
-            let joinEntries: (input: any) => string = (input: string[]) => {
-                return (input && input.length) ? input.join("\n") : "";
-            };
+            const joinEntries: (input: any) => string = (input: string[]) => (input && input.length) ? input.join("\n") : "";
 
             // Basic settings
             (<HTMLInputElement>document.getElementById(elementId.configName)).value = config.name;
@@ -308,14 +306,14 @@ class SettingsApp {
     private updateConfigSelection(message: any): void {
         this.updating = true;
         try {
-            let list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
+            const list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.configSelection);
 
             // Clear list before updating
             list.options.length = 0;
 
             // Update list
-            for (let name of message.selections) {
-                let option: HTMLOptionElement = document.createElement("option");
+            for (const name of message.selections) {
+                const option: HTMLOptionElement = document.createElement("option");
                 option.text = name;
                 option.value = name;
                 list.append(option);
@@ -330,7 +328,7 @@ class SettingsApp {
     private setKnownCompilers(compilers: string[]): void {
         this.updating = true;
         try {
-            let list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
+            const list: HTMLSelectElement = <HTMLSelectElement>document.getElementById(elementId.knownCompilers);
 
             // No need to add items unless webview is reloaded, in which case it will not have any elements.
             // Otherwise, add items again.
@@ -340,14 +338,14 @@ class SettingsApp {
 
             if (compilers.length === 0) {
                 // Get HTML element containing the string, as we can't localize strings in HTML js
-                let noCompilerSpan: HTMLSpanElement = <HTMLSpanElement>document.getElementById(elementId.noCompilerPathsDetected);
-                let option: HTMLOptionElement = document.createElement("option");
+                const noCompilerSpan: HTMLSpanElement = <HTMLSpanElement>document.getElementById(elementId.noCompilerPathsDetected);
+                const option: HTMLOptionElement = document.createElement("option");
                 option.text = noCompilerSpan.textContent;
                 option.disabled = true;
                 list.append(option);
             } else {
-                for (let path of compilers) {
-                    let option: HTMLOptionElement = document.createElement("option");
+                for (const path of compilers) {
+                    const option: HTMLOptionElement = document.createElement("option");
                     option.text = path;
                     option.value = path;
                     list.append(option);
@@ -369,4 +367,4 @@ class SettingsApp {
     }
 }
 
-let app: SettingsApp = new SettingsApp();
+const app: SettingsApp = new SettingsApp();

@@ -17,7 +17,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
-let disposables: vscode.Disposable[] = [];
+const disposables: vscode.Disposable[] = [];
 
 export function buildAndDebugActiveFileStr(): string {
     return ` - ${localize("build.and.debug.active.file", 'Build and debug active file')}`;
@@ -25,14 +25,14 @@ export function buildAndDebugActiveFileStr(): string {
 
 export function initialize(context: vscode.ExtensionContext): void {
     // Activate Process Picker Commands
-    let attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
-    let attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+    const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+    const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
     disposables.push(vscode.commands.registerCommand('extension.pickNativeProcess', () => attacher.ShowAttachEntries()));
-    let remoteAttacher: RemoteAttachPicker = new RemoteAttachPicker();
+    const remoteAttacher: RemoteAttachPicker = new RemoteAttachPicker();
     disposables.push(vscode.commands.registerCommand('extension.pickRemoteNativeProcess', (any) => remoteAttacher.ShowAttachEntries(any)));
 
     // Activate ConfigurationProvider
-    let configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
+    const configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
     let vsdbgProvider: CppVsDbgConfigurationProvider | null = null;
@@ -58,11 +58,11 @@ export function initialize(context: vscode.ExtensionContext): void {
             return Promise.resolve();
         }
 
-        let configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config =>
+        const configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config =>
             config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
 
         if (vsdbgProvider) {
-            let vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config =>
+            const vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config =>
                 config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
             if (vsdbgConfigs) {
                 configs.push(...vsdbgConfigs);

@@ -142,12 +142,12 @@ export class ColorizationSettings {
             this.findThemeStyleForScope(baseCStyle, baseCppStyle, scope, rules);
         });
 
-        let otherSettings: OtherSettings = new OtherSettings(this.uri);
+        const otherSettings: OtherSettings = new OtherSettings(this.uri);
 
         // Next in priority would be a global user override of token color of the equivilent scope
-        let colorTokenName: string | undefined = ColorizationSettings.scopeToTokenColorNameMap.get(scope);
+        const colorTokenName: string | undefined = ColorizationSettings.scopeToTokenColorNameMap.get(scope);
         if (colorTokenName) {
-            let settingValue: string | undefined = otherSettings.getCustomColorToken(colorTokenName);
+            const settingValue: string | undefined = otherSettings.getCustomColorToken(colorTokenName);
             if (settingValue) {
                 if (baseCStyle) {
                     baseCStyle.foreground = settingValue;
@@ -163,7 +163,7 @@ export class ColorizationSettings {
 
         // Next in priority would be a theme-specific user override of token color of the equivilent scope
         if (colorTokenName) {
-            let settingValue: string | undefined = otherSettings.getCustomThemeSpecificColorToken(colorTokenName, themeName);
+            const settingValue: string | undefined = otherSettings.getCustomThemeSpecificColorToken(colorTokenName, themeName);
             if (settingValue) {
                 if (baseCStyle) {
                     baseCStyle.foreground = settingValue;
@@ -175,14 +175,14 @@ export class ColorizationSettings {
         }
 
         // Next in priority would be a theme-specific user override of this scope in textMateRules
-        let textMateRules: TextMateRule[] | undefined = otherSettings.getCustomThemeSpecificTextMateRules(themeName);
+        const textMateRules: TextMateRule[] | undefined = otherSettings.getCustomThemeSpecificTextMateRules(themeName);
         this.findThemeStyleForScope(baseCStyle, baseCppStyle, scope, textMateRules);
     }
 
     // For each level of the scope, look of style information
     private calculateStyleForToken(tokenKind: TokenKind, scope: string, themeName: string, themeTextMateRules: TextMateRule[][]): void {
         // Try scopes, from most general to most specific, apply style in cascading manner
-        let parts: string[] = scope.split(".");
+        const parts: string[] = scope.split(".");
         let accumulatedScope: string = "";
         for (let i: number = 0; i < parts.length; i++) {
             accumulatedScope += parts[i];
@@ -238,7 +238,7 @@ export class ColorizationSettings {
     public async loadTheme(themePath: string, defaultStyle: ThemeStyle): Promise<TextMateRule[][]> {
         let rules: TextMateRule[][] = [];
         if (await util.checkFileExists(themePath)) {
-            let themeContentText: string = await util.readFileText(themePath);
+            const themeContentText: string = await util.readFileText(themePath);
             let themeContent: any;
             let textMateRules: TextMateRule[] | undefined;
             if (themePath.endsWith("tmTheme")) {
@@ -252,7 +252,7 @@ export class ColorizationSettings {
                     textMateRules = themeContent.tokenColors;
                     if (themeContent.include) {
                         // parse included theme file
-                        let includedThemePath: string = path.join(path.dirname(themePath), themeContent.include);
+                        const includedThemePath: string = path.join(path.dirname(themePath), themeContent.include);
                         rules = await this.loadTheme(includedThemePath, defaultStyle);
                     }
 
@@ -270,7 +270,7 @@ export class ColorizationSettings {
                     }
                 });
 
-                let scopelessSetting: any = textMateRules.find(e => e.settings && !e.scope);
+                const scopelessSetting: any = textMateRules.find(e => e.settings && !e.scope);
                 if (scopelessSetting) {
                     if (scopelessSetting.settings.background) {
                         this.editorBackground = scopelessSetting.settings.background;
@@ -285,27 +285,27 @@ export class ColorizationSettings {
     }
 
     public reload(): void {
-        let f: () => void = async () => {
-            let otherSettings: OtherSettings = new OtherSettings(this.uri);
-            let themeName: string | undefined = otherSettings.colorTheme;
+        const f: () => void = async () => {
+            const otherSettings: OtherSettings = new OtherSettings(this.uri);
+            const themeName: string | undefined = otherSettings.colorTheme;
             if (themeName) {
                 // Enumerate through all extensions, looking for this theme.  (Themes are implemented as extensions - even the default ones)
                 // Open each package.json to check for a theme path
                 for (let i: number = 0; i < vscode.extensions.all.length; i++) {
-                    let extensionPath: string = vscode.extensions.all[i].extensionPath;
-                    let extensionPackageJsonPath: string = path.join(extensionPath, "package.json");
+                    const extensionPath: string = vscode.extensions.all[i].extensionPath;
+                    const extensionPackageJsonPath: string = path.join(extensionPath, "package.json");
                     if (!await util.checkFileExists(extensionPackageJsonPath)) {
                         continue;
                     }
-                    let packageJsonText: string = await util.readFileText(extensionPackageJsonPath);
-                    let packageJson: any = jsonc.parse(packageJsonText);
+                    const packageJsonText: string = await util.readFileText(extensionPackageJsonPath);
+                    const packageJson: any = jsonc.parse(packageJsonText);
                     if (packageJson.contributes && packageJson.contributes.themes) {
-                        let foundTheme: any = packageJson.contributes.themes.find((e: any) => e.id === themeName || e.label === themeName);
+                        const foundTheme: any = packageJson.contributes.themes.find((e: any) => e.id === themeName || e.label === themeName);
                         if (foundTheme) {
-                            let themeRelativePath: string = foundTheme.path;
-                            let themeFullPath: string = path.join(extensionPath, themeRelativePath);
-                            let defaultStyle: ThemeStyle = new ThemeStyle();
-                            let rulesSet: TextMateRule[][] = await this.loadTheme(themeFullPath, defaultStyle);
+                            const themeRelativePath: string = foundTheme.path;
+                            const themeFullPath: string = path.join(extensionPath, themeRelativePath);
+                            const defaultStyle: ThemeStyle = new ThemeStyle();
+                            const rulesSet: TextMateRule[][] = await this.loadTheme(themeFullPath, defaultStyle);
                             this.updateStyles(themeName, defaultStyle, rulesSet);
                             return;
                         }
@@ -318,7 +318,7 @@ export class ColorizationSettings {
 
     public static createDecorationFromThemeStyle(themeStyle: ThemeStyle): vscode.TextEditorDecorationType | undefined {
         if (themeStyle && (themeStyle.foreground || themeStyle.background || themeStyle.fontStyle)) {
-            let options: vscode.DecorationRenderOptions = {};
+            const options: vscode.DecorationRenderOptions = {};
             options.rangeBehavior = vscode.DecorationRangeBehavior.OpenOpen;
             if (themeStyle.foreground) {
                 options.color = themeStyle.foreground;
@@ -327,7 +327,7 @@ export class ColorizationSettings {
                 options.backgroundColor = themeStyle.background;
             }
             if (themeStyle.fontStyle) {
-                let parts: string[] = themeStyle.fontStyle.split(" ");
+                const parts: string[] = themeStyle.fontStyle.split(" ");
                 parts.forEach((part) => {
                     switch (part) {
                         case "italic":
@@ -368,7 +368,7 @@ export class ColorizationState {
     }
 
     private createColorizationDecorations(isCpp: boolean): void {
-        let settings: CppSettings = new CppSettings(this.uri);
+        const settings: CppSettings = new CppSettings(this.uri);
         if (settings.enhancedColorization) {
             // Create new decorators
             // The first decorator created takes precedence, so these need to be created in reverse order
@@ -384,7 +384,7 @@ export class ColorizationState {
             }
         }
         if (settings.dimInactiveRegions) {
-            let opacity: number | undefined = settings.inactiveRegionOpacity;
+            const opacity: number | undefined = settings.inactiveRegionOpacity;
             if (opacity !== null && opacity !== undefined) {
                 let backgroundColor: string | undefined = settings.inactiveRegionBackgroundColor;
                 if (backgroundColor === "") {
@@ -411,7 +411,7 @@ export class ColorizationState {
             this.inactiveDecoration = undefined;
         }
         for (let i: number = 0; i < TokenKind.Count; i++) {
-            let decoration: vscode.TextEditorDecorationType | undefined = this.decorations[i];
+            const decoration: vscode.TextEditorDecorationType | undefined = this.decorations[i];
             if (decoration) {
                 decoration.dispose();
                 this.decorations[i] = undefined;
@@ -424,12 +424,12 @@ export class ColorizationState {
     }
 
     private refreshInner(e: vscode.TextEditor): void {
-        let settings: CppSettings = new CppSettings(this.uri);
+        const settings: CppSettings = new CppSettings(this.uri);
         if (settings.enhancedColorization) {
             for (let i: number = 0; i < TokenKind.Count; i++) {
-                let decoration: vscode.TextEditorDecorationType | undefined = this.decorations[i];
+                const decoration: vscode.TextEditorDecorationType | undefined = this.decorations[i];
                 if (decoration) {
-                    let ranges: vscode.Range[] = this.semanticRanges[i];
+                    const ranges: vscode.Range[] = this.semanticRanges[i];
                     if (ranges && ranges.length > 0) {
                         e.setDecorations(decoration, ranges);
                     }
@@ -448,20 +448,20 @@ export class ColorizationState {
 
     public refresh(e: vscode.TextEditor): void {
         this.applyEdits();
-        let f: () => void = async () => {
+        const f: () => void = async () => {
             this.refreshInner(e);
         };
         this.colorizationSettings.syncWithLoadingSettings(f);
     }
 
     public onSettingsChanged(uri: vscode.Uri): void {
-        let f: () => void = async () => {
+        const f: () => void = async () => {
             this.applyEdits();
             this.disposeColorizationDecorations();
-            let isCpp: boolean = util.isEditorFileCpp(uri.toString());
+            const isCpp: boolean = util.isEditorFileCpp(uri.toString());
             this.createColorizationDecorations(isCpp);
-            let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri === uri);
-            for (let e of editors) {
+            const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri === uri);
+            for (const e of editors) {
                 this.refreshInner(e);
             }
         };
@@ -470,11 +470,11 @@ export class ColorizationState {
 
     // Utility function to convert a string and a start Position into a Range
     private textToRange(text: string, startPosition: vscode.Position): vscode.Range {
-        let parts: string[] = text.split("\n");
-        let addedLines: number = parts.length - 1;
-        let newStartLine: number = startPosition.line;
-        let newStartCharacter: number = startPosition.character;
-        let newEndLine: number = newStartLine + addedLines;
+        const parts: string[] = text.split("\n");
+        const addedLines: number = parts.length - 1;
+        const newStartLine: number = startPosition.line;
+        const newStartCharacter: number = startPosition.character;
+        const newEndLine: number = newStartLine + addedLines;
         let newEndCharacter: number = parts[parts.length - 1].length;
         if (newStartLine === newEndLine) {
             newEndCharacter += newStartCharacter;
@@ -484,7 +484,7 @@ export class ColorizationState {
 
     // Utility function to shift a range back after removing content before it
     private shiftRangeAfterRemove(range: vscode.Range, removeStartPosition: vscode.Position, removeEndPosition: vscode.Position): vscode.Range {
-        let lineDelta: number = removeStartPosition.line - removeEndPosition.line;
+        const lineDelta: number = removeStartPosition.line - removeEndPosition.line;
         let startCharacterDelta: number = 0;
         let endCharacterDelta: number = 0;
         if (range.start.line === removeEndPosition.line) {
@@ -493,16 +493,16 @@ export class ColorizationState {
                 endCharacterDelta = startCharacterDelta;
             }
         }
-        let newStart: vscode.Position = range.start.translate(lineDelta, startCharacterDelta);
-        let newEnd: vscode.Position = range.end.translate(lineDelta, endCharacterDelta);
+        const newStart: vscode.Position = range.start.translate(lineDelta, startCharacterDelta);
+        const newEnd: vscode.Position = range.end.translate(lineDelta, endCharacterDelta);
         return new vscode.Range(newStart, newEnd);
     }
 
     // Utility function to shift a range forward after inserting content before it
     private shiftRangeAfterInsert(range: vscode.Range, insertStartPosition: vscode.Position, insertEndPosition: vscode.Position): vscode.Range {
-        let addedLines: number = insertEndPosition.line - insertStartPosition.line;
-        let newStartLine: number = range.start.line + addedLines;
-        let newEndLine: number = range.end.line + addedLines;
+        const addedLines: number = insertEndPosition.line - insertStartPosition.line;
+        const newStartLine: number = range.start.line + addedLines;
+        const newEndLine: number = range.end.line + addedLines;
         let newStartCharacter: number = range.start.character;
         let newEndCharacter: number = range.end.character;
         // If starts on the same line as replacement ended
@@ -561,9 +561,9 @@ export class ColorizationState {
             return new vscode.Range(range.start.line, range.start.character, insertEndPosition.line, insertEndPosition.character + (range.end.character - removeEndPosition.character));
         }
         // Else, the trailing segment ends on another line, so the character position should remain the same.  Just adjust based on added/removed lined.
-        let removedLines: number = removeEndPosition.line - removeInsertStartPosition.line;
-        let addedLines: number = insertEndPosition.line - removeInsertStartPosition.line;
-        let deltaLines: number = addedLines - removedLines;
+        const removedLines: number = removeEndPosition.line - removeInsertStartPosition.line;
+        const addedLines: number = insertEndPosition.line - removeInsertStartPosition.line;
+        const deltaLines: number = addedLines - removedLines;
         return new vscode.Range(range.start.line, range.start.character, range.end.line + deltaLines,  range.end.character);
     }
 
@@ -572,10 +572,10 @@ export class ColorizationState {
         let ranges: vscode.Range[] = originalRanges;
         if (ranges && ranges.length > 0) {
             changes.forEach((change) => {
-                let newRanges: vscode.Range[] = [];
-                let insertRange: vscode.Range = this.textToRange(change.text, change.range.start);
+                const newRanges: vscode.Range[] = [];
+                const insertRange: vscode.Range = this.textToRange(change.text, change.range.start);
                 for (let i: number = 0; i < ranges.length; i++) {
-                    let newRange: vscode.Range | undefined = this.fixRange(ranges[i], change.range.start, change.range.end, insertRange.end);
+                    const newRange: vscode.Range | undefined = this.fixRange(ranges[i], change.range.start, change.range.end, insertRange.end);
                     if (newRange) {
                         newRanges.push(newRange);
                     }
@@ -588,7 +588,7 @@ export class ColorizationState {
 
     // Add edits to be applied when/if cached tokens need to be reapplied.
     public addEdits(changes: readonly vscode.TextDocumentContentChangeEvent[], editVersion: number): void {
-        let edits: VersionedEdits = {
+        const edits: VersionedEdits = {
             editVersion: editVersion,
             changes: changes
         };
@@ -610,8 +610,8 @@ export class ColorizationState {
 
     // Remove any edits from the list if we will never receive tokens that old.
     private purgeOldVersionedEdits(): void {
-        let minVersion: number = this.lastReceivedSemanticVersion;
-        let index: number = this.versionedEdits.findIndex((edit) => edit.editVersion > minVersion);
+        const minVersion: number = this.lastReceivedSemanticVersion;
+        const index: number = this.versionedEdits.findIndex((edit) => edit.editVersion > minVersion);
         if (index === -1) {
             this.versionedEdits = [];
         } else if (index > 0) {
@@ -620,7 +620,7 @@ export class ColorizationState {
     }
 
     private updateColorizationRanges(uri: string): void {
-        let f: () => void = async () => {
+        const f: () => void = async () => {
             this.applyEdits();
             this.purgeOldVersionedEdits();
 
@@ -629,17 +629,17 @@ export class ColorizationState {
             // likely due to a race with UI updates.  Here we set aside the existing decorators to be
             // disposed of after the new decorators have been applied, so there is not a gap
             // in which decorators are not applied.
-            let oldInactiveDecoration: vscode.TextEditorDecorationType | undefined = this.inactiveDecoration;
-            let oldDecorations: (vscode.TextEditorDecorationType | undefined)[] = this.decorations;
+            const oldInactiveDecoration: vscode.TextEditorDecorationType | undefined = this.inactiveDecoration;
+            const oldDecorations: (vscode.TextEditorDecorationType | undefined)[] = this.decorations;
             this.inactiveDecoration = undefined;
             this.decorations =  new Array<vscode.TextEditorDecorationType>(TokenKind.Count);
 
-            let isCpp: boolean = util.isEditorFileCpp(uri);
+            const isCpp: boolean = util.isEditorFileCpp(uri);
             this.createColorizationDecorations(isCpp);
 
             // Apply the decorations to all *visible* text editors
-            let editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
-            for (let e of editors) {
+            const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uri);
+            for (const e of editors) {
                 this.refreshInner(e);
             }
 
@@ -649,7 +649,7 @@ export class ColorizationState {
             }
             if (oldDecorations) {
                 for (let i: number = 0; i < TokenKind.Count; i++) {
-                    let oldDecoration: vscode.TextEditorDecorationType | undefined = oldDecorations[i];
+                    const oldDecoration: vscode.TextEditorDecorationType | undefined = oldDecorations[i];
                     if (oldDecoration) {
                         oldDecoration.dispose();
                     }
