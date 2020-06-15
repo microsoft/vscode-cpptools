@@ -4,7 +4,7 @@
 
 We created C/C++ Extension UI Themes to closely match Visual Studio themes and include colors for many of the new scopes.
 
-VS Code has since provided an API for semantic colorization. The C/C++ Extension has transitioned from its own implementation to this new API.  These themes now include colors for some of the new semantic token scopes.
+VS Code has since provided an API for semantic colorization. The C/C++ Extension has transitioned from its own implementation to this new API. These themes now include colors for some of the new semantic token scopes.
 
 ## Example
 
