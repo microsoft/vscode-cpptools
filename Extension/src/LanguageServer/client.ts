@@ -527,6 +527,7 @@ export interface Client {
     onInterval(): void;
     dispose(): Thenable<void>;
     addFileAssociations(fileAssociations: string, is_c: boolean): void;
+    sendDidChangeSettings(settings: any): void;
 }
 
 export function createClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -1267,7 +1268,7 @@ export class DefaultClient implements Client {
         return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
-    public sendDidChangeSettings(): void {
+    public sendAllSettings(): void {
         let cppSettingsScoped: { [key: string]: any } = {};
         // Gather the C_Cpp settings
         {
@@ -1293,13 +1294,18 @@ export class DefaultClient implements Client {
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {
-                exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri)
+                exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri),
+                associations: new OtherSettings().filesAssociations
             },
             search: {
                 exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
             }
         };
 
+        this.sendDidChangeSettings(settings);
+    }
+
+    public sendDidChangeSettings(settings: any): void {
         // Send settings json to native side
         this.notifyWhenReady(() => {
             this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
@@ -1307,7 +1313,7 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } {
-        this.sendDidChangeSettings();
+        this.sendAllSettings();
         let changedSettings: { [key: string]: string };
         changedSettings = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
@@ -1965,8 +1971,7 @@ export class DefaultClient implements Client {
 
             // TODO: Handle new associations without a reload.
             this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
-            let settings: OtherSettings = new OtherSettings(this.RootUri);
-            let assocs: any = settings.filesAssociations;
+            let assocs: any = new OtherSettings().filesAssociations;
             for (let assoc in assocs) {
                 let dotIndex: number = assoc.lastIndexOf('.');
                 if (dotIndex !== -1) {
@@ -2689,4 +2694,5 @@ class NullClient implements Client {
         return Promise.resolve();
     }
     addFileAssociations(fileAssociations: string, is_c: boolean): void {}
+    sendDidChangeSettings(settings: any): void {}
 }

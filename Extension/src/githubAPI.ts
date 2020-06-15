@@ -139,7 +139,8 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
             // If the user version is greater than or incomparable to the latest available verion then there is no need to update
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
             const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-            if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion)))) {
+            const latestIsCorrect: boolean = latestVersion.suffix !== 'insiders' || updateChannel === 'insiders';
+            if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion) && latestIsCorrect))) {
                 return undefined;
             }
 
