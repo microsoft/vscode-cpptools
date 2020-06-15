@@ -14,25 +14,25 @@ import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension'
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
-    let defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
+    const defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
     // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
-    let invoke2 = (a: any, b: any, callback: (a: any, b: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
-    let invoke3 = (a: any, b: any, c: any, callback: (a: any, b: any, c: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
-    let invoke4 = (a: any, b: any, c: any, d: any, callback: (a: any, b: any, c: any, d: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d));
-    let invoke5 = (a: any, b: any, c: any, d: any, e: any, callback: (a: any, b: any, c: any, d: any, e: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d, e));
+    const invoke2 = (a: any, b: any, callback: (a: any, b: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
+    const invoke3 = (a: any, b: any, c: any, callback: (a: any, b: any, c: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
+    const invoke4 = (a: any, b: any, c: any, d: any, callback: (a: any, b: any, c: any, d: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d));
+    const invoke5 = (a: any, b: any, c: any, d: any, e: any, callback: (a: any, b: any, c: any, d: any, e: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d, e));
     /* tslint:enable */
 
     return {
         didOpen: (document, sendMessage) => {
-            let editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
+            const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
-                let me: Client = clients.getClientFor(document.uri);
+                const me: Client = clients.getClientFor(document.uri);
                 if (clients.checkOwnership(me, document)) {
                     me.TrackedDocuments.add(document);
-                    let finishDidOpen = (doc: vscode.TextDocument) => {
+                    const finishDidOpen = (doc: vscode.TextDocument) => {
                         me.provideCustomConfiguration(doc.uri, undefined);
                         me.notifyWhenReady(() => {
                             sendMessage(doc);
@@ -44,7 +44,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                     };
                     let languageChanged: boolean = false;
                     if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
-                        let cppSettings: CppSettings = new CppSettings();
+                        const cppSettings: CppSettings = new CppSettings();
                         if (cppSettings.autoAddFileAssociations) {
                             const fileName: string = path.basename(document.uri.fsPath);
                             const mappingString: string = fileName + "@" + document.uri.fsPath;
@@ -71,7 +71,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
             }
         },
         didChange: (textDocumentChangeEvent, sendMessage) => {
-            let me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
+            const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
             if (!me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
                 processDelayedDidOpen(textDocumentChangeEvent.document);
             }
@@ -80,7 +80,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         },
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
-            let me: Client = clients.getClientFor(event.document.uri);
+            const me: Client = clients.getClientFor(event.document.uri);
             if (me.TrackedDocuments.has(event.document)) {
                 return me.requestWhenReady(() => sendMessage(event));
             }
@@ -88,7 +88,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         },
         didSave: defaultHandler,
         didClose: (document, sendMessage) => {
-            let me: Client = clients.getClientFor(document.uri);
+            const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
@@ -99,7 +99,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
         provideHover: (document, position, token, next: (document: any, position: any, token: any) => any) => {
-            let me: Client = clients.getClientFor(document.uri);
+            const me: Client = clients.getClientFor(document.uri);
             if (clients.checkOwnership(me, document)) {
                 return clients.ActiveClient.requestWhenReady(() => next(document, position, token));
             }

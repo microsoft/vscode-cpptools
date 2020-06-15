@@ -50,7 +50,7 @@ export class RemoteAttachPicker {
             } else {
                 this._channel.clear();
 
-                let pipeTransport: any = config ? config.pipeTransport : undefined;
+                const pipeTransport: any = config ? config.pipeTransport : undefined;
 
                 if (!pipeTransport) {
                     return Promise.reject<string>(new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport")));
@@ -84,15 +84,15 @@ export class RemoteAttachPicker {
                     pipeProgram = pipeTransport.pipeProgram;
                 }
 
-                let pipeArgs: string[] = pipeTransport.pipeArgs;
+                const pipeArgs: string[] = pipeTransport.pipeArgs;
 
-                let argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
+                const argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
 
-                let pipeCmd: string = `"${pipeProgram}" ${argList}`;
+                const pipeCmd: string = `"${pipeProgram}" ${argList}`;
 
                 return this.getRemoteOSAndProcesses(pipeCmd)
                     .then(processes => {
-                        let attachPickOptions: vscode.QuickPickOptions = {
+                        const attachPickOptions: vscode.QuickPickOptions = {
                             matchOnDetail: true,
                             matchOnDescription: true,
                             placeHolder: localize("select.process.attach", "Select the process to attach to")
@@ -113,7 +113,7 @@ export class RemoteAttachPicker {
         let parameterEnd: string = `)`;
         let escapedQuote: string = `\\\"`;
 
-        let settings: CppSettings = new CppSettings();
+        const settings: CppSettings = new CppSettings();
         if (settings.useBacktickCommandSubstitution) {
             parameterBegin = `\``;
             parameterEnd = `\``;
@@ -139,12 +139,12 @@ export class RemoteAttachPicker {
         return util.execChildProcess(execCommand, undefined, this._channel).then(output => {
             // OS will be on first line
             // Processes will follow if listed
-            let lines: string[] = output.split(/\r?\n/);
+            const lines: string[] = output.split(/\r?\n/);
 
             if (lines.length === 0) {
                 return Promise.reject<AttachItem[]>(new Error(localize("pipe.failed", "Pipe transport failed to get OS and processes.")));
             } else {
-                let remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
+                const remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
                 if (remoteOS !== "Linux" && remoteOS !== "Darwin") {
                     return Promise.reject<AttachItem[]>(new Error(`Operating system "${remoteOS}" not supported.`));
@@ -154,7 +154,7 @@ export class RemoteAttachPicker {
                 if (lines.length === 1) {
                     return Promise.reject<AttachItem[]>(new Error(localize("no.process.list", "Transport attach could not obtain processes list.")));
                 } else {
-                    let processes: string[] = lines.slice(1);
+                    const processes: string[] = lines.slice(1);
                     return PsProcessParser.ParseProcessFromPsArray(processes)
                         .sort((a, b) => {
                             if (a.name === undefined) {
@@ -166,8 +166,8 @@ export class RemoteAttachPicker {
                             if (b.name === undefined) {
                                 return -1;
                             }
-                            let aLower: string = a.name.toLowerCase();
-                            let bLower: string = b.name.toLowerCase();
+                            const aLower: string = a.name.toLowerCase();
+                            const bLower: string = b.name.toLowerCase();
                             if (aLower === bLower) {
                                 return 0;
                             }
@@ -182,7 +182,7 @@ export class RemoteAttachPicker {
     private static createArgumentList(args: string[]): string {
         let argsString: string = "";
 
-        for (let arg of args) {
+        for (const arg of args) {
             if (argsString) {
                 argsString += " ";
             }

@@ -12,6 +12,8 @@
 		"noImplicitUseStrict": true
 	},
 	"include": [
-		"test/**/*.ts"
+		"test/**/*.ts",
+		"tools/**/*.ts",
+		"ui/**/*.ts"
 	]
 }
