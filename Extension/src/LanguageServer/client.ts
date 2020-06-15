@@ -1663,7 +1663,7 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
-        diagnosticsChannel.appendLine(`${header}${version}${configJson}${response.diagnostics}`);
+        diagnosticsChannel.appendLine(`${header}${version}${configJson}${this.customBrowseConfigurationLogging}${response.diagnostics}`);
         diagnosticsChannel.show(false);
     }
 
@@ -2384,6 +2384,8 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(CustomConfigurationNotification, params);
     }
 
+    private customBrowseConfigurationLogging: string = "";
+
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
         let rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         if (!rootFolder) {
@@ -2392,6 +2394,8 @@ export class DefaultClient implements Client {
         let lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, rootFolder);
         let lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, rootFolder);
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
+
+        this.customBrowseConfigurationLogging = "";
 
         // This while (true) is here just so we can break out early if the config is set on error
         while (true) {
@@ -2449,6 +2453,8 @@ export class DefaultClient implements Client {
             }
             break;
         }
+
+        this.customBrowseConfigurationLogging = JSON.stringify(sanitized, null, 4);
 
         let params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized,
