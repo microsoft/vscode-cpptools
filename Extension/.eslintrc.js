@@ -87,6 +87,7 @@ module.exports = {
             "error",
             "never"
         ],
+        "prefer-const": "error",
         "prefer-object-spread": "error",
         "space-in-parens": [
             "error",

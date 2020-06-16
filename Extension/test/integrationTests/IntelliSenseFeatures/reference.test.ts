@@ -14,9 +14,9 @@ function delay(ms: number): Promise<void> {
 
 suite(`[Reference test]`, function(): void {
     let cpptools: apit.CppToolsTestApi;
-    let disposables: vscode.Disposable[] = [];
-    let path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/references.cpp";
-    let fileUri: vscode.Uri = vscode.Uri.file(path);
+    const disposables: vscode.Disposable[] = [];
+    const path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/references.cpp";
+    const fileUri: vscode.Uri = vscode.Uri.file(path);
     let testHook: apit.CppToolsTestHook;
     let getIntelliSenseStatus: any;
     let document: vscode.TextDocument;
@@ -46,10 +46,10 @@ suite(`[Reference test]`, function(): void {
 
     test("[Find confirmed references of a symbol]", async () => {
         // Get reference of function declaration "int func1()"
-        let declarationResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
-        let functionCallResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(24, 21)));
+        const declarationResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(17, 7)));
+        const functionCallResult: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(24, 21)));
 
-        let expectedText: string = "func1";
+        const expectedText: string = "func1";
         assertTextInLocation(document, expectedText, declarationResult);
         assertTextInLocation(document, expectedText, functionCallResult);
         assert.deepEqual(declarationResult, functionCallResult);
@@ -57,9 +57,9 @@ suite(`[Reference test]`, function(): void {
 
     test("[Find references of local param]", async () => {
         // Get reference of local param: var1 in "int func1(float var1)"
-        let result: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(21, 18)));
+        const result: vscode.Location[] = <vscode.Location[]>(await vscode.commands.executeCommand("vscode.executeReferenceProvider", fileUri, new vscode.Position(21, 18)));
 
-        let expectedText: string = "var1";
+        const expectedText: string = "var1";
         assertTextInLocation(document, expectedText, result);
         assert.equal(result.length, 2);
     });
@@ -90,7 +90,7 @@ function assertTextInLocation(document: vscode.TextDocument, expectedText: strin
         console.log("expected reference text: " + expectedText);
     }
     Locations.forEach(location => {
-        let actualtext: string = document.getText(location.range);
+        const actualtext: string = document.getText(location.range);
         if (displayLog) {
             console.log("actual reference text: " + actualtext);
         }
