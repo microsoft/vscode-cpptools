@@ -1,0 +1,112 @@
+variables:
+  llvm_repo: https://github.com/llvm/llvm-project.git
+  llvm_branch: release/10.x
+  llvm_build_type: Release
+  llvm_arch: x86_64
+  llvm_additional_parameters: "-DLLVM_BUILD_LLVM_DYLIB=On -DLLDB_ENABLE_CURSES=Off -DLLDB_ENABLE_PYTHON=Off -DLLDB_INCLUDE_TESTS=OFF"
+  # TODO: fix lldb_mi_repo and lldb_mi_branch (https://github.com/lldb-tools/lldb-mi/pull/37 and https://github.com/lldb-tools/lldb-mi/pull/39)
+  lldb_mi_repo: https://github.com/WardenGnaw/lldb-mi # TODO: Change to lldb-tools
+  lldb_mi_branch: release/cpptools # TODO: Change to master
+  lldb_mi_additional_parameters: ""
+
+jobs:
+- job: LLDB_MI
+  timeoutInMinutes: 360
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+  - task: CmdLine@2
+    displayName: 'Install Dependencies'
+    inputs: 
+      script: sudo apt-get install cmake ninja-build swig
+    continueOnError: true
+
+  - task: CmdLine@2
+    displayName: 'Build LLVM Project'
+    inputs: 
+      script: |
+        log_and_exec_cmd() {
+          echo "##[command] $1"
+          $1
+        }
+
+        log_and_exec_cmd "cd $(Build.StagingDirectory)"
+        log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace"
+        
+        log_and_exec_cmd "git clone $(llvm_repo) llvm-project"
+        log_and_exec_cmd "cd llvm-project"
+        log_and_exec_cmd "git checkout $(llvm_branch)"
+
+        log_and_exec_cmd "cd .."
+        log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace/llvm-inst"
+        log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace/llvm-build"
+        log_and_exec_cmd "cd $(Build.StagingDirectory)/buildspace/llvm-build"
+
+        log_and_exec_cmd "cmake -DLLVM_ENABLE_PROJECTS=clang;lldb -DCMAKE_BUILD_TYPE=$(llvm_build_type) -DCMAKE_INSTALL_PREFIX=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=$(llvm_arch) $(llvm_additional_parameters) -GNinja $(Build.StagingDirectory)/llvm-project/llvm"
+        if [[ $? -ne 0 ]]
+        then
+          echo "##[error] cmake llvm failed"
+          cat $(Build.SourcesDirectory)/buildspace/llvm-build/CMakeFiles/CMakeError.log
+          exit 1
+        fi
+
+        log_and_exec_cmd ninja
+        if [[ $? -ne 0 ]]
+        then
+          echo "##[error] ninja failed"
+          exit 1
+        fi
+
+        ### Workaround for https://github.com/llvm/llvm-project/issues/108
+        log_and_exec_cmd "ninja install"
+
+        # Remove conflicting LLDB.framework file.
+        log_and_exec_cmd "rm -rf $(Build.StagingDirectory)/buildspace/llvm-inst/Library/Frameworks/LLDB.framework"
+
+        # Build lldb/sources/API first
+        log_and_exec_cmd "cmake -P $(Build.StagingDirectory)/buildspace/llvm-build/tools/lldb/source/API/cmake_install.cmake"
+        ### End of Workaround
+
+        log_and_exec_cmd "ninja install"
+        if [[ $? -ne 0 ]]
+        then
+          echo "##[error] ninja install failed"
+          exit 1
+        fi
+
+        echo "##[section] Build LLDB-MI"
+        # Download lldb-mi and build it against our custom installation.
+        log_and_exec_cmd "cd $(Build.StagingDirectory)/buildspace"
+        log_and_exec_cmd "git clone $(lldb_mi_repo) lldb-mi"
+        log_and_exec_cmd "cd lldb-mi"
+        log_and_exec_cmd "git checkout $(lldb_mi_branch)"
+
+        # Create a separate build directory for building lldb-mi.
+        log_and_exec_cmd "mkdir build"
+        log_and_exec_cmd "cd build"
+        log_and_exec_cmd "cmake -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ $(lldb_mi_additional_parameters) -GNinja .."
+        log_and_exec_cmd "ninja"
+        if [[ $? -ne 0 ]]
+        then
+          echo "##[error] ninja failed"
+          exit 1
+        fi
+
+        log_and_exec_cmd "mkdir $(Build.StagingDirectory)/publish"
+        log_and_exec_cmd "cd $(Build.StagingDirectory)/publish"
+
+        log_and_exec_cmd "mkdir -p ./debugAdapters/lldb-mi/bin"
+
+        log_and_exec_cmd "cp $(Build.StagingDirectory)/buildspace/lldb-mi/build/src/lldb-mi ./debugAdapters/lldb-mi/bin/."
+        log_and_exec_cmd "cp $(Build.StagingDirectory)/buildspace/llvm-inst/lib/liblldb.so* ./debugAdapters/lldb-mi/bin/."
+
+        # Grab NOTICE.TXT
+        cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugAdapters/lldb-mi/.
+
+  # Build can be found at https://dev.azure.com/ms/vscode-cpptools/_build?definitionId=313
+  # Click on the build and select 'Artifacts'
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish LLDB-MI'
+    inputs:
+      targetPath: '$(Build.StagingDirectory)/publish'
+      artifactName: 'lldb-mi'
