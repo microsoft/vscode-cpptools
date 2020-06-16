@@ -188,7 +188,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213
+        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to open a configuration file.
         if (!config || !config.type) {
             return null;
         }
@@ -271,6 +271,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
         if (config.logging?.engineLogging) {
             const outputChannel: logger.Logger = logger.getOutputChannelLogger();
+            outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
             logger.showOutputChannel();
         }
