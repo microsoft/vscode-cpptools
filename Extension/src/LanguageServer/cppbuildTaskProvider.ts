@@ -12,7 +12,7 @@ import * as configs from './configurations';
 import * as ext from './extension';
 import * as fs from 'fs';
 import * as nls from 'vscode-nls';
-import { exec } from "child_process";
+import * as cp from "child_process";
 
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
@@ -22,7 +22,7 @@ export interface CppBuildTaskDefinition extends vscode.TaskDefinition {
     label: string;
     command: string;
     args: string[];
-    options: undefined | Record<string, string>;
+    options: cp.ProcessEnvOptions | undefined;
 }
 
 export class CppBuildTaskProvider implements vscode.TaskProvider {
@@ -33,13 +33,16 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     constructor() {}
 
     public async provideTasks(): Promise<vscode.Task[]> {
+        if (this.tasks !== undefined) {
+            return this.tasks;
+        }
         return this.getTasks(false, false);
     }
 
+    // Resolves a task that has no [`execution`](#Task.execution) set.
     public resolveTask(_task: vscode.Task): vscode.Task | undefined {
-        // return this.getTask(compilerPath, compilerArgs);
-        const command: string = _task.definition.command;
-        if (command) {
+        const execution: vscode.ProcessExecution | vscode.ShellExecution | vscode.CustomExecution | undefined = _task.execution;
+        if (execution === undefined) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
             return this.getTask(definition.command, false, false, definition.args ? definition.args : [], definition);
         }
@@ -48,6 +51,9 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
     public async getTasks(returnCompilerPath: boolean, appendSourceToName: boolean): Promise<vscode.Task[]> {
+        if (this.tasks !== undefined) {
+            return this.tasks;
+        }
         this.tasks = [];
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor) {
@@ -148,26 +154,26 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         const taskName: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
         const isWindows: boolean = os.platform() === 'win32';
-        const cwd: string = isCl ? "" : path.dirname(compilerPath);
+        const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
         let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
-        if (compilerArgs && compilerArgs.length > 0) {
+        if (definition === undefined && compilerArgs && compilerArgs.length > 0) {
             args = args.concat(compilerArgs);
         }
+        const options: cp.ProcessEnvOptions | undefined = {"cwd": cwd};
 
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
-        if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"")) {
+        if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
             resolvedcompilerPath = "\"" + resolvedcompilerPath + "\"";
         }
-        const command: string = resolvedcompilerPath + " " + args.join(" ");
 
         if (definition === undefined) {
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskName,
-                command: command,
+                command: resolvedcompilerPath,
                 args: args,
-                options: isCl ? undefined : {"cwd": cwd}
+                options: options
             };
         }
 
@@ -189,7 +195,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         let task: vscode.Task =  new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
             new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> =>
             // When the task is executed, this callback will run. Here, we setup for running the task.
-			 new CustomBuildTaskTerminal(command)
+			 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options, target.name)
             ), isCl ? '$msCompile' : '$gcc');
 
         /* const normalcommand: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
@@ -211,15 +217,18 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
 
     private fileWatcher: vscode.FileSystemWatcher | undefined;
 
-    private command: string;
 
-    constructor(command: string) {
-        this.command = command;
+    constructor(private command: string, private args: string[], private options: cp.ProcessEnvOptions | undefined, private workspaceRoot: string) {
     }
 
 
     open(initialDimensions: vscode.TerminalDimensions | undefined): void {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
+        const pattern: string = path.join(this.workspaceRoot, 'cppBuild');
+        this.fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+        this.fileWatcher.onDidChange(() => this.doBuild());
+        this.fileWatcher.onDidCreate(() => this.doBuild());
+        this.fileWatcher.onDidDelete(() => this.doBuild());
         // At this point we can start using the terminal.
         this.writeEmitter.fire("Starting build...\r\n");
         this.doBuild();
@@ -233,22 +242,26 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     }
 
     private async doBuild(): Promise<void> {
-        return new Promise<void>((resolve) => {
+        return new Promise<void>((resolve, reject) => {
             // Do build.
-            const activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
-            exec(activeCommand, (_error, stdout, stderr) => {
-                this.writeEmitter.fire(stdout);
-                this.writeEmitter.fire(stderr);
+            const activeCommand: string = util.resolveVariables(this.command + " " + this.args.join(" "), this.AdditionalEnvironment);
+            cp.exec(activeCommand, this.options, (_error, stdout, stderr) => {
                 if (_error) {
-                    telemetry.logLanguageServerEvent("cppBuildTaskError");
+                    telemetry.logLanguageServerEvent("cppBuildTaskError", { "error": stderr.toString() });
+                    this.writeEmitter.fire(stderr.toString());
                     this.writeEmitter.fire("Build finished with error.\r\n");
+                    reject();
                 } else {
+                    this.writeEmitter.fire(stdout.toString());
                     this.writeEmitter.fire("Build finished successfully.\r\n");
+                    resolve();
                 }
             });
+        }).finally (() => {
             this.writeEmitter.fire("\r\n");
+            this.closeEmitter.fire();
             // Set timeout to give enough time to the writeEmitter to print all messages.
-            setTimeout(() => {this.closeEmitter.fire(); }, 3000);
+            // setTimeout(() => {this.closeEmitter.fire(); }, 3000);
         });
     }
 

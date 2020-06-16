@@ -40,7 +40,7 @@
   ],
   "activationEvents": [
     "*"
-  ],
+  ], 
   "main": "./dist/main",
   "contributes": {
     "taskDefinitions": [
@@ -58,13 +58,13 @@
 						"type": "string",
 						"description": "The compiler path."
 					},
-					"flags": {
+					"args": {
 						"type": "array",
-						"description": "Additional build flags."
+						"description": "Additional build args."
           },
           "options": {
-						"type": "object",
-						"description": "Current working directory."
+            "type": "object",
+						"description": "Options {\"cwd\": cwd}." 
 					}
 				}
 			}
