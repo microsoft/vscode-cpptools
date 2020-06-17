@@ -461,7 +461,7 @@ gulp.task("generate-native-strings", (done) => {
         // Add to TypeScript switch
         // Skip empty strings, which can be used to prevent enum/index reordering
         if (stringValue != "") {
-            // It's possible that a translation may skip "{#}" entries, so check for up to 20 of them.
+            // It's possible that a translation may skip "{#}" entries, so check for up to 50 of them.
             let numArgs = 0;
             for (let i = 0; i < 50; i++) {
                 if (stringValue.includes(`{${i}}`)) {
