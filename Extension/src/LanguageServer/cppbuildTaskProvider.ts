@@ -276,7 +276,11 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
             return undefined;
         }
         const file: string = editor.document.fileName;
-        return { "file": file, "fileDirname": fileDir.uri.fsPath, "fileBasenameNoExtension": path.parse(file).name};
+        return {
+            "file": file,
+            "fileDirname": fileDir.uri.fsPath,
+            "fileBasenameNoExtension": path.parse(file).name,
+            "workspaceFolder": fileDir.uri.fsPath};
     }
 }
 
