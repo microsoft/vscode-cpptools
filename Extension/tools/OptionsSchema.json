@@ -535,6 +535,16 @@
               "type": "boolean",
               "description": "%c_cpp.debuggers.logging.engineLogging.description%",
               "default": false
+            },
+            "threadExit": {
+              "type": "boolean",
+              "description": "%c_cpp.debuggers.logging.threadExit.description%",
+              "default": false
+            },
+            "processExit": {
+              "type": "boolean",
+              "description": "%c_cpp.debuggers.logging.processExit.description%",
+              "default": true
             }
           }
         },
