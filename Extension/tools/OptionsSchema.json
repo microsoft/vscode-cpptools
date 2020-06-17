@@ -49,7 +49,7 @@
         "quoteArgs": {
           "exceptions": {
             "type": "boolean",
-            "description": "%c_cpp.debuggers.logging.quoteArgs.description%",
+            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
             "default": true
           }
         }
@@ -538,12 +538,12 @@
             },
             "threadExit": {
               "type": "boolean",
-              "description": "%c_cpp.debuggers.logging.threadExit.description%",
+              "description": "%c_cpp.debuggers.cppvsdbg.logging.threadExit.description%",
               "default": false
             },
             "processExit": {
               "type": "boolean",
-              "description": "%c_cpp.debuggers.logging.processExit.description%",
+              "description": "%c_cpp.debuggers.cppvsdbg.logging.processExit.description%",
               "default": true
             }
           }
