@@ -160,7 +160,7 @@ export class SettingsPanel {
 
     public setKnownCompilers(knownCompilers?: config.KnownCompiler[], pathSeparator?: string): void {
         if (knownCompilers && knownCompilers.length) {
-            for (let compiler of knownCompilers) {
+            for (const compiler of knownCompilers) {
                 // Normalize path separators.
                 let path: string = compiler.path;
                 if (pathSeparator === "Forward Slash") {
@@ -274,7 +274,7 @@ export class SettingsPanel {
     }
 
     private updateConfig(message: any): void {
-        let splitEntries: (input: any) => string[] = (input: any) => input.split("\n").filter((e: string) => e);
+        const splitEntries: (input: any) => string[] = (input: any) => input.split("\n").filter((e: string) => e);
 
         switch (message.key) {
             case elementId.configName:

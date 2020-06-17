@@ -29,7 +29,7 @@ export function indentJsonString(json: string, numTabs: number = 1): string {
 }
 
 function formatString(format: string, args: string[]): string {
-    for (let arg in args) {
+    for (const arg in args) {
         format = format.replace("{" + arg + "}", args[arg]);
     }
     return format;
@@ -107,9 +107,9 @@ abstract class Configuration implements IConfiguration {
 export class MIConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("launch.string", "Launch").replace(/\"/g, "\\\"")}`;
+        const name: string = `(${this.MIMode}) ${localize("launch.string", "Launch").replace(/\"/g, "\\\"")}`;
 
-        let body: string = formatString(`{
+        const body: string = formatString(`{
 \t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
@@ -125,9 +125,9 @@ export class MIConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("attach.string", "Attach").replace(/\"/g, "\\\"")}`;
+        const name: string = `(${this.MIMode}) ${localize("attach.string", "Attach").replace(/\"/g, "\\\"")}`;
 
-        let body: string = formatString(`{
+        const body: string = formatString(`{
 \t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))},
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
@@ -146,9 +146,9 @@ export class MIConfigurations extends Configuration {
 export class PipeTransportConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("pipe.launch", "Pipe Launch").replace(/\"/g, "\\\"")}`;
+        const name: string = `(${this.MIMode}) ${localize("pipe.launch", "Pipe Launch").replace(/\"/g, "\\\"")}`;
 
-        let body: string = formatString(`
+        const body: string = formatString(`
 {
 \t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
 \t${indentJsonString(createPipeTransportString(this.pipeProgram, this.MIMode))},
@@ -165,9 +165,9 @@ export class PipeTransportConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("pipe.attach", "Pipe Attach").replace(/\"/g, "\\\"")}`;
+        const name: string = `(${this.MIMode}) ${localize("pipe.attach", "Pipe Attach").replace(/\"/g, "\\\"")}`;
 
-        let body: string = formatString(`
+        const body: string = formatString(`
 {
 \t${indentJsonString(createRemoteAttachString(name, this.miDebugger, this.executable))},
 \t${indentJsonString(createPipeTransportString(this.pipeProgram, this.MIMode))},
@@ -186,9 +186,9 @@ export class PipeTransportConfigurations extends Configuration {
 export class WindowsConfigurations extends Configuration {
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(Windows) ${localize("launch.string", "Launch").replace(/\"/g, "\\\"")}`;
+        const name: string = `(Windows) ${localize("launch.string", "Launch").replace(/\"/g, "\\\"")}`;
 
-        let body: string = `
+        const body: string = `
 {
 \t${indentJsonString(createLaunchString(name, this.windowsDebugger, this.executable))}
 }`;
@@ -204,9 +204,9 @@ export class WindowsConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(Windows) ${localize("attach.string", "Attach").replace(/\"/g, "\\\"")}`;
+        const name: string = `(Windows) ${localize("attach.string", "Attach").replace(/\"/g, "\\\"")}`;
 
-        let body: string = `
+        const body: string = `
 {
 \t${indentJsonString(createAttachString(name, this.windowsDebugger, this.executable))}
 }`;
@@ -226,9 +226,9 @@ export class WSLConfigurations extends Configuration {
     public bashPipeProgram = process.arch === 'ia32' ? "${env:windir}\\\\sysnative\\\\bash.exe" : "${env:windir}\\\\system32\\\\bash.exe";
 
     public GetLaunchConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("bash.on.windows.launch", "Bash on Windows Launch").replace(/\"/g, "\\\"")}`;
+        const name: string = `(${this.MIMode}) ${localize("bash.on.windows.launch", "Bash on Windows Launch").replace(/\"/g, "\\\"")}`;
 
-        let body: string = formatString(`
+        const body: string = formatString(`
 {
 \t${indentJsonString(createLaunchString(name, this.miDebugger, this.executable))},
 \t${indentJsonString(createPipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}
@@ -243,9 +243,9 @@ export class WSLConfigurations extends Configuration {
     }
 
     public GetAttachConfiguration(): IConfigurationSnippet {
-        let name: string = `(${this.MIMode}) ${localize("bash.on.windows.attach", "Bash on Windows Attach").replace(/\"/g, "\\\"")}`;
+        const name: string = `(${this.MIMode}) ${localize("bash.on.windows.attach", "Bash on Windows Attach").replace(/\"/g, "\\\"")}`;
 
-        let body: string = formatString(`
+        const body: string = formatString(`
 {
 \t${indentJsonString(createRemoteAttachString(name, this.miDebugger, this.executable))},
 \t${indentJsonString(createPipeTransportString(this.bashPipeProgram, this.MIMode, ["-c"]))}{0}

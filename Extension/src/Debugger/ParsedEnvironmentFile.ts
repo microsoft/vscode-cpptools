@@ -24,7 +24,7 @@ export class ParsedEnvironmentFile {
     }
 
     public static CreateFromFile(envFile: string, initialEnv?: Environment[]): ParsedEnvironmentFile {
-        let content: string = fs.readFileSync(envFile, "utf8");
+        const content: string = fs.readFileSync(envFile, "utf8");
         return this.CreateFromContent(content, envFile, initialEnv);
     }
 
@@ -35,8 +35,8 @@ export class ParsedEnvironmentFile {
             content = content.substr(1);
         }
 
-        let parseErrors: string[] = [];
-        let env: Map<string, any> = new Map();
+        const parseErrors: string[] = [];
+        const env: Map<string, any> = new Map();
 
         if (initialEnv) {
             // Convert array to map to prevent duplicate keys being created.
@@ -80,7 +80,7 @@ export class ParsedEnvironmentFile {
 
         // Convert env map back to array.
         const arrayEnv: Environment[] = [];
-        for (let key of env.keys()) {
+        for (const key of env.keys()) {
             arrayEnv.push({name: key, value: env.get(key)});
         }
 

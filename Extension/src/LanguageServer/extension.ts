@@ -14,7 +14,7 @@ import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
-import { CppSettings } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -37,7 +37,7 @@ let prevCrashFile: string;
 let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
-let disposables: vscode.Disposable[] = [];
+const disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
 let insiderUpdateEnabled: boolean = false;
@@ -75,10 +75,10 @@ function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                         resolve({});
                         return;
                     }
-                    let database: vcpkgDatabase = {};
-                    let reader: rd.ReadLine = rd.createInterface(stream);
+                    const database: vcpkgDatabase = {};
+                    const reader: rd.ReadLine = rd.createInterface(stream);
                     reader.on('line', (lineText: string) => {
-                        let portFilePair: string[] = lineText.split(':');
+                        const portFilePair: string[] = lineText.split(':');
                         if (portFilePair.length !== 2) {
                             return;
                         }
@@ -215,7 +215,7 @@ export function activate(activationEventOccurred: boolean): void {
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
-            let config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (fs.existsSync(config)) {
                 onActivationEvent();
                 return;
@@ -226,7 +226,7 @@ export function activate(activationEventOccurred: boolean): void {
     // handle "onLanguage:cpp" and "onLanguage:c" activation events.
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
-            let document: vscode.TextDocument = vscode.workspace.textDocuments[i];
+            const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
             if (document.uri.scheme === "file") {
                 if (document.languageId === "cpp" || document.languageId === "c") {
                     onActivationEvent();
@@ -343,7 +343,7 @@ export async function getBuildTasks(returnCompilerPath: boolean, appendSourceToN
         return [];
     }
 
-    let createTask: (compilerPath: string, compilerArgs?: string []) => vscode.Task = (compilerPath: string, compilerArgs?: string []) => {
+    const createTask: (compilerPath: string, compilerArgs?: string []) => vscode.Task = (compilerPath: string, compilerArgs?: string []) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const compilerPathDir: string = path.dirname(compilerPath);
@@ -369,7 +369,7 @@ export async function getBuildTasks(returnCompilerPath: boolean, appendSourceToN
         }
 
         const command: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
-        let uri: vscode.Uri | undefined = clients.ActiveClient.RootUri;
+        const uri: vscode.Uri | undefined = clients.ActiveClient.RootUri;
         if (!uri) {
             throw new Error("No client URI found in getBuildTasks()");
         }
@@ -377,7 +377,7 @@ export async function getBuildTasks(returnCompilerPath: boolean, appendSourceToN
         if (!target) {
             throw new Error("No target WorkspaceFolder found in getBuildTasks()");
         }
-        let task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, isCl ? '$msCompile' : '$gcc');
+        const task: vscode.Task = new vscode.Task(kind, target, taskName, taskSourceStr, command, isCl ? '$msCompile' : '$gcc');
         task.definition = kind; // The constructor for vscode.Task will consume the definition. Reset it by reassigning.
         task.group = vscode.TaskGroup.Build;
 
@@ -394,7 +394,7 @@ export async function getBuildTasks(returnCompilerPath: boolean, appendSourceToN
 
     // Task for user compiler path setting
     if (userCompilerPath) {
-        let task: vscode.Task = createTask(userCompilerPath, userCompilerPathAndArgs?.additionalArgs);
+        const task: vscode.Task = createTask(userCompilerPath, userCompilerPathAndArgs?.additionalArgs);
         buildTasks.push(task);
     }
 
@@ -428,10 +428,10 @@ function realActivation(): void {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
-        let checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
+        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
-            let clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
+            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
                 extension.isActive && extension.id === "mitaki28.vscode-clang");
             if (clangCommandAdapterActive) {
                 telemetry.logLanguageServerEvent("conflictingExtension");
@@ -468,8 +468,8 @@ function realActivation(): void {
         if (info.platform !== "linux" || info.architecture === "x86_64") {
             // Skip Insiders processing for unsupported VS Code versions.
             // TODO: Change this to not require the hardcoded version to be updated.
-            let vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            let minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.43.2");
+            const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.43.2");
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {
@@ -499,7 +499,7 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
-    let activeClient: Client = clients.ActiveClient;
+    const activeClient: Client = clients.ActiveClient;
     const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event, true);
     clients.forEach(client => {
         if (client !== activeClient) {
@@ -528,7 +528,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
         activeDocument = "";
     } else {
@@ -557,26 +557,37 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 }
 
 export function processDelayedDidOpen(document: vscode.TextDocument): void {
-    let client: Client = clients.getClientFor(document.uri);
+    const client: Client = clients.getClientFor(document.uri);
     if (client) {
         if (clients.checkOwnership(client, document)) {
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
                 client.TrackedDocuments.add(document);
+                const finishDidOpen = (doc: vscode.TextDocument) => {
+                    client.provideCustomConfiguration(doc.uri, undefined);
+                    client.notifyWhenReady(() => {
+                        client.takeOwnership(doc);
+                        client.onDidOpenTextDocument(doc);
+                    });
+                };
+                let languageChanged: boolean = false;
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
-                    let cppSettings: CppSettings = new CppSettings();
+                    const cppSettings: CppSettings = new CppSettings();
                     if (cppSettings.autoAddFileAssociations) {
                         const fileName: string = path.basename(document.uri.fsPath);
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
                         client.addFileAssociations(mappingString, false);
+                        client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                        vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
+                            finishDidOpen(newDoc);
+                        });
+                        languageChanged = true;
                     }
                 }
-                client.provideCustomConfiguration(document.uri, undefined);
-                client.notifyWhenReady(() => {
-                    client.takeOwnership(document);
-                    client.onDidOpenTextDocument(document);
-                });
+                if (!languageChanged) {
+                    finishDidOpen(document);
+                }
             }
         }
     }
@@ -601,10 +612,10 @@ function onInterval(): void {
  * @param updateChannel The user's updateChannel setting.
  */
 function installVsix(vsixLocation: string): Thenable<void> {
-    let userVersion: PackageVersion = new PackageVersion(vscode.version);
+    const userVersion: PackageVersion = new PackageVersion(vscode.version);
 
     // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
-    let lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
+    const lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
     if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand, "insider")) {
         return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
     }
@@ -643,7 +654,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
         }
 
         // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
-        let oldVersion: PackageVersion = new PackageVersion('1.27.2');
+        const oldVersion: PackageVersion = new PackageVersion('1.27.2');
         if (userVersion.isGreaterThan(oldVersion, "insider")) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
@@ -695,7 +706,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
             // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
             // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
             let sentOverride: boolean = false;
-            let stdout: Readable | null = process.stdout;
+            const stdout: Readable | null = process.stdout;
             if (!stdout) {
                 reject(new Error("Failed to communicate with VS Code script process for installation"));
                 return;
@@ -704,7 +715,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
                 if (sentOverride) {
                     return;
                 }
-                let stdin: Writable | null = process.stdin;
+                const stdin: Writable | null = process.stdin;
                 if (!stdin) {
                     reject(new Error("Failed to communicate with VS Code script process for installation"));
                     return;
@@ -719,7 +730,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
 }
 
 async function suggestInsidersChannel(): Promise<void> {
-    let suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
+    const suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
 
     if (!suggestInsiders.Value) {
         return;
@@ -741,7 +752,7 @@ async function suggestInsidersChannel(): Promise<void> {
     const yes: string = localize("yes.button", "Yes");
     const askLater: string = localize("ask.me.later.button", "Ask Me Later");
     const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
-    let selection: string | undefined = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
+    const selection: string | undefined = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
     switch (selection) {
         case yes:
             // Cache buildInfo.
@@ -765,8 +776,8 @@ async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
         tempVSIX = await util.createTempFileWithPostfix('.vsix');
 
         // Try to download VSIX
-        let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-        let originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
+        const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+        const originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
         while (true) { // Might need to try again with a different http.proxySupport setting.
             try {
                 await util.downloadFileToDestination(buildInfo.downloadUrl, tempVSIX.name);
@@ -879,13 +890,14 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
 function onSwitchHeaderSource(): void {
     onActivationEvent();
-    let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
         return;
     }
@@ -895,7 +907,7 @@ function onSwitchHeaderSource(): void {
     }
 
     let rootPath: string = clients.ActiveClient.RootPath;
-    let fileName: string = activeEditor.document.fileName;
+    const fileName: string = activeEditor.document.fileName;
 
     if (!rootPath) {
         rootPath = path.dirname(fileName); // When switching without a folder open.
@@ -934,7 +946,7 @@ function selectClient(): Thenable<Client> {
     } else {
         return ui.showWorkspaces(clients.Names).then(key => {
             if (key !== "") {
-                let client: Client | undefined = clients.get(key);
+                const client: Client | undefined = clients.get(key);
                 if (client) {
                     return client;
                 } else {
@@ -1013,28 +1025,28 @@ function onAddToIncludePath(path: string): void {
 function onEnableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
-    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<string>("errorSquiggles", "Enabled");
 }
 
 function onDisableSquiggles(): void {
     onActivationEvent();
     // This only applies to the active client.
-    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<string>("errorSquiggles", "Disabled");
 }
 
 function onToggleIncludeFallback(): void {
     onActivationEvent();
     // This only applies to the active client.
-    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
 }
 
 function onToggleDimInactiveRegions(): void {
     onActivationEvent();
     // This only applies to the active client.
-    let settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
+    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
 }
 
@@ -1060,14 +1072,14 @@ function onShowReferencesProgress(): void {
 
 function onToggleRefGroupView(): void {
     // Set context to switch icons
-    let client: Client = getActiveClient();
+    const client: Client = getActiveClient();
     client.toggleReferenceResultsView();
 }
 
 function onTakeSurvey(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("onTakeSurvey");
-    let uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
+    const uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
     vscode.commands.executeCommand('vscode.open', uri);
 }
 
@@ -1112,7 +1124,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         }
 
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
-        let portsPromises: Promise<string[]>[] = [];
+        const portsPromises: Promise<string[]>[] = [];
         missingIncludeLocations.forEach(docAndLineNumbers => {
             docAndLineNumbers[1].forEach(async line => {
                 portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
@@ -1122,7 +1134,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         if (!ports.length) {
             return;
         }
-        let ports2: string[] = ports;
+        const ports2: string[] = ports;
         ports = ports2.filter((port: string, index: number) => ports2.indexOf(port) === index);
     }
 
@@ -1139,6 +1151,10 @@ function onSetActiveConfigName(configurationName: string): Thenable<void> {
 
 function onGetActiveConfigName(): Thenable<string | undefined> {
     return clients.ActiveClient.getCurrentConfigName();
+}
+
+function onGetActiveConfigCustomVariable(variableName: string): Thenable<string> {
+    return clients.ActiveClient.getCurrentConfigCustomVariable(variableName);
 }
 
 function onLogDiagnostics(): void {
@@ -1178,9 +1194,9 @@ function reportMacCrashes(): void {
         if (!home) {
             return;
         }
-        let crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
+        const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
-            let crashObject: { [key: string]: string } = {};
+            const crashObject: { [key: string]: string } = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
                 crashObject["fs.stat: err.code"] = err.code;
@@ -1221,7 +1237,7 @@ function reportMacCrashes(): void {
 }
 
 function logCrashTelemetry(data: string): void {
-    let crashObject: { [key: string]: string } = {};
+    const crashObject: { [key: string]: string } = {};
     crashObject["CrashingThreadCallStack"] = data;
     telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
 }
@@ -1234,7 +1250,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
     // Extract the crashing process version, because the version might not match
     // if multiple VS Codes are running with different extension versions.
     let binaryVersion: string = "";
-    let startVersion: number = data.indexOf("Version:");
+    const startVersion: number = data.indexOf("Version:");
     if (startVersion >= 0) {
         data = data.substr(startVersion);
         const binaryVersionMatches: string[] | null = data.match(/^Version:\s*(\d*\.\d*\.\d*\.\d*|\d)/);
@@ -1276,7 +1292,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
     }
 
     // Remove runtime lines because they can be different on different machines.
-    let lines: string[] = data.split("\n");
+    const lines: string[] = data.split("\n");
     data = "";
     lines.forEach((line: string) => {
         if (!line.includes(".dylib") && !line.includes("???")) {

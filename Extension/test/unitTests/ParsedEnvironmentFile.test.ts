@@ -8,7 +8,7 @@ import * as assert from 'assert';
 // Because the environment variable is set as an array, the index does not matter.
 function assertEnvironmentEqual(env: Environment[], name: string, value: string): void {
     let found: boolean = false;
-    for (let e of env) {
+    for (const e of env) {
         if (e.name === name) {
             assert(e.value === value, `Checking if ${e.value} == ${value}`);
             found = true;
