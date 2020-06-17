@@ -188,85 +188,95 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        if (config) {
-            if (config.type === 'cppvsdbg') {
-                // Fail if cppvsdbg type is running on non-Windows
-                if (os.platform() !== 'win32') {
-                    logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
-                    return undefined;
-                }
+        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to open a configuration file.
+        if (!config || !config.type) {
+            return null;
+        }
 
-                // Disable debug heap by default, enable if 'enableDebugHeap' is set.
-                if (!config.enableDebugHeap) {
-                    const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
-
-                    if (config.environment && util.isArray(config.environment)) {
-                        config.environment.push(disableDebugHeapEnvSetting);
-                    } else {
-                        config.environment = [disableDebugHeapEnvSetting];
-                    }
-                }
+        if (config.type === 'cppvsdbg') {
+            // Fail if cppvsdbg type is running on non-Windows
+            if (os.platform() !== 'win32') {
+                logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
+                return undefined;
             }
 
-            // Add environment variables from .env file
-            this.resolveEnvFile(config, folder);
+            // Disable debug heap by default, enable if 'enableDebugHeap' is set.
+            if (!config.enableDebugHeap) {
+                const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
 
-            this.resolveSourceFileMapVariables(config);
-
-            // Modify WSL config for OpenDebugAD7
-            if (os.platform() === 'win32' &&
-                config.pipeTransport &&
-                config.pipeTransport.pipeProgram) {
-                let replacedPipeProgram: string | undefined;
-                const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
-
-                // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
-                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
-
-                // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-                if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
-                    const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
-                    const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
-
-                    replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
-                }
-
-                if (replacedPipeProgram) {
-                    config.pipeTransport.pipeProgram = replacedPipeProgram;
-                }
-            }
-
-            const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
-            const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
-
-            const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
-
-            // Validate LLDB-MI
-            if (os.platform() === 'darwin' && // Check for macOS
-                fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
-                (!macOSMIMode || macOSMIMode === 'lldb') &&
-                !macOSMIDebuggerPath // User did not provide custom lldb-mi
-            ) {
-                const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
-
-                if (!frameworkPath) {
-                    const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
-                    const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
-
-                    vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
-                        .then(value => {
-                            if (value === moreInfoButton) {
-                                const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
-                                vscode.env.openExternal(vscode.Uri.parse(helpURL));
-                            }
-                        });
-
-                    return undefined;
+                if (config.environment && util.isArray(config.environment)) {
+                    config.environment.push(disableDebugHeapEnvSetting);
+                } else {
+                    config.environment = [disableDebugHeapEnvSetting];
                 }
             }
         }
-        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213
-        return config && config.type ? config : null;
+
+        // Add environment variables from .env file
+        this.resolveEnvFile(config, folder);
+
+        this.resolveSourceFileMapVariables(config);
+
+        // Modify WSL config for OpenDebugAD7
+        if (os.platform() === 'win32' &&
+            config.pipeTransport &&
+            config.pipeTransport.pipeProgram) {
+            let replacedPipeProgram: string | undefined;
+            const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
+
+            // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
+            replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
+
+            // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+            if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
+                const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+
+                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
+            }
+
+            if (replacedPipeProgram) {
+                config.pipeTransport.pipeProgram = replacedPipeProgram;
+            }
+        }
+
+        const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
+        const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
+
+        const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
+
+        // Validate LLDB-MI
+        if (os.platform() === 'darwin' && // Check for macOS
+            fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
+            (!macOSMIMode || macOSMIMode === 'lldb') &&
+            !macOSMIDebuggerPath // User did not provide custom lldb-mi
+        ) {
+            const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
+
+            if (!frameworkPath) {
+                const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
+                const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
+
+                vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
+                    .then(value => {
+                        if (value === moreInfoButton) {
+                            const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
+                            vscode.env.openExternal(vscode.Uri.parse(helpURL));
+                        }
+                    });
+
+                return undefined;
+            }
+        }
+
+        if (config.logging?.engineLogging) {
+            const outputChannel: logger.Logger = logger.getOutputChannelLogger();
+            outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
+            outputChannel.appendLine(JSON.stringify(config, undefined, 2));
+            logger.showOutputChannel();
+        }
+
+        return config;
     }
 
     private getLLDBFrameworkPath(): string | undefined {
