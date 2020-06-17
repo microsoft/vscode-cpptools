@@ -444,36 +444,49 @@ gulp.task("generate-native-strings", (done) => {
 
     let stringIndex = 1;
     for (let property in stringTable) {
-        let stringName = property;
         let stringValue = stringTable[property];
+        let hintValue;
+        if (typeof stringValue !== "string")
+        {
+            hintValue = stringValue.hint;
+            stringValue = stringValue.text;
+        }
         
         // Add to native enum
         nativeEnumContent += `    ${property} = ${stringIndex},\n`;
         
         // Add to native string table
-        nativeStringTableContent += `    ${JSON.stringify(stringTable[property])},\n`;
+        nativeStringTableContent += `    ${JSON.stringify(stringValue)},\n`;
 
         // Add to TypeScript switch
         // Skip empty strings, which can be used to prevent enum/index reordering
-        if (stringTable[property] != "") {
+        if (stringValue != "") {
             // It's possible that a translation may skip "{#}" entries, so check for up to 20 of them.
             let numArgs = 0;
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 50; i++) {
                 if (stringValue.includes(`{${i}}`)) {
                     numArgs = i + 1;
                 }
             }
             typeScriptSwitchContent += `        case ${stringIndex}:\n`;
             if (numArgs != 0) {
-                typeScriptSwitchContent += `            if (!stringArgs) {\n`;
-                typeScriptSwitchContent += `                break;\n`;
-                typeScriptSwitchContent += `            }\n`;
+                typeScriptSwitchContent += `            if (stringArgs) {\n`;
+                if (hintValue) {
+                    typeScriptSwitchContent += `                message = localize({ key: ${JSON.stringify(property)}, comment: [${JSON.stringify(hintValue)}] }, ${JSON.stringify(stringValue)}`;
+                } else {
+                    typeScriptSwitchContent += `                message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringValue)}`;
+                }
+                for (let i = 0; i < numArgs; i++) {
+                    typeScriptSwitchContent += `, stringArgs[${i}]`;
+                }
+                typeScriptSwitchContent += `);\n                break;\n            }\n`;
             }
-            typeScriptSwitchContent += `            message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringTable[property])}`;
-            for (let i = 0; i < numArgs; i++) {
-                typeScriptSwitchContent += `, stringArgs[${i}]`;
+            if (hintValue) {
+                typeScriptSwitchContent += `            message = localize({ key: ${JSON.stringify(property)}, comment: [${JSON.stringify(hintValue)}] }, ${JSON.stringify(stringValue)}`;
+            } else {
+                typeScriptSwitchContent += `            message = localize(${JSON.stringify(property)}, ${JSON.stringify(stringValue)}`;
             }
-            typeScriptSwitchContent += ");\n            break;\n";
+            typeScriptSwitchContent += `);\n            break;\n`;
         }
         ++stringIndex;
     };
@@ -491,6 +504,8 @@ import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+export const localizedStringCount: number = ${stringIndex};
 
 export function lookupString(stringId: number, stringArgs?: string[]): string {
     let message: string = "";
@@ -518,7 +533,7 @@ ${typeScriptSwitchContent}
 
 #pragma once
 
-enum class localized_string_id
+enum class localized_string_id : unsigned int
 {
     blank = 0,
 ${nativeEnumContent}};

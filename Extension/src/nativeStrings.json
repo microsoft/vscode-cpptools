@@ -13,7 +13,6 @@
     "could_not_find_compile_commands": "\"{0}\" could not be found. 'includePath' from c_cpp_properties.json in folder '{1}' will be used instead.",
     "file_not_found_in_path": "\"{0}\" not found in \"{1}\". 'includePath' from c_cpp_properties.json in folder '{2}' will be used for this file instead.",
     "database_reset": "The IntelliSense database was successfully reset.",
-    "global_scope": "",
     "send_response_failed": "Failed to send response to client: {0}",
     "read_response_failed": "Failed to read response from server: {0}",
     "send_request_failed": "Failed to send request to server: {0}",
@@ -158,5 +157,28 @@
     "fallback_to_no_bitness": "Failed to query compiler. Falling back to no bitness.",
     "intellisense_client_creation_aborted": "IntelliSense client creation aborted: {0}",
     "include_errors_config_provider_intellisense_disabled ": "#include errors detected based on information provided by the configurationProvider setting. IntelliSense features for this translation unit ({0}) will be provided by the Tag Parser.",
-    "include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0})."
+    "include_errors_config_provider_squiggles_disabled ": "#include errors detected based on information provided by the configurationProvider setting. Squiggles are disabled for this translation unit ({0}).",
+    "preprocessor_keyword": {
+        "text": "preprocessor keyword",
+        "hint": "Refers to C/C++ processor keywords"
+    },
+    "c_keyword": "C keyword",
+    "cpp_keyword": "C++ keyword",
+    "overload": {
+        "text": "overload",
+        "hint": "Refers to 'overloaded' function in C++"
+    },
+    "overloads": {
+        "text": "overloads",
+        "hint": "Refers to 'overloaded' functions in C++"
+    },
+    "specialization": {
+        "text": "specialization",
+        "hint": "Refers to a C++ template specialization"
+    },
+    "specializations": {
+        "text": "specializations",
+        "hint": "Refers to C++ template specializations"
+    },
+    "expands_to": "Expands to:"
 }
