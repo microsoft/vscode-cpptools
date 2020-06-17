@@ -2454,7 +2454,7 @@ export class DefaultClient implements Client {
             break;
         }
 
-        this.customBrowseConfigurationLogging = JSON.stringify(sanitized, null, 4);
+        this.customBrowseConfigurationLogging = localize("browse.configuration", "Custom browse configuration: {0}", `\n${JSON.stringify(sanitized, null, 4)}\n`);
 
         let params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized,
