@@ -165,20 +165,21 @@
     "c_keyword": "C keyword",
     "cpp_keyword": "C++ keyword",
     "overload": {
-        "text": "overload",
-        "hint": "Refers to 'overloaded' function in C++"
+        "text": "+1 overload",
+        "hint": "Refers to 'overloaded' function in C++. This is part of a description indicating there is 1 additional overload of a specified function."
     },
     "overloads": {
-        "text": "overloads",
-        "hint": "Refers to 'overloaded' functions in C++"
+        "text": "+%d overloads",
+        "hint": "Refers to 'overloaded' functions in C++. This is part of a description indicating there are N additional overloads of a specified function.  %d is replaced with that number."
     },
     "specialization": {
-        "text": "specialization",
-        "hint": "Refers to a C++ template specialization"
+        "text": "+1 specialization",
+        "hint": "Refers to a C++ template specialization. This is part of a description indicating there is 1 additional specialization of a function."
     },
     "specializations": {
-        "text": "specializations",
-        "hint": "Refers to C++ template specializations"
+        "text": "+%d specializations",
+        "hint": "Refers to C++ template specializations. This is part of a description indicating there are N additional specializations of a function.  %d is replaced with that number."
     },
-    "expands_to": "Expands to:"
+    "expands_to": "Expands to:",
+    "file_label": "File:"
 }
