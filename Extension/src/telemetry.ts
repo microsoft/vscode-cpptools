@@ -45,7 +45,7 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
 
 function createReporter(): TelemetryReporter | null {
     if (util.extensionContext) {
-        let packageInfo: IPackageInfo = getPackageInfo();
+        const packageInfo: IPackageInfo = getPackageInfo();
         if (packageInfo) {
             return new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey);
         }

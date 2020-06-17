@@ -46,9 +46,9 @@ suite("LinuxDistro Tests", () => {
                              'REDHAT_SUPPORT_PRODUCT="centos"' + os.EOL +
                              'REDHAT_SUPPORT_PRODUCT_VERSION="7"';
 
-        let ubuntu1404: LinuxDistribution = LinuxDistribution.getDistroInformation(dataUbuntu1404);
-        let ubuntu1510: LinuxDistribution = LinuxDistribution.getDistroInformation(dataUbuntu1510);
-        let centos73: LinuxDistribution = LinuxDistribution.getDistroInformation(dataCentos73);
+        const ubuntu1404: LinuxDistribution = LinuxDistribution.getDistroInformation(dataUbuntu1404);
+        const ubuntu1510: LinuxDistribution = LinuxDistribution.getDistroInformation(dataUbuntu1510);
+        const centos73: LinuxDistribution = LinuxDistribution.getDistroInformation(dataCentos73);
 
         assert.equal(ubuntu1404.name, 'ubuntu');
         assert.equal(ubuntu1404.version, '"14.04"');
@@ -63,7 +63,7 @@ suite("LinuxDistro Tests", () => {
     test("Parse invalid os-release file", () => {
         const data: string = 'garbage"';
 
-        let unknown: LinuxDistribution = LinuxDistribution.getDistroInformation(data);
+        const unknown: LinuxDistribution = LinuxDistribution.getDistroInformation(data);
         assert.equal(unknown.name, 'unknown');
         assert.equal(unknown.version, 'unknown');
     });
@@ -86,11 +86,11 @@ suite("Pick Process Tests", () => {
                            'Name=conhost.exe' + os.EOL +
                            'ProcessId=59148' + os.EOL;
 
-        let parsedOutput: Process[] = WmicProcessParser.ParseProcessFromWmic(wmicOutput);
+        const parsedOutput: Process[] = WmicProcessParser.ParseProcessFromWmic(wmicOutput);
 
-        let process1: Process = parsedOutput[0];
-        let process2: Process = parsedOutput[1];
-        let process3: Process = parsedOutput[2];
+        const process1: Process = parsedOutput[0];
+        const process2: Process = parsedOutput[1];
+        const process3: Process = parsedOutput[2];
 
         assert.equal(process1.commandLine, '');
         assert.equal(process1.name, 'System Idle Process');
@@ -111,11 +111,11 @@ suite("Pick Process Tests", () => {
                          '15470 ScopedBookmarkAgent                                ScopedBookmarkAgent' + os.EOL +
                          '15220 mdworker                                           mdworker -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared' + os.EOL;
 
-        let parsedOutput: Process[] = PsProcessParser.ParseProcessFromPs(psOutput);
+        const parsedOutput: Process[] = PsProcessParser.ParseProcessFromPs(psOutput);
 
-        let process1: Process = parsedOutput[0];
-        let process2: Process = parsedOutput[1];
-        let process3: Process = parsedOutput[2];
+        const process1: Process = parsedOutput[0];
+        const process2: Process = parsedOutput[1];
+        const process3: Process = parsedOutput[2];
 
         assert.equal(process1.commandLine, 'ScopedBookmarkAgent');
         assert.equal(process1.name, 'ScopedBookmarkAgent');
