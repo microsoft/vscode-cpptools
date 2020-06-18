@@ -869,6 +869,7 @@ async function checkAndApplyUpdateOnTimer(): Promise<void> {
  * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
  * The update can be an upgrade or downgrade depending on the the updateChannel setting.
  * @param updateChannel The user's updateChannel setting.
+ * @param isFromSettingsChange True if the invocation is the result of a settings change.
  */
 async function checkAndApplyUpdate(updateChannel: string, isFromSettingsChange: boolean): Promise<void> {
     // If we have buildInfo cache, we should use it.

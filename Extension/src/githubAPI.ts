@@ -126,6 +126,7 @@ export interface BuildInfo {
 /**
  * Use the GitHub API to retrieve the download URL of the extension version the user should update to, if any.
  * @param updateChannel The user's updateChannel setting.
+ * @param isFromSettingsChange True if the invocation is the result of a settings change.
  * @return Download URL for the extension VSIX package that the user should install. If the user
  * does not need to update, resolves to undefined.
  */
@@ -180,6 +181,7 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
  * @param builds The GitHub release list parsed as an array of Builds.
  * @param userVersion The verion of the extension that the user is running.
  * @param updateChannel The user's updateChannel setting.
+ * @param isFromSettingsChange True if the invocation is the result of a settings change.
  * @return The Build if the user should update to it, otherwise undefined.
  */
 export function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string, isFromSettingsChange: boolean): Build | undefined {
