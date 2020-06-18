@@ -184,7 +184,10 @@
     "expands_to": "Expands to:",
     "file_label": "File:",
     "parameters_label": "Parameters:",
-    "returns_label": "Returns:",
+    "returns_label": {
+        "text": "Returns:",
+        "hint": "This label is for the return value description for a function. Usage example: 'Returns: Area of a shape.'"
+    },
     "deprecated_label": "Deprecated:",
     "exceptions_label": "Exceptions:"
 }
