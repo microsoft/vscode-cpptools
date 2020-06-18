@@ -182,5 +182,9 @@
         "hint": "Refers to C++ template specializations. This is part of a description indicating there are N additional specializations of a function.  %d is replaced with that number."
     },
     "expands_to": "Expands to:",
-    "file_label": "File:"
+    "file_label": "File:",
+    "parameters_label": "Parameters:",
+    "returns_label": "Returns:",
+    "deprecated_label": "Deprecated:",
+    "exceptions_label": "Exceptions:"
 }
