@@ -33,6 +33,7 @@ import * as os from 'os';
 import { TokenKind, ColorizationSettings, ColorizationState } from './colorization';
 import * as refs from './references';
 import * as nls from 'vscode-nls';
+import { lookupString, localizedStringCount } from '../nativeStrings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1199,6 +1200,11 @@ export class DefaultClient implements Client {
             }
         }
 
+        const localizedStrings: string[] = [];
+        for (let i: number = 0; i < localizedStringCount; i++) {
+            localizedStrings.push(lookupString(i));
+        }
+
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'cpp' },
@@ -1237,7 +1243,8 @@ export class DefaultClient implements Client {
                 vcpkg_root: util.getVcpkgRoot(),
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
-                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId())
+                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
+                localizedStrings: localizedStrings
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
