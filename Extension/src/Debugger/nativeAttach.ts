@@ -175,6 +175,10 @@ function execChildProcess(process: string, workingDirectory?: string): Promise<s
             }
 
             if (stderr && stderr.length > 0) {
+                if (stderr.indexOf('screen size is bogus') >= 0) {
+                    // ignore this error silently; see https://github.com/microsoft/vscode/issues/75932
+                    // see similar fix for the Node - Debug (Legacy) Extension at https://github.com/microsoft/vscode-node-debug/commit/5298920
+                }
                 reject(new Error(stderr));
                 return;
             }
