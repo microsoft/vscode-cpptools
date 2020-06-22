@@ -17,8 +17,7 @@ import * as assert from 'assert';
 import * as https from 'https';
 import * as tmp from 'tmp';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
-import { getRawTasksJson, getTasksJsonPath, CppBuildTaskProvider } from './LanguageServer/cppbuildTaskProvider';
-import { OtherSettings } from './LanguageServer/settings';
+
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
@@ -56,49 +55,6 @@ export function getRawPackageJson(): any {
         rawPackageJson = JSON.parse(fileContents.toString());
     }
     return rawPackageJson;
-}
-
-
-export async function ensureBuildTaskExists(taskName: string): Promise<void> {
-    let rawTasksJson: any = await getRawTasksJson();
-
-    // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
-    if (!rawTasksJson.tasks) {
-        rawTasksJson.tasks = new Array();
-    }
-    // Find or create the task which should be created based on the selected "debug configuration".
-    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === task);
-    if (selectedTask) {
-        return;
-    }
-
-    const buildTasks: vscode.Task[] = await new CppBuildTaskProvider().getTasks(false, true);
-    selectedTask = buildTasks.find(task => task.name === taskName);
-    console.assert(selectedTask);
-    if (!selectedTask) {
-        throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
-    }
-
-    rawTasksJson.version = "2.0.0";
-
-    let selectedTask2: vscode.Task = selectedTask;
-    if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-        let task: any = {
-            ...selectedTask2.definition,
-            problemMatcher: selectedTask2.problemMatchers,
-            group: { kind: "build", "isDefault": true }
-        };
-        rawTasksJson.tasks.push(task);
-    }
-
-    // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
-    let settings: OtherSettings = new OtherSettings();
-    let tasksJsonPath: string | undefined = getTasksJsonPath();
-    if (!tasksJsonPath) {
-        throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
-    }
-
-    await writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
 }
 
 export function fileIsCOrCppSource(file: string): boolean {

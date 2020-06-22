@@ -13,6 +13,7 @@ import * as ext from './extension';
 import * as fs from 'fs';
 import * as nls from 'vscode-nls';
 import * as cp from "child_process";
+import { OtherSettings } from './settings';
 
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
@@ -202,6 +203,48 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
         return task;
     };
+
+    async ensureBuildTaskExists(taskName: string): Promise<void> {
+        let rawTasksJson: any = await getRawTasksJson();
+
+        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+        if (!rawTasksJson.tasks) {
+            rawTasksJson.tasks = new Array();
+        }
+        // Find or create the task which should be created based on the selected "debug configuration".
+        let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === task);
+        if (selectedTask) {
+            return;
+        }
+
+        const buildTasks: vscode.Task[] = await this.getTasks(false, true);
+        selectedTask = buildTasks.find(task => task.name === taskName);
+        console.assert(selectedTask);
+        if (!selectedTask) {
+            throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
+        }
+
+        rawTasksJson.version = "2.0.0";
+
+        let selectedTask2: vscode.Task = selectedTask;
+        if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
+            let task: any = {
+                ...selectedTask2.definition,
+                problemMatcher: selectedTask2.problemMatchers,
+                group: { kind: "build", "isDefault": true }
+            };
+            rawTasksJson.tasks.push(task);
+        }
+
+        // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
+        let settings: OtherSettings = new OtherSettings();
+        let tasksJsonPath: string | undefined = getTasksJsonPath();
+        if (!tasksJsonPath) {
+            throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
+        }
+
+        await util.writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
+    }
 }
 
 class CustomBuildTaskTerminal implements vscode.Pseudoterminal {

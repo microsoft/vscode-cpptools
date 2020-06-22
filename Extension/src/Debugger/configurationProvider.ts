@@ -78,7 +78,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
             try {
-                await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                 await vscode.debug.startDebugging(folder, selection.configuration);
                 Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
             } catch (e) {

@@ -13,6 +13,7 @@ import { failedToParseTasksJson } from '../LanguageServer/cppbuildTaskProvider';
 import * as util from '../common';
 import * as Telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
+import { cppBuildTaskProvider } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -89,7 +90,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             if (selection.configuration.preLaunchTask) {
                 if (folder) {
                     try {
-                        await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                        await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                         Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
                     } catch (e) {
                         if (e && e.message === failedToParseTasksJson) {
