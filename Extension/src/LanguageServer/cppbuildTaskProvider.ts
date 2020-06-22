@@ -33,7 +33,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     constructor() {}
 
     public async provideTasks(): Promise<vscode.Task[]> {
-        if (this.tasks !== undefined) {
+        if (this.tasks) {
             return this.tasks;
         }
         return this.getTasks(false, false);
@@ -42,7 +42,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     // Resolves a task that has no [`execution`](#Task.execution) set.
     public resolveTask(_task: vscode.Task): vscode.Task | undefined {
         const execution: vscode.ProcessExecution | vscode.ShellExecution | vscode.CustomExecution | undefined = _task.execution;
-        if (execution === undefined) {
+        if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
             return this.getTask(definition.command, false, false, definition.args ? definition.args : [], definition);
         }
@@ -54,7 +54,6 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (this.tasks !== undefined) {
             return this.tasks;
         }
-        this.tasks = [];
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor) {
             return [];
@@ -67,7 +66,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
         // Don't offer tasks for header files.
         const fileExtLower: string = fileExt.toLowerCase();
-        const isHeader: boolean = !fileExt || ["*.hpp", "*.hh", "*.hxx", "*.h++", "*.hp", "*.h", "*.ii", "*.inl", "*.idl", ""].some(ext => fileExtLower === ext);
+        const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
         if (isHeader) {
             return [];
         }
@@ -79,7 +78,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             fileIsCpp = true;
             fileIsC = true;
         } else {
-            fileIsCpp = ["*.cpp", "*.cc", "*.cxx", "*.c++", "*.cp", "*.ino", "*.ipp", "*.tcc"].some(ext => fileExtLower === ext);
+            fileIsCpp = [".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
             fileIsC = fileExtLower === ".c";
         }
         if (!(fileIsCpp || fileIsC)) {
@@ -133,12 +132,11 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         }
 
         // Create a build task per compiler path
-
+        this.tasks = [];
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
             this.tasks  = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, returnCompilerPath, appendSourceToName, undefined));
         }
-
         // Task for user compiler path setting
         if (userCompilerPath) {
             this.tasks.push(this.getTask(userCompilerPath, returnCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
@@ -148,7 +146,6 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     }
 
     private getTask: (compilerPath: string, returnCompilerPath: boolean, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, returnCompilerPath: boolean, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => {
-
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskName: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
@@ -156,7 +153,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         const isWindows: boolean = os.platform() === 'win32';
         const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
         let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
-        if (definition === undefined && compilerArgs && compilerArgs.length > 0) {
+        if (!definition && compilerArgs && compilerArgs.length > 0) {
             args = args.concat(compilerArgs);
         }
         const options: cp.ProcessEnvOptions | undefined = {"cwd": cwd};
@@ -167,7 +164,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             resolvedcompilerPath = "\"" + resolvedcompilerPath + "\"";
         }
 
-        if (definition === undefined) {
+        if (!definition) {
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskName,
