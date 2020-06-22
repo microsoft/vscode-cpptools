@@ -31,7 +31,7 @@ suite("UpgradeDowngrade", () => {
                     name: release0, assets: three_assets}];
 
                 const userVersion: PackageVersion = new PackageVersion(insider2);
-                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                 assert.equal(targetBuild.name, release0);
             });
         });
@@ -46,7 +46,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider1);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });
                 test("Insider to Insider", () => {
@@ -56,7 +56,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider3);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });
                 test("Release to Insider", () => {
@@ -67,7 +67,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(release1);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });
             });
@@ -81,7 +81,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider3);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild.name, release0);
                 });
                 test("Insider to Insider", () => {
@@ -92,7 +92,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider3);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild.name, insider1);
                 });
             });
@@ -107,7 +107,7 @@ suite("UpgradeDowngrade", () => {
                         name: insider2, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(release0);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild.name, release1);
                 });
                 test("Insider to Release", () => {
@@ -117,7 +117,7 @@ suite("UpgradeDowngrade", () => {
                         name: insider2, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider2);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild.name, release1);
                 });
             });
@@ -130,7 +130,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(release0);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild.name, insider1);
                 });
                 test("Release to Insider, no Upgrade", () => {
@@ -140,7 +140,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(release0);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });
                 test("Insider to Insider, Upgrade", () => {
@@ -151,7 +151,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider1);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild.name, insider2);
                 });
                 test("Insider to Insider, no Upgrade", () => {
@@ -161,7 +161,7 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider2);
-                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });
             });
