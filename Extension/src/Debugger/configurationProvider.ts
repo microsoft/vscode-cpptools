@@ -7,11 +7,12 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CppBuildTaskProvider, CppBuildTaskDefinition} from '../LanguageServer/cppbuildTaskProvider';
+import { CppBuildTaskDefinition} from '../LanguageServer/cppbuildTaskProvider';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
 import { buildAndDebugActiveFileStr } from './extension';
+import { cppBuildTaskProvider} from '../LanguageServer/extension';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 
@@ -105,7 +106,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await new CppBuildTaskProvider().getTasks(true, true);
+        let buildTasks: vscode.Task[] = await cppBuildTaskProvider.getTasks(true, true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }

@@ -32,6 +32,7 @@ import { CppBuildTaskProvider } from './cppbuildTaskProvider';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+export let cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -170,7 +171,7 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, new CppBuildTaskProvider());
+    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
     vscode.tasks.onDidStartTask(event => {
         if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
