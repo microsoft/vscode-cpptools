@@ -67,7 +67,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
         // Don't offer tasks for header files.
         const fileExtLower: string = fileExt.toLowerCase();
-        const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h", ".inl", ""].some(ext => fileExtLower === ext);
+        const isHeader: boolean = !fileExt || ["*.hpp", "*.hh", "*.hxx", "*.h++", "*.hp", "*.h", "*.ii", "*.inl", "*.idl", ""].some(ext => fileExtLower === ext);
         if (isHeader) {
             return [];
         }
@@ -79,7 +79,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             fileIsCpp = true;
             fileIsC = true;
         } else {
-            fileIsCpp = [".cpp", ".cc", ".cxx", ".mm", ".ino"].some(ext => fileExtLower === ext);
+            fileIsCpp = ["*.cpp", "*.cc", "*.cxx", "*.c++", "*.cp", "*.ino", "*.ipp", "*.tcc"].some(ext => fileExtLower === ext);
             fileIsC = fileExtLower === ".c";
         }
         if (!(fileIsCpp || fileIsC)) {
@@ -209,11 +209,9 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
 class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     private writeEmitter  = new vscode.EventEmitter<string>();
-    // eslint-disable-next-line no-invalid-this
-    onDidWrite: vscode.Event<string> = this.writeEmitter.event;
     private closeEmitter = new vscode.EventEmitter<void>();
-    // eslint-disable-next-line no-invalid-this
-    onDidClose?: vscode.Event<void> = this.closeEmitter.event;
+    public get onDidWrite(): vscode.Event<string> { return this.writeEmitter.event; }
+    public get onDidClose(): vscode.Event<void> { return this.closeEmitter.event; }
 
     private fileWatcher: vscode.FileSystemWatcher | undefined;
 
