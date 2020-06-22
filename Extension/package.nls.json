@@ -86,6 +86,8 @@
     "c_cpp.debuggers.logging.engineLogging.description": "Optional flag to determine whether diagnostic debug engine messages should be logged to the Debug Console. Defaults to false.",
     "c_cpp.debuggers.logging.trace.description": "Optional flag to determine whether diagnostic adapter command tracing should be logged to the Debug Console. Defaults to false.",
     "c_cpp.debuggers.logging.traceResponse.description": "Optional flag to determine whether diagnostic adapter command and response tracing should be logged to the Debug Console. Defaults to false.",
+    "c_cpp.debuggers.cppvsdbg.logging.threadExit.description": "Optional flag to determine whether thread exits messages should be logged to the Debug Console. Default: `false`.",
+    "c_cpp.debuggers.cppvsdbg.logging.processExit.description": "Optional flag to determine whether target process exits messages should be logged to the Debug Console., or debugging is stopped. Default: `true`.",
     "c_cpp.debuggers.text.description": "The debugger command to execute.",
     "c_cpp.debuggers.description.description": "Optional description for the command.",
     "c_cpp.debuggers.ignoreFailures.description": "If true, failures from the command should be ignored. Default value is false.",
