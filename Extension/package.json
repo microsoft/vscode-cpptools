@@ -47,7 +47,8 @@
       {
         "type": "cppbuild",
         "required": [
-          "command"
+          "command",
+          "label"
         ],
         "properties": {
           "label": {

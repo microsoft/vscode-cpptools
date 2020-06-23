@@ -158,7 +158,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (!definition && compilerArgs && compilerArgs.length > 0) {
             args = args.concat(compilerArgs);
         }
-        const options: cp.ExecOptions | undefined = {"cwd": cwd};
+        const options: cp.ExecOptions | undefined = {cwd: cwd};
 
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
@@ -253,7 +253,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     }
 
 
-    open(initialDimensions: vscode.TerminalDimensions | undefined): void {
+    open(_initialDimensions: vscode.TerminalDimensions | undefined): void {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         const pattern: string = path.join(this.workspaceRoot, 'cppBuild');
         this.fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
@@ -275,15 +275,22 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     private async doBuild(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             // Do build.
-            const activeCommand: string = util.resolveVariables(this.command + " " + this.args.join(" "), this.AdditionalEnvironment);
+            let activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
+            this.args.forEach(value => {
+                let temp: string = util.resolveVariables(value, this.AdditionalEnvironment);
+                if (temp && temp.includes(" ")) {
+                    temp = "\"" + temp + "\"";
+                }
+                activeCommand = activeCommand + " " + temp;
+            });
             if (this.options?.cwd) {
                 this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
             }
-            cp.exec(activeCommand, this.options, (_error, stdout, stderr) => {
+            cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
                 if (_error) {
                     telemetry.logLanguageServerEvent("cppBuildTaskError", { "error": _error.message });
                     this.writeEmitter.fire("Build finished with error:\r\n");
-                    this.writeEmitter.fire("\t" + _error.message + "\r\n");
+                    this.writeEmitter.fire(_error.message);
                     reject();
                 } else {
                     this.writeEmitter.fire(stdout.toString());
@@ -292,6 +299,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                 }
             });
         }).finally (() => {
+            this.writeEmitter.fire("\r\n");
             this.closeEmitter.fire();
         });
     }
