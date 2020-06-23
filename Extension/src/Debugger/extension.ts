@@ -9,7 +9,7 @@ import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachT
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
-import { failedToParseTasksJson } from '../LanguageServer/cppbuildTaskProvider';
+import { failedToParseTasksJson } from '../LanguageServer/cppBuildTaskProvider';
 import * as util from '../common';
 import * as Telemetry from '../telemetry';
 import * as nls from 'vscode-nls';

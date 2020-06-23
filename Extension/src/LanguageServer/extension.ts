@@ -28,7 +28,7 @@ import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
 import * as nls from 'vscode-nls';
-import { CppBuildTaskProvider } from './cppbuildTaskProvider';
+import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

@@ -40,35 +40,35 @@
   ],
   "activationEvents": [
     "*"
-  ], 
+  ],
   "main": "./dist/main",
   "contributes": {
     "taskDefinitions": [
-			{
-				"type": "cppbuild",
-				"required": [
-					"command"
-				],
-				"properties": {
+      {
+        "type": "cppbuild",
+        "required": [
+          "command"
+        ],
+        "properties": {
           "label": {
-						"type": "string",
-						"description": "Task's name."
-					},
-					"command": {
-						"type": "string",
-						"description": "The compiler path."
-					},
-					"args": {
-						"type": "array",
-						"description": "Additional build args."
+            "type": "string",
+            "description": "Task's name."
+          },
+          "command": {
+            "type": "string",
+            "description": "The compiler path."
+          },
+          "args": {
+            "type": "array",
+            "description": "Additional build args."
           },
           "options": {
             "type": "object",
-						"description": "Options {\"cwd\": cwd}." 
+            "description": "Options"
           }
-				}
-			}
-		],
+        }
+      }
+    ],
     "views": {
       "references-view": [
         {

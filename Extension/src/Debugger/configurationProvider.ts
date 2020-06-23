@@ -7,7 +7,7 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CppBuildTaskDefinition} from '../LanguageServer/cppbuildTaskProvider';
+import { CppBuildTaskDefinition} from '../LanguageServer/cppBuildTaskProvider';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';

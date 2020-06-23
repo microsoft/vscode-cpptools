@@ -14,6 +14,7 @@ import * as fs from 'fs';
 import * as nls from 'vscode-nls';
 import * as cp from "child_process";
 import { OtherSettings } from './settings';
+import * as jsonc from 'jsonc-parser';
 
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
@@ -23,7 +24,7 @@ export interface CppBuildTaskDefinition extends vscode.TaskDefinition {
     label: string;
     command: string;
     args: string[];
-    options: cp.ProcessEnvOptions | undefined;
+    options: cp.ExecOptions | undefined;
 }
 
 export class CppBuildTaskProvider implements vscode.TaskProvider {
@@ -157,7 +158,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (!definition && compilerArgs && compilerArgs.length > 0) {
             args = args.concat(compilerArgs);
         }
-        const options: cp.ProcessEnvOptions | undefined = {"cwd": cwd};
+        const options: cp.ExecOptions | undefined = {"cwd": cwd};
 
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
@@ -248,7 +249,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     private fileWatcher: vscode.FileSystemWatcher | undefined;
 
 
-    constructor(private command: string, private args: string[], private options: cp.ProcessEnvOptions | undefined, private workspaceRoot: string) {
+    constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined, private workspaceRoot: string) {
     }
 
 
@@ -320,15 +321,14 @@ export function getRawTasksJson(): Promise<any> {
         if (!path) {
             return resolve({});
         }
-        fs.exists(path, exists => {
+        fs.exists(path, async exists => {
             if (!exists) {
                 return resolve({});
             }
-            let fileContents: string = fs.readFileSync(path).toString();
-            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
+            let fileContents: string = await util.readFileText(path);
             let rawTasks: any = {};
             try {
-                rawTasks = JSON.parse(fileContents);
+                rawTasks = jsonc.parse(fileContents);
             } catch (error) {
                 return reject(new Error(failedToParseTasksJson));
             }
