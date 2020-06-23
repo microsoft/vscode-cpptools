@@ -37,7 +37,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (this.tasks) {
             return this.tasks;
         }
-        return this.getTasks(false, false);
+        return this.getTasks(false);
     }
 
     // Resolves a task that has no [`execution`](#Task.execution) set.
@@ -45,13 +45,13 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         const execution: vscode.ProcessExecution | vscode.ShellExecution | vscode.CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
-            return this.getTask(definition.command, false, false, definition.args ? definition.args : [], definition);
+            return this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
         }
         return undefined;
     }
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
-    public async getTasks(returnCompilerPath: boolean, appendSourceToName: boolean): Promise<vscode.Task[]> {
+    public async getTasks(appendSourceToName: boolean): Promise<vscode.Task[]> {
         if (this.tasks !== undefined) {
             return this.tasks;
         }
@@ -136,17 +136,17 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         this.tasks = [];
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
-            this.tasks  = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, returnCompilerPath, appendSourceToName, undefined));
+            this.tasks  = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
         }
         // Task for user compiler path setting
         if (userCompilerPath) {
-            this.tasks.push(this.getTask(userCompilerPath, returnCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            this.tasks.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
         }
 
         return this.tasks;
     }
 
-    private getTask: (compilerPath: string, returnCompilerPath: boolean, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, returnCompilerPath: boolean, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => {
+    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskName: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
@@ -175,11 +175,6 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             };
         }
 
-        if (returnCompilerPath) {
-            definition = definition as CppBuildTaskDefinition;
-            definition.compilerPath = isCl ? compilerPathBase : compilerPath;
-        }
-
         let activeClient: Client = ext.getActiveClient();
         let uri: vscode.Uri | undefined = activeClient.RootUri;
         if (!uri) {
@@ -196,9 +191,6 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 			 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options, target.name)
             ), isCl ? '$msCompile' : '$gcc');
 
-        /* const normalcommand: vscode.ShellExecution = new vscode.ShellExecution(compilerPath, [...args], { cwd: cwd });
-        let task: vscode.Task = new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
-            normalcommand, isCl ? '$msCompile' : '$gcc');*/
         task.group = vscode.TaskGroup.Build;
 
         return task;
@@ -212,12 +204,12 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             rawTasksJson.tasks = new Array();
         }
         // Find or create the task which should be created based on the selected "debug configuration".
-        let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === task);
+        let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskName);
         if (selectedTask) {
             return;
         }
 
-        const buildTasks: vscode.Task[] = await this.getTasks(false, true);
+        const buildTasks: vscode.Task[] = await this.getTasks(true);
         selectedTask = buildTasks.find(task => task.name === taskName);
         console.assert(selectedTask);
         if (!selectedTask) {

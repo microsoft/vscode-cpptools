@@ -106,7 +106,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await cppBuildTaskProvider.getTasks(true, true);
+        let buildTasks: vscode.Task[] = await cppBuildTaskProvider.getTasks(true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
@@ -135,7 +135,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
             const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
-            const compilerName: string = path.basename(definition.compilerPath);
+            const compilerPath: string = definition.command;
+            const compilerName: string = path.basename(compilerPath);
 
             let newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
@@ -167,7 +168,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                         debuggerName += ".exe";
                     }
 
-                    const compilerDirname: string = path.dirname(definition.compilerPath);
+                    const compilerDirname: string = path.dirname(compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
                     fs.stat(debuggerPath, (err, stats: fs.Stats) => {
                         if (!err && stats && stats.isFile) {
