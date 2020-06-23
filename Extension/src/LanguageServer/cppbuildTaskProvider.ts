@@ -290,7 +290,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                 if (_error) {
                     telemetry.logLanguageServerEvent("cppBuildTaskError", { "error": _error.message });
                     this.writeEmitter.fire("Build finished with error:\r\n");
-                    this.writeEmitter.fire(_error.message);
+                    this.writeEmitter.fire(stdout.toString());
                     reject();
                 } else {
                     this.writeEmitter.fire(stdout.toString());
@@ -299,7 +299,6 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                 }
             });
         }).finally (() => {
-            this.writeEmitter.fire("\r\n");
             this.closeEmitter.fire();
         });
     }
