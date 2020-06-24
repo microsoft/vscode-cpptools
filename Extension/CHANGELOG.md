@@ -9,8 +9,8 @@
 * Update to clang-format 10. [#5194](https://github.com/microsoft/vscode-cpptools/issues/5194)
 * Added system to store and query properties from the active C/C++ configuration.
   * bugengine (@bugengine) [PR #5453](https://github.com/microsoft/vscode-cpptools/pull/5453)
-* Add 'quoteArgs` to `launch.json` schema. [PR #5639](https://github.com/microsoft/vscode-cpptools/pull/5639)
-* Add logs for a resolved 'launch.json' if "engineLogging" is enabled. [PR #5644](https://github.com/microsoft/vscode-cpptools/pull/5644)
+* Add `quoteArgs` to `launch.json` schema. [PR #5639](https://github.com/microsoft/vscode-cpptools/pull/5639)
+* Add logs for a resolved `launch.json` if "engineLogging" is enabled. [PR #5644](https://github.com/microsoft/vscode-cpptools/pull/5644)
 * Add threadExit and processExit logging flags for 'cppvsdbg'. [PR #5652](https://github.com/microsoft/vscode-cpptools/pull/5652)
 
 ### Bug Fixes
@@ -31,11 +31,11 @@
   * nukoyluoglu (@nukoyluoglu)
 * Fix potential thread deadlock in cpptools.
 * Fix copying a long value from debug watch results in pasting partial value [#5470](https://github.com/microsoft/vscode-cpptools/issues/5470)
-  * [MIEngine#1009](https://github.com/microsoft/MIEngine/pull/1009)
+  * [PR MIEngine#1009](https://github.com/microsoft/MIEngine/pull/1009)
 * Fix Modifying conditional breakpoints [#2297](https://github.com/microsoft/vscode-cpptools/issues/2297)
-  * [MIEngine#1010](https://github.com/microsoft/MIEngine/pull/1010)
+  * [PR MIEngine#1010](https://github.com/microsoft/MIEngine/pull/1010)
 * Fix find <miDebuggerPath>.exe in Windows path [#3076](https://github.com/microsoft/vscode-cpptools/issues/3076)
-  * [MIEngine#1001](https://github.com/microsoft/MIEngine/pull/1001)
+  * [PR MIEngine#1001](https://github.com/microsoft/MIEngine/pull/1001)
 
 ## Version 0.28.3: June 9, 2020
 ### Enhancements
