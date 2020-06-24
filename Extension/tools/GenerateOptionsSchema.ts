@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 
 import * as fs from 'fs';
 import * as os from 'os';
@@ -9,7 +9,7 @@ import * as os from 'os';
 function appendFieldsToObject(reference: any, obj: any): any {
     // Make sure it is an object type
     if (typeof obj === 'object') {
-        for (let referenceKey in reference) {
+        for (const referenceKey in reference) {
             // If key exists in original object and is an object.
             if (obj.hasOwnProperty(referenceKey)) {
                 obj[referenceKey] = appendFieldsToObject(reference[referenceKey], obj[referenceKey]);
@@ -25,13 +25,13 @@ function appendFieldsToObject(reference: any, obj: any): any {
 
 // Combines two object's fields, giving the parentDefault a higher precedence.
 function mergeDefaults(parentDefault: any, childDefault: any): any {
-    let newDefault: any = {};
+    const newDefault: any = {};
 
-    for (let attrname in childDefault) {
+    for (const attrname in childDefault) {
         newDefault[attrname] = childDefault[attrname];
     }
 
-    for (let attrname in parentDefault) {
+    for (const attrname in parentDefault) {
         newDefault[attrname] = parentDefault[attrname];
     }
 
@@ -40,7 +40,7 @@ function mergeDefaults(parentDefault: any, childDefault: any): any {
 
 function updateDefaults(object: any, defaults: any): any {
     if (defaults !== null) {
-        for (let key in object) {
+        for (const key in object) {
             if (object[key].hasOwnProperty('type') && object[key].type === 'object' && object[key].properties !== null) {
                 object[key].properties = updateDefaults(object[key].properties, mergeDefaults(defaults, object[key].default));
             } else if (key in defaults) {
@@ -54,17 +54,17 @@ function updateDefaults(object: any, defaults: any): any {
 
 function refReplace(definitions: any, ref: any): any {
 // $ref is formatted as "#/definitions/ObjectName"
-    let referenceStringArray: string[] = ref['$ref'].split('/');
+    const referenceStringArray: string[] = ref['$ref'].split('/');
 
     // Getting "ObjectName"
-    let referenceName: string = referenceStringArray[referenceStringArray.length - 1];
+    const referenceName: string = referenceStringArray[referenceStringArray.length - 1];
 
     // Make sure reference has replaced its own $ref fields and hope there are no recursive references.
     definitions[referenceName] = replaceReferences(definitions, definitions[referenceName]);
 
     // Retrieve ObjectName from definitions. (TODO: Does not retrieve inner objects)
     // Need to deep copy, there are no functions in these objects.
-    let reference: any = JSON.parse(JSON.stringify(definitions[referenceName]));
+    const reference: any = JSON.parse(JSON.stringify(definitions[referenceName]));
 
     ref = appendFieldsToObject(reference, ref);
 
@@ -75,7 +75,7 @@ function refReplace(definitions: any, ref: any): any {
 }
 
 function replaceReferences(definitions: any, objects: any): any {
-    for (let key in objects) {
+    for (const key in objects) {
         if (objects[key].hasOwnProperty('$ref')) {
             objects[key] = refReplace(definitions, objects[key]);
         }
@@ -96,8 +96,8 @@ function replaceReferences(definitions: any, objects: any): any {
 }
 
 function generateOptionsSchema(): void {
-    let packageJSON: any = JSON.parse(fs.readFileSync('package.json').toString());
-    let schemaJSON: any = JSON.parse(fs.readFileSync('tools/OptionsSchema.json').toString());
+    const packageJSON: any = JSON.parse(fs.readFileSync('package.json').toString());
+    const schemaJSON: any = JSON.parse(fs.readFileSync('tools/OptionsSchema.json').toString());
 
     schemaJSON.definitions = replaceReferences(schemaJSON.definitions, schemaJSON.definitions);
 

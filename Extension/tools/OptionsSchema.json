@@ -45,6 +45,13 @@
           },
           "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
           "default": {}
+        },
+        "quoteArgs": {
+          "exceptions": {
+            "type": "boolean",
+            "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+            "default": true
+          }
         }
       }
     },
@@ -528,6 +535,16 @@
               "type": "boolean",
               "description": "%c_cpp.debuggers.logging.engineLogging.description%",
               "default": false
+            },
+            "threadExit": {
+              "type": "boolean",
+              "description": "%c_cpp.debuggers.cppvsdbg.logging.threadExit.description%",
+              "default": false
+            },
+            "processExit": {
+              "type": "boolean",
+              "description": "%c_cpp.debuggers.cppvsdbg.logging.processExit.description%",
+              "default": true
             }
           }
         },

@@ -57,7 +57,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            let menuItem: MenuItem = {label: config.name, configuration: config};
+            const menuItem: MenuItem = {label: config.name, configuration: config};
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -132,11 +132,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
-        let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
+        const configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
             const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
             const compilerName: string = path.basename(definition.compilerPath);
 
-            let newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
+            const newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
@@ -188,91 +188,101 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        if (config) {
-            if (config.type === 'cppvsdbg') {
-                // Fail if cppvsdbg type is running on non-Windows
-                if (os.platform() !== 'win32') {
-                    logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
-                    return undefined;
-                }
+        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to open a configuration file.
+        if (!config || !config.type) {
+            return null;
+        }
 
-                // Disable debug heap by default, enable if 'enableDebugHeap' is set.
-                if (!config.enableDebugHeap) {
-                    const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
-
-                    if (config.environment && util.isArray(config.environment)) {
-                        config.environment.push(disableDebugHeapEnvSetting);
-                    } else {
-                        config.environment = [disableDebugHeapEnvSetting];
-                    }
-                }
+        if (config.type === 'cppvsdbg') {
+            // Fail if cppvsdbg type is running on non-Windows
+            if (os.platform() !== 'win32') {
+                logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
+                return undefined;
             }
 
-            // Add environment variables from .env file
-            this.resolveEnvFile(config, folder);
+            // Disable debug heap by default, enable if 'enableDebugHeap' is set.
+            if (!config.enableDebugHeap) {
+                const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
 
-            this.resolveSourceFileMapVariables(config);
-
-            // Modify WSL config for OpenDebugAD7
-            if (os.platform() === 'win32' &&
-                config.pipeTransport &&
-                config.pipeTransport.pipeProgram) {
-                let replacedPipeProgram: string | undefined;
-                const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
-
-                // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
-                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
-
-                // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-                if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
-                    const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
-                    const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
-
-                    replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
-                }
-
-                if (replacedPipeProgram) {
-                    config.pipeTransport.pipeProgram = replacedPipeProgram;
-                }
-            }
-
-            const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
-            const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
-
-            const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
-
-            // Validate LLDB-MI
-            if (os.platform() === 'darwin' && // Check for macOS
-                fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
-                (!macOSMIMode || macOSMIMode === 'lldb') &&
-                !macOSMIDebuggerPath // User did not provide custom lldb-mi
-            ) {
-                const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
-
-                if (!frameworkPath) {
-                    const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
-                    const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
-
-                    vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
-                        .then(value => {
-                            if (value === moreInfoButton) {
-                                let helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
-                                vscode.env.openExternal(vscode.Uri.parse(helpURL));
-                            }
-                        });
-
-                    return undefined;
+                if (config.environment && util.isArray(config.environment)) {
+                    config.environment.push(disableDebugHeapEnvSetting);
+                } else {
+                    config.environment = [disableDebugHeapEnvSetting];
                 }
             }
         }
-        // if config or type is not specified, return null to trigger VS Code to open a configuration file https://github.com/Microsoft/vscode/issues/54213
-        return config && config.type ? config : null;
+
+        // Add environment variables from .env file
+        this.resolveEnvFile(config, folder);
+
+        this.resolveSourceFileMapVariables(config);
+
+        // Modify WSL config for OpenDebugAD7
+        if (os.platform() === 'win32' &&
+            config.pipeTransport &&
+            config.pipeTransport.pipeProgram) {
+            let replacedPipeProgram: string | undefined;
+            const pipeProgramStr: string = config.pipeTransport.pipeProgram.toLowerCase().trim();
+
+            // OpenDebugAD7 is a 32-bit process. Make sure the WSL pipe transport is using the correct program.
+            replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, debugUtils.ArchType.ia32);
+
+            // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+            if (!replacedPipeProgram && !path.isAbsolute(pipeProgramStr) && config.pipeTransport.pipeCwd) {
+                const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+
+                replacedPipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, debugUtils.ArchType.ia32);
+            }
+
+            if (replacedPipeProgram) {
+                config.pipeTransport.pipeProgram = replacedPipeProgram;
+            }
+        }
+
+        const macOSMIMode: string = config.osx?.MIMode ?? config.MIMode;
+        const macOSMIDebuggerPath: string = config.osx?.miDebuggerPath ?? config.miDebuggerPath;
+
+        const lldb_mi_10_x_path: string = path.join(util.extensionPath, "debugAdapters", "lldb-mi", "bin", "lldb-mi");
+
+        // Validate LLDB-MI
+        if (os.platform() === 'darwin' && // Check for macOS
+            fs.existsSync(lldb_mi_10_x_path) && // lldb-mi 10.x exists
+            (!macOSMIMode || macOSMIMode === 'lldb') &&
+            !macOSMIDebuggerPath // User did not provide custom lldb-mi
+        ) {
+            const frameworkPath: string | undefined = this.getLLDBFrameworkPath();
+
+            if (!frameworkPath) {
+                const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
+                const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
+
+                vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
+                    .then(value => {
+                        if (value === moreInfoButton) {
+                            const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
+                            vscode.env.openExternal(vscode.Uri.parse(helpURL));
+                        }
+                    });
+
+                return undefined;
+            }
+        }
+
+        if (config.logging?.engineLogging) {
+            const outputChannel: logger.Logger = logger.getOutputChannelLogger();
+            outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
+            outputChannel.appendLine(JSON.stringify(config, undefined, 2));
+            logger.showOutputChannel();
+        }
+
+        return config;
     }
 
     private getLLDBFrameworkPath(): string | undefined {
         const LLDBFramework: string = "LLDB.framework";
         // Note: When adding more search paths, make sure the shipped lldb-mi also has it. See Build/lldb-mi.yml and 'install_name_tool' commands.
-        let searchPaths: string[] = [
+        const searchPaths: string[] = [
             "/Library/Developer/CommandLineTools/Library/PrivateFrameworks", // XCode CLI
             "/Applications/Xcode.app/Contents/SharedFrameworks" // App Store XCode
         ];
@@ -326,7 +336,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     }
 
     private resolveSourceFileMapVariables(config: vscode.DebugConfiguration): void {
-        let messages: string[] = [];
+        const messages: string[] = [];
         if (config.sourceFileMap) {
             for (const sourceFileMapSource of Object.keys(config.sourceFileMap)) {
                 let message: string = "";
@@ -370,9 +380,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
     private static async showFileWarningAsync(message: string, fileName: string): Promise<void> {
         const openItem: vscode.MessageItem = { title: localize("open.envfile", "Open {0}", "envFile") };
-        let result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(message, openItem);
+        const result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(message, openItem);
         if (result && result.title === openItem.title) {
-            let doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
+            const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(fileName);
             if (doc) {
                 vscode.window.showTextDocument(doc);
             }
@@ -416,14 +426,14 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
     configurations: IConfiguration[] = [];
 
     public getInitialConfigurations(debuggerType: DebuggerType): any {
-        let configurationSnippet: IConfigurationSnippet[] = [];
+        const configurationSnippet: IConfigurationSnippet[] = [];
 
         // Only launch configurations are initial configurations
         this.configurations.forEach(configuration => {
             configurationSnippet.push(configuration.GetLaunchConfiguration());
         });
 
-        let initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
+        const initialConfigurations: any = configurationSnippet.filter(snippet => snippet.debuggerType === debuggerType && snippet.isInitialConfiguration)
             .map(snippet => JSON.parse(snippet.bodyText));
 
         // If configurations is empty, then it will only have an empty configurations array in launch.json. Users can still add snippets.
@@ -431,7 +441,7 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
     }
 
     public getConfigurationSnippets(): vscode.CompletionItem[] {
-        let completionItems: vscode.CompletionItem[] = [];
+        const completionItems: vscode.CompletionItem[] = [];
 
         this.configurations.forEach(configuration => {
             completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetLaunchConfiguration()));
@@ -500,7 +510,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
 }
 
 function convertConfigurationSnippetToCompetionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
-    let item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
 
     item.insertText = snippet.bodyText;
 

@@ -137,10 +137,10 @@ export function getReferenceTypeIconPath(referenceType: ReferenceType): { light:
         case ReferenceType.ConfirmationInProgress: basePath = "ref-confirmation-in-progress"; break;
     }
 
-    let lightPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixLight);
-    let lightPathUri: vscode.Uri = vscode.Uri.file(lightPath);
-    let darkPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixDark);
-    let darkPathUri: vscode.Uri = vscode.Uri.file(darkPath);
+    const lightPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixLight);
+    const lightPathUri: vscode.Uri = vscode.Uri.file(lightPath);
+    const darkPath: string = util.getExtensionFilePath(assetsFolder + basePath + postFixDark);
+    const darkPathUri: vscode.Uri = vscode.Uri.file(darkPath);
     return {
         light: lightPathUri,
         dark: darkPathUri
@@ -148,10 +148,10 @@ export function getReferenceTypeIconPath(referenceType: ReferenceType): { light:
 }
 
 function getReferenceCanceledIconPath(): { light: vscode.Uri; dark: vscode.Uri } {
-    let lightPath: string = util.getExtensionFilePath("assets/ref-canceled-light.svg");
-    let lightPathUri: vscode.Uri = vscode.Uri.file(lightPath);
-    let darkPath: string = util.getExtensionFilePath("assets/ref-canceled-dark.svg");
-    let darkPathUri: vscode.Uri = vscode.Uri.file(darkPath);
+    const lightPath: string = util.getExtensionFilePath("assets/ref-canceled-light.svg");
+    const lightPathUri: vscode.Uri = vscode.Uri.file(lightPath);
+    const darkPath: string = util.getExtensionFilePath("assets/ref-canceled-dark.svg");
+    const darkPathUri: vscode.Uri = vscode.Uri.file(darkPath);
     return {
         light: lightPathUri,
         dark: darkPathUri
@@ -256,7 +256,7 @@ export class ReferencesManager {
                     let numConfirmingReferences: number = 0;
                     let numFinishedWithoutConfirming: number = 0;
                     let numFinishedConfirming: number = 0;
-                    for (let targetLocationProgress of this.referencesCurrentProgress.targetReferencesProgress) {
+                    for (const targetLocationProgress of this.referencesCurrentProgress.targetReferencesProgress) {
                         switch (targetLocationProgress) {
                             case TargetReferencesProgress.WaitingToLex:
                                 ++numWaitingToLex;
@@ -315,7 +315,7 @@ export class ReferencesManager {
     private handleProgressStarted(referencesProgress: ReferencesProgress): void {
         this.referencesStartedWhileTagParsing = this.client.IsTagParsing;
 
-        let mode: ReferencesCommandMode =
+        const mode: ReferencesCommandMode =
                 (referencesProgress === ReferencesProgress.StartedRename) ? ReferencesCommandMode.Rename :
                     (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
                         ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
@@ -429,7 +429,7 @@ export class ReferencesManager {
         }
 
         if (this.referencesStartedWhileTagParsing) {
-            let msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
+            const msg: string = localize("some.references.may.be.missing", "[Warning] Some references may be missing, because workspace parsing was incomplete when {0} was started.",
                 referencesCommandModeToString(this.client.ReferencesCommandMode));
             if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
                 if (this.referencesChannel) {
@@ -438,7 +438,7 @@ export class ReferencesManager {
                     this.referencesChannel.show(true);
                 }
             } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
-                let logChannel: vscode.OutputChannel = logger.getOutputChannel();
+                const logChannel: vscode.OutputChannel = logger.getOutputChannel();
                 logChannel.appendLine(msg);
                 logChannel.appendLine("");
                 logChannel.show(true);
@@ -447,12 +447,12 @@ export class ReferencesManager {
 
         // Need to reset these before we call the callback, as the callback my trigger another request
         // and we need to ensure these values are already reset before that happens.
-        let referencesRequestPending: boolean = this.referencesRequestPending;
-        let referencesCanceled: boolean = this.referencesCanceled;
+        const referencesRequestPending: boolean = this.referencesRequestPending;
+        const referencesCanceled: boolean = this.referencesCanceled;
         this.referencesRequestPending = false;
         this.referencesCanceled = false;
 
-        let currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
+        const currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
 
         if (referencesResult.isFinished) {
             this.symbolSearchInProgress = false;
@@ -490,9 +490,9 @@ export class ReferencesManager {
 
             // Display data based on command mode: peek references OR find all references
             if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
-                let showConfirmedReferences: boolean = referencesCanceled;
+                const showConfirmedReferences: boolean = referencesCanceled;
                 if (this.findAllRefsView) {
-                    let peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
+                    const peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
                     if (peekReferencesResults) {
                         if (this.referencesChannel) {
                             this.referencesChannel.appendLine(peekReferencesResults);

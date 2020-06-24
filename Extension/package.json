@@ -52,6 +52,13 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "debug",
+        "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
+        "when": "debugStartLanguage == cpp || debugStartLanguage == c"
+      }
+    ],
     "problemMatchers": [
       {
         "name": "gcc",
@@ -470,6 +477,20 @@
           "description": "%c_cpp.configuration.default.systemIncludePath.description%",
           "scope": "machine-overridable"
         },
+        "C_Cpp.default.customConfigurationVariables": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "patternProperties": {
+            "(^.+$)": {
+              "type": "string"
+            }
+          },
+          "description": "%c_cpp.configuration.default.customConfigurationVariables.description%",
+          "scope": "machine-overridable"
+        },
         "C_Cpp.default.enableConfigurationSquiggles": {
           "type": "boolean",
           "default": true,
@@ -658,6 +679,10 @@
       {
         "type": "cppdbg",
         "label": "C++ (GDB/LLDB)",
+        "languages": [
+          "c",
+          "cpp"
+        ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
           "pickRemoteProcess": "extension.pickRemoteNativeProcess"
@@ -950,6 +975,13 @@
                     },
                     "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
+                  },
+                  "quoteArgs": {
+                    "exceptions": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+                      "default": true
+                    }
                   }
                 }
               },
@@ -1136,6 +1168,13 @@
                     },
                     "description": "%c_cpp.debuggers.pipeTransport.pipeEnv.description%",
                     "default": {}
+                  },
+                  "quoteArgs": {
+                    "exceptions": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
+                      "default": true
+                    }
                   }
                 }
               },
@@ -1192,6 +1231,10 @@
       {
         "type": "cppvsdbg",
         "label": "C++ (Windows)",
+        "languages": [
+          "c",
+          "cpp"
+        ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
         },
@@ -1310,6 +1353,16 @@
                     "type": "boolean",
                     "description": "%c_cpp.debuggers.logging.engineLogging.description%",
                     "default": false
+                  },
+                  "threadExit": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.cppvsdbg.logging.threadExit.description%",
+                    "default": false
+                  },
+                  "processExit": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.cppvsdbg.logging.processExit.description%",
+                    "default": true
                   }
                 }
               },
@@ -1563,7 +1616,7 @@
     "ts-loader": "^6.0.4",
     "tslint": "^5.19.0",
     "typescript": "^3.5.3",
-    "vscode-cpptools": "^3.1.0",
+    "vscode-cpptools": "^4.0.1",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
