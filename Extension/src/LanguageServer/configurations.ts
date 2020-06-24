@@ -679,9 +679,6 @@ export class CppProperties {
             try {
                 filePaths.forEach((path: string) => {
                     this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
-                        if (event === "rename") {
-                            return;
-                        }
                         // Wait 1 second after a change to allow time for the write to finish.
                         if (this.compileCommandsFileWatcherTimer) {
                             clearInterval(this.compileCommandsFileWatcherTimer);
