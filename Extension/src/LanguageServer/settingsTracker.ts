@@ -158,6 +158,7 @@ export class SettingsTracker {
                     break;
                 }
                 case "commentContinuationPatterns": {
+                    key = "commentContinuationPatterns2";
                     value = this.areEqual(val, settings.inspect(key)?.defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     break;
                 }
