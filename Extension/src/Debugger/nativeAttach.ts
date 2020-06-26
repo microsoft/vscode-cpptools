@@ -180,8 +180,8 @@ function execChildProcess(process: string, workingDirectory?: string): Promise<s
                     // see similar fix for the Node - Debug (Legacy) Extension at https://github.com/microsoft/vscode-node-debug/commit/5298920
                 } else {
                     reject(new Error(stderr));
+                    return;
                 }
-                return;
             }
 
             resolve(stdout);
