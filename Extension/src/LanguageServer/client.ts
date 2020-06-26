@@ -2358,6 +2358,7 @@ export class DefaultClient implements Client {
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item)) {
+                this.customConfigurationLogging.set(item.uri.toString(), JSON.stringify(item.configuration, null, 4));
                 if (settings.loggingLevel === "Debug") {
                     out.appendLine(`  uri: ${item.uri.toString()}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
@@ -2396,6 +2397,7 @@ export class DefaultClient implements Client {
     }
 
     private customBrowseConfigurationLogging: string = "";
+    private customConfigurationLogging: Map<string, string> = new Map<string, string>();
 
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
