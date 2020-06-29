@@ -473,10 +473,15 @@ function realActivation(): void {
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {
-                    suggestInsidersChannel();
+                    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+                    if (userVersion.suffix === "insiders") {
+                        checkAndApplyUpdate(settings.updateChannel, false);
+                    } else {
+                        suggestInsidersChannel();
+                    }
                 } else if (settings.updateChannel === 'Insiders') {
-                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval, settings.updateChannel);
-                    checkAndApplyUpdate(settings.updateChannel);
+                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+                    checkAndApplyUpdate(settings.updateChannel, false);
                 }
             }
         }
@@ -513,10 +518,10 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
             if (newUpdateChannel === 'Default') {
                 clearInterval(insiderUpdateTimer);
             } else if (newUpdateChannel === 'Insiders') {
-                insiderUpdateTimer = global.setInterval(checkAndApplyUpdate, insiderUpdateTimerInterval);
+                insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
             }
 
-            checkAndApplyUpdate(newUpdateChannel);
+            checkAndApplyUpdate(newUpdateChannel, true);
         }
     }
 }
@@ -737,7 +742,7 @@ async function suggestInsidersChannel(): Promise<void> {
     }
     let buildInfo: BuildInfo | undefined;
     try {
-        buildInfo = await getTargetBuildInfo("Insiders");
+        buildInfo = await getTargetBuildInfo("Insiders", false);
     } catch (error) {
         console.log(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
@@ -829,12 +834,17 @@ async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
     }
 }
 
+async function checkAndApplyUpdateOnTimer(): Promise<void> {
+    return checkAndApplyUpdate('Insiders', false);
+}
+
 /**
  * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
  * The update can be an upgrade or downgrade depending on the the updateChannel setting.
  * @param updateChannel The user's updateChannel setting.
+ * @param isFromSettingsChange True if the invocation is the result of a settings change.
  */
-async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
+async function checkAndApplyUpdate(updateChannel: string, isFromSettingsChange: boolean): Promise<void> {
     // If we have buildInfo cache, we should use it.
     let buildInfo: BuildInfo | undefined = buildInfoCache;
     // clear buildInfo cache.
@@ -842,7 +852,7 @@ async function checkAndApplyUpdate(updateChannel: string): Promise<void> {
 
     if (!buildInfo) {
         try {
-            buildInfo = await getTargetBuildInfo(updateChannel);
+            buildInfo = await getTargetBuildInfo(updateChannel, isFromSettingsChange);
         } catch (error) {
             telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         }
