@@ -1640,7 +1640,7 @@
           "stringLiteral": [ "entity.name.operator.custom-literal.string" ]
         }
       }
-    ],
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
