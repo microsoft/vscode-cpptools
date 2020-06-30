@@ -1554,7 +1554,7 @@
     "semanticTokenTypes": [
       {
         "id": "referenceType",
-        "superType": "type",
+        "superType": "class",
         "description": "A C++/CLI reference type."
       },
       {
@@ -1564,12 +1564,12 @@
       },
       {
         "id": "genericType",
-        "superType": "type",
+        "superType": "class",
         "description": "A C++/CLI generic type."
       },
       {
         "id": "valueType",
-        "superType": "type",
+        "superType": "class",
         "description": "A C++/CLI value type."
       },
       {
@@ -1579,7 +1579,7 @@
       },
       {
         "id": "templateType",
-        "superType": "type",
+        "superType": "class",
         "description": "A template type."
       },
       {
