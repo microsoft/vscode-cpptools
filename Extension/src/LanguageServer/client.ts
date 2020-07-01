@@ -2503,6 +2503,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomConfigurations(): void {
+        this.customConfigurationLogging.clear();
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
@@ -2510,6 +2511,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomBrowseConfiguration(): void {
+        this.customBrowseConfigurationLogging = "";
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
