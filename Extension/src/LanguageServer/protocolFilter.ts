@@ -64,7 +64,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                 // NO-OP
                 // If the file is not opened into an editor (such as in response for a control-hover),
                 // we do not actually load a translation unit for it.  When we receive a didOpen, the file
-                // may not yet be visible.  So, we defer creation of the  translation until we receive a
+                // may not yet be visible.  So, we defer creation of the translation until we receive a
                 // call to onDidChangeVisibleTextEditors(), in extension.ts.  A file is only loaded when
                 // it is actually opened in the editor (not in response to control-hover, which sends a
                 // didOpen), and first becomes visible.
