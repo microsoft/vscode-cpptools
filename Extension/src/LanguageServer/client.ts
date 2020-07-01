@@ -1662,6 +1662,8 @@ export class DefaultClient implements Client {
         if (!diagnosticsChannel) {
             diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
             workspaceDisposables.push(diagnosticsChannel);
+        } else {
+            diagnosticsChannel.clear();
         }
 
         const header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
@@ -1670,7 +1672,30 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
-        diagnosticsChannel.appendLine(`${header}${version}${configJson}${this.customBrowseConfigurationLogging}${response.diagnostics}`);
+        let customConfigurationLoggingStr: string = "";
+        const searchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
+        if (searchStart >= 0) {
+            const searchEnd: number = response.diagnostics.indexOf("Translation Unit Configurations:");
+            if (searchEnd >= 0 && searchEnd > searchStart) {
+                let searchString: string = response.diagnostics.substr(searchStart, searchEnd - searchStart);
+                let curSearchIndex: number = searchString.indexOf("[");
+                while (curSearchIndex > 0) {
+                    const match: RegExpMatchArray | null = searchString.match(/\[\s(.*)\s\]/);
+                    if (match && match.length > 1) {
+                        const fsPath: string = vscode.Uri.file(match[1]).toString();
+                        if (this.customConfigurationLogging.has(fsPath)) {
+                            if (customConfigurationLoggingStr.length === 0) {
+                                customConfigurationLoggingStr += "Custom configurations:\n";
+                            }
+                            customConfigurationLoggingStr += `[ ${match[1]} ]\n${this.customConfigurationLogging.get(fsPath)}\n`;
+                        }
+                    }
+                    searchString = searchString.substr(curSearchIndex);
+                    curSearchIndex = searchString.indexOf("[");
+                }
+            }
+        }
+        diagnosticsChannel.appendLine(`${header}${version}${configJson}${this.customBrowseConfigurationLogging}${customConfigurationLoggingStr}${response.diagnostics}`);
         diagnosticsChannel.show(false);
     }
 
