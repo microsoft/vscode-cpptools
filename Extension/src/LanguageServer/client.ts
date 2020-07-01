@@ -1679,7 +1679,7 @@ export class DefaultClient implements Client {
             if (searchEnd >= 0 && searchEnd > searchStart) {
                 let searchString: string = response.diagnostics.substr(searchStart, searchEnd - searchStart);
                 let curSearchIndex: number = searchString.indexOf("[");
-                while (curSearchIndex > 0) {
+                while (curSearchIndex >= 0) {
                     const match: RegExpMatchArray | null = searchString.match(/\[\s(.*)\s\]/);
                     if (match && match.length > 1) {
                         const fsPath: string = vscode.Uri.file(match[1]).toString();
@@ -1690,7 +1690,7 @@ export class DefaultClient implements Client {
                             customConfigurationLoggingStr += `[ ${match[1]} ]\n${this.customConfigurationLogging.get(fsPath)}\n`;
                         }
                     }
-                    searchString = searchString.substr(curSearchIndex);
+                    searchString = searchString.substr(curSearchIndex + 1);
                     curSearchIndex = searchString.indexOf("[");
                 }
             }
