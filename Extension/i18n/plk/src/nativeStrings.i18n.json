@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "Nie można wykonać zapytania dotyczącego kompilatora. Powrót do braku liczby bitów.",
 	"intellisense_client_creation_aborted": "Przerwano tworzenie klienta IntelliSense: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "Wykryto błędy #include na podstawie informacji podanych przez ustawienie configurationProvider. Funkcje IntelliSense dla tej jednostki tłumaczeniowej ({0}) będą udostępniane przez analizator tagów.",
-	"include_errors_config_provider_squiggles_disabled ": "Wykryto błędy #include na podstawie informacji podanych przez ustawienie configurationProvider. Zygzaki dla tej jednostki tłumaczeniowej ({0}) są wyłączone."
+	"include_errors_config_provider_squiggles_disabled ": "Wykryto błędy #include na podstawie informacji podanych przez ustawienie configurationProvider. Zygzaki dla tej jednostki tłumaczeniowej ({0}) są wyłączone.",
+	"preprocessor_keyword": "preprocessor keyword",
+	"c_keyword": "C keyword",
+	"cpp_keyword": "C++ keyword",
+	"overload": "+1 overload",
+	"overloads": "+%d overloads",
+	"specialization": "+1 specialization",
+	"specializations": "+%d specializations",
+	"expands_to": "Expands to:",
+	"file_label": "File:",
+	"parameters_label": "Parameters:",
+	"returns_label": "Returns:",
+	"deprecated_label": "Deprecated:",
+	"exceptions_label": "Exceptions:"
 }

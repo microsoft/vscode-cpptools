@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "無法查詢編譯器。請回復成沒有位元。",
 	"intellisense_client_creation_aborted": "已中止建立 IntelliSense 用戶端: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "根據 configurationProvider 設定提供的資訊，偵測到 #include 錯誤。此編譯單位 ({0}) 的 IntelliSense 功能將由標籤剖析器提供。",
-	"include_errors_config_provider_squiggles_disabled ": "根據 configurationProvider 設定提供的資訊，偵測到 #include 錯誤。已停用此編譯單位 ({0}) 的波浪線。"
+	"include_errors_config_provider_squiggles_disabled ": "根據 configurationProvider 設定提供的資訊，偵測到 #include 錯誤。已停用此編譯單位 ({0}) 的波浪線。",
+	"preprocessor_keyword": "前置處理器關鍵字",
+	"c_keyword": "C 關鍵字",
+	"cpp_keyword": "C++ keyword",
+	"overload": "+1 overload",
+	"overloads": "+%d overloads",
+	"specialization": "+1 specialization",
+	"specializations": "+%d specializations",
+	"expands_to": "Expands to:",
+	"file_label": "檔案:",
+	"parameters_label": "參數:",
+	"returns_label": "傳回:",
+	"deprecated_label": "Deprecated:",
+	"exceptions_label": "例外狀況:"
 }
