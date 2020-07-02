@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "コンパイラを照会できませんでした。ビットなしに戻ります。",
 	"intellisense_client_creation_aborted": "IntelliSense クライアントの作成が中止されました: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) の IntelliSense 機能は、タグ パーサーによって提供されます。",
-	"include_errors_config_provider_squiggles_disabled ": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) では、波線が無効になっています。"
+	"include_errors_config_provider_squiggles_disabled ": "configurationProvider 設定によって提供された情報に基づいて、#include エラーが検出されました。この翻訳単位 ({0}) では、波線が無効になっています。",
+	"preprocessor_keyword": "preprocessor keyword",
+	"c_keyword": "C keyword",
+	"cpp_keyword": "C++ keyword",
+	"overload": "+1 overload",
+	"overloads": "+%d overloads",
+	"specialization": "+1 specialization",
+	"specializations": "+%d specializations",
+	"expands_to": "Expands to:",
+	"file_label": "File:",
+	"parameters_label": "Parameters:",
+	"returns_label": "Returns:",
+	"deprecated_label": "Deprecated:",
+	"exceptions_label": "Exceptions:"
 }
