@@ -133,7 +133,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
-        let configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
+        const configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
             const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
             const compilerPath: string = definition.command;
             const compilerName: string = path.basename(compilerPath);

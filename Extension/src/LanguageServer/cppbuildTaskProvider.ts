@@ -176,8 +176,8 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             };
         }
 
-        let activeClient: Client = ext.getActiveClient();
-        let uri: vscode.Uri | undefined = activeClient.RootUri;
+        const activeClient: Client = ext.getActiveClient();
+        const uri: vscode.Uri | undefined = activeClient.RootUri;
         if (!uri) {
             throw new Error("No client URI found in getBuildTasks()");
         }
@@ -186,7 +186,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             throw new Error("No target WorkspaceFolder found in getBuildTasks()");
         }
 
-        let task: vscode.Task =  new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: vscode.Task =  new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
             new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> =>
             // When the task is executed, this callback will run. Here, we setup for running the task.
 			 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options, target.name)
@@ -198,7 +198,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     };
 
     async ensureBuildTaskExists(taskName: string): Promise<void> {
-        let rawTasksJson: any = await getRawTasksJson();
+        const rawTasksJson: any = await getRawTasksJson();
 
         // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
         if (!rawTasksJson.tasks) {
@@ -219,9 +219,9 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
         rawTasksJson.version = "2.0.0";
 
-        let selectedTask2: vscode.Task = selectedTask;
+        const selectedTask2: vscode.Task = selectedTask;
         if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-            let task: any = {
+            const task: any = {
                 ...selectedTask2.definition,
                 problemMatcher: selectedTask2.problemMatchers,
                 group: { kind: "build", "isDefault": true }
@@ -230,8 +230,8 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         }
 
         // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
-        let settings: OtherSettings = new OtherSettings();
-        let tasksJsonPath: string | undefined = getTasksJsonPath();
+        const settings: OtherSettings = new OtherSettings();
+        const tasksJsonPath: string | undefined = getTasksJsonPath();
         if (!tasksJsonPath) {
             throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
         }
@@ -332,7 +332,7 @@ export function getRawTasksJson(): Promise<any> {
             if (!exists) {
                 return resolve({});
             }
-            let fileContents: string = await util.readFileText(path);
+            const fileContents: string = await util.readFileText(path);
             let rawTasks: any = {};
             try {
                 rawTasks = jsonc.parse(fileContents);

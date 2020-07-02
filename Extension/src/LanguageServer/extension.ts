@@ -32,7 +32,7 @@ import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-export let cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
+export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
 
 let prevCrashFile: string;
 let clients: ClientCollection;
