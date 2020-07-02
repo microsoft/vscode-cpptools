@@ -1672,7 +1672,7 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
-        let customConfigurationLoggingStr: string = "";
+        let configurationLoggingStr: string = "";
         const searchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
         if (searchStart >= 0) {
             const searchEnd: number = response.diagnostics.indexOf("Translation Unit Configurations:");
@@ -1683,11 +1683,11 @@ export class DefaultClient implements Client {
                     const match: RegExpMatchArray | null = searchString.match(/\[\s(.*)\s\]/);
                     if (match && match.length > 1) {
                         const fsPath: string = vscode.Uri.file(match[1]).toString();
-                        if (this.customConfigurationLogging.has(fsPath)) {
-                            if (customConfigurationLoggingStr.length === 0) {
-                                customConfigurationLoggingStr += "Custom configurations:\n";
+                        if (this.configurationLogging.has(fsPath)) {
+                            if (configurationLoggingStr.length === 0) {
+                                configurationLoggingStr += "Custom configurations:\n";
                             }
-                            customConfigurationLoggingStr += `[ ${match[1]} ]\n${this.customConfigurationLogging.get(fsPath)}\n`;
+                            configurationLoggingStr += `[ ${match[1]} ]\n${this.configurationLogging.get(fsPath)}\n`;
                         }
                     }
                     searchString = searchString.substr(curSearchIndex + 1);
@@ -1695,7 +1695,7 @@ export class DefaultClient implements Client {
                 }
             }
         }
-        diagnosticsChannel.appendLine(`${header}${version}${configJson}${this.customBrowseConfigurationLogging}${customConfigurationLoggingStr}${response.diagnostics}`);
+        diagnosticsChannel.appendLine(`${header}${version}${configJson}${this.browseConfigurationLogging}${configurationLoggingStr}${response.diagnostics}`);
         diagnosticsChannel.show(false);
     }
 
@@ -2383,7 +2383,7 @@ export class DefaultClient implements Client {
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item)) {
-                this.customConfigurationLogging.set(item.uri.toString(), JSON.stringify(item.configuration, null, 4));
+                this.configurationLogging.set(item.uri.toString(), JSON.stringify(item.configuration, null, 4));
                 if (settings.loggingLevel === "Debug") {
                     out.appendLine(`  uri: ${item.uri.toString()}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
@@ -2421,8 +2421,8 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(CustomConfigurationNotification, params);
     }
 
-    private customBrowseConfigurationLogging: string = "";
-    private customConfigurationLogging: Map<string, string> = new Map<string, string>();
+    private browseConfigurationLogging: string = "";
+    private configurationLogging: Map<string, string> = new Map<string, string>();
 
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
@@ -2433,7 +2433,7 @@ export class DefaultClient implements Client {
         const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, rootFolder);
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
 
-        this.customBrowseConfigurationLogging = "";
+        this.browseConfigurationLogging = "";
 
         // This while (true) is here just so we can break out early if the config is set on error
         while (true) {
@@ -2492,7 +2492,7 @@ export class DefaultClient implements Client {
             break;
         }
 
-        this.customBrowseConfigurationLogging = localize("browse.configuration", "Custom browse configuration: {0}", `\n${JSON.stringify(sanitized, null, 4)}\n`);
+        this.browseConfigurationLogging = localize("browse.configuration", "Custom browse configuration: {0}", `\n${JSON.stringify(sanitized, null, 4)}\n`);
 
         const params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized,
@@ -2503,7 +2503,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomConfigurations(): void {
-        this.customConfigurationLogging.clear();
+        this.configurationLogging.clear();
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
@@ -2511,7 +2511,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomBrowseConfiguration(): void {
-        this.customBrowseConfigurationLogging = "";
+        this.browseConfigurationLogging = "";
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
