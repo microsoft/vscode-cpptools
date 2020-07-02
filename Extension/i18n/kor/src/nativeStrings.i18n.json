@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "컴파일러를 쿼리하지 못했습니다. 0비트로 대체하는 중입니다.",
 	"intellisense_client_creation_aborted": "IntelliSense 클라이언트 만들기가 중단되었습니다. {0}",
 	"include_errors_config_provider_intellisense_disabled ": "configurationProvider 설정에서 제공하는 정보를 기준으로 #include 오류가 검색되었습니다. 태그 파서가 이 변환 단위({0})에 적합한 IntelliSense 기능을 제공합니다.",
-	"include_errors_config_provider_squiggles_disabled ": "configurationProvider 설정에서 제공하는 정보를 기준으로 #include 오류가 검색되었습니다. 이 변환 단위({0})에서 물결선을 사용할 수 없습니다."
+	"include_errors_config_provider_squiggles_disabled ": "configurationProvider 설정에서 제공하는 정보를 기준으로 #include 오류가 검색되었습니다. 이 변환 단위({0})에서 물결선을 사용할 수 없습니다.",
+	"preprocessor_keyword": "preprocessor keyword",
+	"c_keyword": "C keyword",
+	"cpp_keyword": "C++ keyword",
+	"overload": "+1 overload",
+	"overloads": "+%d overloads",
+	"specialization": "+1 specialization",
+	"specializations": "+%d specializations",
+	"expands_to": "Expands to:",
+	"file_label": "File:",
+	"parameters_label": "Parameters:",
+	"returns_label": "Returns:",
+	"deprecated_label": "Deprecated:",
+	"exceptions_label": "Exceptions:"
 }
