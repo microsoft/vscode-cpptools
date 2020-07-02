@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "Не удалось запросить сведения от компилятора. Возврат к режиму без использования разрядности.",
 	"intellisense_client_creation_aborted": "Создание клиента IntelliSense прервано: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Функции IntelliSense для этой записи преобразования ({0}) будут предоставлены анализатором тегов.",
-	"include_errors_config_provider_squiggles_disabled ": "Обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Волнистые линии для этой записи преобразования ({0}) отключены."
+	"include_errors_config_provider_squiggles_disabled ": "Обнаружены ошибки #include на основе сведений, предоставленных параметром configurationProvider. Волнистые линии для этой записи преобразования ({0}) отключены.",
+	"preprocessor_keyword": "preprocessor keyword",
+	"c_keyword": "C keyword",
+	"cpp_keyword": "C++ keyword",
+	"overload": "+1 overload",
+	"overloads": "+%d overloads",
+	"specialization": "+1 specialization",
+	"specializations": "+%d specializations",
+	"expands_to": "Expands to:",
+	"file_label": "File:",
+	"parameters_label": "Parameters:",
+	"returns_label": "Returns:",
+	"deprecated_label": "Deprecated:",
+	"exceptions_label": "Exceptions:"
 }

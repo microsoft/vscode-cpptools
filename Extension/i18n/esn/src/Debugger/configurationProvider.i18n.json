@@ -10,6 +10,7 @@
 	"debugger.not.available": "El depurador de tipo \"{0}\" solo está disponible en Windows. Use el tipo \"{1}\" en la plataforma de sistema operativo actual.",
 	"lldb.framework.install.xcode": "Más información",
 	"lldb.framework.not.found": "No se encuentra \"LLDB.framework\" para lldb-mi. Instale XCode o las herramientas de línea de comandos de XCode.",
+	"debugger.launchConfig": "Launch configuration:",
 	"lldb.find.failed": "Falta la dependencia \"{0}\" para el ejecutable lldb-mi.",
 	"lldb.search.paths": "Buscado en:",
 	"lldb.install.help": "Para resolver este problema, instale XCode mediante App Store de Apple o instale las herramientas de línea de comandos de XCode ejecutando \"{0}\" en una ventana de terminal.",

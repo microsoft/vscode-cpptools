@@ -1,5 +1,49 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.29.0-insiders2: July 1, 2020
+### Bug Fixes
+* Ignore "screen size is bogus" error when debugging. [PR #5669](https://github.com/microsoft/vscode-cpptools/pull/5669)
+  * nukoyluoglu (@nukoyluoglu)
+
+## Version 0.29.0-insiders: June 24, 2020
+### New Features
+* Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
+
+### Enhancements
+* Add support for the Debug Welcome Panel. [#4837](https://github.com/microsoft/vscode-cpptools/issues/4837)
+* Update to clang-format 10. [#5194](https://github.com/microsoft/vscode-cpptools/issues/5194)
+* Added system to store and query properties from the active C/C++ configuration.
+  * bugengine (@bugengine) [PR #5453](https://github.com/microsoft/vscode-cpptools/pull/5453)
+* Add `quoteArgs` to `launch.json` schema. [PR #5639](https://github.com/microsoft/vscode-cpptools/pull/5639)
+* Add logs for a resolved `launch.json` if "engineLogging" is enabled. [PR #5644](https://github.com/microsoft/vscode-cpptools/pull/5644)
+* Add threadExit and processExit logging flags for 'cppvsdbg'. [PR #5652](https://github.com/microsoft/vscode-cpptools/pull/5652)
+
+### Bug Fixes
+* Add localization support for autocomplete and hover text. [#5370](https://github.com/microsoft/vscode-cpptools/issues/5370)
+* Some `updateChannel` fixes. [PR #5465](https://github.com/microsoft/vscode-cpptools/pull/5465)
+* Fix wrong language standard used with compile commands. [#5498](https://github.com/microsoft/vscode-cpptools/issues/5498)
+* Fix issue with defines and includes not being handled correctly in `compilerPath` or `compilerArgs`. [#5512](https://github.com/microsoft/vscode-cpptools/issues/5512)
+* Add gcc/gcc-10 compiler detection. [#5540](https://github.com/microsoft/vscode-cpptools/issues/5540)
+* Fix `--target` compiler arg getting overridden. [#5557](https://github.com/microsoft/vscode-cpptools/issues/5557)
+  * Matt Schulte (@schultetwin1)
+* Fix IntelliSense process crashes. [#5584](https://github.com/microsoft/vscode-cpptools/issues/5584), [#5629](https://github.com/microsoft/vscode-cpptools/issues/5629)
+* Fix Find All References and Rename when multiple references are on the same line. [#5568](https://github.com/microsoft/vscode-cpptools/issues/5568)
+* Fix an add/remove workspace folder crash. [#5591](https://github.com/microsoft/vscode-cpptools/issues/5591)
+* Fix default build tasks failing on Windows if the compiler isn't on the PATH. [#5604](https://github.com/microsoft/vscode-cpptools/issues/5604)
+* Fix updating `files.associations` and .C files being associated with C instead of C++. [#5618](https://github.com/microsoft/vscode-cpptools/issues/5618)
+* Fix IntelliSense malfunction when RxCpp is used. [#5619](https://github.com/microsoft/vscode-cpptools/issues/5619)
+* Fix potential thread deadlock in cpptools.
+* Fix copying a long value from debug watch results in pasting partial value [#5470](https://github.com/microsoft/vscode-cpptools/issues/5470)
+  * [PR MIEngine#1009](https://github.com/microsoft/MIEngine/pull/1009)
+* Fix Modifying conditional breakpoints [#2297](https://github.com/microsoft/vscode-cpptools/issues/2297)
+  * [PR MIEngine#1010](https://github.com/microsoft/MIEngine/pull/1010)
+* Fix find <miDebuggerPath>.exe in Windows path [#3076](https://github.com/microsoft/vscode-cpptools/issues/3076)
+  * [PR MIEngine#1001](https://github.com/microsoft/MIEngine/pull/1001)
+
+## Version 0.28.3: June 9, 2020
+### Enhancements
+* Update version of vscode-cpptools API to 4.0.1 [PR #5624](https://github.com/microsoft/vscode-cpptools/pull/5624)
+
 ## Version 0.28.2: June 1, 2020
 ### Regression Bug Fixes
 * Fix string arrays in `env` not being joined properly. [#5509](https://github.com/microsoft/vscode-cpptools/issues/5509)

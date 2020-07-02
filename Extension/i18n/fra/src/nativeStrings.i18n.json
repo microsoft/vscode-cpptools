@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "Échec de l'interrogation du compilateur. Retour au mode sans nombre de bits.",
 	"intellisense_client_creation_aborted": "Abandon de la création du client IntelliSense : {0}",
 	"include_errors_config_provider_intellisense_disabled ": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les fonctionnalités IntelliSense de cette unité de traduction ({0}) sont fournies par l'analyseur de balises.",
-	"include_errors_config_provider_squiggles_disabled ": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les tildes sont désactivés pour cette unité de traduction ({0})."
+	"include_errors_config_provider_squiggles_disabled ": "Erreurs #include détectées d'après les informations fournies par le paramètre configurationProvider. Les tildes sont désactivés pour cette unité de traduction ({0}).",
+	"preprocessor_keyword": "mot clé de préprocesseur",
+	"c_keyword": "Mot clé C",
+	"cpp_keyword": "Mot clé C++",
+	"overload": "+1 surcharge",
+	"overloads": "+%d surcharges",
+	"specialization": "+1 spécialisation",
+	"specializations": "+%d spécialisations",
+	"expands_to": "Se développe sur :",
+	"file_label": "Fichier :",
+	"parameters_label": "Paramètres :",
+	"returns_label": "Retourne :",
+	"deprecated_label": "Déprécié :",
+	"exceptions_label": "Exceptions :"
 }

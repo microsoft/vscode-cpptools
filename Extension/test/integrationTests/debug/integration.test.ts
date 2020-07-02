@@ -11,7 +11,7 @@ suite(`Debug Integration Test: `, function(): void {
     let hijackedFactoryFile: string;
 
     suiteSetup(async function(): Promise<void> {
-        let extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
+        const extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools");
         if (!extension.isActive) {
             await extension.activate();
         }
@@ -21,7 +21,7 @@ suite(`Debug Integration Test: `, function(): void {
         // If it is failing on startDebugging. Investigate the SimpleCppProject's tasks.json or launch.json.
         await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "(gdb) Launch");
 
-        let debugSessionTerminated: Promise<void> = new Promise(resolve => {
+        const debugSessionTerminated: Promise<void> = new Promise(resolve => {
             vscode.debug.onDidTerminateDebugSession((e) => resolve());
         });
 

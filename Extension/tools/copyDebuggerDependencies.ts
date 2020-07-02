@@ -13,7 +13,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-//Change this to true to force a dev workflow.
+// Change this to true to force a dev workflow.
 const EnableDevWorkflow: boolean = false;
 
 const DebugAdapterPath: string = "./debugAdapters";
@@ -46,13 +46,13 @@ function findCppToolsExtensionDebugAdapterFolder(): string {
 
     let dirPath: string = os.homedir();
     if (fs.existsSync(dirPath)) {
-        let files: string[] = fs.readdirSync(dirPath);
+        const files: string[] = fs.readdirSync(dirPath);
         for (let i: number = 0; i < files.length; i++) {
             // Check to see if it starts with '.vscode'
             if (vscodeFolderRegExp.test(files[i])) {
-                let extPath: string = path.join(dirPath, files[i], "extensions");
+                const extPath: string = path.join(dirPath, files[i], "extensions");
                 if (fs.existsSync(extPath)) {
-                    let extFiles: string[] = fs.readdirSync(extPath);
+                    const extFiles: string[] = fs.readdirSync(extPath);
                     for (let j: number = 0; j < extFiles.length; j++) {
                         if (cpptoolsFolderRegExp.test(path.join(extFiles[j]))) {
                             dirPath = path.join(extPath, extFiles[j]);
@@ -77,7 +77,7 @@ function findCppToolsExtensionDebugAdapterFolder(): string {
 
 function enableDevWorkflow(): Boolean {
     if (process.env.AGENT_ID) {
-        //Agent machines must not attempt any dev workflows
+        // Agent machines must not attempt any dev workflows
         return false;
     }
 
@@ -168,9 +168,9 @@ function removeFolder(root: string): void {
         return;
     }
 
-    let files: string[] = fs.readdirSync(root);
+    const files: string[] = fs.readdirSync(root);
     for (let i: number = 0; i < files.length; i++) {
-        let fullPath: string = path.join(root, files[i]);
+        const fullPath: string = path.join(root, files[i]);
         console.warn('Found entry %s', fullPath);
         if (!isDirectory(fullPath)) {
             console.warn('Deleting %s', fullPath);
@@ -194,7 +194,7 @@ function isDirectory(dir: string): Boolean {
 
 function makeDirectory(dir: string): void {
     try {
-        //Note: mkdir is limited to creating folders with one level of nesting. Creating "a/b" if 'a' doesn't exist will throw a ENOENT.
+        // Note: mkdir is limited to creating folders with one level of nesting. Creating "a/b" if 'a' doesn't exist will throw a ENOENT.
         fs.mkdirSync(dir);
     } catch (e) {
         if ((<NodeJS.ErrnoException>e).code !== "EEXIST") {

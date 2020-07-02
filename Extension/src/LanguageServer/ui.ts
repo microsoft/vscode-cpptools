@@ -157,14 +157,14 @@ export class UI {
     }
 
     public activeDocumentChanged(): void {
-        let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!activeEditor) {
             this.ShowConfiguration = false;
         } else {
-            let isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
+            const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
             // It's sometimes desirable to see the config and icons when making settings changes.
-            let isSettingsJson: boolean = ((activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
+            const isSettingsJson: boolean = ((activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
 
             this.ShowConfiguration = isCpp || isSettingsJson;
         }
@@ -179,10 +179,10 @@ export class UI {
     }
 
     public showConfigurations(configurationNames: string[]): Thenable<number> {
-        let options: vscode.QuickPickOptions = {};
+        const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.a.configuration", "Select a Configuration...");
 
-        let items: IndexableQuickPickItem[] = [];
+        const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < configurationNames.length; i++) {
             items.push({ label: configurationNames[i], description: "", index: i });
         }
@@ -194,11 +194,11 @@ export class UI {
     }
 
     public showConfigurationProviders(currentProvider?: string): Thenable<string | undefined> {
-        let options: vscode.QuickPickOptions = {};
+        const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
-        let providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+        const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
 
-        let items: KeyedQuickPickItem[] = [];
+        const items: KeyedQuickPickItem[] = [];
         providers.forEach(provider => {
             let label: string = provider.name;
             if (isSameProviderExtensionId(currentProvider, provider.extensionId)) {
@@ -213,10 +213,10 @@ export class UI {
     }
 
     public showCompileCommands(paths: string[]): Thenable<number> {
-        let options: vscode.QuickPickOptions = {};
+        const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.compile.commands", "Select a compile_commands.json...");
 
-        let items: IndexableQuickPickItem[] = [];
+        const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
             items.push({label: paths[i], description: "", index: i});
         }
@@ -226,10 +226,10 @@ export class UI {
     }
 
     public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
-        let options: vscode.QuickPickOptions = {};
+        const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.workspace", "Select a workspace folder...");
 
-        let items: KeyedQuickPickItem[] = [];
+        const items: KeyedQuickPickItem[] = [];
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
 
         return vscode.window.showQuickPick(items, options)
@@ -237,11 +237,10 @@ export class UI {
     }
 
     public showParsingCommands(): Thenable<number> {
-        let options: vscode.QuickPickOptions = {};
+        const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.parsing.command", "Select a parsing command...");
 
-        let items: IndexableQuickPickItem[];
-        items = [];
+        const items: IndexableQuickPickItem[] = [];
         if (this.browseEngineStatusBarItem.tooltip === "Parsing paused") {
             items.push({ label: localize("resume.parsing", "Resume Parsing"), description: "", index: 1 });
         } else {
@@ -269,8 +268,8 @@ export class UI {
     }
 
     private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
-        let showPrompt: () => Thenable<ConfigurationResult> = async () => {
-            let configured: boolean = await prompt();
+        const showPrompt: () => Thenable<ConfigurationResult> = async () => {
+            const configured: boolean = await prompt();
             return Promise.resolve({
                 priority: priority,
                 configured: configured

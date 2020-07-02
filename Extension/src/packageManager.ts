@@ -119,7 +119,7 @@ export class PackageManager {
     private BuildPromiseChain<TItem, TPromise>(items: TItem[], promiseBuilder: (item: TItem) => Promise<TPromise>): Promise<TPromise | null> {
         let promiseChain: Promise<TPromise | null> = Promise.resolve<TPromise | null>(null);
 
-        for (let item of items) {
+        for (const item of items) {
             promiseChain = promiseChain.then(() => promiseBuilder(item));
         }
 
@@ -133,7 +133,7 @@ export class PackageManager {
                     this.allPackages = <IPackage[]>util.packageJson.runtimeDependencies;
 
                     // Convert relative binary paths to absolute
-                    for (let pkg of this.allPackages) {
+                    for (const pkg of this.allPackages) {
                         if (pkg.binaries) {
                             pkg.binaries = pkg.binaries.map((value) => util.getExtensionFilePath(value));
                         }
@@ -210,10 +210,10 @@ export class PackageManager {
         this.AppendLineChannel(" " + localize("done", "Done!"));
         if (retryCount !== 0) {
             // Log telemetry to see if retrying helps.
-            let telemetryProperties: { [key: string]: string } = {};
+            const telemetryProperties: { [key: string]: string } = {};
             telemetryProperties["success"] = success ? `OnRetry${retryCount}` : 'false';
             if (lastError instanceof PackageManagerError) {
-                let packageError: PackageManagerError = lastError;
+                const packageError: PackageManagerError = lastError;
                 telemetryProperties['error.methodName'] = packageError.methodName;
                 telemetryProperties['error.message'] = packageError.message;
                 if (packageError.pkg) {
@@ -230,10 +230,10 @@ export class PackageManager {
 
     // reloadCpptoolsJson in main.ts uses ~25% of this function.
     private DownloadFile(urlString: any, pkg: IPackage, delay: number, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
-        let parsedUrl: url.Url = url.parse(urlString);
-        let proxyStrictSSL: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
+        const parsedUrl: url.Url = url.parse(urlString);
+        const proxyStrictSSL: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
 
-        let options: https.RequestOptions = {
+        const options: https.RequestOptions = {
             host: parsedUrl.host,
             path: parsedUrl.path,
             agent: util.getHttpsProxyAgent(),
@@ -253,7 +253,7 @@ export class PackageManager {
                     return reject(new PackageManagerError('Temporary Package file unavailable', localize("temp.package.unavailable", 'Temporary Package file unavailable'), 'DownloadFile', pkg));
                 }
 
-                let handleHttpResponse: (response: IncomingMessage) => void = (response: IncomingMessage) => {
+                const handleHttpResponse: (response: IncomingMessage) => void = (response: IncomingMessage) => {
                     if (response.statusCode === 301 || response.statusCode === 302) {
                         // Redirect - download from new location
                         let redirectUrl: string | string[];
@@ -271,7 +271,7 @@ export class PackageManager {
                             return reject(new PackageManagerError('Invalid response code received', localize("invalid.response.code.received", 'Invalid response code received'), 'DownloadFile', pkg));
                         }
                         // Download failed - print error message
-                        let errorMessage: string = localize("failed.web.error", "failed (error code '{0}')", response.statusCode);
+                        const errorMessage: string = localize("failed.web.error", "failed (error code '{0}')", response.statusCode);
                         return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
                     } else {
                         // Downloading - hook up events
@@ -284,16 +284,16 @@ export class PackageManager {
                             }
                             contentLength = response.headers['content-length'][0];
                         }
-                        let packageSize: number = parseInt(contentLength, 10);
-                        let downloadPercentage: number = 0;
+                        const packageSize: number = parseInt(contentLength, 10);
+                        const downloadPercentage: number = 0;
                         let dots: number = 0;
-                        let tmpFile: fs.WriteStream = fs.createWriteStream("", { fd: pkg.tmpFile.fd });
+                        const tmpFile: fs.WriteStream = fs.createWriteStream("", { fd: pkg.tmpFile.fd });
 
                         this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `);
 
                         response.on('data', (data) => {
                             // Update dots after package name in output console
-                            let newDots: number = Math.ceil(downloadPercentage / 5);
+                            const newDots: number = Math.ceil(downloadPercentage / 5);
                             if (newDots > dots) {
                                 this.AppendChannel(".".repeat(newDots - dots));
                                 dots = newDots;
@@ -310,7 +310,7 @@ export class PackageManager {
                     }
                 };
 
-                let request: ClientRequest = https.request(options, handleHttpResponse);
+                const request: ClientRequest = https.request(options, handleHttpResponse);
 
                 request.on('error', (error) =>
                     reject(new PackageManagerError(
@@ -347,7 +347,7 @@ export class PackageManager {
                 zipfile.readEntry();
 
                 zipfile.on('entry', (entry: yauzl.Entry) => {
-                    let absoluteEntryPath: string = util.getExtensionFilePath(entry.fileName);
+                    const absoluteEntryPath: string = util.getExtensionFilePath(entry.fileName);
 
                     if (entry.fileName.endsWith("/")) {
                         // Directory - create it
@@ -377,7 +377,7 @@ export class PackageManager {
 
                                         // Create as a .tmp file to avoid partially unzipped files
                                         // counting as completed files.
-                                        let absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
+                                        const absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
                                         if (fs.existsSync(absoluteEntryTempFile)) {
                                             try {
                                                 await util.unlinkPromise(absoluteEntryTempFile);
@@ -387,8 +387,8 @@ export class PackageManager {
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
-                                        let fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
-                                        let writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
+                                        const fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        const writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
 
                                         writeStream.on('close', async () => {
                                             try {

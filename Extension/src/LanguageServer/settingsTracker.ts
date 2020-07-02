@@ -26,12 +26,12 @@ export class SettingsTracker {
     }
 
     public getUserModifiedSettings(): { [key: string]: string } {
-        let filter: FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => !this.areEqual(val, settings.inspect(key)?.defaultValue);
+        const filter: FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfiguration) => !this.areEqual(val, settings.inspect(key)?.defaultValue);
         return this.collectSettings(filter);
     }
 
     public getChangedSettings(): { [key: string]: string } {
-        let filter: FilterFunction = (key: string, val: string) => !(key in this.previousCppSettings) || !this.areEqual(val, this.previousCppSettings[key]);
+        const filter: FilterFunction = (key: string, val: string) => !(key in this.previousCppSettings) || !this.areEqual(val, this.previousCppSettings[key]);
         return this.collectSettings(filter);
     }
 
@@ -40,7 +40,7 @@ export class SettingsTracker {
         const settingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
         const selectCorrectlyScopedSettings = (rawSetting: any): vscode.WorkspaceConfiguration =>
             (!rawSetting || rawSetting.scope === "resource" || rawSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
-        let result: { [key: string]: string } = {};
+        const result: { [key: string]: string } = {};
         for (const key in settingsResourceScope) {
             const rawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
             const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting);
@@ -77,20 +77,20 @@ export class SettingsTracker {
     private getSetting(settings: vscode.WorkspaceConfiguration, key: string): any {
         // Ignore methods and settings that don't exist
         if (settings.inspect(key)?.defaultValue !== undefined) {
-            let val: any = settings.get(key);
+            const val: any = settings.get(key);
             if (val instanceof Object) {
                 return val; // It's a sub-section.
             }
 
             // Only return values that match the setting's type and enum (if applicable).
-            let curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+            const curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
             if (curSetting) {
-                let type: string | undefined = this.typeMatch(val, curSetting["type"]);
+                const type: string | undefined = this.typeMatch(val, curSetting["type"]);
                 if (type) {
                     if (type !== "string") {
                         return val;
                     }
-                    let curEnum: any[] = curSetting["enum"];
+                    const curEnum: any[] = curSetting["enum"];
                     if (curEnum && curEnum.indexOf(val) === -1) {
                         return "<invalid>";
                     }
@@ -105,7 +105,7 @@ export class SettingsTracker {
         if (type) {
             if (type instanceof Array) {
                 for (let i: number = 0; i < type.length; i++) {
-                    let t: string = type[i];
+                    const t: string = type[i];
                     if (t) {
                         if (typeof value === t) {
                             return t;
@@ -132,7 +132,7 @@ export class SettingsTracker {
             switch (key) {
                 case "clang_format_style":
                 case "clang_format_fallbackStyle": {
-                    let newKey: string = key + "2";
+                    const newKey: string = key + "2";
                     if (val) {
                         switch (String(val).toLowerCase()) {
                             case "visual studio":
@@ -158,6 +158,7 @@ export class SettingsTracker {
                     break;
                 }
                 case "commentContinuationPatterns": {
+                    key = "commentContinuationPatterns2";
                     value = this.areEqual(val, settings.inspect(key)?.defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     break;
                 }

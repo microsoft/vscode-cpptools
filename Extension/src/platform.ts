@@ -27,7 +27,7 @@ export class PlatformInformation {
     constructor(public platform: string, public architecture?: string, public distribution?: LinuxDistribution, public version?: string) { }
 
     public static GetPlatformInformation(): Promise<PlatformInformation> {
-        let platform: string = os.platform();
+        const platform: string = os.platform();
         let architecturePromise: Promise<string | undefined>;
         let distributionPromise: Promise<LinuxDistribution | undefined> = Promise.resolve<LinuxDistribution | undefined>(undefined);
         let versionPromise: Promise<string | undefined> = Promise.resolve<string | undefined>(undefined);
@@ -63,9 +63,9 @@ export class PlatformInformation {
         return util.execChildProcess('wmic os get osarchitecture', util.extensionPath)
             .then((architecture) => {
                 if (architecture) {
-                    let archArray: string[] = architecture.split(os.EOL);
+                    const archArray: string[] = architecture.split(os.EOL);
                     if (archArray.length >= 2) {
-                        let arch: string = archArray[1].trim();
+                        const arch: string = archArray[1].trim();
 
                         // Note: This string can be localized. So, we'll just check to see if it contains 32 or 64.
                         if (arch.indexOf('64') >= 0) {
