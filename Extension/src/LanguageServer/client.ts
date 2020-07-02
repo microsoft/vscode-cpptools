@@ -1672,26 +1672,28 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
+
+        // Get diagnotics for configuration provider info.
         let configurationLoggingStr: string = "";
-        const searchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
-        if (searchStart >= 0) {
-            const searchEnd: number = response.diagnostics.indexOf("Translation Unit Configurations:");
-            if (searchEnd >= 0 && searchEnd > searchStart) {
-                let searchString: string = response.diagnostics.substr(searchStart, searchEnd - searchStart);
-                let curSearchIndex: number = searchString.indexOf("[");
-                while (curSearchIndex >= 0) {
-                    const match: RegExpMatchArray | null = searchString.match(/\[\s(.*)\s\]/);
-                    if (match && match.length > 1) {
-                        const fsPath: string = vscode.Uri.file(match[1]).toString();
-                        if (this.configurationLogging.has(fsPath)) {
+        const tuSearchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
+        if (tuSearchStart >= 0) {
+            const tuSearchEnd: number = response.diagnostics.indexOf("Translation Unit Configurations:");
+            if (tuSearchEnd >= 0 && tuSearchEnd > tuSearchStart) {
+                let tuSearchString: string = response.diagnostics.substr(tuSearchStart, tuSearchEnd - tuSearchStart);
+                let tuSearchIndex: number = tuSearchString.indexOf("[");
+                while (tuSearchIndex >= 0) {
+                    const tuMatch: RegExpMatchArray | null = tuSearchString.match(/\[\s(.*)\s\]/);
+                    if (tuMatch && tuMatch.length > 1) {
+                        const tuPath: string = vscode.Uri.file(tuMatch[1]).toString();
+                        if (this.configurationLogging.has(tuPath)) {
                             if (configurationLoggingStr.length === 0) {
                                 configurationLoggingStr += "Custom configurations:\n";
                             }
-                            configurationLoggingStr += `[ ${match[1]} ]\n${this.configurationLogging.get(fsPath)}\n`;
+                            configurationLoggingStr += `[ ${tuMatch[1]} ]\n${this.configurationLogging.get(tuPath)}\n`;
                         }
                     }
-                    searchString = searchString.substr(curSearchIndex + 1);
-                    curSearchIndex = searchString.indexOf("[");
+                    tuSearchString = tuSearchString.substr(tuSearchIndex + 1);
+                    tuSearchIndex = tuSearchString.indexOf("[");
                 }
             }
         }
