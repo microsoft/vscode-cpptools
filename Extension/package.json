@@ -250,6 +250,12 @@
           "description": "%c_cpp.configuration.preferredPathSeparator.description%",
           "scope": "machine-overridable"
         },
+        "C_Cpp.simplifyStructuredComments": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.simplifyStructuredComments.description%",
+          "scope": "resource"
+        },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [

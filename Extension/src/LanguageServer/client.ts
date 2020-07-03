@@ -1207,6 +1207,7 @@ export class DefaultClient implements Client {
         const settings_dimInactiveRegions: boolean[] = [];
         const settings_enhancedColorization: string[] = [];
         const settings_suggestSnippets: (boolean | undefined)[] = [];
+        const settings_simplifyStructuredComments: (boolean | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
@@ -1241,6 +1242,7 @@ export class DefaultClient implements Client {
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
                 settings_enhancedColorization.push(setting.enhancedColorization ? "Enabled" : "Disabled");
                 settings_suggestSnippets.push(setting.suggestSnippets);
+                settings_simplifyStructuredComments.push(setting.simplifyStructuredComments);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
@@ -1300,6 +1302,7 @@ export class DefaultClient implements Client {
                 dimInactiveRegions: settings_dimInactiveRegions,
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
+                simplifyStructuredComments: settings_simplifyStructuredComments,
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
