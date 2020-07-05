@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "Fehler beim Abfragen des Compilers. Es wird ein Fallback auf keine Bitanzahl durchgeführt.",
 	"intellisense_client_creation_aborted": "IntelliSense-Clienterstellung abgebrochen: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "Basierend auf den von der configurationProvider-Einstellung bereitgestellten Informationen wurden #include-Fehler festgestellt. IntelliSense-Features für diese Übersetzungseinheit ({0}) werden vom Tagparser bereitgestellt.",
-	"include_errors_config_provider_squiggles_disabled ": "Basierend auf den von der configurationProvider-Einstellung bereitgestellten Informationen wurden #include-Fehler festgestellt. Wellenlinien sind für diese Übersetzungseinheit deaktiviert ({0})."
+	"include_errors_config_provider_squiggles_disabled ": "Basierend auf den von der configurationProvider-Einstellung bereitgestellten Informationen wurden #include-Fehler festgestellt. Wellenlinien sind für diese Übersetzungseinheit deaktiviert ({0}).",
+	"preprocessor_keyword": "preprocessor keyword",
+	"c_keyword": "C keyword",
+	"cpp_keyword": "C++ keyword",
+	"overload": "+1 overload",
+	"overloads": "+%d overloads",
+	"specialization": "+1 specialization",
+	"specializations": "+%d specializations",
+	"expands_to": "Expands to:",
+	"file_label": "File:",
+	"parameters_label": "Parameters:",
+	"returns_label": "Returns:",
+	"deprecated_label": "Deprecated:",
+	"exceptions_label": "Exceptions:"
 }
