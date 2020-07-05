@@ -11,6 +11,7 @@ import * as nls from 'vscode-nls';
 import * as logger from '../logger';
 import { PersistentState } from './persistentState';
 import * as util from '../common';
+import { setInterval } from 'timers';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

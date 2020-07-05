@@ -9,6 +9,7 @@ import { Client } from './client';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as nls from 'vscode-nls';
+import { setTimeout } from 'timers';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

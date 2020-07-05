@@ -17,6 +17,7 @@ import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 import * as nls from 'vscode-nls';
+import { setTimeout } from 'timers';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
