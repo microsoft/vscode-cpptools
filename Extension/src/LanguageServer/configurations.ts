@@ -299,11 +299,14 @@ export class CppProperties {
 
         // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
 
+        const abTestSettings: ABTestSettings = getABTestSettings();
+        const rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+        const defaultFolder: string = "${default}";
+        // We don't add system includes to the includePath anymore. The language server has this information.
         if (isUnset(settings.defaultIncludePath)) {
-            // We don't add system includes to the includePath anymore. The language server has this information.
-            const abTestSettings: ABTestSettings = getABTestSettings();
-            const rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
             configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
+        } else {
+            configuration.includePath = [rootFolder].concat(this.vcpkgIncludes).concat([defaultFolder]);
         }
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {

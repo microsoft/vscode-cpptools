@@ -10,7 +10,7 @@
 	"debugger.not.available": "Ladicí program typu {0} je k dispozici jen ve Windows. Na aktuální platformě operačního systému použijte typ {1}.",
 	"lldb.framework.install.xcode": "Další informace",
 	"lldb.framework.not.found": "Nepovedlo se najít LLDB.framework pro lldb-mi. Nainstalujte prosím XCode nebo jeho nástroje příkazového řádku.",
-	"debugger.launchConfig": "Launch configuration:",
+	"debugger.launchConfig": "Spustit konfiguraci:",
 	"lldb.find.failed": "Chybí závislosti {0} pro spustitelný soubor lldb-mi.",
 	"lldb.search.paths": "Prohledáno:",
 	"lldb.install.help": "Pokud chcete tento problém vyřešit, buď nainstalujte XCode přes obchod Apple App Store, nebo v okně terminálu spusťte {0}, aby se nainstalovaly nástroje příkazového řádku XCode.",
