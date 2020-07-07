@@ -254,7 +254,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.simplifyStructuredComments.description%",
-          "scope": "resource"
+          "scope": "application"
         },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
