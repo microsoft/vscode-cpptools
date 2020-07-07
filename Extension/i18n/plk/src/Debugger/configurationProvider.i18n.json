@@ -10,7 +10,7 @@
 	"debugger.not.available": "Debuger typu: „{0}” jest dostępny tylko w systemie Windows. Użyj typu: „{1}” na bieżącej platformie systemu operacyjnego.",
 	"lldb.framework.install.xcode": "Więcej informacji",
 	"lldb.framework.not.found": "Nie można zlokalizować elementu „LLDB.framework” dla narzędzia lldb-mi. Zainstaluj środowisko XCode lub narzędzia wiersza polecenia środowiska XCode.",
-	"debugger.launchConfig": "Launch configuration:",
+	"debugger.launchConfig": "Konfiguracja uruchamiania:",
 	"lldb.find.failed": "Brak zależności „{0}” dla pliku wykonywalnego lldb-mi.",
 	"lldb.search.paths": "Wyszukano w:",
 	"lldb.install.help": "Aby rozwiązać ten problem, zainstaluj środowisko XCode za pośrednictwem sklepu Apple App Store lub zainstaluj narzędzia wiersza polecenia środowiska XCode, uruchamiając polecenie „{0}” w oknie terminala.",
