@@ -214,6 +214,21 @@ export async function isExtensionReady(): Promise<boolean> {
     return doesInstallLockFileExist;
 }
 
+export function removeInstallLockFile(): Promise<void> {
+    if (os.platform() !== 'win32') {
+        const sourcePath: string = getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
+        if (fs.existsSync(sourcePath)) {
+            fs.rename(sourcePath, getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
+                if (err) {
+                    getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
+                        'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
+                }
+            });
+        }
+    }
+
+    return Promise.resolve();
+}
 let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
@@ -555,6 +570,25 @@ export function getInstalledBinaryPlatform(): string | undefined {
         installedPlatform = "linux";
     }
     return installedPlatform;
+}
+
+/* Check if the core files exists in extension's installation folder */
+export function checkInstallationFiles(installedPlatform: string | undefined): boolean {
+    if (!installedPlatform) {
+        return false;
+    }
+    let successInstall: boolean = true;
+    // json files in bin folder
+    // cpptools, cpptools-srv
+
+    // debug adapters, llvm bin
+    switch (installedPlatform) {
+        case "win32":
+        case "darwin":
+        case "linux":
+    }
+
+    return successInstall;
 }
 
 /** Reads the content of a text file */
