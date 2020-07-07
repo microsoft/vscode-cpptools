@@ -1633,6 +1633,8 @@ export class DefaultClient implements Client {
         if (!diagnosticsChannel) {
             diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
             workspaceDisposables.push(diagnosticsChannel);
+        } else {
+            diagnosticsChannel.clear();
         }
 
         const header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
@@ -1641,7 +1643,32 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
-        diagnosticsChannel.appendLine(`${header}${version}${configJson}${response.diagnostics}`);
+
+        // Get diagnotics for configuration provider info.
+        let configurationLoggingStr: string = "";
+        const tuSearchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
+        if (tuSearchStart >= 0) {
+            const tuSearchEnd: number = response.diagnostics.indexOf("Translation Unit Configurations:");
+            if (tuSearchEnd >= 0 && tuSearchEnd > tuSearchStart) {
+                let tuSearchString: string = response.diagnostics.substr(tuSearchStart, tuSearchEnd - tuSearchStart);
+                let tuSearchIndex: number = tuSearchString.indexOf("[");
+                while (tuSearchIndex >= 0) {
+                    const tuMatch: RegExpMatchArray | null = tuSearchString.match(/\[\s(.*)\s\]/);
+                    if (tuMatch && tuMatch.length > 1) {
+                        const tuPath: string = vscode.Uri.file(tuMatch[1]).toString();
+                        if (this.configurationLogging.has(tuPath)) {
+                            if (configurationLoggingStr.length === 0) {
+                                configurationLoggingStr += "Custom configurations:\n";
+                            }
+                            configurationLoggingStr += `[ ${tuMatch[1]} ]\n${this.configurationLogging.get(tuPath)}\n`;
+                        }
+                    }
+                    tuSearchString = tuSearchString.substr(tuSearchIndex + 1);
+                    tuSearchIndex = tuSearchString.indexOf("[");
+                }
+            }
+        }
+        diagnosticsChannel.appendLine(`${header}${version}${configJson}${this.browseConfigurationLogging}${configurationLoggingStr}${response.diagnostics}`);
         diagnosticsChannel.show(false);
     }
 
@@ -2378,6 +2405,7 @@ export class DefaultClient implements Client {
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item)) {
+                this.configurationLogging.set(item.uri.toString(), JSON.stringify(item.configuration, null, 4));
                 if (settings.loggingLevel === "Debug") {
                     out.appendLine(`  uri: ${item.uri.toString()}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
@@ -2415,6 +2443,9 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(CustomConfigurationNotification, params);
     }
 
+    private browseConfigurationLogging: string = "";
+    private configurationLogging: Map<string, string> = new Map<string, string>();
+
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         if (!rootFolder) {
@@ -2423,6 +2454,8 @@ export class DefaultClient implements Client {
         const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, rootFolder);
         const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, rootFolder);
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
+
+        this.browseConfigurationLogging = "";
 
         // This while (true) is here just so we can break out early if the config is set on error
         while (true) {
@@ -2481,6 +2514,8 @@ export class DefaultClient implements Client {
             break;
         }
 
+        this.browseConfigurationLogging = localize("browse.configuration", "Custom browse configuration: {0}", `\n${JSON.stringify(sanitized, null, 4)}\n`);
+
         const params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized,
             workspaceFolderUri: this.RootPath
@@ -2490,6 +2525,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomConfigurations(): void {
+        this.configurationLogging.clear();
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
@@ -2497,6 +2533,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomBrowseConfiguration(): void {
+        this.browseConfigurationLogging = "";
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
