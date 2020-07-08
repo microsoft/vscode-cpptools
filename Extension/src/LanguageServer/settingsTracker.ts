@@ -48,7 +48,9 @@ export class SettingsTracker {
             if (val === undefined) {
                 continue;
             }
-            if (val instanceof Object && !(val instanceof Array)) {
+
+            // Iterate through dotted "sub" settings.
+            const collectSettingsRecursive = (key: string, val: Object) => {
                 for (const subKey in val) {
                     const newKey: string = key + "." + subKey;
                     const newRawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + newKey];
@@ -57,11 +59,18 @@ export class SettingsTracker {
                     if (subVal === undefined) {
                         continue;
                     }
-                    const entry: KeyValuePair | undefined = this.filterAndSanitize(newKey, subVal, correctlyScopedSubSettings, filter);
-                    if (entry && entry.key && entry.value) {
-                        result[entry.key] = entry.value;
+                    if (subVal instanceof Object && !(subVal instanceof Array)) {
+                        collectSettingsRecursive(newKey, subVal);
+                    } else {
+                        const entry: KeyValuePair | undefined = this.filterAndSanitize(newKey, subVal, correctlyScopedSubSettings, filter);
+                        if (entry && entry.key && entry.value) {
+                            result[entry.key] = entry.value;
+                        }
                     }
                 }
+            };
+            if (val instanceof Object && !(val instanceof Array)) {
+                collectSettingsRecursive(key, val);
                 continue;
             }
 
