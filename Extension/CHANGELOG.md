@@ -7,7 +7,7 @@
 
 ### Enhancements
 * Automatically add `"${default}"` to the default `includePath` in `c_cpp_properties.json` if `C_Cpp.default.includePath` is set. [#3733](https://github.com/microsoft/vscode-cpptools/issues/3733)
-* Add 'C_Cpp.simplifyStructuredComments` setting. [#5706](https://github.com/microsoft/vscode-cpptools/issues/5706)
+* Add `C_Cpp.simplifyStructuredComments` setting. [#5706](https://github.com/microsoft/vscode-cpptools/issues/5706)
 * Add configuration provider logging to `C/C++: Log Diagnostics`. [#4826](https://github.com/microsoft/vscode-cpptools/issues/4826)
 
 ### Bug Fixes
