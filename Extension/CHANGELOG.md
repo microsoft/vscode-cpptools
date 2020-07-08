@@ -1,7 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.29.0-insiders2: July 1, 2020
+## Version 0.29.0-insiders2: July 8, 2020
 ### Bug Fixes
+* Fix forced includes not handled properly when parsed as compiler args. [5738](https://github.com/microsoft/vscode-cpptools/issues/5738)
+* Add msys2 clang compilers to the compiler search list (previously only gcc was handled). [#5697](https://github.com/microsoft/vscode-cpptools/issues/5697)
+* Fix `compile_commands.json` sometimes not updating. [#5687](https://github.com/microsoft/vscode-cpptools/issues/5687)
 * Ignore "screen size is bogus" error when debugging. [PR #5669](https://github.com/microsoft/vscode-cpptools/pull/5669)
   * nukoyluoglu (@nukoyluoglu)
 
