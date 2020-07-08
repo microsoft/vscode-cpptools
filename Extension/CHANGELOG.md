@@ -1,9 +1,22 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.29.0-insiders2: July 1, 2020
+## Version 0.29.0-insiders2: July 8, 2020
+### New Features
+* Added support for LogMessage Breakpoints for debug type `cppdbg`. [#1013](https://github.com/microsoft/MIEngine/pull/1013)
+* Switch to using the VS Code Semantic Tokens API for semantic colorization. [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401)
+
+### Enhancements
+* Automatically add `"${default}"` to the default `includePath` in `c_cpp_properties.json` if `C_Cpp.default.includePath` is set. [#3733](https://github.com/microsoft/vscode-cpptools/issues/3733)
+* Add `C_Cpp.simplifyStructuredComments` setting. [#5706](https://github.com/microsoft/vscode-cpptools/issues/5706)
+* Add configuration provider logging to `C/C++: Log Diagnostics`. [#4826](https://github.com/microsoft/vscode-cpptools/issues/4826)
+
 ### Bug Fixes
 * Ignore "screen size is bogus" error when debugging. [PR #5669](https://github.com/microsoft/vscode-cpptools/pull/5669)
   * nukoyluoglu (@nukoyluoglu)
+* Fix `compile_commands.json` sometimes not updating. [#5687](https://github.com/microsoft/vscode-cpptools/issues/5687)
+* Add msys2 clang compilers to the compiler search list (previously only gcc was handled). [#5697](https://github.com/microsoft/vscode-cpptools/issues/5697)
+* Fix extension getting stuck when an "@" response file that doesn't end with ".rsp" is used in `compilerArgs`. [#5731](https://github.com/microsoft/vscode-cpptools/issues/5731)
+* Fix forced includes not handled properly when parsed as compiler args. [#5738](https://github.com/microsoft/vscode-cpptools/issues/5738)
 
 ## Version 0.29.0-insiders: June 24, 2020
 ### New Features
