@@ -15,7 +15,7 @@
   * nukoyluoglu (@nukoyluoglu)
 * Fix `compile_commands.json` sometimes not updating. [#5687](https://github.com/microsoft/vscode-cpptools/issues/5687)
 * Add msys2 clang compilers to the compiler search list (previously only gcc was handled). [#5697](https://github.com/microsoft/vscode-cpptools/issues/5697)
-* Fix extension getting stuck when a "@response" file that doesn't end with ".rsp" is used in `compilerArgs`. [#5731](https://github.com/microsoft/vscode-cpptools/issues/5731)
+* Fix extension getting stuck when an "@" response file that doesn't end with ".rsp" is used in `compilerArgs`. [#5731](https://github.com/microsoft/vscode-cpptools/issues/5731)
 * Fix forced includes not handled properly when parsed as compiler args. [#5738](https://github.com/microsoft/vscode-cpptools/issues/5738)
 
 ## Version 0.29.0-insiders: June 24, 2020
