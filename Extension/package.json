@@ -1778,6 +1778,20 @@
       ]
     },
     {
+      "description": "C/C++ language components (Linux / arm)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2131982",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
+      ]
+    },
+    {
       "description": "C/C++ language components (OS X)",
       "url": "https://go.microsoft.com/fwlink/?linkid=2132316",
       "platforms": [
