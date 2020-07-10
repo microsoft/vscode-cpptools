@@ -431,6 +431,7 @@ const RequestCustomConfig: NotificationType<string, void> = new NotificationType
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
+const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
 
 let failureMessageShown: boolean = false;
 
@@ -602,8 +603,12 @@ class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 
 class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     private client: DefaultClient;
+    public onDidChangeSemanticTokensEvent = new vscode.EventEmitter<void>();
+    public onDidChangeSemanticTokens?: vscode.Event<void>;
+
     constructor(client: DefaultClient) {
         this.client = client;
+        this.onDidChangeSemanticTokens = this.onDidChangeSemanticTokensEvent.event;
     }
 
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
@@ -641,6 +646,7 @@ export class DefaultClient implements Client {
     private innerLanguageClient?: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
+    private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
@@ -1137,7 +1143,8 @@ export class DefaultClient implements Client {
                                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
                             }
                             if (settings.enhancedColorization && this.semanticTokensLegend) {
-                                this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);
+                                this.semanticTokensProvider = new SemanticTokensProvider(this);
+                                this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
                             }
 
                             // Listen for messages from the language server.
@@ -1409,10 +1416,12 @@ export class DefaultClient implements Client {
                 if (changedSettings["enhancedColorization"]) {
                     const settings: CppSettings = new CppSettings();
                     if (settings.enhancedColorization && this.semanticTokensLegend) {
+                        this.semanticTokensProvider = new SemanticTokensProvider(this);
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
                     } else if (this.semanticTokensProviderDisposable) {
                         this.semanticTokensProviderDisposable.dispose();
                         this.semanticTokensProviderDisposable = undefined;
+                        this.semanticTokensProvider = undefined;
                     }
                 }
                 this.configuration.onDidChangeSettings();
@@ -1946,6 +1955,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
+        this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.onDidChangeSemanticTokensEvent.fire());
         setupOutputHandlers();
     }
 
