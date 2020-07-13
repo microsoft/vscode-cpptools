@@ -1632,6 +1632,24 @@
     "semanticTokenScopes": [
       {
         "scopes": {
+          "label": [
+            "entity.name.label"
+          ],
+          "variable.global": [
+            "variable.other.global"
+          ],
+          "variable.local": [
+            "variable.other.local"
+          ],
+          "property.static": [
+            "variable.other.property.static"
+          ],
+          "member.static": [
+            "entity.name.function.member.static"
+          ],
+          "macro": [
+            "entity.name.function.preprocessor"
+          ],
           "referenceType": [
             "entity.name.type.class.reference"
           ],
