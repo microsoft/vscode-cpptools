@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.29.0: July 16, 2020
+## Version 0.29.0: July 15, 2020
 ### New Features
 * Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
   * Add `C_Cpp.simplifyStructuredComments` setting. [#5706](https://github.com/microsoft/vscode-cpptools/issues/5706)
