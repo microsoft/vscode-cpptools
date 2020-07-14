@@ -277,6 +277,12 @@
           "description": "%c_cpp.configuration.preferredPathSeparator.description%",
           "scope": "machine-overridable"
         },
+        "C_Cpp.simplifyStructuredComments": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.simplifyStructuredComments.description%",
+          "scope": "application"
+        },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [
@@ -1653,18 +1659,60 @@
     "semanticTokenScopes": [
       {
         "scopes": {
-          "referenceType": [ "entity.name.type.class.reference" ],
-          "cliProperty": [ "variable.other.property.cli" ],
-          "genericType": [ "entity.name.type.class.generic" ],
-          "valueType": [ "entity.name.type.class.value" ],
-          "templateFunction": [ "entity.name.function.templated" ],
-          "templateType": [ "entity.name.type.class.templated" ],
-          "operatorOverload": [ "entity.name.function.operator" ],
-          "memberOperatorOverload": [ "entity.name.function.operator.member" ],
-          "newOperator": [ "keyword.operator.new" ],
-          "numberLiteral": [ "entity.name.operator.custom-literal.number" ],
-          "customLiteral": [ "entity.name.operator.custom-literal" ],
-          "stringLiteral": [ "entity.name.operator.custom-literal.string" ]
+          "label": [
+            "entity.name.label"
+          ],
+          "variable.global": [
+            "variable.other.global"
+          ],
+          "variable.local": [
+            "variable.other.local"
+          ],
+          "property.static": [
+            "variable.other.property.static"
+          ],
+          "member.static": [
+            "entity.name.function.member.static"
+          ],
+          "macro": [
+            "entity.name.function.preprocessor"
+          ],
+          "referenceType": [
+            "entity.name.type.class.reference"
+          ],
+          "cliProperty": [
+            "variable.other.property.cli"
+          ],
+          "genericType": [
+            "entity.name.type.class.generic"
+          ],
+          "valueType": [
+            "entity.name.type.class.value"
+          ],
+          "templateFunction": [
+            "entity.name.function.templated"
+          ],
+          "templateType": [
+            "entity.name.type.class.templated"
+          ],
+          "operatorOverload": [
+            "entity.name.function.operator"
+          ],
+          "memberOperatorOverload": [
+            "entity.name.function.operator.member"
+          ],
+          "newOperator": [
+            "keyword.operator.new"
+          ],
+          "numberLiteral": [
+            "entity.name.operator.custom-literal.number"
+          ],
+          "customLiteral": [
+            "entity.name.operator.custom-literal"
+          ],
+          "stringLiteral": [
+            "entity.name.operator.custom-literal.string"
+          ]
         }
       }
     ]
