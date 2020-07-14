@@ -561,7 +561,7 @@ export function checkInstallLockFile(): Promise<boolean> {
 /** Get the platform that the installed binaries belong to.*/
 export function getInstalledBinaryPlatform(): string | undefined {
     // the LLVM/bin folder is utilized to identify the platform
-    let installedPlatform: string = "";
+    let installedPlatform: string | undefined;
     if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
         installedPlatform = "win32";
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
@@ -573,22 +573,71 @@ export function getInstalledBinaryPlatform(): string | undefined {
 }
 
 /* Check if the core files exists in extension's installation folder */
-export function checkInstallationFiles(installedPlatform: string | undefined): boolean {
-    if (!installedPlatform) {
+export function checkInstallationFilesExist(installedPlatform: string | undefined): boolean {
+    if (!installedPlatform || !checkInstallLockFile()) {
         return false;
     }
-    let successInstall: boolean = true;
-    // json files in bin folder
-    // cpptools, cpptools-srv
+    const commonFiles: string[]= [
+        "bin/cpptools.exe",
+        "bin/cpptools-srv.exe",
+        "bin/cpptools-vcpkgsrv.exe",
+        "bin/msvc.arm32.clang.json",
+        "bin/msvc.arm32.gcc.json",
+        "bin/msvc.arm32.msvc.json",
+        "bin/msvc.arm64.clang.json",
+        "bin/msvc.arm64.gcc.json",
+        "bin/msvc.arm64.msvc.json",
+        "bin/msvc.json",
+        "bin/msvc.x64.clang.json",
+        "bin/msvc.x64.gcc.json",
+        "bin/msvc.x64.msvc.json",
+        "bin/msvc.x86.clang.json",
+        "bin/msvc.x86.gcc.json",
+        "bin/msvc.x86.msvc.json",
+        "bin/vcpkgsrvtest.exe",
+        "debugAdapters/OpenDebugAD7",
+        "debugAdapters/bin/cppdbg.ad7Engine.json",
+        "debugAdapters/bin/OpenDebugAD7.exe"
+    ];
+    /* const win32Files: string[] = [
+        "LLVM/bin/clang-format.exe"
+    ];
+    const darwinFiles: string[] = [
+        "LLVM/bin/clang-format.darwin"
+    ];
+    const linuxFiles: string[] = [
+        "LLVM/bin/clang-format"
+    ];*/
 
-    // debug adapters, llvm bin
-    switch (installedPlatform) {
+    commonFiles.forEach(file => {
+        if (!checkFileExistsSync(path.join(extensionPath, file))) {
+            return false;
+        }
+    });
+    /* switch (installedPlatform) {
         case "win32":
+            win32Files.forEach(file => {
+                if (!checkFileExistsSync(path.join(extensionPath, file))) {
+                    return false;
+                }
+            });
+            break;
         case "darwin":
+            darwinFiles.forEach(file => {
+                if (!checkFileExistsSync(path.join(extensionPath, file))) {
+                    return false;
+                }
+            });
+            break;
         case "linux":
-    }
-
-    return successInstall;
+            linuxFiles.forEach(file => {
+                if (!checkFileExistsSync(path.join(extensionPath, file))) {
+                    return false;
+                }
+            });
+            break;
+    }*/
+    return true;
 }
 
 /** Reads the content of a text file */

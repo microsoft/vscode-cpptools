@@ -75,21 +75,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
 
     // check if the extension has been installed successfully.
-    const successInstall: boolean = util.checkInstallationFiles(installedPlatform);
-    if (!successInstall) {
+    const successInstall: boolean = util.checkInstallationFilesExist(installedPlatform);
+    if (!installedPlatform || !successInstall) {
         errMsg = localize("extension.installation.failed", "The extension is not installed successfully. Please remove the failed extension, and re-install.");
-        const reload: string = localize("remove.extension", "Remove \'C/C++\' extension");
+        const reload: string = localize("remove.extension", "Remove \'C/C++\' extension.");
         vscode.window.showInformationMessage(errMsg, reload).then((value?: string) => {
             if (value === reload) {
-
+                util.removeInstallLockFile();
                 vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
         });
-
-    }
-
-    // Check if the correct offline/insiders vsix is installed on the correct platform.
-    if (!installedPlatform || (process.platform !== installedPlatform)) {
+    } else if (process.platform !== installedPlatform) {
+        // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
         errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
@@ -100,8 +97,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
             }
         });
     }
-
-
 
     return cppTools;
 }
