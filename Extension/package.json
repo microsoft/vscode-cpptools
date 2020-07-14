@@ -53,19 +53,19 @@
         "properties": {
           "label": {
             "type": "string",
-            "description": "Task's name."
+            "description": "%c_cpp.taskDefinitions.name.description%"
           },
           "command": {
             "type": "string",
-            "description": "The compiler path."
+            "description": "%c_cpp.taskDefinitions.command.description%"
           },
           "args": {
             "type": "array",
-            "description": "Additional compiler args."
+            "description": "%c_cpp.taskDefinitions.args.description%"
           },
           "options": {
             "type": "object",
-            "description": "Options"
+            "description": "%c_cpp.taskDefinitions.options.description%"
           }
         }
       }
