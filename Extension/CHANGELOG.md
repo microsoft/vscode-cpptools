@@ -6,14 +6,14 @@
   * Add `C_Cpp.simplifyStructuredComments` setting. [#5706](https://github.com/microsoft/vscode-cpptools/issues/5706)
 * Auto-convert `.` to `->` when the type is a pointer. [#862](https://github.com/microsoft/vscode-cpptools/issues/862)
 * Switch to using the VS Code Semantic Tokens API for semantic colorization (works with remoting). [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401), [#3932](https://github.com/microsoft/vscode-cpptools/issues/3932), [#3933](https://github.com/microsoft/vscode-cpptools/issues/3933), [#3942](https://github.com/microsoft/vscode-cpptools/issues/3942)
-* Added support for LogMessage Breakpoints for debug type `cppdbg`. [MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
+* Add support for LogMessage Breakpoints for debug type `cppdbg`. [MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
 
 ### Enhancements
 * Automatically add `"${default}"` to the default `includePath` in `c_cpp_properties.json` if `C_Cpp.default.includePath` is set. [#3733](https://github.com/microsoft/vscode-cpptools/issues/3733)
 * Add configuration provider logging to `C/C++: Log Diagnostics`. [#4826](https://github.com/microsoft/vscode-cpptools/issues/4826)
 * Add support for the Debug Welcome Panel. [#4837](https://github.com/microsoft/vscode-cpptools/issues/4837)
 * Update to clang-format 10. [#5194](https://github.com/microsoft/vscode-cpptools/issues/5194)
-* Added system to store and query properties from the active C/C++ configuration.
+* Add system to store and query properties from the active C/C++ configuration.
   * bugengine (@bugengine) [PR #5453](https://github.com/microsoft/vscode-cpptools/pull/5453)
 * Add `quoteArgs` to `launch.json` schema. [PR #5639](https://github.com/microsoft/vscode-cpptools/pull/5639)
 * Add logs for a resolved `launch.json` if "engineLogging" is enabled. [PR #5644](https://github.com/microsoft/vscode-cpptools/pull/5644)
