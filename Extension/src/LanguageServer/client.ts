@@ -431,6 +431,7 @@ const RequestCustomConfig: NotificationType<string, void> = new NotificationType
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
+const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
 
 let failureMessageShown: boolean = false;
 
@@ -602,8 +603,12 @@ class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 
 class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     private client: DefaultClient;
+    public onDidChangeSemanticTokensEvent = new vscode.EventEmitter<void>();
+    public onDidChangeSemanticTokens?: vscode.Event<void>;
+
     constructor(client: DefaultClient) {
         this.client = client;
+        this.onDidChangeSemanticTokens = this.onDidChangeSemanticTokensEvent.event;
     }
 
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
@@ -641,6 +646,7 @@ export class DefaultClient implements Client {
     private innerLanguageClient?: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
+    private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
@@ -1137,7 +1143,8 @@ export class DefaultClient implements Client {
                                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
                             }
                             if (settings.enhancedColorization && this.semanticTokensLegend) {
-                                this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);
+                                this.semanticTokensProvider = new SemanticTokensProvider(this);
+                                this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
                             }
 
                             // Listen for messages from the language server.
@@ -1300,6 +1307,7 @@ export class DefaultClient implements Client {
                 dimInactiveRegions: settings_dimInactiveRegions,
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
+                simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -1408,10 +1416,12 @@ export class DefaultClient implements Client {
                 if (changedSettings["enhancedColorization"]) {
                     const settings: CppSettings = new CppSettings();
                     if (settings.enhancedColorization && this.semanticTokensLegend) {
+                        this.semanticTokensProvider = new SemanticTokensProvider(this);
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
                     } else if (this.semanticTokensProviderDisposable) {
                         this.semanticTokensProviderDisposable.dispose();
                         this.semanticTokensProviderDisposable = undefined;
+                        this.semanticTokensProvider = undefined;
                     }
                 }
                 this.configuration.onDidChangeSettings();
@@ -1632,6 +1642,8 @@ export class DefaultClient implements Client {
         if (!diagnosticsChannel) {
             diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
             workspaceDisposables.push(diagnosticsChannel);
+        } else {
+            diagnosticsChannel.clear();
         }
 
         const header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
@@ -1640,7 +1652,32 @@ export class DefaultClient implements Client {
         if (this.configuration.CurrentConfiguration) {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
-        diagnosticsChannel.appendLine(`${header}${version}${configJson}${response.diagnostics}`);
+
+        // Get diagnotics for configuration provider info.
+        let configurationLoggingStr: string = "";
+        const tuSearchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
+        if (tuSearchStart >= 0) {
+            const tuSearchEnd: number = response.diagnostics.indexOf("Translation Unit Configurations:");
+            if (tuSearchEnd >= 0 && tuSearchEnd > tuSearchStart) {
+                let tuSearchString: string = response.diagnostics.substr(tuSearchStart, tuSearchEnd - tuSearchStart);
+                let tuSearchIndex: number = tuSearchString.indexOf("[");
+                while (tuSearchIndex >= 0) {
+                    const tuMatch: RegExpMatchArray | null = tuSearchString.match(/\[\s(.*)\s\]/);
+                    if (tuMatch && tuMatch.length > 1) {
+                        const tuPath: string = vscode.Uri.file(tuMatch[1]).toString();
+                        if (this.configurationLogging.has(tuPath)) {
+                            if (configurationLoggingStr.length === 0) {
+                                configurationLoggingStr += "Custom configurations:\n";
+                            }
+                            configurationLoggingStr += `[ ${tuMatch[1]} ]\n${this.configurationLogging.get(tuPath)}\n`;
+                        }
+                    }
+                    tuSearchString = tuSearchString.substr(tuSearchIndex + 1);
+                    tuSearchIndex = tuSearchString.indexOf("[");
+                }
+            }
+        }
+        diagnosticsChannel.appendLine(`${header}${version}${configJson}${this.browseConfigurationLogging}${configurationLoggingStr}${response.diagnostics}`);
         diagnosticsChannel.show(false);
     }
 
@@ -1918,6 +1955,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
+        this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.onDidChangeSemanticTokensEvent.fire());
         setupOutputHandlers();
     }
 
@@ -2377,6 +2415,7 @@ export class DefaultClient implements Client {
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item)) {
+                this.configurationLogging.set(item.uri.toString(), JSON.stringify(item.configuration, null, 4));
                 if (settings.loggingLevel === "Debug") {
                     out.appendLine(`  uri: ${item.uri.toString()}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
@@ -2414,6 +2453,9 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(CustomConfigurationNotification, params);
     }
 
+    private browseConfigurationLogging: string = "";
+    private configurationLogging: Map<string, string> = new Map<string, string>();
+
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         if (!rootFolder) {
@@ -2422,6 +2464,8 @@ export class DefaultClient implements Client {
         const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, rootFolder);
         const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, rootFolder);
         let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
+
+        this.browseConfigurationLogging = "";
 
         // This while (true) is here just so we can break out early if the config is set on error
         while (true) {
@@ -2480,6 +2524,8 @@ export class DefaultClient implements Client {
             break;
         }
 
+        this.browseConfigurationLogging = localize("browse.configuration", "Custom browse configuration: {0}", `\n${JSON.stringify(sanitized, null, 4)}\n`);
+
         const params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized,
             workspaceFolderUri: this.RootPath
@@ -2489,6 +2535,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomConfigurations(): void {
+        this.configurationLogging.clear();
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
@@ -2496,6 +2543,7 @@ export class DefaultClient implements Client {
     }
 
     private clearCustomBrowseConfiguration(): void {
+        this.browseConfigurationLogging = "";
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
