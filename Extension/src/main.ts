@@ -85,6 +85,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                 vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
         });
+        return new NullCppTools();
     } else if (process.platform !== installedPlatform) {
         // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
@@ -96,6 +97,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                 vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
             }
         });
+        return new NullCppTools();
     }
 
     return cppTools;
