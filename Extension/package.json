@@ -61,7 +61,7 @@
           },
           "args": {
             "type": "array",
-            "description": "Additional build args."
+            "description": "Additional compiler args."
           },
           "options": {
             "type": "object",

@@ -189,7 +189,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         const task: vscode.Task =  new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
             new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> =>
             // When the task is executed, this callback will run. Here, we setup for running the task.
-			 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options, target.name)
+			 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = vscode.TaskGroup.Build;
@@ -246,20 +246,12 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     public get onDidWrite(): vscode.Event<string> { return this.writeEmitter.event; }
     public get onDidClose(): vscode.Event<number> { return this.closeEmitter.event; }
 
-    private fileWatcher: vscode.FileSystemWatcher | undefined;
-
-
-    constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined, private workspaceRoot: string) {
+    constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
 
 
     open(_initialDimensions: vscode.TerminalDimensions | undefined): void {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
-        const pattern: string = path.join(this.workspaceRoot, 'cppBuild');
-        this.fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
-        this.fileWatcher.onDidChange(() => this.doBuild());
-        this.fileWatcher.onDidCreate(() => this.doBuild());
-        this.fileWatcher.onDidDelete(() => this.doBuild());
         // At this point we can start using the terminal.
         this.writeEmitter.fire("Starting build...\r\n");
         this.doBuild();
@@ -267,9 +259,6 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
 
     close(): void {
         // The terminal has been closed. Shutdown the build.
-        if (this.fileWatcher) {
-            this.fileWatcher.dispose();
-        }
     }
 
     private async doBuild(): Promise<number> {
@@ -288,7 +277,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
             }
             cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
                 if (_error) {
-                    telemetry.logLanguageServerEvent("cppBuildTaskError", { "error": _error.message });
+                    telemetry.logLanguageServerEvent("cppBuildTaskError");
                     this.writeEmitter.fire("Build finished with error:\r\n");
                     this.writeEmitter.fire(stdout.toString());
                     reject();
