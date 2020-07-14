@@ -77,15 +77,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // check if the extension has been installed successfully.
     const successInstall: boolean = util.checkInstallationFilesExist(installedPlatform);
     if (!installedPlatform || !successInstall) {
-        errMsg = localize("extension.installation.failed", "The extension is not installed successfully. Please remove the failed extension, and re-install.");
-        const reload: string = localize("remove.extension", "Remove \'C/C++\' extension.");
+        errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
+        const reload: string = localize("remove.extension", "Attempt to Repair");
         vscode.window.showInformationMessage(errMsg, reload).then((value?: string) => {
             if (value === reload) {
                 util.removeInstallLockFile();
                 vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
         });
-        return new NullCppTools();
     } else if (process.platform !== installedPlatform) {
         // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
@@ -97,7 +96,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                 vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
             }
         });
-        return new NullCppTools();
     }
 
     return cppTools;
