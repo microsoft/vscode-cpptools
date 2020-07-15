@@ -65,7 +65,13 @@
           },
           "options": {
             "type": "object",
-            "description": "%c_cpp.taskDefinitions.options.description%"
+            "description": "%c_cpp.taskDefinitions.options.description%",
+            "properties": {
+              "cwd": {
+                "type": "string",
+                "description": "%c_cpp.taskDefinitions.options.cwd.description%"
+              }
+            }
           }
         }
       }
