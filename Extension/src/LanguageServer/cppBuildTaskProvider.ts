@@ -317,10 +317,7 @@ export function getRawTasksJson(): Promise<any> {
         if (!path) {
             return resolve({});
         }
-        fs.exists(path, async exists => {
-            if (!exists) {
-                return resolve({});
-            }
+        util.checkFileExists(path).then(async () => {
             const fileContents: string = await util.readFileText(path);
             let rawTasks: any = {};
             try {
@@ -329,6 +326,8 @@ export function getRawTasksJson(): Promise<any> {
                 return reject(new Error(failedToParseTasksJson));
             }
             resolve(rawTasks);
+        }).catch(() => {
+            resolve({});
         });
     });
 }
