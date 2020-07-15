@@ -31,7 +31,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
-let disposables: vscode.Disposable[] = [];
+const disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     let errMsg: string = "";
@@ -54,8 +54,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     class SchemaProvider implements vscode.TextDocumentContentProvider {
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
             console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
-            let fileName: string = uri.path.substr(1);
-            let locale: string = util.getLocaleId();
+            const fileName: string = uri.path.substr(1);
+            const locale: string = util.getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
             const fileExists: boolean = await util.checkFileExists(localizedFilePath);
             if (!fileExists) {
@@ -73,7 +73,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     await processRuntimeDependencies();
 
     // check if the correct offline/insiders vsix is installed on the correct platform
-    let installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
+    const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
     if (!installedPlatform || (process.platform !== installedPlatform)) {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
@@ -206,10 +206,10 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
 }
 
 async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
-    let outputChannelLogger: Logger = getOutputChannelLogger();
+    const outputChannelLogger: Logger = getOutputChannelLogger();
     outputChannelLogger.appendLine(localize("updating.dependencies", "Updating C/C++ dependencies..."));
 
-    let packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
+    const packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
 
     return vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
@@ -244,8 +244,8 @@ function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolea
 }
 
 function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
-    let promises: Thenable<void>[] = [];
-    let packages: IPackage[] = util.packageJson["runtimeDependencies"];
+    const promises: Thenable<void>[] = [];
+    const packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
         if (p.binaries && p.binaries.length > 0 &&
             packageMatchesPlatform(p, info)) {
@@ -256,8 +256,8 @@ function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void>
 }
 
 function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
-    let promises: Thenable<void>[] = [];
-    let packages: IPackage[] = util.packageJson["runtimeDependencies"];
+    const promises: Thenable<void>[] = [];
+    const packages: IPackage[] = util.packageJson["runtimeDependencies"];
     const logger: Logger = getOutputChannelLogger();
 
     packages.forEach(p => {
@@ -277,7 +277,7 @@ function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
 
 function removeUnnecessaryFile(): Promise<void> {
     if (os.platform() !== 'win32') {
-        let sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
+        const sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
             fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
                 if (err) {
@@ -296,13 +296,13 @@ function touchInstallLockFile(): Promise<void> {
 }
 
 function handleError(error: any): void {
-    let installationInformation: InstallationInformation = getInstallationInformation();
+    const installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
     installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";
     let errorMessage: string;
 
     if (error instanceof PackageManagerError) {
-        let packageError: PackageManagerError = error;
+        const packageError: PackageManagerError = error;
 
         installationInformation.telemetryProperties['error.methodName'] = packageError.methodName;
         installationInformation.telemetryProperties['error.message'] = packageError.message;
@@ -327,7 +327,7 @@ function handleError(error: any): void {
         installationInformation.telemetryProperties['error.toString'] = util.removePotentialPII(errorMessage);
     }
 
-    let outputChannelLogger: Logger = getOutputChannelLogger();
+    const outputChannelLogger: Logger = getOutputChannelLogger();
     if (installationInformation.stage === 'downloadPackages') {
         outputChannelLogger.appendLine("");
     }
@@ -340,7 +340,7 @@ function handleError(error: any): void {
 }
 
 function sendTelemetry(info: PlatformInformation): boolean {
-    let installBlob: InstallationInformation = getInstallationInformation();
+    const installBlob: InstallationInformation = getInstallationInformation();
     const success: boolean = !installBlob.hasError;
 
     installBlob.telemetryProperties['success'] = success.toString();
@@ -363,7 +363,7 @@ function sendTelemetry(info: PlatformInformation): boolean {
 }
 
 async function postInstall(info: PlatformInformation): Promise<void> {
-    let outputChannelLogger: Logger = getOutputChannelLogger();
+    const outputChannelLogger: Logger = getOutputChannelLogger();
     outputChannelLogger.appendLine("");
     outputChannelLogger.appendLine(localize('finished.installing.dependencies', "Finished installing dependencies"));
     outputChannelLogger.appendLine("");
@@ -382,7 +382,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    let settings: CppSettings = new CppSettings();
+    const settings: CppSettings = new CppSettings();
     if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
@@ -402,9 +402,9 @@ async function finalizeExtensionActivation(): Promise<void> {
     }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
 
-    let packageJson: any = util.getRawPackageJson();
+    const packageJson: any = util.getRawPackageJson();
     let writePackageJson: boolean = false;
-    let packageJsonPath: string = util.getExtensionFilePath("package.json");
+    const packageJsonPath: string = util.getExtensionFilePath("package.json");
     if (packageJsonPath.includes(".vscode-insiders") || packageJsonPath.includes(".vscode-exploration")) {
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
@@ -419,7 +419,7 @@ async function finalizeExtensionActivation(): Promise<void> {
 
 function rewriteManifest(): Promise<void> {
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
-    let packageJson: any = util.getRawPackageJson();
+    const packageJson: any = util.getRawPackageJson();
 
     packageJson.activationEvents = [
         "onLanguage:cpp",
@@ -442,7 +442,9 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.RescanWorkspace",
         "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
         "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
-        "onDebug",
+        "onDebugInitialConfigurations",
+        "onDebugResolve:cppdbg",
+        "onDebugResolve:cppvsdbg",
         "workspaceContains:/.vscode/c_cpp_properties.json",
         "onFileSystem:cpptools-schema"
     ];

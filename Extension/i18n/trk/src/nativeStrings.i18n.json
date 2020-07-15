@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "Derleyici sorgulanamadı. Bit genişliği yok durumuna geri dönülüyor.",
 	"intellisense_client_creation_aborted": "IntelliSense istemcisi oluşturma işlemi durduruldu: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "configurationProvider ayarı tarafından sağlanan bilgilere göre #include hataları saptandı. Bu çeviri birimi ({0}) için IntelliSense özellikleri Etiket Ayrıştırıcısı tarafından sağlanır.",
-	"include_errors_config_provider_squiggles_disabled ": "configurationProvider ayarı tarafından sağlanan bilgilere göre #include hataları saptandı. Bu çeviri birimi ({0}) için dalgalı çizgiler devre dışı bırakıldı."
+	"include_errors_config_provider_squiggles_disabled ": "configurationProvider ayarı tarafından sağlanan bilgilere göre #include hataları saptandı. Bu çeviri birimi ({0}) için dalgalı çizgiler devre dışı bırakıldı.",
+	"preprocessor_keyword": "ön işlemci anahtar sözcüğü",
+	"c_keyword": "C anahtar sözcüğü",
+	"cpp_keyword": "C++ anahtar sözcüğü",
+	"overload": "1 aşırı yükleme daha",
+	"overloads": "%d aşırı yükleme daha",
+	"specialization": "1 özelleştirme daha",
+	"specializations": "%d özelleştirme daha",
+	"expands_to": "Şu öğeye genişler:",
+	"file_label": "Dosya:",
+	"parameters_label": "Parametreler:",
+	"returns_label": "Şunu döndürür:",
+	"deprecated_label": "Kullanım dışı:",
+	"exceptions_label": "Özel durumlar:"
 }

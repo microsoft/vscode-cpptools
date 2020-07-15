@@ -30,7 +30,7 @@ class Settings {
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
 
     protected getWithFallback<T>(section: string, deprecatedSection: string): T {
-        let info: any = this.settings.inspect<T>(section);
+        const info: any = this.settings.inspect<T>(section);
         if (info.workspaceFolderValue !== undefined) {
             return info.workspaceFolderValue;
         } else if (info.workspaceValue !== undefined) {
@@ -38,7 +38,7 @@ class Settings {
         } else if (info.globalValue !== undefined) {
             return info.globalValue;
         }
-        let value: T | undefined = this.settings.get<T>(deprecatedSection);
+        const value: T | undefined = this.settings.get<T>(deprecatedSection);
         if (value !== undefined) {
             return value;
         }
@@ -46,7 +46,7 @@ class Settings {
     }
 
     protected getWithNullAsUndefined<T>(section: string): T | undefined {
-        let result: T | undefined | null = this.settings.get<T>(section);
+        const result: T | undefined | null = this.settings.get<T>(section);
         if (result === null) {
             return undefined;
         }
@@ -81,8 +81,8 @@ export class CppSettings extends Settings {
                 // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
                 let clangFormatVersion: string;
                 try {
-                    let exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
-                    let output: string[] = execSync(`${exePath} --version`).toString().split(" ");
+                    const exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
+                    const output: string[] = execSync(`${exePath} --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || !semver.valid(output[2])) {
                         return path;
                     }
@@ -94,7 +94,7 @@ export class CppSettings extends Settings {
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
-                    let output: string[] = execSync(`"${path}" --version`).toString().split(" ");
+                    const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
                         path = "";
                     }
@@ -126,6 +126,7 @@ export class CppSettings extends Settings {
     public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
     public get workspaceSymbols(): string | undefined { return super.Section.get<string>("workspaceSymbols"); }
     public get exclusionPolicy(): string | undefined { return super.Section.get<string>("exclusionPolicy"); }
+    public get simplifyStructuredComments(): boolean | undefined { return super.Section.get<boolean>("simplifyStructuredComments"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
@@ -140,7 +141,7 @@ export class CppSettings extends Settings {
     public get defaultForcedInclude(): string[] | undefined { return super.Section.get<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string | undefined {
-        let result: string | undefined | null = super.Section.get<string | null>("default.compilerPath");
+        const result: string | undefined | null = super.Section.get<string | null>("default.compilerPath");
         if (result === null) {
             return undefined;
         }
@@ -172,7 +173,7 @@ export class CppSettings extends Settings {
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
-        let value: string | undefined = super.Section.get<string>(name);
+        const value: string | undefined = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
     }
 

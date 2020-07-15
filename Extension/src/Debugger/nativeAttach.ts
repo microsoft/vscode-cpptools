@@ -52,14 +52,14 @@ abstract class NativeAttachItemsProvider implements AttachItemsProvider {
                 if (b.name === undefined) {
                     return -1;
                 }
-                let aLower: string = a.name.toLowerCase();
-                let bLower: string = b.name.toLowerCase();
+                const aLower: string = a.name.toLowerCase();
+                const bLower: string = b.name.toLowerCase();
                 if (aLower === bLower) {
                     return 0;
                 }
                 return aLower < bLower ? -1 : 1;
             });
-            let attachItems: AttachItem[] = processEntries.map(p => p.toAttachItem());
+            const attachItems: AttachItem[] = processEntries.map(p => p.toAttachItem());
             return attachItems;
         });
     }
@@ -119,21 +119,21 @@ export class PsProcessParser {
 
     // Only public for tests.
     public static ParseProcessFromPs(processes: string): Process[] {
-        let lines: string[] = processes.split(os.EOL);
+        const lines: string[] = processes.split(os.EOL);
         return PsProcessParser.ParseProcessFromPsArray(lines);
     }
 
     public static ParseProcessFromPsArray(processArray: string[]): Process[] {
-        let processEntries: Process[] = [];
+        const processEntries: Process[] = [];
 
         // lines[0] is the header of the table
         for (let i: number = 1; i < processArray.length; i++) {
-            let line: string = processArray[i];
+            const line: string = processArray[i];
             if (!line) {
                 continue;
             }
 
-            let processEntry: Process | undefined = PsProcessParser.parseLineFromPs(line);
+            const processEntry: Process | undefined = PsProcessParser.parseLineFromPs(line);
             if (processEntry) {
                 processEntries.push(processEntry);
             }
@@ -180,8 +180,8 @@ function execChildProcess(process: string, workingDirectory?: string): Promise<s
                     // see similar fix for the Node - Debug (Legacy) Extension at https://github.com/microsoft/vscode-node-debug/commit/5298920
                 } else {
                     reject(new Error(stderr));
+                    return;
                 }
-                return;
             }
 
             resolve(stdout);
@@ -211,12 +211,12 @@ export class WmicProcessParser {
 
     // Only public for tests.
     public static ParseProcessFromWmic(processes: string): Process[] {
-        let lines: string[] = processes.split(os.EOL);
+        const lines: string[] = processes.split(os.EOL);
         let currentProcess: Process = new Process("current process", undefined, undefined);
-        let processEntries: Process[] = [];
+        const processEntries: Process[] = [];
 
         for (let i: number = 0; i < lines.length; i++) {
-            let line: string = lines[i];
+            const line: string = lines[i];
             if (!line) {
                 continue;
             }
@@ -234,9 +234,9 @@ export class WmicProcessParser {
     }
 
     private static parseLineFromWmic(line: string, process: Process): void {
-        let splitter: number = line.indexOf('=');
+        const splitter: number = line.indexOf('=');
         if (splitter >= 0) {
-            let key: string = line.slice(0, line.indexOf('=')).trim();
+            const key: string = line.slice(0, line.indexOf('=')).trim();
             let value: string = line.slice(line.indexOf('=') + 1).trim();
             if (key === WmicProcessParser.wmicNameTitle) {
                 process.name = value;
