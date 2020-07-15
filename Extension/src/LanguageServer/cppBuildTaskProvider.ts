@@ -249,31 +249,31 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
 
-    open(_initialDimensions: vscode.TerminalDimensions | undefined): void {
+    async open(_initialDimensions: vscode.TerminalDimensions | undefined): Promise<void> {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
         this.writeEmitter.fire("Starting build...\r\n");
-        this.doBuild();
+        await this.doBuild();
     }
 
     close(): void {
         // The terminal has been closed. Shutdown the build.
     }
 
-    private async doBuild(): Promise<number> {
-        return new Promise<number>((resolve, reject) => {
-            // Do build.
-            let activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
-            this.args.forEach(value => {
-                let temp: string = util.resolveVariables(value, this.AdditionalEnvironment);
-                if (temp && temp.includes(" ")) {
-                    temp = "\"" + temp + "\"";
-                }
-                activeCommand = activeCommand + " " + temp;
-            });
-            if (this.options?.cwd) {
-                this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
+    private async doBuild(): Promise<any> {
+        // Do build.
+        let activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
+        this.args.forEach(value => {
+            let temp: string = util.resolveVariables(value, this.AdditionalEnvironment);
+            if (temp && temp.includes(" ")) {
+                temp = "\"" + temp + "\"";
             }
+            activeCommand = activeCommand + " " + temp;
+        });
+        if (this.options?.cwd) {
+            this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
+        }
+        await new Promise<number>((resolve, reject) => {
             cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
                 if (_error) {
                     telemetry.logLanguageServerEvent("cppBuildTaskError");
@@ -283,7 +283,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                 } else {
                     this.writeEmitter.fire(stdout.toString());
                     this.writeEmitter.fire("\r\nBuild finished successfully.\r\n");
-                    resolve(0);
+                    resolve();
                 }
             });
         }).finally(() => {
