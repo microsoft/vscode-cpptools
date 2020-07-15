@@ -325,9 +325,7 @@ export function getRawTasksJson(): Promise<any> {
                 return reject(new Error(failedToParseTasksJson));
             }
             resolve(rawTasks);
-        }).catch(() => {
-            resolve({});
-        });
+        }).catch(() => { resolve({}); });
     });
 }
 
