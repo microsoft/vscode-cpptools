@@ -1,31 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.29.0-insiders2: July 8, 2020
+## Version 0.29.0: July 15, 2020
 ### New Features
-* Added support for LogMessage Breakpoints for debug type `cppdbg`. [#1013](https://github.com/microsoft/MIEngine/pull/1013)
-* Switch to using the VS Code Semantic Tokens API for semantic colorization. [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401)
+* Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
+  * The way comments are formatted is controlled by the C_Cpp.simplifyStructuredComments setting."
+* Auto-convert `.` to `->` when the type is a pointer. [#862](https://github.com/microsoft/vscode-cpptools/issues/862)
+* Switch to using the VS Code Semantic Tokens API for semantic colorization (works with remoting). [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401), [#3932](https://github.com/microsoft/vscode-cpptools/issues/3932), [#3933](https://github.com/microsoft/vscode-cpptools/issues/3933), [#3942](https://github.com/microsoft/vscode-cpptools/issues/3942)
+* Add support for LogMessage Breakpoints for debug type `cppdbg`. [MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
 
 ### Enhancements
 * Automatically add `"${default}"` to the default `includePath` in `c_cpp_properties.json` if `C_Cpp.default.includePath` is set. [#3733](https://github.com/microsoft/vscode-cpptools/issues/3733)
-* Add `C_Cpp.simplifyStructuredComments` setting. [#5706](https://github.com/microsoft/vscode-cpptools/issues/5706)
 * Add configuration provider logging to `C/C++: Log Diagnostics`. [#4826](https://github.com/microsoft/vscode-cpptools/issues/4826)
-
-### Bug Fixes
-* Ignore "screen size is bogus" error when debugging. [PR #5669](https://github.com/microsoft/vscode-cpptools/pull/5669)
-  * nukoyluoglu (@nukoyluoglu)
-* Fix `compile_commands.json` sometimes not updating. [#5687](https://github.com/microsoft/vscode-cpptools/issues/5687)
-* Add msys2 clang compilers to the compiler search list (previously only gcc was handled). [#5697](https://github.com/microsoft/vscode-cpptools/issues/5697)
-* Fix extension getting stuck when an "@" response file that doesn't end with ".rsp" is used in `compilerArgs`. [#5731](https://github.com/microsoft/vscode-cpptools/issues/5731)
-* Fix forced includes not handled properly when parsed as compiler args. [#5738](https://github.com/microsoft/vscode-cpptools/issues/5738)
-
-## Version 0.29.0-insiders: June 24, 2020
-### New Features
-* Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
-
-### Enhancements
 * Add support for the Debug Welcome Panel. [#4837](https://github.com/microsoft/vscode-cpptools/issues/4837)
 * Update to clang-format 10. [#5194](https://github.com/microsoft/vscode-cpptools/issues/5194)
-* Added system to store and query properties from the active C/C++ configuration.
+* Add system to store and query properties from the active C/C++ configuration.
   * bugengine (@bugengine) [PR #5453](https://github.com/microsoft/vscode-cpptools/pull/5453)
 * Add `quoteArgs` to `launch.json` schema. [PR #5639](https://github.com/microsoft/vscode-cpptools/pull/5639)
 * Add logs for a resolved `launch.json` if "engineLogging" is enabled. [PR #5644](https://github.com/microsoft/vscode-cpptools/pull/5644)
@@ -39,12 +27,18 @@
 * Add gcc/gcc-10 compiler detection. [#5540](https://github.com/microsoft/vscode-cpptools/issues/5540)
 * Fix `--target` compiler arg getting overridden. [#5557](https://github.com/microsoft/vscode-cpptools/issues/5557)
   * Matt Schulte (@schultetwin1)
-* Fix IntelliSense process crashes. [#5584](https://github.com/microsoft/vscode-cpptools/issues/5584), [#5629](https://github.com/microsoft/vscode-cpptools/issues/5629)
 * Fix Find All References and Rename when multiple references are on the same line. [#5568](https://github.com/microsoft/vscode-cpptools/issues/5568)
+* Fix IntelliSense process crashes. [#5584](https://github.com/microsoft/vscode-cpptools/issues/5584), [#5629](https://github.com/microsoft/vscode-cpptools/issues/5629)
 * Fix an add/remove workspace folder crash. [#5591](https://github.com/microsoft/vscode-cpptools/issues/5591)
 * Fix default build tasks failing on Windows if the compiler isn't on the PATH. [#5604](https://github.com/microsoft/vscode-cpptools/issues/5604)
 * Fix updating `files.associations` and .C files being associated with C instead of C++. [#5618](https://github.com/microsoft/vscode-cpptools/issues/5618)
 * Fix IntelliSense malfunction when RxCpp is used. [#5619](https://github.com/microsoft/vscode-cpptools/issues/5619)
+* Ignore "screen size is bogus" error when debugging. [PR #5669](https://github.com/microsoft/vscode-cpptools/pull/5669)
+  * nukoyluoglu (@nukoyluoglu)
+* Fix `compile_commands.json` sometimes not updating. [#5687](https://github.com/microsoft/vscode-cpptools/issues/5687)
+* Add msys2 clang compilers to the compiler search list (previously only gcc was handled). [#5697](https://github.com/microsoft/vscode-cpptools/issues/5697)
+* Fix extension getting stuck when an "@" response file that doesn't end with ".rsp" is used in `compilerArgs`. [#5731](https://github.com/microsoft/vscode-cpptools/issues/5731)
+* Fix forced includes not handled properly when parsed as compiler args. [#5738](https://github.com/microsoft/vscode-cpptools/issues/5738)
 * Fix potential thread deadlock in cpptools.
 * Fix copying a long value from debug watch results in pasting partial value [#5470](https://github.com/microsoft/vscode-cpptools/issues/5470)
   * [PR MIEngine#1009](https://github.com/microsoft/MIEngine/pull/1009)
