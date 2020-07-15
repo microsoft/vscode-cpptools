@@ -32,7 +32,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     static CppBuildSourceStr: string = "C/C++";
     private tasks: vscode.Task[] | undefined;
 
-    constructor() {}
+    constructor() { }
 
     public async provideTasks(): Promise<vscode.Task[]> {
         if (this.tasks) {
@@ -117,13 +117,13 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
         // Filter them based on the file type to get a reduced list appropriate for the active file.
         let knownCompilerPaths: string[] | undefined;
-        let knownCompilers: configs.KnownCompiler[]  | undefined = await activeClient.getKnownCompilers();
+        let knownCompilers: configs.KnownCompiler[] | undefined = await activeClient.getKnownCompilers();
         if (knownCompilers) {
             knownCompilers = knownCompilers.filter(info =>
                 ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
-                    userCompilerPathAndArgs &&
-                    (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
-                    (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
+                userCompilerPathAndArgs &&
+                (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
+                (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
             knownCompilerPaths = knownCompilers.map<string>(info => info.path);
         }
 
@@ -137,7 +137,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         this.tasks = [];
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
-            this.tasks  = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
+            this.tasks = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
         }
         // Task for user compiler path setting
         if (userCompilerPath) {
@@ -147,7 +147,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         return this.tasks;
     }
 
-    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string [], definition?: CppBuildTaskDefinition) => {
+    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskName: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
@@ -158,7 +158,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (!definition && compilerArgs && compilerArgs.length > 0) {
             args = args.concat(compilerArgs);
         }
-        const options: cp.ExecOptions | undefined = {cwd: cwd};
+        const options: cp.ExecOptions | undefined = { cwd: cwd };
 
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
@@ -186,10 +186,10 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             throw new Error("No target WorkspaceFolder found in getBuildTasks()");
         }
 
-        const task: vscode.Task =  new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: vscode.Task = new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
             new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> =>
-            // When the task is executed, this callback will run. Here, we setup for running the task.
-			 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
+                // When the task is executed, this callback will run. Here, we setup for running the task.
+                new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = vscode.TaskGroup.Build;
@@ -241,14 +241,13 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 }
 
 class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
-    private writeEmitter  = new vscode.EventEmitter<string>();
+    private writeEmitter = new vscode.EventEmitter<string>();
     private closeEmitter = new vscode.EventEmitter<number>();
     public get onDidWrite(): vscode.Event<string> { return this.writeEmitter.event; }
     public get onDidClose(): vscode.Event<number> { return this.closeEmitter.event; }
 
     constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
-
 
     open(_initialDimensions: vscode.TerminalDimensions | undefined): void {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
@@ -287,7 +286,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                     resolve(0);
                 }
             });
-        }).finally (() => {
+        }).finally(() => {
             this.closeEmitter.fire(0);
         });
     }
@@ -307,7 +306,8 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
             "file": file,
             "fileDirname": fileDir.uri.fsPath,
             "fileBasenameNoExtension": path.parse(file).name,
-            "workspaceFolder": fileDir.uri.fsPath};
+            "workspaceFolder": fileDir.uri.fsPath
+        };
     }
 }
 
