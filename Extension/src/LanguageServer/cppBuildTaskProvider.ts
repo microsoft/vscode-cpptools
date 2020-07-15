@@ -276,14 +276,20 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
+                    const endOfLine: string = os.platform() === 'win32' ? "\r\n" : "\n";
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
-                        this.writeEmitter.fire("Build finished with error:\r\n");
+                        const dot: string = (stdout || _stderr) ? ":" : ".";
+                        this.writeEmitter.fire("Build finished with error" + dot + endOfLine);
                         this.writeEmitter.fire(stdout.toString());
+                        for (const line of _stderr.toString().split('\n')) {
+                            this.writeEmitter.fire(line);
+                            this.writeEmitter.fire(endOfLine);
+                        }
                         resolve(-1);
                     } else {
                         this.writeEmitter.fire(stdout.toString());
-                        this.writeEmitter.fire("\r\nBuild finished successfully.\r\n");
+                        this.writeEmitter.fire(endOfLine + "Build finished successfully." + endOfLine);
                         resolve(0);
                     }
                 });
