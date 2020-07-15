@@ -1133,6 +1133,7 @@ export class DefaultClient implements Client {
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_editorTabSize: (number | undefined)[] = [];
+      //  const settings_editorSize: (number | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
         const settings_intelliSenseEngineFallback: (string | undefined)[] = [];
         const settings_errorSquiggles: (string | undefined)[] = [];
@@ -1145,12 +1146,66 @@ export class DefaultClient implements Client {
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
         const settings_autoComplete: (string | undefined)[] = [];
-        const settings_formatting: (string | undefined)[] = [];
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const settings_indentBraces: boolean[] = [];
+        const settings_indentMultiLine: (string | undefined)[] = [];
+        const settings_preserveIndentWithinParenthesis: boolean[] = [];
+        const settings_indentCaseLabels: boolean[] = [];
+        const settings_indentCaseContents: boolean[] = [];
+        const settings_indentCaseContentsWhenBlock: boolean[] = [];
+        const settings_indentLambdaBracesWhenParameter: boolean[] = [];
+        const settings_indentGotoLabels: (string | undefined)[] = [];
+        const settings_indentPreprocessor: (string | undefined)[] = []; 
+        const settings_indentAccessSpecifiers: boolean[] = [];
+        const settings_indentNamespaceContents: boolean[] = [];
+        const settings_indentPreserveComment: boolean[] = [];
         const settings_formattingEngine: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceNamespace: (string | undefined)[] = [];
+        const settings_newLineBeforeOpenBraceType: (string | undefined)[] = [];
+        const settings_newLineBeforeOpenBraceFunction: (string | undefined)[] = [];
+        const settings_newLineBeforeOpenBraceBlock: (string | undefined)[] = [];
+        const settings_newLineBeforeOpenBraceLambda: (string | undefined)[] = [];
+        const settings_newLineScopeBracesOnSeparateLines: (boolean | undefined)[] = [];
+        const settings_newLineCloseBraceSameLineEmptyType: (boolean | undefined)[] = [];
+        const settings_newLineCloseBraceSameLineEmptyFunction: (boolean | undefined)[] = [];
+        const settings_newLineBeforeCatch: (boolean | undefined)[] = [];
+        const settings_newLineBeforeElse: (boolean | undefined)[] = [];
+        const settings_newLineBeforeWhileInDoWhile: (boolean | undefined)[] = [];
+        const settings_spaceBeforeFunctionOpenParenthesis: (string | undefined)[] = [];
+        const settings_spaceWithinParameterListParentheses: (boolean | undefined)[] = [];
+        const settings_spaceBetweenEmptyParameterListParentheses: (boolean | undefined)[] = [];
+        const settings_spaceAfterKeywordsInControlFlowStatements: (boolean | undefined)[] = [];
+        const settings_spaceWithinControlFlowStatementParentheses: (boolean | undefined)[] = [];
+        const settings_spaceBeforeLambdaOpenParenthesis: (boolean | undefined)[] = [];
+        const settings_spaceWithinCastParentheses: (boolean | undefined)[] = [];
+        const settings_spaceSpaceAfterCastCloseParenthesis: (boolean | undefined)[] = [];
+        const settings_spaceWithinExpressionParentheses: (boolean | undefined)[] = [];
+        const settings_spaceBeforeBlockOpenBrace: (boolean | undefined)[] = [];
+        const settings_spaceBetweenEmptyBraces: (boolean | undefined)[] = [];
+        const settings_spaceBeforeInitializerListOpenBrace: (boolean | undefined)[] = [];
+        const settings_spaceWithinInitializerListBraces: (boolean | undefined)[] = [];
+        const settings_spacePreserveInInitializerList: (boolean | undefined)[] = [];
+        const settings_spaceBeforeOpenSquareBracket: (boolean | undefined)[] = [];
+        const settings_spaceWithinSquareBracketse: (boolean | undefined)[] = [];
+        const settings_spaceBeforeEmptySquareBrackets: (boolean | undefined)[] = [];
+        const settings_spaceBetweenEmptySquareBrackets: (boolean | undefined)[] = [];
+        const settings_spaceGroupSquareBrackets: (boolean | undefined)[] = [];
+        const settings_spaceWithinLambdaBrackets: (boolean | undefined)[] = [];
+        const settings_spaceBetweenEmptyLambdaBrackets: (boolean | undefined)[] = [];
+        const settings_spaceBeforeComma: (boolean | undefined)[] = [];
+        const settings_spaceAfterComma: (boolean | undefined)[] = [];
+        const settings_spaceRemoveAroundMemberOperators: (boolean | undefined)[] = [];
+        const settings_spaceBeforeInheritanceColon: (boolean | undefined)[] = [];
+        const settings_spaceBeforeConstructorColon: (boolean | undefined)[] = [];
+        const settings_spaceRemoveBeforeSemicolon: (boolean | undefined)[] = [];
+        const settings_spaceInsertAfterSemicolon: (boolean | undefined)[] = [];
+        const settings_spaceRemoveAroundUnaryOperator: (boolean | undefined)[] = [];
+        const settings_spaceAroundBinaryOperator: (string | undefined)[] = [];
+        const settings_spaceAroundAssignmentOperator: (string | undefined)[] = [];
+        const settings_spacePointerReferenceAlignment: (string | undefined)[] = [];
+        const settings_spaceAroundTernaryOperator: (string | undefined)[] = [];
+        const settings_wrapPreserveBlocks: (string | undefined)[] = [];
 
         {
             const settings: CppSettings[] = [];
@@ -1170,7 +1225,62 @@ export class DefaultClient implements Client {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
-                settings_newLineBeforeOpenBraceNamespace.push(setting.vcFormatNewlineBeforeOpenBracesNamespace);
+                settings_preserveIndentWithinParenthesis.push(setting.vcFormatPreserveIndentationWithinParenthesis);
+                settings_indentMultiLine.push(setting.vcFormatIndentMultiLineRelativeTo);
+                settings_indentCaseLabels.push(setting.vcFormatIndentCaseLabels);
+                settings_indentCaseContents.push(setting.vcFormatIndentCaseContents);
+                settings_indentCaseContentsWhenBlock.push(setting.vcFormatIndentCaseContentsWhenBlock);
+                settings_indentLambdaBracesWhenParameter.push(setting.vcFormatIndentLambdaBracesWhenParameter);
+                settings_indentGotoLabels.push(setting.vcFormatIndentGotoLables);
+                settings_indentPreprocessor.push(setting.vcFormatIndentPreprocessor);
+                settings_indentAccessSpecifiers.push(setting.vcFormatIndentAccessSpecifiers);
+                settings_indentNamespaceContents.push(setting.vcFormatIndentNamespaceContents);
+                settings_indentPreserveComment.push(setting.vcFormatIndentPreserveComment);
+                settings_newLineBeforeOpenBraceNamespace.push(setting.vcFormatNewlineBeforeOpenBraceNamespace);
+                settings_newLineBeforeOpenBraceType.push(setting.vcFormatNewlineBeforeOpenBraceType);
+                settings_newLineBeforeOpenBraceFunction.push(setting.vcFormatNewlineBeforeOpenBraceFunction);
+                settings_newLineBeforeOpenBraceBlock.push(setting.vcFormatNewlineBeforeOpenBraceBlock);
+                settings_newLineScopeBracesOnSeparateLines.push(setting.vcFormatNewlineScopeBracesOnSeparateLines);
+                settings_newLineBeforeOpenBraceLambda.push(setting.vcFormatNewlineBeforeOpenBraceLambda);
+                settings_newLineCloseBraceSameLineEmptyType.push(setting.vcFormatNewlineCloseBraceSameLineEmptyType);
+                settings_newLineCloseBraceSameLineEmptyFunction.push(setting.vcFormatNewlineCloseBraceSameLineEmptyFunction);
+                settings_newLineBeforeCatch.push(setting.vcFormatNewlinecBeforeCatch);
+                settings_newLineBeforeElse.push(setting.vcFormatNewlinecBeforeElse);
+                settings_newLineBeforeWhileInDoWhile.push(setting.vcFormatNewlineBeforeWhileInDoWhile);
+                settings_spaceBeforeFunctionOpenParenthesis.push(setting.vcFormatSpaceBeforeFunctionOpenParenthesis);
+                settings_spaceWithinParameterListParentheses.push(setting.vcFormatSpaceWithinParameterListParentheses);
+                settings_spaceBetweenEmptyParameterListParentheses.push(setting.vcFormatSpaceBetweenEmptyParameterListParentheses);
+                settings_spaceAfterKeywordsInControlFlowStatements.push(setting.vcFormatSpaceAfterKeywordsInControlFlowStatements);
+                settings_spaceWithinControlFlowStatementParentheses.push(setting.vcFormatSpaceWithinControlFlowStatementParentheses);
+                settings_spaceBeforeLambdaOpenParenthesis.push(setting.vcFormatSpaceBeforeLambdaOpenParenthesis);
+                settings_spaceWithinCastParentheses.push(setting.vcFormatSpaceWithinCastParentheses);
+                settings_spaceSpaceAfterCastCloseParenthesis.push(setting.vcFormatSpaceAfterCastCloseParenthesis);
+                settings_spaceWithinExpressionParentheses.push(setting.vcFormatSpaceWithinExpressionParentheses);
+                settings_spaceBeforeBlockOpenBrace.push(setting.vcFormatSpaceBeforeBlockOpenBrace);
+                settings_spaceBetweenEmptyBraces.push(setting.vcFormatSpaceBetweenEmptyBraces);
+                settings_spaceBeforeInitializerListOpenBrace.push(setting.vcFormatSpaceBeforeInitializerListOpenBrace);
+                settings_spaceWithinInitializerListBraces.push(setting.vcFormatSpaceWithinInitializerListBraces);
+                settings_spacePreserveInInitializerList.push(setting.vcFormatSpacePreserveInInitializerList);
+                settings_spaceBeforeOpenSquareBracket.push(setting.vcFormatSpaceBeforeOpenSquareBracket);
+                settings_spaceWithinSquareBracketse.push(setting.vcFormatSpaceWithinSquareBrackets);
+                settings_spaceBeforeEmptySquareBrackets.push(setting.vcFormatSpaceBeforeEmptySquareBrackets);
+                settings_spaceBetweenEmptySquareBrackets.push(setting.vcFormatSpaceBetweenEmptySquareBrackets);
+                settings_spaceGroupSquareBrackets.push(setting.vcFormatSpaceGroupSquareBrackets);
+                settings_spaceWithinLambdaBrackets.push(setting.vcFormatSpaceWithinLambdaBrackets);
+                settings_spaceBetweenEmptyLambdaBrackets.push(setting.vcFormatSpaceBetweenEmptyLambdaBrackets);
+                settings_spaceBeforeComma.push(setting.vcFormatSpaceBeforeComma);
+                settings_spaceAfterComma.push(setting.vcFormatSpaceAfterComma);
+                settings_spaceRemoveAroundMemberOperators.push(setting.vcFormatSpaceRemoveAroundMemberOperators);
+                settings_spaceBeforeInheritanceColon.push(setting.vcFormatSpaceBeforeInheritanceColon);
+                settings_spaceBeforeConstructorColon.push(setting.vcFormatSpaceBeforeConstructorColon);
+                settings_spaceRemoveBeforeSemicolon.push(setting.vcFormatSpaceRemoveBeforeSemicolon);
+                settings_spaceInsertAfterSemicolon.push(setting.vcFormatSpaceInsertAfterSemicolon);
+                settings_spaceRemoveAroundUnaryOperator.push(setting.vcFormatSpaceRemoveAroundUnaryOperator);
+                settings_spaceAroundBinaryOperator.push(setting.vcFormatSpaceAroundBinaryOperator);
+                settings_spaceAroundAssignmentOperator.push(setting.vcFormatSpaceAroundAssignmentOperator);
+                settings_spacePointerReferenceAlignment.push(setting.vcFormatSpacePointerReferenceAlignment);
+                settings_spaceAroundTernaryOperator.push(setting.vcFormatSpaceAroundTernaryOperator);
+                settings_wrapPreserveBlocks.push(setting.vcFormatWrapPreserveBlocks);
                 settings_clangFormatStyle.push(setting.clangFormatStyle);
                 settings_clangFormatFallbackStyle.push(setting.clangFormatFallbackStyle);
                 settings_clangFormatSortIncludes.push(setting.clangFormatSortIncludes);
@@ -1220,13 +1330,78 @@ export class DefaultClient implements Client {
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
                 formatting: {
-                    engine: settings_formattingEngine,
+                    engine: settings_formattingEngine
+                },
+                vcFormat : {
                     indent: {
-                        braces: settings_indentBraces
+                        braces: settings_indentBraces,
+                        multiLineRelativeTo: settings_indentMultiLine,
+                        preserveIndentationWithinParentheses: settings_preserveIndentWithinParenthesis,
+                        caseLabels: settings_indentCaseLabels,
+                        caseContents: settings_indentCaseContents,
+                        caseContentsWhenBlock: settings_indentCaseContentsWhenBlock,
+                        lambdaBracesWhenParameter: settings_indentLambdaBracesWhenParameter,
+                        gotoLabels: settings_indentGotoLabels,
+                        preprocessor : settings_indentPreprocessor,
+                        accesSpecifiers : settings_indentAccessSpecifiers,
+                        namespaceContents : settings_indentNamespaceContents,
+                        preserveComment : settings_indentPreserveComment
                     },
                     newLine:{
-                        beforeOpenBrace:{ settings_newLineBeforeOpenBraceNamespace
-                        }
+                        beforeOpenBrace:{ 
+                            namespace: settings_newLineBeforeOpenBraceNamespace,
+                            type: settings_newLineBeforeOpenBraceType,
+                            function: settings_newLineBeforeOpenBraceFunction,
+                            block: settings_newLineBeforeOpenBraceBlock,
+                            lambda: settings_newLineBeforeOpenBraceLambda
+                        },
+                        scopeBracesOnSeparateLines: settings_newLineScopeBracesOnSeparateLines,
+                        closeBraceSameLine: {
+                            emptyType:  settings_newLineCloseBraceSameLineEmptyType,
+                            emptyFunction: settings_newLineCloseBraceSameLineEmptyFunction
+                        },
+                        beforeCatch : settings_newLineBeforeCatch,
+                        beforeElse : settings_newLineBeforeElse,
+                        beforeWhileInDoWhile : settings_newLineBeforeWhileInDoWhile
+
+                    },
+                    space: {
+                        beforeFunctionOpenParenthesis : settings_spaceBeforeFunctionOpenParenthesis,
+                        withinParameterListParentheses : settings_spaceWithinParameterListParentheses,
+                        betweenEmptyParameterListParentheses : settings_spaceBetweenEmptyParameterListParentheses,
+                        afterKeywordsInControlFlowStatements : settings_spaceAfterKeywordsInControlFlowStatements,
+                        withinControlFlowStatementParentheses : settings_spaceWithinControlFlowStatementParentheses,
+                        beforeLambdaOpenParenthesis : settings_spaceBeforeLambdaOpenParenthesis,
+                        withinCastParentheses : settings_spaceWithinCastParentheses,
+                        afterCastCloseParenthesis : settings_spaceSpaceAfterCastCloseParenthesis,
+                        withinExpressionParentheses : settings_spaceWithinExpressionParentheses,
+                        beforeBlockOpenBrace : settings_spaceBeforeBlockOpenBrace,
+                        betweenEmptyBraces : settings_spaceBetweenEmptyBraces,
+                        beforeInitializerListOpenBrace : settings_spaceBeforeInitializerListOpenBrace,
+                        withinInitializerListBraces : settings_spaceWithinInitializerListBraces,
+                        preserveInInitializerList : settings_spacePreserveInInitializerList,
+                        beforeOpenSquareBracket : settings_spaceBeforeOpenSquareBracket,
+                        withinSquareBrackets : settings_spaceWithinSquareBracketse,
+                        beforeEmptySquareBrackets : settings_spaceBeforeEmptySquareBrackets,
+                        betweenEmptySquareBrackets : settings_spaceBetweenEmptySquareBrackets,
+                        groupSquareBrackets : settings_spaceGroupSquareBrackets,
+                        withinLambdaBrackets : settings_spaceWithinLambdaBrackets,
+                        betweenEmptyLambdaBrackets : settings_spaceBetweenEmptyLambdaBrackets,
+                        beforeComma : settings_spaceBeforeComma,
+                        afterComma : settings_spaceAfterComma,
+                        removeAroundMemberOperators : settings_spaceRemoveAroundMemberOperators,
+                        beforeInheritanceColon : settings_spaceBeforeInheritanceColon,
+                        beforeConstructorColon : settings_spaceBeforeConstructorColon,
+                        removeBeforeSemicolon : settings_spaceRemoveBeforeSemicolon,
+                        insertAfterSemicolon : settings_spaceInsertAfterSemicolon,
+                        removeAroundUnaryOperator : settings_spaceRemoveAroundUnaryOperator,
+                        aroundBinaryOperator : settings_spaceAroundBinaryOperator,
+                        aroundAssignmentOperator : settings_spaceAroundAssignmentOperator,
+                        pointerReferenceAlignment : settings_spacePointerReferenceAlignment,
+                        aroundTernaryOperator : settings_spaceAroundTernaryOperator
+                    },
+                    wrap: {
+                        preserveBlocks: settings_wrapPreserveBlocks
                     }
                 },
                 clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
@@ -1321,8 +1496,11 @@ export class DefaultClient implements Client {
         
                     newLine: {
                       // ...vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine",this.RootUri),
-                        beforeOpenBrace: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.beforeOpenBrace",this.RootUri)
-                    } 
+                        beforeOpenBrace: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.beforeOpenBrace",this.RootUri),
+                        closeBraceSameLine: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.closeBraceSameLine",this.RootUri)
+                    },
+                    space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space",this.RootUri),
+                    wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap",this.RootUri)
                 },
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
