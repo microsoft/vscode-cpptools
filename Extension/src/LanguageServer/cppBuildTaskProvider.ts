@@ -10,7 +10,6 @@ import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
 import * as ext from './extension';
-import * as fs from 'fs';
 import * as nls from 'vscode-nls';
 import * as cp from "child_process";
 import { OtherSettings } from './settings';
