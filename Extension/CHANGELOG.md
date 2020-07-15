@@ -47,7 +47,6 @@
 * Fix find <miDebuggerPath>.exe in Windows path [#3076](https://github.com/microsoft/vscode-cpptools/issues/3076)
   * [PR MIEngine#1001](https://github.com/microsoft/MIEngine/pull/1001)
 
-
 ## Version 0.28.3: June 9, 2020
 ### Enhancements
 * Update version of vscode-cpptools API to 4.0.1 [PR #5624](https://github.com/microsoft/vscode-cpptools/pull/5624)
