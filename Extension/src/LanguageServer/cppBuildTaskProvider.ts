@@ -272,22 +272,27 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
         if (this.options?.cwd) {
             this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
         }
-        await new Promise<number>((resolve, reject) => {
-            cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
-                if (_error) {
-                    telemetry.logLanguageServerEvent("cppBuildTaskError");
-                    this.writeEmitter.fire("Build finished with error:\r\n");
-                    this.writeEmitter.fire(stdout.toString());
-                    reject();
-                } else {
-                    this.writeEmitter.fire(stdout.toString());
-                    this.writeEmitter.fire("\r\nBuild finished successfully.\r\n");
-                    resolve();
-                }
+
+        try {
+            await new Promise<number>((resolve, reject) => {
+                cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
+                    if (_error) {
+                        telemetry.logLanguageServerEvent("cppBuildTaskError");
+                        const endOfLine: string = stdout ? ":" : ".";
+                        this.writeEmitter.fire("Build finished with error" + endOfLine + "\r\n");
+                        this.writeEmitter.fire(stdout.toString());
+                        resolve(-1);
+                    } else {
+                        this.writeEmitter.fire(stdout.toString());
+                        this.writeEmitter.fire("\r\nBuild finished successfully.\r\n");
+                        resolve(0);
+                    }
+                });
             });
-        }).finally(() => {
             this.closeEmitter.fire(0);
-        });
+        } catch {
+            this.closeEmitter.fire(-1);
+        }
     }
 
     private get AdditionalEnvironment(): { [key: string]: string | string[] } | undefined {
@@ -310,23 +315,24 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
     }
 }
 
-export function getRawTasksJson(): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-        const path: string | undefined = getTasksJsonPath();
-        if (!path) {
-            return resolve({});
-        }
-        util.checkFileExists(path).then(async () => {
-            const fileContents: string = await util.readFileText(path);
-            let rawTasks: any = {};
-            try {
-                rawTasks = jsonc.parse(fileContents);
-            } catch (error) {
-                return reject(new Error(failedToParseTasksJson));
-            }
-            resolve(rawTasks);
-        }).catch(() => { resolve({}); });
-    });
+export async function getRawTasksJson(): Promise<any> {
+    const path: string | undefined = getTasksJsonPath();
+    if (!path) {
+        return {};
+    }
+    const fileExists: boolean = await util.checkFileExists(path);
+    if (!fileExists) {
+        return {};
+    }
+
+    const fileContents: string = await util.readFileText(path);
+    let rawTasks: any = {};
+    try {
+        rawTasks = jsonc.parse(fileContents);
+    } catch (error) {
+        throw new Error(failedToParseTasksJson);
+    }
+    return rawTasks;
 }
 
 export function getTasksJsonPath(): string | undefined {
