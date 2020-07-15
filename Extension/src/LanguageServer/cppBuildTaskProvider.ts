@@ -282,7 +282,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                         const dot: string = (stdout || _stderr) ? ":" : ".";
                         this.writeEmitter.fire("Build finished with error" + dot + endOfLine);
                         this.writeEmitter.fire(stdout.toString());
-                        for (const line of _stderr.toString().split('\n')) {
+                        for (const line of _stderr.toString().split(endOfLine)) {
                             this.writeEmitter.fire(line);
                             this.writeEmitter.fire(endOfLine);
                         }
