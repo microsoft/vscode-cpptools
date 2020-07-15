@@ -274,12 +274,11 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
         }
 
         try {
-            await new Promise<number>((resolve, reject) => {
+            const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
-                        const endOfLine: string = stdout ? ":" : ".";
-                        this.writeEmitter.fire("Build finished with error" + endOfLine + "\r\n");
+                        this.writeEmitter.fire("Build finished with error:\r\n");
                         this.writeEmitter.fire(stdout.toString());
                         resolve(-1);
                     } else {
@@ -289,7 +288,7 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
                     }
                 });
             });
-            this.closeEmitter.fire(0);
+            this.closeEmitter.fire(result);
         } catch {
             this.closeEmitter.fire(-1);
         }
