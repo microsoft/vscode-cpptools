@@ -1148,6 +1148,10 @@ export class DefaultClient implements Client {
         const settings_formatting: (string | undefined)[] = [];
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
+        const settings_indentBraces: boolean[] = [];
+        const settings_formattingEngine: (string | undefined)[] = [];
+        const settings_newLineBeforeOpenBraceNamespace: (string | undefined)[] = [];
+
         {
             const settings: CppSettings[] = [];
             const otherSettings: OtherSettings[] = [];
@@ -1164,6 +1168,9 @@ export class DefaultClient implements Client {
 
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
+                settings_formattingEngine.push(setting.formattingEngine);
+                settings_indentBraces.push(setting.vcFormatIndentBraces);
+                settings_newLineBeforeOpenBraceNamespace.push(setting.vcFormatNewlineBeforeOpenBracesNamespace);
                 settings_clangFormatStyle.push(setting.clangFormatStyle);
                 settings_clangFormatFallbackStyle.push(setting.clangFormatFallbackStyle);
                 settings_clangFormatSortIncludes.push(setting.clangFormatSortIncludes);
@@ -1179,7 +1186,6 @@ export class DefaultClient implements Client {
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
                 settings_autoComplete.push(setting.autoComplete);
-                settings_formatting.push(setting.formatting);
             }
 
             for (const otherSetting of otherSettings) {
@@ -1213,9 +1219,18 @@ export class DefaultClient implements Client {
             initializationOptions: {
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
+                formatting: {
+                    engine: settings_formattingEngine,
+                    indent: {
+                        braces: settings_indentBraces
+                    },
+                    newLine:{
+                        beforeOpenBrace:{ settings_newLineBeforeOpenBraceNamespace
+                        }
+                    }
+                },
                 clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings_clangFormatSortIncludes,
-                formatting: settings_formatting,
                 extension_path: util.extensionPath,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
@@ -1299,6 +1314,16 @@ export class DefaultClient implements Client {
         const settings: any = {
             C_Cpp: {
                 ...cppSettingsScoped,
+                formatting:vscode.workspace.getConfiguration("C_Cpp.formatting",this.RootUri),
+                vcFormat: {
+                  //  ...vscode.workspace.getConfiguration("C_Cpp.vcFormat",this.RootUri),
+                    indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent",this.RootUri),
+        
+                    newLine: {
+                      // ...vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine",this.RootUri),
+                        beforeOpenBrace: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.beforeOpenBrace",this.RootUri)
+                    } 
+                },
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {

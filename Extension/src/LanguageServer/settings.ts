@@ -109,7 +109,6 @@ export class CppSettings extends Settings {
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
-    public get formatting(): string | undefined { return super.Section.get<string>("formatting"); }
     public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
@@ -164,6 +163,20 @@ export class CppSettings extends Settings {
             && super.Section.get<string>("intelliSenseEngine") === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
+
+    public get formattingEngine(): string | undefined {
+        return super.Section.get<string>("formatting.engine");
+    }
+
+    
+    public get formattingIndentBraces() : boolean {
+        return super.Section.get<boolean>("formatting.indent.braces") === true
+    }
+    
+    public get formattingNewlineBeforeOpenBracesNamespace() : string | undefined {
+        return super.Section.get<string>("formatting.newLine.beforeOpenBrace.namespace");
+    }
+
 
     public get dimInactiveRegions(): boolean {
         return super.Section.get<boolean>("dimInactiveRegions") === true
