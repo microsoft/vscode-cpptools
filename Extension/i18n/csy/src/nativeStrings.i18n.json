@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "Nepovedlo se poslat dotaz na kompilátor. Probíhá návrat k režimu bez bitové verze.",
 	"intellisense_client_creation_aborted": "Vytváření klienta IntelliSense se přerušilo: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "Na základě informací z nastavení configurationProvider se zjistily chyby direktivy #include. Funkce IntelliSense pro tuto jednotku překladu ({0}) bude poskytovat Tag Parser.",
-	"include_errors_config_provider_squiggles_disabled ": "Na základě informací z nastavení configurationProvider se zjistily chyby direktivy #include. Pro tuto jednotku překladu ({0}) se zakázaly vlnovky."
+	"include_errors_config_provider_squiggles_disabled ": "Na základě informací z nastavení configurationProvider se zjistily chyby direktivy #include. Pro tuto jednotku překladu ({0}) se zakázaly vlnovky.",
+	"preprocessor_keyword": "klíčové slovo preprocesoru",
+	"c_keyword": "Klíčové slovo jazyka C",
+	"cpp_keyword": "Klíčové slovo jazyka C++",
+	"overload": "+1 přetížení",
+	"overloads": "+%d přetížení",
+	"specialization": "+1 specializace",
+	"specializations": "+tento počet specializací: %d",
+	"expands_to": "Rozšiřuje se na:",
+	"file_label": "Soubor:",
+	"parameters_label": "Parametry:",
+	"returns_label": "Vrací:",
+	"deprecated_label": "Zastaralé:",
+	"exceptions_label": "Výjimky:"
 }

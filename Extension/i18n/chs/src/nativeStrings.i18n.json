@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "未能查询编译器。正在回退到无位数。",
 	"intellisense_client_creation_aborted": "已中止创建 IntelliSense 客户端: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "基于 configurationProvider 设置提供的信息检测到 #include 错误。此翻译单元({0})的 IntelliSense 功能将由标记分析器提供。",
-	"include_errors_config_provider_squiggles_disabled ": "基于 configurationProvider 设置提供的信息检测到 #include 错误。已针对此翻译单元({0})禁用波形曲线。"
+	"include_errors_config_provider_squiggles_disabled ": "基于 configurationProvider 设置提供的信息检测到 #include 错误。已针对此翻译单元({0})禁用波形曲线。",
+	"preprocessor_keyword": "预处理器关键字",
+	"c_keyword": "C 关键字",
+	"cpp_keyword": "C++ 关键字",
+	"overload": "还有 1 个重载",
+	"overloads": "还有 %d 个重载",
+	"specialization": "还有 1 个专业化",
+	"specializations": "还有 %d 个专业化",
+	"expands_to": "扩展到:",
+	"file_label": "文件:",
+	"parameters_label": "参数:",
+	"returns_label": "返回:",
+	"deprecated_label": "已弃用:",
+	"exceptions_label": "异常:"
 }

@@ -16,11 +16,9 @@ export class LinuxDistribution {
      * https://www.freedesktop.org/software/systemd/man/os-release.html
      */
     public static GetDistroInformation(): Promise<LinuxDistribution> {
-        let linuxDistro: Promise<LinuxDistribution>;
-
         // First check /etc/os-release and only fallback to /usr/lib/os-release
         // as per the os-release documentation.
-        linuxDistro = LinuxDistribution.getDistroInformationFromFile('/etc/os-release')
+        const linuxDistro: Promise<LinuxDistribution> = LinuxDistribution.getDistroInformationFromFile('/etc/os-release')
             .catch(() => LinuxDistribution.getDistroInformationFromFile('/usr/lib/os-release'))
             .catch(() => Promise.resolve(new LinuxDistribution('unknown', 'unknown'))); // couldn't get distro information;
         return linuxDistro;
@@ -45,9 +43,9 @@ export class LinuxDistribution {
         let distroName: string = 'unknown';
         let distroVersion: string = 'unknown';
 
-        let keyValues: string[] = data.split(os.EOL);
+        const keyValues: string[] = data.split(os.EOL);
         for (let i: number = 0; i < keyValues.length; i++) {
-            let keyValue: string[] = keyValues[i].split('=');
+            const keyValue: string[] = keyValues[i].split('=');
             if (keyValue.length === 2) {
                 if (keyValue[0] === idKey) {
                     distroName = keyValue[1];

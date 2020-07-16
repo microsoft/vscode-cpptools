@@ -20,6 +20,7 @@
 		"statusBarItem.remoteForeground": "#FFF",
 		"statusBarItem.remoteBackground": "#16825D"
 	},
+	"semanticHighlighting": true,
 	"tokenColors": [
 		{
 			"scope": [
@@ -464,6 +465,38 @@
 			"scope": "variable.parameter",
 			"settings": {
 				"foreground": "#7F7F7F"
+			}
+		}
+	],
+	"semanticTokenColors": [
+		{
+			"operatorOverload": {
+				"foreground": "#B4B4B4"
+			}
+		},
+		{
+			"operatorOverloadMember": {
+				"foreground": "#B4B4B4"
+			}
+		},
+		{
+			"newOperator": {
+				"foreground": "#569CD6"
+			}
+		},
+		{
+			"numberLiteral": {
+				"foreground": "#B5CEA8"
+			}
+		},
+		{
+			"customLiteral": {
+				"foreground": "#DADADA"
+			}
+		},
+		{
+			"stringLiteral": {
+				"foreground": "#D69D85"
 			}
 		}
 	]

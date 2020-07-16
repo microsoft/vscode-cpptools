@@ -68,7 +68,7 @@ export class ABTestSettings {
             const exists: boolean = fs.existsSync(cpptoolsJsonFile);
             if (exists) {
                 const fileContent: string = fs.readFileSync(cpptoolsJsonFile).toString();
-                let newSettings: Settings = <Settings>JSON.parse(fileContent);
+                const newSettings: Settings = <Settings>JSON.parse(fileContent);
                 this.intelliSenseEngineDefault.Value = util.isNumber(newSettings.defaultIntelliSenseEngine) ? newSettings.defaultIntelliSenseEngine : this.intelliSenseEngineDefault.DefaultValue;
                 this.recursiveIncludesDefault.Value = util.isNumber(newSettings.recursiveIncludes) ? newSettings.recursiveIncludes : this.recursiveIncludesDefault.DefaultValue;
                 this.gotoDefIntelliSenseDefault.Value = util.isNumber(newSettings.gotoDefIntelliSense) ? newSettings.gotoDefIntelliSense : this.gotoDefIntelliSenseDefault.DefaultValue;
@@ -87,7 +87,7 @@ export class ABTestSettings {
 
     private downloadCpptoolsJsonPkgAsync(): Promise<void> {
         let hasError: boolean = false;
-        let telemetryProperties: { [key: string]: string } = {};
+        const telemetryProperties: { [key: string]: string } = {};
         const localConfigPath: string = util.getExtensionFilePath(localConfigFile);
         return util.downloadFileToDestination("https://go.microsoft.com/fwlink/?linkid=2097702", localConfigPath)
             .catch((error) => {

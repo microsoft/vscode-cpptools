@@ -145,7 +145,7 @@
                     },
                     "customConfigurationVariables": {
                         "type": "object",
-                        "description": "Custom variables that can be queried through the command ${cpptools:activeConfigCustomVariable} to use for the input variables in launch.json.",
+                        "description": "Custom variables that can be queried through the command ${cpptools:activeConfigCustomVariable} to use for the input variables in launch.json or tasks.json.",
                         "patternProperties": {
                             "(^.+$)": {
                                 "type": "string"
