@@ -1796,7 +1796,7 @@
       ]
     },
     {
-      "description": "C/C++ language components (Linux / arm)",
+      "description": "C/C++ language components (Linux / armhf)",
       "url": "https://go.microsoft.com/fwlink/?linkid=2131982",
       "platforms": [
         "linux"
