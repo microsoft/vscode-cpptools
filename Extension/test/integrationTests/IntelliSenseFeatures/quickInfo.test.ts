@@ -44,24 +44,22 @@ suite("[Quick info test]", function(): void {
         disposables.forEach(d => d.dispose());
     });
 
-    test("[Hover over function call]", async () => {
-        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(12, 12)));
+    test("[Hover over function call - normal comment]", async () => {
+        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(35, 23)));
+        const expected: string = `\`\`\`cpp\nbool isEven(int value)\n\`\`\`  \nVerifies if input is even number or not`;
+        const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
+        assert.equal(actual, expected);
+    });
 
-        const expectedMap: Map<string, string> = new Map<string, string>();
-        expectedMap.set("win32", `\`\`\`cpp\nvoid myfunction(int var1, std::string var2, std::string var3)\n\`\`\``);
-        expectedMap.set("linux", `\`\`\`cpp\nvoid myfunction(int var1, std::string var2, std::string var3)\n\`\`\``);
-        expectedMap.set("darwin", `\`\`\`cpp\nvoid myfunction(int var1, std::__cxx11::string var2, std::__cxx11::string var3)\n\`\`\``);
-
-        const expected1: string = expectedMap.get(platform);
-        const actual1: string = (<vscode.MarkdownString>result[0].contents[0]).value;
-        assert.equal(actual1, expected1);
-        const expected2: string = `comment for myfunction`;
-        const actual2: string = (<vscode.MarkdownString>result[0].contents[1]).value;
-        assert.equal(actual2, expected2);
+    test("[Hover over function call - Doxygen comment]", async () => {
+        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(36, 9)));
+        const expected: string = `\`\`\`cpp\nint testDoxygen<int>(int base, int height)\n\`\`\`  \n_@brief_ – Calculates area of rectangle  \n  \n_@tparam_ \`T\` – is template param  \n  \n_@param_ \`base\` – is horizontal length  \n  \n_@param_ \`height\` – is virtical length  \n  \n_@return_ – Area of rectangle  \n  \n_@exception_ – This is an exception comment  \n  \n_@pre_ – This is pre comment`;
+        const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
+        assert.equal(actual, expected);
     });
 
     test("[Hover over function param string variable]", async () => {
-        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(12, 30)));
+        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(33, 30)));
 
         const expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
@@ -73,22 +71,16 @@ suite("[Quick info test]", function(): void {
         assert.equal(actual, expected);
     });
 
-    test("[Hover over function param string literal]", async () => {
-        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(12, 44)));
-
-        const expectedMap: Map<string, string> = new Map<string, string>();
-        expectedMap.set("win32", `\`\`\`cpp\nstd::string::basic_string(const char *_Ptr)\n\`\`\`\n\n+17 overloads\n`);
-        expectedMap.set("linux", `\`\`\`cpp\nstd::string::basic_string<...>(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+17 overloads\n`);
-        expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string::basic_string<...>(const char *__s, const std::allocator<...> &__a = std::allocator<...>())\n\`\`\`\n\n+17 overloads\n`);
-
-        const expected: string = expectedMap.get(platform);
+    test("[Hover over function param int]", async () => {
+        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(33, 18)));
+        const expected: string = `\`\`\`cpp\nint intVar\n\`\`\``;
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
 
     test("[Hover over function param with squiggles]", async () => {
-        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(13, 18)));
-        const expected: string = `\`\`\`cpp\nint intVar\n\`\`\``;
+        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(26, 18)));
+        const expected: string = `\`\`\`cpp\n(bool)false\n\`\`\``;
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
