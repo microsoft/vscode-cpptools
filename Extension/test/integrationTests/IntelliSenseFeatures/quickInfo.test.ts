@@ -53,7 +53,7 @@ suite("[Quick info test]", function(): void {
 
     test("[Hover over function call - Doxygen comment]", async () => {
         const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(36, 9)));
-        const expected: string = `\`\`\`cpp\nint testDoxygen<int>(int base, int height)\n\`\`\`  \n_@brief_ – Calculates area of rectangle  \n  \n_@tparam_ \`T\` – is template param  \n  \n_@param_ \`base\` – is horizontal length  \n  \n_@param_ \`height\` – is virtical length  \n  \n_@return_ – Area of rectangle  \n  \n_@exception_ – This is an exception comment  \n  \n_@pre_ – This is pre comment`;
+        const expected: string = `\`\`\`cpp\nint testDoxygen<int>(int base, int height)\n\`\`\`  \nCalculates area of rectangle  \n  \n**Template Parameters:**  \n\`T\` – is template param  \n  \n**Parameters:**  \n\`base\` – is horizontal length  \n\`height\` – is virtical length  \n  \n**Returns:**  \nArea of rectangle  \n  \n**Exceptions:**  \nThis is an exception comment`;
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
@@ -74,13 +74,6 @@ suite("[Quick info test]", function(): void {
     test("[Hover over function param int]", async () => {
         const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(33, 18)));
         const expected: string = `\`\`\`cpp\nint intVar\n\`\`\``;
-        const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
-        assert.equal(actual, expected);
-    });
-
-    test("[Hover over function param with squiggles]", async () => {
-        const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(26, 18)));
-        const expected: string = `\`\`\`cpp\n(bool)false\n\`\`\``;
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         assert.equal(actual, expected);
     });
