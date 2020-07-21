@@ -1133,7 +1133,6 @@ export class DefaultClient implements Client {
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_editorTabSize: (number | undefined)[] = [];
-      //  const settings_editorSize: (number | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
         const settings_intelliSenseEngineFallback: (string | undefined)[] = [];
         const settings_errorSquiggles: (string | undefined)[] = [];
@@ -1329,9 +1328,7 @@ export class DefaultClient implements Client {
             initializationOptions: {
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
-                formatting: {
-                    engine: settings_formattingEngine
-                },
+                formatting: settings_formattingEngine,
                 vcFormat : {
                     indent: {
                         braces: settings_indentBraces,
@@ -1489,7 +1486,6 @@ export class DefaultClient implements Client {
         const settings: any = {
             C_Cpp: {
                 ...cppSettingsScoped,
-                formatting:vscode.workspace.getConfiguration("C_Cpp.formatting",this.RootUri),
                 vcFormat: {
                   //  ...vscode.workspace.getConfiguration("C_Cpp.vcFormat",this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent",this.RootUri),
@@ -2208,7 +2204,7 @@ export class DefaultClient implements Client {
                         }
                     }
                 }
-            });
+            });5
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
                 this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });

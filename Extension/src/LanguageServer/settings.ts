@@ -165,7 +165,7 @@ export class CppSettings extends Settings {
     }
 
     public get formattingEngine(): string | undefined {
-        return super.Section.get<string>("formatting.engine");
+        return super.Section.get<string>("formatting");
     }
 
     public get vcFormatIndentBraces() : boolean {
