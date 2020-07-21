@@ -3,7 +3,7 @@
 ## Version 0.29.0: July 15, 2020
 ### New Features
 * Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
-  * The way comments are formatted is controlled by the C_Cpp.simplifyStructuredComments setting.
+  * The way comments are formatted is controlled by the `C_Cpp.simplifyStructuredComments` setting.
 * Auto-convert `.` to `->` when the type is a pointer. [#862](https://github.com/microsoft/vscode-cpptools/issues/862)
 * Switch to using the VS Code Semantic Tokens API for semantic colorization (works with remoting). [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401), [#3932](https://github.com/microsoft/vscode-cpptools/issues/3932), [#3933](https://github.com/microsoft/vscode-cpptools/issues/3933), [#3942](https://github.com/microsoft/vscode-cpptools/issues/3942)
 * Add support for LogMessage Breakpoints for debug type `cppdbg`. [MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
@@ -21,6 +21,7 @@
 * Add support to run cpp build tasks  (Tasks: Run Build Task) [#3674](https://github.com/microsoft/vscode-cpptools/issues/3674)
 
 ### Bug Fixes
+* Fix IntelliSense when using "import_" in a variable name. [#5272](https://github.com/microsoft/vscode-cpptools/issues/5272)
 * Add localization support for autocomplete and hover text. [#5370](https://github.com/microsoft/vscode-cpptools/issues/5370)
 * Some `updateChannel` fixes. [PR #5465](https://github.com/microsoft/vscode-cpptools/pull/5465)
 * Fix wrong language standard used with compile commands. [#5498](https://github.com/microsoft/vscode-cpptools/issues/5498)
@@ -34,6 +35,7 @@
 * Fix default build tasks failing on Windows if the compiler isn't on the PATH. [#5604](https://github.com/microsoft/vscode-cpptools/issues/5604)
 * Fix updating `files.associations` and .C files being associated with C instead of C++. [#5618](https://github.com/microsoft/vscode-cpptools/issues/5618)
 * Fix IntelliSense malfunction when RxCpp is used. [#5619](https://github.com/microsoft/vscode-cpptools/issues/5619)
+* Fix an incorrect IntelliSense error. [#5627](https://github.com/microsoft/vscode-cpptools/issues/5627)
 * Ignore "screen size is bogus" error when debugging. [PR #5669](https://github.com/microsoft/vscode-cpptools/pull/5669)
   * nukoyluoglu (@nukoyluoglu)
 * Fix `compile_commands.json` sometimes not updating. [#5687](https://github.com/microsoft/vscode-cpptools/issues/5687)

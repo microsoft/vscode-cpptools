@@ -295,7 +295,7 @@ function realActivation(): void {
 
     PlatformInformation.GetPlatformInformation().then(info => {
         // Skip Insiders processing for 32-bit Linux.
-        if (info.platform !== "linux" || info.architecture === "x86_64") {
+        if (info.platform !== "linux" || info.architecture === "x86_64" || info.architecture === "arm") {
             // Skip Insiders processing for unsupported VS Code versions.
             // TODO: Change this to not require the hardcoded version to be updated.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);

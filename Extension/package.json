@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.29.0-master",
+  "version": "0.30.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -1816,7 +1816,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2131982",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135548",
       "platforms": [
         "linux"
       ],
@@ -1829,8 +1829,22 @@
       ]
     },
     {
+      "description": "C/C++ language components (Linux / armhf)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135628",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
+      ]
+    },
+    {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2132316",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135549",
       "platforms": [
         "darwin"
       ],
@@ -1841,7 +1855,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2132317",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135298",
       "platforms": [
         "win32"
       ],
@@ -1849,7 +1863,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117044",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135581",
       "platforms": [
         "linux"
       ],
@@ -1861,8 +1875,21 @@
       ]
     },
     {
+      "description": "ClangFormat (Linux / armhf)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135579",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format"
+      ]
+    },
+    {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117146",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135580",
       "platforms": [
         "darwin"
       ],
@@ -1872,7 +1899,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117043",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135627",
       "platforms": [
         "win32"
       ],

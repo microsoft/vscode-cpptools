@@ -104,6 +104,7 @@ export function vsixNameForPlatform(info: PlatformInformation): string {
             default: {
                 switch (platformInfo.architecture) {
                     case 'x86_64': return 'cpptools-linux.vsix';
+                    case 'arm': return 'cpptools-linux-armhf.vsix';
                     default: throw new Error(`Unexpected Linux architecture: ${platformInfo.architecture}`);
                 }
             }
