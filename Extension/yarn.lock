@@ -204,10 +204,10 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/vscode@1.43.0":
-  version "1.43.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.43.0.tgz#22276e60034c693b33117f1068ffaac0e89522db"
-  integrity sha512-kIaR9qzd80rJOxePKpCB/mdy00mz8Apt2QA5Y6rdrKFn13QNFNeP3Hzmsf37Bwh/3cS7QjtAeGSK7wSqAU0sYQ==
+"@types/vscode@1.44.0":
+  version "1.44.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.44.0.tgz#62ecfe3d0e38942fce556574da54ee1013c775b7"
+  integrity sha512-WJZtZlinE3meRdH+I7wTsIhpz/GLhqEQwmPGeh4s1irWLwMzCeTV8WZ+pgPTwrDXoafVUWwo1LiZ9HJVHFlJSQ==
 
 "@types/webpack-sources@*":
   version "0.1.6"
@@ -3348,9 +3348,9 @@ lodash.uniq@^4.5.0:
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
 lodash@^4.17.14, lodash@^4.17.15:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+  version "4.17.19"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
+  integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
 
 log-symbols@2.2.0:
   version "2.2.0"
@@ -5619,10 +5619,10 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
-vscode-cpptools@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-3.1.0.tgz#fbc0e493e81a05baf01702ea8b9467c39fba257d"
-  integrity sha512-z4W/A1TQMEtqTEWNY3Hb4HJcJ2J3HeaLHp3TyqCotoRkLU8ovH4jmDb5tNTyh3DgIiaAAnDalO03A4wm5IvNBg==
+vscode-cpptools@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-4.0.1.tgz#7e591572b437a6aca47b767487b52bc253e6d911"
+  integrity sha512-2IjtWe7rjIp20J+5m0Yjpa8TjGhdQWChwE49iYJBUUTHFqJDFq0aXNAyiDNw6BDWI1Q2Z/gmeQGsJBoxTb0J0Q==
 
 vscode-debugadapter@^1.35.0:
   version "1.38.0"

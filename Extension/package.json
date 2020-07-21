@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.28.2-master",
+  "version": "0.30.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -12,7 +12,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.43.0"
+    "vscode": "^1.44.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -663,6 +663,12 @@
           "default": "Forward Slash",
           "description": "%c_cpp.configuration.preferredPathSeparator.description%",
           "scope": "machine-overridable"
+        },
+        "C_Cpp.simplifyStructuredComments": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.simplifyStructuredComments.description%",
+          "scope": "application"
         },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
@@ -1953,16 +1959,150 @@
     "configurationDefaults": {
       "[cpp]": {
         "editor.wordBasedSuggestions": false,
-        "editor.suggest.insertMode": "replace"
+        "editor.suggest.insertMode": "replace",
+        "editor.semanticHighlighting.enabled": true
       },
       "[c]": {
         "editor.wordBasedSuggestions": false,
-        "editor.suggest.insertMode": "replace"
+        "editor.suggest.insertMode": "replace",
+        "editor.semanticHighlighting.enabled": true
       },
       "[Log]": {
         "editor.wordWrap": "off"
       }
-    }
+    },
+    "semanticTokenTypes": [
+      {
+        "id": "referenceType",
+        "superType": "class",
+        "description": "A C++/CLI reference type."
+      },
+      {
+        "id": "cliProperty",
+        "superType": "property",
+        "description": "A C++/CLI property."
+      },
+      {
+        "id": "genericType",
+        "superType": "class",
+        "description": "A C++/CLI generic type."
+      },
+      {
+        "id": "valueType",
+        "superType": "class",
+        "description": "A C++/CLI value type."
+      },
+      {
+        "id": "templateFunction",
+        "superType": "function",
+        "description": "A template function."
+      },
+      {
+        "id": "templateType",
+        "superType": "class",
+        "description": "A template type."
+      },
+      {
+        "id": "operatorOverload",
+        "superType": "operator",
+        "description": "An overloaded operator."
+      },
+      {
+        "id": "memberOperatorOverload",
+        "superType": "operator",
+        "description": "An overloaded operator member function."
+      },
+      {
+        "id": "newOperator",
+        "superType": "operator",
+        "description": "A C++ new or delete operator."
+      },
+      {
+        "id": "customLiteral",
+        "superType": "number",
+        "description": "A user-defined literal."
+      },
+      {
+        "id": "numberLiteral",
+        "superType": "number",
+        "description": "A user-defined literal number."
+      },
+      {
+        "id": "stringLiteral",
+        "superType": "string",
+        "description": "A user-defined literal string."
+      }
+    ],
+    "semanticTokenModifiers": [
+      {
+        "id": "global",
+        "description": "Annotates a symbol that is declared in global scope."
+      },
+      {
+        "id": "local",
+        "description": "Annotates a symbol that is declared in local scope."
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "scopes": {
+          "label": [
+            "entity.name.label"
+          ],
+          "variable.global": [
+            "variable.other.global"
+          ],
+          "variable.local": [
+            "variable.other.local"
+          ],
+          "property.static": [
+            "variable.other.property.static"
+          ],
+          "member.static": [
+            "entity.name.function.member.static"
+          ],
+          "macro": [
+            "entity.name.function.preprocessor"
+          ],
+          "referenceType": [
+            "entity.name.type.class.reference"
+          ],
+          "cliProperty": [
+            "variable.other.property.cli"
+          ],
+          "genericType": [
+            "entity.name.type.class.generic"
+          ],
+          "valueType": [
+            "entity.name.type.class.value"
+          ],
+          "templateFunction": [
+            "entity.name.function.templated"
+          ],
+          "templateType": [
+            "entity.name.type.class.templated"
+          ],
+          "operatorOverload": [
+            "entity.name.function.operator"
+          ],
+          "memberOperatorOverload": [
+            "entity.name.function.operator.member"
+          ],
+          "newOperator": [
+            "keyword.operator.new"
+          ],
+          "numberLiteral": [
+            "entity.name.operator.custom-literal.number"
+          ],
+          "customLiteral": [
+            "entity.name.operator.custom-literal"
+          ],
+          "stringLiteral": [
+            "entity.name.operator.custom-literal.string"
+          ]
+        }
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
@@ -1993,7 +2133,7 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.43.0",
+    "@types/vscode": "1.44.0",
     "@types/webpack": "^4.39.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
@@ -2031,7 +2171,7 @@
     "ts-loader": "^6.0.4",
     "tslint": "^5.19.0",
     "typescript": "^3.5.3",
-    "vscode-cpptools": "^3.1.0",
+    "vscode-cpptools": "^4.0.1",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-extension-telemetry": "^0.1.2",
@@ -2058,7 +2198,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2131982",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135548",
       "platforms": [
         "linux"
       ],
@@ -2071,8 +2211,22 @@
       ]
     },
     {
+      "description": "C/C++ language components (Linux / armhf)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135628",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
+      ]
+    },
+    {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2132316",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135549",
       "platforms": [
         "darwin"
       ],
@@ -2083,7 +2237,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2132317",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135298",
       "platforms": [
         "win32"
       ],
@@ -2091,7 +2245,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117044",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135581",
       "platforms": [
         "linux"
       ],
@@ -2103,8 +2257,21 @@
       ]
     },
     {
+      "description": "ClangFormat (Linux / armhf)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135579",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format"
+      ]
+    },
+    {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117146",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135580",
       "platforms": [
         "darwin"
       ],
@@ -2114,7 +2281,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117043",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135627",
       "platforms": [
         "win32"
       ],

@@ -162,5 +162,18 @@
 	"fallback_to_no_bitness": "Falha ao consultar o compilador. Voltando para nenhum número de bit.",
 	"intellisense_client_creation_aborted": "Criação de cliente do IntelliSense anulada: {0}",
 	"include_errors_config_provider_intellisense_disabled ": "#inclui erros detectados com base nas informações fornecidas pela configuração configurationProvider. Os recursos do IntelliSense para essa unidade de conversão ({0}) serão fornecidos pelo Analisador de Marca.",
-	"include_errors_config_provider_squiggles_disabled ": "#inclui erros detectados com base nas informações fornecidas pela configuração configurationProvider. Os rabiscos estão desabilitados para esta unidade de tradução ({0})."
+	"include_errors_config_provider_squiggles_disabled ": "#inclui erros detectados com base nas informações fornecidas pela configuração configurationProvider. Os rabiscos estão desabilitados para esta unidade de tradução ({0}).",
+	"preprocessor_keyword": "palavra-chave do pré-processador",
+	"c_keyword": "Palavra-chave C",
+	"cpp_keyword": "Palavra-chave C++",
+	"overload": "Mais 1 sobrecarga",
+	"overloads": "Mais %d sobrecargas",
+	"specialization": "Mais 1 especialização",
+	"specializations": "Mais %d especializações",
+	"expands_to": "Expande para:",
+	"file_label": "Arquivo:",
+	"parameters_label": "Parâmetros:",
+	"returns_label": "Retorna:",
+	"deprecated_label": "Preterido:",
+	"exceptions_label": "Exceções:"
 }

@@ -104,6 +104,7 @@ export function vsixNameForPlatform(info: PlatformInformation): string {
             default: {
                 switch (platformInfo.architecture) {
                     case 'x86_64': return 'cpptools-linux.vsix';
+                    case 'arm': return 'cpptools-linux-armhf.vsix';
                     default: throw new Error(`Unexpected Linux architecture: ${platformInfo.architecture}`);
                 }
             }
@@ -126,10 +127,11 @@ export interface BuildInfo {
 /**
  * Use the GitHub API to retrieve the download URL of the extension version the user should update to, if any.
  * @param updateChannel The user's updateChannel setting.
+ * @param isFromSettingsChange True if the invocation is the result of a settings change.
  * @return Download URL for the extension VSIX package that the user should install. If the user
  * does not need to update, resolves to undefined.
  */
-export async function getTargetBuildInfo(updateChannel: string): Promise<BuildInfo | undefined> {
+export async function getTargetBuildInfo(updateChannel: string, isFromSettingsChange: boolean): Promise<BuildInfo | undefined> {
     return getReleaseJson()
         .then(builds => {
             if (!builds || builds.length === 0) {
@@ -144,7 +146,7 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
                 return undefined;
             }
 
-            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel);
+            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
             if (targetBuild === undefined) {
                 // no action
                 telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
@@ -180,10 +182,11 @@ export async function getTargetBuildInfo(updateChannel: string): Promise<BuildIn
  * @param builds The GitHub release list parsed as an array of Builds.
  * @param userVersion The verion of the extension that the user is running.
  * @param updateChannel The user's updateChannel setting.
+ * @param isFromSettingsChange True if the invocation is the result of a settings change.
  * @return The Build if the user should update to it, otherwise undefined.
  */
-export function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string): Build | undefined {
-    if (!vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+export function getTargetBuild(builds: Build[], userVersion: PackageVersion, updateChannel: string, isFromSettingsChange: boolean): Build | undefined {
+    if (!isFromSettingsChange && !vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
         return undefined;
     }
     const latestVersion: PackageVersion = new PackageVersion(builds[0].name);

@@ -125,6 +125,7 @@ export class CppSettings extends Settings {
     public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
     public get workspaceSymbols(): string | undefined { return super.Section.get<string>("workspaceSymbols"); }
     public get exclusionPolicy(): string | undefined { return super.Section.get<string>("exclusionPolicy"); }
+    public get simplifyStructuredComments(): boolean | undefined { return super.Section.get<boolean>("simplifyStructuredComments"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }

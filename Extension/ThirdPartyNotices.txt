@@ -1237,7 +1237,7 @@ SOFTWARE.
 
 -------------------------------------------------------------------
 
-vscode-cpptools 3.1.0 - MIT
+vscode-cpptools 4.0.1 - MIT
 https://github.com/Microsoft/vscode-cpptools-api#readme
 Copyright (c) Microsoft Corporation.
 
