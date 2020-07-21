@@ -22,6 +22,7 @@ import { OtherSettings } from './LanguageServer/settings';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
+import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -214,7 +215,7 @@ export async function isExtensionReady(): Promise<boolean> {
     return doesInstallLockFileExist;
 }
 
-export function removeInstallLockFile(): Promise<void> {
+export function renameDebugAdaptersPath(): Promise<void> {
     if (os.platform() !== 'win32') {
         const sourcePath: string = getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
@@ -229,6 +230,7 @@ export function removeInstallLockFile(): Promise<void> {
 
     return Promise.resolve();
 }
+
 let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
@@ -573,10 +575,11 @@ export function getInstalledBinaryPlatform(): string | undefined {
 }
 
 /* Check if the core files exists in extension's installation folder */
-export function checkInstallationFilesExist(installedPlatform: string | undefined): boolean {
+export async function checkInstallationFilesExist(installedPlatform: string | undefined): Promise<boolean> {
     if (!installedPlatform || !checkInstallLockFile()) {
         return false;
     }
+    let installationFilesExist: boolean = true;
     const commonFiles: string[]= [
         "bin/cpptools.exe",
         "bin/cpptools-srv.exe",
@@ -594,50 +597,26 @@ export function checkInstallationFilesExist(installedPlatform: string | undefine
         "bin/msvc.x86.clang.json",
         "bin/msvc.x86.gcc.json",
         "bin/msvc.x86.msvc.json",
-        "bin/vcpkgsrvtest.exe",
-        "debugAdapters/OpenDebugAD7",
+        "bin/vcpkgsrvtest.exe"
+        /*"debugAdapters/OpenDebugAD7",
         "debugAdapters/bin/cppdbg.ad7Engine.json",
-        "debugAdapters/bin/OpenDebugAD7.exe"
+        "debugAdapters/bin/OpenDebugAD7.exe"*/
     ];
-    /* const win32Files: string[] = [
-        "LLVM/bin/clang-format.exe"
-    ];
-    const darwinFiles: string[] = [
-        "LLVM/bin/clang-format.darwin"
-    ];
-    const linuxFiles: string[] = [
-        "LLVM/bin/clang-format"
-    ];*/
+    //const packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
+    await Promise.all(commonFiles.map(async (file) => {
+        installationFilesExist = await checkFileExists(path.join(extensionPath, file));
+      }));
+    return installationFilesExist;
+}
 
-    commonFiles.forEach(file => {
-        if (!checkFileExistsSync(path.join(extensionPath, file))) {
-            return false;
-        }
-    });
-    /* switch (installedPlatform) {
-        case "win32":
-            win32Files.forEach(file => {
-                if (!checkFileExistsSync(path.join(extensionPath, file))) {
-                    return false;
-                }
-            });
-            break;
-        case "darwin":
-            darwinFiles.forEach(file => {
-                if (!checkFileExistsSync(path.join(extensionPath, file))) {
-                    return false;
-                }
-            });
-            break;
-        case "linux":
-            linuxFiles.forEach(file => {
-                if (!checkFileExistsSync(path.join(extensionPath, file))) {
-                    return false;
-                }
-            });
-            break;
-    }*/
-    return true;
+export function removeInstallLockFile(): boolean {
+    try {
+        fs.unlinkSync(path.join(extensionPath, "install.lock"));
+        return true;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
 }
 
 /** Reads the content of a text file */

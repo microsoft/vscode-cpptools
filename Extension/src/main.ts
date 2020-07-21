@@ -75,7 +75,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
 
     // check if the extension has been installed successfully.
-    const successInstall: boolean = util.checkInstallationFilesExist(installedPlatform);
+    const successInstall: boolean = await util.checkInstallationFilesExist(installedPlatform);
     if (!installedPlatform || !successInstall) {
         errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
         const reload: string = localize("remove.extension", "Attempt to Repair");
