@@ -1797,7 +1797,7 @@
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2131982",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135628",
       "platforms": [
         "linux"
       ],
@@ -1830,7 +1830,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117044",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135581",
       "platforms": [
         "linux"
       ],
@@ -1842,8 +1842,21 @@
       ]
     },
     {
+      "description": "ClangFormat (Linux / armhf)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135579",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format"
+      ]
+    },
+    {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117146",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135580",
       "platforms": [
         "darwin"
       ],
@@ -1853,7 +1866,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117043",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135627",
       "platforms": [
         "win32"
       ],
