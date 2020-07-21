@@ -52,7 +52,7 @@ suite("[Quick info test]", function(): void {
     });
 
     test("[Hover over function call - Doxygen comment]", async () => {
-        testHelpers.delay(500); // Delay for half a second to ensure Doxygen comment is processed.
+        testHelpers.delay(3000); // Delay to ensure Doxygen comment is processed.
         const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(36, 9)));
         const expected: string = `\`\`\`cpp\nint testDoxygen<int>(int base, int height)\n\`\`\`  \nCalculates area of rectangle  \n  \n**Template Parameters:**  \n\`T\` – is template param  \n  \n**Parameters:**  \n\`base\` – is horizontal length  \n\`height\` – is virtical length  \n  \n**Returns:**  \nArea of rectangle  \n  \n**Exceptions:**  \nThis is an exception comment`;
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
