@@ -438,7 +438,6 @@ export class OtherSettings {
     }
 
     public get editorTabSize(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
-    public get editorInsertSpaces(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("insertSpaces"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files", null).get("associations"); }
     public set filesAssociations(value: any) {
         vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);

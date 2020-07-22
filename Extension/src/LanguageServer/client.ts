@@ -1220,7 +1220,6 @@ export class DefaultClient implements Client {
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
-        const settings_editorTabSize: (number | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
         const settings_intelliSenseEngineFallback: (string | undefined)[] = [];
         const settings_errorSquiggles: (string | undefined)[] = [];
@@ -1388,7 +1387,6 @@ export class DefaultClient implements Client {
             for (const otherSetting of otherSettings) {
                 settings_filesExclude.push(otherSetting.filesExclude);
                 settings_searchExclude.push(otherSetting.searchExclude);
-                settings_editorTabSize.push(otherSetting.editorTabSize);
             }
         }
 
@@ -1496,7 +1494,6 @@ export class DefaultClient implements Client {
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
                 storage_path: this.storagePath,
-                tabSize: settings_editorTabSize,
                 intelliSenseEngine: settings_intelliSenseEngine,
                 intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
