@@ -74,9 +74,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
 
-    // check if the extension has been installed successfully.
-    const successInstall: boolean = await util.checkInstallationFilesExist(installedPlatform);
-    if (!installedPlatform || !successInstall) {
+    // Check the main binaries files to declare if the extension has been installed successfully.
+    if (!installedPlatform || !(await util.checkInstallBinariesExist())) {
         errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
         const reload: string = localize("remove.extension", "Attempt to Repair");
         vscode.window.showInformationMessage(errMsg, reload).then((value?: string) => {
@@ -90,6 +89,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
         errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
+        const downloadLink: string = localize("download.button", "Go to Download Page");
+        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+            if (selection === downloadLink) {
+                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+            }
+        });
+    } else if (!(await util.checkInstallJasonsExist())) {
+        // Check the Json files to declare if the extension has been installed successfully.
+        errMsg = localize("jason.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
         const downloadLink: string = localize("download.button", "Go to Download Page");
         vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
             if (selection === downloadLink) {

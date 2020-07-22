@@ -113,6 +113,17 @@ export class PackageManager {
             });
     }
 
+    public GetPackages(): Promise<IPackage[]> {
+        return this.GetPackageList()
+            .then((list) =>
+                list.filter((value, index, array) =>
+                    ArchitecturesMatch(value, this.platformInfo) &&
+                        PlatformsMatch(value, this.platformInfo) &&
+                        VersionsMatch(value, this.platformInfo)
+                )
+            );
+    }
+
     /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
      *  Like Promise.all, but runs the promises in sequence rather than simultaneously.
      */
@@ -147,17 +158,6 @@ export class PackageManager {
                 resolve(this.allPackages);
             }
         });
-    }
-
-    private GetPackages(): Promise<IPackage[]> {
-        return this.GetPackageList()
-            .then((list) =>
-                list.filter((value, index, array) =>
-                    ArchitecturesMatch(value, this.platformInfo) &&
-                        PlatformsMatch(value, this.platformInfo) &&
-                        VersionsMatch(value, this.platformInfo)
-                )
-            );
     }
 
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {

@@ -22,7 +22,7 @@ import { OtherSettings } from './LanguageServer/settings';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
-import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
+import { PackageManager, IPackage } from './packageManager';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -574,16 +574,33 @@ export function getInstalledBinaryPlatform(): string | undefined {
     return installedPlatform;
 }
 
-/* Check if the core files exists in extension's installation folder */
-export async function checkInstallationFilesExist(installedPlatform: string | undefined): Promise<boolean> {
-    if (!installedPlatform || !checkInstallLockFile()) {
+/* Check if the core binaries exists in extension's installation folder */
+export async function checkInstallBinariesExist(): Promise<boolean> {
+    if (!checkInstallLockFile()) {
         return false;
     }
-    let installationFilesExist: boolean = true;
-    const commonFiles: string[]= [
-        "bin/cpptools.exe",
-        "bin/cpptools-srv.exe",
-        "bin/cpptools-vcpkgsrv.exe",
+    let installBinariesExist: boolean = true;
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const packageManager: PackageManager = new PackageManager(info);
+    let packages: Promise<IPackage[]> = packageManager.GetPackages();
+    for (const pkg of await packages) {
+        if (pkg.binaries) {
+            await Promise.all(pkg.binaries.map(async (file: string) => {
+                if (!await checkFileExists(file) &&
+                    !(info.platform == "win32" && await checkFileExists(file + ".exe"))) {
+                    installBinariesExist = false;
+                    console.log(`Extension file ${file} is missing.`);
+                }
+            }));
+        }
+    }
+    return installBinariesExist;
+}
+
+/* Check if the core Json files exists in extension's installation folder */
+export async function checkInstallJasonsExist(): Promise<boolean> {
+    let installJasonsExist: boolean = true;
+    const jsonFiles: string[]= [
         "bin/msvc.arm32.clang.json",
         "bin/msvc.arm32.gcc.json",
         "bin/msvc.arm32.msvc.json",
@@ -597,16 +614,15 @@ export async function checkInstallationFilesExist(installedPlatform: string | un
         "bin/msvc.x86.clang.json",
         "bin/msvc.x86.gcc.json",
         "bin/msvc.x86.msvc.json",
-        "bin/vcpkgsrvtest.exe"
-        /*"debugAdapters/OpenDebugAD7",
-        "debugAdapters/bin/cppdbg.ad7Engine.json",
-        "debugAdapters/bin/OpenDebugAD7.exe"*/
+        "debugAdapters/bin/cppdbg.ad7Engine.json"
     ];
-    //const packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
-    await Promise.all(commonFiles.map(async (file) => {
-        installationFilesExist = await checkFileExists(path.join(extensionPath, file));
+    await Promise.all(jsonFiles.map(async (file) => {
+        if (!await checkFileExists(path.join(extensionPath, file))){
+            installJasonsExist = false;
+            console.log(`Extension file ${file} is missing.`);
+        }
       }));
-    return installationFilesExist;
+    return installJasonsExist;
 }
 
 export function removeInstallLockFile(): boolean {
