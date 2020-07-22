@@ -55,6 +55,7 @@ let debugChannel: vscode.OutputChannel;
 let diagnosticsCollection: vscode.DiagnosticCollection;
 let workspaceDisposables: vscode.Disposable[] = [];
 let workspaceReferences: refs.ReferencesManager;
+const openFileVersions: Map<string, number> = new Map<string, number>();
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -605,6 +606,7 @@ class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     private client: DefaultClient;
     public onDidChangeSemanticTokensEvent = new vscode.EventEmitter<void>();
     public onDidChangeSemanticTokens?: vscode.Event<void>;
+    private tokenCaches: Map<string, [number, vscode.SemanticTokens]> = new Map<string, [number, vscode.SemanticTokens]>();
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -615,30 +617,43 @@ class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
         return new Promise<vscode.SemanticTokens>((resolve, reject) => {
             this.client.notifyWhenReady(() => {
                 const uriString: string = document.uri.toString();
-                const id: number = ++abortRequestId;
-                const params: GetSemanticTokensParams = {
-                    id: id,
-                    uri: uriString
-                };
-                this.client.languageClient.sendRequest(GetSemanticTokensRequest, params)
-                    .then((tokensResult) => {
-                        if (tokensResult.canceled) {
-                            reject();
-                        } else {
-                            if (tokensResult.fileVersion !== this.client.openFileVersions.get(uriString)) {
+                // First check the token cache to see if we already have results for that file and version
+                const cache: [number, vscode.SemanticTokens] | undefined = this.tokenCaches.get(uriString);
+                if (cache && cache[0] === document.version) {
+                    resolve(cache[1]);
+                } else {
+                    const id: number = ++abortRequestId;
+                    const params: GetSemanticTokensParams = {
+                        id: id,
+                        uri: uriString
+                    };
+                    this.client.languageClient.sendRequest(GetSemanticTokensRequest, params)
+                        .then((tokensResult) => {
+                            if (tokensResult.canceled) {
                                 reject();
                             } else {
-                                const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
-                                tokensResult.tokens.forEach((token) => {
-                                    builder.push(token.line, token.character, token.length, token.type, token.modifiers);
-                                });
-                                resolve(builder.build());
+                                if (tokensResult.fileVersion !== openFileVersions.get(uriString)) {
+                                    reject();
+                                } else {
+                                    const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
+                                    tokensResult.tokens.forEach((token) => {
+                                        builder.push(token.line, token.character, token.length, token.type, token.modifiers);
+                                    });
+                                    const tokens: vscode.SemanticTokens = builder.build();
+                                    this.tokenCaches.set(uriString, [tokensResult.fileVersion, tokens]);
+                                    resolve(tokens);
+                                }
                             }
-                        }
-                    });
-                token.onCancellationRequested(e => this.client.abortRequest(id));
+                        });
+                    token.onCancellationRequested(e => this.client.abortRequest(id));
+                }
             });
         });
+    }
+
+    public invalidateFile(uri: string): void {
+        this.tokenCaches.delete(uri);
+        this.onDidChangeSemanticTokensEvent.fire();
     }
 }
 
@@ -655,7 +670,6 @@ export class DefaultClient implements Client {
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
-    public openFileVersions = new Map<string, number>();
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
     private documentSelector: DocumentFilter[] = [
@@ -865,8 +879,7 @@ export class DefaultClient implements Client {
 
                         public async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
                             const params: WorkspaceSymbolParams = {
-                                query: query,
-                                workspaceFolderUri: this.client.RootPath
+                                query: query
                             };
 
                             return this.client.languageClient.sendRequest(GetSymbolInfoRequest, params)
@@ -1648,10 +1661,10 @@ export class DefaultClient implements Client {
                     this.cancelReferences();
                 }
 
-                const oldVersion: number | undefined = this.openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
+                const oldVersion: number | undefined = openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
                 const newVersion: number = textDocumentChangeEvent.document.version;
                 if (oldVersion === undefined || newVersion > oldVersion) {
-                    this.openFileVersions.set(textDocumentChangeEvent.document.uri.toString(), newVersion);
+                    openFileVersions.set(textDocumentChangeEvent.document.uri.toString(), newVersion);
                 }
             }
         }
@@ -1659,12 +1672,12 @@ export class DefaultClient implements Client {
 
     public onDidOpenTextDocument(document: vscode.TextDocument): void {
         if (document.uri.scheme === "file") {
-            this.openFileVersions.set(document.uri.toString(), document.version);
+            openFileVersions.set(document.uri.toString(), document.version);
         }
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
-        this.openFileVersions.delete(document.uri.toString());
+        openFileVersions.delete(document.uri.toString());
     }
 
     private registeredProviders: CustomConfigurationProvider1[] = [];
@@ -2151,7 +2164,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
-        this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.onDidChangeSemanticTokensEvent.fire());
+        this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         setupOutputHandlers();
     }
 
@@ -2391,7 +2404,7 @@ export class DefaultClient implements Client {
                 };
                 this.inactiveRegionsDecorations.set(params.uri, toInsert);
             }
-            if (settings.dimInactiveRegions && params.fileVersion === this.openFileVersions.get(params.uri)) {
+            if (settings.dimInactiveRegions && params.fileVersion === openFileVersions.get(params.uri)) {
                 // Apply the decorations to all *visible* text editors
                 const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
                 for (const e of editors) {
