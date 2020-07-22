@@ -182,5 +182,13 @@
         "hint": "Refers to C++ template specializations. This is part of a description indicating there are N additional specializations of a function.  %d is replaced with that number."
     },
     "expands_to": "Expands to:",
-    "file_label": "File:"
+    "file_label": "File:",
+    "parameters_label": "Parameters:",
+    "returns_label": {
+        "text": "Returns:",
+        "hint": "This label is for the return value description for a function. Usage example: 'Returns: Area of a shape.'"
+    },
+    "deprecated_label": "Deprecated:",
+    "exceptions_label": "Exceptions:",
+    "template_parameters_label": "Template Parameters:"
 }

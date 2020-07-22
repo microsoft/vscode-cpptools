@@ -19,6 +19,7 @@
 		"statusBarItem.remoteForeground": "#FFF",
 		"statusBarItem.remoteBackground": "#16825D"
 	},
+	"semanticHighlighting": true,
 	"tokenColors": [
 		{
 			"scope": ["meta.embedded", "source.groovy.embedded"],
@@ -453,6 +454,28 @@
 			"scope": "variable.parameter",
 			"settings": {
 				"foreground": "#808080"
+			}
+		}
+	],
+	"semanticTokenColors": [
+		{
+			"operatorOverload": {
+				"foreground": "#008080"
+			}
+		},
+		{
+			"operatorOverloadMember": {
+				"foreground": "#008080"
+			}
+		},
+		{
+			"newOperator": {
+				"foreground": "#0000FF"
+			}
+		},
+		{
+			"stringLiteral": {
+				"foreground": "#A31515"
 			}
 		}
 	]
