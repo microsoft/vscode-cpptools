@@ -582,12 +582,12 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
     let installBinariesExist: boolean = true;
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     const packageManager: PackageManager = new PackageManager(info);
-    let packages: Promise<IPackage[]> = packageManager.GetPackages();
+    const packages: Promise<IPackage[]> = packageManager.GetPackages();
     for (const pkg of await packages) {
         if (pkg.binaries) {
             await Promise.all(pkg.binaries.map(async (file: string) => {
                 if (!await checkFileExists(file) &&
-                    !(info.platform == "win32" && await checkFileExists(file + ".exe"))) {
+                    !(info.platform === "win32" && await checkFileExists(file + ".exe"))) {
                     installBinariesExist = false;
                     console.log(`Extension file ${file} is missing.`);
                 }
@@ -600,7 +600,7 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
 /* Check if the core Json files exists in extension's installation folder */
 export async function checkInstallJasonsExist(): Promise<boolean> {
     let installJasonsExist: boolean = true;
-    const jsonFiles: string[]= [
+    const jsonFiles: string[] = [
         "bin/msvc.arm32.clang.json",
         "bin/msvc.arm32.gcc.json",
         "bin/msvc.arm32.msvc.json",
@@ -617,11 +617,11 @@ export async function checkInstallJasonsExist(): Promise<boolean> {
         "debugAdapters/bin/cppdbg.ad7Engine.json"
     ];
     await Promise.all(jsonFiles.map(async (file) => {
-        if (!await checkFileExists(path.join(extensionPath, file))){
+        if (!await checkFileExists(path.join(extensionPath, file))) {
             installJasonsExist = false;
             console.log(`Extension file ${file} is missing.`);
         }
-      }));
+    }));
     return installJasonsExist;
 }
 
