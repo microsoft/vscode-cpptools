@@ -1155,7 +1155,7 @@ export class DefaultClient implements Client {
         const settings_indentCaseContentsWhenBlock: boolean[] = [];
         const settings_indentLambdaBracesWhenParameter: boolean[] = [];
         const settings_indentGotoLabels: (string | undefined)[] = [];
-        const settings_indentPreprocessor: (string | undefined)[] = []; 
+        const settings_indentPreprocessor: (string | undefined)[] = [];
         const settings_indentAccessSpecifiers: boolean[] = [];
         const settings_indentNamespaceContents: boolean[] = [];
         const settings_indentPreserveComment: boolean[] = [];
@@ -1344,8 +1344,8 @@ export class DefaultClient implements Client {
                         namespaceContents : settings_indentNamespaceContents,
                         preserveComment : settings_indentPreserveComment
                     },
-                    newLine:{
-                        beforeOpenBrace:{ 
+                    newLine: {
+                        beforeOpenBrace: {
                             namespace: settings_newLineBeforeOpenBraceNamespace,
                             type: settings_newLineBeforeOpenBraceType,
                             function: settings_newLineBeforeOpenBraceFunction,
@@ -1487,16 +1487,13 @@ export class DefaultClient implements Client {
             C_Cpp: {
                 ...cppSettingsScoped,
                 vcFormat: {
-                  //  ...vscode.workspace.getConfiguration("C_Cpp.vcFormat",this.RootUri),
-                    indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent",this.RootUri),
-        
+                    indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
                     newLine: {
-                      // ...vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine",this.RootUri),
-                        beforeOpenBrace: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.beforeOpenBrace",this.RootUri),
-                        closeBraceSameLine: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.closeBraceSameLine",this.RootUri)
+                        beforeOpenBrace: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.beforeOpenBrace", this.RootUri),
+                        closeBraceSameLine: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.closeBraceSameLine", this.RootUri)
                     },
-                    space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space",this.RootUri),
-                    wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap",this.RootUri)
+                    space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
+                    wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
                 },
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
@@ -2204,7 +2201,7 @@ export class DefaultClient implements Client {
                         }
                     }
                 }
-            });5
+            });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
                 this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });

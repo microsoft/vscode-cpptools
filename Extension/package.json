@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.28.2-master",
+  "version": "0.30.0-master",
   "publisher": "ms-vscode",
   "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
@@ -39,7 +39,31 @@
     "Snippets"
   ],
   "activationEvents": [
-   "*"
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onCommand:extension.pickNativeProcess",
+    "onCommand:extension.pickRemoteNativeProcess",
+    "onCommand:C_Cpp.BuildAndDebugActiveFile",
+    "onCommand:C_Cpp.ConfigurationEditJSON",
+    "onCommand:C_Cpp.ConfigurationEditUI",
+    "onCommand:C_Cpp.ConfigurationSelect",
+    "onCommand:C_Cpp.ConfigurationProviderSelect",
+    "onCommand:C_Cpp.SwitchHeaderSource",
+    "onCommand:C_Cpp.EnableErrorSquiggles",
+    "onCommand:C_Cpp.DisableErrorSquiggles",
+    "onCommand:C_Cpp.ToggleIncludeFallback",
+    "onCommand:C_Cpp.ToggleDimInactiveRegions",
+    "onCommand:C_Cpp.ResetDatabase",
+    "onCommand:C_Cpp.TakeSurvey",
+    "onCommand:C_Cpp.LogDiagnostics",
+    "onCommand:C_Cpp.RescanWorkspace",
+    "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
+    "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
+    "onDebugInitialConfigurations",
+    "onDebugResolve:cppdbg",
+    "onDebugResolve:cppvsdbg",
+    "workspaceContains:/.vscode/c_cpp_properties.json",
+    "onFileSystem:cpptools-schema"
   ],
   "main": "./dist/main",
   "contributes": {
@@ -98,6 +122,7 @@
           "enum": [
             "clangFormat",
             "vcFormat",
+            "Default",
             "Disabled"
           ],
           "default": "clangFormat",
@@ -2002,7 +2027,6 @@
     "@typescript-eslint/parser": "^2.19.2",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
-    "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.1",

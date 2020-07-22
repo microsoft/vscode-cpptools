@@ -30,7 +30,7 @@ class Settings {
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
 
     protected getWithFallback<T>(section: string, deprecatedSection: string): T {
-        let info: any = this.settings.inspect<T>(section);
+        const info: any = this.settings.inspect<T>(section);
         if (info.workspaceFolderValue !== undefined) {
             return info.workspaceFolderValue;
         } else if (info.workspaceValue !== undefined) {
@@ -38,7 +38,7 @@ class Settings {
         } else if (info.globalValue !== undefined) {
             return info.globalValue;
         }
-        let value: T | undefined = this.settings.get<T>(deprecatedSection);
+        const value: T | undefined = this.settings.get<T>(deprecatedSection);
         if (value !== undefined) {
             return value;
         }
@@ -46,7 +46,7 @@ class Settings {
     }
 
     protected getWithNullAsUndefined<T>(section: string): T | undefined {
-        let result: T | undefined | null = this.settings.get<T>(section);
+        const result: T | undefined | null = this.settings.get<T>(section);
         if (result === null) {
             return undefined;
         }
@@ -81,8 +81,8 @@ export class CppSettings extends Settings {
                 // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
                 let clangFormatVersion: string;
                 try {
-                    let exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
-                    let output: string[] = execSync(`${exePath} --version`).toString().split(" ");
+                    const exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
+                    const output: string[] = execSync(`${exePath} --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || !semver.valid(output[2])) {
                         return path;
                     }
@@ -94,7 +94,7 @@ export class CppSettings extends Settings {
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
-                    let output: string[] = execSync(`"${path}" --version`).toString().split(" ");
+                    const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
                         path = "";
                     }
@@ -168,234 +168,234 @@ export class CppSettings extends Settings {
         return super.Section.get<string>("formatting");
     }
 
-    public get vcFormatIndentBraces() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.braces") === true
+    public get vcFormatIndentBraces(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.braces") === true;
     }
-    
+
     public get vcFormatIndentMultiLineRelativeTo(): string | undefined {
         return super.Section.get<string>("vcFormat.indent.multiLineRelativeTo");
     }
 
-    public get vcFormatPreserveIndentationWithinParenthesis() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.preserveIndentationWithinParentheses") === true
+    public get vcFormatPreserveIndentationWithinParenthesis(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.preserveIndentationWithinParentheses") === true;
     }
 
-    public get vcFormatIndentCaseLabels() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.caseLabels") === true
+    public get vcFormatIndentCaseLabels(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.caseLabels") === true;
     }
 
-    public get vcFormatIndentCaseContents() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.caseContents") === true
+    public get vcFormatIndentCaseContents(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.caseContents") === true;
     }
-    
-    public get vcFormatIndentCaseContentsWhenBlock() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.caseContentsWhenBlock") === true
+
+    public get vcFormatIndentCaseContentsWhenBlock(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.caseContentsWhenBlock") === true;
     }
-    
-    public get vcFormatIndentLambdaBracesWhenParameter() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.lambdaBracesWhenParameter") === true
+
+    public get vcFormatIndentLambdaBracesWhenParameter(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.lambdaBracesWhenParameter") === true;
     }
-    
-    public get vcFormatIndentGotoLables() :  string | undefined {
+
+    public get vcFormatIndentGotoLables(): string | undefined {
         return super.Section.get<string>("vcFormat.indent.gotoLabels");
     }
 
-    public get vcFormatIndentPreprocessor() :  string | undefined {
+    public get vcFormatIndentPreprocessor(): string | undefined {
         return super.Section.get<string>("vcFormat.indent.preprocessor");
     }
 
-    public get vcFormatIndentAccessSpecifiers() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.accessSpecifiers") === true
+    public get vcFormatIndentAccessSpecifiers(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.accessSpecifiers") === true;
     }
 
-    public get vcFormatIndentNamespaceContents() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.namespaceContents") === true
+    public get vcFormatIndentNamespaceContents(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.namespaceContents") === true;
     }
 
-    public get vcFormatIndentPreserveComment() : boolean {
-        return super.Section.get<boolean>("vcFormat.indent.preserveComment") === true
+    public get vcFormatIndentPreserveComment(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.preserveComment") === true;
     }
 
 
-    public get vcFormatNewlineBeforeOpenBraceNamespace() : string | undefined {
+    public get vcFormatNewlineBeforeOpenBraceNamespace(): string | undefined {
         return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.namespace");
     }
 
-    public get vcFormatNewlineBeforeOpenBraceType() : string | undefined {
+    public get vcFormatNewlineBeforeOpenBraceType(): string | undefined {
         return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.type");
     }
 
-    public get vcFormatNewlineBeforeOpenBraceFunction() : string | undefined {
+    public get vcFormatNewlineBeforeOpenBraceFunction(): string | undefined {
         return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.function");
     }
 
-    public get vcFormatNewlineBeforeOpenBraceBlock() : string | undefined {
+    public get vcFormatNewlineBeforeOpenBraceBlock(): string | undefined {
         return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.block");
     }
 
-    public get vcFormatNewlineBeforeOpenBraceLambda() : string | undefined {
+    public get vcFormatNewlineBeforeOpenBraceLambda(): string | undefined {
         return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.lamda");
     }
 
-    public get vcFormatNewlineScopeBracesOnSeparateLines() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.newLine.scopeBracesOnSeparateLines") === true
+    public get vcFormatNewlineScopeBracesOnSeparateLines(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.newLine.scopeBracesOnSeparateLines") === true;
     }
 
-    public get vcFormatNewlineCloseBraceSameLineEmptyType() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyType") === true
+    public get vcFormatNewlineCloseBraceSameLineEmptyType(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyType") === true;
     }
 
-    public get vcFormatNewlineCloseBraceSameLineEmptyFunction() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyFunction") === true
+    public get vcFormatNewlineCloseBraceSameLineEmptyFunction(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyFunction") === true;
     }
 
-    public get vcFormatNewlinecBeforeCatch() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.newLine.beforeCatch") === true
+    public get vcFormatNewlinecBeforeCatch(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.newLine.beforeCatch") === true;
     }
 
-    public get vcFormatNewlinecBeforeElse() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.newLine.beforeElse") === true
+    public get vcFormatNewlinecBeforeElse(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.newLine.beforeElse") === true;
     }
 
-    public get vcFormatNewlineBeforeWhileInDoWhile() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.newLine.beforeWhileInDoWhile") === true
+    public get vcFormatNewlineBeforeWhileInDoWhile(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.newLine.beforeWhileInDoWhile") === true;
     }
 
-    public get vcFormatSpaceBeforeFunctionOpenParenthesis() : string | undefined {
+    public get vcFormatSpaceBeforeFunctionOpenParenthesis(): string | undefined {
         return super.Section.get<string>("vcFormat.space.beforeFunctionOpenParenthesis");
     }
 
-    
-    public get vcFormatSpaceWithinParameterListParentheses() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.withinParameterListParentheses") ===  true
+
+    public get vcFormatSpaceWithinParameterListParentheses(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.withinParameterListParentheses") === true;
     }
 
-    public get vcFormatSpaceBetweenEmptyParameterListParentheses() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.betweenEmptyParameterListParentheses") ===  true
+    public get vcFormatSpaceBetweenEmptyParameterListParentheses(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptyParameterListParentheses") === true;
     }
 
-    public get vcFormatSpaceAfterKeywordsInControlFlowStatements() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.afterKeywordsInControlFlowStatements") ===  true
-    }
-    
-    public get vcFormatSpaceWithinControlFlowStatementParentheses() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.withinControlFlowStatementParentheses") ===  true
+    public get vcFormatSpaceAfterKeywordsInControlFlowStatements(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.afterKeywordsInControlFlowStatements") === true;
     }
 
-    public get vcFormatSpaceBeforeLambdaOpenParenthesis() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") ===  true
+    public get vcFormatSpaceWithinControlFlowStatementParentheses(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.withinControlFlowStatementParentheses") === true;
     }
 
-    public get vcFormatSpaceWithinCastParentheses() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") ===  true
-    }
-    
-    public get vcFormatSpaceAfterCastCloseParenthesis() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") ===  true
+    public get vcFormatSpaceBeforeLambdaOpenParenthesis(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
     }
 
-    public get vcFormatSpaceWithinExpressionParentheses() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") ===  true
+    public get vcFormatSpaceWithinCastParentheses(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
     }
 
-    public get vcFormatSpaceBeforeBlockOpenBrace() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") ===  true
+    public get vcFormatSpaceAfterCastCloseParenthesis(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
     }
 
-    public get vcFormatSpaceBetweenEmptyBraces() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.betweenEmptyBraces") ===  true
+    public get vcFormatSpaceWithinExpressionParentheses(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
     }
 
-    public get vcFormatSpaceBeforeInitializerListOpenBrace() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeInitializerListOpenBrace") ===  true
-    }
-    
-    public get vcFormatSpaceWithinInitializerListBraces() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.withinInitializerListBraces") ===  true
+    public get vcFormatSpaceBeforeBlockOpenBrace(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
     }
 
-    public get vcFormatSpacePreserveInInitializerList() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.preserveInInitializerList") ===  true
+    public get vcFormatSpaceBetweenEmptyBraces(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptyBraces") === true;
     }
 
-    public get vcFormatSpaceBeforeOpenSquareBracket() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeOpenSquareBracket") ===  true
+    public get vcFormatSpaceBeforeInitializerListOpenBrace(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeInitializerListOpenBrace") === true;
     }
 
-    public get vcFormatSpaceWithinSquareBrackets() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.withinSquareBrackets") ===  true
+    public get vcFormatSpaceWithinInitializerListBraces(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.withinInitializerListBraces") === true;
     }
 
-    public get vcFormatSpaceBeforeEmptySquareBrackets() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeEmptySquareBrackets") ===  true
+    public get vcFormatSpacePreserveInInitializerList(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.preserveInInitializerList") === true;
     }
 
-    public get vcFormatSpaceBetweenEmptySquareBrackets() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeEmptySquareBrackets") ===  true
+    public get vcFormatSpaceBeforeOpenSquareBracket(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeOpenSquareBracket") === true;
     }
 
-    public get vcFormatSpaceGroupSquareBrackets() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.groupSquareBrackets") ===  true
+    public get vcFormatSpaceWithinSquareBrackets(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.withinSquareBrackets") === true;
     }
 
-    public get vcFormatSpaceWithinLambdaBrackets() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.withinLambdaBrackets") ===  true
+    public get vcFormatSpaceBeforeEmptySquareBrackets(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeEmptySquareBrackets") === true;
     }
 
-    public get vcFormatSpaceBetweenEmptyLambdaBrackets() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.betweenEmptyLambdaBrackets") ===  true
+    public get vcFormatSpaceBetweenEmptySquareBrackets(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeEmptySquareBrackets") === true;
     }
 
-    public get vcFormatSpaceBeforeComma() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeComma") ===  true
+    public get vcFormatSpaceGroupSquareBrackets(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.groupSquareBrackets") === true;
     }
 
-    public get vcFormatSpaceAfterComma() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.afterComma") ===  true
+    public get vcFormatSpaceWithinLambdaBrackets(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.withinLambdaBrackets") === true;
     }
 
-    public get vcFormatSpaceRemoveAroundMemberOperators() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.removeAroundMemberOperators") ===  true
+    public get vcFormatSpaceBetweenEmptyLambdaBrackets(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptyLambdaBrackets") === true;
     }
 
-    public get vcFormatSpaceBeforeInheritanceColon() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeInheritanceColon") ===  true
+    public get vcFormatSpaceBeforeComma(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeComma") === true;
     }
 
-    public get vcFormatSpaceBeforeConstructorColon() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.beforeConstructorColon") ===  true
+    public get vcFormatSpaceAfterComma(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.afterComma") === true;
     }
 
-    public get vcFormatSpaceRemoveBeforeSemicolon() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.removeBeforeSemicolon") ===  true
+    public get vcFormatSpaceRemoveAroundMemberOperators(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.removeAroundMemberOperators") === true;
     }
 
-    public get vcFormatSpaceInsertAfterSemicolon() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.insertAfterSemicolon") ===  true
+    public get vcFormatSpaceBeforeInheritanceColon(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeInheritanceColon") === true;
     }
 
-    public get vcFormatSpaceRemoveAroundUnaryOperator() : boolean | undefined {
-        return super.Section.get<boolean>("vcFormat.space.removeAroundUnaryOperator") ===  true
+    public get vcFormatSpaceBeforeConstructorColon(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.beforeConstructorColon") === true;
     }
 
-    public get vcFormatSpaceAroundBinaryOperator() : string | undefined {
+    public get vcFormatSpaceRemoveBeforeSemicolon(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.removeBeforeSemicolon") === true;
+    }
+
+    public get vcFormatSpaceInsertAfterSemicolon(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.insertAfterSemicolon") === true;
+    }
+
+    public get vcFormatSpaceRemoveAroundUnaryOperator(): boolean | undefined {
+        return super.Section.get<boolean>("vcFormat.space.removeAroundUnaryOperator") === true;
+    }
+
+    public get vcFormatSpaceAroundBinaryOperator(): string | undefined {
         return super.Section.get<string>("vcFormat.space.aroundBinaryOperator");
     }
 
-    
-    public get vcFormatSpaceAroundAssignmentOperator() : string | undefined {
+
+    public get vcFormatSpaceAroundAssignmentOperator(): string | undefined {
         return super.Section.get<string>("vcFormat.space.aroundAssignmentOperator");
     }
 
-    public get vcFormatSpacePointerReferenceAlignment() : string | undefined {
+    public get vcFormatSpacePointerReferenceAlignment(): string | undefined {
         return super.Section.get<string>("vcFormat.space.pointerReferenceAlignment");
     }
 
-    public get vcFormatSpaceAroundTernaryOperator() : string | undefined {
+    public get vcFormatSpaceAroundTernaryOperator(): string | undefined {
         return super.Section.get<string>("vcFormat.space.aroundTernaryOperator");
     }
 
-    public get vcFormatWrapPreserveBlocks() : string | undefined {
+    public get vcFormatWrapPreserveBlocks(): string | undefined {
         return super.Section.get<string>("vcFormat.wrap.preserveBlocks");
     }
 
@@ -406,7 +406,7 @@ export class CppSettings extends Settings {
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
-        let value: string | undefined = super.Section.get<string>(name);
+        const value: string | undefined = super.Section.get<string>(name);
         super.Section.update(name, value === value1 ? value2 : value1, getTarget());
     }
 
