@@ -18,6 +18,7 @@ interface Settings {
     recursiveIncludes?: number;
     gotoDefIntelliSense?: number;
     enhancedColorization?: number;
+    vscodeEngine?: Record<string, string>;
 }
 
 export class ABTestSettings {
@@ -37,7 +38,8 @@ export class ABTestSettings {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
             recursiveIncludes: this.recursiveIncludesDefault.Value,
             gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
-            enhancedColorization: this.enhancedColorizationDefault.Value
+            enhancedColorization: this.enhancedColorizationDefault.Value,
+            
         };
         this.bucket = new PersistentState<number>(userBucketString, -1);
         if (this.bucket.Value === -1) {

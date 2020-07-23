@@ -566,6 +566,18 @@
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "resource"
+        },
+        "C_Cpp.vscodeEngine": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object"
+          },
+          "default": null,
+          "description": "%c_cpp.configuration.vscodeEngine.description%",
+          "scope": "machine-overridable"
         }
       }
     },
