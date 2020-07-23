@@ -624,7 +624,7 @@ export async function checkInstallJsonsExist(): Promise<boolean> {
 }
 
 export async function removeInstallLockFile(): Promise<void> {
-    return await unlinkAsync(path.join(extensionPath, "install.lock"));
+    await unlinkAsync(path.join(extensionPath, "install.lock"));
 }
 
 /** Reads the content of a text file */
