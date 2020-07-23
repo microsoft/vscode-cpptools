@@ -380,20 +380,20 @@ export class PackageManager {
                                         const absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
                                         if (fs.existsSync(absoluteEntryTempFile)) {
                                             try {
-                                                await util.unlinkPromise(absoluteEntryTempFile);
+                                                await util.unlinkAsync(absoluteEntryTempFile);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
-                                        const fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        const fileMode: number = (this.platformInfo.platform !== "win32" && pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
                                         const writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
 
                                         writeStream.on('close', async () => {
                                             try {
                                                 // Remove .tmp extension from the file.
-                                                await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
+                                                await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }

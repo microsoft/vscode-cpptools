@@ -215,20 +215,18 @@ export async function isExtensionReady(): Promise<boolean> {
     return doesInstallLockFileExist;
 }
 
-export function renameDebugAdaptersPath(): Promise<void> {
+export async function renameDebugAdaptersPath(): Promise<void> {
     if (os.platform() !== 'win32') {
         const sourcePath: string = getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
         if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
-                if (err) {
-                    getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
-                        'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
-                }
-            });
+            try {
+                await renameAsync(sourcePath, getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"));
+            } catch (err) {
+                getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
+                    'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
+            }
         }
     }
-
-    return Promise.resolve();
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
@@ -598,7 +596,7 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
 }
 
 /* Check if the core Json files exists in extension's installation folder */
-export async function checkInstallJasonsExist(): Promise<boolean> {
+export async function checkInstallJsonsExist(): Promise<boolean> {
     let installJasonsExist: boolean = true;
     const jsonFiles: string[] = [
         "bin/msvc.arm32.clang.json",
@@ -625,14 +623,8 @@ export async function checkInstallJasonsExist(): Promise<boolean> {
     return installJasonsExist;
 }
 
-export function removeInstallLockFile(): boolean {
-    try {
-        fs.unlinkSync(path.join(extensionPath, "install.lock"));
-        return true;
-    } catch (err) {
-        console.log(err);
-        return false;
-    }
+export async function removeInstallLockFile(): Promise<void> {
+    return await unlinkAsync(path.join(extensionPath, "install.lock"));
 }
 
 /** Reads the content of a text file */
@@ -828,7 +820,7 @@ export function checkDistro(platformInfo: PlatformInformation): void {
     }
 }
 
-export async function unlinkPromise(fileName: string): Promise<void> {
+export async function unlinkAsync(fileName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.unlink(fileName, err => {
             if (err) {
@@ -839,7 +831,7 @@ export async function unlinkPromise(fileName: string): Promise<void> {
     });
 }
 
-export async function renamePromise(oldName: string, newName: string): Promise<void> {
+export async function renameAsync(oldName: string, newName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.rename(oldName, newName, err => {
             if (err) {
