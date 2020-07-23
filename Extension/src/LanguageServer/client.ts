@@ -1481,6 +1481,9 @@ export class DefaultClient implements Client {
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
+        if (this.semanticTokensProvider) {
+            this.semanticTokensProvider.invalidateFile(document.uri.toString());
+        }
         openFileVersions.delete(document.uri.toString());
     }
 
