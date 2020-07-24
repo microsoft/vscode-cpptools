@@ -27,6 +27,7 @@ export class ABTestSettings {
     private recursiveIncludesDefault: PersistentState<number>;
     private gotoDefIntelliSenseDefault: PersistentState<number>;
     private enhancedColorizationDefault: PersistentState<number>;
+    private vscodeEngine: Record<string, string> | null;
     private bucket: PersistentState<number>;
 
     constructor() {
@@ -34,12 +35,13 @@ export class ABTestSettings {
         this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
         this.gotoDefIntelliSenseDefault = new PersistentState<number>("ABTest.3", 100);
         this.enhancedColorizationDefault = new PersistentState<number>("ABTest.4", 100);
+        this.vscodeEngine = null;
         this.settings = {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
             recursiveIncludes: this.recursiveIncludesDefault.Value,
             gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
             enhancedColorization: this.enhancedColorizationDefault.Value,
-            
+            vscodeEngine: null
         };
         this.bucket = new PersistentState<number>(userBucketString, -1);
         if (this.bucket.Value === -1) {
@@ -75,11 +77,13 @@ export class ABTestSettings {
                 this.recursiveIncludesDefault.Value = util.isNumber(newSettings.recursiveIncludes) ? newSettings.recursiveIncludes : this.recursiveIncludesDefault.DefaultValue;
                 this.gotoDefIntelliSenseDefault.Value = util.isNumber(newSettings.gotoDefIntelliSense) ? newSettings.gotoDefIntelliSense : this.gotoDefIntelliSenseDefault.DefaultValue;
                 this.enhancedColorizationDefault.Value = util.isNumber(newSettings.enhancedColorization) ? newSettings.enhancedColorization : this.enhancedColorizationDefault.DefaultValue;
+                this.vscodeEngine = newSettings.vscodeEngine ? newSettings.vscodeEngine : this.vscodeEngine;
                 this.settings = {
                     defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
                     recursiveIncludes: this.recursiveIncludesDefault.Value,
                     gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
-                    enhancedColorization: this.enhancedColorizationDefault.Value
+                    enhancedColorization: this.enhancedColorizationDefault.Value,
+                    vscodeEngine: this.vscodeEngine
                 };
             }
         } catch (error) {

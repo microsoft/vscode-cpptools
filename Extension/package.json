@@ -568,13 +568,7 @@
           "scope": "resource"
         },
         "C_Cpp.vscodeEngine": {
-          "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "type": "object"
-          },
+          "type": "object",
           "default": null,
           "description": "%c_cpp.configuration.vscodeEngine.description%",
           "scope": "machine-overridable"
