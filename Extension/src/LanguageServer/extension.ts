@@ -496,8 +496,8 @@ export function updateLanguageConfigurations(): void {
     languageConfigurations.forEach(d => d.dispose());
     languageConfigurations = [];
 
-    languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
-    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c')));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp')));
 }
 
 /**
