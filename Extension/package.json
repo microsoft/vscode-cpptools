@@ -283,7 +283,7 @@
             ]
           },
           "description": "%c_cpp.configuration.commentContinuationPatterns.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.configurationWarnings": {
           "type": "string",
@@ -537,7 +537,7 @@
           ],
           "default": "Enabled",
           "description": "%c_cpp.configuration.enhancedColorization.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.vcpkg.enabled": {
           "type": "boolean",
@@ -565,7 +565,7 @@
           ],
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
-          "scope": "resource"
+          "scope": "window"
         }
       }
     },
