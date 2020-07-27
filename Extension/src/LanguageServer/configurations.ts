@@ -628,6 +628,27 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
+            if (configuration.compilerPath === undefined && !!this.defaultCompilerPath) {
+                configuration.compilerPath = this.defaultCompilerPath;
+                if (configuration.cStandard === undefined && !!this.defaultCStandard) {
+                    configuration.cStandard = this.defaultCStandard;
+                }
+                if (configuration.cppStandard === undefined && !!this.defaultCppStandard) {
+                    configuration.cppStandard = this.defaultCppStandard;
+                }
+                if (configuration.includePath === undefined && !!this.defaultIncludes) {
+                    configuration.includePath = this.defaultIncludes;
+                }
+                if (configuration.intelliSenseMode === undefined && !!this.defaultIntelliSenseMode) {
+                    configuration.intelliSenseMode = this.defaultIntelliSenseMode;
+                }
+                if (configuration.macFrameworkPath === undefined && !!this.defaultFrameworks) {
+                    configuration.macFrameworkPath = this.defaultFrameworks;
+                }
+                if (configuration.windowsSdkVersion === undefined && !!this.defaultWindowsSdkVersion) {
+                    configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+                }
+            }
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
