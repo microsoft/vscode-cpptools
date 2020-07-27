@@ -628,25 +628,25 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
-            if (configuration.compilerPath === undefined && !!this.defaultCompilerPath) {
+            if ((configuration.compilerPath === undefined || configuration.compilerPath === "") && !!this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
-                if (configuration.cStandard === undefined && !!this.defaultCStandard) {
+                if ((!configuration.cStandard || configuration.cStandard === "") && !!this.defaultCStandard) {
                     configuration.cStandard = this.defaultCStandard;
                 }
-                if (configuration.cppStandard === undefined && !!this.defaultCppStandard) {
+                if ((!configuration.cppStandard || configuration.cppStandard === "") && !!this.defaultCppStandard) {
                     configuration.cppStandard = this.defaultCppStandard;
                 }
-                if (configuration.includePath === undefined && !!this.defaultIncludes) {
-                    configuration.includePath = this.defaultIncludes;
-                }
-                if (configuration.intelliSenseMode === undefined && !!this.defaultIntelliSenseMode) {
+                if ((!configuration.intelliSenseMode || configuration.intelliSenseMode === "") && !!this.defaultIntelliSenseMode) {
                     configuration.intelliSenseMode = this.defaultIntelliSenseMode;
                 }
-                if (configuration.macFrameworkPath === undefined && !!this.defaultFrameworks) {
-                    configuration.macFrameworkPath = this.defaultFrameworks;
-                }
-                if (configuration.windowsSdkVersion === undefined && !!this.defaultWindowsSdkVersion) {
+                if ((!configuration.windowsSdkVersion || configuration.windowsSdkVersion === "") && !!this.defaultWindowsSdkVersion) {
                     configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+                }
+                if (!configuration.includePath && !!this.defaultIncludes) {
+                    configuration.includePath = this.defaultIncludes;
+                }
+                if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
+                    configuration.macFrameworkPath = this.defaultFrameworks;
                 }
             }
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
