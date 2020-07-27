@@ -75,7 +75,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
 
     // Check the main binaries files to declare if the extension has been installed successfully.
-    if (!installedPlatform && process.platform !== installedPlatform) {
+    if (installedPlatform && process.platform !== installedPlatform) {
         // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
