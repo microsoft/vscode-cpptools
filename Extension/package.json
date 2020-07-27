@@ -565,7 +565,7 @@
           ],
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.supportExtensionVscodeVersion": {
           "type": "object",
