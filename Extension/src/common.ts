@@ -570,8 +570,7 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
     for (const pkg of await packages) {
         if (pkg.binaries) {
             await Promise.all(pkg.binaries.map(async (file: string) => {
-                if (!await checkFileExists(file) &&
-                    !(info.platform === "win32" && await checkFileExists(file + ".exe"))) {
+                if (!await checkFileExists(file)) {
                     installBinariesExist = false;
                     console.log(`Extension file ${file} is missing.`);
                 }

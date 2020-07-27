@@ -75,16 +75,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
 
     // Check the main binaries files to declare if the extension has been installed successfully.
-    if (!installedPlatform || !(await util.checkInstallBinariesExist())) {
-        errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
-        const reload: string = localize("remove.extension", "Attempt to Repair");
-        vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
-            if (value === reload) {
-                await util.removeInstallLockFile();
-                vscode.commands.executeCommand("workbench.action.reloadWindow");
-            }
-        });
-    } else if (process.platform !== installedPlatform) {
+    if (!installedPlatform && process.platform !== installedPlatform) {
         // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
@@ -93,6 +84,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
             if (selection === downloadLink) {
                 vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+            }
+        });
+    } else if (!installedPlatform || !(await util.checkInstallBinariesExist())) {
+        errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
+        const reload: string = localize("remove.extension", "Attempt to Repair");
+        vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
+            if (value === reload) {
+                await util.removeInstallLockFile();
+                vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
         });
     } else if (!(await util.checkInstallJsonsExist())) {

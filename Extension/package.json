@@ -1827,8 +1827,8 @@
         "win32"
       ],
       "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
+        "./bin/cpptools.exe",
+        "./bin/cpptools-srv.exe"
       ]
     },
     {
@@ -1874,7 +1874,7 @@
         "win32"
       ],
       "binaries": [
-        "./LLVM/bin/clang-format"
+        "./LLVM/bin/clang-format.exe"
       ]
     },
     {
@@ -1969,7 +1969,7 @@
         "win32"
       ],
       "binaries": [
-        "./debugAdapters/vsdbg/bin/vsdbg"
+        "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ]
     }
   ]
