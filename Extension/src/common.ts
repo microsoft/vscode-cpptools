@@ -215,20 +215,6 @@ export async function isExtensionReady(): Promise<boolean> {
     return doesInstallLockFileExist;
 }
 
-export async function renameDebugAdaptersPath(): Promise<void> {
-    if (os.platform() !== 'win32') {
-        const sourcePath: string = getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
-        if (fs.existsSync(sourcePath)) {
-            try {
-                await renameAsync(sourcePath, getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"));
-            } catch (err) {
-                getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
-                    'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
-            }
-        }
-    }
-}
-
 let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
