@@ -30,7 +30,7 @@
     "c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Access specifiers are indented relative to class or struct definition by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Code is indented relative to its enclosing namespace by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.preserveComment.description": "Indentation of comments is not changed during formatting operations",
-    "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace": "Opening braces are moved to a new line, kept on the same line and a space is added before each or leaves open braces where entered",
+    "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Opening braces are moved to a new line, kept on the same line and a space is added before each or leaves open braces where entered",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Opening braces are moved to a new line, kept on the same line and a space is added before each or leaves open braces where entered",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.function.description": "Opening braces are moved to a new line, kept on the same line and a space is added before each or leaves open braces where entered",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.block.description": "Opening braces are moved to a new line, kept on the same line and a space is added before each or leaves open braces where entered",

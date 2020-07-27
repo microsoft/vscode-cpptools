@@ -1330,8 +1330,8 @@ export class DefaultClient implements Client {
                 settings_newLineBeforeOpenBraceLambda.push(setting.vcFormatNewlineBeforeOpenBraceLambda);
                 settings_newLineCloseBraceSameLineEmptyType.push(setting.vcFormatNewlineCloseBraceSameLineEmptyType);
                 settings_newLineCloseBraceSameLineEmptyFunction.push(setting.vcFormatNewlineCloseBraceSameLineEmptyFunction);
-                settings_newLineBeforeCatch.push(setting.vcFormatNewlinecBeforeCatch);
-                settings_newLineBeforeElse.push(setting.vcFormatNewlinecBeforeElse);
+                settings_newLineBeforeCatch.push(setting.vcFormatNewlineBeforeCatch);
+                settings_newLineBeforeElse.push(setting.vcFormatNewlineBeforeElse);
                 settings_newLineBeforeWhileInDoWhile.push(setting.vcFormatNewlineBeforeWhileInDoWhile);
                 settings_spaceBeforeFunctionOpenParenthesis.push(setting.vcFormatSpaceBeforeFunctionOpenParenthesis);
                 settings_spaceWithinParameterListParentheses.push(setting.vcFormatSpaceWithinParameterListParentheses);
@@ -1575,6 +1575,7 @@ export class DefaultClient implements Client {
                 vcFormat: {
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
                     newLine: {
+                        ...vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine", this.RootUri),
                         beforeOpenBrace: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.beforeOpenBrace", this.RootUri),
                         closeBraceSameLine: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.closeBraceSameLine", this.RootUri)
                     },
