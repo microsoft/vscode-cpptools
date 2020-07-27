@@ -114,11 +114,11 @@
         "C_Cpp.vcFormat.indent.multiLineRelativeTo": {
           "type": "string",
           "enum": [
-            "outermostParenthesis",
-            "innermostParenthesis",
+            "outermostPparenthesis",
+            "innermostPparenthesis",
             "statementBegin"
           ],
-          "default": "innermost_parenthesis",
+          "default": "innermostParenthesis",
           "description": "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description%",
           "scope": "resource"
         },
@@ -148,15 +148,15 @@
         },
         "C_Cpp.vcFormat.indent.lambdaBracesWhenParameter": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.gotoLabels": {
           "type": "string",
           "enum": [
-            "one_left",
-            "leftmost_column",
+            "oneLeft",
+            "leftmostColumn",
             "none"
           ],
           "default": "none",
@@ -166,8 +166,8 @@
         "C_Cpp.vcFormat.indent.preprocessor": {
           "type": "string",
           "enum": [
-            "one_left",
-            "leftmost_column",
+            "oneLeft",
+            "leftmostColumn",
             "none"
           ],
           "default": "none",
@@ -182,7 +182,7 @@
         },
         "C_Cpp.vcFormat.indent.namespaceContents": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.indent.namespaceContents.description%",
           "scope": "resource"
         },
@@ -195,30 +195,30 @@
         "C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": {
           "type": "string",
           "enum": [
-            "new_line",
-            "same_line",
+            "newLine",
+            "sameLine",
             "ignore"
           ],
-          "default": "ignore",
+          "default": "Ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeOpenBrace.type": {
           "type": "string",
           "enum": [
-            "new_line",
-            "same_line",
+            "newLine",
+            "sameLine",
             "ignore"
           ],
-          "default": "ignore",
+          "default": "Ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeOpenBrace.function": {
           "type": "string",
           "enum": [
-            "new_line",
-            "same_line",
+            "newLine",
+            "sameLine",
             "ignore"
           ],
           "default": "ignore",
@@ -228,8 +228,8 @@
         "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": {
           "type": "string",
           "enum": [
-            "new_line",
-            "same_line",
+            "newLine",
+            "sameLine",
             "ignore"
           ],
           "default": "ignore",
@@ -237,10 +237,9 @@
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeOpenBrace.lambda": {
-          "type": "string",
           "enum": [
-            "new_line",
-            "same_line",
+            "newLine",
+            "sameLine",
             "ignore"
           ],
           "default": "ignore",
@@ -255,13 +254,13 @@
         },
         "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyType": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyType.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyFunction": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyFunction.description%",
           "scope": "resource"
         },
@@ -344,7 +343,7 @@
         },
         "C_Cpp.vcFormat.space.beforeBlockOpenBrace": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.beforeBlockOpenBrace.description%",
           "scope": "resource"
         },
@@ -362,7 +361,7 @@
         },
         "C_Cpp.vcFormat.space.withinInitializerListBraces": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description%",
           "scope": "resource"
         },
@@ -398,7 +397,7 @@
         },
         "C_Cpp.vcFormat.space.groupSquareBrackets": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.groupSquareBrackets.description%",
           "scope": "resource"
         },
@@ -428,25 +427,25 @@
         },
         "C_Cpp.vcFormat.space.removeAroundMemberOperators": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.removeAroundMemberOperators.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.space.beforeInheritanceColon": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.beforeInheritanceColon.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.space.beforeConstructorColon": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.beforeConstructorColon.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.space.removeBeforeSemicolon": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.removeBeforeSemicolon.description%",
           "scope": "resource"
         },
@@ -458,7 +457,7 @@
         },
         "C_Cpp.vcFormat.space.removeAroundUnaryOperator": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.removeAroundUnaryOperator.description%",
           "scope": "resource"
         },
@@ -510,8 +509,8 @@
         "C_Cpp.vcFormat.wrap.preserveBlocks": {
           "type": "string",
           "enum": [
-            "one_liners",
-            "all_one_line_scopes",
+            "oneLiners",
+            "allOneLineScopes",
             "never"
           ],
           "default": "never",
@@ -698,7 +697,7 @@
             ]
           },
           "description": "%c_cpp.configuration.commentContinuationPatterns.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.configurationWarnings": {
           "type": "string",
@@ -952,7 +951,7 @@
           ],
           "default": "Enabled",
           "description": "%c_cpp.configuration.enhancedColorization.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.vcpkg.enabled": {
           "type": "boolean",
@@ -980,7 +979,7 @@
           ],
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
-          "scope": "resource"
+          "scope": "window"
         }
       }
     },
