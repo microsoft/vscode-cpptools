@@ -78,7 +78,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     if (!installedPlatform || !(await util.checkInstallBinariesExist())) {
         errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
         const reload: string = localize("remove.extension", "Attempt to Repair");
-        vscode.window.showInformationMessage(errMsg, reload).then(async (value?: string) => {
+        vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
             if (value === reload) {
                 await util.removeInstallLockFile();
                 vscode.commands.executeCommand("workbench.action.reloadWindow");
