@@ -250,11 +250,11 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyFunction") === true;
     }
 
-    public get vcFormatNewlinecBeforeCatch():  boolean {
+    public get vcFormatNewlineBeforeCatch():  boolean {
         return super.Section.get<boolean>("vcFormat.newLine.beforeCatch") === true;
     }
 
-    public get vcFormatNewlinecBeforeElse():  boolean {
+    public get vcFormatNewlineBeforeElse():  boolean {
         return super.Section.get<boolean>("vcFormat.newLine.beforeElse") === true;
     }
 

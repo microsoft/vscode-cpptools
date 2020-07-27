@@ -114,9 +114,9 @@
         "C_Cpp.vcFormat.indent.multiLineRelativeTo": {
           "type": "string",
           "enum": [
-            "outermost_parenthesis",
-            "innermost_parenthesis",
-            "statement_begin"
+            "outermostParenthesis",
+            "innermostParenthesis",
+            "statementBegin"
           ],
           "default": "innermost_parenthesis",
           "description": "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description%",
@@ -136,7 +136,7 @@
         },
         "C_Cpp.vcFormat.indent.caseContents": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.indent.caseContents.description%",
           "scope": "resource"
         },
@@ -267,13 +267,13 @@
         },
         "C_Cpp.vcFormat.newLine.beforeCatch": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeCatch.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeElse": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeElse.description%",
           "scope": "resource"
         },
@@ -308,7 +308,7 @@
         },
         "C_Cpp.vcFormat.space.afterKeywordsInControlFlowStatements": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.afterKeywordsInControlFlowStatements.description%",
           "scope": "resource"
         },
@@ -422,7 +422,7 @@
         },
         "C_Cpp.vcFormat.space.afterComma": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%c_cpp.configuration.vcFormat.space.afterComma.description%",
           "scope": "resource"
         },
