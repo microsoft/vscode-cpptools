@@ -28,6 +28,7 @@ import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
+import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -467,9 +468,10 @@ function realActivation(): void {
         // Skip Insiders processing for 32-bit Linux.
         if (info.platform !== "linux" || info.architecture === "x86_64" || info.architecture === "arm") {
             // Skip Insiders processing for unsupported VS Code versions.
-            // TODO: Change this to not require the hardcoded version to be updated.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.43.2");
+            const extensionVersion: string = new PackageVersion(util.packageJson.version).noPatchVersion;;
+            const abTestSettings: ABTestSettings = getABTestSettings();
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion(abTestSettings.minimumVscodeSupportedVersion(extensionVersion));
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {

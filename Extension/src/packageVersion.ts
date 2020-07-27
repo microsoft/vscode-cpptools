@@ -77,4 +77,8 @@ export class PackageVersion {
             }
         }
     }
+
+    public get noPatchVersion(): string {
+        return this.major.toString() + "." + this.minor.toString() + ".0";
+    }
 }

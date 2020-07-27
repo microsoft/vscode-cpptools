@@ -12,13 +12,15 @@ import * as fs from 'fs';
 const userBucketMax: number = 100;
 const userBucketString: string = "CPP.UserBucket";
 const localConfigFile: string = "cpptools.json";
+const minimumVscodeVersion: string = "1.43.2";
 
 interface Settings {
     defaultIntelliSenseEngine?: number;
     recursiveIncludes?: number;
     gotoDefIntelliSense?: number;
     enhancedColorization?: number;
-    vscodeEngine?: Record<string, string>;
+    // a record of <extensionVersion, vscodeVersion>
+    supportExtensionVscodeVersion?: Record<string, string> | null;
 }
 
 export class ABTestSettings {
@@ -27,7 +29,7 @@ export class ABTestSettings {
     private recursiveIncludesDefault: PersistentState<number>;
     private gotoDefIntelliSenseDefault: PersistentState<number>;
     private enhancedColorizationDefault: PersistentState<number>;
-    private vscodeEngine: Record<string, string> | null;
+    private supportExtensionVscodeVersion: Record<string, string> | null;
     private bucket: PersistentState<number>;
 
     constructor() {
@@ -35,13 +37,13 @@ export class ABTestSettings {
         this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
         this.gotoDefIntelliSenseDefault = new PersistentState<number>("ABTest.3", 100);
         this.enhancedColorizationDefault = new PersistentState<number>("ABTest.4", 100);
-        this.vscodeEngine = null;
+        this.supportExtensionVscodeVersion = null;
         this.settings = {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
             recursiveIncludes: this.recursiveIncludesDefault.Value,
             gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
             enhancedColorization: this.enhancedColorizationDefault.Value,
-            vscodeEngine: null
+            supportExtensionVscodeVersion: null
         };
         this.bucket = new PersistentState<number>(userBucketString, -1);
         if (this.bucket.Value === -1) {
@@ -65,6 +67,12 @@ export class ABTestSettings {
         return util.isNumber(this.settings.gotoDefIntelliSense) ? this.settings.gotoDefIntelliSense >= this.bucket.Value : true;
     }
 
+    public minimumVscodeSupportedVersion(extensionVersion: string): string {
+        return (this.settings.supportExtensionVscodeVersion && this.settings.supportExtensionVscodeVersion[extensionVersion]) ?
+            this.settings.supportExtensionVscodeVersion[extensionVersion] :
+            minimumVscodeVersion;
+    }
+
     private updateSettings(): void {
         const cpptoolsJsonFile: string = util.getExtensionFilePath(localConfigFile);
 
@@ -77,13 +85,13 @@ export class ABTestSettings {
                 this.recursiveIncludesDefault.Value = util.isNumber(newSettings.recursiveIncludes) ? newSettings.recursiveIncludes : this.recursiveIncludesDefault.DefaultValue;
                 this.gotoDefIntelliSenseDefault.Value = util.isNumber(newSettings.gotoDefIntelliSense) ? newSettings.gotoDefIntelliSense : this.gotoDefIntelliSenseDefault.DefaultValue;
                 this.enhancedColorizationDefault.Value = util.isNumber(newSettings.enhancedColorization) ? newSettings.enhancedColorization : this.enhancedColorizationDefault.DefaultValue;
-                this.vscodeEngine = newSettings.vscodeEngine ? newSettings.vscodeEngine : this.vscodeEngine;
+                this.supportExtensionVscodeVersion = newSettings.supportExtensionVscodeVersion ? newSettings.supportExtensionVscodeVersion : this.supportExtensionVscodeVersion;
                 this.settings = {
                     defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
                     recursiveIncludes: this.recursiveIncludesDefault.Value,
                     gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
                     enhancedColorization: this.enhancedColorizationDefault.Value,
-                    vscodeEngine: this.vscodeEngine
+                    supportExtensionVscodeVersion: this.supportExtensionVscodeVersion
                 };
             }
         } catch (error) {
