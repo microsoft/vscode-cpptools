@@ -114,8 +114,8 @@
         "C_Cpp.vcFormat.indent.multiLineRelativeTo": {
           "type": "string",
           "enum": [
-            "outermostPparenthesis",
-            "innermostPparenthesis",
+            "outermostParenthesis",
+            "innermostParenthesis",
             "statementBegin"
           ],
           "default": "innermostParenthesis",
@@ -199,7 +199,7 @@
             "sameLine",
             "ignore"
           ],
-          "default": "Ignore",
+          "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description%",
           "scope": "resource"
         },
@@ -210,7 +210,7 @@
             "sameLine",
             "ignore"
           ],
-          "default": "Ignore",
+          "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description%",
           "scope": "resource"
         },

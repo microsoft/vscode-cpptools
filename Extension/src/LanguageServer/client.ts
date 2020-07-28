@@ -1573,7 +1573,6 @@ export class DefaultClient implements Client {
             C_Cpp: {
                 ...cppSettingsScoped,
                 vcFormat: {
-                    // Reach all settings
                     ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
                     newLine: {
