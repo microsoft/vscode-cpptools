@@ -33,6 +33,7 @@ import * as os from 'os';
 import * as refs from './references';
 import * as nls from 'vscode-nls';
 import { lookupString, localizedStringCount } from '../nativeStrings';
+import { settings } from 'cluster';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -297,6 +298,19 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
 }
 
+interface DocumentFormatParams { 
+    settings: any;
+    uri: string;
+    insertSpaces: boolean;
+    tabSize: number;
+}
+
+interface TextEdit {
+    range: Range;
+    newText: string;
+}
+
+
 interface GetFoldingRangesParams {
     uri: string;
     id: number;
@@ -389,7 +403,7 @@ const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, Loca
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-
+const DocumentFormatRequest: RequestType<DocumentFormatParams, TextEdit[], void, void> = new RequestType<DocumentFormatParams, TextEdit[], void, void>('cpptools/documentFormat');
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
@@ -1007,7 +1021,43 @@ export class DefaultClient implements Client {
                             });
                         }
                     }
+                    
+                    class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
 
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+
+                        public provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+                            // check for editorconfig for file 
+                            // if there are no settings, parse the editorconfig
+                            // populate documentFormat request in the params object
+                            // allow native side to handle informatoin 
+                            // return an array of textedits 
+                            return new Promise<vscode.TextEdit[]>((resolve, reject) => {
+
+                                const params: DocumentFormatParams = {
+                                    settings: settings,
+                                    uri: document.uri.toString(),
+                                    insertSpaces: options.insertSpaces,
+                                    tabSize: options.tabSize
+
+                                };
+                                return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                                    .then((textEdits) => {
+                                        const result: vscode.TextEdit[] = [];
+                                        textEdits.forEach((textEdit) => {
+                                            result.push({
+                                                range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
+                                                newText: textEdit.newText
+                                            });                                        
+                                        });
+                                        resolve(result)
+                                    });
+                            });
+                        }
+                    }
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -1147,6 +1197,7 @@ export class DefaultClient implements Client {
                             this.registerFileWatcher();
 
                             this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
+                            this.disposables.push(vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this)));
                             this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
                             this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                             this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
@@ -1573,6 +1624,7 @@ export class DefaultClient implements Client {
             C_Cpp: {
                 ...cppSettingsScoped,
                 vcFormat: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
                     newLine: {
                         ...vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine", this.RootUri),
@@ -1608,29 +1660,27 @@ export class DefaultClient implements Client {
         const changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
             if (Object.keys(changedSettings).length > 0) {
-                if (isFirstClient) {
-                    if (changedSettings["commentContinuationPatterns"]) {
-                        updateLanguageConfigurations();
+                if (changedSettings["commentContinuationPatterns"]) {
+                    updateLanguageConfigurations();
+                }
+                if (changedSettings["codeFolding"]) {
+                    const settings: CppSettings = new CppSettings();
+                    if (settings.codeFolding) {
+                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                    } else if (this.codeFoldingProviderDisposable) {
+                        this.codeFoldingProviderDisposable.dispose();
+                        this.codeFoldingProviderDisposable = undefined;
                     }
-                    if (changedSettings["codeFolding"]) {
-                        const settings: CppSettings = new CppSettings();
-                        if (settings.codeFolding) {
-                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
-                        } else if (this.codeFoldingProviderDisposable) {
-                            this.codeFoldingProviderDisposable.dispose();
-                            this.codeFoldingProviderDisposable = undefined;
-                        }
-                    }
-                    if (changedSettings["enhancedColorization"]) {
-                        const settings: CppSettings = new CppSettings();
-                        if (settings.enhancedColorization && this.semanticTokensLegend) {
-                            this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
-                        } else if (this.semanticTokensProviderDisposable) {
-                            this.semanticTokensProviderDisposable.dispose();
-                            this.semanticTokensProviderDisposable = undefined;
-                            this.semanticTokensProvider = undefined;
-                        }
+                }
+                if (changedSettings["enhancedColorization"]) {
+                    const settings: CppSettings = new CppSettings();
+                    if (settings.enhancedColorization && this.semanticTokensLegend) {
+                        this.semanticTokensProvider = new SemanticTokensProvider(this);
+                        this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
+                    } else if (this.semanticTokensProviderDisposable) {
+                        this.semanticTokensProviderDisposable.dispose();
+                        this.semanticTokensProviderDisposable = undefined;
+                        this.semanticTokensProvider = undefined;
                     }
                 }
                 this.configuration.onDidChangeSettings();
@@ -1677,9 +1727,6 @@ export class DefaultClient implements Client {
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
-        if (this.semanticTokensProvider) {
-            this.semanticTokensProvider.invalidateFile(document.uri.toString());
-        }
         openFileVersions.delete(document.uri.toString());
     }
 
