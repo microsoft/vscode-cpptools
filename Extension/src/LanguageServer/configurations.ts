@@ -628,7 +628,7 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
-            if (!configuration.compilerPath && !!this.defaultCompilerPath) {
+            if ((configuration.compilerPath === undefined) && !!this.defaultCompilerPath) {
                 configuration.compilerPath = this.defaultCompilerPath;
                 if (!configuration.cStandard && !!this.defaultCStandard) {
                     configuration.cStandard = this.defaultCStandard;
