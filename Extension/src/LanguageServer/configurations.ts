@@ -652,6 +652,14 @@ export class CppProperties {
                         configuration.macFrameworkPath = this.defaultFrameworks;
                     }
                 }
+            } else {
+                // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
+                if (configuration.compilerPath === "${default}") {
+                    configuration.compilerPath = settings.defaultCompilerPath;
+                } else if (configuration.compilerPath === null) {
+                    configuration.compilerPath = undefined;
+                }
+                configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
             }
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
