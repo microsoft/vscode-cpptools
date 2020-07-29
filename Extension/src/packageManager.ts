@@ -113,6 +113,17 @@ export class PackageManager {
             });
     }
 
+    public GetPackages(): Promise<IPackage[]> {
+        return this.GetPackageList()
+            .then((list) =>
+                list.filter((value, index, array) =>
+                    ArchitecturesMatch(value, this.platformInfo) &&
+                        PlatformsMatch(value, this.platformInfo) &&
+                        VersionsMatch(value, this.platformInfo)
+                )
+            );
+    }
+
     /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
      *  Like Promise.all, but runs the promises in sequence rather than simultaneously.
      */
@@ -147,17 +158,6 @@ export class PackageManager {
                 resolve(this.allPackages);
             }
         });
-    }
-
-    private GetPackages(): Promise<IPackage[]> {
-        return this.GetPackageList()
-            .then((list) =>
-                list.filter((value, index, array) =>
-                    ArchitecturesMatch(value, this.platformInfo) &&
-                        PlatformsMatch(value, this.platformInfo) &&
-                        VersionsMatch(value, this.platformInfo)
-                )
-            );
     }
 
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
@@ -380,20 +380,20 @@ export class PackageManager {
                                         const absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
                                         if (fs.existsSync(absoluteEntryTempFile)) {
                                             try {
-                                                await util.unlinkPromise(absoluteEntryTempFile);
+                                                await util.unlinkAsync(absoluteEntryTempFile);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
-                                        const fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        const fileMode: number = (this.platformInfo.platform !== "win32" && pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
                                         const writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
 
                                         writeStream.on('close', async () => {
                                             try {
                                                 // Remove .tmp extension from the file.
-                                                await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
+                                                await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
