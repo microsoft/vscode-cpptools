@@ -582,7 +582,7 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
 
 /* Check if the core Json files exists in extension's installation folder */
 export async function checkInstallJsonsExist(): Promise<boolean> {
-    let installJasonsExist: boolean = true;
+    let installJsonsExist: boolean = true;
     const jsonFiles: string[] = [
         "bin/msvc.arm32.clang.json",
         "bin/msvc.arm32.gcc.json",
@@ -601,11 +601,11 @@ export async function checkInstallJsonsExist(): Promise<boolean> {
     ];
     await Promise.all(jsonFiles.map(async (file) => {
         if (!await checkFileExists(path.join(extensionPath, file))) {
-            installJasonsExist = false;
+            installJsonsExist = false;
             console.log(`Extension file ${file} is missing.`);
         }
     }));
-    return installJasonsExist;
+    return installJsonsExist;
 }
 
 export async function removeInstallLockFile(): Promise<void> {
