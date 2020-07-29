@@ -79,6 +79,6 @@ export class PackageVersion {
     }
 
     public get noPatchVersion(): string {
-        return this.major.toString() + "." + this.minor.toString() + ".0";
+        return `${this.major}.${this.minor}.0`;
     }
 }

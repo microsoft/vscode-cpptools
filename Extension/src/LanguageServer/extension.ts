@@ -471,7 +471,7 @@ function realActivation(): void {
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
             const extensionVersion: string = new PackageVersion(util.packageJson.version).noPatchVersion;
             const abTestSettings: ABTestSettings = getABTestSettings();
-            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion(abTestSettings.minimumVscodeSupportedVersion(extensionVersion));
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion(abTestSettings.getMinimumVSCodeVersion(extensionVersion));
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {
