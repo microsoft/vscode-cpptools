@@ -654,12 +654,14 @@ export class CppProperties {
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
-                if (configuration.compilerPath === "${default}") {
-                    configuration.compilerPath = settings.defaultCompilerPath;
-                } else if (configuration.compilerPath === null) {
+                if (configuration.compilerPath === null) {
                     configuration.compilerPath = undefined;
+                } else {
+                    if (configuration.compilerPath === "${default}") {
+                        configuration.compilerPath = settings.defaultCompilerPath;
+                    }
+                    configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                 }
-                configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
             }
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
