@@ -1007,7 +1007,6 @@ export class DefaultClient implements Client {
                             });
                         }
                     }
-
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -1573,6 +1572,7 @@ export class DefaultClient implements Client {
             C_Cpp: {
                 ...cppSettingsScoped,
                 vcFormat: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
                     newLine: {
                         ...vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine", this.RootUri),

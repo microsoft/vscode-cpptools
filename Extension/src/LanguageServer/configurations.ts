@@ -623,11 +623,46 @@ export class CppProperties {
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
             configuration.forcedInclude = this.updateConfigurationStringArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
             configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
-            configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
+            if (!configuration.compileCommands) {
+                // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
+                // don't set a default when compileCommands is in use.
+                configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
+                if (configuration.compilerPath === undefined && !!this.defaultCompilerPath) {
+                    configuration.compilerPath = this.defaultCompilerPath;
+                    if (!configuration.cStandard && !!this.defaultCStandard) {
+                        configuration.cStandard = this.defaultCStandard;
+                    }
+                    if (!configuration.cppStandard && !!this.defaultCppStandard) {
+                        configuration.cppStandard = this.defaultCppStandard;
+                    }
+                    if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
+                        configuration.intelliSenseMode = this.defaultIntelliSenseMode;
+                    }
+                    if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
+                        configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+                    }
+                    if (!configuration.includePath && !!this.defaultIncludes) {
+                        configuration.includePath = this.defaultIncludes;
+                    }
+                    if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
+                        configuration.macFrameworkPath = this.defaultFrameworks;
+                    }
+                }
+            } else {
+                // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
+                if (configuration.compilerPath === "${default}") {
+                    configuration.compilerPath = settings.defaultCompilerPath;
+                }
+                if (configuration.compilerPath === null) {
+                    configuration.compilerPath = undefined;
+                } else if (configuration.compilerPath !== undefined) {
+                    configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
+                }
+            }
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
