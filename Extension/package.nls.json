@@ -22,7 +22,7 @@
     "c_cpp.configuration.formatting.vcFormat.description": "The Visual C++ formatting engine will be used to format code",
     "c_cpp.configuration.formatting.Default.description": "clang-format will be used to format code",
     "c_cpp.configuration.formatting.Disabled.description": "Code formatting will be disabled",
-    "c_cpp.configuration.vcFormat.indent.braces.description": "Braces are indented by the amound specified in the Editor: Tab Size setting",
+    "c_cpp.configuration.vcFormat.indent.braces.description": "Braces are indented by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "When a new line is typed, indent the new line relatively to:",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.outermostParenthesis.description": "the outermost open parenthesis",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.innermostParenthesis.description": "the innermost open parenthesis",
