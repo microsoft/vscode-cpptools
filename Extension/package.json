@@ -2240,7 +2240,10 @@
       "platforms": [
         "win32"
       ],
-      "binaries": []
+      "binaries": [
+        "./bin/cpptools.exe",
+        "./bin/cpptools-srv.exe"
+      ]
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2284,7 +2287,9 @@
       "platforms": [
         "win32"
       ],
-      "binaries": []
+      "binaries": [
+        "./LLVM/bin/clang-format.exe"
+      ]
     },
     {
       "description": "Mono Framework Assemblies",
@@ -2377,7 +2382,9 @@
       "platforms": [
         "win32"
       ],
-      "binaries": []
+      "binaries": [
+        "./debugAdapters/vsdbg/bin/vsdbg.exe"
+      ]
     }
   ]
 }
