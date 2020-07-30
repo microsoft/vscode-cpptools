@@ -322,7 +322,7 @@
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeElse.description%",
           "scope": "resource"
         },
-        "C_Cpp.vcFormat.newLine.beforeWhileInDoWile": {
+        "C_Cpp.vcFormat.newLine.beforeWhileInDoWhile": {
           "type": "boolean",
           "default": false,
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.description%",
