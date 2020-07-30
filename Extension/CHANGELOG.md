@@ -1,5 +1,26 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.30.0-insiders: July 29, 2020
+### New Features
+* Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429] (https://github.com/microsoft/vscode-cpptools/issues/429)
+* Add the `vcFormat` option to `C_Cpp.formatting` (with `C_Cpp.vcFormat.*` options) to enable VS-style formatting (instead of clang-format formatting). [#657](https://github.com/microsoft/vscode-cpptools/issues/657)
+
+### Bug Fixes
+* Fix installation of clang-format 10 with the online vsix. [#5194](https://github.com/microsoft/vscode-cpptools/issues/5194)
+* Get the compiler type to determine if it's Clang when querying for default compiler so that the correct default `intelliSenseMode` is set. [#5352](https://github.com/microsoft/vscode-cpptools/issues/5352)
+* Get the default language standard of the compiler and use that std version if no version is specified. [#5579](https://github.com/microsoft/vscode-cpptools/issues/5579)
+* Fix an incorrect IntelliSense error squiggle. [#5783](https://github.com/microsoft/vscode-cpptools/issues/5783)
+* Fix an IntelliSense crash when using C++20 on Linux. [#5727](https://github.com/microsoft/vscode-cpptools/issues/5727)
+* Get the default target of the compiler. If the default target is ARM/ARM64, do not use the generic "--target" option to determine bitness. [#5772](https://github.com/microsoft/vscode-cpptools/issues/5772)
+* Fix `compilerArgs` not being used if no `compilerPath` is set. [#5776](https://github.com/microsoft/vscode-cpptools/issues/5776)
+* Fix semantic colorization and inactive regions for multiroot workspaces. [#5812](https://github.com/microsoft/vscode-cpptools/issues/5812), [#5828](https://github.com/microsoft/vscode-cpptools/issues/5828)
+* Fix bug with cl.exe flags /FU and /FI not being processed. [#5819](https://github.com/microsoft/vscode-cpptools/issues/5819)
+* Fix `cStandard` being set to `c11` instead of `gnu18` with gcc. [#5834](https://github.com/microsoft/vscode-cpptools/issues/5834)
+
+### Potentially Breaking Changes
+* Settings `commentContinuationPatterns`, `enhancedColorization`, and `codeFolding` are no longer available in per-Folder settings (only Workspace or higher settings). [PR #5830](https://github.com/microsoft/vscode-cpptools/pull/5830)
+* Fix compile command arguments not being used when `compilerPath` is set (so the compile command arguments need to be compatible now).
+
 ## Version 0.29.0: July 15, 2020
 ### New Features
 * Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
