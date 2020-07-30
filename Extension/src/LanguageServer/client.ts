@@ -6,6 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as editorConfig from 'editorconfig'
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter
@@ -33,7 +34,6 @@ import * as os from 'os';
 import * as refs from './references';
 import * as nls from 'vscode-nls';
 import { lookupString, localizedStringCount } from '../nativeStrings';
-import { settings } from 'cluster';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1036,28 +1036,35 @@ export class DefaultClient implements Client {
                             // allow native side to handle informatoin 
                             // return an array of textedits 
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    let filePath = document.uri.fsPath;
+                                    editorConfig.parse(filePath).then((configSettings) => {
+                                        
+                                        console.log(configSettings);
+                                        const params: DocumentFormatParams = {
+                                            settings: configSettings,
+                                            uri: document.uri.toString(),
+                                            insertSpaces: options.insertSpaces,
+                                            tabSize: options.tabSize
 
-                                const params: DocumentFormatParams = {
-                                    settings: settings,
-                                    uri: document.uri.toString(),
-                                    insertSpaces: options.insertSpaces,
-                                    tabSize: options.tabSize
-
-                                };
-                                return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
-                                    .then((textEdits) => {
-                                        const result: vscode.TextEdit[] = [];
-                                        textEdits.forEach((textEdit) => {
-                                            result.push({
-                                                range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
-                                                newText: textEdit.newText
-                                            });                                        
-                                        });
-                                        resolve(result)
+                                        };
+                                        return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                                            .then((textEdits) => {
+                                                const result: vscode.TextEdit[] = [];
+                                                textEdits.forEach((textEdit) => {
+                                                    result.push({
+                                                        range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
+                                                        newText: textEdit.newText
+                                                    });
+                                                });
+                                                resolve(result)
+                                            });
                                     });
+                                });
                             });
                         }
                     }
+                        
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
