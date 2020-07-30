@@ -175,5 +175,6 @@
 	"parameters_label": "매개 변수:",
 	"returns_label": "반환 값:",
 	"deprecated_label": "사용되지 않음:",
-	"exceptions_label": "예외:"
+	"exceptions_label": "예외:",
+	"template_parameters_label": "Template Parameters:"
 }

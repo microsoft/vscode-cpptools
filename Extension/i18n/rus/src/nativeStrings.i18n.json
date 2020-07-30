@@ -175,5 +175,6 @@
 	"parameters_label": "Параметры:",
 	"returns_label": "Возвращает:",
 	"deprecated_label": "Нерекомендуемый:",
-	"exceptions_label": "Исключения:"
+	"exceptions_label": "Исключения:",
+	"template_parameters_label": "Template Parameters:"
 }

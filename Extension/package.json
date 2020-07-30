@@ -101,6 +101,12 @@
             "Default",
             "Disabled"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.formatting.clangFormat.description%",
+            "%c_cpp.configuration.formatting.vcFormat.description%",
+            "%c_cpp.configuration.formatting.Default.description%",
+            "%c_cpp.configuration.formatting.Disabled.description%"
+          ],
           "default": "clangFormat",
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
@@ -117,6 +123,11 @@
             "outermostParenthesis",
             "innermostParenthesis",
             "statementBegin"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.outermostParenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.innermostParenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.statementBegin.description%"
           ],
           "default": "innermostParenthesis",
           "description": "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description%",
@@ -159,6 +170,11 @@
             "leftmostColumn",
             "none"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.description%",
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.description%",
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.none.description%"
+          ],
           "default": "none",
           "description": "%c_cpp.configuration.vcFormat.indent.gotoLabels.description%",
           "scope": "resource"
@@ -169,6 +185,11 @@
             "oneLeft",
             "leftmostColumn",
             "none"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.description%",
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.leftmostColumn.description%",
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.none.description%"
           ],
           "default": "none",
           "description": "%c_cpp.configuration.vcFormat.indent.preprocessor.description%",
@@ -199,6 +220,11 @@
             "sameLine",
             "ignore"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description%",
           "scope": "resource"
@@ -209,6 +235,11 @@
             "newLine",
             "sameLine",
             "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
           ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description%",
@@ -221,6 +252,11 @@
             "sameLine",
             "ignore"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.function.description%",
           "scope": "resource"
@@ -232,6 +268,11 @@
             "sameLine",
             "ignore"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.block.description%",
           "scope": "resource"
@@ -241,6 +282,11 @@
             "newLine",
             "sameLine",
             "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
           ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description%",
@@ -288,6 +334,11 @@
             "insert",
             "remove",
             "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.ignore.description%"
           ],
           "default": "remove",
           "description": "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.description%",
@@ -468,6 +519,11 @@
             "remove",
             "ignore"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description%"
+          ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description%",
           "scope": "resource"
@@ -478,6 +534,11 @@
             "insert",
             "remove",
             "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description%"
           ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.space.aroundAssignmentOperator.description%",
@@ -491,6 +552,12 @@
             "right",
             "ignore"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.left.description%",
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.center.description%",
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.right.description%",
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.ignore.description%"
+          ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.description%",
           "scope": "resource"
@@ -502,6 +569,11 @@
             "remove",
             "ignore"
           ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description%"
+          ],
           "default": "ignore",
           "description": "%c_cpp.configuration.vcFormat.space.aroundTernaryOperator.description%",
           "scope": "resource"
@@ -512,6 +584,11 @@
             "oneLiners",
             "allOneLineScopes",
             "never"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.description%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.description%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.description%"
           ],
           "default": "never",
           "description": "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.description%",
