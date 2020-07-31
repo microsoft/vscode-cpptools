@@ -183,9 +183,7 @@
             "leftmostColumn",
             "none"
           ],
-          "enumDescriptions": [
-            
-          ],
+          "enumDescriptions": [],
           "default": "none",
           "description": "%c_cpp.configuration.vcFormat.indent.gotoLabels.description%",
           "scope": "resource"

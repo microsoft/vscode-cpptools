@@ -303,6 +303,8 @@ interface DocumentFormatParams {
     uri: string;
     insertSpaces: boolean;
     tabSize: number;
+    range: Range;
+    character: string;
 }
 
 interface TextEdit {
@@ -1022,6 +1024,100 @@ export class DefaultClient implements Client {
                         }
                     }
                     
+                    class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider { 
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+                        
+                        public provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> { 
+                            return new Promise<vscode.TextEdit[]>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    let filePath = document.uri.fsPath;
+                                    editorConfig.parse(filePath).then((configSettings) => {
+                                        
+                                        console.log(configSettings);
+                                        const params: DocumentFormatParams = {
+                                            settings: configSettings,
+                                            uri: document.uri.toString(),
+                                            insertSpaces: options.insertSpaces,
+                                            tabSize: options.tabSize,
+                                            character: "",
+                                            range:  { 
+                                                start: {
+                                                    character: range.start.character,
+                                                    line: range.start.line
+                                                },
+                                                end: {
+                                                    character: range.end.character,
+                                                    line: range.end.line
+                                                }
+                                            }
+                                        };
+                                        return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                                            .then((textEdits) => {
+                                                const result: vscode.TextEdit[] = [];
+                                                textEdits.forEach((textEdit) => {
+                                                    result.push({
+                                                        range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
+                                                        newText: textEdit.newText
+                                                    });
+                                                });
+                                                resolve(result)
+                                            });
+                                    });
+                                });
+                            });
+                        }
+
+                    }
+                        
+                    class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider { 
+                        private client: DefaultClient;
+                        constructor(client: DefaultClient) {
+                            this.client = client;
+                        }
+
+                        public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> { 
+                            return new Promise<vscode.TextEdit[]>((resolve, reject) => {
+                                this.client.notifyWhenReady(() => {
+                                    let filePath = document.uri.fsPath;
+                                    editorConfig.parse(filePath).then((configSettings) => {
+
+                                        const params: DocumentFormatParams = {
+                                            settings: configSettings,
+                                            uri: document.uri.toString(),
+                                            insertSpaces: options.insertSpaces,
+                                            tabSize: options.tabSize,
+                                            character: ch,
+                                            range:  { 
+                                                start: {
+                                                    character: position.character,
+                                                    line: position.line
+                                                },
+                                                end: {
+                                                    character: position.character,
+                                                    line: position.line
+                                                }
+                                            }
+                                        };
+                                        return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                                            .then((textEdits) => {
+                                                const result: vscode.TextEdit[] = [];
+                                                textEdits.forEach((textEdit) => {
+                                                    result.push({
+                                                        range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
+                                                        newText: textEdit.newText
+                                                    });
+                                                });
+                                                resolve(result)
+                                            });
+                                    });
+                                });
+                            });
+                        }
+                 }
+                
                     class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
 
                         private client: DefaultClient;
@@ -1045,8 +1141,18 @@ export class DefaultClient implements Client {
                                             settings: configSettings,
                                             uri: document.uri.toString(),
                                             insertSpaces: options.insertSpaces,
-                                            tabSize: options.tabSize
-
+                                            tabSize: options.tabSize,
+                                            character: "",
+                                            range:  { 
+                                                start: {
+                                                    character: 0,
+                                                    line: 0
+                                                },
+                                                end: {
+                                                    character: 0,
+                                                    line: 0
+                                                }
+                                            }
                                         };
                                         return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
                                             .then((textEdits) => {
@@ -1205,6 +1311,8 @@ export class DefaultClient implements Client {
 
                             this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
                             this.disposables.push(vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this)));
+                            this.disposables.push(vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "{","}"));
+                            this.disposables.push(vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this)));
                             this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
                             this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                             this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
