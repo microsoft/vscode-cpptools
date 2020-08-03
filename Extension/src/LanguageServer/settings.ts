@@ -288,19 +288,19 @@ export class CppSettings extends Settings {
     }
 
     public get vcFormatSpaceWithinCastParentheses():  boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
+        return super.Section.get<boolean>("vcFormat.space.withinCastParentheses") === true;
     }
 
     public get vcFormatSpaceAfterCastCloseParenthesis():  boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
+        return super.Section.get<boolean>("vcFormat.space.afterCastCloseParenthesis") === true;
     }
 
     public get vcFormatSpaceWithinExpressionParentheses():  boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
+        return super.Section.get<boolean>("vcFormat.space.withinExpressionParentheses") === true;
     }
 
     public get vcFormatSpaceBeforeBlockOpenBrace():  boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
+        return super.Section.get<boolean>("vcFormat.space.beforeBlockOpenBrace") === true;
     }
 
     public get vcFormatSpaceBetweenEmptyBraces():  boolean {
@@ -332,7 +332,7 @@ export class CppSettings extends Settings {
     }
 
     public get vcFormatSpaceBetweenEmptySquareBrackets():  boolean {
-        return super.Section.get<boolean>("vcFormat.space.beforeEmptySquareBrackets") === true;
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptySquareBrackets") === true;
     }
 
     public get vcFormatSpaceGroupSquareBrackets():  boolean {

@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.30.0-insiders: July 29, 2020
+## Version 0.30.0-insiders: August 4, 2020
 ### New Features
 * Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429] (https://github.com/microsoft/vscode-cpptools/issues/429)
 * Add the `vcFormat` option to `C_Cpp.formatting` (with `C_Cpp.vcFormat.*` options) to enable VS-style formatting (instead of clang-format formatting). [#657](https://github.com/microsoft/vscode-cpptools/issues/657)
@@ -16,6 +16,7 @@
 * Fix semantic colorization and inactive regions for multiroot workspaces. [#5812](https://github.com/microsoft/vscode-cpptools/issues/5812), [#5828](https://github.com/microsoft/vscode-cpptools/issues/5828)
 * Fix bug with cl.exe flags /FU and /FI not being processed. [#5819](https://github.com/microsoft/vscode-cpptools/issues/5819)
 * Fix `cStandard` being set to `c11` instead of `gnu18` with gcc. [#5834](https://github.com/microsoft/vscode-cpptools/issues/5834)
+* Fix compile commands compiler not being used if `C_Cpp.default.compilerPath` is set. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
 
 ### Potentially Breaking Changes
 * Settings `commentContinuationPatterns`, `enhancedColorization`, and `codeFolding` are no longer available in per-Folder settings (only Workspace or higher settings). [PR #5830](https://github.com/microsoft/vscode-cpptools/pull/5830)
