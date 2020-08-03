@@ -982,10 +982,10 @@
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
         },
-        "C_Cpp.supportExtensionVscodeVersion": {
+        "C_Cpp.minimumVSCodeVersions": {
           "type": "object",
           "default": null,
-          "description": "%c_cpp.configuration.supportExtensionVscodeVersion.description%",
+          "description": "The minimum version of VS Code to support C/C++ extension",
           "scope": "machine-overridable"
         }
       }

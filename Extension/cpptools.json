@@ -4,9 +4,8 @@
     "recursiveIncludes": 100,
     "gotoDefIntelliSense": 100,
     "enhancedColorization": 100,
-    "supportExtensionVscodeVersion": {
-        "0.28.0": "1.44.0",
-        "0.29.0": "1.44.0",
-        "0.30.0": "1.44.0"
+    "minimumVSCodeVersions": {
+        "0.30.0": "1.47.0",
+        "0.28.0": "1.44.0"
     }
 }
