@@ -150,7 +150,7 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
             if (targetBuild === undefined) {
                 // no action
                 telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
-            } else if (userVersion.isGreaterThan(new PackageVersion(targetBuild.name))) {
+            } else if (userVersion.isGreaterThan(new PackageVersion(targetBuild.name), "insiders")) {
                 // downgrade
                 telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "version": targetBuild.name });
             } else {
@@ -191,7 +191,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     }
     const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
     // Allows testing pre-releases without accidentally downgrading to the latest version
-    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion))) {
+    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion, "insiders"))) {
         return undefined;
     }
 
@@ -204,7 +204,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         useBuild = isBuild;
     } else if (updateChannel === 'Default') {
         // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
-        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
+        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target, "insiders"); };
         // look for the latest non-insiders released build
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
     } else {

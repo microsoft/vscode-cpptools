@@ -50,8 +50,8 @@ export class PackageVersion {
             this.suffix === other.suffix && this.suffixVersion === other.suffixVersion;
     }
 
-    public isGreaterThan(other: PackageVersion, suffixStr: string = 'insiders'): boolean {
-        if ((this.suffix && !this.suffix.startsWith(suffixStr)) || (other.suffix && !other.suffix.startsWith(suffixStr))) {
+    public isGreaterThan(other: PackageVersion, suffixStr: string | undefined): boolean {
+        if (suffixStr && ((this.suffix && !this.suffix.startsWith(suffixStr)) || (other.suffix && !other.suffix.startsWith(suffixStr)))) {
             return false;
         }
 
@@ -66,13 +66,18 @@ export class PackageVersion {
                 diff = this.patch - other.patch;
                 if (diff) {
                     return diff > 0;
-                } else if (this.suffix) {
-                    if (!other.suffix) {
-                        return false;
-                    }
-                    return (this.suffixVersion > other.suffixVersion);
                 } else {
-                    return other.suffix ? true : false;
+                    if (!suffixStr) {
+                        return false; // isEqual = true
+                    }
+                    if (this.suffix) {
+                        if (!other.suffix) {
+                            return false;
+                        }
+                        return (this.suffixVersion > other.suffixVersion);
+                    } else {
+                        return other.suffix ? true : false;
+                    }
                 }
             }
         }

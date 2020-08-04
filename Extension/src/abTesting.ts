@@ -22,9 +22,7 @@ interface Settings {
     enhancedColorization?: number;
     // a map of <extensionVersion, vscodeVersion>
     // Note: the new dependency entries should be added in the beginning of the map.
-    minimumVSCodeVersion: {
-        [extensionVersion: string]: string;
-    };
+    minimumVSCodeVersion: { [extensionVersion: string]: string };
 }
 
 export class ABTestSettings {
@@ -78,7 +76,7 @@ export class ABTestSettings {
         for (const [extensionString, vscodeString] of this.minimumVSCodeVersionDefault) {
             const extensionPackage: PackageVersion = new PackageVersion(extensionString);
             const vscodePackage: PackageVersion = new PackageVersion(vscodeString);
-            if (!extensionPackage.isGreaterThan(curExtension)) {
+            if (!extensionPackage.isGreaterThan(curExtension, undefined)) {
                 return vscodePackage;
             }
         }
@@ -97,14 +95,19 @@ export class ABTestSettings {
                 this.recursiveIncludesDefault.Value = util.isNumber(newSettings.recursiveIncludes) ? newSettings.recursiveIncludes : this.recursiveIncludesDefault.DefaultValue;
                 this.gotoDefIntelliSenseDefault.Value = util.isNumber(newSettings.gotoDefIntelliSense) ? newSettings.gotoDefIntelliSense : this.gotoDefIntelliSenseDefault.DefaultValue;
                 this.enhancedColorizationDefault.Value = util.isNumber(newSettings.enhancedColorization) ? newSettings.enhancedColorization : this.enhancedColorizationDefault.DefaultValue;
-                const map: Map<string, string> = new Map<string, string>(Object.entries(newSettings.minimumVSCodeVersion));
-                this.minimumVSCodeVersionDefault = map.size ? map : this.minimumVSCodeVersionDefault;
+                const newMap: Map<string, string> = new Map<string, string>();
+                if (newSettings.minimumVSCodeVersion) {
+                    for (const [extensionVersion, vscodeVersion] of Object.entries(newSettings.minimumVSCodeVersion)) {
+                        newMap.set(extensionVersion, <string> vscodeVersion);
+                    }
+                }
+                this.minimumVSCodeVersionDefault = newSettings.minimumVSCodeVersion ? newMap : this.minimumVSCodeVersionDefault;
                 this.settings = {
                     defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
                     recursiveIncludes: this.recursiveIncludesDefault.Value,
                     gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
                     enhancedColorization: this.enhancedColorizationDefault.Value,
-                    minimumVSCodeVersion: newSettings.minimumVSCodeVersion
+                    minimumVSCodeVersion: newSettings.minimumVSCodeVersion ? newSettings.minimumVSCodeVersion : this.settings.minimumVSCodeVersion
                 };
             }
         } catch (error) {
