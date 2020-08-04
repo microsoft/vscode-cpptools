@@ -981,12 +981,6 @@
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
-        },
-        "C_Cpp.minimumVSCodeVersions": {
-          "type": "object",
-          "default": null,
-          "description": "The minimum version of VS Code to support C/C++ extension",
-          "scope": "machine-overridable"
         }
       }
     },

@@ -5,7 +5,9 @@
     "gotoDefIntelliSense": 100,
     "enhancedColorization": 100,
     "minimumVSCodeVersions": {
+        "0.31.0": "1.48.0",
         "0.30.0": "1.47.0",
+        "0.29.0": "1:46.0",
         "0.28.0": "1.44.0"
     }
 }

@@ -469,9 +469,9 @@ function realActivation(): void {
         if (info.platform !== "linux" || info.architecture === "x86_64" || info.architecture === "arm") {
             // Skip Insiders processing for unsupported VS Code versions.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            const extensionVersion: string = new PackageVersion(util.packageJson.version).noPatchVersion;
             const abTestSettings: ABTestSettings = getABTestSettings();
-            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion(abTestSettings.getMinimumVSCodeVersion(extensionVersion));
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = 
+                abTestSettings.getMinimumVSCodeVersion(new PackageVersion(util.packageJson.version));
             if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {

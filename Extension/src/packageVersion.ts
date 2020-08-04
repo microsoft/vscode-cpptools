@@ -77,8 +77,4 @@ export class PackageVersion {
             }
         }
     }
-
-    public get noPatchVersion(): string {
-        return `${this.major}.${this.minor}.0`;
-    }
 }

@@ -8,11 +8,12 @@ import * as util from './common';
 import * as Telemetry from './telemetry';
 import { PersistentState } from './LanguageServer/persistentState';
 import * as fs from 'fs';
+import { PackageVersion } from './packageVersion';
 
 const userBucketMax: number = 100;
 const userBucketString: string = "CPP.UserBucket";
 const localConfigFile: string = "cpptools.json";
-const minimumVSCodeVersionDefault: string = "1.43.2";
+const minimumVSCodeVersionDefault: PackageVersion = new PackageVersion("1.43.2");
 
 interface Settings {
     defaultIntelliSenseEngine?: number;
@@ -21,7 +22,9 @@ interface Settings {
     enhancedColorization?: number;
     // a map of <extensionVersion, vscodeVersion>
     // Note: the new dependency entries should be added in the beginning of the map.
-    minimumVSCodeVersion?: Map<string, string>;
+    minimumVSCodeVersion: {
+        [extensionVersion: string]: string;
+    };
 }
 
 export class ABTestSettings {
@@ -38,13 +41,13 @@ export class ABTestSettings {
         this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
         this.gotoDefIntelliSenseDefault = new PersistentState<number>("ABTest.3", 100);
         this.enhancedColorizationDefault = new PersistentState<number>("ABTest.4", 100);
-        this.minimumVSCodeVersionDefault = new Map();
+        this.minimumVSCodeVersionDefault = new Map<string, string>();
         this.settings = {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
             recursiveIncludes: this.recursiveIncludesDefault.Value,
             gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
             enhancedColorization: this.enhancedColorizationDefault.Value,
-            minimumVSCodeVersion: this.minimumVSCodeVersionDefault
+            minimumVSCodeVersion: {}
         };
         this.bucket = new PersistentState<number>(userBucketString, -1);
         if (this.bucket.Value === -1) {
@@ -68,12 +71,17 @@ export class ABTestSettings {
         return util.isNumber(this.settings.gotoDefIntelliSense) ? this.settings.gotoDefIntelliSense >= this.bucket.Value : true;
     }
 
-    public getMinimumVSCodeVersion(extensionVersion: string): string {
-        /*if (!this.settings.minimumVSCodeVersion || this.settings.minimumVSCodeVersion.size === 0) 
+    public getMinimumVSCodeVersion(curExtension: PackageVersion): PackageVersion {
+        if (this.minimumVSCodeVersionDefault.size === 0) {
             return minimumVSCodeVersionDefault;
-        for (let [key, value] of this.settings.minimumVSCodeVersion) {
-            if
-        }*/
+        }
+        for (const [extensionString, vscodeString] of this.minimumVSCodeVersionDefault) {
+            const extensionPackage: PackageVersion = new PackageVersion(extensionString);
+            const vscodePackage: PackageVersion = new PackageVersion(vscodeString);
+            if (!extensionPackage.isGreaterThan(curExtension)) {
+                return vscodePackage;
+            }
+        }
         return minimumVSCodeVersionDefault;
     }
 
@@ -89,13 +97,14 @@ export class ABTestSettings {
                 this.recursiveIncludesDefault.Value = util.isNumber(newSettings.recursiveIncludes) ? newSettings.recursiveIncludes : this.recursiveIncludesDefault.DefaultValue;
                 this.gotoDefIntelliSenseDefault.Value = util.isNumber(newSettings.gotoDefIntelliSense) ? newSettings.gotoDefIntelliSense : this.gotoDefIntelliSenseDefault.DefaultValue;
                 this.enhancedColorizationDefault.Value = util.isNumber(newSettings.enhancedColorization) ? newSettings.enhancedColorization : this.enhancedColorizationDefault.DefaultValue;
-                this.minimumVSCodeVersionDefault = newSettings.minimumVSCodeVersion ? newSettings.minimumVSCodeVersion : this.minimumVSCodeVersionDefault;
+                const map: Map<string, string> = new Map<string, string>(Object.entries(newSettings.minimumVSCodeVersion));
+                this.minimumVSCodeVersionDefault = map.size ? map : this.minimumVSCodeVersionDefault;
                 this.settings = {
                     defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
                     recursiveIncludes: this.recursiveIncludesDefault.Value,
                     gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
                     enhancedColorization: this.enhancedColorizationDefault.Value,
-                    minimumVSCodeVersion: this.minimumVSCodeVersionDefault
+                    minimumVSCodeVersion: newSettings.minimumVSCodeVersion
                 };
             }
         } catch (error) {

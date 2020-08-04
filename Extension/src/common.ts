@@ -22,6 +22,7 @@ import { OtherSettings } from './LanguageServer/settings';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
+import M = require('minimatch');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1228,4 +1229,14 @@ export function getUniqueWorkspaceName(workspaceFolder: vscode.WorkspaceFolder):
 
 export function getUniqueWorkspaceStorageName(workspaceFolder: vscode.WorkspaceFolder): string {
     return getUniqueWorkspaceNameHelper(workspaceFolder, true);
+}
+
+export function convertArrayToMap(array: Array<Array<string>>): Map<string, string> {
+    let map = new Map<string, string>();
+    array.forEach(function (data){
+        if (data.length === 2) {
+            map.set(data[0], data[1]);
+        }
+    });
+    return map;
 }
