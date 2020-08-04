@@ -623,7 +623,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
 
     // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
     const lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
-    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand, "insiders")) {
+    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand, "insider")) {
         return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
     }
 
@@ -662,7 +662,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
 
         // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
         const oldVersion: PackageVersion = new PackageVersion('1.27.2');
-        if (userVersion.isGreaterThan(oldVersion, "insiders")) {
+        if (userVersion.isGreaterThan(oldVersion, "insider")) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
                 try {
