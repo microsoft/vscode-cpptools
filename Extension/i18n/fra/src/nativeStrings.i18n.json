@@ -175,5 +175,6 @@
 	"parameters_label": "Paramètres :",
 	"returns_label": "Retourne :",
 	"deprecated_label": "Déprécié :",
-	"exceptions_label": "Exceptions :"
+	"exceptions_label": "Exceptions :",
+	"template_parameters_label": "Paramètres du modèle :"
 }

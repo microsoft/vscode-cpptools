@@ -72,12 +72,32 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     await processRuntimeDependencies();
 
-    // check if the correct offline/insiders vsix is installed on the correct platform
     const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
-    if (!installedPlatform || (process.platform !== installedPlatform)) {
+
+    // Check the main binaries files to declare if the extension has been installed successfully.
+    if (installedPlatform && process.platform !== installedPlatform) {
+        // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
         errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
+        const downloadLink: string = localize("download.button", "Go to Download Page");
+        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+            if (selection === downloadLink) {
+                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+            }
+        });
+    } else if (!installedPlatform || !(await util.checkInstallBinariesExist())) {
+        errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
+        const reload: string = localize("remove.extension", "Attempt to Repair");
+        vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
+            if (value === reload) {
+                await util.removeInstallLockFile();
+                vscode.commands.executeCommand("workbench.action.reloadWindow");
+            }
+        });
+    } else if (!(await util.checkInstallJsonsExist())) {
+        // Check the Json files to declare if the extension has been installed successfully.
+        errMsg = localize("jason.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
         const downloadLink: string = localize("download.button", "Go to Download Page");
         vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
             if (selection === downloadLink) {

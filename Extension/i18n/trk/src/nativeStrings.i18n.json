@@ -175,5 +175,6 @@
 	"parameters_label": "Parametreler:",
 	"returns_label": "Şunu döndürür:",
 	"deprecated_label": "Kullanım dışı:",
-	"exceptions_label": "Özel durumlar:"
+	"exceptions_label": "Özel durumlar:",
+	"template_parameters_label": "Şablon Parametreleri:"
 }
