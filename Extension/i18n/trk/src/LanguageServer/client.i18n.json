@@ -35,5 +35,5 @@
 	"no.button": "Hayır",
 	"configurations.received": "Alınan özel yapılandırmalar:",
 	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}",
-	"browse.configuration": "Custom browse configuration: {0}"
+	"browse.configuration": "Özel göz atma yapılandırması: {0}"
 }

@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "When braces are empty and on the same line, a space is inserted between them",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "A space is added before the opening brace of uniform initialization and initializer lists",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "A space is added after the opening brace and also before the closing brace of uniform initialization and initializer lists",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved insider uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "A space is added before opening square brackets",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "在左方括号后面和右方括号前面添加一个空格",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "当方括号为空时，在左方括号的前面添加一个空格",

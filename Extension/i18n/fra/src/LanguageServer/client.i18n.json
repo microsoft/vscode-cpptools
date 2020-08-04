@@ -35,5 +35,5 @@
 	"no.button": "Non",
 	"configurations.received": "Configurations personnalisées reçues :",
 	"browse.configuration.received": "Configuration de navigation personnalisée reçue : {0}",
-	"browse.configuration": "Custom browse configuration: {0}"
+	"browse.configuration": "Configuration de navigation personnalisée : {0}"
 }

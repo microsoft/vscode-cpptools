@@ -35,5 +35,5 @@
 	"no.button": "Não",
 	"configurations.received": "Configurações personalizadas recebidas:",
 	"browse.configuration.received": "Configuração de pesquisa personalizada recebida: {0}",
-	"browse.configuration": "Custom browse configuration: {0}"
+	"browse.configuration": "Configuração de pesquisa personalizada: {0}"
 }

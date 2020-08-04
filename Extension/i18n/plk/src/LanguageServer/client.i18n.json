@@ -35,5 +35,5 @@
 	"no.button": "Nie",
 	"configurations.received": "Odebrano konfiguracje niestandardowe:",
 	"browse.configuration.received": "Odebrano niestandardową konfigurację przeglądania: {0}",
-	"browse.configuration": "Custom browse configuration: {0}"
+	"browse.configuration": "Niestandardowa konfiguracja przeglądania: {0}"
 }
