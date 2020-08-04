@@ -5,6 +5,9 @@
 * Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429] (https://github.com/microsoft/vscode-cpptools/issues/429)
 * Add the `vcFormat` option to `C_Cpp.formatting` (with `C_Cpp.vcFormat.*` options) to enable VS-style formatting (instead of clang-format formatting). [#657](https://github.com/microsoft/vscode-cpptools/issues/657)
 
+### Enhancements
+* Use `jsonc` parser to load `c_cpp_properties.json` to allow comments, trailing commas, etc. [#5885](https://github.com/microsoft/vscode-cpptools/issues/5885)
+
 ### Bug Fixes
 * Fix installation of clang-format 10 with the online vsix. [#5194](https://github.com/microsoft/vscode-cpptools/issues/5194)
 * Get the compiler type to determine if it's Clang when querying for default compiler so that the correct default `intelliSenseMode` is set. [#5352](https://github.com/microsoft/vscode-cpptools/issues/5352)
@@ -17,6 +20,9 @@
 * Fix bug with cl.exe flags /FU and /FI not being processed. [#5819](https://github.com/microsoft/vscode-cpptools/issues/5819)
 * Fix `cStandard` being set to `c11` instead of `gnu18` with gcc. [#5834](https://github.com/microsoft/vscode-cpptools/issues/5834)
 * Fix compile commands compiler not being used if `C_Cpp.default.compilerPath` is set. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
+* Fix a bug that could cause the extension to delay processing a newly opened file until any outstanding IntelliSense operations are complete, if using a custom configuration provider.
+* Fix a bug with incorrect configuration of a file when using a custom configuration provider and no custom configuration is available for that file. This now falls back to the compiler info received from the configuration provider with the browse configuration.
+* Fix a bug in which making a modification to `c_cpp_properties.json` could result in custom configurations for currently open files being discarded and not re-requested.
 
 ### Potentially Breaking Changes
 * Settings `commentContinuationPatterns`, `enhancedColorization`, and `codeFolding` are no longer available in per-Folder settings (only Workspace or higher settings). [PR #5830](https://github.com/microsoft/vscode-cpptools/pull/5830)
