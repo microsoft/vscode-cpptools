@@ -176,5 +176,5 @@
 	"returns_label": "戻り値:",
 	"deprecated_label": "非推奨:",
 	"exceptions_label": "例外:",
-	"template_parameters_label": "Template Parameters:"
+	"template_parameters_label": "テンプレート パラメーター:"
 }
