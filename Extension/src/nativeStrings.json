@@ -190,5 +190,6 @@
     },
     "deprecated_label": "Deprecated:",
     "exceptions_label": "Exceptions:",
-    "template_parameters_label": "Template Parameters:"
+    "template_parameters_label": "Template Parameters:",
+    "compiler_probe_command_line": "Compiler probe command line: {0}"
 }
