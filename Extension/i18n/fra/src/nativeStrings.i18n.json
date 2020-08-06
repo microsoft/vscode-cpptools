@@ -176,5 +176,6 @@
 	"returns_label": "Retourne :",
 	"deprecated_label": "Déprécié :",
 	"exceptions_label": "Exceptions :",
-	"template_parameters_label": "Paramètres du modèle :"
+	"template_parameters_label": "Paramètres du modèle :",
+	"compiler_probe_command_line": "Compiler probe command line: {0}"
 }
