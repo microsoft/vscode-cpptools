@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "当大括号为空且位于同一行时，在它们之间插入一个空格",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "在统一初始化和初始值设定项列表的左大括号前面添加一个空格",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "在统一初始化和初始值设定项列表的左大括号后面和右大括号前面添加一个空格",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "在统一初始化和初始值设定项列表中，逗号两侧的空格会保留",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "在左方括号的前面添加一个空格",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "在左方括号后面和右方括号前面添加一个空格",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "当方括号为空时，在左方括号的前面添加一个空格",

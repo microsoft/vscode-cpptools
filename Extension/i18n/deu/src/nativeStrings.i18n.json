@@ -176,5 +176,6 @@
 	"returns_label": "Rückgabe:",
 	"deprecated_label": "Veraltet:",
 	"exceptions_label": "Ausnahmen:",
-	"template_parameters_label": "Vorlagenparameter:"
+	"template_parameters_label": "Vorlagenparameter:",
+	"compiler_probe_command_line": "Compiler probe command line: {0}"
 }
