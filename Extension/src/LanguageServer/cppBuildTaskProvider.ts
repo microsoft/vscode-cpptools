@@ -20,7 +20,7 @@ export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", 
 
 export interface CppBuildTaskDefinition extends vscode.TaskDefinition {
     type: string;
-    label: string;
+    label: string; // The label appears in tasks.json file.
     command: string;
     args: string[];
     options: cp.ExecOptions | undefined;
@@ -149,7 +149,8 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
-        const taskName: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
+        const taskLabel: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
+        const taskName: string = "Build with " + compilerPathBase + ".";
         const isCl: boolean = compilerPathBase === "cl.exe";
         const isWindows: boolean = os.platform() === 'win32';
         const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
@@ -180,12 +181,13 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (!uri) {
             throw new Error("No client URI found in getBuildTasks()");
         }
-        const target: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(uri);
-        if (!target) {
+        //const scope: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(uri);
+        const scope: vscode.TaskScope = vscode.TaskScope.Workspace;
+        if (!scope) {
             throw new Error("No target WorkspaceFolder found in getBuildTasks()");
         }
 
-        const task: vscode.Task = new vscode.Task(definition, target, taskName, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: vscode.Task = new vscode.Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
             new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
                 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
@@ -196,7 +198,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         return task;
     };
 
-    async ensureBuildTaskExists(taskName: string): Promise<void> {
+    async ensureBuildTaskExists(taskLabel: string): Promise<void> {
         const rawTasksJson: any = await getRawTasksJson();
 
         // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
@@ -204,13 +206,13 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             rawTasksJson.tasks = new Array();
         }
         // Find or create the task which should be created based on the selected "debug configuration".
-        let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskName);
+        let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
         if (selectedTask) {
             return;
         }
 
         const buildTasks: vscode.Task[] = await this.getTasks(true);
-        selectedTask = buildTasks.find(task => task.name === taskName);
+        selectedTask = buildTasks.find(task => task.name === taskLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
             throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
