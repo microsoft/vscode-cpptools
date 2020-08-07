@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "Küme ayraçları boş ve aynı satırda olduğunda aralarına bir boşluk eklenir",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "Tek düzen başlatma ve başlatıcı listelerinin açma küme ayracından önce bir boşluk eklenir",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "Tek düzen başlatma ve başlatıcı listelerinin açma küme ayracından sonra ve kapatma küme ayracından önce bir boşluk eklenir",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Tek düzen başlatma ve başlatıcı listeleri içindeki virgüllerin etrafındaki boşluklar korunur",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Tek düzen başlatma ve başlatıcı listeleri içinde, virgüllerin etrafındaki boşluklar korunur",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "Açma köşeli ayracından önce bir boşluk eklenir",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "Sol köşeli ayraçtan sonra ve sağ köşeli ayraçtan önce bir boşluk eklenir",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "Köşeli ayraçlar boş olduğunda sol köşeli ayraçtan önce bir boşluk eklenir",

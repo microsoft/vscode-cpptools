@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "Gdy nawiasy klamrowe są puste i znajdują się w tym samym wierszu, wstawiany jest odstęp między nimi",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "Dodawany jest odstęp przed otwierającym nawiasem klamrowym na listach jednolitej inicjacji i inicjatorów",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "Dodawany jest odstęp po otwierającym nawiasie klamrowym, a także przed zamykającym nawiasem klamrowym na listach jednolitej inicjacji i inicjatorów",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Odstępy wokół przecinków są zachowywane wewnątrz list jednolitej inicjacji i inicjatorów",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "Dodawany jest odstęp przed otwierającymi nawiasami kwadratowymi",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "Dodawany jest odstęp po otwierającym nawiasie kwadratowym, a także przed zamykającym nawiasem kwadratowym",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "Gdy nawiasy kwadratowe są puste, przed otwierający nawias kwadratowy wstawiany jest odstęp",
