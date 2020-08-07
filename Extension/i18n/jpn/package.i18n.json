@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "中かっこが空で、同じ行にある場合は、その間にスペースが挿入されます",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "均一初期化および初期化子リストの左中かっこの前にスペースが追加されます",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "均一初期化および初期化子リストで左中かっこの後と右中かっこの前にスペースが追加されます",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "コンマの前後のスペースは、均一初期化および初期化子リストの中に保持されます",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "始め角かっこの前にスペースが追加されます",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "始め角かっこの後と終わり角かっこの前にスペースが追加されます",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "角かっこが空の場合、始めかっこの前にスペースが追加されます",

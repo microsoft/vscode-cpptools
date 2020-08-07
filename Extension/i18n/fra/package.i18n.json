@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "Quand les accolades sont vides et situées sur la même ligne, un espace est inséré entre elles",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "Un espace est ajouté avant l'accolade ouvrante de l'initialisation uniforme et des listes d'initialiseurs",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "Un espace est ajouté après l'accolade ouvrante et avant l'accolade fermante de l'initialisation uniforme et des listes d'initialiseurs",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Les espaces autour des virgules sont conservés dans l'initialisation uniforme et les listes d'initialiseurs",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "Un espace est ajouté avant les crochets ouvrants",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "Un espace est ajouté après le crochet ouvrant et avant le crochet fermant",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "Quand les crochets sont vides, un espace est ajouté avant le crochet ouvrant",

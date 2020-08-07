@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "Quando le parentesi graffe sono vuote e sulla stessa riga, viene inserito uno spazio tra di esse",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "Viene aggiunto uno spazio prima della parentesi graffa di apertura di elenchi di inizializzatori e inizializzazioni uniformi",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "Viene aggiunto uno spazio dopo la parentesi graffa di apertura e prima della parentesi graffa di chiusura di elenchi di inizializzatori e inizializzazioni uniformi",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Gli spazi prima e dopo le virgole vengono mantenuti all'interno di elenchi di inizializzatori e inizializzazioni uniformi",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "Viene aggiunto uno spazio prima delle parentesi quadre di apertura",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "Viene aggiunto uno spazio dopo la parentesi quadra di apertura e prima della parentesi quadra di chiusura",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "Quando le parentesi quadre sono vuote, viene aggiunto uno spazio prima della parentesi quadra di apertura",
