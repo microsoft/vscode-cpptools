@@ -575,8 +575,9 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
             await Promise.all(pkg.binaries.map(async (file: string) => {
                 if (!await checkFileExists(file)) {
                     installBinariesExist = false;
-                    console.log(`Extension file ${file} is missing.`);
-                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${file}` });
+                    const fileBase: string = path.basename(file);
+                    console.log(`Extension file ${fileBase} is missing.`);
+                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${fileBase}` });
                 }
             }));
         }
