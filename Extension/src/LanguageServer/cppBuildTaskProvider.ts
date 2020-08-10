@@ -46,7 +46,7 @@ export class QuickPickCppBuildTaskProvider implements vscode.TaskProvider {
             const item: MenueItem = { label: "hello", taskItem: task, description: "cheers" };
             return item;
         });
-        const selectedTask: MenueItem | undefined = await vscode.window.showQuickPick(taskItems, {placeHolder: localize("select.configuration", "Select a task to configure")} );
+        const selectedTask: MenueItem | undefined = await vscode.window.showQuickPick(taskItems, { placeHolder: localize("select.configuration", "Select a task to configure") });
         if (!selectedTask) {
             throw new Error();
         }
@@ -87,20 +87,21 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             return this.tasks;
         }
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        let emptyTasks: vscode.Task[] = [];
         if (!editor) {
-            return [];
+            return emptyTasks;
         }
 
         const fileExt: string = path.extname(editor.document.fileName);
         if (!fileExt) {
-            return [];
+            return emptyTasks;
         }
 
         // Don't offer tasks for header files.
         const fileExtLower: string = fileExt.toLowerCase();
         const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
         if (isHeader) {
-            return [];
+            return emptyTasks;
         }
 
         // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
@@ -114,7 +115,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             fileIsC = fileExtLower === ".c";
         }
         if (!(fileIsCpp || fileIsC)) {
-            return [];
+            return emptyTasks;
         }
 
         // Get compiler paths.
@@ -126,7 +127,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             if (!e || e.message !== ext.intelliSenseDisabledError) {
                 console.error("Unknown error calling getActiveClient().");
             }
-            return []; // Language service features may be disabled.
+            return emptyTasks; // Language service features may be disabled.
         }
 
         // Get user compiler path.
@@ -160,21 +161,22 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         if (!knownCompilerPaths && !userCompilerPath) {
             // Don't prompt a message yet until we can make a data-based decision.
             telemetry.logLanguageServerEvent('noCompilerFound');
-            return [];
+            return emptyTasks;
         }
 
         // Create a build task per compiler path
-        this.tasks = [];
+        //this.tasks = [];
+        let result: vscode.Task[] = [];
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
-            this.tasks = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
+            result = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
         }
         // Task for user compiler path setting
         if (userCompilerPath) {
-            this.tasks.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
         }
 
-        return this.tasks;
+        return result;
     }
 
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
