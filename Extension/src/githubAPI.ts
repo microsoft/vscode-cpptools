@@ -50,8 +50,8 @@ function getVsixDownloadUrl(build: Build, vsixName: string): string {
  * @return Whether input is of type Asset.
  */
 function isAsset(input: any): input is Asset {
-    return input && input.name && typeof(input.name) === "string" &&
-        input.browser_download_url && typeof(input.browser_download_url) === "string";
+    return input && input.name && typeof (input.name) === "string" &&
+        input.browser_download_url && typeof (input.browser_download_url) === "string";
 }
 
 /**
@@ -61,7 +61,7 @@ function isAsset(input: any): input is Asset {
  * @return Whether input is of type Build.
  */
 function isBuild(input: any): input is Build {
-    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 3;
+    return input && input.name && typeof (input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 3;
 }
 
 /**
@@ -97,7 +97,7 @@ function isArrayOfBuilds(input: any): input is Build[] {
  * @return VSIX filename for the extension's releases matched to the user's platform.
  */
 export function vsixNameForPlatform(info: PlatformInformation): string {
-    const vsixName: string | undefined = function(platformInfo): string | undefined {
+    const vsixName: string | undefined = function (platformInfo): string | undefined {
         switch (platformInfo.platform) {
             case 'win32': return 'cpptools-win32.vsix';
             case 'darwin': return 'cpptools-osx.vsix';
@@ -190,8 +190,8 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         return undefined;
     }
     const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-    // Allows testing pre-releases without accidentally downgrading to the latest version
-    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion, "insiders"))) {
+    // Allows testing pre-releases without accidentally downgrading to the latest version (in both 'Insiders' and 'Default' chanel).
+    if (userVersion.isGreaterThan(latestVersion, "insiders")) {
         return undefined;
     }
 
@@ -204,7 +204,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         useBuild = isBuild;
     } else if (updateChannel === 'Default') {
         // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
-        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target, "insiders"); };
+        needsUpdate = function (installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target, "insiders"); };
         // look for the latest non-insiders released build
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
     } else {
