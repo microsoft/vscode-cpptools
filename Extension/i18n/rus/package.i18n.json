@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "Вставка пробела между пустыми фигурными скобками, находящимися на одной строке.",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "Добавление пробела перед открывающей фигурной скобкой в равномерной инициализации и списках инициализаторов.",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "Добавление пробела после открывающей фигурной скобки и перед закрывающей для равномерной инициализации и списков инициализаторов.",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Пробелы вокруг запятых сохраняются в равномерной инициализации и списках инициализаторов.",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "Добавление пробела перед открывающими квадратными скобками.",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "После открывающей квадратной скобки и перед закрывающей квадратной скобкой добавляются пробелы.",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "Если квадратные скобки пусты, перед открывающей квадратной скобкой добавляется пробел.",

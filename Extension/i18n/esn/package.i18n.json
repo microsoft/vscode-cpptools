@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "Cuando las llaves están vacías y en la misma línea, se inserta un espacio entre ellas.",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "Se agrega un espacio delante de la llave de apertura de las listas uniformes de inicialización y del inicializador.",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "Se agrega un espacio después de la llave de apertura y también antes de la llave de cierre de las listas uniformes de inicialización y del inicializador.",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Los espacios alrededor de las comas se mantienen en la inicialización uniforme y las listas de inicializadores.",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "Se agrega un espacio delante de los corchetes de apertura.",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "Se agrega un espacio después del corchete de apertura y también antes del corchete de cierre.",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "Cuando los corchetes están vacíos, se agrega un espacio delante del corchete de apertura.",

@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "Pokud jsou složené závorky prázdné a na stejném řádku, vloží se mezi ně mezera.",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "Před levou závorku jednotné inicializace a seznamy inicializátorů se přidá mezera.",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "Přidá se mezera za levou složenou závorku i před pravou složenou závorku jednotné inicializace a seznamů inicializátorů.",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "V jednotné inicializaci a seznamech inicializátorů se zachovají mezery kolem čárek.",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "Před levé hranaté závorky se přidá mezera.",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "Přidá se mezera za levou hranatou závorku a taky před pravou hranatou závorku.",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "Přidá mezeru před levou závorku, pokud jsou hranaté závorky prázdné.",

@@ -78,7 +78,7 @@
 	"c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description": "중괄호가 비어 있고 같은 줄에 있는 경우 중괄호 사이에 공백이 삽입됩니다.",
 	"c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description": "균일 초기화 및 이니셜라이저 목록의 여는 중괄호 앞에 공백이 추가됩니다.",
 	"c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description": "균일 초기화 및 이니셜라이저 목록의 여는 중괄호 뒤와 닫는 중괄호 앞에 공백이 추가됩니다.",
-	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "Spaces around commas are preserved inside uniform initialization and initializer lists",
+	"c_cpp.configuration.vcFormat.space.preserveInInitializerList.description": "균일 초기화 및 이니셜라이저 목록 내부 쉼표 주위의 공백이 유지됩니다.",
 	"c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description": "여는 대괄호 앞에 공백이 추가됩니다.",
 	"c_cpp.configuration.vcFormat.space.withinSquareBrackets.description": "여는 대괄호 뒤와 닫는 대괄호 앞에 공백을 추가합니다.",
 	"c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description": "대괄호가 비어 있으면 여는 대괄호 앞에 공백을 추가합니다.",
