@@ -191,7 +191,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     }
     const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
     // Allows testing pre-releases without accidentally downgrading to the latest version
-    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion))) {
+    if (userVersion.isGreaterThan(latestVersion)) {
         return undefined;
     }
 
