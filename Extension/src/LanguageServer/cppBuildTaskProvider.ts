@@ -26,6 +26,37 @@ export interface CppBuildTaskDefinition extends vscode.TaskDefinition {
     options: cp.ExecOptions | undefined;
 }
 
+export class QuickPickCppBuildTaskProvider implements vscode.TaskProvider {
+    private underlyingTaskProvider: vscode.TaskProvider;
+
+    public constructor(taskProvider: CppBuildTaskProvider) {
+        this.underlyingTaskProvider = taskProvider;
+    }
+
+    public async provideTasks(): Promise<vscode.Task[]> {
+        let tasks: vscode.Task[] | undefined | null = this.underlyingTaskProvider.provideTasks ?
+            await this.underlyingTaskProvider.provideTasks() : undefined;
+        if (!tasks) {
+            tasks = [];
+        }
+        interface MenueItem extends vscode.QuickPickItem {
+            taskItem: vscode.Task;
+        }
+        const taskItems: MenueItem[] = tasks.map<MenueItem>(task => {
+            const item: MenueItem = { label: "hello", taskItem: task, description: "cheers" };
+            return item;
+        });
+        const selectedTask: MenueItem | undefined = await vscode.window.showQuickPick(taskItems, {placeHolder: localize("select.configuration", "Select a task to configure")} );
+        if (!selectedTask) {
+            throw new Error();
+        }
+        return [selectedTask.taskItem];
+    }
+
+    public resolveTask(_task: vscode.Task): vscode.Task | undefined {
+        return undefined;
+    }
+}
 export class CppBuildTaskProvider implements vscode.TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
     static CppBuildSourceStr: string = "C/C++";
