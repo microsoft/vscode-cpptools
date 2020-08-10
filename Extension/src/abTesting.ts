@@ -13,16 +13,14 @@ import { PackageVersion } from './packageVersion';
 const userBucketMax: number = 100;
 const userBucketString: string = "CPP.UserBucket";
 const localConfigFile: string = "cpptools.json";
-const minimumVSCodeVersionDefault: PackageVersion = new PackageVersion("1.43.2");
 
 interface Settings {
     defaultIntelliSenseEngine?: number;
     recursiveIncludes?: number;
     gotoDefIntelliSense?: number;
     enhancedColorization?: number;
-    // a map of <extensionVersion, vscodeVersion>
-    // Note: the new dependency entries should be added in the beginning of the map.
-    minimumVSCodeVersion: { [extensionVersion: string]: string };
+    // the minimum VS Code's version that is supported by the latest insiders' C/C++ extension
+    minimumVSCodeVersion?: string;
 }
 
 export class ABTestSettings {
@@ -31,7 +29,7 @@ export class ABTestSettings {
     private recursiveIncludesDefault: PersistentState<number>;
     private gotoDefIntelliSenseDefault: PersistentState<number>;
     private enhancedColorizationDefault: PersistentState<number>;
-    private minimumVSCodeVersionDefault: Map<string, string>;
+    private minimumVSCodeVersionDefault: string;
     private bucket: PersistentState<number>;
 
     constructor() {
@@ -39,13 +37,13 @@ export class ABTestSettings {
         this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
         this.gotoDefIntelliSenseDefault = new PersistentState<number>("ABTest.3", 100);
         this.enhancedColorizationDefault = new PersistentState<number>("ABTest.4", 100);
-        this.minimumVSCodeVersionDefault = new Map<string, string>();
+        this.minimumVSCodeVersionDefault = "1.43.2";
         this.settings = {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
             recursiveIncludes: this.recursiveIncludesDefault.Value,
             gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
             enhancedColorization: this.enhancedColorizationDefault.Value,
-            minimumVSCodeVersion: {}
+            minimumVSCodeVersion: this.minimumVSCodeVersionDefault
         };
         this.bucket = new PersistentState<number>(userBucketString, -1);
         if (this.bucket.Value === -1) {
@@ -69,18 +67,10 @@ export class ABTestSettings {
         return util.isNumber(this.settings.gotoDefIntelliSense) ? this.settings.gotoDefIntelliSense >= this.bucket.Value : true;
     }
 
-    public getMinimumVSCodeVersion(curExtension: PackageVersion): PackageVersion {
-        if (this.minimumVSCodeVersionDefault.size === 0) {
-            return minimumVSCodeVersionDefault;
-        }
-        for (const [extensionString, vscodeString] of this.minimumVSCodeVersionDefault) {
-            const extensionPackage: PackageVersion = new PackageVersion(extensionString);
-            const vscodePackage: PackageVersion = new PackageVersion(vscodeString);
-            if (!extensionPackage.isGreaterThan(curExtension, undefined)) {
-                return vscodePackage;
-            }
-        }
-        return minimumVSCodeVersionDefault;
+    public getMinimumVSCodeVersion(): PackageVersion {
+        // Get minimum VS Code's supported version for latest insiders upgrades.
+        return new PackageVersion(
+            this.settings.minimumVSCodeVersion ? this.settings.minimumVSCodeVersion : this.minimumVSCodeVersionDefault);
     }
 
     private updateSettings(): void {
@@ -95,19 +85,13 @@ export class ABTestSettings {
                 this.recursiveIncludesDefault.Value = util.isNumber(newSettings.recursiveIncludes) ? newSettings.recursiveIncludes : this.recursiveIncludesDefault.DefaultValue;
                 this.gotoDefIntelliSenseDefault.Value = util.isNumber(newSettings.gotoDefIntelliSense) ? newSettings.gotoDefIntelliSense : this.gotoDefIntelliSenseDefault.DefaultValue;
                 this.enhancedColorizationDefault.Value = util.isNumber(newSettings.enhancedColorization) ? newSettings.enhancedColorization : this.enhancedColorizationDefault.DefaultValue;
-                const newMap: Map<string, string> = new Map<string, string>();
-                if (newSettings.minimumVSCodeVersion) {
-                    for (const [extensionVersion, vscodeVersion] of Object.entries(newSettings.minimumVSCodeVersion)) {
-                        newMap.set(extensionVersion, <string> vscodeVersion);
-                    }
-                }
-                this.minimumVSCodeVersionDefault = newSettings.minimumVSCodeVersion ? newMap : this.minimumVSCodeVersionDefault;
+                this.minimumVSCodeVersionDefault = newSettings.minimumVSCodeVersion ? newSettings.minimumVSCodeVersion : this.minimumVSCodeVersionDefault;
                 this.settings = {
                     defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
                     recursiveIncludes: this.recursiveIncludesDefault.Value,
                     gotoDefIntelliSense: this.gotoDefIntelliSenseDefault.Value,
                     enhancedColorization: this.enhancedColorizationDefault.Value,
-                    minimumVSCodeVersion: newSettings.minimumVSCodeVersion ? newSettings.minimumVSCodeVersion : this.settings.minimumVSCodeVersion
+                    minimumVSCodeVersion: this.minimumVSCodeVersionDefault
                 };
             }
         } catch (error) {
