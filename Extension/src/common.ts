@@ -555,6 +555,9 @@ export function getInstalledBinaryPlatform(): string | undefined {
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
         installedPlatform = "linux";
     }
+    if (!installedPlatform) {
+        Telemetry.logLanguageServerEvent("missingBinary", { "source": "clang-format" });
+    }
     return installedPlatform;
 }
 
@@ -573,6 +576,7 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
                 if (!await checkFileExists(file)) {
                     installBinariesExist = false;
                     console.log(`Extension file ${file} is missing.`);
+                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${file}` });
                 }
             }));
         }
@@ -603,6 +607,7 @@ export async function checkInstallJsonsExist(): Promise<boolean> {
         if (!await checkFileExists(path.join(extensionPath, file))) {
             installJsonsExist = false;
             console.log(`Extension file ${file} is missing.`);
+            Telemetry.logLanguageServerEvent("missingJson", { "source": `${file}` });
         }
     }));
     return installJsonsExist;
