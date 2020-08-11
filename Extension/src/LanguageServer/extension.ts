@@ -171,7 +171,8 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, new QuickPickCppBuildTaskProvider(cppBuildTaskProvider));
+    // taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, new QuickPickCppBuildTaskProvider(cppBuildTaskProvider));
+    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
     vscode.tasks.onDidStartTask(event => {
         if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {

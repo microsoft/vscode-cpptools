@@ -3,7 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path';
-import * as vscode from 'vscode';
+import {
+    TaskDefinition, Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
+    TaskProvider,  TaskScope, QuickPickItem, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
+} from 'vscode';
 import * as os from 'os';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -18,53 +21,54 @@ import * as jsonc from 'jsonc-parser';
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
 
-export interface CppBuildTaskDefinition extends vscode.TaskDefinition {
+export interface CppBuildTaskDefinition extends TaskDefinition {
     type: string;
     label: string; // The label appears in tasks.json file.
+    description: string;
     command: string;
     args: string[];
     options: cp.ExecOptions | undefined;
 }
 
-export class QuickPickCppBuildTaskProvider implements vscode.TaskProvider {
-    private underlyingTaskProvider: vscode.TaskProvider;
+export class QuickPickCppBuildTaskProvider implements TaskProvider {
+    private underlyingTaskProvider: TaskProvider;
 
     public constructor(taskProvider: CppBuildTaskProvider) {
         this.underlyingTaskProvider = taskProvider;
     }
 
-    public async provideTasks(): Promise<vscode.Task[]> {
-        let tasks: vscode.Task[] | undefined | null = this.underlyingTaskProvider.provideTasks ?
+    public async provideTasks(): Promise<Task[]> {
+        let tasks: Task[] | undefined | null = this.underlyingTaskProvider.provideTasks ?
             await this.underlyingTaskProvider.provideTasks() : undefined;
         if (!tasks) {
             tasks = [];
         }
-        interface MenueItem extends vscode.QuickPickItem {
-            taskItem: vscode.Task;
+        interface MenueItem extends QuickPickItem {
+            taskItem: Task;
         }
         const taskItems: MenueItem[] = tasks.map<MenueItem>(task => {
             const item: MenueItem = { label: "hello", taskItem: task, description: "cheers" };
             return item;
         });
-        const selectedTask: MenueItem | undefined = await vscode.window.showQuickPick(taskItems, { placeHolder: localize("select.configuration", "Select a task to configure") });
+        const selectedTask: MenueItem | undefined = await window.showQuickPick(taskItems, { placeHolder: localize("select.configuration", "Select a task to configure") });
         if (!selectedTask) {
             throw new Error();
         }
         return [selectedTask.taskItem];
     }
 
-    public resolveTask(_task: vscode.Task): vscode.Task | undefined {
+    public resolveTask(_task: Task): Task | undefined {
         return undefined;
     }
 }
-export class CppBuildTaskProvider implements vscode.TaskProvider {
+export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
     static CppBuildSourceStr: string = "C/C++";
-    private tasks: vscode.Task[] | undefined;
+    private tasks: Task[] | undefined;
 
     constructor() { }
 
-    public async provideTasks(): Promise<vscode.Task[]> {
+    public async provideTasks(): Promise<Task[]> {
         if (this.tasks) {
             return this.tasks;
         }
@@ -72,8 +76,8 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     }
 
     // Resolves a task that has no [`execution`](#Task.execution) set.
-    public resolveTask(_task: vscode.Task): vscode.Task | undefined {
-        const execution: vscode.ProcessExecution | vscode.ShellExecution | vscode.CustomExecution | undefined = _task.execution;
+    public resolveTask(_task: Task): Task | undefined {
+        const execution: ProcessExecution | ShellExecution | CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
             return this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
@@ -82,12 +86,12 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     }
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
-    public async getTasks(appendSourceToName: boolean): Promise<vscode.Task[]> {
+    public async getTasks(appendSourceToName: boolean): Promise<Task[]> {
         if (this.tasks !== undefined) {
             return this.tasks;
         }
-        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        let emptyTasks: vscode.Task[] = [];
+        const editor: TextEditor | undefined = window.activeTextEditor;
+        const emptyTasks: Task[] = [];
         if (!editor) {
             return emptyTasks;
         }
@@ -165,11 +169,11 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         }
 
         // Create a build task per compiler path
-        //this.tasks = [];
-        let result: vscode.Task[] = [];
+        // this.tasks = [];
+        let result: Task[] = [];
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
-            result = knownCompilerPaths.map<vscode.Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
+            result = knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
         }
         // Task for user compiler path setting
         if (userCompilerPath) {
@@ -179,7 +183,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         return result;
     }
 
-    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => vscode.Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
+    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskLabel: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
@@ -203,6 +207,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskName,
+                description: taskName,
                 command: resolvedcompilerPath,
                 args: args,
                 options: options
@@ -210,23 +215,23 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
         }
 
         const activeClient: Client = ext.getActiveClient();
-        const uri: vscode.Uri | undefined = activeClient.RootUri;
+        const uri: Uri | undefined = activeClient.RootUri;
         if (!uri) {
             throw new Error("No client URI found in getBuildTasks()");
         }
-        //const scope: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(uri);
-        const scope: vscode.TaskScope = vscode.TaskScope.Workspace;
+        // const scope: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(uri);
+        const scope: TaskScope = TaskScope.Workspace;
         if (!scope) {
             throw new Error("No target WorkspaceFolder found in getBuildTasks()");
         }
 
-        const task: vscode.Task = new vscode.Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
-            new vscode.CustomExecution(async (): Promise<vscode.Pseudoterminal> =>
+        const task: Task = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
+            new CustomExecution(async (): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
                 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
             ), isCl ? '$msCompile' : '$gcc');
 
-        task.group = vscode.TaskGroup.Build;
+        task.group = TaskGroup.Build;
 
         return task;
     };
@@ -239,12 +244,12 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
             rawTasksJson.tasks = new Array();
         }
         // Find or create the task which should be created based on the selected "debug configuration".
-        let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+        let selectedTask: Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
         if (selectedTask) {
             return;
         }
 
-        const buildTasks: vscode.Task[] = await this.getTasks(true);
+        const buildTasks: Task[] = await this.getTasks(true);
         selectedTask = buildTasks.find(task => task.name === taskLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
@@ -253,7 +258,7 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
 
         rawTasksJson.version = "2.0.0";
 
-        const selectedTask2: vscode.Task = selectedTask;
+        const selectedTask2: Task = selectedTask;
         if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
             const task: any = {
                 ...selectedTask2.definition,
@@ -274,16 +279,16 @@ export class CppBuildTaskProvider implements vscode.TaskProvider {
     }
 }
 
-class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
-    private writeEmitter = new vscode.EventEmitter<string>();
-    private closeEmitter = new vscode.EventEmitter<number>();
-    public get onDidWrite(): vscode.Event<string> { return this.writeEmitter.event; }
-    public get onDidClose(): vscode.Event<number> { return this.closeEmitter.event; }
+class CustomBuildTaskTerminal implements Pseudoterminal {
+    private writeEmitter = new EventEmitter<string>();
+    private closeEmitter = new EventEmitter<number>();
+    public get onDidWrite(): Event<string> { return this.writeEmitter.event; }
+    public get onDidClose(): Event<number> { return this.closeEmitter.event; }
 
     constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
 
-    async open(_initialDimensions: vscode.TerminalDimensions | undefined): Promise<void> {
+    async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
         this.writeEmitter.fire("Starting build...\r\n");
@@ -337,11 +342,11 @@ class CustomBuildTaskTerminal implements vscode.Pseudoterminal {
 
     private get AdditionalEnvironment(): { [key: string]: string | string[] } | undefined {
 
-        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        const editor: TextEditor | undefined = window.activeTextEditor;
         if (!editor) {
             return undefined;
         }
-        const fileDir: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+        const fileDir: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
         if (!fileDir) {
             return undefined;
         }
@@ -376,11 +381,11 @@ export async function getRawTasksJson(): Promise<any> {
 }
 
 export function getTasksJsonPath(): string | undefined {
-    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    const editor: TextEditor | undefined = window.activeTextEditor;
     if (!editor) {
         return undefined;
     }
-    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    const folder: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
     if (!folder) {
         return undefined;
     }
