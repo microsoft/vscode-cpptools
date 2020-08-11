@@ -28,7 +28,7 @@ import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
 import * as nls from 'vscode-nls';
-import { CppBuildTaskProvider, QuickPickCppBuildTaskProvider } from './cppBuildTaskProvider';
+import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -171,7 +171,6 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    // taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, new QuickPickCppBuildTaskProvider(cppBuildTaskProvider));
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
     vscode.tasks.onDidStartTask(event => {

@@ -5,7 +5,7 @@
 import * as path from 'path';
 import {
     TaskDefinition, Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
-    TaskProvider,  TaskScope, QuickPickItem, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
+    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
 } from 'vscode';
 import * as os from 'os';
 import * as util from '../common';
@@ -30,37 +30,6 @@ export interface CppBuildTaskDefinition extends TaskDefinition {
     options: cp.ExecOptions | undefined;
 }
 
-export class QuickPickCppBuildTaskProvider implements TaskProvider {
-    private underlyingTaskProvider: TaskProvider;
-
-    public constructor(taskProvider: CppBuildTaskProvider) {
-        this.underlyingTaskProvider = taskProvider;
-    }
-
-    public async provideTasks(): Promise<Task[]> {
-        let tasks: Task[] | undefined | null = this.underlyingTaskProvider.provideTasks ?
-            await this.underlyingTaskProvider.provideTasks() : undefined;
-        if (!tasks) {
-            tasks = [];
-        }
-        interface MenueItem extends QuickPickItem {
-            taskItem: Task;
-        }
-        const taskItems: MenueItem[] = tasks.map<MenueItem>(task => {
-            const item: MenueItem = { label: "hello", taskItem: task, description: "cheers" };
-            return item;
-        });
-        const selectedTask: MenueItem | undefined = await window.showQuickPick(taskItems, { placeHolder: localize("select.configuration", "Select a task to configure") });
-        if (!selectedTask) {
-            throw new Error();
-        }
-        return [selectedTask.taskItem];
-    }
-
-    public resolveTask(_task: Task): Task | undefined {
-        return undefined;
-    }
-}
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
     static CppBuildSourceStr: string = "C/C++";
@@ -151,7 +120,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
         // Filter them based on the file type to get a reduced list appropriate for the active file.
-        let knownCompilerPaths: string[] | undefined;
+        const knownCompilerPathsSet: Set<string> = new Set();
         let knownCompilers: configs.KnownCompiler[] | undefined = await activeClient.getKnownCompilers();
         if (knownCompilers) {
             knownCompilers = knownCompilers.filter(info =>
@@ -159,9 +128,12 @@ export class CppBuildTaskProvider implements TaskProvider {
                 userCompilerPathAndArgs &&
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
                 (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
-            knownCompilerPaths = knownCompilers.map<string>(info => info.path);
+            knownCompilers.map<void>(info => {
+                knownCompilerPathsSet.add(info.path);
+            });
         }
-
+        const knownCompilerPaths: string[] | undefined = knownCompilerPathsSet.size ?
+            Array.from(knownCompilerPathsSet) : undefined;
         if (!knownCompilerPaths && !userCompilerPath) {
             // Don't prompt a message yet until we can make a data-based decision.
             telemetry.logLanguageServerEvent('noCompilerFound');
@@ -169,7 +141,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Create a build task per compiler path
-        // this.tasks = [];
         let result: Task[] = [];
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
@@ -219,12 +190,11 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!uri) {
             throw new Error("No client URI found in getBuildTasks()");
         }
-        // const scope: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(uri);
-        const scope: TaskScope = TaskScope.Workspace;
-        if (!scope) {
+        if (!workspace.getWorkspaceFolder(uri)) {
             throw new Error("No target WorkspaceFolder found in getBuildTasks()");
         }
 
+        const scope: TaskScope = TaskScope.Workspace;
         const task: Task = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
@@ -348,6 +318,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
         const fileDir: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
         if (!fileDir) {
+            window.showErrorMessage('This command is not yet available for single-file mode.');
             return undefined;
         }
         const file: string = editor.document.fileName;
