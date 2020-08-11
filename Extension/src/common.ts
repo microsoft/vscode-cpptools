@@ -23,6 +23,7 @@ import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
 import { PackageManager, IPackage } from './packageManager';
+import * as jsonc from 'comment-json';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -75,7 +76,7 @@ export function getRawTasksJson(): Promise<any> {
             fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
             let rawTasks: any = {};
             try {
-                rawTasks = JSON.parse(fileContents);
+                rawTasks = jsonc.parse(fileContents);
             } catch (error) {
                 return reject(new Error(failedToParseTasksJson));
             }
@@ -123,7 +124,7 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
     }
 
-    await writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
+    await writeFileText(tasksJsonPath, jsonc.stringify(rawTasksJson, null, settings.editorTabSize));
 }
 
 export function fileIsCOrCppSource(file: string): boolean {
