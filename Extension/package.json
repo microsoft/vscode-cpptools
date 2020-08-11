@@ -2243,6 +2243,7 @@
     "@typescript-eslint/parser": "^2.19.2",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
+    "comment-json": "^3.0.3",
     "escape-string-regexp": "^2.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.1",
@@ -2487,8 +2488,5 @@
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ]
     }
-  ],
-  "dependencies": {
-    "comment-json": "^3.0.3"
-  }
+  ]
 }
