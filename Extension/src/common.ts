@@ -73,7 +73,6 @@ export function getRawTasksJson(): Promise<any> {
                 return resolve({});
             }
             let fileContents: string = fs.readFileSync(path).toString();
-            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
             let rawTasks: any = {};
             try {
                 rawTasks = jsonc.parse(fileContents);
