@@ -6,6 +6,7 @@
 * Fix vcFormat formatting causing multi-byte character document corruption. [#5914](https://github.com/microsoft/vscode-cpptools/issues/5914)
 * Fix an IntelliSense crash (regression) when using the IntelliSense cache with a standalone header. [#5923](https://github.com/microsoft/vscode-cpptools/issues/5923)
 * Change `clangFormat` and `Default` formatting modes that use the `Visual Studio` style (or fallback style) to use the clang-format implementation instead of vcFormat.
+* Restore fallback to the base configuration if a custom configuration provider does not provide a configuration for a file and does not provide compiler info in a custom browse configuration.
 
 ## Version 0.30.0-insiders: August 4, 2020
 ### New Features
