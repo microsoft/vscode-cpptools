@@ -60,8 +60,11 @@ function isAsset(input: any): input is Asset {
  * @param input Incoming object.
  * @return Whether input is of type Build.
  */
-function isBuild(input: any): input is Build {
-    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 3;
+function isBuild(input: any, isValid: boolean = true): input is Build {
+    // if isValid = true, check if the input is a valid build type with 3 assets,
+    // otherwise, check if the input is a build type.
+    return input && input.name && typeof (input.name) === "string" && isArrayOfAssets(input.assets) &&
+        (!isValid || input.assets.length >= 3);
 }
 
 /**
@@ -84,7 +87,7 @@ function isArrayOfBuilds(input: any): input is Build[] {
     }
     // Only check the five most recent builds for validity -- no need to check all of them
     for (let i: number = 0; i < 5 && i < input.length; i++) {
-        if (!isBuild(input[i])) {
+        if (!isBuild(input[i], false)) {
             return false;
         }
     }
