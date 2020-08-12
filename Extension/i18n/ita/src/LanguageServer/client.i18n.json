@@ -34,5 +34,6 @@
 	"yes.button": "Sì",
 	"no.button": "No",
 	"configurations.received": "Configurazioni personalizzate ricevute:",
-	"browse.configuration.received": "La configurazione di esplorazione personalizzata è stata ricevuta: {0}"
+	"browse.configuration.received": "La configurazione di esplorazione personalizzata è stata ricevuta: {0}",
+	"browse.configuration": "Configurazione di esplorazione personalizzata: {0}"
 }

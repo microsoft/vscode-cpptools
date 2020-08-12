@@ -175,5 +175,7 @@
 	"parameters_label": "Parametry:",
 	"returns_label": "Vrací:",
 	"deprecated_label": "Zastaralé:",
-	"exceptions_label": "Výjimky:"
+	"exceptions_label": "Výjimky:",
+	"template_parameters_label": "Parametry šablony:",
+	"compiler_probe_command_line": "Příkazový řádek sondy kompilátoru: {0}"
 }

@@ -6,7 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as editorConfig from 'editorconfig'
+import * as editorConfig from 'editorconfig';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter
@@ -57,7 +57,7 @@ let diagnosticsCollection: vscode.DiagnosticCollection;
 let workspaceDisposables: vscode.Disposable[] = [];
 let workspaceReferences: refs.ReferencesManager;
 const openFileVersions: Map<string, number> = new Map<string, number>();
-const configStorage: Map<string, any> = new Map<string, any>();
+const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -299,20 +299,19 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
 }
 
-interface DocumentFormatParams { 
-    settings: any;
+interface DocumentFormatParams {
     uri: string;
-    insertSpaces: boolean;
-    tabSize: number;
     range: Range;
     character: string;
+    insertSpaces: boolean;
+    tabSize: number;
+    settings: any;
 }
 
 interface TextEdit {
     range: Range;
     newText: string;
 }
-
 
 interface GetFoldingRangesParams {
     uri: string;
@@ -1024,20 +1023,20 @@ export class DefaultClient implements Client {
                             });
                         }
                     }
-                    
+
                     class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
                             this.client = client;
                         }
-                        
+
                         public provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
-                                    let filePath = document.uri.fsPath;
+                                    const filePath: string = document.uri.fsPath;
                                     const configCallBack = (configSettings: any) => {
                                         console.log(configSettings);
-                                        configStorage.set(filePath, configSettings);
+                                        cachedEditorConfigSettings.set(filePath, configSettings);
                                         const params: DocumentFormatParams = {
                                             settings: configSettings,
                                             uri: document.uri.toString(),
@@ -1054,7 +1053,7 @@ export class DefaultClient implements Client {
                                                     line: range.end.line
                                                 }
                                             }
-                                        }
+                                        };
                                         return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
                                             .then((textEdits) => {
                                                 const result: vscode.TextEdit[] = [];
@@ -1064,30 +1063,30 @@ export class DefaultClient implements Client {
                                                         newText: textEdit.newText
                                                     });
                                                 });
-                                                resolve(result)
+                                                resolve(result);
                                             });
                                     };
-                                    let settings = configStorage.get(filePath);
-
+                                    const settings: any = cachedEditorConfigSettings.get(filePath);
                                     if (!settings) {
-                                        editorConfig.parse(filePath).then(configCallBack)
+                                        editorConfig.parse(filePath).then(configCallBack);
                                     } else {
-                                        configCallBack(settings)
+                                        configCallBack(settings);
                                     }
                                 });
                             });
                         };
                     }
-                    class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider { 
+
+                    class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
                             this.client = client;
                         }
 
-                        public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> { 
+                        public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
-                                    let filePath = document.uri.fsPath;
+                                    const filePath: string = document.uri.fsPath;
                                     const configCallBack = (configSettings: any) => {
                                         const params: DocumentFormatParams = {
                                             settings: configSettings,
@@ -1115,23 +1114,21 @@ export class DefaultClient implements Client {
                                                         newText: textEdit.newText
                                                     });
                                                 });
-                                                resolve(result)
+                                                resolve(result);
                                             });
                                     };
-                                    let settings = configStorage.get(filePath);
-
+                                    const settings: any = cachedEditorConfigSettings.get(filePath);
                                     if (!settings) {
-                                        editorConfig.parse(filePath).then(configCallBack)
+                                        editorConfig.parse(filePath).then(configCallBack);
                                     } else {
-                                        configCallBack(settings)
+                                        configCallBack(settings);
                                     }
                                 });
                             });
                         }
-                 }
-                
-                    class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
+                    }
 
+                    class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
                             this.client = client;
@@ -1140,9 +1137,8 @@ export class DefaultClient implements Client {
                         public provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
-                                    let filePath = document.uri.fsPath;
+                                    const filePath: string = document.uri.fsPath;
                                     const configCallBack = (configSettings: any) => {
-                                        
                                         console.log(configSettings);
                                         const params: DocumentFormatParams = {
                                             settings: configSettings,
@@ -1150,7 +1146,7 @@ export class DefaultClient implements Client {
                                             insertSpaces: options.insertSpaces,
                                             tabSize: options.tabSize,
                                             character: "",
-                                            range:  { 
+                                            range:  {
                                                 start: {
                                                     character: 0,
                                                     line: 0
@@ -1170,21 +1166,20 @@ export class DefaultClient implements Client {
                                                         newText: textEdit.newText
                                                     });
                                                 });
-                                                resolve(result)
+                                                resolve(result);
                                             });
                                     };
-                                    let settings = configStorage.get(filePath);
-
+                                    const settings: any = cachedEditorConfigSettings.get(filePath);
                                     if (!settings) {
-                                        editorConfig.parse(filePath).then(configCallBack)
+                                        editorConfig.parse(filePath).then(configCallBack);
                                     } else {
-                                        configCallBack(settings)
+                                        configCallBack(settings);
                                     }
                                 });
                             });
                         }
                     }
-                        
+
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -1325,7 +1320,7 @@ export class DefaultClient implements Client {
 
                             this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
                             this.disposables.push(vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this)));
-                            this.disposables.push(vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "{","}"));
+                            this.disposables.push(vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "{", "}", "\n"));
                             this.disposables.push(vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this)));
                             this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
                             this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
@@ -2373,8 +2368,8 @@ export class DefaultClient implements Client {
                 false /* ignoreDeleteEvents */);
 
             this.rootPathFileWatcher.onDidCreate((uri) => {
-                if (path.basename(uri.fsPath).toLowerCase() == ".editorconfig") {
-                    configStorage.clear()
+                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                    cachedEditorConfigSettings.clear();
                 }
 
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
@@ -2393,10 +2388,9 @@ export class DefaultClient implements Client {
             this.rootPathFileWatcher.onDidChange((uri) => {
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
 
-                if (path.basename(uri.fsPath).toLowerCase() == ".editorconfig") {
-                    configStorage.clear()
+                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                    cachedEditorConfigSettings.clear();
                 }
-
 
                 if (dotIndex !== -1) {
                     const ext: string = uri.fsPath.substr(dotIndex + 1);
@@ -2414,8 +2408,8 @@ export class DefaultClient implements Client {
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
-                if (path.basename(uri.fsPath).toLowerCase() == ".editorconfig") {
-                    configStorage.clear()
+                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                    cachedEditorConfigSettings.clear();
                 }
 
                 this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
