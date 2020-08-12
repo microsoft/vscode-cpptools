@@ -190,9 +190,9 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     if (!isFromSettingsChange && !vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
         return undefined;
     }
-    const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
+    const latestVersionOnline: PackageVersion = new PackageVersion(builds[0].name);
     // Allows testing pre-releases without accidentally downgrading to the latest version
-    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion))) {
+    if (userVersion.isGreaterThan(latestVersionOnline, "insiders")) {
         return undefined;
     }
 
