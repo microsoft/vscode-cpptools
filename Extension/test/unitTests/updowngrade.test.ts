@@ -22,7 +22,7 @@ suite("UpgradeDowngrade", () => {
 
     suite("DefaultChannel", () => {
         const updateChannel: string = "Default";
-        suite("Automatic Downgrade", () => {
+        suite("Downgrade", () => {
             test("Insiders to Release", () => {
                 const builds: Build[] = [{
                     name: insider3, assets: []}, {
@@ -33,6 +33,16 @@ suite("UpgradeDowngrade", () => {
                 const userVersion: PackageVersion = new PackageVersion(insider2);
                 const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                 assert.equal(targetBuild.name, release0);
+            });
+        });
+        suite("Internal Testing, no Downgrade", () => {
+            test("Insider to Release", () => {
+                const builds: Build[] = [{
+                    name: release0, assets: three_assets}];
+
+                const userVersion: PackageVersion = new PackageVersion(insider1);
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
             });
         });
     });
