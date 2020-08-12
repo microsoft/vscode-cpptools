@@ -1411,7 +1411,8 @@ export class DefaultClient implements Client {
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const settings_indentBraces: boolean[] = [];
         const settings_indentMultiLine: (string | undefined)[] = [];
-        const settings_preserveIndentWithinParenthesis: boolean[] = [];
+        const settings_indentWithinParentheses: (string | undefined)[] = [];
+        const settings_indentExistingWithinParentheses: boolean[] = [];
         const settings_indentCaseLabels: boolean[] = [];
         const settings_indentCaseContents: boolean[] = [];
         const settings_indentCaseContentsWhenBlock: boolean[] = [];
@@ -1486,7 +1487,8 @@ export class DefaultClient implements Client {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
-                settings_preserveIndentWithinParenthesis.push(setting.vcFormatPreserveIndentationWithinParenthesis);
+                settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
+                settings_indentExistingWithinParentheses.push(setting.vcFormatIndentExistingWithinParentheses);
                 settings_indentMultiLine.push(setting.vcFormatIndentMultiLineRelativeTo);
                 settings_indentCaseLabels.push(setting.vcFormatIndentCaseLabels);
                 settings_indentCaseContents.push(setting.vcFormatIndentCaseContents);
@@ -1594,7 +1596,8 @@ export class DefaultClient implements Client {
                     indent: {
                         braces: settings_indentBraces,
                         multiLineRelativeTo: settings_indentMultiLine,
-                        preserveIndentationWithinParentheses: settings_preserveIndentWithinParenthesis,
+                        indentWithinParentheses: settings_indentWithinParentheses,
+                        indentExistingWithinParentheses: settings_indentExistingWithinParentheses,
                         caseLabels: settings_indentCaseLabels,
                         caseContents: settings_indentCaseContents,
                         caseContentsWhenBlock: settings_indentCaseContentsWhenBlock,

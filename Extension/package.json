@@ -157,10 +157,24 @@
           "description": "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description%",
           "scope": "resource"
         },
-        "C_Cpp.vcFormat.indent.preserveIndentationWithinParentheses": {
+        "C_Cpp.vcFormat.indent.withinParentheses": {
+          "type": "string",
+          "enum": [
+            "alignToPatenthesis",
+            "indent"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToPatenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description%"
+          ],
+          "default": "indent",
+          "description": "%c_cpp.configuration.vcFormat.indent.withinParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.existingWithinParentheses": {
           "type": "boolean",
-          "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.preserveIndentationWithinParentheses.description%",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.indent.existingWithinParentheses.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.caseLabels": {
