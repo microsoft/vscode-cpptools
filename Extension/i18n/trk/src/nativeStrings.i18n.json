@@ -177,5 +177,5 @@
 	"deprecated_label": "Kullanım dışı:",
 	"exceptions_label": "Özel durumlar:",
 	"template_parameters_label": "Şablon Parametreleri:",
-	"compiler_probe_command_line": "Compiler probe command line: {0}"
+	"compiler_probe_command_line": "Derleyici yoklaması komut satırı: {0}"
 }
