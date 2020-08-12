@@ -1,8 +1,16 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.30.0-insiders2: August 11, 2020
+### Bug Fixes
+* Fix vcFormat setting default values. [#5907](https://github.com/microsoft/vscode-cpptools/issues/5907)
+* Fix vcFormat formatting causing multi-byte character document corruption. [#5914](https://github.com/microsoft/vscode-cpptools/issues/5914)
+* Fix an IntelliSense crash (regression) when using the IntelliSense cache with a standalone header. [#5923](https://github.com/microsoft/vscode-cpptools/issues/5923)
+* Change `clangFormat` and `Default` formatting modes that use the `Visual Studio` style (or fallback style) to use the clang-format implementation instead of vcFormat.
+* Restore fallback to the base configuration if a custom configuration provider does not provide a configuration for a file and does not provide compiler info in a custom browse configuration.
+
 ## Version 0.30.0-insiders: August 4, 2020
 ### New Features
-* Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429] (https://github.com/microsoft/vscode-cpptools/issues/429)
+* Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429](https://github.com/microsoft/vscode-cpptools/issues/429)
 * Add the `vcFormat` option to `C_Cpp.formatting` (with `C_Cpp.vcFormat.*` options) to enable VS-style formatting (instead of clang-format formatting). [#657](https://github.com/microsoft/vscode-cpptools/issues/657)
 
 ### Enhancements
@@ -27,6 +35,8 @@
 ### Potentially Breaking Changes
 * Settings `commentContinuationPatterns`, `enhancedColorization`, and `codeFolding` are no longer available in per-Folder settings (only Workspace or higher settings). [PR #5830](https://github.com/microsoft/vscode-cpptools/pull/5830)
 * Fix compile command arguments not being used when `compilerPath` is set (so the compile command arguments need to be compatible now).
+* Default formatting results may be different if the "Visual Studio" style is used -- use the "Emulated Visual Studio" style to get the previous behavior. For example, see [#5901](https://github.com/microsoft/vscode-cpptools/issues/5901)
+* If a non-matching `intelliSenseMode` was being used, such as clang-x64 with a gcc ARM compiler, then we may auto-fix it internally, which may cause changes to IntelliSense behavior.
 
 ## Version 0.29.0: July 15, 2020
 ### New Features
