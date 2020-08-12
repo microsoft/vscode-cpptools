@@ -37,7 +37,7 @@ export class ABTestSettings {
         this.recursiveIncludesDefault = new PersistentState<number>("ABTest.2", 100);
         this.gotoDefIntelliSenseDefault = new PersistentState<number>("ABTest.3", 100);
         this.enhancedColorizationDefault = new PersistentState<number>("ABTest.4", 100);
-        this.minimumVSCodeVersionDefault = new PersistentState<string>("ABTest.5","1.43.2");
+        this.minimumVSCodeVersionDefault = new PersistentState<string>("ABTest.5", "1.43.2");
         this.settings = {
             defaultIntelliSenseEngine: this.intelliSenseEngineDefault.Value,
             recursiveIncludes: this.recursiveIncludesDefault.Value,
