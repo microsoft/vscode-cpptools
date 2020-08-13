@@ -50,7 +50,19 @@ export class PackageVersion {
             this.suffix === other.suffix && this.suffixVersion === other.suffixVersion;
     }
 
-    public isGreaterThan(other: PackageVersion, suffixStr: string | undefined = undefined): boolean {
+    public isVsCodeVersionGreaterThan(other: PackageVersion): boolean {
+        return this.isGreaterThan(other, 'insider');
+    }
+
+    public isExtensionVersionGreaterThan(other: PackageVersion): boolean {
+        return this.isGreaterThan(other, 'insiders');
+    }
+
+    public isMajorMinorPatchGreaterThan(other: PackageVersion): boolean {
+        return this.isGreaterThan(other, "");
+    }
+
+    private isGreaterThan(other: PackageVersion, suffixStr: string): boolean {
         if (suffixStr && ((this.suffix && !this.suffix.startsWith(suffixStr)) || (other.suffix && !other.suffix.startsWith(suffixStr)))) {
             return false;
         }
