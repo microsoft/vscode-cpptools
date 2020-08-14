@@ -105,6 +105,7 @@ export function vsixNameForPlatform(info: PlatformInformation): string {
                 switch (platformInfo.architecture) {
                     case 'x86_64': return 'cpptools-linux.vsix';
                     case 'arm': return 'cpptools-linux-armhf.vsix';
+                    case 'arm64': return 'cpptools-linux-aarch64.vsix';
                     default: throw new Error(`Unexpected Linux architecture: ${platformInfo.architecture}`);
                 }
             }
@@ -189,9 +190,9 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     if (!isFromSettingsChange && !vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
         return undefined;
     }
-    const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
+    const latestVersionOnline: PackageVersion = new PackageVersion(builds[0].name);
     // Allows testing pre-releases without accidentally downgrading to the latest version
-    if ((updateChannel === 'Insiders') && (userVersion.isGreaterThan(latestVersion))) {
+    if (userVersion.isGreaterThan(latestVersionOnline, "insiders")) {
         return undefined;
     }
 

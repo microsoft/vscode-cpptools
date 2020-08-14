@@ -177,5 +177,5 @@
 	"deprecated_label": "Preterido:",
 	"exceptions_label": "Exceções:",
 	"template_parameters_label": "Parâmetros do Modelo:",
-	"compiler_probe_command_line": "Compiler probe command line: {0}"
+	"compiler_probe_command_line": "Linha de comando de investigação do compilador: {0}"
 }
