@@ -299,7 +299,7 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
 }
 
-interface DocumentFormatParams {
+interface FormatParams {
     uri: string;
     range: Range;
     character: string;
@@ -405,7 +405,7 @@ const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, Loca
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-const DocumentFormatRequest: RequestType<DocumentFormatParams, TextEdit[], void, void> = new RequestType<DocumentFormatParams, TextEdit[], void, void>('cpptools/documentFormat');
+const DocumentFormatRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/documentFormat');
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
@@ -1037,7 +1037,7 @@ export class DefaultClient implements Client {
                                     const configCallBack = (configSettings: any) => {
                                         console.log(configSettings);
                                         cachedEditorConfigSettings.set(filePath, configSettings);
-                                        const params: DocumentFormatParams = {
+                                        const params: FormatParams = {
                                             settings: configSettings,
                                             uri: document.uri.toString(),
                                             insertSpaces: options.insertSpaces,
@@ -1066,11 +1066,11 @@ export class DefaultClient implements Client {
                                                 resolve(result);
                                             });
                                     };
-                                    const settings: any = cachedEditorConfigSettings.get(filePath);
-                                    if (!settings) {
+                                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                                    if (!editorConfigSettings) {
                                         editorConfig.parse(filePath).then(configCallBack);
                                     } else {
-                                        configCallBack(settings);
+                                        configCallBack(editorConfigSettings);
                                     }
                                 });
                             });
@@ -1086,9 +1086,18 @@ export class DefaultClient implements Client {
                         public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
+                                    const settings: CppSettings = new CppSettings();
+                                    if (settings.formattingEngine !== "vcFormat") {
+                                        // If not using vcFormat, don't process on-type requests
+                                        // for '{' or '\n'
+                                        if (ch === '{' || ch === '\n') {
+                                            const result: vscode.TextEdit[] = [];
+                                            resolve(result);
+                                        }
+                                    }
                                     const filePath: string = document.uri.fsPath;
                                     const configCallBack = (configSettings: any) => {
-                                        const params: DocumentFormatParams = {
+                                        const params: FormatParams = {
                                             settings: configSettings,
                                             uri: document.uri.toString(),
                                             insertSpaces: options.insertSpaces,
@@ -1117,11 +1126,11 @@ export class DefaultClient implements Client {
                                                 resolve(result);
                                             });
                                     };
-                                    const settings: any = cachedEditorConfigSettings.get(filePath);
-                                    if (!settings) {
+                                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                                    if (!editorConfigSettings) {
                                         editorConfig.parse(filePath).then(configCallBack);
                                     } else {
-                                        configCallBack(settings);
+                                        configCallBack(editorConfigSettings);
                                     }
                                 });
                             });
@@ -1140,7 +1149,7 @@ export class DefaultClient implements Client {
                                     const filePath: string = document.uri.fsPath;
                                     const configCallBack = (configSettings: any) => {
                                         console.log(configSettings);
-                                        const params: DocumentFormatParams = {
+                                        const params: FormatParams = {
                                             settings: configSettings,
                                             uri: document.uri.toString(),
                                             insertSpaces: options.insertSpaces,
@@ -1169,11 +1178,11 @@ export class DefaultClient implements Client {
                                                 resolve(result);
                                             });
                                     };
-                                    const settings: any = cachedEditorConfigSettings.get(filePath);
-                                    if (!settings) {
+                                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                                    if (!editorConfigSettings) {
                                         editorConfig.parse(filePath).then(configCallBack);
                                     } else {
-                                        configCallBack(settings);
+                                        configCallBack(editorConfigSettings);
                                     }
                                 });
                             });

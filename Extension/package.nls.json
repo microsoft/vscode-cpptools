@@ -28,7 +28,7 @@
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.innermostParenthesis.description": "the innermost open parenthesis",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.statementBegin.description": "the beginning of the current statement",
     "c_cpp.configuration.vcFormat.indent.withinParentheses.description": "When a new line is typed, it is aligned under the opening parenthesis or it is indented by the amount specified in the Editor: Tab Size setting",
-    "c_cpp.configuration.vcFormat.indent.withinParentheses.alignToPatenthesis.description": "New line is aligned under the opening parenthesis",
+    "c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.description": "New line is aligned under the opening parenthesis",
     "c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description": "New line is indented by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description": "In existing code, do not use the setting for alignment of new lines within parentheses",
     "c_cpp.configuration.vcFormat.indent.caseLabels.description": "Labels are indented relative to switch statements by the amount specified in the Editor: Tab Size setting",

@@ -136,11 +136,11 @@
         "C_Cpp.vcFormat.indent.withinParentheses": {
           "type": "string",
           "enum": [
-            "alignToPatenthesis",
+            "alignToParenthesis",
             "indent"
           ],
           "enumDescriptions": [
-            "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToPatenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.description%",
             "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description%"
           ],
           "default": "indent",
