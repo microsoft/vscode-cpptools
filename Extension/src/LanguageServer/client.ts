@@ -1412,7 +1412,7 @@ export class DefaultClient implements Client {
         const settings_indentBraces: boolean[] = [];
         const settings_indentMultiLine: (string | undefined)[] = [];
         const settings_indentWithinParentheses: (string | undefined)[] = [];
-        const settings_indentExistingWithinParentheses: boolean[] = [];
+        const settings_indentPreserveWithinParentheses: boolean[] = [];
         const settings_indentCaseLabels: boolean[] = [];
         const settings_indentCaseContents: boolean[] = [];
         const settings_indentCaseContentsWhenBlock: boolean[] = [];
@@ -1488,7 +1488,7 @@ export class DefaultClient implements Client {
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
-                settings_indentExistingWithinParentheses.push(setting.vcFormatIndentExistingWithinParentheses);
+                settings_indentPreserveWithinParentheses.push(setting.vcFormatindentPreserveWithinParentheses);
                 settings_indentMultiLine.push(setting.vcFormatIndentMultiLineRelativeTo);
                 settings_indentCaseLabels.push(setting.vcFormatIndentCaseLabels);
                 settings_indentCaseContents.push(setting.vcFormatIndentCaseContents);
@@ -1597,7 +1597,7 @@ export class DefaultClient implements Client {
                         braces: settings_indentBraces,
                         multiLineRelativeTo: settings_indentMultiLine,
                         indentWithinParentheses: settings_indentWithinParentheses,
-                        indentExistingWithinParentheses: settings_indentExistingWithinParentheses,
+                        indentPreserveWithinParentheses: settings_indentPreserveWithinParentheses,
                         caseLabels: settings_indentCaseLabels,
                         caseContents: settings_indentCaseContents,
                         caseContentsWhenBlock: settings_indentCaseContentsWhenBlock,

@@ -171,10 +171,10 @@
           "description": "%c_cpp.configuration.vcFormat.indent.withinParentheses.description%",
           "scope": "resource"
         },
-        "C_Cpp.vcFormat.indent.existingWithinParentheses": {
+        "C_Cpp.vcFormat.indent.preserveWithinParentheses": {
           "type": "boolean",
-          "default": true,
-          "description": "%c_cpp.configuration.vcFormat.indent.existingWithinParentheses.description%",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.caseLabels": {
@@ -338,13 +338,13 @@
         },
         "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyType": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyType.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyFunction": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyFunction.description%",
           "scope": "resource"
         },

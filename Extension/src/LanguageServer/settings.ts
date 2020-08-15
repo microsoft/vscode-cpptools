@@ -181,8 +181,8 @@ export class CppSettings extends Settings {
         return super.Section.get<string>("vcFormat.indent.withinParentheses");
     }
 
-    public get vcFormatIndentExistingWithinParentheses(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.existingWithinParentheses") === true;
+    public get vcFormatindentPreserveWithinParentheses(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.preserveWithinParentheses") === true;
     }
 
     public get vcFormatIndentCaseLabels(): boolean {
