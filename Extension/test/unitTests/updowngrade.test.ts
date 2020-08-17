@@ -44,6 +44,27 @@ suite("UpgradeDowngrade", () => {
                 const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                 assert.equal(targetBuild, undefined);
             });
+            test("Insider to Insider", () => {
+                const builds: Build[] = [{
+                    name: insider2, assets: three_assets}, {
+                    name: insider1, assets: three_assets}, {
+                    name: release0, assets: three_assets}];
+
+                const userVersion: PackageVersion = new PackageVersion(insider3);
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
+            });
+            test("Release to Insider", () => {
+                const builds: Build[] = [{
+                    name: insider3, assets: three_assets}, {
+                    name: insider2, assets: three_assets}, {
+                    name: insider1, assets: three_assets}, {
+                    name: release0, assets: three_assets}];
+
+                const userVersion: PackageVersion = new PackageVersion(release1);
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
+            });
         });
     });
 
