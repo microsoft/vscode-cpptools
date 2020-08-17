@@ -405,7 +405,7 @@ const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, Loca
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-const DocumentFormatRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/documentFormat');
+const DocumentFormatRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/format');
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
@@ -1034,11 +1034,9 @@ export class DefaultClient implements Client {
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
                                     const filePath: string = document.uri.fsPath;
-                                    const configCallBack = (configSettings: any) => {
-                                        console.log(configSettings);
-                                        cachedEditorConfigSettings.set(filePath, configSettings);
+                                    const configCallBack = (editorConfigSettings: any | undefined) => {
                                         const params: FormatParams = {
-                                            settings: configSettings,
+                                            settings: { ...editorConfigSettings },
                                             uri: document.uri.toString(),
                                             insertSpaces: options.insertSpaces,
                                             tabSize: options.tabSize,
@@ -1066,11 +1064,17 @@ export class DefaultClient implements Client {
                                                 resolve(result);
                                             });
                                     };
-                                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
-                                    if (!editorConfigSettings) {
-                                        editorConfig.parse(filePath).then(configCallBack);
+                                    const settings: CppSettings = new CppSettings();
+                                    if (settings.formattingEngine !== "vcFormat") {
+                                        configCallBack(undefined);
                                     } else {
-                                        configCallBack(editorConfigSettings);
+                                        const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                                        if (!editorConfigSettings) {
+                                            editorConfig.parse(filePath).then(configCallBack);
+                                        } else {
+                                            cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                                            configCallBack(editorConfigSettings);
+                                        }
                                     }
                                 });
                             });
@@ -1086,18 +1090,10 @@ export class DefaultClient implements Client {
                         public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
-                                    const settings: CppSettings = new CppSettings();
-                                    if (settings.formattingEngine !== "vcFormat") {
-                                        // If not using vcFormat, only process on-type requests for ';'
-                                        if (ch !== ';') {
-                                            const result: vscode.TextEdit[] = [];
-                                            resolve(result);
-                                        }
-                                    }
                                     const filePath: string = document.uri.fsPath;
-                                    const configCallBack = (configSettings: any) => {
+                                    const configCallBack = (editorConfigSettings: any | undefined) => {
                                         const params: FormatParams = {
-                                            settings: configSettings,
+                                            settings: { ...editorConfigSettings },
                                             uri: document.uri.toString(),
                                             insertSpaces: options.insertSpaces,
                                             tabSize: options.tabSize,
@@ -1125,11 +1121,22 @@ export class DefaultClient implements Client {
                                                 resolve(result);
                                             });
                                     };
-                                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
-                                    if (!editorConfigSettings) {
-                                        editorConfig.parse(filePath).then(configCallBack);
+                                    const settings: CppSettings = new CppSettings();
+                                    if (settings.formattingEngine !== "vcFormat") {
+                                        // If not using vcFormat, only process on-type requests for ';'
+                                        if (ch !== ';') {
+                                            const result: vscode.TextEdit[] = [];
+                                            resolve(result);
+                                        }
+                                        configCallBack(undefined);
                                     } else {
-                                        configCallBack(editorConfigSettings);
+                                        const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                                        if (!editorConfigSettings) {
+                                            editorConfig.parse(filePath).then(configCallBack);
+                                        } else {
+                                            cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                                            configCallBack(editorConfigSettings);
+                                        }
                                     }
                                 });
                             });
@@ -1146,10 +1153,9 @@ export class DefaultClient implements Client {
                             return new Promise<vscode.TextEdit[]>((resolve, reject) => {
                                 this.client.notifyWhenReady(() => {
                                     const filePath: string = document.uri.fsPath;
-                                    const configCallBack = (configSettings: any) => {
-                                        console.log(configSettings);
+                                    const configCallBack = (editorConfigSettings: any| undefined) => {
                                         const params: FormatParams = {
-                                            settings: configSettings,
+                                            settings: { ...editorConfigSettings },
                                             uri: document.uri.toString(),
                                             insertSpaces: options.insertSpaces,
                                             tabSize: options.tabSize,
@@ -1177,11 +1183,17 @@ export class DefaultClient implements Client {
                                                 resolve(result);
                                             });
                                     };
-                                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
-                                    if (!editorConfigSettings) {
-                                        editorConfig.parse(filePath).then(configCallBack);
+                                    const settings: CppSettings = new CppSettings();
+                                    if (settings.formattingEngine !== "vcFormat") {
+                                        configCallBack(undefined);
                                     } else {
-                                        configCallBack(editorConfigSettings);
+                                        const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                                        if (!editorConfigSettings) {
+                                            editorConfig.parse(filePath).then(configCallBack);
+                                        } else {
+                                            cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                                            configCallBack(editorConfigSettings);
+                                        }
                                     }
                                 });
                             });
