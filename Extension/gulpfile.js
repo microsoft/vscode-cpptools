@@ -20,7 +20,7 @@ const filter = require('gulp-filter');
 const vinyl = require('vinyl');
 const parse5 = require('parse5');
 const traverse = require('parse5-traverse');
-const jsonc = require('jsonc-parser'); // Used to allow comments in nativeStrings.json
+const jsonc = require('comment-json'); // Used to allow comments in nativeStrings.json
 
 
 // Patterns to find HTML files

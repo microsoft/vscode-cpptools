@@ -16,7 +16,7 @@ import { getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
-import * as jsonc from 'jsonc-parser';
+import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
