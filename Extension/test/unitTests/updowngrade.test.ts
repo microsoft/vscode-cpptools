@@ -58,7 +58,7 @@ suite("UpgradeDowngrade", () => {
                 const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                 assert.equal(targetBuild, undefined);
             });
-            test("Release to Insider", () => {
+            test("Release to Insider (master)", () => {
                 const builds: Build[] = [{
                     name: insider3, assets: three_assets}, {
                     name: insider2, assets: three_assets}, {
@@ -66,6 +66,16 @@ suite("UpgradeDowngrade", () => {
                     name: release0, assets: three_assets}];
                 // In internal testing, the name of the release has a "-master" at the end of it.
                 const userVersion: PackageVersion = new PackageVersion(release1 + "-master");
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
+            });
+            test("Release to Insider", () => {
+                const builds: Build[] = [{
+                    name: insider3, assets: three_assets}, {
+                    name: insider2, assets: three_assets}, {
+                    name: insider1, assets: three_assets}, {
+                    name: release0, assets: three_assets}];
+                const userVersion: PackageVersion = new PackageVersion(release1);
                 const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                 assert.equal(targetBuild, undefined);
             });
@@ -94,7 +104,7 @@ suite("UpgradeDowngrade", () => {
                     const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });
-                test("Release to Insider", () => {
+                test("Release to Insider (master)", () => {
                     const builds: Build[] = [{
                         name: insider3, assets: three_assets}, {
                         name: insider2, assets: three_assets}, {
@@ -102,6 +112,16 @@ suite("UpgradeDowngrade", () => {
                         name: release0, assets: three_assets}];
                     // In internal testing, the name of the release has a "-master" at the end of it.
                     const userVersion: PackageVersion = new PackageVersion(release1 + "-master");
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                    assert.equal(targetBuild, undefined);
+                });
+                test("Release to Insider", () => {
+                    const builds: Build[] = [{
+                        name: insider3, assets: three_assets}, {
+                        name: insider2, assets: three_assets}, {
+                        name: insider1, assets: three_assets}, {
+                        name: release0, assets: three_assets}];
+                    const userVersion: PackageVersion = new PackageVersion(release1);
                     const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });

@@ -55,16 +55,23 @@ function isAsset(input: any): input is Asset {
 }
 
 /**
- * Determine whether an object is of type Build. Note that earlier releases of the extension
- * do not have 3 or greater Assets (Mac, Win, Linux). Only call this on more recent Builds.
+ * Determine whether an object is of type Build.
  * @param input Incoming object.
  * @return Whether input is of type Build.
  */
-function isBuild(input: any, isValid: boolean = false): input is Build {
-    // if isValid = true, check if the input is a valid build type with 3 assets,
-    // otherwise, check if the input is a build type.
-    return input && input.name && typeof (input.name) === "string" && isArrayOfAssets(input.assets) &&
-        (!isValid || input.assets.length >= 3);
+function isBuild(input: any): input is Build {
+    return input && input.name && typeof (input.name) === "string" && isArrayOfAssets(input.assets);
+}
+
+/**
+ * Determine whether an object is of type Build, and it has 3 or more assets (i.e valid build).
+ * Note that earlier releases of the extension do not have 3 or greater Assets
+ * (Mac, Win, Linux). Only call this on more recent Builds.
+ * @param input Incoming object.
+ * @return Whether input is a valid build.
+ */
+function isValidBuild(input: any): input is Build {
+    return isBuild(input) && input.assets.length >= 3;
 }
 
 /**
@@ -88,11 +95,11 @@ function getArrayOfBuilds(input: any): Build[] {
     }
     // Only return the the most recent release and insider builds.
     for (let i: number = 0, j: number = 0; i < input.length; i++) {
-        if (isBuild(input[i], false)) {
+        if (isBuild(input[i])) {
             builds[j] = input[i];
             j++;
             // the latest "valid" released build
-            if (input[i].name.indexOf('-') === -1 && isBuild(input[i], true)) {
+            if (input[i].name.indexOf('-') === -1 && isValidBuild(input[i])) {
                 break;
             }
         }
@@ -205,13 +212,13 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     if (updateChannel === 'Insiders') {
         needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
         // Check if the assets are available
-        useBuild = (build: Build): boolean => isBuild(build, true);
+        useBuild = isValidBuild
     } else if (updateChannel === 'Default') {
         // If the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean {
             return installed.isExtensionVersionGreaterThan(target); };
         // Look for the latest non-insiders released build
-        useBuild = (build: Build): boolean => build.name.indexOf('-') === -1 && isBuild(build, true);
+        useBuild = (build: Build): boolean => build.name.indexOf('-') === -1 && isValidBuild(build);
     } else {
         throw new Error('Incorrect updateChannel setting provided');
     }
