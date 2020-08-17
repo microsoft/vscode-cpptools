@@ -1807,27 +1807,29 @@ export class DefaultClient implements Client {
         const changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenReady(() => {
             if (Object.keys(changedSettings).length > 0) {
-                if (changedSettings["commentContinuationPatterns"]) {
-                    updateLanguageConfigurations();
-                }
-                if (changedSettings["codeFolding"]) {
-                    const settings: CppSettings = new CppSettings();
-                    if (settings.codeFolding) {
-                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
-                    } else if (this.codeFoldingProviderDisposable) {
-                        this.codeFoldingProviderDisposable.dispose();
-                        this.codeFoldingProviderDisposable = undefined;
+                if (isFirstClient) {
+                    if (changedSettings["commentContinuationPatterns"]) {
+                        updateLanguageConfigurations();
                     }
-                }
-                if (changedSettings["enhancedColorization"]) {
-                    const settings: CppSettings = new CppSettings();
-                    if (settings.enhancedColorization && this.semanticTokensLegend) {
-                        this.semanticTokensProvider = new SemanticTokensProvider(this);
-                        this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
-                    } else if (this.semanticTokensProviderDisposable) {
-                        this.semanticTokensProviderDisposable.dispose();
-                        this.semanticTokensProviderDisposable = undefined;
-                        this.semanticTokensProvider = undefined;
+                    if (changedSettings["codeFolding"]) {
+                        const settings: CppSettings = new CppSettings();
+                        if (settings.codeFolding) {
+                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                        } else if (this.codeFoldingProviderDisposable) {
+                            this.codeFoldingProviderDisposable.dispose();
+                            this.codeFoldingProviderDisposable = undefined;
+                        }
+                    }
+                    if (changedSettings["enhancedColorization"]) {
+                        const settings: CppSettings = new CppSettings();
+                        if (settings.enhancedColorization && this.semanticTokensLegend) {
+                            this.semanticTokensProvider = new SemanticTokensProvider(this);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
+                        } else if (this.semanticTokensProviderDisposable) {
+                            this.semanticTokensProviderDisposable.dispose();
+                            this.semanticTokensProviderDisposable = undefined;
+                            this.semanticTokensProvider = undefined;
+                        }
                     }
                 }
                 this.configuration.onDidChangeSettings();
@@ -1874,6 +1876,9 @@ export class DefaultClient implements Client {
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
+        if (this.semanticTokensProvider) {
+            this.semanticTokensProvider.invalidateFile(document.uri.toString());
+        }
         openFileVersions.delete(document.uri.toString());
     }
 
