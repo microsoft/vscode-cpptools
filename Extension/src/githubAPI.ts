@@ -148,14 +148,7 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
                 return undefined;
             }
 
-            // If the user version is greater than or incomparable to the latest available verion then there is no need to update
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-            const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-            const latestIsCorrect: boolean = latestVersion.suffix !== 'insiders' || updateChannel === 'insiders';
-            if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion) && latestIsCorrect))) {
-                return undefined;
-            }
-
             const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
             if (targetBuild === undefined) {
                 // no action
@@ -201,15 +194,8 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     }
     const latestVersionOnline: PackageVersion = new PackageVersion(builds[0].name);
     // Allows testing pre-releases without accidentally downgrading to the latest version
-    if (userVersion.isExtensionVersionGreaterThan(latestVersionOnline)) {
-        return undefined;
-    }
-
-    // If the user version is greater than or incomparable to the latest available verion then there is no need to update
-
-    const latestValidVersion: PackageVersion = new PackageVersion(builds[0].name);
-    const latestIsCorrect: boolean = latestValidVersion.suffix !== 'insiders' || updateChannel === 'insiders';
-    if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestValidVersion) && latestIsCorrect))) {
+    if ((!testingInsidersVsixInstall && userVersion.suffix && userVersion.suffix !== 'insiders') ||
+        userVersion.isExtensionVersionGreaterThan(latestVersionOnline)) {
         return undefined;
     }
 
@@ -218,13 +204,13 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
         needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
-        // check if the assets are available (insider)
+        // Check if the assets are available
         useBuild = (build: Build): boolean => isBuild(build, true);
     } else if (updateChannel === 'Default') {
-        // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
+        // If the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean {
             return installed.isExtensionVersionGreaterThan(target); };
-        // look for the latest non-insiders released build
+        // Look for the latest non-insiders released build
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1 && isBuild(build, true);
     } else {
         throw new Error('Incorrect updateChannel setting provided');
