@@ -298,22 +298,17 @@ gulp.task("translations-import", (done) => {
 // ****************************
 
 async function DownloadFile(urlString) {
-    const url = new URL(urlString);
-    const options = {
-        host: url.host,
-        path: url.path,
-    };
-
     const buffers = [];
     return new Promise((resolve, reject) => {
         const req = https.request(urlString, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302 && !response.headers.location) {
+            if (response.statusCode === 301 || response.statusCode === 302) {
                 // Redirect - download from new location
                 let redirectUrl;
                 if (typeof response.headers.location === "string") {
                     redirectUrl = response.headers.location;
                 } else {
                     if (!response.headers.location) {
+                        console.log(`Invalid download location received`);
                         return reject();
                     }
                     redirectUrl = response.headers.location[0];
@@ -342,13 +337,13 @@ async function DownloadFile(urlString) {
             });
 
             response.on('error', err => {
-                console.log(`Problem with request: '${err.message}'`);
+                console.log(`problem with request: '${err.message}'`);
                 return reject();
             });
         });
 
         req.on('error', err => {
-            console.log(`Problem with request: '${err.message}'`);
+            console.log(`problem with request: '${err.message}'`);
             return reject();
         });
 
@@ -358,7 +353,7 @@ async function DownloadFile(urlString) {
     
 }
 
-async function generatePackageHash(packageJson) {
+async function generatePackageHashes(packageJson) {
     const downloadAndGetHash = async (url) => {
         console.log(url);
         try {
@@ -370,7 +365,7 @@ async function generatePackageHash(packageJson) {
                 return value;
             }
             return undefined;
-        } catch (e) {
+        } catch (err) {
             return undefined;
         }
     };
@@ -381,19 +376,20 @@ async function generatePackageHash(packageJson) {
         if (hash) {
             dependency.integrity = hash;
             console.log(`integrity: '${hash}'`);
+        } else {
+            console.log(`No hash generated for package '${dependency.description}`);
         }
+        console.log(`\n`);
     }
 
     let content = JSON.stringify(packageJson, null, 2);
     return content;
 }
 
-gulp.task('generate-package-hash', async (done) => {
+gulp.task('generate-package-hashes', async (done) => {
     const packageJsonPath = './package.json';
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString());
-    const content = await generatePackageHash(packageJson);
-
-    console.log("Writing integrity hashes into package.json ...");
+    const content = await generatePackageHashes(packageJson);
     fs.writeFileSync(packageJsonPath, content);
     done();
 });
