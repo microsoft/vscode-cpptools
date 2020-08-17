@@ -82,7 +82,7 @@ function isArrayOfAssets(input: any): input is Asset[] {
  * @return An array of type Build[].
  */
 function getArrayOfBuilds(input: any): Build[] {
-    let builds: Build[] = [];
+    const builds: Build[] = [];
     if (!input || !(input instanceof Array) || input.length === 0) {
         return builds;
     }
