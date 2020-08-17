@@ -1090,7 +1090,7 @@ export class DefaultClient implements Client {
                                     if (settings.formattingEngine !== "vcFormat") {
                                         // If not using vcFormat, don't process on-type requests
                                         // for '{' or '\n'
-                                        if (ch === '{' || ch === '\n') {
+                                        if (ch !== ';') {
                                             const result: vscode.TextEdit[] = [];
                                             resolve(result);
                                         }
