@@ -94,10 +94,9 @@ function getArrayOfBuilds(input: any): Build[] {
         return builds;
     }
     // Only return the the most recent release and insider builds.
-    for (let i: number = 0, j: number = 0; i < input.length; i++) {
+    for (let i: number = 0; i < input.length; i++) {
         if (isBuild(input[i])) {
-            builds[j] = input[i];
-            j++;
+            builds.push(input[i]);
             // the latest "valid" released build
             if (input[i].name.indexOf('-') === -1 && isValidBuild(input[i])) {
                 break;
