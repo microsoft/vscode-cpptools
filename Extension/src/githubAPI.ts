@@ -205,6 +205,14 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         return undefined;
     }
 
+    // If the user version is greater than or incomparable to the latest available verion then there is no need to update
+
+    const latestValidVersion: PackageVersion = new PackageVersion(builds[0].name);
+    const latestIsCorrect: boolean = latestValidVersion.suffix !== 'insiders' || updateChannel === 'insiders';
+    if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestValidVersion) && latestIsCorrect))) {
+        return undefined;
+    }
+
     // Get predicates to determine the build to install, if any
     let needsUpdate: (installed: PackageVersion, target: PackageVersion) => boolean;
     let useBuild: (build: Build) => boolean;
