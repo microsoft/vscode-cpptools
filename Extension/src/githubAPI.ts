@@ -60,7 +60,7 @@ function isAsset(input: any): input is Asset {
  * @param input Incoming object.
  * @return Whether input is of type Build.
  */
-function isBuild(input: any, isValid: boolean = true): input is Build {
+function isBuild(input: any, isValid: boolean = false): input is Build {
     // if isValid = true, check if the input is a valid build type with 3 assets,
     // otherwise, check if the input is a build type.
     return input && input.name && typeof (input.name) === "string" && isArrayOfAssets(input.assets) &&
@@ -77,21 +77,27 @@ function isArrayOfAssets(input: any): input is Asset[] {
 }
 
 /**
- * Determine whether an object is of type Build[].
+ * Return the most recent released builds.
  * @param input Incoming object.
- * @return Whether input is of type Build[].
+ * @return An array of type Build[].
  */
-function isArrayOfBuilds(input: any): input is Build[] {
+function getArrayOfBuilds(input: any): Build[] {
+    let builds: Build[] = [];
     if (!input || !(input instanceof Array) || input.length === 0) {
-        return false;
+        return builds;
     }
-    // Only check the five most recent builds for validity -- no need to check all of them
-    for (let i: number = 0; i < 5 && i < input.length; i++) {
-        if (!isBuild(input[i], false)) {
-            return false;
+    // Only return the the most recent release and insider builds.
+    for (let i: number = 0, j: number = 0; i < input.length; i++) {
+        if (isBuild(input[i], false)) {
+            builds[j] = input[i];
+            j++;
+            // the latest "valid" released build
+            if (input[i].name.indexOf('-') === -1 && isBuild(input[i], true)) {
+                break;
+            }
         }
     }
-    return true;
+    return builds;
 }
 
 /**
@@ -209,8 +215,8 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     } else if (updateChannel === 'Default') {
         // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
-        // look for the latest non-insiders released build
-        useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
+        // look for the latest non-insiders valid released build
+        useBuild = (build: Build): boolean => build.name.indexOf('-') === -1 && isBuild(build, true);
     } else {
         throw new Error('Incorrect updateChannel setting provided');
     }
@@ -310,10 +316,11 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
         throw new Error('Failed to parse release JSON');
     }
 
-    // Type check
-    if (isArrayOfBuilds(releaseJson)) {
-        return releaseJson;
-    } else {
+    // Find the latest released builds.
+    const builds: Build[] = getArrayOfBuilds(releaseJson);
+    if (!builds || builds.length === 0) {
         throw new Error('Release JSON is not of type Build[]');
+    } else {
+        return builds;
     }
 }
