@@ -21,6 +21,8 @@ const vinyl = require('vinyl');
 const parse5 = require('parse5');
 const traverse = require('parse5-traverse');
 const jsonc = require('jsonc-parser'); // Used to allow comments in nativeStrings.json
+const crypto = require('crypto');
+const https = require('https');
 
 
 // Patterns to find HTML files
@@ -288,6 +290,112 @@ gulp.task("translations-import", (done) => {
     .pipe(es.wait(() => {
         done();
     }));
+});
+
+// ****************************
+// Command: generate-hash
+// Generates a hash for each dependency package
+// ****************************
+
+async function DownloadFile(urlString) {
+    const url = new URL(urlString);
+    const options = {
+        host: url.host,
+        path: url.path,
+    };
+
+    const buffers = [];
+    return new Promise((resolve, reject) => {
+        const req = https.request(urlString, (response) => {
+            if (response.statusCode === 301 || response.statusCode === 302 && !response.headers.location) {
+                // Redirect - download from new location
+                let redirectUrl;
+                if (typeof response.headers.location === "string") {
+                    redirectUrl = response.headers.location;
+                } else {
+                    if (!response.headers.location) {
+                        return reject();
+                    }
+                    redirectUrl = response.headers.location[0];
+                }
+                console.log(`Using redirectUrl: '${redirectUrl}'`);
+                return resolve(DownloadFile(redirectUrl));
+            } else if (response.statusCode !== 200) {
+                if (response.statusCode === undefined || response.statusCode === null) {
+                    console.log("unknown error code.");
+                    return reject();
+                }
+                console.log(`failed with error code: '${response.statusCode}'`);
+                return reject();
+            }
+
+            response.on('data', (data) => {
+                buffers.push(data);
+            });
+
+            response.on('end', () => {
+                if (buffers.length > 0) {
+                    return resolve(Buffer.concat(buffers));
+                } else {
+                    return reject();
+                }
+            });
+
+            response.on('error', err => {
+                console.log(`Problem with request: '${err.message}'`);
+                return reject();
+            });
+        });
+
+        req.on('error', err => {
+            console.log(`Problem with request: '${err.message}'`);
+            return reject();
+        });
+
+        // Execute the request
+        req.end();
+    });
+    
+}
+
+async function generatePackageHash(packageJson) {
+    const downloadAndGetHash = async (url) => {
+        console.log(url);
+        try {
+            const buf = await DownloadFile(url);
+            if (buf) {
+                const hash = crypto.createHash('sha256');
+                hash.update(buf);
+                const value = hash.digest('hex').toUpperCase();
+                return value;
+            }
+            return undefined;
+        } catch (e) {
+            return undefined;
+        }
+    };
+
+    for (let dependency of packageJson.runtimeDependencies) {
+        console.log(`-------- Downloading package: '${dependency.description}' --------`);
+        const hash = await downloadAndGetHash(dependency.url);
+        if (hash) {
+            dependency.integrity = hash;
+            console.log(`integrity: '${hash}'`);
+        }
+    }
+
+    let content = JSON.stringify(packageJson, null, 2);
+    return content;
+}
+
+gulp.task('generate-package-hash', async (done) => {
+    const packageJsonPath = './package.json';
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString());
+    const content = await generatePackageHash(packageJson);
+
+    console.log("Writing integrity hashes into package.json ...");
+    fs.writeFileSync(packageJsonPath, content);
+    done();
 });
 
 

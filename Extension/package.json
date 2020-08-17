@@ -2208,6 +2208,7 @@
     "translations-import": "node ./tools/prepublish.js && gulp translations-import",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
+    "generatePackageHash" : "gulp generate-package-hash",
     "pr-check": "gulp pr-check",
     "lint": "gulp lint",
     "unitTests": "tsc -p test.tsconfig.json && node ./out/test/unitTests/runTest.js",
