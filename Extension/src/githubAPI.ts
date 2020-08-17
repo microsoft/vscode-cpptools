@@ -212,7 +212,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     if (updateChannel === 'Insiders') {
         needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
         // Check if the assets are available
-        useBuild = isValidBuild
+        useBuild = isValidBuild;
     } else if (updateChannel === 'Default') {
         // If the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean {
