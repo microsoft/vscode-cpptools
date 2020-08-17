@@ -1088,8 +1088,7 @@ export class DefaultClient implements Client {
                                 this.client.notifyWhenReady(() => {
                                     const settings: CppSettings = new CppSettings();
                                     if (settings.formattingEngine !== "vcFormat") {
-                                        // If not using vcFormat, don't process on-type requests
-                                        // for '{' or '\n'
+                                        // If not using vcFormat, only process on-type requests for ';'
                                         if (ch !== ';') {
                                             const result: vscode.TextEdit[] = [];
                                             resolve(result);
