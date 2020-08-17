@@ -18,6 +18,7 @@ import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 import * as jsonc from 'jsonc-parser';
 import * as nls from 'vscode-nls';
+import which = require('which');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -664,6 +665,19 @@ export class CppProperties {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                 }
             }
+
+            if (configuration.compilerPath
+                && configuration.compilerPath.length > 0
+                && configuration.compilerPath[0] !== '/'
+                && !fs.existsSync(configuration.compilerPath)) {
+                // If a compiler path is specified, and it doesn't resolve to a file,
+                // try looking for it in the current path.
+                try {
+                    configuration.compilerPath = which.sync(configuration.compilerPath);
+                } catch {
+                }
+            }
+
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
