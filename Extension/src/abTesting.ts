@@ -69,8 +69,8 @@ export class ABTestSettings {
 
     public getMinimumVSCodeVersion(): PackageVersion {
         // Get minimum VS Code's supported version for latest insiders upgrades.
-        return new PackageVersion(
-            this.settings.minimumVSCodeVersion ? this.settings.minimumVSCodeVersion : this.minimumVSCodeVersionDefault.Value);
+        return new PackageVersion(this.settings.minimumVSCodeVersion ?
+            this.settings.minimumVSCodeVersion : this.minimumVSCodeVersionDefault.Value);
     }
 
     private updateSettings(): void {

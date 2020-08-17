@@ -471,8 +471,7 @@ function realActivation(): void {
             // Skip Insiders processing for unsupported VS Code versions.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
             const abTestSettings: ABTestSettings = getABTestSettings();
-            const minimumSupportedVersionForInsidersUpgrades: PackageVersion =
-                abTestSettings.getMinimumVSCodeVersion();
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
             if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {

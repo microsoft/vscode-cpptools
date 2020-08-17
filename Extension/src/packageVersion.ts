@@ -79,8 +79,9 @@ export class PackageVersion {
                 if (diff) {
                     return diff > 0;
                 } else {
+                    // When suffixStr is empty, only the major/minor/patch components of the version are being compared.
                     if (!suffixStr) {
-                        return false; // isEqual = true
+                        return false;
                     }
                     if (this.suffix) {
                         if (!other.suffix) {
