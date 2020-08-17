@@ -1057,7 +1057,7 @@ export class DefaultClient implements Client {
                                                 const result: vscode.TextEdit[] = [];
                                                 textEdits.forEach((textEdit) => {
                                                     result.push({
-                                                        range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
+                                                        range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
                                                         newText: textEdit.newText
                                                     });
                                                 });
@@ -1114,7 +1114,7 @@ export class DefaultClient implements Client {
                                                 const result: vscode.TextEdit[] = [];
                                                 textEdits.forEach((textEdit) => {
                                                     result.push({
-                                                        range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
+                                                        range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
                                                         newText: textEdit.newText
                                                     });
                                                 });
@@ -1176,7 +1176,7 @@ export class DefaultClient implements Client {
                                                 const result: vscode.TextEdit[] = [];
                                                 textEdits.forEach((textEdit) => {
                                                     result.push({
-                                                        range: new vscode.Range(textEdit.range.start.line, 0, textEdit.range.end.line, 0),
+                                                        range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
                                                         newText: textEdit.newText
                                                     });
                                                 });
