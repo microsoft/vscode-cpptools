@@ -160,7 +160,7 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
             if (targetBuild === undefined) {
                 // no action
                 telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
-            } else if (userVersion.isGreaterThan(new PackageVersion(targetBuild.name))) {
+            } else if (userVersion.isExtensionVersionGreaterThan(new PackageVersion(targetBuild.name))) {
                 // downgrade
                 telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "version": targetBuild.name });
             } else {
@@ -201,7 +201,7 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     }
     const latestVersionOnline: PackageVersion = new PackageVersion(builds[0].name);
     // Allows testing pre-releases without accidentally downgrading to the latest version
-    if (userVersion.isGreaterThan(latestVersionOnline, "insiders")) {
+    if (userVersion.isExtensionVersionGreaterThan(latestVersionOnline)) {
         return undefined;
     }
 
@@ -214,8 +214,9 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
         useBuild = (build: Build): boolean => isBuild(build, true);
     } else if (updateChannel === 'Default') {
         // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
-        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean { return installed.isGreaterThan(target); };
-        // look for the latest non-insiders valid released build
+        needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean {
+            return installed.isExtensionVersionGreaterThan(target); };
+        // look for the latest non-insiders released build
         useBuild = (build: Build): boolean => build.name.indexOf('-') === -1 && isBuild(build, true);
     } else {
         throw new Error('Incorrect updateChannel setting provided');
