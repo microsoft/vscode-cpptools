@@ -298,16 +298,10 @@ gulp.task("translations-import", (done) => {
 // ****************************
 
 async function DownloadFile(urlString) {
-    const url = new URL(urlString);
-    const options = {
-        host: url.host,
-        path: url.path,
-    };
-
     const buffers = [];
     return new Promise((resolve, reject) => {
         const req = https.request(urlString, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302 && !response.headers.location) {
+            if (response.statusCode === 301 || response.statusCode === 302) {
                 // Redirect - download from new location
                 let redirectUrl;
                 if (typeof response.headers.location === "string") {
