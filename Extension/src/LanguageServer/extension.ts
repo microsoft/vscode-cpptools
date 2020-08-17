@@ -20,7 +20,7 @@ import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
-import { ChildProcess, spawn, execSync } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
@@ -30,6 +30,7 @@ import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as nls from 'vscode-nls';
+import * as which from 'which';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -649,8 +650,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
                 try {
-                    const stdout: Buffer = execSync('which ' + vsCodeBinName);
-                    return stdout.toString().trim();
+                    return which.sync(vsCodeBinName);
                 } catch (error) {
                     return undefined;
                 }
