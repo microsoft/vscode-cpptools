@@ -55,13 +55,23 @@ function isAsset(input: any): input is Asset {
 }
 
 /**
- * Determine whether an object is of type Build. Note that earlier releases of the extension
- * do not have 3 or greater Assets (Mac, Win, Linux). Only call this on more recent Builds.
+ * Determine whether an object is of type Build.
  * @param input Incoming object.
  * @return Whether input is of type Build.
  */
 function isBuild(input: any): input is Build {
-    return input && input.name && typeof(input.name) === "string" && isArrayOfAssets(input.assets) && input.assets.length >= 3;
+    return input && input.name && typeof (input.name) === "string" && isArrayOfAssets(input.assets);
+}
+
+/**
+ * Determine whether an object is of type Build, and it has 3 or more assets (i.e valid build).
+ * Note that earlier releases of the extension do not have 3 or greater Assets
+ * (Mac, Win, Linux). Only call this on more recent Builds.
+ * @param input Incoming object.
+ * @return Whether input is a valid build.
+ */
+function isValidBuild(input: any): input is Build {
+    return isBuild(input) && input.assets.length >= 3;
 }
 
 /**
@@ -74,21 +84,26 @@ function isArrayOfAssets(input: any): input is Asset[] {
 }
 
 /**
- * Determine whether an object is of type Build[].
+ * Return the most recent released builds.
  * @param input Incoming object.
- * @return Whether input is of type Build[].
+ * @return An array of type Build[].
  */
-function isArrayOfBuilds(input: any): input is Build[] {
+function getArrayOfBuilds(input: any): Build[] {
+    const builds: Build[] = [];
     if (!input || !(input instanceof Array) || input.length === 0) {
-        return false;
+        return builds;
     }
-    // Only check the five most recent builds for validity -- no need to check all of them
-    for (let i: number = 0; i < 5 && i < input.length; i++) {
-        if (!isBuild(input[i])) {
-            return false;
+    // Only return the the most recent release and insider builds.
+    for (let i: number = 0; i < input.length; i++) {
+        if (isBuild(input[i])) {
+            builds.push(input[i]);
+            // the latest "valid" released build
+            if (input[i].name.indexOf('-') === -1 && isValidBuild(input[i])) {
+                break;
+            }
         }
     }
-    return true;
+    return builds;
 }
 
 /**
@@ -139,14 +154,7 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
                 return undefined;
             }
 
-            // If the user version is greater than or incomparable to the latest available verion then there is no need to update
             const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-            const latestVersion: PackageVersion = new PackageVersion(builds[0].name);
-            const latestIsCorrect: boolean = latestVersion.suffix !== 'insiders' || updateChannel === 'insiders';
-            if (!testingInsidersVsixInstall && ((userVersion.suffix && userVersion.suffix !== 'insiders') || (userVersion.isEqual(latestVersion) && latestIsCorrect))) {
-                return undefined;
-            }
-
             const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
             if (targetBuild === undefined) {
                 // no action
@@ -192,7 +200,8 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     }
     const latestVersionOnline: PackageVersion = new PackageVersion(builds[0].name);
     // Allows testing pre-releases without accidentally downgrading to the latest version
-    if (userVersion.isExtensionVersionGreaterThan(latestVersionOnline)) {
+    if ((!testingInsidersVsixInstall && userVersion.suffix && userVersion.suffix !== 'insiders') ||
+        userVersion.isExtensionVersionGreaterThan(latestVersionOnline)) {
         return undefined;
     }
 
@@ -201,14 +210,14 @@ export function getTargetBuild(builds: Build[], userVersion: PackageVersion, upd
     let useBuild: (build: Build) => boolean;
     if (updateChannel === 'Insiders') {
         needsUpdate = (installed: PackageVersion, target: PackageVersion) => testingInsidersVsixInstall || (!target.isEqual(installed));
-        // check if the assets are available (insider)
-        useBuild = isBuild;
+        // Check if the assets are available
+        useBuild = isValidBuild;
     } else if (updateChannel === 'Default') {
-        // if the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
+        // If the updateChannel switches from 'Insiders' to 'Default', a downgrade to the latest non-insiders release is needed.
         needsUpdate = function(installed: PackageVersion, target: PackageVersion): boolean {
             return installed.isExtensionVersionGreaterThan(target); };
-        // look for the latest non-insiders released build
-        useBuild = (build: Build): boolean => build.name.indexOf('-') === -1;
+        // Look for the latest non-insiders released build
+        useBuild = (build: Build): boolean => build.name.indexOf('-') === -1 && isValidBuild(build);
     } else {
         throw new Error('Incorrect updateChannel setting provided');
     }
@@ -308,10 +317,11 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
         throw new Error('Failed to parse release JSON');
     }
 
-    // Type check
-    if (isArrayOfBuilds(releaseJson)) {
-        return releaseJson;
-    } else {
+    // Find the latest released builds.
+    const builds: Build[] = getArrayOfBuilds(releaseJson);
+    if (!builds || builds.length === 0) {
         throw new Error('Release JSON is not of type Build[]');
+    } else {
+        return builds;
     }
 }
