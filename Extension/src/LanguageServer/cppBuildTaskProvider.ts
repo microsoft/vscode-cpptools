@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path';
 import {
-    TaskDefinition, Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
+    TaskDefinition, Task2 as Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
     TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
 } from 'vscode';
 import * as os from 'os';
@@ -49,7 +49,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         const execution: ProcessExecution | ShellExecution | CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
-            return this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
+            _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
+            _task.detail = "Existing task defined in tasks.json.";
+            return _task;
         }
         return undefined;
     }
@@ -202,6 +204,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
+        task.detail = "compiler: " + resolvedcompilerPath;
 
         return task;
     };
