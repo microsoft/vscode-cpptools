@@ -19,7 +19,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.configurationProvider": "可为源文件提供 IntelliSense 配置信息的 VS Code 扩展的 ID。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.limitSymbolsToIncludedHeaders": "如果为 true，则仅处理以标头形式直接或间接包含的文件；如果为 false，则处理指定的包含路径下的所有文件。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.databaseFilename": "所生成的符号数据库的路径。如果指定了相对路径，则它将相对于工作区的默认存储位置。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.path": "标记分析器在搜索包含的标头时要使用的路径列表。默认情况下，按递归方式搜索这些路径。指定 \"*\" 可指示非递归搜索。例如: \"/usr/include\" 将搜索所有子目录，而 \"/usr/include/*\" 将不搜索所有子目录。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.path": "A list of paths to use for indexing and parsing of workspace symbols (for use by Go to Definition, Find All References, etc.). Searching on these paths is recursive by default. Specify '*' to indicate non-recursive search. For example, '${workspaceFolder}' will search through all subdirectories while '${workspaceFolder}/*' will not.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.customConfigurationVariables": "可通过命令 ${cpptools:activeConfigCustomVariable} 查询要用于 launch.json 或 tasks.json 的输入变量的自定义变量。",
 	"c_cpp_properties.schema.json.definitions.env": "可通过 ${变量} 或 ${env:变量} 语法在此文件中的任意位置重用的自定义变量。",
 	"c_cpp_properties.schema.json.definitions.version": "配置文件的版本。此属性由扩展托管。请勿更改它。",
