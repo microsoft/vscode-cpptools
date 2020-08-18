@@ -1616,8 +1616,8 @@ export class DefaultClient implements Client {
                     indent: {
                         braces: settings_indentBraces,
                         multiLineRelativeTo: settings_indentMultiLine,
-                        indentWithinParentheses: settings_indentWithinParentheses,
-                        indentPreserveWithinParentheses: settings_indentPreserveWithinParentheses,
+                        withinParentheses: settings_indentWithinParentheses,
+                        preserveWithinParentheses: settings_indentPreserveWithinParentheses,
                         caseLabels: settings_indentCaseLabels,
                         caseContents: settings_indentCaseContents,
                         caseContentsWhenBlock: settings_indentCaseContentsWhenBlock,
