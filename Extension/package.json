@@ -1158,6 +1158,11 @@
           "light": "assets/ref-ungroup-by-type-light.svg",
           "dark": "assets/ref-ungroup-by-type-dark.svg"
         }
+      },
+      {
+        "command": "C_Cpp.debugger.MemoryView",
+        "title": "Open Memory View",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
@@ -2030,6 +2035,10 @@
         {
           "command": "C_Cpp.referencesViewUngroupByType",
           "when": "cppReferenceTypes:hasResults"
+        },
+        {
+          "command": "C_Cpp.debugger.MemoryView",
+          "when": "debugType == 'cppdbg' && inDebugMode"
         }
       ]
     },
