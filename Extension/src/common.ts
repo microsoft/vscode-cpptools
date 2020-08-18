@@ -72,7 +72,7 @@ export function getRawTasksJson(): Promise<any> {
             if (!exists) {
                 return resolve({});
             }
-            let fileContents: string = fs.readFileSync(path).toString();
+            const fileContents: string = fs.readFileSync(path).toString();
             let rawTasks: any = {};
             try {
                 rawTasks = jsonc.parse(fileContents);
