@@ -50,7 +50,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
             _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
-            _task.detail = "Existing task defined in tasks.json.";
+            // TODO: currently, no tasks are resolved when the quick pick is shown.
+            // This change will not be effective in VS Code 1.49.
+            // _task.detail = "Existing task defined in tasks.json.";
             return _task;
         }
         return undefined;
