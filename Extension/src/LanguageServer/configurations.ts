@@ -308,7 +308,7 @@ export class CppProperties {
         if (isUnset(settings.defaultIncludePath)) {
             configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
         } else {
-            configuration.includePath = [rootFolder].concat(this.vcpkgIncludes).concat([defaultFolder]);
+            configuration.includePath = [defaultFolder].concat(this.vcpkgIncludes);
         }
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {

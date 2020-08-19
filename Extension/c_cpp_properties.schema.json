@@ -64,8 +64,7 @@
                         "type": "string"
                     },
                     "includePath": {
-                        "description": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive.",
-                        "type": "array",
+                        "description": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive. Specify '**' to indicate recursive search. For example, '${workspaceFolder}/**' will search through all subdirectories while '${workspaceFolder}' will not.",                        "type": "array",
                         "items": {
                             "type": "string"
                         }
