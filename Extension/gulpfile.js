@@ -293,7 +293,7 @@ gulp.task("translations-import", (done) => {
 });
 
 // ****************************
-// Command: generate-hash
+// Command: generate-package-hashes
 // Generates a hash for each dependency package
 // ****************************
 
