@@ -17,6 +17,10 @@ jobs:
     displayName: "Install Dependencies"
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
 
+  - script: yarn run generatePackageHashes
+    displayName: "Generate hashes for runtime dependency packages"
+    workingDirectory: '$(Build.SourcesDirectory)/Extension'
+
   - script: yarn run compile
     displayName: "Compile Sources"
     workingDirectory: '$(Build.SourcesDirectory)\Extension'
