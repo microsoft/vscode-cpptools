@@ -133,10 +133,24 @@
           "description": "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description%",
           "scope": "resource"
         },
-        "C_Cpp.vcFormat.indent.preserveIndentationWithinParentheses": {
+        "C_Cpp.vcFormat.indent.withinParentheses": {
+          "type": "string",
+          "enum": [
+            "alignToParenthesis",
+            "indent"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description%"
+          ],
+          "default": "indent",
+          "description": "%c_cpp.configuration.vcFormat.indent.withinParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.preserveWithinParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.preserveIndentationWithinParentheses.description%",
+          "description": "%c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.caseLabels": {
@@ -300,13 +314,13 @@
         },
         "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyType": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyType.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyFunction": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyFunction.description%",
           "scope": "resource"
         },
@@ -2219,6 +2233,7 @@
     "@typescript-eslint/parser": "^2.19.2",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
+    "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.1",

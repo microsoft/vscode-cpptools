@@ -6,6 +6,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as editorConfig from 'editorconfig';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,
     RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter
@@ -56,6 +57,7 @@ let diagnosticsCollection: vscode.DiagnosticCollection;
 let workspaceDisposables: vscode.Disposable[] = [];
 let workspaceReferences: refs.ReferencesManager;
 const openFileVersions: Map<string, number> = new Map<string, number>();
+const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -297,6 +299,20 @@ interface DidChangeConfigurationParams extends WorkspaceFolderParams {
     settings: any;
 }
 
+interface FormatParams {
+    uri: string;
+    range: Range;
+    character: string;
+    insertSpaces: boolean;
+    tabSize: number;
+    settings: any;
+}
+
+interface TextEdit {
+    range: Range;
+    newText: string;
+}
+
 interface GetFoldingRangesParams {
     uri: string;
     id: number;
@@ -389,7 +405,7 @@ const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, Loca
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-
+const DocumentFormatRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/format');
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
@@ -657,9 +673,189 @@ class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     }
 }
 
+
+class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
+    private client: DefaultClient;
+    constructor(client: DefaultClient) {
+        this.client = client;
+    }
+
+    public provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        return new Promise<vscode.TextEdit[]>((resolve, reject) => {
+            this.client.notifyWhenReady(() => {
+                const filePath: string = document.uri.fsPath;
+                const configCallBack = (editorConfigSettings: any| undefined) => {
+                    const params: FormatParams = {
+                        settings: { ...editorConfigSettings },
+                        uri: document.uri.toString(),
+                        insertSpaces: options.insertSpaces,
+                        tabSize: options.tabSize,
+                        character: "",
+                        range:  {
+                            start: {
+                                character: 0,
+                                line: 0
+                            },
+                            end: {
+                                character: 0,
+                                line: 0
+                            }
+                        }
+                    };
+                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                        .then((textEdits) => {
+                            const result: vscode.TextEdit[] = [];
+                            textEdits.forEach((textEdit) => {
+                                result.push({
+                                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
+                                    newText: textEdit.newText
+                                });
+                            });
+                            resolve(result);
+                        });
+                };
+                const settings: CppSettings = new CppSettings();
+                if (settings.formattingEngine !== "vcFormat") {
+                    configCallBack(undefined);
+                } else {
+                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                    if (!editorConfigSettings) {
+                        editorConfig.parse(filePath).then(configCallBack);
+                    } else {
+                        cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                        configCallBack(editorConfigSettings);
+                    }
+                }
+            });
+        });
+    }
+}
+
+class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
+    private client: DefaultClient;
+    constructor(client: DefaultClient) {
+        this.client = client;
+    }
+
+    public provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        return new Promise<vscode.TextEdit[]>((resolve, reject) => {
+            this.client.notifyWhenReady(() => {
+                const filePath: string = document.uri.fsPath;
+                const configCallBack = (editorConfigSettings: any | undefined) => {
+                    const params: FormatParams = {
+                        settings: { ...editorConfigSettings },
+                        uri: document.uri.toString(),
+                        insertSpaces: options.insertSpaces,
+                        tabSize: options.tabSize,
+                        character: "",
+                        range: {
+                            start: {
+                                character: range.start.character,
+                                line: range.start.line
+                            },
+                            end: {
+                                character: range.end.character,
+                                line: range.end.line
+                            }
+                        }
+                    };
+                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                        .then((textEdits) => {
+                            const result: vscode.TextEdit[] = [];
+                            textEdits.forEach((textEdit) => {
+                                result.push({
+                                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
+                                    newText: textEdit.newText
+                                });
+                            });
+                            resolve(result);
+                        });
+                };
+                const settings: CppSettings = new CppSettings();
+                if (settings.formattingEngine !== "vcFormat") {
+                    configCallBack(undefined);
+                } else {
+                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                    if (!editorConfigSettings) {
+                        editorConfig.parse(filePath).then(configCallBack);
+                    } else {
+                        cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                        configCallBack(editorConfigSettings);
+                    }
+                }
+            });
+        });
+    };
+}
+
+class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
+    private client: DefaultClient;
+    constructor(client: DefaultClient) {
+        this.client = client;
+    }
+
+    public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        return new Promise<vscode.TextEdit[]>((resolve, reject) => {
+            this.client.notifyWhenReady(() => {
+                const filePath: string = document.uri.fsPath;
+                const configCallBack = (editorConfigSettings: any | undefined) => {
+                    const params: FormatParams = {
+                        settings: { ...editorConfigSettings },
+                        uri: document.uri.toString(),
+                        insertSpaces: options.insertSpaces,
+                        tabSize: options.tabSize,
+                        character: ch,
+                        range: {
+                            start: {
+                                character: position.character,
+                                line: position.line
+                            },
+                            end: {
+                                character: position.character,
+                                line: position.line
+                            }
+                        }
+                    };
+                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                        .then((textEdits) => {
+                            const result: vscode.TextEdit[] = [];
+                            textEdits.forEach((textEdit) => {
+                                result.push({
+                                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
+                                    newText: textEdit.newText
+                                });
+                            });
+                            resolve(result);
+                        });
+                };
+                const settings: CppSettings = new CppSettings();
+                if (settings.formattingEngine !== "vcFormat") {
+                    // If not using vcFormat, only process on-type requests for ';'
+                    if (ch !== ';') {
+                        const result: vscode.TextEdit[] = [];
+                        resolve(result);
+                    }
+                    configCallBack(undefined);
+                } else {
+                    const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+                    if (!editorConfigSettings) {
+                        editorConfig.parse(filePath).then(configCallBack);
+                    } else {
+                        cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                        configCallBack(editorConfigSettings);
+                    }
+                }
+            });
+        });
+    }
+}
+
 export class DefaultClient implements Client {
     private innerLanguageClient?: LanguageClient; // The "client" that launches and communicates with our language "server" process.
     private disposables: vscode.Disposable[] = [];
+    private documentFormattingProviderDisposable: vscode.Disposable | undefined;
+    private formattingRangeProviderDisposable: vscode.Disposable | undefined;
+    private onTypeFormattingProviderDisposable: vscode.Disposable | undefined;
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
@@ -1007,6 +1203,7 @@ export class DefaultClient implements Client {
                             });
                         }
                     }
+
                     class RenameProvider implements vscode.RenameProvider {
                         private client: DefaultClient;
                         constructor(client: DefaultClient) {
@@ -1151,6 +1348,11 @@ export class DefaultClient implements Client {
                             this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
                             this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
                             const settings: CppSettings = new CppSettings();
+                            if (settings.formattingEngine !== "Disabled") {
+                                this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
+                                this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                                this.onTypeFormattingProviderDisposable  = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                            }
                             if (settings.codeFolding) {
                                 this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
                             }
@@ -1235,7 +1437,8 @@ export class DefaultClient implements Client {
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const settings_indentBraces: boolean[] = [];
         const settings_indentMultiLine: (string | undefined)[] = [];
-        const settings_preserveIndentWithinParenthesis: boolean[] = [];
+        const settings_indentWithinParentheses: (string | undefined)[] = [];
+        const settings_indentPreserveWithinParentheses: boolean[] = [];
         const settings_indentCaseLabels: boolean[] = [];
         const settings_indentCaseContents: boolean[] = [];
         const settings_indentCaseContentsWhenBlock: boolean[] = [];
@@ -1310,7 +1513,8 @@ export class DefaultClient implements Client {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
-                settings_preserveIndentWithinParenthesis.push(setting.vcFormatPreserveIndentationWithinParenthesis);
+                settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
+                settings_indentPreserveWithinParentheses.push(setting.vcFormatindentPreserveWithinParentheses);
                 settings_indentMultiLine.push(setting.vcFormatIndentMultiLineRelativeTo);
                 settings_indentCaseLabels.push(setting.vcFormatIndentCaseLabels);
                 settings_indentCaseContents.push(setting.vcFormatIndentCaseContents);
@@ -1418,7 +1622,8 @@ export class DefaultClient implements Client {
                     indent: {
                         braces: settings_indentBraces,
                         multiLineRelativeTo: settings_indentMultiLine,
-                        preserveIndentationWithinParentheses: settings_preserveIndentWithinParenthesis,
+                        withinParentheses: settings_indentWithinParentheses,
+                        preserveWithinParentheses: settings_indentPreserveWithinParentheses,
                         caseLabels: settings_indentCaseLabels,
                         caseContents: settings_indentCaseContents,
                         caseContentsWhenBlock: settings_indentCaseContentsWhenBlock,
@@ -1612,8 +1817,36 @@ export class DefaultClient implements Client {
                     if (changedSettings["commentContinuationPatterns"]) {
                         updateLanguageConfigurations();
                     }
+                    const settings: CppSettings = new CppSettings();
+                    if (changedSettings["formatting"]) {
+                        if (settings.formattingEngine !== "Disabled") {
+                            // Because the setting is not a bool, changes do not always imply we need to
+                            // register/unregister the providers.
+                            if (!this.documentFormattingProviderDisposable) {
+                                this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
+                            }
+                            if (!this.formattingRangeProviderDisposable) {
+                                this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                            }
+                            if (!this.onTypeFormattingProviderDisposable) {
+                                this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                            }
+                        } else {
+                            if (this.documentFormattingProviderDisposable) {
+                                this.documentFormattingProviderDisposable.dispose();
+                                this.documentFormattingProviderDisposable = undefined;
+                            }
+                            if (this.formattingRangeProviderDisposable) {
+                                this.formattingRangeProviderDisposable.dispose();
+                                this.formattingRangeProviderDisposable = undefined;
+                            }
+                            if (this.onTypeFormattingProviderDisposable) {
+                                this.onTypeFormattingProviderDisposable.dispose();
+                                this.onTypeFormattingProviderDisposable = undefined;
+                            }
+                        }
+                    }
                     if (changedSettings["codeFolding"]) {
-                        const settings: CppSettings = new CppSettings();
                         if (settings.codeFolding) {
                             this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
                         } else if (this.codeFoldingProviderDisposable) {
@@ -1622,7 +1855,6 @@ export class DefaultClient implements Client {
                         }
                     }
                     if (changedSettings["enhancedColorization"]) {
-                        const settings: CppSettings = new CppSettings();
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
                             this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
@@ -2197,6 +2429,10 @@ export class DefaultClient implements Client {
                 false /* ignoreDeleteEvents */);
 
             this.rootPathFileWatcher.onDidCreate((uri) => {
+                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                    cachedEditorConfigSettings.clear();
+                }
+
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
             });
 
@@ -2212,6 +2448,11 @@ export class DefaultClient implements Client {
             }
             this.rootPathFileWatcher.onDidChange((uri) => {
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
+
+                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                    cachedEditorConfigSettings.clear();
+                }
+
                 if (dotIndex !== -1) {
                     const ext: string = uri.fsPath.substr(dotIndex + 1);
                     if (this.associations_for_did_change?.has(ext)) {
@@ -2228,6 +2469,10 @@ export class DefaultClient implements Client {
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
+                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                    cachedEditorConfigSettings.clear();
+                }
+
                 this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
             });
 
@@ -2847,6 +3092,18 @@ export class DefaultClient implements Client {
         return promise.then(() => {
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
+            if (this.documentFormattingProviderDisposable) {
+                this.documentFormattingProviderDisposable.dispose();
+                this.documentFormattingProviderDisposable = undefined;
+            }
+            if (this.formattingRangeProviderDisposable) {
+                this.formattingRangeProviderDisposable.dispose();
+                this.formattingRangeProviderDisposable = undefined;
+            }
+            if (this.onTypeFormattingProviderDisposable) {
+                this.onTypeFormattingProviderDisposable.dispose();
+                this.onTypeFormattingProviderDisposable = undefined;
+            }
             if (this.codeFoldingProviderDisposable) {
                 this.codeFoldingProviderDisposable.dispose();
                 this.codeFoldingProviderDisposable = undefined;
