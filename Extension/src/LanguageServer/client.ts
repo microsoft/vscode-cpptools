@@ -1217,6 +1217,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatStyle: (string | undefined)[] = [];
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
+        const settings_filesEncoding: (string | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
@@ -1384,6 +1385,7 @@ export class DefaultClient implements Client {
             }
 
             for (const otherSetting of otherSettings) {
+                settings_filesEncoding.push(otherSetting.filesEncoding);
                 settings_filesExclude.push(otherSetting.filesExclude);
                 settings_searchExclude.push(otherSetting.searchExclude);
             }
@@ -1489,6 +1491,7 @@ export class DefaultClient implements Client {
                 clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings_clangFormatSortIncludes,
                 extension_path: util.extensionPath,
+                files_encoding: settings_filesEncoding,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
@@ -1585,6 +1588,7 @@ export class DefaultClient implements Client {
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {
+                encoding: vscode.workspace.getConfiguration("files.encoding", this.RootUri),
                 exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri),
                 associations: new OtherSettings().filesAssociations
             },
