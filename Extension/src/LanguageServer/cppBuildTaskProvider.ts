@@ -24,7 +24,6 @@ export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", 
 export interface CppBuildTaskDefinition extends TaskDefinition {
     type: string;
     label: string; // The label appears in tasks.json file.
-    description: string;
     command: string;
     args: string[];
     options: cp.ExecOptions | undefined;
@@ -182,8 +181,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskName,
-                description: taskName,
-                command: resolvedcompilerPath,
+                command: isCl ? compilerPathBase : compilerPath,
                 args: args,
                 options: options
             };

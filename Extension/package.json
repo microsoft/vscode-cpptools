@@ -56,10 +56,6 @@
             "type": "string",
             "description": "%c_cpp.taskDefinitions.name.description%"
           },
-          "description": {
-            "type": "string",
-            "description": "description of the task."
-          },
           "command": {
             "type": "string",
             "description": "%c_cpp.taskDefinitions.command.description%"
