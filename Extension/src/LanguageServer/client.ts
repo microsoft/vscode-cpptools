@@ -834,8 +834,9 @@ class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvide
                     if (ch !== ';') {
                         const result: vscode.TextEdit[] = [];
                         resolve(result);
+                    } else {
+                        configCallBack(undefined);
                     }
-                    configCallBack(undefined);
                 } else {
                     const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
                     if (!editorConfigSettings) {
