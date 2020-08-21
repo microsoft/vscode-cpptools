@@ -811,8 +811,8 @@ class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvide
                                 line: position.line
                             },
                             end: {
-                                character: position.character,
-                                line: position.line
+                                character: 0,
+                                line: 0
                             }
                         }
                     };
