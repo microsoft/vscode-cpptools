@@ -1492,6 +1492,7 @@ export class DefaultClient implements Client {
                 clang_format_sortIncludes: settings_clangFormatSortIncludes,
                 extension_path: util.extensionPath,
                 files_encoding: settings_filesEncoding,
+                base_files_encoding: workspaceOtherSettings.filesEncoding,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
