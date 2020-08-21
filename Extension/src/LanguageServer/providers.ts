@@ -1,11 +1,7 @@
 import * as vscode from 'vscode';
-import {DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, 
-    FoldingRangeKind, GetSemanticTokensParams, GetSemanticTokensRequest, 
-    openFileVersions, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings} from './client';
+import {DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings} from './client';
 import { CppSettings } from './settings';
 import * as editorConfig from 'editorconfig';
-
-
 
 let abortRequestId: number = 0;
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
