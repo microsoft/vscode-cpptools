@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.30.0-insiders3: August 20, 2020
+### New Features
+* Support for running the extension on Linux arm64/aarch64 devices, using remoting. [#2506](https://github.com/microsoft/vscode-cpptools/issues/2506), [#5969](https://github.com/microsoft/vscode-cpptools/issues/5969)
+* Add support for vcFormat settings in `.editorconfig` files. [PR #5932](https://github.com/microsoft/vscode-cpptools/pull/5932)
+
+### Enhancements
+* Validate crypto signatures of binaries we download. [#5268](https://github.com/microsoft/vscode-cpptools/issues/5268)
+* Search for `compilerPath` in the PATH environment variable. [#5908](https://github.com/microsoft/vscode-cpptools/issues/5908)
+
+### Bug Fixes
+* Fix compiler probing when relative paths are used in `compile_commands.json`. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
+* Fix IntelliSense failures with gcc 10.2 headers with C++20. [#5897](https://github.com/microsoft/vscode-cpptools/issues/5897), [#5973](https://github.com/microsoft/vscode-cpptools/issues/5973)
+* Fix a regression introduced in a previous insiders in which additional format on-type characters were introduced when using clang-format. These on-type characters have been reverted, when using clang-format. [#5962](https://github.com/microsoft/vscode-cpptools/issues/5962)
+
 ## Version 0.30.0-insiders2: August 11, 2020
 ### Bug Fixes
 * Fix vcFormat setting default values. [#5907](https://github.com/microsoft/vscode-cpptools/issues/5907)
