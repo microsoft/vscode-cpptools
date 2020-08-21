@@ -161,7 +161,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskLabel: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
-        const taskName: string = "Build with " + compilerPathBase + ".";
+        // TODO: currently, the name of the task in the tasks.json file, and the label shown in quickpick menu are not differentiable.
+        // This change will not be effective in VS Code 1.49.
+        // const taskName: string = "Build with " + compilerPathBase + ".";
         const isCl: boolean = compilerPathBase === "cl.exe";
         const isWindows: boolean = os.platform() === 'win32';
         const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
@@ -180,7 +182,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!definition) {
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
-                label: taskName,
+                label: taskLabel,
                 command: isCl ? compilerPathBase : compilerPath,
                 args: args,
                 options: options
