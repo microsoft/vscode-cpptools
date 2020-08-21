@@ -1,3 +1,7 @@
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import {DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings} from './client';
 import { CppSettings } from './settings';
