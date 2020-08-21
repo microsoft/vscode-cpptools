@@ -15,7 +15,7 @@
 * Fix compiler probing when relative paths are used in `compile_commands.json`. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
 * Fix IntelliSense failures with gcc 10.2 headers with C++20. [#5897](https://github.com/microsoft/vscode-cpptools/issues/5897), [#5973](https://github.com/microsoft/vscode-cpptools/issues/5973)
 * Fix Doxygen comment to escape markdown characters. [#5904](https://github.com/microsoft/vscode-cpptools/issues/5904)
-* Fix a regression introduced in a previous insiders in which additional format on-type characters were introduced when using clang-format. These on-type characters have been reverted, when using clang-format.can [#5962](https://github.com/microsoft/vscode-cpptools/issues/5962)
+* Fix a regression introduced in a previous insiders in which additional format on-type characters were introduced when using clang-format. These on-type characters have been reverted, when using clang-format. [#5962](https://github.com/microsoft/vscode-cpptools/issues/5962)
 
 ## Version 0.30.0-insiders2: August 11, 2020
 ### Bug Fixes
