@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 0.30.0-insiders3: August 20, 2020
+## Version 0.30.0-insiders3: August 21, 2020
 ### New Features
 * Support for running the extension on Linux arm64/aarch64 devices, using remoting. [#2506](https://github.com/microsoft/vscode-cpptools/issues/2506), [#5969](https://github.com/microsoft/vscode-cpptools/issues/5969)
 * Add support for vcFormat settings in `.editorconfig` files. [PR #5932](https://github.com/microsoft/vscode-cpptools/pull/5932)
