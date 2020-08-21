@@ -10,7 +10,7 @@
 * Search for `compilerPath` in the PATH environment variable. [#5908](https://github.com/microsoft/vscode-cpptools/issues/5908)
 
 ### Bug Fixes
-* Fix `configuration.includePath` to only add the `defaultFolder when the default `includePath` is set. [#5621](https://github.com/microsoft/vscode-cpptools/issues/5621)
+* Fix `configuration.includePath` to only add the `defaultFolder` when the default `includePath` is set. [#5621](https://github.com/microsoft/vscode-cpptools/issues/5621)
 * Fix Doxygen parameterHint comment to display for a parameter name that is followed by colon. [#5836](https://github.com/microsoft/vscode-cpptools/issues/5836)
 * Fix compiler probing when relative paths are used in `compile_commands.json`. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
 * Fix IntelliSense failures with gcc 10.2 headers with C++20. [#5897](https://github.com/microsoft/vscode-cpptools/issues/5897), [#5973](https://github.com/microsoft/vscode-cpptools/issues/5973)
