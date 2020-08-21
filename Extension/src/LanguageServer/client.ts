@@ -1697,7 +1697,9 @@ export class DefaultClient implements Client {
                 clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings_clangFormatSortIncludes,
                 extension_path: util.extensionPath,
-                files_encoding: settings_filesEncoding,
+                files: {
+                    encoding: settings_filesEncoding
+                },
                 base_files_encoding: workspaceOtherSettings.filesEncoding,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
@@ -1776,6 +1778,9 @@ export class DefaultClient implements Client {
             cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
         }
 
+        const otherSettingsWorkspace: OtherSettings = new OtherSettings(this.RootUri);
+        const otherSettingsGlobal: OtherSettings = new OtherSettings();
+
         // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
         // build a new JSON object with everything we need on the native side.
         const settings: any = {
@@ -1792,10 +1797,14 @@ export class DefaultClient implements Client {
                     space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
                 },
+                files: {
+                    encoding: otherSettingsWorkspace.filesEncoding
+                },
+                base_files_encoding: otherSettingsGlobal.filesEncoding,
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {
-                encoding: vscode.workspace.getConfiguration("files.encoding", this.RootUri),
+                encoding: otherSettingsWorkspace.filesEncoding,
                 exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri),
                 associations: new OtherSettings().filesAssociations
             },
