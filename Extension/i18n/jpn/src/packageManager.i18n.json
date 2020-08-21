@@ -18,6 +18,7 @@
 	"failed.web.error": "失敗 (エラー コード '{0}')",
 	"web.response.error": "HTTP/HTTPS 応答エラー",
 	"invalid.content.length.received": "無効なコンテンツの長さの場所を受信しました",
+	"invalid.content.received": "Invalid content received. Hash is incorrect.",
 	"web.request.error": "HTTP/HTTPS 要求エラー",
 	"installing.package": "パッケージ '{0}' をインストールしています",
 	"downloaded.unavailable": "ダウンロードしたファイルは利用できません",
