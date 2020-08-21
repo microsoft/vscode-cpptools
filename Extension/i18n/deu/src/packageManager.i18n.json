@@ -18,6 +18,7 @@
 	"failed.web.error": "Fehler (Fehlercode: {0})",
 	"web.response.error": "HTTP/HTTPS-Antwortfehler",
 	"invalid.content.length.received": "Ungültige Content-Length-Position empfangen.",
+	"invalid.content.received": "Invalid content received. Hash is incorrect.",
 	"web.request.error": "HTTP/HTTPS-Anforderungsfehler",
 	"installing.package": "Paket \"{0}\" wird installiert",
 	"downloaded.unavailable": "Heruntergeladene Datei nicht verfügbar",
