@@ -18,6 +18,7 @@
 	"failed.web.error": "neúspěšné (kód chyby {0})",
 	"web.response.error": "Chyba odpovědi HTTP/HTTPS",
 	"invalid.content.length.received": "Přijato neplatné umístění délky obsahu",
+	"invalid.content.received": "Invalid content received. Hash is incorrect.",
 	"web.request.error": "Chyba požadavku HTTP/HTTPS",
 	"installing.package": "Instaluje se balíček {0}",
 	"downloaded.unavailable": "Stažený soubor není k dispozici.",

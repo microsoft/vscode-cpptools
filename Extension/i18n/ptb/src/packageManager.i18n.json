@@ -18,6 +18,7 @@
 	"failed.web.error": "falha (código de erro '{0}')",
 	"web.response.error": "Erro de resposta HTTP/HTTPS",
 	"invalid.content.length.received": "Recebido local de comprimento de conteúdo inválido",
+	"invalid.content.received": "Invalid content received. Hash is incorrect.",
 	"web.request.error": "Erro de solicitação HTTP/HTTPS",
 	"installing.package": "Instalando o pacote '{0}'",
 	"downloaded.unavailable": "Arquivo baixado não disponível",
