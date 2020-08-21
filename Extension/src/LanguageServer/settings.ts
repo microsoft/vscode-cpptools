@@ -177,8 +177,12 @@ export class CppSettings extends Settings {
         return super.Section.get<string>("vcFormat.indent.multiLineRelativeTo");
     }
 
-    public get vcFormatPreserveIndentationWithinParenthesis(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.preserveIndentationWithinParentheses") === true;
+    public get vcFormatIndentWithinParentheses(): string | undefined {
+        return super.Section.get<string>("vcFormat.indent.withinParentheses");
+    }
+
+    public get vcFormatindentPreserveWithinParentheses(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.preserveWithinParentheses") === true;
     }
 
     public get vcFormatIndentCaseLabels(): boolean {
@@ -216,7 +220,6 @@ export class CppSettings extends Settings {
     public get vcFormatIndentPreserveComment(): boolean {
         return super.Section.get<boolean>("vcFormat.indent.preserveComment") === true;
     }
-
 
     public get vcFormatNewlineBeforeOpenBraceNamespace(): string | undefined {
         return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.namespace");
@@ -265,7 +268,6 @@ export class CppSettings extends Settings {
     public get vcFormatSpaceBeforeFunctionOpenParenthesis(): string | undefined {
         return super.Section.get<string>("vcFormat.space.beforeFunctionOpenParenthesis");
     }
-
 
     public get vcFormatSpaceWithinParameterListParentheses():  boolean {
         return super.Section.get<boolean>("vcFormat.space.withinParameterListParentheses") === true;
@@ -382,7 +384,6 @@ export class CppSettings extends Settings {
     public get vcFormatSpaceAroundBinaryOperator(): string | undefined {
         return super.Section.get<string>("vcFormat.space.aroundBinaryOperator");
     }
-
 
     public get vcFormatSpaceAroundAssignmentOperator(): string | undefined {
         return super.Section.get<string>("vcFormat.space.aroundAssignmentOperator");
