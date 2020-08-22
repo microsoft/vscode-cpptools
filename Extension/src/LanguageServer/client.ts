@@ -19,7 +19,7 @@ import { RenameProvider } from './renameProvider';
 import { FindAllReferencesProvider } from './findAllReferencesProvider';
 // End provider imports
 
-import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier,RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
+import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
@@ -465,7 +465,7 @@ const SemanticTokensChanged: NotificationType<string, void> = new NotificationTy
 
 let failureMessageShown: boolean = false;
 
-export class ReferenceParamsHolder { 
+export class ReferenceParamsHolder {
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
     public static referencesPendingCancellations: ReferencesCancellationState[] = [];
