@@ -3,8 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind } from './client';
-import { abortRequestIdVar } from './client';
+import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, AbortRequestIdHolder } from './client';
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;
@@ -13,7 +12,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     }
     provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
         token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-        const id: number = ++abortRequestIdVar.abortRequestId;
+        const id: number = ++AbortRequestIdHolder.abortRequestId;
         const params: GetFoldingRangesParams = {
             id: id,
             uri: document.uri.toString()

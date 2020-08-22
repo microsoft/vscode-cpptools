@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, refParams, workspaceReferences, renameParams, ReferencesCancellationState, RenameParams, CancelReferencesNotification } from './client';
+import { DefaultClient, ReferenceParamsHolder, workspaceReferences, RenameParamsHolder, ReferencesCancellationState, RenameParams, CancelReferencesNotification } from './client';
 import * as refs from './references';
 import { CppSettings } from './settings';
 import { Position } from 'vscode-languageclient';
@@ -31,8 +31,8 @@ export class RenameProvider implements vscode.RenameProvider {
         // Because that prevents our rename UI, we ignore cancellation requests.
         // VS Code will attempt to issue new rename requests while another is still active.
         // When we receive another rename request, cancel the one that is in progress.
-        renameParams.renamePending = true;
-        ++renameParams.renameRequestsPending;
+        RenameParamsHolder.renamePending = true;
+        ++RenameParamsHolder.renameRequestsPending;
         return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
             const callback: () => void = () => {
                 const params: RenameParams = {
@@ -40,13 +40,13 @@ export class RenameProvider implements vscode.RenameProvider {
                     position: Position.create(position.line, position.character),
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                 };
-                refParams.referencesParams = params;
+                ReferenceParamsHolder.referencesParams = params;
                 this.client.notifyWhenReady(() => {
                     // The current request is represented by referencesParams.  If a request detects
                     // referencesParams does not match the object used when creating the request, abort it.
-                    if (params !== refParams.referencesParams) {
-                        if (--renameParams.renameRequestsPending === 0) {
-                            renameParams.renamePending = false;
+                    if (params !== ReferenceParamsHolder.referencesParams) {
+                        if (--RenameParamsHolder.renameRequestsPending === 0) {
+                            RenameParamsHolder.renamePending = false;
                         }
 
                         // Complete with nothing instead of rejecting, to avoid an error message from VS Code
@@ -54,24 +54,24 @@ export class RenameProvider implements vscode.RenameProvider {
                         resolve(workspaceEdit);
                         return;
                     }
-                    refParams.referencesRequestPending = true;
+                    ReferenceParamsHolder.referencesRequestPending = true;
                     workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult | null, doResolve: boolean) => {
-                        refParams.referencesRequestPending = false;
-                        --renameParams.renameRequestsPending;
+                        ReferenceParamsHolder.referencesRequestPending = false;
+                        --RenameParamsHolder.renameRequestsPending;
                         const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                        const cancelling: boolean = refParams.referencesPendingCancellations.length > 0;
+                        const cancelling: boolean = ReferenceParamsHolder.referencesPendingCancellations.length > 0;
                         if (cancelling) {
-                            while (refParams.referencesPendingCancellations.length > 1) {
-                                const pendingCancel: ReferencesCancellationState = refParams.referencesPendingCancellations[0];
-                                refParams.referencesPendingCancellations.pop();
+                            while (ReferenceParamsHolder.referencesPendingCancellations.length > 1) {
+                                const pendingCancel: ReferencesCancellationState = ReferenceParamsHolder.referencesPendingCancellations[0];
+                                ReferenceParamsHolder.referencesPendingCancellations.pop();
                                 pendingCancel.reject();
                             }
-                            const pendingCancel: ReferencesCancellationState = refParams.referencesPendingCancellations[0];
-                            refParams.referencesPendingCancellations.pop();
+                            const pendingCancel: ReferencesCancellationState = ReferenceParamsHolder.referencesPendingCancellations[0];
+                            ReferenceParamsHolder.referencesPendingCancellations.pop();
                             pendingCancel.callback();
                         } else {
-                            if (renameParams.renameRequestsPending === 0) {
-                                renameParams.renamePending = false;
+                            if (RenameParamsHolder.renameRequestsPending === 0) {
+                                RenameParamsHolder.renamePending = false;
                             }
                             // If rename UI was canceled, we will get a null result.
                             // If null, return an empty list to avoid Rename failure dialog.
@@ -97,11 +97,11 @@ export class RenameProvider implements vscode.RenameProvider {
                 });
             };
 
-            if (refParams.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
-                const cancelling: boolean = refParams.referencesPendingCancellations.length > 0;
-                refParams.referencesPendingCancellations.push({
+            if (ReferenceParamsHolder.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
+                const cancelling: boolean = ReferenceParamsHolder.referencesPendingCancellations.length > 0;
+                ReferenceParamsHolder.referencesPendingCancellations.push({
                     reject: () => {
-                        --renameParams.renameRequestsPending;
+                        --RenameParamsHolder.renameRequestsPending;
                         // Complete with nothing instead of rejecting, to avoid an error message from VS Code
                         const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         resolve(workspaceEdit);
@@ -109,7 +109,7 @@ export class RenameProvider implements vscode.RenameProvider {
                 });
                 if (!cancelling) {
                     workspaceReferences.referencesCanceled = true;
-                    if (!refParams.referencesRequestPending) {
+                    if (!ReferenceParamsHolder.referencesRequestPending) {
                         workspaceReferences.referencesCanceledWhilePreviewing = true;
                     }
                     this.client.languageClient.sendNotification(CancelReferencesNotification);
