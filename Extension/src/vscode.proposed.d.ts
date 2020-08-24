@@ -19,21 +19,6 @@ declare module 'vscode' {
 	// #region auth provider: https://github.com/microsoft/vscode/issues/88309
 
 	/**
-	 * An [event](#Event) which fires when an [AuthenticationProvider](#AuthenticationProvider) is added or removed.
-	 */
-	export interface AuthenticationProvidersChangeEvent {
-		/**
-		 * The ids of the [authenticationProvider](#AuthenticationProvider)s that have been added.
-		 */
-		readonly added: ReadonlyArray<AuthenticationProviderInformation>;
-
-		/**
-		 * The ids of the [authenticationProvider](#AuthenticationProvider)s that have been removed.
-		 */
-		readonly removed: ReadonlyArray<AuthenticationProviderInformation>;
-	}
-
-	/**
 	* An [event](#Event) which fires when an [AuthenticationSession](#AuthenticationSession) is added, removed, or changed.
 	*/
 	export interface AuthenticationProviderAuthenticationSessionsChangeEvent {
@@ -53,96 +38,7 @@ declare module 'vscode' {
 		readonly changed: ReadonlyArray<string>;
 	}
 
-	/**
-	 * **WARNING** When writing an AuthenticationProvider, `id` should be treated as part of your extension's
-	 * API, changing it is a breaking change for all extensions relying on the provider. The id is
-	 * treated case-sensitively.
-	 */
-	export interface AuthenticationProvider {
-		/**
-		 * Used as an identifier for extensions trying to work with a particular
-		 * provider: 'microsoft', 'github', etc. id must be unique, registering
-		 * another provider with the same id will fail.
-		 */
-		readonly id: string;
 
-		/**
-		 * The human-readable name of the provider.
-		 */
-		readonly label: string;
-
-		/**
-		 * Whether it is possible to be signed into multiple accounts at once with this provider
-		*/
-		readonly supportsMultipleAccounts: boolean;
-
-		/**
-		 * An [event](#Event) which fires when the array of sessions has changed, or data
-		 * within a session has changed.
-		 */
-		readonly onDidChangeSessions: Event<AuthenticationProviderAuthenticationSessionsChangeEvent>;
-
-		/**
-		 * Returns an array of current sessions.
-		 */
-		getSessions(): Thenable<ReadonlyArray<AuthenticationSession>>;
-
-		/**
-		 * Prompts a user to login.
-		 */
-		login(scopes: string[]): Thenable<AuthenticationSession>;
-
-		/**
-		 * Removes the session corresponding to session id.
-		 * @param sessionId The session id to log out of
-		 */
-		logout(sessionId: string): Thenable<void>;
-	}
-
-	export namespace authentication {
-		/**
-		 * Register an authentication provider.
-		 *
-		 * There can only be one provider per id and an error is being thrown when an id
-		 * has already been used by another provider.
-		 *
-		 * @param provider The authentication provider provider.
-		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
-		 */
-		export function registerAuthenticationProvider(provider: AuthenticationProvider): Disposable;
-
-		/**
-		 * Fires with the provider id that was registered or unregistered.
-		 */
-		export const onDidChangeAuthenticationProviders: Event<AuthenticationProvidersChangeEvent>;
-
-		/**
-		 * @deprecated
-		 * The ids of the currently registered authentication providers.
-		 * @returns An array of the ids of authentication providers that are currently registered.
-		 */
-		export function getProviderIds(): Thenable<ReadonlyArray<string>>;
-
-		/**
-		 * @deprecated
-		 * An array of the ids of authentication providers that are currently registered.
-		 */
-		export const providerIds: ReadonlyArray<string>;
-
-		/**
-		 * An array of the information of authentication providers that are currently registered.
-		 */
-		export const providers: ReadonlyArray<AuthenticationProviderInformation>;
-
-		/**
-		 * @deprecated
-		* Logout of a specific session.
-		* @param providerId The id of the provider to use
-		* @param sessionId The session id to remove
-		* provider
-		*/
-		export function logout(providerId: string, sessionId: string): Thenable<void>;
-	}
 
 	//#endregion
 
@@ -1021,54 +917,7 @@ declare module 'vscode' {
 
 	//#region Status bar item with ID and Name: https://github.com/microsoft/vscode/issues/74972
 
-	export namespace window {
 
-		/**
-		 * Options to configure the status bar item.
-		 */
-		export interface StatusBarItemOptions {
-
-			/**
-			 * A unique identifier of the status bar item. The identifier
-			 * is for example used to allow a user to show or hide the
-			 * status bar item in the UI.
-			 */
-			id: string;
-
-			/**
-			 * A human readable name of the status bar item. The name is
-			 * for example used as a label in the UI to show or hide the
-			 * status bar item.
-			 */
-			name: string;
-
-			/**
-			 * Accessibility information used when screen reader interacts with this status bar item.
-			 */
-			accessibilityInformation?: AccessibilityInformation;
-
-			/**
-			 * The alignment of the status bar item.
-			 */
-			alignment?: StatusBarAlignment;
-
-			/**
-			 * The priority of the status bar item. Higher value means the item should
-			 * be shown more to the left.
-			 */
-			priority?: number;
-		}
-
-		/**
-		 * Creates a status bar [item](#StatusBarItem).
-		 *
-		 * @param options The options of the item. If not provided, some default values
-		 * will be assumed. For example, the `StatusBarItemOptions.id` will be the id
-		 * of the extension and the `StatusBarItemOptions.name` will be the extension name.
-		 * @return A new status bar item.
-		 */
-		export function createStatusBarItem(options?: StatusBarItemOptions): StatusBarItem;
-	}
 
 	//#endregion
 
@@ -1760,75 +1609,6 @@ declare module 'vscode' {
 
 	//#region @eamodio - timeline: https://github.com/microsoft/vscode/issues/84297
 
-	export class TimelineItem {
-		/**
-		 * A timestamp (in milliseconds since 1 January 1970 00:00:00) for when the timeline item occurred.
-		 */
-		timestamp: number;
-
-		/**
-		 * A human-readable string describing the timeline item.
-		 */
-		label: string;
-
-		/**
-		 * Optional id for the timeline item. It must be unique across all the timeline items provided by this source.
-		 *
-		 * If not provided, an id is generated using the timeline item's timestamp.
-		 */
-		id?: string;
-
-		/**
-		 * The icon path or [ThemeIcon](#ThemeIcon) for the timeline item.
-		 */
-		iconPath?: Uri | { light: Uri; dark: Uri; } | ThemeIcon;
-
-		/**
-		 * A human readable string describing less prominent details of the timeline item.
-		 */
-		description?: string;
-
-		/**
-		 * The tooltip text when you hover over the timeline item.
-		 */
-		detail?: string;
-
-		/**
-		 * The [command](#Command) that should be executed when the timeline item is selected.
-		 */
-		command?: Command;
-
-		/**
-		 * Context value of the timeline item. This can be used to contribute specific actions to the item.
-		 * For example, a timeline item is given a context value as `commit`. When contributing actions to `timeline/item/context`
-		 * using `menus` extension point, you can specify context value for key `timelineItem` in `when` expression like `timelineItem == commit`.
-		 * ```
-		 *	"contributes": {
-		 *		"menus": {
-		 *			"timeline/item/context": [
-		 *				{
-		 *					"command": "extension.copyCommitId",
-		 *					"when": "timelineItem == commit"
-		 *				}
-		 *			]
-		 *		}
-		 *	}
-		 * ```
-		 * This will show the `extension.copyCommitId` action only for items where `contextValue` is `commit`.
-		 */
-		contextValue?: string;
-
-		/**
-		 * Accessibility information used when screen reader interacts with this timeline item.
-		 */
-		accessibilityInformation?: AccessibilityInformation;
-
-		/**
-		 * @param label A human-readable string describing the timeline item
-		 * @param timestamp A timestamp (in milliseconds since 1 January 1970 00:00:00) for when the timeline item occurred
-		 */
-		constructor(label: string, timestamp: number);
-	}
 
 	export interface TimelineChangeEvent {
 		/**
@@ -1842,20 +1622,6 @@ declare module 'vscode' {
 		reset?: boolean;
 	}
 
-	export interface Timeline {
-		readonly paging?: {
-			/**
-			 * A provider-defined cursor specifying the starting point of timeline items which are after the ones returned.
-			 * Use `undefined` to signal that there are no more items to be returned.
-			 */
-			readonly cursor: string | undefined;
-		};
-
-		/**
-		 * An array of [timeline items](#TimelineItem).
-		 */
-		readonly items: readonly TimelineItem[];
-	}
 
 	export interface TimelineOptions {
 		/**
@@ -1870,49 +1636,7 @@ declare module 'vscode' {
 		limit?: number | { timestamp: number; id?: string; };
 	}
 
-	export interface TimelineProvider {
-		/**
-		 * An optional event to signal that the timeline for a source has changed.
-		 * To signal that the timeline for all resources (uris) has changed, do not pass any argument or pass `undefined`.
-		 */
-		onDidChange?: Event<TimelineChangeEvent | undefined>;
 
-		/**
-		 * An identifier of the source of the timeline items. This can be used to filter sources.
-		 */
-		readonly id: string;
-
-		/**
-		 * A human-readable string describing the source of the timeline items. This can be used as the display label when filtering sources.
-		 */
-		readonly label: string;
-
-		/**
-		 * Provide [timeline items](#TimelineItem) for a [Uri](#Uri).
-		 *
-		 * @param uri The [uri](#Uri) of the file to provide the timeline for.
-		 * @param options A set of options to determine how results should be returned.
-		 * @param token A cancellation token.
-		 * @return The [timeline result](#TimelineResult) or a thenable that resolves to such. The lack of a result
-		 * can be signaled by returning `undefined`, `null`, or an empty array.
-		 */
-		provideTimeline(uri: Uri, options: TimelineOptions, token: CancellationToken): ProviderResult<Timeline>;
-	}
-
-	export namespace workspace {
-		/**
-		 * Register a timeline provider.
-		 *
-		 * Multiple providers can be registered. In that case, providers are asked in
-		 * parallel and the results are merged. A failing provider (rejected promise or exception) will
-		 * not cause a failure of the whole operation.
-		 *
-		 * @param scheme A scheme or schemes that defines which documents this provider is applicable to. Can be `*` to target all documents.
-		 * @param provider A timeline provider.
-		 * @return A [disposable](#Disposable) that unregisters this provider when being disposed.
-		*/
-		export function registerTimelineProvider(scheme: string | string[], provider: TimelineProvider): Disposable;
-	}
 
 	//#endregion
 
