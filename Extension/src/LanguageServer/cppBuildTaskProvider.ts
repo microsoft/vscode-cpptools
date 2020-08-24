@@ -157,7 +157,8 @@ export class CppBuildTaskProvider implements TaskProvider {
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
-        const taskLabel: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
+        const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
+            CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
         const isWindows: boolean = os.platform() === 'win32';
         const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
@@ -227,14 +228,24 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         rawTasksJson.version = "2.0.0";
 
-        const selectedTask2: Task = selectedTask;
-        if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-            const task: any = {
-                ...selectedTask2.definition,
-                problemMatcher: selectedTask2.problemMatchers,
-                group: { kind: "build", "isDefault": true }
+        // Modify the current default task
+        rawTasksJson.tasks.forEach((task: any) => {
+            if (task.label === selectedTask?.definition.label) {
+                task.group = { kind: "build", "isDefault": true };
+            }
+            else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
+                task.group = "build";
+            }
+        });
+
+        if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask?.definition.label)) {
+            const newTask: any = {
+                ...selectedTask.definition,
+                problemMatcher: selectedTask.problemMatchers,
+                group: { kind: "build", "isDefault": true },
+                detail: "Generated task by Debugger"
             };
-            rawTasksJson.tasks.push(task);
+            rawTasksJson.tasks.push(newTask);
         }
 
         // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
@@ -310,7 +321,6 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     }
 
     private get AdditionalEnvironment(): { [key: string]: string | string[] } | undefined {
-
         const editor: TextEditor | undefined = window.activeTextEditor;
         if (!editor) {
             return undefined;
