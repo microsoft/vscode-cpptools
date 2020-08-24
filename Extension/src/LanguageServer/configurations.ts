@@ -19,6 +19,7 @@ import escapeStringRegExp = require('escape-string-regexp');
 import * as jsonc from 'jsonc-parser';
 import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
+import * as which from 'which';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

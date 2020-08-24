@@ -30,6 +30,7 @@ import { Readable, Writable } from 'stream';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
+import * as which from 'which';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
