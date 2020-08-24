@@ -20,9 +20,21 @@ import { IncomingMessage, ClientRequest } from 'http';
 import { Logger } from './logger';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
+import * as crypto from 'crypto';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+export function isValidPackage(buffer: Buffer, integrity: string): boolean {
+    if (integrity && integrity.length > 0) {
+        const hash: crypto.Hash = crypto.createHash('sha256');
+        hash.update(buffer);
+        const value: string = hash.digest('hex').toUpperCase();
+        return (value === integrity.toUpperCase());
+    }
+    // No integrity has been specified
+    return true;
+}
 
 export interface IPackage {
     // Description of the package
@@ -49,6 +61,9 @@ export interface IPackage {
 
     // Internal location to which the package was downloaded
     tmpFile: tmp.FileResult;
+
+    // sha256 hash of the package
+    integrity: string;
 }
 
 export class PackageManagerError extends Error {
@@ -113,6 +128,17 @@ export class PackageManager {
             });
     }
 
+    public GetPackages(): Promise<IPackage[]> {
+        return this.GetPackageList()
+            .then((list) =>
+                list.filter((value, index, array) =>
+                    ArchitecturesMatch(value, this.platformInfo) &&
+                        PlatformsMatch(value, this.platformInfo) &&
+                        VersionsMatch(value, this.platformInfo)
+                )
+            );
+    }
+
     /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
      *  Like Promise.all, but runs the promises in sequence rather than simultaneously.
      */
@@ -147,17 +173,6 @@ export class PackageManager {
                 resolve(this.allPackages);
             }
         });
-    }
-
-    private GetPackages(): Promise<IPackage[]> {
-        return this.GetPackageList()
-            .then((list) =>
-                list.filter((value, index, array) =>
-                    ArchitecturesMatch(value, this.platformInfo) &&
-                        PlatformsMatch(value, this.platformInfo) &&
-                        VersionsMatch(value, this.platformInfo)
-                )
-            );
     }
 
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
@@ -240,6 +255,7 @@ export class PackageManager {
             rejectUnauthorized: proxyStrictSSL
         };
 
+        const buffers: Buffer[] = [];
         return new Promise<void>((resolve, reject) => {
             let secondsDelay: number = Math.pow(2, delay);
             if (secondsDelay === 1) {
@@ -292,6 +308,7 @@ export class PackageManager {
                         this.AppendChannel(`(${Math.ceil(packageSize / 1024)} KB) `);
 
                         response.on('data', (data) => {
+                            buffers.push(data);
                             // Update dots after package name in output console
                             const newDots: number = Math.ceil(downloadPercentage / 5);
                             if (newDots > dots) {
@@ -300,7 +317,14 @@ export class PackageManager {
                             }
                         });
 
-                        response.on('end', resolve);
+                        response.on('end', () => {
+                            const packageBuffer: Buffer = Buffer.concat(buffers);
+                            if (isValidPackage(packageBuffer, pkg.integrity)) {
+                                resolve();
+                            } else {
+                                reject(new PackageManagerError('Invalid content received. Hash is incorrect.', localize("invalid.content.received", 'Invalid content received. Hash is incorrect.'), 'DownloadFile', pkg));
+                            }
+                        });
 
                         response.on('error', (error) =>
                             reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error.stack, error.name)));
@@ -380,20 +404,20 @@ export class PackageManager {
                                         const absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
                                         if (fs.existsSync(absoluteEntryTempFile)) {
                                             try {
-                                                await util.unlinkPromise(absoluteEntryTempFile);
+                                                await util.unlinkAsync(absoluteEntryTempFile);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }
                                         }
 
                                         // Make sure executable files have correct permissions when extracted
-                                        const fileMode: number = (pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        const fileMode: number = (this.platformInfo.platform !== "win32" && pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
                                         const writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
 
                                         writeStream.on('close', async () => {
                                             try {
                                                 // Remove .tmp extension from the file.
-                                                await util.renamePromise(absoluteEntryTempFile, absoluteEntryPath);
+                                                await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
                                             } catch (err) {
                                                 return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
                                             }

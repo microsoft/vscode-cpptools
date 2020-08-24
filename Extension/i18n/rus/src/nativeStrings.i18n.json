@@ -175,5 +175,7 @@
 	"parameters_label": "Параметры:",
 	"returns_label": "Возвращает:",
 	"deprecated_label": "Нерекомендуемый:",
-	"exceptions_label": "Исключения:"
+	"exceptions_label": "Исключения:",
+	"template_parameters_label": "Параметры шаблона:",
+	"compiler_probe_command_line": "Командная строка проверки компилятора: {0}"
 }

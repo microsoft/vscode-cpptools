@@ -34,5 +34,6 @@
 	"yes.button": "はい",
 	"no.button": "いいえ",
 	"configurations.received": "カスタム構成を受信しました:",
-	"browse.configuration.received": "カスタムの参照構成を受信しました: {0}"
+	"browse.configuration.received": "カスタムの参照構成を受信しました: {0}",
+	"browse.configuration": "カスタムの参照構成: {0}"
 }

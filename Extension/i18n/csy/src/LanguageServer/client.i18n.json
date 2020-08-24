@@ -34,5 +34,6 @@
 	"yes.button": "Ano",
 	"no.button": "Ne",
 	"configurations.received": "Přijaly se vlastní konfigurace:",
-	"browse.configuration.received": "Přijala se vlastní konfigurace procházení: {0}"
+	"browse.configuration.received": "Přijala se vlastní konfigurace procházení: {0}",
+	"browse.configuration": "Vlastní konfigurace procházení: {0}"
 }

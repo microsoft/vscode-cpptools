@@ -109,7 +109,6 @@ export class CppSettings extends Settings {
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
-    public get formatting(): string | undefined { return super.Section.get<string>("formatting"); }
     public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
@@ -164,6 +163,242 @@ export class CppSettings extends Settings {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
             && super.Section.get<string>("intelliSenseEngine") === "Default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+    }
+
+    public get formattingEngine(): string | undefined {
+        return super.Section.get<string>("formatting");
+    }
+
+    public get vcFormatIndentBraces(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.braces") === true;
+    }
+
+    public get vcFormatIndentMultiLineRelativeTo(): string | undefined {
+        return super.Section.get<string>("vcFormat.indent.multiLineRelativeTo");
+    }
+
+    public get vcFormatIndentWithinParentheses(): string | undefined {
+        return super.Section.get<string>("vcFormat.indent.withinParentheses");
+    }
+
+    public get vcFormatindentPreserveWithinParentheses(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.preserveWithinParentheses") === true;
+    }
+
+    public get vcFormatIndentCaseLabels(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.caseLabels") === true;
+    }
+
+    public get vcFormatIndentCaseContents(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.caseContents") === true;
+    }
+
+    public get vcFormatIndentCaseContentsWhenBlock(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.caseContentsWhenBlock") === true;
+    }
+
+    public get vcFormatIndentLambdaBracesWhenParameter(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.lambdaBracesWhenParameter") === true;
+    }
+
+    public get vcFormatIndentGotoLables(): string | undefined {
+        return super.Section.get<string>("vcFormat.indent.gotoLabels");
+    }
+
+    public get vcFormatIndentPreprocessor(): string | undefined {
+        return super.Section.get<string>("vcFormat.indent.preprocessor");
+    }
+
+    public get vcFormatIndentAccessSpecifiers(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.accessSpecifiers") === true;
+    }
+
+    public get vcFormatIndentNamespaceContents(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.namespaceContents") === true;
+    }
+
+    public get vcFormatIndentPreserveComment(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.preserveComment") === true;
+    }
+
+    public get vcFormatNewlineBeforeOpenBraceNamespace(): string | undefined {
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.namespace");
+    }
+
+    public get vcFormatNewlineBeforeOpenBraceType(): string | undefined {
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.type");
+    }
+
+    public get vcFormatNewlineBeforeOpenBraceFunction(): string | undefined {
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.function");
+    }
+
+    public get vcFormatNewlineBeforeOpenBraceBlock(): string | undefined {
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.block");
+    }
+
+    public get vcFormatNewlineBeforeOpenBraceLambda(): string | undefined {
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.lamda");
+    }
+
+    public get vcFormatNewlineScopeBracesOnSeparateLines():  boolean {
+        return super.Section.get<boolean>("vcFormat.newLine.scopeBracesOnSeparateLines") === true;
+    }
+
+    public get vcFormatNewlineCloseBraceSameLineEmptyType():  boolean {
+        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyType") === true;
+    }
+
+    public get vcFormatNewlineCloseBraceSameLineEmptyFunction():  boolean {
+        return super.Section.get<boolean>("vcFormat.newLine.closeBraceSameLine.emptyFunction") === true;
+    }
+
+    public get vcFormatNewlineBeforeCatch():  boolean {
+        return super.Section.get<boolean>("vcFormat.newLine.beforeCatch") === true;
+    }
+
+    public get vcFormatNewlineBeforeElse():  boolean {
+        return super.Section.get<boolean>("vcFormat.newLine.beforeElse") === true;
+    }
+
+    public get vcFormatNewlineBeforeWhileInDoWhile():  boolean {
+        return super.Section.get<boolean>("vcFormat.newLine.beforeWhileInDoWhile") === true;
+    }
+
+    public get vcFormatSpaceBeforeFunctionOpenParenthesis(): string | undefined {
+        return super.Section.get<string>("vcFormat.space.beforeFunctionOpenParenthesis");
+    }
+
+    public get vcFormatSpaceWithinParameterListParentheses():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.withinParameterListParentheses") === true;
+    }
+
+    public get vcFormatSpaceBetweenEmptyParameterListParentheses():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptyParameterListParentheses") === true;
+    }
+
+    public get vcFormatSpaceAfterKeywordsInControlFlowStatements():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.afterKeywordsInControlFlowStatements") === true;
+    }
+
+    public get vcFormatSpaceWithinControlFlowStatementParentheses():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.withinControlFlowStatementParentheses") === true;
+    }
+
+    public get vcFormatSpaceBeforeLambdaOpenParenthesis():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeLambdaOpenParenthesis") === true;
+    }
+
+    public get vcFormatSpaceWithinCastParentheses():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.withinCastParentheses") === true;
+    }
+
+    public get vcFormatSpaceAfterCastCloseParenthesis():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.afterCastCloseParenthesis") === true;
+    }
+
+    public get vcFormatSpaceWithinExpressionParentheses():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.withinExpressionParentheses") === true;
+    }
+
+    public get vcFormatSpaceBeforeBlockOpenBrace():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeBlockOpenBrace") === true;
+    }
+
+    public get vcFormatSpaceBetweenEmptyBraces():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptyBraces") === true;
+    }
+
+    public get vcFormatSpaceBeforeInitializerListOpenBrace():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeInitializerListOpenBrace") === true;
+    }
+
+    public get vcFormatSpaceWithinInitializerListBraces():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.withinInitializerListBraces") === true;
+    }
+
+    public get vcFormatSpacePreserveInInitializerList():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.preserveInInitializerList") === true;
+    }
+
+    public get vcFormatSpaceBeforeOpenSquareBracket():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeOpenSquareBracket") === true;
+    }
+
+    public get vcFormatSpaceWithinSquareBrackets():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.withinSquareBrackets") === true;
+    }
+
+    public get vcFormatSpaceBeforeEmptySquareBrackets():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeEmptySquareBrackets") === true;
+    }
+
+    public get vcFormatSpaceBetweenEmptySquareBrackets():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptySquareBrackets") === true;
+    }
+
+    public get vcFormatSpaceGroupSquareBrackets():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.groupSquareBrackets") === true;
+    }
+
+    public get vcFormatSpaceWithinLambdaBrackets():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.withinLambdaBrackets") === true;
+    }
+
+    public get vcFormatSpaceBetweenEmptyLambdaBrackets():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.betweenEmptyLambdaBrackets") === true;
+    }
+
+    public get vcFormatSpaceBeforeComma():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeComma") === true;
+    }
+
+    public get vcFormatSpaceAfterComma():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.afterComma") === true;
+    }
+
+    public get vcFormatSpaceRemoveAroundMemberOperators():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.removeAroundMemberOperators") === true;
+    }
+
+    public get vcFormatSpaceBeforeInheritanceColon():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeInheritanceColon") === true;
+    }
+
+    public get vcFormatSpaceBeforeConstructorColon():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.beforeConstructorColon") === true;
+    }
+
+    public get vcFormatSpaceRemoveBeforeSemicolon():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.removeBeforeSemicolon") === true;
+    }
+
+    public get vcFormatSpaceInsertAfterSemicolon():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.insertAfterSemicolon") === true;
+    }
+
+    public get vcFormatSpaceRemoveAroundUnaryOperator():  boolean {
+        return super.Section.get<boolean>("vcFormat.space.removeAroundUnaryOperator") === true;
+    }
+
+    public get vcFormatSpaceAroundBinaryOperator(): string | undefined {
+        return super.Section.get<string>("vcFormat.space.aroundBinaryOperator");
+    }
+
+    public get vcFormatSpaceAroundAssignmentOperator(): string | undefined {
+        return super.Section.get<string>("vcFormat.space.aroundAssignmentOperator");
+    }
+
+    public get vcFormatSpacePointerReferenceAlignment(): string | undefined {
+        return super.Section.get<string>("vcFormat.space.pointerReferenceAlignment");
+    }
+
+    public get vcFormatSpaceAroundTernaryOperator(): string | undefined {
+        return super.Section.get<string>("vcFormat.space.aroundTernaryOperator");
+    }
+
+    public get vcFormatWrapPreserveBlocks(): string | undefined {
+        return super.Section.get<string>("vcFormat.wrap.preserveBlocks");
     }
 
     public get dimInactiveRegions(): boolean {

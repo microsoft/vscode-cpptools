@@ -21,6 +21,7 @@ import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
+import { PackageManager, IPackage } from './packageManager';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -466,7 +467,7 @@ export function checkInstallLockFile(): Promise<boolean> {
 /** Get the platform that the installed binaries belong to.*/
 export function getInstalledBinaryPlatform(): string | undefined {
     // the LLVM/bin folder is utilized to identify the platform
-    let installedPlatform: string = "";
+    let installedPlatform: string | undefined;
     if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
         installedPlatform = "win32";
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
@@ -474,7 +475,67 @@ export function getInstalledBinaryPlatform(): string | undefined {
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
         installedPlatform = "linux";
     }
+    if (!installedPlatform) {
+        Telemetry.logLanguageServerEvent("missingBinary", { "source": "clang-format" });
+    }
     return installedPlatform;
+}
+
+/* Check if the core binaries exists in extension's installation folder */
+export async function checkInstallBinariesExist(): Promise<boolean> {
+    if (!checkInstallLockFile()) {
+        return false;
+    }
+    let installBinariesExist: boolean = true;
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const packageManager: PackageManager = new PackageManager(info);
+    const packages: Promise<IPackage[]> = packageManager.GetPackages();
+    for (const pkg of await packages) {
+        if (pkg.binaries) {
+            await Promise.all(pkg.binaries.map(async (file: string) => {
+                if (!await checkFileExists(file)) {
+                    installBinariesExist = false;
+                    const fileBase: string = path.basename(file);
+                    console.log(`Extension file ${fileBase} is missing.`);
+                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${fileBase}` });
+                }
+            }));
+        }
+    }
+    return installBinariesExist;
+}
+
+/* Check if the core Json files exists in extension's installation folder */
+export async function checkInstallJsonsExist(): Promise<boolean> {
+    let installJsonsExist: boolean = true;
+    const jsonFiles: string[] = [
+        "bin/msvc.arm32.clang.json",
+        "bin/msvc.arm32.gcc.json",
+        "bin/msvc.arm32.msvc.json",
+        "bin/msvc.arm64.clang.json",
+        "bin/msvc.arm64.gcc.json",
+        "bin/msvc.arm64.msvc.json",
+        "bin/msvc.json",
+        "bin/msvc.x64.clang.json",
+        "bin/msvc.x64.gcc.json",
+        "bin/msvc.x64.msvc.json",
+        "bin/msvc.x86.clang.json",
+        "bin/msvc.x86.gcc.json",
+        "bin/msvc.x86.msvc.json",
+        "debugAdapters/bin/cppdbg.ad7Engine.json"
+    ];
+    await Promise.all(jsonFiles.map(async (file) => {
+        if (!await checkFileExists(path.join(extensionPath, file))) {
+            installJsonsExist = false;
+            console.log(`Extension file ${file} is missing.`);
+            Telemetry.logLanguageServerEvent("missingJson", { "source": `${file}` });
+        }
+    }));
+    return installJsonsExist;
+}
+
+export async function removeInstallLockFile(): Promise<void> {
+    await unlinkAsync(path.join(extensionPath, "install.lock"));
 }
 
 /** Reads the content of a text file */
@@ -670,7 +731,7 @@ export function checkDistro(platformInfo: PlatformInformation): void {
     }
 }
 
-export async function unlinkPromise(fileName: string): Promise<void> {
+export async function unlinkAsync(fileName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.unlink(fileName, err => {
             if (err) {
@@ -681,7 +742,7 @@ export async function unlinkPromise(fileName: string): Promise<void> {
     });
 }
 
-export async function renamePromise(oldName: string, newName: string): Promise<void> {
+export async function renameAsync(oldName: string, newName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.rename(oldName, newName, err => {
             if (err) {
