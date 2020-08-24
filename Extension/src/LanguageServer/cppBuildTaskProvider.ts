@@ -232,8 +232,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         rawTasksJson.tasks.forEach((task: any) => {
             if (task.label === selectedTask?.definition.label) {
                 task.group = { kind: "build", "isDefault": true };
-            }
-            else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
+            } else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
                 task.group = "build";
             }
         });
