@@ -49,9 +49,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
             _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
-            // TODO: currently, no tasks are resolved when the quick pick is shown.
-            // This change will not be effective in VS Code 1.49.
-            // _task.detail = "Existing task defined in tasks.json.";
             return _task;
         }
         return undefined;
@@ -161,9 +158,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskLabel: string = (appendSourceToName ? CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
-        // TODO: currently, the name of the task in the tasks.json file, and the label shown in quickpick menu are not differentiable.
-        // This change will not be effective in VS Code 1.49.
-        // const taskName: string = "Build with " + compilerPathBase + ".";
         const isCl: boolean = compilerPathBase === "cl.exe";
         const isWindows: boolean = os.platform() === 'win32';
         const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
