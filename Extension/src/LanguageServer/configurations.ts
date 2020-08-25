@@ -105,6 +105,7 @@ export interface CompilerDefaults {
     windowsSdkVersion: string;
     intelliSenseMode: string;
     rootfs: string;
+    cplusplusMacro: string;
 }
 
 export class CppProperties {
@@ -126,6 +127,7 @@ export class CppProperties {
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private defaultIntelliSenseMode?: string;
+    private defaultCplusplusMacro?: string;
     private defaultCustomConfigurationVariables?: { [key: string]: string };
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
@@ -187,6 +189,7 @@ export class CppProperties {
         this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+        this.defaultCplusplusMacro = compilerDefaults.cplusplusMacro;
         this.rootfs = compilerDefaults.rootfs;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
@@ -304,6 +307,8 @@ export class CppProperties {
         const abTestSettings: ABTestSettings = getABTestSettings();
         const rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
         const defaultFolder: string = "${default}";
+        let isDefaultIntelliSenseModeUsed: boolean = false;
+        let isDefaultdefaultCStandardUsed: boolean = false;
         // We don't add system includes to the includePath anymore. The language server has this information.
         if (isUnset(settings.defaultIncludePath)) {
             configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
@@ -313,10 +318,6 @@ export class CppProperties {
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
             configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
-            if ((settings.defaultIntelliSenseMode && settings.defaultIntelliSenseMode.startsWith("msvc")) ||
-                (this.defaultIntelliSenseMode && this.defaultIntelliSenseMode.startsWith("msvc"))) {
-                configuration.defines.push("/Zc:__cplusplus");
-            }
         }
         if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
             configuration.macFrameworkPath = this.defaultFrameworks;
@@ -335,12 +336,17 @@ export class CppProperties {
         }
         if ((isUnset(settings.defaultCppStandard) || settings.defaultCppStandard === "") && this.defaultCppStandard) {
             configuration.cppStandard = this.defaultCppStandard;
+            isDefaultdefaultCStandardUsed = true;
         }
         if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
+            isDefaultIntelliSenseModeUsed = true;
         }
         if (isUnset(settings.defaultCustomConfigurationVariables) || settings.defaultCustomConfigurationVariables === {}) {
             configuration.customConfigurationVariables = this.defaultCustomConfigurationVariables;
+        }
+        if (isDefaultIntelliSenseModeUsed && isDefaultdefaultCStandardUsed && this.defaultCplusplusMacro) {
+            configuration.defines?.push(this.defaultCplusplusMacro);
         }
     }
 
