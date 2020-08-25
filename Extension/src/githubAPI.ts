@@ -161,10 +161,10 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
                 telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
             } else if (userVersion.isExtensionVersionGreaterThan(new PackageVersion(targetBuild.name))) {
                 // downgrade
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "version": targetBuild.name });
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "newVersion": targetBuild.name });
             } else {
                 // upgrade
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "version": targetBuild.name });
+                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "newVersion": targetBuild.name });
             }
             return targetBuild;
         })
