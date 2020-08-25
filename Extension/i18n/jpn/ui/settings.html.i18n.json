@@ -30,7 +30,7 @@
 	"intellisense.mode": "IntelliSense モード",
 	"intellisense.mode.description": "MSVC、gcc、Clang のアーキテクチャ固有のバリアントにマップするために使用する IntelliSense モードです。値が設定されていない場合または {0} に設定されている場合、拡張機能はそのプラットフォームの既定値を選択します。Windows の既定値は {1}、Linux の既定値は {2}、macOS の既定値は {3} です。{4} モードをオーバーライドするには、特定の IntelliSense モードを選択します。",
 	"include.path": "パスを含める",
-	"include.path.description": "インクルード パスは、ソース ファイルにインクルードされるヘッダー ファイル ({0} など) を含むフォルダーです。インクルードされたヘッダー ファイルを検索する際に、IntelliSense エンジンが使用する一覧のパスを指定します。パスの末尾が {1} の場合、IntelliSense エンジンは、そのディレクトリからヘッダー ファイルの再帰的な検索を開始します。Windows 上に Visual Studio がインストールされている場合、または {2} 設定でコンパイラが指定されている場合は、この一覧にシステム インクルード パスを含める必要はありません。",
+	"include.path.description": "An include path is a folder that contains header files (such as {0}) that are included in a source file. Specify a list paths for the IntelliSense engine to use while searching for included header files. Searching on these paths is not recursive. Specify {1} to indicate recursive search. For example, {2} will search through all subdirectories while {3} will not.  If on Windows with Visual Studio installed, or if a compiler is specified in the {4} setting, it is not necessary to list the system include paths in this list.",
 	"one.include.path.per.line": "1 行につき 1 つのインクルード パスです。",
 	"defines": "定義",
 	"defines.description": "ファイルの解析時に IntelliSense エンジンが使用するプリプロセッサ定義の一覧です。必要に応じて、{0} を使用して値を設定します (例: {1})。",
