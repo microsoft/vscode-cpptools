@@ -313,6 +313,10 @@ export class CppProperties {
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
             configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
+            if ((settings.defaultIntelliSenseMode && settings.defaultIntelliSenseMode.startsWith("msvc")) ||
+                (this.defaultIntelliSenseMode && this.defaultIntelliSenseMode.startsWith("msvc"))) {
+                configuration.defines.push("/Zc:__cplusplus");
+            }
         }
         if (isUnset(settings.defaultMacFrameworkPath) && process.platform === 'darwin') {
             configuration.macFrameworkPath = this.defaultFrameworks;
