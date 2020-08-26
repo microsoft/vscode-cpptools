@@ -1700,7 +1700,7 @@ export class DefaultClient implements Client {
                 files: {
                     encoding: settings_filesEncoding
                 },
-                base_files_encoding: workspaceOtherSettings.filesEncoding,
+                base_fallback_encoding: workspaceOtherSettings.filesEncoding,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
@@ -1800,7 +1800,7 @@ export class DefaultClient implements Client {
                 files: {
                     encoding: otherSettingsWorkspace.filesEncoding
                 },
-                base_files_encoding: otherSettingsGlobal.filesEncoding,
+                base_fallback_encoding: otherSettingsGlobal.filesEncoding,
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {
