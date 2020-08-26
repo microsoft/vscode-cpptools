@@ -3,7 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions, AbortRequestIdHolder } from './client';
+import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions } from '../client';
+import AbortRequestIdHolder = require('../client');
 
 export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     private client: DefaultClient;

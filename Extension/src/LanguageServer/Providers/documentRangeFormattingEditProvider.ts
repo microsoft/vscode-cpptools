@@ -3,8 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings } from './client';
-import { CppSettings } from './settings';
+import { DefaultClient, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings } from '../client';
+import { CppSettings } from '../settings';
 import * as editorConfig from 'editorconfig';
 
 export class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {

@@ -8,15 +8,15 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 // Importing providers here
-import { OnTypeFormattingEditProvider } from './onTypeFormattingEditProvider';
-import { FoldingRangeProvider } from './foldingRangeProvider';
-import { SemanticTokensProvider } from './semanticTokensProvider';
-import { DocumentFormattingEditProvider } from './documentFormattingEditProvider';
-import { DocumentRangeFormattingEditProvider } from './documentRangeFormattingEditProvider';
-import { DocumentSymbolProvider } from './documentSymbolProvider';
-import { WorkspaceSymbolProvider } from './workspaceSymbolProvider';
-import { RenameProvider } from './renameProvider';
-import { FindAllReferencesProvider } from './findAllReferencesProvider';
+import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
+import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
+import { SemanticTokensProvider } from './Providers/semanticTokensProvider';
+import { DocumentFormattingEditProvider } from './Providers/documentFormattingEditProvider';
+import { DocumentRangeFormattingEditProvider } from './Providers/documentRangeFormattingEditProvider';
+import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
+import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
+import { RenameProvider } from './Providers/renameProvider';
+import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 // End provider imports
 
 import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
@@ -68,9 +68,7 @@ export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
-export class AbortRequestIdHolder {
-    public static abortRequestId: number = 0;
-}
+export let abortRequestId: number = 0;
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -465,16 +463,12 @@ const SemanticTokensChanged: NotificationType<string, void> = new NotificationTy
 
 let failureMessageShown: boolean = false;
 
-export class ReferenceParamsHolder {
-    public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
-    public static referencesRequestPending: boolean = false;
-    public static referencesPendingCancellations: ReferencesCancellationState[] = [];
-}
+export let referencesParams: RenameParams | FindAllReferencesParams | undefined;
+export let referencesRequestPending: boolean = false;
+export const referencesPendingCancellations: ReferencesCancellationState[] = [];
 
-export class RenameParamsHolder {
-    public static renameRequestsPending: number = 0;
-    public static renamePending: boolean = false;
-}
+export let renameRequestsPending: number = 0;
+export let renamePending: boolean = false;
 
 export interface ReferencesCancellationState {
     reject(): void;
@@ -1349,7 +1343,7 @@ export class DefaultClient implements Client {
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
             if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
                 // If any file has changed, we need to abort the current rename operation
-                if (RenameParamsHolder.renamePending) {
+                if (renamePending) {
                     this.cancelReferences();
                 }
 
@@ -2578,7 +2572,7 @@ export class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            const cancelling: boolean = ReferenceParamsHolder.referencesPendingCancellations.length > 0;
+            const cancelling: boolean = referencesPendingCancellations.length > 0;
             if (!cancelling) {
                 workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
                 if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
@@ -2602,11 +2596,11 @@ export class DefaultClient implements Client {
     }
 
     public cancelReferences(): void {
-        ReferenceParamsHolder.referencesParams = undefined;
-        RenameParamsHolder.renamePending = false;
-        if (ReferenceParamsHolder.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
-            const cancelling: boolean = ReferenceParamsHolder.referencesPendingCancellations.length > 0;
-            ReferenceParamsHolder.referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+        referencesParams = undefined;
+        renamePending = false;
+        if (referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
+            const cancelling: boolean = referencesPendingCancellations.length > 0;
+            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
                 languageClient.sendNotification(CancelReferencesNotification);

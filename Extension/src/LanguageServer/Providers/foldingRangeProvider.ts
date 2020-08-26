@@ -3,7 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, AbortRequestIdHolder } from './client';
+import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind } from '../client';
+import AbortRequestIdHolder = require('../client');
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;

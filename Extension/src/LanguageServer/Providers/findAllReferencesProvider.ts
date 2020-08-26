@@ -3,9 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, ReferenceParamsHolder, RenameParamsHolder, workspaceReferences, FindAllReferencesParams, ReferencesCancellationState, RequestReferencesNotification, CancelReferencesNotification } from './client';
+import { DefaultClient, workspaceReferences, FindAllReferencesParams, ReferencesCancellationState, RequestReferencesNotification, CancelReferencesNotification } from '../client';
+import ReferenceParamsHolder = require('../client');
+import RenameParamsHolder = require('../client');
 import { Position } from 'vscode-languageclient';
-import * as refs from './references';
+import * as refs from '../references';
 
 export class FindAllReferencesProvider implements vscode.ReferenceProvider {
     private client: DefaultClient;

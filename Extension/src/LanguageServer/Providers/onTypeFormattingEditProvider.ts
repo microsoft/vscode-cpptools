@@ -3,18 +3,18 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings } from './client';
-import { CppSettings } from './settings';
+import {DefaultClient,  FormatParams, DocumentFormatRequest, cachedEditorConfigSettings} from '../client';
+import { CppSettings } from '../settings';
 import * as editorConfig from 'editorconfig';
 
 
-export class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
+export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
     private client: DefaultClient;
     constructor(client: DefaultClient) {
         this.client = client;
     }
 
-    public provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+    public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         return new Promise<vscode.TextEdit[]>((resolve, reject) => {
             this.client.notifyWhenReady(() => {
                 const filePath: string = document.uri.fsPath;
@@ -24,11 +24,11 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                         uri: document.uri.toString(),
                         insertSpaces: options.insertSpaces,
                         tabSize: options.tabSize,
-                        character: "",
+                        character: ch,
                         range: {
                             start: {
-                                character: 0,
-                                line: 0
+                                character: position.character,
+                                line: position.line
                             },
                             end: {
                                 character: 0,
@@ -50,7 +50,13 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                 };
                 const settings: CppSettings = new CppSettings();
                 if (settings.formattingEngine !== "vcFormat") {
-                    configCallBack(undefined);
+                    // If not using vcFormat, only process on-type requests for ';'
+                    if (ch !== ';') {
+                        const result: vscode.TextEdit[] = [];
+                        resolve(result);
+                    } else {
+                        configCallBack(undefined);
+                    }
                 } else {
                     const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
                     if (!editorConfigSettings) {

@@ -3,12 +3,14 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, ReferenceParamsHolder, workspaceReferences, RenameParamsHolder, ReferencesCancellationState, RenameParams, CancelReferencesNotification } from './client';
-import * as refs from './references';
-import { CppSettings } from './settings';
+import { DefaultClient, workspaceReferences, ReferencesCancellationState, RenameParams, CancelReferencesNotification } from '../client';
+import ReferenceParamsHolder = require('../client');
+import RenameParamsHolder = require('../client');
+import * as refs from '../references';
+import { CppSettings } from '../settings';
 import { Position } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
-import * as util from '../common';
+import * as util from '../../common';
 
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();

@@ -3,8 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams } from './client';
-import * as util from '../common';
+import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams } from '../client';
+import * as util from '../../common';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
     private client: DefaultClient;
