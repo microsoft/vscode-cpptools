@@ -34,6 +34,5 @@
 	"yes.button": "Да",
 	"no.button": "Нет",
 	"configurations.received": "Получены пользовательские конфигурации:",
-	"browse.configuration.received": "Получена настраиваемая конфигурация просмотра: {0}",
-	"browse.configuration": "Пользовательская конфигурация просмотра: {0}"
+	"browse.configuration.received": "Получена настраиваемая конфигурация просмотра: {0}"
 }

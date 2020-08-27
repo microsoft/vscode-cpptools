@@ -10,7 +10,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "用於 IntelliSense 的 C 語言標準版本。注意: GNU 標準僅會用於查詢設定編譯器以取得 GNU 定義，而 IntelliSense 將會模擬相同的 C 標準版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "用於 IntelliSense 的 C++ 語言標準版本。注意: GNU 標準僅會用於查詢設定編譯器以取得 GNU 定義，而 IntelliSense 將會模擬相同的 C++ 標準版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "工作區 compile_commands.json 檔案的完整路徑。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.includePath": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive. Specify '**' to indicate recursive search. For example, '${workspaceFolder}/**' will search through all subdirectories while '${workspaceFolder}' will not.",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.includePath": "Intellisense 引擎搜尋所含標頭檔時所要使用的清單路徑。若要重複搜尋，請指定 '**'。例如 '${workspaceFolder}/**' 會搜尋所有子目錄，而 '${workspaceFolder}' 不會。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.macFrameworkPath": "供 Intellisense 引擎在 Mac 架構中搜尋包含的標頭時使用的路徑清單。僅支援用於 Mac 組態。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.windowsSdkVersion": "要在 Windows 上使用的 Windows SDK 包含路徑版本，例如 '10.0.17134.0'。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.defines": "剖析檔案時，IntelliSense 引擎要使用的前置處理器定義清單。您可使用 = 來設定值，例如 VERSION=1。",

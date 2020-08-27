@@ -34,6 +34,5 @@
 	"yes.button": "是",
 	"no.button": "否",
 	"configurations.received": "收到的自訂組態:",
-	"browse.configuration.received": "收到的自訂瀏覽組態: {0}",
-	"browse.configuration": "自訂瀏覽設定: {0}"
+	"browse.configuration.received": "收到的自訂瀏覽組態: {0}"
 }

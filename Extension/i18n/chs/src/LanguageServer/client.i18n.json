@@ -34,6 +34,5 @@
 	"yes.button": "是",
 	"no.button": "否",
 	"configurations.received": "已收到自定义配置:",
-	"browse.configuration.received": "已收到自定义浏览配置: {0}",
-	"browse.configuration": "自定义浏览配置: {0}"
+	"browse.configuration.received": "已收到自定义浏览配置: {0}"
 }
