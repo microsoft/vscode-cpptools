@@ -18,7 +18,7 @@
 	"failed.web.error": "başarısız oldu (hata kodu '{0}')",
 	"web.response.error": "HTTP/HTTPS Yanıt Hatası",
 	"invalid.content.length.received": "Geçersiz içerik uzunluğu konumu alındı",
-	"invalid.content.received": "Invalid content received. Hash is incorrect.",
+	"invalid.content.received": "Geçersiz içerik alındı. Karma yanlış.",
 	"web.request.error": "HTTP/HTTPS İstek hatası",
 	"installing.package": "'{0}' paketi yükleniyor",
 	"downloaded.unavailable": "İndirilen dosya kullanılamıyor",
