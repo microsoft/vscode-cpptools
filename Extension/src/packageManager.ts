@@ -131,7 +131,7 @@ export class PackageManager {
     }
 
     private GetIncrement(step: number, totalSteps: number, initialPosition: number = 0): number {
-        return step / totalSteps * 25 + initialPosition;
+        return 100/6;
     }
 
     public GetPackages(): Promise<IPackage[]> {
@@ -184,7 +184,8 @@ export class PackageManager {
     private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>, newIncrement: number): Promise<void> {
         this.AppendChannel(localize("downloading.package", "Downloading package '{0}' ", pkg.description));
         
-        progress.report({increment: newIncrement, message: localize("downloading.progress.description", "Downloading {0}: {1}", progressCount, pkg.description)});
+        progress.report({ message: localize("downloading.progress.description", "Downloading {0}: {1}", progressCount, pkg.description) });
+        progress.report({ increment: newIncrement });
 
         const tmpResult: tmp.FileResult = await this.CreateTempFile(pkg);
         await this.DownloadPackageWithRetries(pkg, tmpResult, progress);
@@ -357,8 +358,8 @@ export class PackageManager {
     private InstallPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>, newIncrement: number): Promise<void> {
         this.AppendLineChannel(localize("installing.package", "Installing package '{0}'", pkg.description));
 
-        progress.report({increment: newIncrement, message: localize("installing.progress.description", "Installing {0}: {1}", progressCount, pkg.description)});
-
+        progress.report({ message: `Installing ${progressCount}: ${pkg.description}` });
+        progress.report({ increment: newIncrement });
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
                 return reject(new PackageManagerError('Downloaded file unavailable', localize("downloaded.unavailable", 'Downloaded file unavailable'), 'InstallPackage', pkg));
