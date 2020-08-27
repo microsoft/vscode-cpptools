@@ -109,7 +109,8 @@ export class PackageManager {
             .then((packages) => {
                 let count: number = 1;
                 return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.DownloadPackage(pkg, `${count}/${packages.length}`, progress);
+                    const newIncrement: number =this.GetIncrement(count, packages.length);
+                    const p: Promise<void> = this.DownloadPackage(pkg, `${count}/${packages.length}`, progress, newIncrement);
                     count += 1;
                     return p;
                 });
@@ -121,11 +122,16 @@ export class PackageManager {
             .then((packages) => {
                 let count: number = 1;
                 return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.InstallPackage(pkg, `${count}/${packages.length}`, progress);
+                    const newIncrement: number = this.GetIncrement(count, packages.length, 25);
+                    const p: Promise<void> = this.InstallPackage(pkg, `${count}/${packages.length}`, progress, newIncrement);
                     count += 1;
                     return p;
                 });
             });
+    }
+
+    private GetIncrement(step: number, totalSteps: number, initialPosition: number = 0): number {
+        return step / totalSteps * 25 + initialPosition;
     }
 
     public GetPackages(): Promise<IPackage[]> {
@@ -175,10 +181,10 @@ export class PackageManager {
         });
     }
 
-    private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>, newIncrement: number): Promise<void> {
         this.AppendChannel(localize("downloading.package", "Downloading package '{0}' ", pkg.description));
-
-        progress.report({message: localize("downloading.progress.description", "Downloading {0}: {1}", progressCount, pkg.description)});
+        
+        progress.report({increment: newIncrement, message: localize("downloading.progress.description", "Downloading {0}: {1}", progressCount, pkg.description)});
 
         const tmpResult: tmp.FileResult = await this.CreateTempFile(pkg);
         await this.DownloadPackageWithRetries(pkg, tmpResult, progress);
@@ -348,10 +354,10 @@ export class PackageManager {
         });
     }
 
-    private InstallPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    private InstallPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>, newIncrement: number): Promise<void> {
         this.AppendLineChannel(localize("installing.package", "Installing package '{0}'", pkg.description));
 
-        progress.report({message: `Installing ${progressCount}: ${pkg.description}`});
+        progress.report({increment: newIncrement, message: localize("installing.progress.description", "Installing {0}: {1}", progressCount, pkg.description)});
 
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
