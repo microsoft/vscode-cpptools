@@ -366,9 +366,9 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         } else if (input === match && isArrayOfString(v)) {
                             newValue = v.join(envDelimiter);
                         }
-                        if (newValue === undefined) {
-                            newValue = process.env[name];
-                        }
+                    }
+                    if (newValue === undefined) {
+                        newValue = process.env[name];
                     }
                     break;
                 }
