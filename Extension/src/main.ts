@@ -233,6 +233,7 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
         cancellable: false
     }, async (progress, token) => {
 
+        progress.report({ message: "C/C++ Extension" , increment: 0});
         outputChannelLogger.appendLine('');
         setInstallationStage('downloadPackages');
         await packageManager.DownloadPackages(progress);
