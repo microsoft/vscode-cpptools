@@ -1,0 +1,33 @@
+{
+    "name": "cpptools-extension-pack",
+    "displayName": "C/C++ Tools Extension Pack",
+    "description": "",
+    "publisher": "ms-vscode",
+    "icon": "LanguageCCPP_color_128x.png",
+    "readme": "README.md",
+    "author": {
+      "name": "Microsoft Corporation"
+    },
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.48.0"
+    },
+    "categories": [
+        "Extension Packs"
+    ],
+    "extensionPack": [ 
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-themes",
+        "ms-vscode.cmake-tools",
+        "ms-vscode-remote.remote-wsl",
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode-remote.remote-ssh",
+        "ms-vsonline.vsonline",
+        "ms-vsliveshare.vsliveshare",
+        "ms-vsliveshare.vsliveshare-audio",
+        "vscode-icons-teams.vscode-icons",
+        "github.vscode-pull-request-github",
+        "eamodio.gitlens"
+    ]
+}
