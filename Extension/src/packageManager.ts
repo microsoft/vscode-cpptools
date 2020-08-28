@@ -133,8 +133,8 @@ export class PackageManager {
     private GetIncrement(curStep: number, totalSteps: number): number {
         // The first half of the progress bar is assigned to download progress,
         // and the second half of the progress bar is assigned to install progress.
-        const maxIncrement = 100 / 2;
-        const increment = Math.floor(maxIncrement / totalSteps);
+        const maxIncrement: number = 100 / 2;
+        const increment: number = Math.floor(maxIncrement / totalSteps);
         return (curStep !== totalSteps) ? increment : maxIncrement - (totalSteps - 1) * increment;
     }
 
