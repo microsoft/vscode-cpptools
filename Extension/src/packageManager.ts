@@ -104,36 +104,36 @@ export class PackageManager {
         tmp.setGracefulCleanup();
     }
 
-    public DownloadPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void | null> {
+    public DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         return this.GetPackages()
             .then((packages) => {
                 let count: number = 1;
-                const newIncrement: number = this.GetIncrement(packages.length);
                 return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.DownloadPackage(pkg, `${count}/${packages.length}`, progress, newIncrement);
+                    const p: Promise<void> = this.DownloadPackage(pkg, progress, this.GetIncrement(count, packages.length));
                     count += 1;
                     return p;
                 });
             });
     }
 
-    public InstallPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void | null> {
+    public InstallPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         return this.GetPackages()
             .then((packages) => {
                 let count: number = 1;
-                const newIncrement: number = this.GetIncrement(packages.length);
                 return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.InstallPackage(pkg, `${count}/${packages.length}`, progress, newIncrement);
+                    const p: Promise<void> = this.InstallPackage(pkg, progress, this.GetIncrement(count, packages.length));
                     count += 1;
                     return p;
                 });
             });
     }
 
-    private GetIncrement(totalSteps: number): number {
+    private GetIncrement(curStep: number, totalSteps: number): number {
         // The first half of the progress bar is assigned to download progress,
         // and the second half of the progress bar is assigned to install progress.
-        return 100 / 2 / totalSteps;
+        const maxIncrement = 100 / 2;
+        const increment = Math.floor(maxIncrement / totalSteps);
+        return (curStep !== totalSteps) ? increment : maxIncrement - (totalSteps - 1) * increment;
     }
 
     public GetPackages(): Promise<IPackage[]> {
@@ -183,10 +183,10 @@ export class PackageManager {
         });
     }
 
-    private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>, newIncrement: number): Promise<void> {
+    private async DownloadPackage(pkg: IPackage, progress: vscode.Progress<{ message?: string; increment?: number }>, newIncrement: number): Promise<void> {
         this.AppendChannel(localize("downloading.package", "Downloading package '{0}' ", pkg.description));
         
-        progress.report({ message: localize("downloading.progress.description", "Downloading {0}: {1}", progressCount, pkg.description) });
+        progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description) });
         progress.report({ increment: newIncrement });
 
         const tmpResult: tmp.FileResult = await this.CreateTempFile(pkg);
@@ -357,10 +357,10 @@ export class PackageManager {
         });
     }
 
-    private InstallPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>, newIncrement: number): Promise<void> {
+    private InstallPackage(pkg: IPackage, progress: vscode.Progress<{ message?: string; increment?: number }>, newIncrement: number): Promise<void> {
         this.AppendLineChannel(localize("installing.package", "Installing package '{0}'", pkg.description));
 
-        progress.report({ message: localize("installing.progress.description", "Installing {0}: {1}", progressCount, pkg.description) });
+        progress.report({ message: localize("installing.progress.description", "Installing {0}", pkg.description) });
         progress.report({ increment: newIncrement });
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {
