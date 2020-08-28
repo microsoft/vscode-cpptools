@@ -18,7 +18,7 @@
 	"failed.web.error": "échec (code d'erreur '{0}')",
 	"web.response.error": "Erreur de réponse HTTP/HTTPS",
 	"invalid.content.length.received": "Emplacement de longueur de contenu reçu non valide",
-	"invalid.content.received": "Invalid content received. Hash is incorrect.",
+	"invalid.content.received": "Contenu non valide reçu. Code de hachage incorrect.",
 	"web.request.error": "Erreur de requête HTTP/HTTPS",
 	"installing.package": "Installation du package '{0}'",
 	"downloaded.unavailable": "Fichier téléchargé non disponible",
