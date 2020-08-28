@@ -1778,8 +1778,8 @@ export class DefaultClient implements Client {
             cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
         }
 
-        const otherSettingsWorkspace: OtherSettings = new OtherSettings(this.RootUri);
-        const otherSettingsGlobal: OtherSettings = new OtherSettings();
+        const otherSettingsFolder: OtherSettings = new OtherSettings(this.RootUri);
+        const otherSettingsWorkspace: OtherSettings = new OtherSettings();
 
         // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
         // build a new JSON object with everything we need on the native side.
@@ -1798,13 +1798,13 @@ export class DefaultClient implements Client {
                     wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
                 },
                 files: {
-                    encoding: otherSettingsWorkspace.filesEncoding
+                    encoding: otherSettingsFolder.filesEncoding
                 },
-                base_fallback_encoding: otherSettingsGlobal.filesEncoding,
+                base_fallback_encoding: otherSettingsWorkspace.filesEncoding,
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {
-                encoding: otherSettingsWorkspace.filesEncoding,
+                encoding: otherSettingsFolder.filesEncoding,
                 exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri),
                 associations: new OtherSettings().filesAssociations
             },
