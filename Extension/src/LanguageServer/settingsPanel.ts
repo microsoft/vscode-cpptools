@@ -356,11 +356,16 @@ export class SettingsPanel {
 
         content = fs.readFileSync(util.getLocalizedHtmlPath("ui/settings.html")).toString();
 
-        content = content.replace(
-            /{{root}}/g,
-            vscode.Uri.file(util.extensionPath)
-                .with({ scheme: 'vscode-resource' })
-                .toString());
+        if (this.panel && this.panel.webview) {
+            const cppImageUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'LanguageCCPP_color_128x.png')));
+            content = content.replace(
+                /{{cpp_image_uri}}/g,
+                cppImageUri.toString());
+            const settingsJsUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'out/ui/settings.js')));
+            content = content.replace(
+                /{{settings_js_uri}}/g,
+                settingsJsUri.toString());
+        }
 
         content = content.replace(
             /{{nonce}}/g,
