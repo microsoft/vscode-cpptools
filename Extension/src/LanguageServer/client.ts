@@ -1797,10 +1797,6 @@ export class DefaultClient implements Client {
                     space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
                 },
-                files: {
-                    encoding: otherSettingsFolder.filesEncoding
-                },
-                workspace_fallback_encoding: otherSettingsWorkspace.filesEncoding,
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {
@@ -1808,6 +1804,7 @@ export class DefaultClient implements Client {
                 exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri),
                 associations: new OtherSettings().filesAssociations
             },
+            workspace_fallback_encoding: otherSettingsWorkspace.filesEncoding,
             search: {
                 exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
             }
