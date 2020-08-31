@@ -104,28 +104,38 @@ export class PackageManager {
         tmp.setGracefulCleanup();
     }
 
-    public DownloadPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void | null> {
+    public DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         return this.GetPackages()
             .then((packages) => {
                 let count: number = 1;
                 return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.DownloadPackage(pkg, `${count}/${packages.length}`, progress);
+                    const p: Promise<void> = this.DownloadPackage(pkg);
+                    progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
                     count += 1;
                     return p;
                 });
             });
     }
 
-    public InstallPackages(progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void | null> {
+    public InstallPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         return this.GetPackages()
             .then((packages) => {
                 let count: number = 1;
                 return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.InstallPackage(pkg, `${count}/${packages.length}`, progress);
+                    const p: Promise<void> = this.InstallPackage(pkg);
+                    progress.report({ message: localize("installing.progress.description", "Installing {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
                     count += 1;
                     return p;
                 });
             });
+    }
+
+    private GetIncrement(curStep: number, totalSteps: number): number {
+        // The first half of the progress bar is assigned to download progress,
+        // and the second half of the progress bar is assigned to install progress.
+        const maxIncrement: number = 100 / 2;
+        const increment: number = Math.floor(maxIncrement / totalSteps);
+        return (curStep !== totalSteps) ? increment : maxIncrement - (totalSteps - 1) * increment;
     }
 
     public GetPackages(): Promise<IPackage[]> {
@@ -175,13 +185,11 @@ export class PackageManager {
         });
     }
 
-    private async DownloadPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    private async DownloadPackage(pkg: IPackage): Promise<void> {
         this.AppendChannel(localize("downloading.package", "Downloading package '{0}' ", pkg.description));
 
-        progress.report({message: localize("downloading.progress.description", "Downloading {0}: {1}", progressCount, pkg.description)});
-
         const tmpResult: tmp.FileResult = await this.CreateTempFile(pkg);
-        await this.DownloadPackageWithRetries(pkg, tmpResult, progress);
+        await this.DownloadPackageWithRetries(pkg, tmpResult);
     }
 
     private async CreateTempFile(pkg: IPackage): Promise<tmp.FileResult> {
@@ -196,7 +204,7 @@ export class PackageManager {
         });
     }
 
-    private async DownloadPackageWithRetries(pkg: IPackage, tmpResult: tmp.FileResult, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    private async DownloadPackageWithRetries(pkg: IPackage, tmpResult: tmp.FileResult): Promise<void> {
         pkg.tmpFile = tmpResult;
 
         let success: boolean = false;
@@ -207,7 +215,7 @@ export class PackageManager {
         // Retry the download at most MAX_RETRIES times with 2-32 seconds delay.
         do {
             try {
-                await this.DownloadFile(pkg.url, pkg, retryCount, progress);
+                await this.DownloadFile(pkg.url, pkg, retryCount);
                 success = true;
             } catch (error) {
                 retryCount += 1;
@@ -244,7 +252,7 @@ export class PackageManager {
     }
 
     // reloadCpptoolsJson in main.ts uses ~25% of this function.
-    private DownloadFile(urlString: any, pkg: IPackage, delay: number, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    private DownloadFile(urlString: any, pkg: IPackage, delay: number): Promise<void> {
         const parsedUrl: url.Url = url.parse(urlString);
         const proxyStrictSSL: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
 
@@ -281,7 +289,7 @@ export class PackageManager {
                             }
                             redirectUrl = response.headers.location[0];
                         }
-                        return resolve(this.DownloadFile(redirectUrl, pkg, 0, progress));
+                        return resolve(this.DownloadFile(redirectUrl, pkg, 0));
                     } else if (response.statusCode !== 200) {
                         if (response.statusCode === undefined || response.statusCode === null) {
                             return reject(new PackageManagerError('Invalid response code received', localize("invalid.response.code.received", 'Invalid response code received'), 'DownloadFile', pkg));
@@ -348,10 +356,8 @@ export class PackageManager {
         });
     }
 
-    private InstallPackage(pkg: IPackage, progressCount: string, progress: vscode.Progress<{message?: string; increment?: number}>): Promise<void> {
+    private InstallPackage(pkg: IPackage): Promise<void> {
         this.AppendLineChannel(localize("installing.package", "Installing package '{0}'", pkg.description));
-
-        progress.report({message: `Installing ${progressCount}: ${pkg.description}`});
 
         return new Promise<void>((resolve, reject) => {
             if (!pkg.tmpFile || pkg.tmpFile.fd === 0) {

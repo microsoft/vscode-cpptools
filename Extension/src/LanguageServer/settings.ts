@@ -24,7 +24,7 @@ class Settings {
      * @param resource The path to a resource to which the settings should apply, or undefined if global settings are desired
      */
     constructor(section: string, resource?: vscode.Uri) {
-        this.settings = vscode.workspace.getConfiguration(section, resource ? resource : null);
+        this.settings = vscode.workspace.getConfiguration(section, resource ? resource : undefined);
     }
 
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
@@ -429,19 +429,20 @@ export interface TextMateRule {
 }
 
 export class OtherSettings {
-    private resource: vscode.Uri | null;
+    private resource: vscode.Uri | undefined;
 
-    constructor(resource?: vscode.Uri | null) {
+    constructor(resource?: vscode.Uri) {
         if (!resource) {
-            resource = null;
+            resource = undefined;
         }
         this.resource = resource;
     }
 
     public get editorTabSize(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
-    public get filesAssociations(): any { return vscode.workspace.getConfiguration("files", null).get("associations"); }
+    public get filesEncoding(): string | undefined { return vscode.workspace.getConfiguration("files", { uri: this.resource, languageId: "cpp" }).get<string>("encoding"); }
+    public get filesAssociations(): any { return vscode.workspace.getConfiguration("files").get("associations"); }
     public set filesAssociations(value: any) {
-        vscode.workspace.getConfiguration("files", null).update("associations", value, vscode.ConfigurationTarget.Workspace);
+        vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
