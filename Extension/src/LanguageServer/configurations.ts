@@ -1423,6 +1423,10 @@ export class CppProperties {
                         && !resolvedPath.startsWith('"')
                         && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
+
+                    if (!compilerPathNeedsQuotes && which.sync(resolvedPath)) {
+                        continue; // Don't squiggle if compiler path is resolving with environment path.
+                    }
                 }
 
                 const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
