@@ -18,6 +18,7 @@
 	"failed.web.error": "실패(오류 코드 '{0}')",
 	"web.response.error": "HTTP/HTTPS 응답 오류",
 	"invalid.content.length.received": "잘못된 콘텐츠 길이 위치가 수신되었습니다.",
+	"invalid.content.received": "잘못된 콘텐츠를 받았습니다. 해시가 올바르지 않습니다.",
 	"web.request.error": "HTTP/HTTPS 요청 오류",
 	"installing.package": "'{0}' 패키지를 설치하는 중",
 	"downloaded.unavailable": "다운로드한 파일을 사용할 수 없음",

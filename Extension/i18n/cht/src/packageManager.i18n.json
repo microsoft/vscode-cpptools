@@ -18,6 +18,7 @@
 	"failed.web.error": "失敗 (錯誤碼 '{0}')",
 	"web.response.error": "HTTP/HTTPS 回應錯誤",
 	"invalid.content.length.received": "收到的內容長度位置無效",
+	"invalid.content.received": "收到的內容無效。雜湊不正確。",
 	"web.request.error": "HTTP/HTTPS 要求錯誤",
 	"installing.package": "正在安裝套件 '{0}'",
 	"downloaded.unavailable": "下載的檔案無法使用",

@@ -34,6 +34,5 @@
 	"yes.button": "Evet",
 	"no.button": "Hayır",
 	"configurations.received": "Alınan özel yapılandırmalar:",
-	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}",
-	"browse.configuration": "Özel göz atma yapılandırması: {0}"
+	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}"
 }

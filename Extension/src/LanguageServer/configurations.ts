@@ -18,6 +18,7 @@ import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
+import which = require('which');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -307,7 +308,7 @@ export class CppProperties {
         if (isUnset(settings.defaultIncludePath)) {
             configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
         } else {
-            configuration.includePath = [rootFolder].concat(this.vcpkgIncludes).concat([defaultFolder]);
+            configuration.includePath = [defaultFolder];
         }
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
@@ -664,6 +665,19 @@ export class CppProperties {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                 }
             }
+
+            if (configuration.compilerPath
+                && configuration.compilerPath.length > 0
+                && configuration.compilerPath[0] !== '/'
+                && !fs.existsSync(configuration.compilerPath)) {
+                // If a compiler path is specified, and it doesn't resolve to a file,
+                // try looking for it in the current path.
+                try {
+                    configuration.compilerPath = which.sync(configuration.compilerPath);
+                } catch {
+                }
+            }
+
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
@@ -1409,6 +1423,10 @@ export class CppProperties {
                         && !resolvedPath.startsWith('"')
                         && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
+
+                    if (!compilerPathNeedsQuotes && which.sync(resolvedPath)) {
+                        continue; // Don't squiggle if compiler path is resolving with environment path.
+                    }
                 }
 
                 const isWSL: boolean = isWindows && resolvedPath.startsWith("/");

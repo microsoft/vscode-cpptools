@@ -18,6 +18,7 @@
 	"failed.web.error": "niepowodzenie (kod błędu „{0}”)",
 	"web.response.error": "Błąd odpowiedzi HTTP/HTTPS",
 	"invalid.content.length.received": "Odebrano nieprawidłową lokalizację długości zawartości",
+	"invalid.content.received": "Odebrano nieprawidłową zawartość. Wartość skrótu jest niepoprawna.",
 	"web.request.error": "Błąd żądania HTTP/HTTPS",
 	"installing.package": "Instalowanie pakietu „{0}”",
 	"downloaded.unavailable": "Pobrany plik niedostępny",

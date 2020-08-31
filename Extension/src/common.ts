@@ -366,9 +366,9 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         } else if (input === match && isArrayOfString(v)) {
                             newValue = v.join(envDelimiter);
                         }
-                        if (newValue === undefined) {
-                            newValue = process.env[name];
-                        }
+                    }
+                    if (newValue === undefined) {
+                        newValue = process.env[name];
                     }
                     break;
                 }
@@ -555,6 +555,9 @@ export function getInstalledBinaryPlatform(): string | undefined {
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
         installedPlatform = "linux";
     }
+    if (!installedPlatform) {
+        Telemetry.logLanguageServerEvent("missingBinary", { "source": "clang-format" });
+    }
     return installedPlatform;
 }
 
@@ -572,7 +575,9 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
             await Promise.all(pkg.binaries.map(async (file: string) => {
                 if (!await checkFileExists(file)) {
                     installBinariesExist = false;
-                    console.log(`Extension file ${file} is missing.`);
+                    const fileBase: string = path.basename(file);
+                    console.log(`Extension file ${fileBase} is missing.`);
+                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${fileBase}` });
                 }
             }));
         }
@@ -603,6 +608,7 @@ export async function checkInstallJsonsExist(): Promise<boolean> {
         if (!await checkFileExists(path.join(extensionPath, file))) {
             installJsonsExist = false;
             console.log(`Extension file ${file} is missing.`);
+            Telemetry.logLanguageServerEvent("missingJson", { "source": `${file}` });
         }
     }));
     return installJsonsExist;

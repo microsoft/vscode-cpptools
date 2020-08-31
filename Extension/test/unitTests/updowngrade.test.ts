@@ -14,25 +14,70 @@ suite("UpgradeDowngrade", () => {
     const asset_osx: Asset = {name: "cpptools-osx.vsix", browser_download_url: "https://github.com/microsoft/vscode-cpptools/releases/download/0.27.0/cpptools-osx.vsix"};
     const three_assets: Asset[] = [asset_win32, asset_linux, asset_osx];
 
-    const release1: string = "0.27.1";
-    const insider3: string = "0.27.1-insiders3";
-    const insider2: string = "0.27.1-insiders2";
-    const insider1: string = "0.27.1-insiders";
+    const release1patch: string = "0.28.1";
+    const release1: string = "0.28.0";
+    const insider3: string = "0.28.0-insiders3";
+    const insider2: string = "0.28.0-insiders2";
+    const insider1: string = "0.28.0-insiders";
+    const release0patch: string = "0.27.1";
     const release0: string = "0.27.0";
 
     suite("DefaultChannel", () => {
         const updateChannel: string = "Default";
-        suite("Automatic Downgrade", () => {
+        // When updateChannel switches from 'Insiders' to 'Default', the only possible action is to downgrade.
+        suite("Downgrade", () => {
             test("Insiders to Release", () => {
                 const builds: Build[] = [{
                     name: insider3, assets: []}, {
                     name: insider2, assets: three_assets}, {
                     name: insider1, assets: three_assets}, {
+                    name: release0patch, assets: []}, {
                     name: release0, assets: three_assets}];
 
                 const userVersion: PackageVersion = new PackageVersion(insider2);
                 const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                 assert.equal(targetBuild.name, release0);
+            });
+        });
+        suite("Internal Testing, no Downgrade", () => {
+            test("Insider to Release", () => {
+                const builds: Build[] = [{
+                    name: release0, assets: three_assets}];
+
+                const userVersion: PackageVersion = new PackageVersion(insider1);
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
+            });
+            test("Insider to Insider", () => {
+                const builds: Build[] = [{
+                    name: insider2, assets: three_assets}, {
+                    name: insider1, assets: three_assets}, {
+                    name: release0, assets: three_assets}];
+
+                const userVersion: PackageVersion = new PackageVersion(insider3);
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
+            });
+            test("Release to Insider (master)", () => {
+                const builds: Build[] = [{
+                    name: insider3, assets: three_assets}, {
+                    name: insider2, assets: three_assets}, {
+                    name: insider1, assets: three_assets}, {
+                    name: release0, assets: three_assets}];
+                // In internal testing, the name of the release has a "-master" at the end of it.
+                const userVersion: PackageVersion = new PackageVersion(release1 + "-master");
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
+            });
+            test("Release to Insider", () => {
+                const builds: Build[] = [{
+                    name: insider3, assets: three_assets}, {
+                    name: insider2, assets: three_assets}, {
+                    name: insider1, assets: three_assets}, {
+                    name: release0, assets: three_assets}];
+                const userVersion: PackageVersion = new PackageVersion(release1);
+                const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                assert.equal(targetBuild, undefined);
             });
         });
     });
@@ -59,13 +104,23 @@ suite("UpgradeDowngrade", () => {
                     const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
                 });
+                test("Release to Insider (master)", () => {
+                    const builds: Build[] = [{
+                        name: insider3, assets: three_assets}, {
+                        name: insider2, assets: three_assets}, {
+                        name: insider1, assets: three_assets}, {
+                        name: release0, assets: three_assets}];
+                    // In internal testing, the name of the release has a "-master" at the end of it.
+                    const userVersion: PackageVersion = new PackageVersion(release1 + "-master");
+                    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
+                    assert.equal(targetBuild, undefined);
+                });
                 test("Release to Insider", () => {
                     const builds: Build[] = [{
                         name: insider3, assets: three_assets}, {
                         name: insider2, assets: three_assets}, {
                         name: insider1, assets: three_assets}, {
                         name: release0, assets: three_assets}];
-
                     const userVersion: PackageVersion = new PackageVersion(release1);
                     const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, false);
                     assert.equal(targetBuild, undefined);
@@ -78,6 +133,7 @@ suite("UpgradeDowngrade", () => {
                         name: insider3, assets: []}, {
                         name: insider2, assets: []}, {
                         name: insider1, assets: []}, {
+                        name: release0patch, assets: []}, {
                         name: release0, assets: three_assets}];
 
                     const userVersion: PackageVersion = new PackageVersion(insider3);
@@ -102,6 +158,7 @@ suite("UpgradeDowngrade", () => {
             suite("Automatic Upgrade", () => {
                 test("Release to Release", () => {
                     const builds: Build[] = [{
+                        name: release1patch, assets: []}, {
                         name: release1, assets: three_assets}, {
                         name: insider3, assets: three_assets}, {
                         name: insider2, assets: three_assets}];

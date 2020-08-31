@@ -1,8 +1,33 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.30.0-insiders3: August 21, 2020
+### New Features
+* Support for running the extension on Linux arm64/aarch64 devices, using remoting. [#2506](https://github.com/microsoft/vscode-cpptools/issues/2506), [#5969](https://github.com/microsoft/vscode-cpptools/issues/5969)
+* Add support for vcFormat settings in `.editorconfig` files. [PR #5932](https://github.com/microsoft/vscode-cpptools/pull/5932)
+
+### Enhancements
+* Validate crypto signatures of binaries we download. [#5268](https://github.com/microsoft/vscode-cpptools/issues/5268)
+* Search for `compilerPath` in the PATH environment variable. [#5908](https://github.com/microsoft/vscode-cpptools/issues/5908)
+
+### Bug Fixes
+* Fix `configuration.includePath` to only add the `defaultFolder` when the default `includePath` is set. [#5621](https://github.com/microsoft/vscode-cpptools/issues/5621)
+* Fix Doxygen parameterHint comment to display for a parameter name that is followed by colon. [#5836](https://github.com/microsoft/vscode-cpptools/issues/5836)
+* Fix compiler probing when relative paths are used in `compile_commands.json`. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
+* Fix IntelliSense failures with gcc 10.2 headers with C++20. [#5897](https://github.com/microsoft/vscode-cpptools/issues/5897), [#5973](https://github.com/microsoft/vscode-cpptools/issues/5973)
+* Fix Doxygen comment to escape markdown characters. [#5904](https://github.com/microsoft/vscode-cpptools/issues/5904)
+* Fix a regression introduced in a previous insiders in which additional format on-type characters were introduced when using clang-format. These on-type characters have been reverted, when using clang-format. [#5962](https://github.com/microsoft/vscode-cpptools/issues/5962)
+
+## Version 0.30.0-insiders2: August 11, 2020
+### Bug Fixes
+* Fix vcFormat setting default values. [#5907](https://github.com/microsoft/vscode-cpptools/issues/5907)
+* Fix vcFormat formatting causing multi-byte character document corruption. [#5914](https://github.com/microsoft/vscode-cpptools/issues/5914)
+* Fix an IntelliSense crash (regression) when using the IntelliSense cache with a standalone header. [#5923](https://github.com/microsoft/vscode-cpptools/issues/5923)
+* Change `clangFormat` and `Default` formatting modes that use the `Visual Studio` style (or fallback style) to use the clang-format implementation instead of vcFormat.
+* Restore fallback to the base configuration if a custom configuration provider does not provide a configuration for a file and does not provide compiler info in a custom browse configuration.
+
 ## Version 0.30.0-insiders: August 4, 2020
 ### New Features
-* Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429] (https://github.com/microsoft/vscode-cpptools/issues/429)
+* Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429](https://github.com/microsoft/vscode-cpptools/issues/429)
 * Add the `vcFormat` option to `C_Cpp.formatting` (with `C_Cpp.vcFormat.*` options) to enable VS-style formatting (instead of clang-format formatting). [#657](https://github.com/microsoft/vscode-cpptools/issues/657)
 
 ### Enhancements
@@ -27,6 +52,8 @@
 ### Potentially Breaking Changes
 * Settings `commentContinuationPatterns`, `enhancedColorization`, and `codeFolding` are no longer available in per-Folder settings (only Workspace or higher settings). [PR #5830](https://github.com/microsoft/vscode-cpptools/pull/5830)
 * Fix compile command arguments not being used when `compilerPath` is set (so the compile command arguments need to be compatible now).
+* Default formatting results may be different if the "Visual Studio" style is used -- use the "Emulated Visual Studio" style to get the previous behavior. For example, see [#5901](https://github.com/microsoft/vscode-cpptools/issues/5901)
+* If a non-matching `intelliSenseMode` was being used, such as clang-x64 with a gcc ARM compiler, then we may auto-fix it internally, which may cause changes to IntelliSense behavior.
 
 ## Version 0.29.0: July 15, 2020
 ### New Features
