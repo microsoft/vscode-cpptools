@@ -1,7 +1,7 @@
 {
     "name": "cpptools-extension-pack",
-    "displayName": "C/C++ Tools Extension Pack",
-    "description": "",
+    "displayName": "C/C++ Extension Pack",
+    "description": "Popular extensions for C++ development in Visual Studio Code.",
     "publisher": "ms-vscode",
     "icon": "LanguageCCPP_color_128x.png",
     "readme": "README.md",
@@ -9,13 +9,28 @@
       "name": "Microsoft Corporation"
     },
     "license": "SEE LICENSE IN LICENSE.txt",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "engines": {
         "vscode": "^1.48.0"
     },
     "categories": [
         "Extension Packs"
     ],
+    "keywords": [
+        "C",
+        "C++",
+        "IntelliSense",
+        "Microsoft",
+        "color-theme",
+        "build",
+        "cmake",
+        "remote",
+        "ssh",
+        "wsl",
+        "remote",
+        "codespace",
+        "liveshare"
+      ],
     "extensionPack": [ 
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
@@ -23,11 +38,9 @@
         "ms-vscode-remote.remote-wsl",
         "ms-vscode-remote.remote-containers",
         "ms-vscode-remote.remote-ssh",
+        "github.vscode-pull-request-github",
         "ms-vsonline.vsonline",
         "ms-vsliveshare.vsliveshare",
-        "ms-vsliveshare.vsliveshare-audio",
-        "vscode-icons-teams.vscode-icons",
-        "github.vscode-pull-request-github",
-        "eamodio.gitlens"
+        "ms-vsliveshare.vsliveshare-audio"
     ]
 }
