@@ -61,27 +61,24 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
-export function getRawTasksJson(): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-        const path: string | undefined = getTasksJsonPath();
-        if (!path) {
-            return resolve({});
-        }
-        fs.exists(path, exists => {
-            if (!exists) {
-                return resolve({});
-            }
-            let fileContents: string = fs.readFileSync(path).toString();
-            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
-            let rawTasks: any = {};
-            try {
-                rawTasks = JSON.parse(fileContents);
-            } catch (error) {
-                return reject(new Error(failedToParseTasksJson));
-            }
-            resolve(rawTasks);
-        });
-    });
+export async function getRawTasksJson(): Promise<any> {
+    const path: string | undefined = getTasksJsonPath();
+    if (!path) {
+        return {};
+    }
+    const fileExists: boolean = await util.checkFileExists(path);
+    if (!fileExists) {
+        return {};
+    }
+
+    const fileContents: string = await util.readFileText(path);
+    let rawTasks: any = {};
+    try {
+        rawTasks = jsonc.parse(fileContents);
+    } catch (error) {
+        throw new Error(failedToParseTasksJson);
+    }
+    return rawTasks;
 }
 
 export async function ensureBuildTaskExists(taskName: string): Promise<void> {
