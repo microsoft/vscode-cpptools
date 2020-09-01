@@ -7,7 +7,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.name": "配置标识符。Mac、Linux 和 Win32 是将在这些平台上自动选定的特殊配置标识符，但标识符可为任何内容。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerPath": "正在使用以便启用更准确的 IntelliSense 的编译器的完整路径，例如 /usr/bin/gcc。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "用于修改所使用的包含或定义的编译器参数，例如 -nostdinc++、-m32 等。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "用于 IntelliSense 的 C 语言标准的版本。注意: GNU 标准仅用于查询设置用来获取 GNU 定义的编译器，并且 IntelliSense 将模拟等效的 C 标准版本。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "用于 IntelliSense 的 C 语言标准的版本。注意: GNU 标准仅用于查询设置编译器以获取 GNU 定义，并且 IntelliSense 将模拟等效的 C 标准版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "用于 IntelliSense 的 C++ 语言标准的版本。注意: GNU 标准仅用于查询设置用来获取 GNU 定义的编译器，并且 IntelliSense 将模拟等效的 C++ 标准版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "工作区的 compile_commands.json 文件的完整路径。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.includePath": "在搜索包含的标头时 IntelliSense 引擎要使用的路径列表。对这些路径的搜索不是递归搜索。指定 \"**\" 可指示递归搜索。例如: \"${workspaceFolder}/**\" 将搜索所有子目录，而 \"${workspaceFolder}\" 将不搜索所有子目录。",
