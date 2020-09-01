@@ -3,11 +3,11 @@
 
 ## Version 0.1.0: September 1, 2020
 ### List of extensions:
-* C/C++ (Microsoft)
-* C/C++ Themes (Microsoft)
-* CMake Tools (Microsoft)
-* Remote Development extension pack (Microsoft)
-* GitHub Pull Requests and Issues (GitHub)
-* Visual Studio Codespaces (Microsoft)
-* LiveShare Extension Pack (Microsoft)
+* C/C++
+* C/C++ Themes
+* CMake Tools
+* Remote Development Extension Pack
+* GitHub Pull Requests and Issues
+* Visual Studio Codespaces
+* LiveShare Extension Pack
 
