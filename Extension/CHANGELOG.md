@@ -1,13 +1,32 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.30.0-insiders4: September 1, 2020
+### New Features
+* Support non-UTF-8 file encodings (GBK, UTF-16, etc.). [#414](https://github.com/microsoft/vscode-cpptools/issues/414)
+* Add support for `/Zc:__cplusplus` in `compilerArgs` for cl.exe. [#2595](https://github.com/microsoft/vscode-cpptools/issues/2595)
+* Support for running the extension on Linux arm/arm64 for older OS's without glibc 2.28 (Ubuntu 14-18, Debian 8-9, CentOS 7, etc.). [#5984](https://github.com/microsoft/vscode-cpptools/issues/5984), [#5993](https://github.com/microsoft/vscode-cpptools/issues/5993)
+* Add diagnostics on potentially conflicting recursive includes to `C/C++: Log Diagnostics`, i.e. if a workspace uses files with the same name as system headers. [#6009](https://github.com/microsoft/vscode-cpptools/issues/6009)
+
+### Enhancements
+* Improve the download and installation progress bar. [#1961](https://github.com/microsoft/vscode-cpptools/issues/1961)
+* Add error codes and "C/C++" source to IntelliSense errors. [#2345](https://github.com/microsoft/vscode-cpptools/issues/2345)
+* Add link to the documentation in the configuration UI. [#5875](https://github.com/microsoft/vscode-cpptools/issues/5875)
+  * Abhishek Pal (@devabhishekpal) [#PR 5991](https://github.com/microsoft/vscode-cpptools/pull/5991)
+
+### Bug Fixes
+* Fix member completion in C code after an operator is used in an expression. [#2184](https://github.com/microsoft/vscode-cpptools/issues/2184)
+* Fix squiggles on `compilerPath` for compilers found from the PATH environment variable. [#6006](https://github.com/microsoft/vscode-cpptools/issues/6006)
+* Remove keyword completion of C identifiers that are defined in headers and aren't keywords (e.g. `alignas`). [#6022](https://github.com/microsoft/vscode-cpptools/issues/6022)
+* Fix `vcFormat` formatting not using VS Code's `tabSize`.
+
 ## Version 0.30.0-insiders3: August 21, 2020
 ### New Features
 * Support for running the extension on Linux arm64/aarch64 devices, using remoting. [#2506](https://github.com/microsoft/vscode-cpptools/issues/2506), [#5969](https://github.com/microsoft/vscode-cpptools/issues/5969)
 * Add support for vcFormat settings in `.editorconfig` files. [PR #5932](https://github.com/microsoft/vscode-cpptools/pull/5932)
 
 ### Enhancements
+* Search for `compilerPath` in the PATH environment variable. [#3078](https://github.com/microsoft/vscode-cpptools/issues/3078), [#5908](https://github.com/microsoft/vscode-cpptools/issues/5908)
 * Validate crypto signatures of binaries we download. [#5268](https://github.com/microsoft/vscode-cpptools/issues/5268)
-* Search for `compilerPath` in the PATH environment variable. [#5908](https://github.com/microsoft/vscode-cpptools/issues/5908)
 
 ### Bug Fixes
 * Fix `configuration.includePath` to only add the `defaultFolder` when the default `includePath` is set. [#5621](https://github.com/microsoft/vscode-cpptools/issues/5621)
