@@ -1,6 +1,6 @@
 # C/C++ Extension Pack
 
-This Extension pack includes a set of popular extensions for C++ development in Visual Studio Code. It includes the following set of Visual Studio Code extensions:
+This extension pack includes a set of popular extensions for C++ development in Visual Studio Code:
 * [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 * [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-themes) Themes
 * [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)
