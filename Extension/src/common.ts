@@ -23,7 +23,7 @@ import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
 import { PackageManager, IPackage } from './packageManager';
-import * as jsonc from 'jsonc-parser';
+import * as jsonc from 'comment-json';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -65,11 +65,11 @@ export function getRawPackageJson(): any {
 export async function getRawTasksJson(): Promise<any> {
     const path: string | undefined = getTasksJsonPath();
     if (!path) {
-        return {};
+        return resolve({});
     }
     const fileExists: boolean = await checkFileExists(path);
     if (!fileExists) {
-        return {};
+        return resolve({});
     }
 
     const fileContents: string = await readFileText(path);
@@ -77,9 +77,9 @@ export async function getRawTasksJson(): Promise<any> {
     try {
         rawTasks = jsonc.parse(fileContents);
     } catch (error) {
-        throw new Error(failedToParseTasksJson);
+        return reject(new Error(failedToParseTasksJson));
     }
-    return rawTasks;
+    return resolve(rawTasks);
 }
 
 export async function ensureBuildTaskExists(taskLabel: string): Promise<void> {
@@ -122,14 +122,13 @@ export async function ensureBuildTaskExists(taskLabel: string): Promise<void> {
         rawTasksJson.tasks.push(newTask);
     }
 
-    // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     const settings: OtherSettings = new OtherSettings();
     const tasksJsonPath: string | undefined = getTasksJsonPath();
     if (!tasksJsonPath) {
         throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
     }
 
-    await writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
+    await writeFileText(tasksJsonPath, jsonc.stringify(rawTasksJson, null, settings.editorTabSize));
 }
 
 export function fileIsCOrCppSource(file: string): boolean {
