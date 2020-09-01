@@ -950,7 +950,7 @@ export class CppProperties {
                     settings.update("default.configurationProvider", undefined); // delete the setting
                 }
 
-                await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, 4));
+                await util.writeFileText(fullPathToFile, jsonc.stringify(this.configurationJson, null, 4));
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
@@ -1617,7 +1617,7 @@ export class CppProperties {
     private writeToJson(): void {
         console.assert(this.propertiesFile);
         if (this.propertiesFile) {
-            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            fs.writeFileSync(this.propertiesFile.fsPath, jsonc.stringify(this.configurationJson, null, 4));
         }
     }
 

@@ -116,7 +116,6 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         rawTasksJson.tasks.push(task);
     }
 
-    // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     const settings: OtherSettings = new OtherSettings();
     const tasksJsonPath: string | undefined = getTasksJsonPath();
     if (!tasksJsonPath) {
