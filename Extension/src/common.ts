@@ -23,6 +23,7 @@ import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
 import { PackageManager, IPackage } from './packageManager';
+import * as jsonc from 'jsonc-parser';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -66,12 +67,12 @@ export async function getRawTasksJson(): Promise<any> {
     if (!path) {
         return {};
     }
-    const fileExists: boolean = await util.checkFileExists(path);
+    const fileExists: boolean = await checkFileExists(path);
     if (!fileExists) {
         return {};
     }
 
-    const fileContents: string = await util.readFileText(path);
+    const fileContents: string = await readFileText(path);
     let rawTasks: any = {};
     try {
         rawTasks = jsonc.parse(fileContents);
