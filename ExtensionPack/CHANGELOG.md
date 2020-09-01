@@ -5,7 +5,7 @@
 ### List of extensions:
 * C/C++ (Microsoft)
 * C/C++ Themes (Microsoft)
-* Cmake Tools (Microsoft)
+* CMake Tools (Microsoft)
 * Remote Development extension pack (Microsoft)
 * GitHub Pull Requests and Issues (GitHub)
 * Visual Studio Codespaces (Microsoft)
