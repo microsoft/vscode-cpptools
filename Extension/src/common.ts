@@ -64,24 +64,22 @@ export function getRawPackageJson(): any {
 
 export async function getRawTasksJson(): Promise<any> {
     const path: string | undefined = getTasksJsonPath();
-    return new Promise<any>(async (resolve, reject) => {
-        if (!path) {
-            return resolve({});
-        }
-        const fileExists: boolean = await checkFileExists(path);
-        if (!fileExists) {
-            return resolve({});
-        }
+    if (!path) {
+        return {};
+    }
+    const fileExists: boolean = await checkFileExists(path);
+    if (!fileExists) {
+        return {};
+    }
 
-        const fileContents: string = await readFileText(path);
-        let rawTasks: any = {};
-        try {
-            rawTasks = jsonc.parse(fileContents);
-        } catch (error) {
-            return reject(new Error(failedToParseTasksJson));
-        }
-        return resolve(rawTasks);
-    });
+    const fileContents: string = await readFileText(path);
+    let rawTasks: any = {};
+    try {
+        rawTasks = jsonc.parse(fileContents);
+    } catch (error) {
+        throw new Error(failedToParseTasksJson);
+    }
+    return rawTasks;
 }
 
 export async function ensureBuildTaskExists(taskLabel: string): Promise<void> {
