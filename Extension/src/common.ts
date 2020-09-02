@@ -62,29 +62,54 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
-export function getRawTasksJson(): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-        const path: string | undefined = getTasksJsonPath();
-        if (!path) {
-            return resolve({});
-        }
-        fs.exists(path, exists => {
-            if (!exists) {
-                return resolve({});
-            }
-            const fileContents: string = fs.readFileSync(path).toString();
-            let rawTasks: any = {};
-            try {
-                rawTasks = jsonc.parse(fileContents);
-            } catch (error) {
-                return reject(new Error(failedToParseTasksJson));
-            }
-            resolve(rawTasks);
-        });
-    });
+export async function getRawLaunchJson(): Promise<any> {
+    const path: string | undefined = getLaunchJsonPath();
+    return getRawJson(path);
 }
 
-export async function ensureBuildTaskExists(taskName: string): Promise<void> {
+export async function getRawTasksJson(): Promise<any> {
+    const path: string | undefined = getTasksJsonPath();
+    return getRawJson(path);
+}
+
+async function getRawJson(path: string | undefined): Promise<any> {
+    if (!path) {
+        return {};
+    }
+    const fileExists: boolean = await checkFileExists(path);
+    if (!fileExists) {
+        return {};
+    }
+
+    const fileContents: string = await readFileText(path);
+    let rawTasks: any = {};
+    try {
+        rawTasks = jsonc.parse(fileContents);
+    } catch (error) {
+        throw new Error(failedToParseTasksJson);
+    }
+    return rawTasks;
+}
+
+export async function ensureDebugConfigExists(configName: string): Promise<void> {
+    const launchJsonPath: string | undefined = getLaunchJsonPath();
+    if (!launchJsonPath) {
+        throw new Error("Failed to get launchJsonPath in ensureDebugConfigExists()");
+    }
+
+    const rawLaunchJson: any = await getRawLaunchJson();
+    // Ensure that the debug configurations exists in the user's launch.json. Config will not be found otherwise.
+    if (!rawLaunchJson || !rawLaunchJson.configurations) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    const selectedConfig: vscode.Task | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
+    if (!selectedConfig) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    return;
+}
+
+export async function ensureBuildTaskExists(taskLabel: string): Promise<void> {
     const rawTasksJson: any = await getRawTasksJson();
 
     // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
@@ -92,13 +117,13 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         rawTasksJson.tasks = new Array();
     }
     // Find or create the task which should be created based on the selected "debug configuration".
-    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === task);
+    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
     if (selectedTask) {
         return;
     }
 
     const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
-    selectedTask = buildTasks.find(task => task.name === taskName);
+    selectedTask = buildTasks.find(task => task.name === taskLabel);
     console.assert(selectedTask);
     if (!selectedTask) {
         throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
@@ -106,14 +131,22 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     rawTasksJson.version = "2.0.0";
 
-    const selectedTask2: vscode.Task = selectedTask;
-    if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-        const task: any = {
-            ...selectedTask2.definition,
-            problemMatcher: selectedTask2.problemMatchers,
+    // Modify the current default task
+    rawTasksJson.tasks.forEach((task: any) => {
+        if (task.label === selectedTask?.definition.label) {
+            task.group = { kind: "build", "isDefault": true };
+        } else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
+            task.group = "build";
+        }
+    });
+
+    if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask?.definition.label)) {
+        const newTask: any = {
+            ...selectedTask.definition,
+            problemMatcher: selectedTask.problemMatchers,
             group: { kind: "build", "isDefault": true }
         };
-        rawTasksJson.tasks.push(task);
+        rawTasksJson.tasks.push(newTask);
     }
 
     const settings: OtherSettings = new OtherSettings();
@@ -153,7 +186,15 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
+export function getLaunchJsonPath(): string | undefined {
+    return getJsonPath("launch.json");
+}
+
 export function getTasksJsonPath(): string | undefined {
+    return getJsonPath("tasks.json");
+}
+
+function getJsonPath(jsonFilaName: string): string | undefined {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return undefined;
@@ -162,7 +203,7 @@ export function getTasksJsonPath(): string | undefined {
     if (!folder) {
         return undefined;
     }
-    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
+    return path.join(folder.uri.fsPath, ".vscode", jsonFilaName);
 }
 
 export function getVcpkgPathDescriptorFile(): string {
@@ -632,6 +673,18 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
 
 /** Writes content to a text file */
 export function writeFileText(filePath: string, content: string, encoding: string = "utf8"): Promise<void> {
+    const folders: string[] = filePath.split(path.sep).slice(0, -1);
+    if (folders.length) {
+        // create folder path if it doesn't exist
+        folders.reduce((last, folder) => {
+            const folderPath: string = last ? last + path.sep + folder : folder;
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath);
+            }
+            return folderPath;
+        });
+    }
+
     return new Promise<void>((resolve, reject) => {
         fs.writeFile(filePath, content, { encoding }, (err) => {
             if (err) {
