@@ -34,6 +34,7 @@
     "extensionPack": [ 
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
+        "twxs.cmake",
         "ms-vscode.cmake-tools",
         "ms-vscode-remote.remote-wsl",
         "ms-vscode-remote.remote-containers",
@@ -41,6 +42,8 @@
         "github.vscode-pull-request-github",
         "ms-vsonline.vsonline",
         "ms-vsliveshare.vsliveshare",
-        "ms-vsliveshare.vsliveshare-audio"
+        "ms-vsliveshare.vsliveshare-audio",
+        "cschlosser.doxdocgen",
+        "jeff-hykin.better-cpp-syntax"
     ]
 }
