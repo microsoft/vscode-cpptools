@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind } from '../client';
-import AbortRequestIdHolder = require('../client');
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;
@@ -13,7 +12,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     }
     provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
         token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-        const id: number = ++AbortRequestIdHolder.abortRequestId;
+        const id: number = ++DefaultClient.abortRequestId;
         const params: GetFoldingRangesParams = {
             id: id,
             uri: document.uri.toString()
