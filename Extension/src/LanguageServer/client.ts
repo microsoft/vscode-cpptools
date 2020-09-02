@@ -405,7 +405,10 @@ const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, Loca
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-const DocumentFormatRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/format');
+const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
+const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
+const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
+
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
@@ -702,7 +705,7 @@ class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditPro
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatDocumentRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {
@@ -759,7 +762,7 @@ class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormatt
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatRangeRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {
@@ -816,7 +819,7 @@ class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvide
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatOnTypeRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {
