@@ -62,8 +62,17 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
+export async function getRawLaunchJson(): Promise<any> {
+    const path: string | undefined = getLaunchJsonPath();
+    return getRawJson(path);
+}
+
 export async function getRawTasksJson(): Promise<any> {
     const path: string | undefined = getTasksJsonPath();
+    return getRawJson(path);
+}
+
+async function getRawJson(path: string | undefined): Promise<any> {
     if (!path) {
         return {};
     }
@@ -80,6 +89,24 @@ export async function getRawTasksJson(): Promise<any> {
         throw new Error(failedToParseTasksJson);
     }
     return rawTasks;
+}
+
+export async function ensureDebugConfigExists(configName: string): Promise<void> {
+    const launchJsonPath: string | undefined = getLaunchJsonPath();
+    if (!launchJsonPath) {
+        throw new Error("Failed to get launchJsonPath in ensureDebugConfigExists()");
+    }
+
+    const rawLaunchJson: any = await getRawLaunchJson();
+    // Ensure that the debug configurations exists in the user's launch.json. Config will not be found otherwise.
+    if (!rawLaunchJson || !rawLaunchJson.configurations) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    const selectedConfig: vscode.Task | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
+    if (!selectedConfig) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    return;
 }
 
 export async function ensureBuildTaskExists(taskLabel: string): Promise<void> {
@@ -159,7 +186,15 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
+export function getLaunchJsonPath(): string | undefined {
+    return getJsonPath("launch.json");
+}
+
 export function getTasksJsonPath(): string | undefined {
+    return getJsonPath("tasks.json");
+}
+
+function getJsonPath(jsonFilaName: string): string | undefined {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return undefined;
@@ -168,7 +203,7 @@ export function getTasksJsonPath(): string | undefined {
     if (!folder) {
         return undefined;
     }
-    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
+    return path.join(folder.uri.fsPath, ".vscode", jsonFilaName);
 }
 
 export function getVcpkgPathDescriptorFile(): string {
