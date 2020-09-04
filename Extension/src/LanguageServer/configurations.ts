@@ -1433,7 +1433,7 @@ export class CppProperties {
                         && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
 
-                    if (!compilerPathNeedsQuotes && which.sync(resolvedPath)) {
+                    if (!compilerPathNeedsQuotes && which.sync(resolvedPath, {nothrow: true})) {
                         continue; // Don't squiggle if compiler path is resolving with environment path.
                     }
                 }
