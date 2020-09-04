@@ -68,6 +68,8 @@ export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
+export let abortRequestId: number = 0;
+
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
     workspaceDisposables = [];
@@ -461,6 +463,13 @@ const SemanticTokensChanged: NotificationType<string, void> = new NotificationTy
 
 let failureMessageShown: boolean = false;
 
+export let referencesParams: RenameParams | FindAllReferencesParams | undefined;
+export let referencesRequestPending: boolean = false;
+export const referencesPendingCancellations: ReferencesCancellationState[] = [];
+
+export let renameRequestsPending: number = 0;
+export let renamePending: boolean = false;
+
 export interface ReferencesCancellationState {
     reject(): void;
     callback(): void;
@@ -594,14 +603,6 @@ export class DefaultClient implements Client {
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
-    public static abortRequestId: number = 0;
-
-    public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
-    public static referencesRequestPending: boolean = false;
-    public static referencesPendingCancellations: ReferencesCancellationState[] = [];
-
-    public static renameRequestsPending: number = 0;
-    public static renamePending: boolean = false;
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
 
@@ -1342,7 +1343,7 @@ export class DefaultClient implements Client {
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
             if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
                 // If any file has changed, we need to abort the current rename operation
-                if (DefaultClient.renamePending) {
+                if (renamePending) {
                     this.cancelReferences();
                 }
 
@@ -2571,7 +2572,7 @@ export class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
+            const cancelling: boolean = referencesPendingCancellations.length > 0;
             if (!cancelling) {
                 workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
                 if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
@@ -2595,11 +2596,11 @@ export class DefaultClient implements Client {
     }
 
     public cancelReferences(): void {
-        DefaultClient.referencesParams = undefined;
-        DefaultClient.renamePending = false;
-        if (DefaultClient.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
-            const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
-            DefaultClient.referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+        referencesParams = undefined;
+        renamePending = false;
+        if (referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
+            const cancelling: boolean = referencesPendingCancellations.length > 0;
+            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
                 languageClient.sendNotification(CancelReferencesNotification);
