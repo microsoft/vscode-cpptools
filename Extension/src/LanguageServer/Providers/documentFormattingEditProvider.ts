@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings } from '../client';
+import { DefaultClient, FormatParams, FormatDocumentRequest, cachedEditorConfigSettings } from '../client';
 import { CppSettings } from '../settings';
 import * as editorConfig from 'editorconfig';
 
@@ -36,7 +36,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatDocumentRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {

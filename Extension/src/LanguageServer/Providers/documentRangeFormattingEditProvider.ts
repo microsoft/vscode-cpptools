@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, DocumentFormatRequest, cachedEditorConfigSettings } from '../client';
+import { DefaultClient, FormatParams, FormatRangeRequest, cachedEditorConfigSettings } from '../client';
 import { CppSettings } from '../settings';
 import * as editorConfig from 'editorconfig';
 
@@ -35,7 +35,7 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatRangeRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {

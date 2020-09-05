@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions } from '../client';
-import AbortRequestIdHolder = require('../client');
 
 export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     private client: DefaultClient;
@@ -26,7 +25,7 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
                 if (cache && cache[0] === document.version) {
                     resolve(cache[1]);
                 } else {
-                    const id: number = ++AbortRequestIdHolder.abortRequestId;
+                    const id: number = ++DefaultClient.abortRequestId;
                     const params: GetSemanticTokensParams = {
                         id: id,
                         uri: uriString

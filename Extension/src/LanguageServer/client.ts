@@ -68,8 +68,6 @@ export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
-export let abortRequestId: number = 0;
-
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
     workspaceDisposables = [];
@@ -416,7 +414,10 @@ export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParam
 export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-export const DocumentFormatRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/format');
+export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
+export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
+export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
+
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
@@ -462,13 +463,6 @@ const ReportTextDocumentLanguage: NotificationType<string, void> = new Notificat
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
 
 let failureMessageShown: boolean = false;
-
-export let referencesParams: RenameParams | FindAllReferencesParams | undefined;
-export let referencesRequestPending: boolean = false;
-export const referencesPendingCancellations: ReferencesCancellationState[] = [];
-
-export let renameRequestsPending: number = 0;
-export let renamePending: boolean = false;
 
 export interface ReferencesCancellationState {
     reject(): void;
@@ -602,6 +596,16 @@ export class DefaultClient implements Client {
         { scheme: 'file', language: 'c' }
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
+
+    public static abortRequestId: number = 0;
+
+    public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
+    public static referencesRequestPending: boolean = false;
+    public static referencesPendingCancellations: ReferencesCancellationState[] = [];
+
+    public static renameRequestsPending: number = 0;
+    public static renamePending: boolean = false;
+
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -2572,7 +2576,7 @@ export class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenReady(() => {
-            const cancelling: boolean = referencesPendingCancellations.length > 0;
+            const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
             if (!cancelling) {
                 workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
                 if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
@@ -2596,11 +2600,14 @@ export class DefaultClient implements Client {
     }
 
     public cancelReferences(): void {
-        referencesParams = undefined;
-        renamePending = false;
-        if (referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
-            const cancelling: boolean = referencesPendingCancellations.length > 0;
-            referencesPendingCancellations.push({ reject: () => {}, callback: () => {} });
+        DefaultClient.referencesParams = undefined;
+        DefaultClient.renamePending = false;
+        if (DefaultClient.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
+            const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
+            DefaultClient.referencesPendingCancellations.push({
+              reject: () => {},
+              callback: () => {},
+            });
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
                 languageClient.sendNotification(CancelReferencesNotification);
