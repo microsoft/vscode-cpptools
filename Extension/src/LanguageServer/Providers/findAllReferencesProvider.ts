@@ -4,6 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, workspaceReferences, FindAllReferencesParams, ReferencesCancellationState, RequestReferencesNotification, CancelReferencesNotification } from '../client';
+import ReferenceParamsHolder = require('../client');
+import RenameParamsHolder = require('../client');
 import { Position } from 'vscode-languageclient';
 import * as refs from '../references';
 
@@ -19,20 +21,20 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
                     position: Position.create(position.line, position.character),
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                 };
-                DefaultClient.referencesParams = params;
+                ReferenceParamsHolder.referencesParams = params;
                 this.client.notifyWhenReady(() => {
                     // The current request is represented by referencesParams.  If a request detects
                     // referencesParams does not match the object used when creating the request, abort it.
-                    if (params !== DefaultClient.referencesParams) {
+                    if (params !== ReferenceParamsHolder.referencesParams) {
                         // Complete with nothing instead of rejecting, to avoid an error message from VS Code
                         const locations: vscode.Location[] = [];
                         resolve(locations);
                         return;
                     }
-                    DefaultClient.referencesRequestPending = true;
+                    ReferenceParamsHolder.referencesRequestPending = true;
                     // Register a single-fire handler for the reply.
                     const resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult | null, doResolve: boolean) => {
-                        DefaultClient.referencesRequestPending = false;
+                        ReferenceParamsHolder.referencesRequestPending = false;
                         const locations: vscode.Location[] = [];
                         if (result) {
                             result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
@@ -47,14 +49,14 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
                         if (doResolve) {
                             resolve(locations);
                         }
-                        if (DefaultClient.referencesPendingCancellations.length > 0) {
-                            while (DefaultClient.referencesPendingCancellations.length > 1) {
-                                const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                                DefaultClient.referencesPendingCancellations.pop();
+                        if (ReferenceParamsHolder.referencesPendingCancellations.length > 0) {
+                            while (ReferenceParamsHolder.referencesPendingCancellations.length > 1) {
+                                const pendingCancel: ReferencesCancellationState = ReferenceParamsHolder.referencesPendingCancellations[0];
+                                ReferenceParamsHolder.referencesPendingCancellations.pop();
                                 pendingCancel.reject();
                             }
-                            const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                            DefaultClient.referencesPendingCancellations.pop();
+                            const pendingCancel: ReferencesCancellationState = ReferenceParamsHolder.referencesPendingCancellations[0];
+                            ReferenceParamsHolder.referencesPendingCancellations.pop();
                             pendingCancel.callback();
                         }
                     };
@@ -78,15 +80,15 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
                     }
                 });
                 token.onCancellationRequested(e => {
-                    if (params === DefaultClient.referencesParams) {
+                    if (params === ReferenceParamsHolder.referencesParams) {
                         this.client.cancelReferences();
                     }
                 });
             };
 
-            if (DefaultClient.referencesRequestPending || (workspaceReferences.symbolSearchInProgress && !workspaceReferences.referencesRefreshPending)) {
-                const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
-                DefaultClient.referencesPendingCancellations.push({
+            if (ReferenceParamsHolder.referencesRequestPending || (workspaceReferences.symbolSearchInProgress && !workspaceReferences.referencesRefreshPending)) {
+                const cancelling: boolean = ReferenceParamsHolder.referencesPendingCancellations.length > 0;
+                ReferenceParamsHolder.referencesPendingCancellations.push({
                     reject: () => {
                         // Complete with nothing instead of rejecting, to avoid an error message from VS Code
                         const locations: vscode.Location[] = [];
@@ -94,9 +96,9 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
                     }, callback
                 });
                 if (!cancelling) {
-                    DefaultClient.renamePending = false;
+                    RenameParamsHolder.renamePending = false;
                     workspaceReferences.referencesCanceled = true;
-                    if (!DefaultClient.referencesRequestPending) {
+                    if (!ReferenceParamsHolder.referencesRequestPending) {
                         workspaceReferences.referencesCanceledWhilePreviewing = true;
                     }
                     this.client.languageClient.sendNotification(CancelReferencesNotification);
