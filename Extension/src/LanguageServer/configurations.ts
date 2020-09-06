@@ -59,9 +59,9 @@ export interface Configuration {
     compilerPath?: string;
     compilerArgs?: string[];
     cStandard?: string;
-    cStandardExplicit?: boolean;
+    cStandardIsExplicit?: boolean;
     cppStandard?: string;
-    cppStandardExplicit?: boolean;
+    cppStandardIsExplicit?: boolean;
     includePath?: string[];
     macFrameworkPath?: string[];
     windowsSdkVersion?: string;
@@ -633,8 +633,8 @@ export class CppProperties {
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
             configuration.intelliSenseModeExplicit = true;
-            configuration.cStandardExplicit = true;
-            configuration.cppStandardExplicit = true;
+            configuration.cStandardIsExplicit = true;
+            configuration.cppStandardIsExplicit = true;
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
@@ -643,11 +643,11 @@ export class CppProperties {
                     configuration.compilerPath = this.defaultCompilerPath;
                     if (!configuration.cStandard && !!this.defaultCStandard) {
                         configuration.cStandard = this.defaultCStandard;
-                        configuration.cStandardExplicit = false;
+                        configuration.cStandardIsExplicit = false;
                     }
                     if (!configuration.cppStandard && !!this.defaultCppStandard) {
                         configuration.cppStandard = this.defaultCppStandard;
-                        configuration.cppStandardExplicit = false;
+                        configuration.cppStandardIsExplicit = false;
                     }
                     if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
                         configuration.intelliSenseMode = this.defaultIntelliSenseMode;
