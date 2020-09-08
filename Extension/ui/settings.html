@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; img-src vscode-resource:; script-src 'nonce-{{nonce}}';">
+    <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
 
     <style type="text/css">
         @media (max-width: 1140px) {
@@ -404,7 +404,7 @@
     <div style="height: 90px; display: block">
         <table>
             <td>
-              <img src="{{root}}/LanguageCCPP_color_128x.png" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px" data-loc-id-title="microsoft.c.cpp.extension">
+              <img src="{{cpp_image_uri}}" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px" data-loc-id-title="microsoft.c.cpp.extension">
             </td>
             <td>
                 <div style="font-size: 20px; font-weight: 400; line-height: 24px">Microsoft<br><span data-loc-id="c.cpp.extension">C/C++ Extension</span></div>
@@ -676,7 +676,7 @@
 
   </div> <!-- main end -->
 
-  <script nonce="{{nonce}}" src="{{root}}/out/ui/settings.js"></script>
+  <script nonce="{{nonce}}" src="{{settings_js_uri}}"></script>
 
 </body>
 </html>

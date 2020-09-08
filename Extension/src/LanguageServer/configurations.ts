@@ -16,7 +16,7 @@ import { getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
-import * as jsonc from 'jsonc-parser';
+import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
 import which = require('which');
 
@@ -950,7 +950,7 @@ export class CppProperties {
                     settings.update("default.configurationProvider", undefined); // delete the setting
                 }
 
-                await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, 4));
+                await util.writeFileText(fullPathToFile, jsonc.stringify(this.configurationJson, null, 4));
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
@@ -1423,6 +1423,10 @@ export class CppProperties {
                         && !resolvedPath.startsWith('"')
                         && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
+
+                    if (!compilerPathNeedsQuotes && which.sync(resolvedPath, {nothrow: true})) {
+                        continue; // Don't squiggle if compiler path is resolving with environment path.
+                    }
                 }
 
                 const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
@@ -1613,7 +1617,7 @@ export class CppProperties {
     private writeToJson(): void {
         console.assert(this.propertiesFile);
         if (this.propertiesFile) {
-            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            fs.writeFileSync(this.propertiesFile.fsPath, jsonc.stringify(this.configurationJson, null, 4));
         }
     }
 

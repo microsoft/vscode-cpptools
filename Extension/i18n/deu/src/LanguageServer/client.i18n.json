@@ -34,6 +34,5 @@
 	"yes.button": "Ja",
 	"no.button": "Nein",
 	"configurations.received": "Benutzerdefinierte Konfigurationen empfangen:",
-	"browse.configuration.received": "Benutzerdefinierte Suchkonfiguration empfangen: {0}",
-	"browse.configuration": "Benutzerdefinierte Suchkonfiguration: {0}"
+	"browse.configuration.received": "Benutzerdefinierte Suchkonfiguration empfangen: {0}"
 }
