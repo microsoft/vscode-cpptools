@@ -23,7 +23,7 @@
 * Improve the download and installation progress bar. [#1961](https://github.com/microsoft/vscode-cpptools/issues/1961)
 * Add error codes and "C/C++" source to IntelliSense errors. [#2345](https://github.com/microsoft/vscode-cpptools/issues/2345)
 * Add link to the documentation in the configuration UI. [#5875](https://github.com/microsoft/vscode-cpptools/issues/5875)
-  * Abhishek Pal (@devabhishekpal) [#PR 5991](https://github.com/microsoft/vscode-cpptools/pull/5991)
+  * Abhishek Pal (@devabhishekpal) [PR #5991](https://github.com/microsoft/vscode-cpptools/pull/5991)
 
 ### Bug Fixes
 * Fix member completion in C code after an operator is used in an expression. [#2184](https://github.com/microsoft/vscode-cpptools/issues/2184)
