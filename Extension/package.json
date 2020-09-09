@@ -2,9 +2,8 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.30.0-master",
+  "version": "1.0.0",
   "publisher": "ms-vscode",
-  "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
   "author": {
