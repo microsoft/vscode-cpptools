@@ -32,7 +32,7 @@
     "c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description": "New line is indented based on `C_Cpp.vcFormat.indent.multiLineRelativeTo`",
     "c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description": "In existing code, preserve the existing indent alignment of new lines within parentheses",
     "c_cpp.configuration.vcFormat.indent.caseLabels.description": "Labels are indented relative to switch statements by the amount specified in the Editor: Tab Size setting",
-    "c_cpp.configuration.vcFormat.indent.caseContents.description": "Code inside case is indented relative to its label by the amount specified in the Editor: Tab Size setting",
+    "c_cpp.configuration.vcFormat.indent.caseContents.description": "Code inside case block is indented relative to its label by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.description": "Indent braces following a case statement by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.description": "Indent braces of lambdas used as function parameters relative to the start of the statement by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.gotoLabels.description": "The position of goto labels",
