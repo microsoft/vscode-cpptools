@@ -4,7 +4,7 @@
 
 [![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
 
-This release of the C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
+The C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
 
 ## Overview and tutorials
 * [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
