@@ -2615,8 +2615,8 @@ export class DefaultClient implements Client {
         if (DefaultClient.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
             const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
             DefaultClient.referencesPendingCancellations.push({
-              reject: () => {},
-              callback: () => {},
+                reject: () => {},
+                callback: () => {}
             });
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
