@@ -1357,7 +1357,7 @@ export class DefaultClient implements Client {
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
             if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
                 // If any file has changed, we need to abort the current rename operation
-                if (renamePending) {
+                if (DefaultClient.renamePending) {
                     this.cancelReferences();
                 }
 
