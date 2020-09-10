@@ -7,7 +7,6 @@ import {DefaultClient,  FormatParams, FormatOnTypeRequest, cachedEditorConfigSet
 import { CppSettings } from '../settings';
 import * as editorConfig from 'editorconfig';
 
-
 export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
     private client: DefaultClient;
     constructor(client: DefaultClient) {
