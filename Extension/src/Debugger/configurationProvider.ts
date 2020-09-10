@@ -17,7 +17,7 @@ import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 
 import { IConfiguration, IConfigurationSnippet, DebuggerType, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
-import { parse } from 'jsonc-parser';
+import { parse } from 'comment-json';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 

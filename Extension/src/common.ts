@@ -22,6 +22,7 @@ import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
 import { PackageManager, IPackage } from './packageManager';
+import * as jsonc from 'comment-json';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -58,6 +59,102 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
+export async function getRawLaunchJson(): Promise<any> {
+    const path: string | undefined = getLaunchJsonPath();
+    return getRawJson(path);
+}
+
+export async function getRawTasksJson(): Promise<any> {
+    const path: string | undefined = getTasksJsonPath();
+    return getRawJson(path);
+}
+
+async function getRawJson(path: string | undefined): Promise<any> {
+    if (!path) {
+        return {};
+    }
+    const fileExists: boolean = await checkFileExists(path);
+    if (!fileExists) {
+        return {};
+    }
+
+    const fileContents: string = await readFileText(path);
+    let rawTasks: any = {};
+    try {
+        rawTasks = jsonc.parse(fileContents);
+    } catch (error) {
+        throw new Error(failedToParseTasksJson);
+    }
+    return rawTasks;
+}
+
+export async function ensureDebugConfigExists(configName: string): Promise<void> {
+    const launchJsonPath: string | undefined = getLaunchJsonPath();
+    if (!launchJsonPath) {
+        throw new Error("Failed to get launchJsonPath in ensureDebugConfigExists()");
+    }
+
+    const rawLaunchJson: any = await getRawLaunchJson();
+    // Ensure that the debug configurations exists in the user's launch.json. Config will not be found otherwise.
+    if (!rawLaunchJson || !rawLaunchJson.configurations) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    const selectedConfig: vscode.Task | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
+    if (!selectedConfig) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    return;
+}
+
+export async function ensureBuildTaskExists(taskLabel: string): Promise<void> {
+    const rawTasksJson: any = await getRawTasksJson();
+
+    // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+    if (!rawTasksJson.tasks) {
+        rawTasksJson.tasks = new Array();
+    }
+    // Find or create the task which should be created based on the selected "debug configuration".
+    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+    if (selectedTask) {
+        return;
+    }
+
+    const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
+    selectedTask = buildTasks.find(task => task.name === taskLabel);
+    console.assert(selectedTask);
+    if (!selectedTask) {
+        throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
+    }
+
+    rawTasksJson.version = "2.0.0";
+
+    // Modify the current default task
+    rawTasksJson.tasks.forEach((task: any) => {
+        if (task.label === selectedTask?.definition.label) {
+            task.group = { kind: "build", "isDefault": true };
+        } else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
+            task.group = "build";
+        }
+    });
+
+    if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask?.definition.label)) {
+        const newTask: any = {
+            ...selectedTask.definition,
+            problemMatcher: selectedTask.problemMatchers,
+            group: { kind: "build", "isDefault": true }
+        };
+        rawTasksJson.tasks.push(newTask);
+    }
+
+    const settings: OtherSettings = new OtherSettings();
+    const tasksJsonPath: string | undefined = getTasksJsonPath();
+    if (!tasksJsonPath) {
+        throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
+    }
+
+    await writeFileText(tasksJsonPath, jsonc.stringify(rawTasksJson, null, settings.editorTabSize));
+}
+
 export function fileIsCOrCppSource(file: string): boolean {
     const fileExtLower: string = path.extname(file).toLowerCase();
     return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
@@ -84,6 +181,26 @@ export function getExtensionFilePath(extensionfile: string): string {
 
 export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
+}
+
+export function getLaunchJsonPath(): string | undefined {
+    return getJsonPath("launch.json");
+}
+
+export function getTasksJsonPath(): string | undefined {
+    return getJsonPath("tasks.json");
+}
+
+function getJsonPath(jsonFilaName: string): string | undefined {
+    const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!editor) {
+        return undefined;
+    }
+    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    if (!folder) {
+        return undefined;
+    }
+    return path.join(folder.uri.fsPath, ".vscode", jsonFilaName);
 }
 
 export function getVcpkgPathDescriptorFile(): string {
@@ -286,9 +403,9 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         } else if (input === match && isArrayOfString(v)) {
                             newValue = v.join(envDelimiter);
                         }
-                        if (newValue === undefined) {
-                            newValue = process.env[name];
-                        }
+                    }
+                    if (newValue === undefined) {
+                        newValue = process.env[name];
                     }
                     break;
                 }
@@ -553,6 +670,18 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
 
 /** Writes content to a text file */
 export function writeFileText(filePath: string, content: string, encoding: string = "utf8"): Promise<void> {
+    const folders: string[] = filePath.split(path.sep).slice(0, -1);
+    if (folders.length) {
+        // create folder path if it doesn't exist
+        folders.reduce((last, folder) => {
+            const folderPath: string = last ? last + path.sep + folder : folder;
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath);
+            }
+            return folderPath;
+        });
+    }
+
     return new Promise<void>((resolve, reject) => {
         fs.writeFile(filePath, content, { encoding }, (err) => {
             if (err) {

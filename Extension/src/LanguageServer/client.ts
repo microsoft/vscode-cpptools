@@ -405,7 +405,10 @@ const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, Loca
 const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-const DocumentFormatRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/format');
+const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
+const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
+const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
+
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
@@ -702,7 +705,7 @@ class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditPro
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatDocumentRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {
@@ -759,7 +762,7 @@ class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormatt
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatRangeRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {
@@ -816,7 +819,7 @@ class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvide
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(DocumentFormatRequest, params)
+                    return this.client.languageClient.sendRequest(FormatOnTypeRequest, params)
                         .then((textEdits) => {
                             const result: vscode.TextEdit[] = [];
                             textEdits.forEach((textEdit) => {
@@ -1420,6 +1423,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatStyle: (string | undefined)[] = [];
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
+        const settings_filesEncoding: (string | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
@@ -1589,6 +1593,7 @@ export class DefaultClient implements Client {
             }
 
             for (const otherSetting of otherSettings) {
+                settings_filesEncoding.push(otherSetting.filesEncoding);
                 settings_filesExclude.push(otherSetting.filesExclude);
                 settings_searchExclude.push(otherSetting.searchExclude);
             }
@@ -1695,6 +1700,10 @@ export class DefaultClient implements Client {
                 clang_format_fallbackStyle: settings_clangFormatFallbackStyle,
                 clang_format_sortIncludes: settings_clangFormatSortIncludes,
                 extension_path: util.extensionPath,
+                files: {
+                    encoding: settings_filesEncoding
+                },
+                workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
@@ -1772,6 +1781,9 @@ export class DefaultClient implements Client {
             cppSettingsScoped["default"] = { systemIncludePath: cppSettingsResourceScoped.get("default.systemIncludePath") };
         }
 
+        const otherSettingsFolder: OtherSettings = new OtherSettings(this.RootUri);
+        const otherSettingsWorkspace: OtherSettings = new OtherSettings();
+
         // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
         // build a new JSON object with everything we need on the native side.
         const settings: any = {
@@ -1791,9 +1803,11 @@ export class DefaultClient implements Client {
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
             },
             files: {
+                encoding: otherSettingsFolder.filesEncoding,
                 exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri),
                 associations: new OtherSettings().filesAssociations
             },
+            workspace_fallback_encoding: otherSettingsWorkspace.filesEncoding,
             search: {
                 exclude: vscode.workspace.getConfiguration("search.exclude", this.RootUri)
             }
@@ -2982,7 +2996,7 @@ export class DefaultClient implements Client {
             break;
         }
 
-        this.browseConfigurationLogging = localize("browse.configuration", "Custom browse configuration: {0}", `\n${JSON.stringify(sanitized, null, 4)}\n`);
+        this.browseConfigurationLogging = `Custom browse configuration: \n${JSON.stringify(sanitized, null, 4)}\n`;
 
         const params: CustomBrowseConfigurationParams = {
             browseConfiguration: sanitized,

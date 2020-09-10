@@ -230,10 +230,10 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
 
     return vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        title: "C/C++ Extension",
         cancellable: false
     }, async (progress, token) => {
 
+        progress.report({ message: "C/C++ Extension" , increment: 0});
         outputChannelLogger.appendLine('');
         setInstallationStage('downloadPackages');
         await packageManager.DownloadPackages(progress);

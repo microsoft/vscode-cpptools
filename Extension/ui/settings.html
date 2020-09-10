@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; img-src vscode-resource:; script-src 'nonce-{{nonce}}';">
+    <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
 
     <style type="text/css">
         @media (max-width: 1140px) {
@@ -404,7 +404,7 @@
     <div style="height: 90px; display: block">
         <table>
             <td>
-              <img src="{{root}}/LanguageCCPP_color_128x.png" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px" data-loc-id-title="microsoft.c.cpp.extension">
+              <img src="{{cpp_image_uri}}" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px" data-loc-id-title="microsoft.c.cpp.extension">
             </td>
             <td>
                 <div style="font-size: 20px; font-weight: 400; line-height: 24px">Microsoft<br><span data-loc-id="c.cpp.extension">C/C++ Extension</span></div>
@@ -423,6 +423,10 @@
 
         <span data-loc-id="switch.to.json">Switch to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id-title="edit.configurations.in.json">c_cpp_properties.json</a> file by clicking on the file link or using the command:</span><br> 
         <code data-loc-id="edit.configurations.json">C/C++: Edit configurations (JSON)</code>
+
+        <div style="height: 30px; display: block"></div>
+
+        <span data-loc-id="check.the.schema">Learn more about the C/C++ properties by going to <a href="https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference" title="Properties Schema Reference" data-loc-id-title="view.schema.reference">C/C++ Properties Schema Reference</a>.</span><br>
     </div>
 
   </div> <!-- sidebar end -->
@@ -672,7 +676,7 @@
 
   </div> <!-- main end -->
 
-  <script nonce="{{nonce}}" src="{{root}}/out/ui/settings.js"></script>
+  <script nonce="{{nonce}}" src="{{settings_js_uri}}"></script>
 
 </body>
 </html>
