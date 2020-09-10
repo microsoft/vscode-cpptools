@@ -2,9 +2,8 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.30.0-master",
+  "version": "1.0.0-master",
   "publisher": "ms-vscode",
-  "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
   "author": {
@@ -2280,6 +2279,7 @@
   "resolutions": {
     "https-proxy-agent": "^2.2.4",
     "webpack/acorn": "^6.4.1",
+    "webpack/terser-webpack-plugin": "^1.4.5",
     "gulp-sourcemaps/acorn": "^5.7.4",
     "eslint/acorn": "^7.1.1",
     "gulp-eslint/acorn": "^7.1.1",

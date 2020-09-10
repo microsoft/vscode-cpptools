@@ -1,5 +1,17 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.30.0-insiders5: September 9, 2020
+### Enhancements
+* Prevent comments from being removed from `tasks.json` when the extension modifies it.
+  * @dan-shaw [PR #5954](https://github.com/microsoft/vscode-cpptools/pull/5954)
+* Add workspace parsing diagnostics. [#6048](https://github.com/microsoft/vscode-cpptools/issues/6048)
+* Add `wmain` snippet on Windows. [#6064](https://github.com/microsoft/vscode-cpptools/issues/6064)
+
+### Bug Fixes
+* Fix extension not creating `tasks.json` if the `.vscode` folder doesn’t exist. [#4280](https://github.com/microsoft/vscode-cpptools/issues/4280)
+* Fix IntelliSense completion crash regression. [#5960](https://github.com/microsoft/vscode-cpptools/issues/5960)
+* Fix error message with `Build and Debug Active File`. [#6071](https://github.com/microsoft/vscode-cpptools/issues/6071)
+
 ## Version 0.30.0-insiders4: September 1, 2020
 ### New Features
 * Support non-UTF-8 file encodings (GBK, UTF-16, etc.). [#414](https://github.com/microsoft/vscode-cpptools/issues/414)
@@ -11,7 +23,7 @@
 * Improve the download and installation progress bar. [#1961](https://github.com/microsoft/vscode-cpptools/issues/1961)
 * Add error codes and "C/C++" source to IntelliSense errors. [#2345](https://github.com/microsoft/vscode-cpptools/issues/2345)
 * Add link to the documentation in the configuration UI. [#5875](https://github.com/microsoft/vscode-cpptools/issues/5875)
-  * Abhishek Pal (@devabhishekpal) [#PR 5991](https://github.com/microsoft/vscode-cpptools/pull/5991)
+  * Abhishek Pal (@devabhishekpal) [PR #5991](https://github.com/microsoft/vscode-cpptools/pull/5991)
 
 ### Bug Fixes
 * Fix member completion in C code after an operator is used in an expression. [#2184](https://github.com/microsoft/vscode-cpptools/issues/2184)
