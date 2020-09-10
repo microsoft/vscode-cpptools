@@ -1,9 +1,95 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 0.30.0-insiders5: September 9, 2020
+### Enhancements
+* Prevent comments from being removed from `tasks.json` when the extension modifies it.
+  * @dan-shaw [PR #5954](https://github.com/microsoft/vscode-cpptools/pull/5954)
+* Add workspace parsing diagnostics. [#6048](https://github.com/microsoft/vscode-cpptools/issues/6048)
+* Add `wmain` snippet on Windows. [#6064](https://github.com/microsoft/vscode-cpptools/issues/6064)
+
+### Bug Fixes
+* Fix extension not creating `tasks.json` if the `.vscode` folder doesn’t exist. [#4280](https://github.com/microsoft/vscode-cpptools/issues/4280)
+* Fix IntelliSense completion crash regression. [#5960](https://github.com/microsoft/vscode-cpptools/issues/5960)
+* Fix error message with `Build and Debug Active File`. [#6071](https://github.com/microsoft/vscode-cpptools/issues/6071)
+
+## Version 0.30.0-insiders4: September 1, 2020
+### New Features
+* Support non-UTF-8 file encodings (GBK, UTF-16, etc.). [#414](https://github.com/microsoft/vscode-cpptools/issues/414)
+* Add support for `/Zc:__cplusplus` in `compilerArgs` for cl.exe. [#2595](https://github.com/microsoft/vscode-cpptools/issues/2595)
+* Support for running the extension on Linux arm/arm64 for older OS's without glibc 2.28 (Ubuntu 14-18, Debian 8-9, CentOS 7, etc.). [#5984](https://github.com/microsoft/vscode-cpptools/issues/5984), [#5993](https://github.com/microsoft/vscode-cpptools/issues/5993)
+* Add diagnostics on potentially conflicting recursive includes to `C/C++: Log Diagnostics`, i.e. if a workspace uses files with the same name as system headers. [#6009](https://github.com/microsoft/vscode-cpptools/issues/6009)
+
+### Enhancements
+* Improve the download and installation progress bar. [#1961](https://github.com/microsoft/vscode-cpptools/issues/1961)
+* Add error codes and "C/C++" source to IntelliSense errors. [#2345](https://github.com/microsoft/vscode-cpptools/issues/2345)
+* Add link to the documentation in the configuration UI. [#5875](https://github.com/microsoft/vscode-cpptools/issues/5875)
+  * Abhishek Pal (@devabhishekpal) [PR #5991](https://github.com/microsoft/vscode-cpptools/pull/5991)
+
+### Bug Fixes
+* Fix member completion in C code after an operator is used in an expression. [#2184](https://github.com/microsoft/vscode-cpptools/issues/2184)
+* Fix squiggles on `compilerPath` for compilers found from the PATH environment variable. [#6006](https://github.com/microsoft/vscode-cpptools/issues/6006)
+* Remove keyword completion of C identifiers that are defined in headers and aren't keywords (e.g. `alignas`). [#6022](https://github.com/microsoft/vscode-cpptools/issues/6022)
+* Fix `vcFormat` formatting not using VS Code's `tabSize`.
+
+## Version 0.30.0-insiders3: August 21, 2020
+### New Features
+* Support for running the extension on Linux arm64/aarch64 devices, using remoting. [#2506](https://github.com/microsoft/vscode-cpptools/issues/2506), [#5969](https://github.com/microsoft/vscode-cpptools/issues/5969)
+* Add support for vcFormat settings in `.editorconfig` files. [PR #5932](https://github.com/microsoft/vscode-cpptools/pull/5932)
+
+### Enhancements
+* Search for `compilerPath` in the PATH environment variable. [#3078](https://github.com/microsoft/vscode-cpptools/issues/3078), [#5908](https://github.com/microsoft/vscode-cpptools/issues/5908)
+* Validate crypto signatures of binaries we download. [#5268](https://github.com/microsoft/vscode-cpptools/issues/5268)
+
+### Bug Fixes
+* Fix `configuration.includePath` to only add the `defaultFolder` when the default `includePath` is set. [#5621](https://github.com/microsoft/vscode-cpptools/issues/5621)
+* Fix Doxygen parameterHint comment to display for a parameter name that is followed by colon. [#5836](https://github.com/microsoft/vscode-cpptools/issues/5836)
+* Fix compiler probing when relative paths are used in `compile_commands.json`. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
+* Fix IntelliSense failures with gcc 10.2 headers with C++20. [#5897](https://github.com/microsoft/vscode-cpptools/issues/5897), [#5973](https://github.com/microsoft/vscode-cpptools/issues/5973)
+* Fix Doxygen comment to escape markdown characters. [#5904](https://github.com/microsoft/vscode-cpptools/issues/5904)
+* Fix a regression introduced in a previous insiders in which additional format on-type characters were introduced when using clang-format. These on-type characters have been reverted, when using clang-format. [#5962](https://github.com/microsoft/vscode-cpptools/issues/5962)
+
+## Version 0.30.0-insiders2: August 11, 2020
+### Bug Fixes
+* Fix vcFormat setting default values. [#5907](https://github.com/microsoft/vscode-cpptools/issues/5907)
+* Fix vcFormat formatting causing multi-byte character document corruption. [#5914](https://github.com/microsoft/vscode-cpptools/issues/5914)
+* Fix an IntelliSense crash (regression) when using the IntelliSense cache with a standalone header. [#5923](https://github.com/microsoft/vscode-cpptools/issues/5923)
+* Change `clangFormat` and `Default` formatting modes that use the `Visual Studio` style (or fallback style) to use the clang-format implementation instead of vcFormat.
+* Restore fallback to the base configuration if a custom configuration provider does not provide a configuration for a file and does not provide compiler info in a custom browse configuration.
+
+## Version 0.30.0-insiders: August 4, 2020
+### New Features
+* Support for running the extension on Linux ARM devices, using remoting (arm64/aarch64 not supported yet). [#429](https://github.com/microsoft/vscode-cpptools/issues/429)
+* Add the `vcFormat` option to `C_Cpp.formatting` (with `C_Cpp.vcFormat.*` options) to enable VS-style formatting (instead of clang-format formatting). [#657](https://github.com/microsoft/vscode-cpptools/issues/657)
+
+### Enhancements
+* Use `jsonc` parser to load `c_cpp_properties.json` to allow comments, trailing commas, etc. [#5885](https://github.com/microsoft/vscode-cpptools/issues/5885)
+
+### Bug Fixes
+* Fix installation of clang-format 10 with the online vsix. [#5194](https://github.com/microsoft/vscode-cpptools/issues/5194)
+* Get the compiler type to determine if it's Clang when querying for default compiler so that the correct default `intelliSenseMode` is set. [#5352](https://github.com/microsoft/vscode-cpptools/issues/5352)
+* Get the default language standard of the compiler and use that std version if no version is specified. [#5579](https://github.com/microsoft/vscode-cpptools/issues/5579)
+* Fix an incorrect IntelliSense error squiggle. [#5783](https://github.com/microsoft/vscode-cpptools/issues/5783)
+* Fix an IntelliSense crash when using C++20 on Linux. [#5727](https://github.com/microsoft/vscode-cpptools/issues/5727)
+* Get the default target of the compiler. If the default target is ARM/ARM64, do not use the generic "--target" option to determine bitness. [#5772](https://github.com/microsoft/vscode-cpptools/issues/5772)
+* Fix `compilerArgs` not being used if no `compilerPath` is set. [#5776](https://github.com/microsoft/vscode-cpptools/issues/5776)
+* Fix semantic colorization and inactive regions for multiroot workspaces. [#5812](https://github.com/microsoft/vscode-cpptools/issues/5812), [#5828](https://github.com/microsoft/vscode-cpptools/issues/5828)
+* Fix bug with cl.exe flags /FU and /FI not being processed. [#5819](https://github.com/microsoft/vscode-cpptools/issues/5819)
+* Fix `cStandard` being set to `c11` instead of `gnu18` with gcc. [#5834](https://github.com/microsoft/vscode-cpptools/issues/5834)
+* Fix compile commands compiler not being used if `C_Cpp.default.compilerPath` is set. [#5848](https://github.com/microsoft/vscode-cpptools/issues/5848)
+* Fix a bug that could cause the extension to delay processing a newly opened file until any outstanding IntelliSense operations are complete, if using a custom configuration provider.
+* Fix a bug with incorrect configuration of a file when using a custom configuration provider and no custom configuration is available for that file. This now falls back to the compiler info received from the configuration provider with the browse configuration.
+* Fix a bug in which making a modification to `c_cpp_properties.json` could result in custom configurations for currently open files being discarded and not re-requested.
+
+### Potentially Breaking Changes
+* Settings `commentContinuationPatterns`, `enhancedColorization`, and `codeFolding` are no longer available in per-Folder settings (only Workspace or higher settings). [PR #5830](https://github.com/microsoft/vscode-cpptools/pull/5830)
+* Fix compile command arguments not being used when `compilerPath` is set (so the compile command arguments need to be compatible now).
+* Default formatting results may be different if the "Visual Studio" style is used -- use the "Emulated Visual Studio" style to get the previous behavior. For example, see [#5901](https://github.com/microsoft/vscode-cpptools/issues/5901)
+* If a non-matching `intelliSenseMode` was being used, such as clang-x64 with a gcc ARM compiler, then we may auto-fix it internally, which may cause changes to IntelliSense behavior.
+
 ## Version 0.29.0: July 15, 2020
 ### New Features
 * Add Doxygen comment support (to tooltip display of hover, completion, and signature help). [#658](https://github.com/microsoft/vscode-cpptools/issues/658)
-  * The way comments are formatted is controlled by the C_Cpp.simplifyStructuredComments setting."
+  * The way comments are formatted is controlled by the `C_Cpp.simplifyStructuredComments` setting.
 * Auto-convert `.` to `->` when the type is a pointer. [#862](https://github.com/microsoft/vscode-cpptools/issues/862)
 * Switch to using the VS Code Semantic Tokens API for semantic colorization (works with remoting). [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401), [#3932](https://github.com/microsoft/vscode-cpptools/issues/3932), [#3933](https://github.com/microsoft/vscode-cpptools/issues/3933), [#3942](https://github.com/microsoft/vscode-cpptools/issues/3942)
 * Add support for LogMessage Breakpoints for debug type `cppdbg`. [MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
@@ -20,6 +106,7 @@
 * Add threadExit and processExit logging flags for 'cppvsdbg'. [PR #5652](https://github.com/microsoft/vscode-cpptools/pull/5652)
 
 ### Bug Fixes
+* Fix IntelliSense when using "import_" in a variable name. [#5272](https://github.com/microsoft/vscode-cpptools/issues/5272)
 * Add localization support for autocomplete and hover text. [#5370](https://github.com/microsoft/vscode-cpptools/issues/5370)
 * Some `updateChannel` fixes. [PR #5465](https://github.com/microsoft/vscode-cpptools/pull/5465)
 * Fix wrong language standard used with compile commands. [#5498](https://github.com/microsoft/vscode-cpptools/issues/5498)
@@ -33,6 +120,7 @@
 * Fix default build tasks failing on Windows if the compiler isn't on the PATH. [#5604](https://github.com/microsoft/vscode-cpptools/issues/5604)
 * Fix updating `files.associations` and .C files being associated with C instead of C++. [#5618](https://github.com/microsoft/vscode-cpptools/issues/5618)
 * Fix IntelliSense malfunction when RxCpp is used. [#5619](https://github.com/microsoft/vscode-cpptools/issues/5619)
+* Fix an incorrect IntelliSense error. [#5627](https://github.com/microsoft/vscode-cpptools/issues/5627)
 * Ignore "screen size is bogus" error when debugging. [PR #5669](https://github.com/microsoft/vscode-cpptools/pull/5669)
   * nukoyluoglu (@nukoyluoglu)
 * Fix `compile_commands.json` sometimes not updating. [#5687](https://github.com/microsoft/vscode-cpptools/issues/5687)

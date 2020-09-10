@@ -175,5 +175,7 @@
 	"parameters_label": "Parametri:",
 	"returns_label": "Restituisce:",
 	"deprecated_label": "Deprecato:",
-	"exceptions_label": "Eccezioni:"
+	"exceptions_label": "Eccezioni:",
+	"template_parameters_label": "Parametri del modello:",
+	"compiler_probe_command_line": "Riga di comando del probe del compilatore: {0}"
 }

@@ -148,6 +148,7 @@ export class SettingsTracker {
                     const newKey: string = key + "2";
                     if (val) {
                         switch (String(val).toLowerCase()) {
+                            case "emulated visual studio":
                             case "visual studio":
                             case "llvm":
                             case "google":

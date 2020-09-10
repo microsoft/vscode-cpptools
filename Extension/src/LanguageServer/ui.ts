@@ -163,10 +163,19 @@ export class UI {
         } else {
             const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
-            // It's sometimes desirable to see the config and icons when making settings changes.
-            const isSettingsJson: boolean = ((activeEditor.document.fileName.endsWith("c_cpp_properties.json") || activeEditor.document.fileName.endsWith("settings.json")));
+            const isCppPropertiesJson: boolean = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
+            if (isCppPropertiesJson) {
+                vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
+            }
 
-            this.ShowConfiguration = isCpp || isSettingsJson;
+            // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
+            // TODO: Check some "AlwaysShow" setting here.
+            this.ShowConfiguration = isCpp || isCppPropertiesJson ||
+                activeEditor.document.uri.scheme === "output" ||
+                activeEditor.document.fileName.endsWith("settings.json") ||
+                activeEditor.document.fileName.endsWith("tasks.json") ||
+                activeEditor.document.fileName.endsWith("launch.json") ||
+                activeEditor.document.fileName.endsWith(".code-workspace");
         }
     }
 

@@ -22,6 +22,8 @@ import { OtherSettings } from './LanguageServer/settings';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
+import { PackageManager, IPackage } from './packageManager';
+import * as jsonc from 'comment-json';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -60,30 +62,54 @@ export function getRawPackageJson(): any {
     return rawPackageJson;
 }
 
-export function getRawTasksJson(): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-        const path: string | undefined = getTasksJsonPath();
-        if (!path) {
-            return resolve({});
-        }
-        fs.exists(path, exists => {
-            if (!exists) {
-                return resolve({});
-            }
-            let fileContents: string = fs.readFileSync(path).toString();
-            fileContents = fileContents.replace(/^\s*\/\/.*$/gm, ""); // Remove start of line // comments.
-            let rawTasks: any = {};
-            try {
-                rawTasks = JSON.parse(fileContents);
-            } catch (error) {
-                return reject(new Error(failedToParseTasksJson));
-            }
-            resolve(rawTasks);
-        });
-    });
+export async function getRawLaunchJson(): Promise<any> {
+    const path: string | undefined = getLaunchJsonPath();
+    return getRawJson(path);
 }
 
-export async function ensureBuildTaskExists(taskName: string): Promise<void> {
+export async function getRawTasksJson(): Promise<any> {
+    const path: string | undefined = getTasksJsonPath();
+    return getRawJson(path);
+}
+
+async function getRawJson(path: string | undefined): Promise<any> {
+    if (!path) {
+        return {};
+    }
+    const fileExists: boolean = await checkFileExists(path);
+    if (!fileExists) {
+        return {};
+    }
+
+    const fileContents: string = await readFileText(path);
+    let rawTasks: any = {};
+    try {
+        rawTasks = jsonc.parse(fileContents);
+    } catch (error) {
+        throw new Error(failedToParseTasksJson);
+    }
+    return rawTasks;
+}
+
+export async function ensureDebugConfigExists(configName: string): Promise<void> {
+    const launchJsonPath: string | undefined = getLaunchJsonPath();
+    if (!launchJsonPath) {
+        throw new Error("Failed to get launchJsonPath in ensureDebugConfigExists()");
+    }
+
+    const rawLaunchJson: any = await getRawLaunchJson();
+    // Ensure that the debug configurations exists in the user's launch.json. Config will not be found otherwise.
+    if (!rawLaunchJson || !rawLaunchJson.configurations) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    const selectedConfig: vscode.Task | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
+    if (!selectedConfig) {
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+    }
+    return;
+}
+
+export async function ensureBuildTaskExists(taskLabel: string): Promise<void> {
     const rawTasksJson: any = await getRawTasksJson();
 
     // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
@@ -91,13 +117,13 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
         rawTasksJson.tasks = new Array();
     }
     // Find or create the task which should be created based on the selected "debug configuration".
-    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === task);
+    let selectedTask: vscode.Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
     if (selectedTask) {
         return;
     }
 
     const buildTasks: vscode.Task[] = await getBuildTasks(false, true);
-    selectedTask = buildTasks.find(task => task.name === taskName);
+    selectedTask = buildTasks.find(task => task.name === taskLabel);
     console.assert(selectedTask);
     if (!selectedTask) {
         throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
@@ -105,24 +131,31 @@ export async function ensureBuildTaskExists(taskName: string): Promise<void> {
 
     rawTasksJson.version = "2.0.0";
 
-    const selectedTask2: vscode.Task = selectedTask;
-    if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask2.definition.label)) {
-        const task: any = {
-            ...selectedTask2.definition,
-            problemMatcher: selectedTask2.problemMatchers,
+    // Modify the current default task
+    rawTasksJson.tasks.forEach((task: any) => {
+        if (task.label === selectedTask?.definition.label) {
+            task.group = { kind: "build", "isDefault": true };
+        } else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
+            task.group = "build";
+        }
+    });
+
+    if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask?.definition.label)) {
+        const newTask: any = {
+            ...selectedTask.definition,
+            problemMatcher: selectedTask.problemMatchers,
             group: { kind: "build", "isDefault": true }
         };
-        rawTasksJson.tasks.push(task);
+        rawTasksJson.tasks.push(newTask);
     }
 
-    // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
     const settings: OtherSettings = new OtherSettings();
     const tasksJsonPath: string | undefined = getTasksJsonPath();
     if (!tasksJsonPath) {
         throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
     }
 
-    await writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
+    await writeFileText(tasksJsonPath, jsonc.stringify(rawTasksJson, null, settings.editorTabSize));
 }
 
 export function fileIsCOrCppSource(file: string): boolean {
@@ -153,7 +186,15 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
+export function getLaunchJsonPath(): string | undefined {
+    return getJsonPath("launch.json");
+}
+
 export function getTasksJsonPath(): string | undefined {
+    return getJsonPath("tasks.json");
+}
+
+function getJsonPath(jsonFilaName: string): string | undefined {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return undefined;
@@ -162,7 +203,7 @@ export function getTasksJsonPath(): string | undefined {
     if (!folder) {
         return undefined;
     }
-    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
+    return path.join(folder.uri.fsPath, ".vscode", jsonFilaName);
 }
 
 export function getVcpkgPathDescriptorFile(): string {
@@ -365,9 +406,9 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         } else if (input === match && isArrayOfString(v)) {
                             newValue = v.join(envDelimiter);
                         }
-                        if (newValue === undefined) {
-                            newValue = process.env[name];
-                        }
+                    }
+                    if (newValue === undefined) {
+                        newValue = process.env[name];
                     }
                     break;
                 }
@@ -546,7 +587,7 @@ export function checkInstallLockFile(): Promise<boolean> {
 /** Get the platform that the installed binaries belong to.*/
 export function getInstalledBinaryPlatform(): string | undefined {
     // the LLVM/bin folder is utilized to identify the platform
-    let installedPlatform: string = "";
+    let installedPlatform: string | undefined;
     if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
         installedPlatform = "win32";
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
@@ -554,7 +595,67 @@ export function getInstalledBinaryPlatform(): string | undefined {
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
         installedPlatform = "linux";
     }
+    if (!installedPlatform) {
+        Telemetry.logLanguageServerEvent("missingBinary", { "source": "clang-format" });
+    }
     return installedPlatform;
+}
+
+/* Check if the core binaries exists in extension's installation folder */
+export async function checkInstallBinariesExist(): Promise<boolean> {
+    if (!checkInstallLockFile()) {
+        return false;
+    }
+    let installBinariesExist: boolean = true;
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const packageManager: PackageManager = new PackageManager(info);
+    const packages: Promise<IPackage[]> = packageManager.GetPackages();
+    for (const pkg of await packages) {
+        if (pkg.binaries) {
+            await Promise.all(pkg.binaries.map(async (file: string) => {
+                if (!await checkFileExists(file)) {
+                    installBinariesExist = false;
+                    const fileBase: string = path.basename(file);
+                    console.log(`Extension file ${fileBase} is missing.`);
+                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${fileBase}` });
+                }
+            }));
+        }
+    }
+    return installBinariesExist;
+}
+
+/* Check if the core Json files exists in extension's installation folder */
+export async function checkInstallJsonsExist(): Promise<boolean> {
+    let installJsonsExist: boolean = true;
+    const jsonFiles: string[] = [
+        "bin/msvc.arm32.clang.json",
+        "bin/msvc.arm32.gcc.json",
+        "bin/msvc.arm32.msvc.json",
+        "bin/msvc.arm64.clang.json",
+        "bin/msvc.arm64.gcc.json",
+        "bin/msvc.arm64.msvc.json",
+        "bin/msvc.json",
+        "bin/msvc.x64.clang.json",
+        "bin/msvc.x64.gcc.json",
+        "bin/msvc.x64.msvc.json",
+        "bin/msvc.x86.clang.json",
+        "bin/msvc.x86.gcc.json",
+        "bin/msvc.x86.msvc.json",
+        "debugAdapters/bin/cppdbg.ad7Engine.json"
+    ];
+    await Promise.all(jsonFiles.map(async (file) => {
+        if (!await checkFileExists(path.join(extensionPath, file))) {
+            installJsonsExist = false;
+            console.log(`Extension file ${file} is missing.`);
+            Telemetry.logLanguageServerEvent("missingJson", { "source": `${file}` });
+        }
+    }));
+    return installJsonsExist;
+}
+
+export async function removeInstallLockFile(): Promise<void> {
+    await unlinkAsync(path.join(extensionPath, "install.lock"));
 }
 
 /** Reads the content of a text file */
@@ -572,6 +673,18 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
 
 /** Writes content to a text file */
 export function writeFileText(filePath: string, content: string, encoding: string = "utf8"): Promise<void> {
+    const folders: string[] = filePath.split(path.sep).slice(0, -1);
+    if (folders.length) {
+        // create folder path if it doesn't exist
+        folders.reduce((last, folder) => {
+            const folderPath: string = last ? last + path.sep + folder : folder;
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath);
+            }
+            return folderPath;
+        });
+    }
+
     return new Promise<void>((resolve, reject) => {
         fs.writeFile(filePath, content, { encoding }, (err) => {
             if (err) {
@@ -750,7 +863,7 @@ export function checkDistro(platformInfo: PlatformInformation): void {
     }
 }
 
-export async function unlinkPromise(fileName: string): Promise<void> {
+export async function unlinkAsync(fileName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.unlink(fileName, err => {
             if (err) {
@@ -761,7 +874,7 @@ export async function unlinkPromise(fileName: string): Promise<void> {
     });
 }
 
-export async function renamePromise(oldName: string, newName: string): Promise<void> {
+export async function renameAsync(oldName: string, newName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         fs.rename(oldName, newName, err => {
             if (err) {

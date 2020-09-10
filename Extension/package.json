@@ -2,9 +2,8 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "0.29.0",
+  "version": "1.0.0",
   "publisher": "ms-vscode",
-  "preview": true,
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
   "author": {
@@ -93,6 +92,521 @@
           "description": "%c_cpp.configuration.clang_format_style.description%",
           "scope": "machine-overridable"
         },
+        "C_Cpp.formatting": {
+          "type": "string",
+          "enum": [
+            "clangFormat",
+            "vcFormat",
+            "Default",
+            "Disabled"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.formatting.clangFormat.description%",
+            "%c_cpp.configuration.formatting.vcFormat.description%",
+            "%c_cpp.configuration.formatting.Default.description%",
+            "%c_cpp.configuration.formatting.Disabled.description%"
+          ],
+          "default": "clangFormat",
+          "description": "%c_cpp.configuration.formatting.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.braces": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.indent.braces.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.multiLineRelativeTo": {
+          "type": "string",
+          "enum": [
+            "outermostParenthesis",
+            "innermostParenthesis",
+            "statementBegin"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.outermostParenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.innermostParenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.statementBegin.description%"
+          ],
+          "default": "innermostParenthesis",
+          "description": "%c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.withinParentheses": {
+          "type": "string",
+          "enum": [
+            "alignToParenthesis",
+            "indent"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.description%",
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description%"
+          ],
+          "default": "indent",
+          "description": "%c_cpp.configuration.vcFormat.indent.withinParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.preserveWithinParentheses": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.caseLabels": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.indent.caseLabels.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.caseContents": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.indent.caseContents.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.caseContentsWhenBlock": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.lambdaBracesWhenParameter": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.gotoLabels": {
+          "type": "string",
+          "enum": [
+            "oneLeft",
+            "leftmostColumn",
+            "none"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.description%",
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.description%",
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.none.description%"
+          ],
+          "default": "none",
+          "description": "%c_cpp.configuration.vcFormat.indent.gotoLabels.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.preprocessor": {
+          "type": "string",
+          "enum": [
+            "oneLeft",
+            "leftmostColumn",
+            "none"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.description%",
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.leftmostColumn.description%",
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.none.description%"
+          ],
+          "default": "leftmostColumn",
+          "description": "%c_cpp.configuration.vcFormat.indent.preprocessor.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.accessSpecifiers": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.indent.accessSpecifiers.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.namespaceContents": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.indent.namespaceContents.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.indent.preserveComment": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.indent.preserveComment.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": {
+          "type": "string",
+          "enum": [
+            "newLine",
+            "sameLine",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
+          "default": "ignore",
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeOpenBrace.type": {
+          "type": "string",
+          "enum": [
+            "newLine",
+            "sameLine",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
+          "default": "ignore",
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeOpenBrace.function": {
+          "type": "string",
+          "enum": [
+            "newLine",
+            "sameLine",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
+          "default": "ignore",
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.function.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": {
+          "type": "string",
+          "enum": [
+            "newLine",
+            "sameLine",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
+          "default": "ignore",
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.block.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeOpenBrace.lambda": {
+          "enum": [
+            "newLine",
+            "sameLine",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.newLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.sameLine.description%",
+            "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.ignore.description%"
+          ],
+          "default": "ignore",
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.scopeBracesOnSeparateLines": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.newLine.scopeBracesOnSeparateLines.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyType": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyType.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyFunction": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyFunction.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeCatch": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeCatch.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeElse": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeElse.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.newLine.beforeWhileInDoWhile": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeFunctionOpenParenthesis": {
+          "type": "string",
+          "enum": [
+            "insert",
+            "remove",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.ignore.description%"
+          ],
+          "default": "remove",
+          "description": "%c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.withinParameterListParentheses": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.withinParameterListParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.betweenEmptyParameterListParentheses": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.betweenEmptyParameterListParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.afterKeywordsInControlFlowStatements": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.afterKeywordsInControlFlowStatements.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.withinControlFlowStatementParentheses": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.withinControlFlowStatementParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeLambdaOpenParenthesis": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeLambdaOpenParenthesis.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.withinCastParentheses": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.withinCastParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.afterCastCloseParenthesis": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.afterCastCloseParenthesis.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.withinExpressionParentheses": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.withinExpressionParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeBlockOpenBrace": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeBlockOpenBrace.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.betweenEmptyBraces": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.betweenEmptyBraces.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeInitializerListOpenBrace": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeInitializerListOpenBrace.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.withinInitializerListBraces": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.withinInitializerListBraces.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.preserveInInitializerList": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.preserveInInitializerList.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeOpenSquareBracket": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeOpenSquareBracket.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.withinSquareBrackets": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.withinSquareBrackets.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeEmptySquareBrackets": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeEmptySquareBrackets.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.betweenEmptySquareBrackets": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.betweenEmptySquareBrackets.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.groupSquareBrackets": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.groupSquareBrackets.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.withinLambdaBrackets": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.withinLambdaBrackets.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.betweenEmptyLambdaBrackets": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.betweenEmptyLambdaBrackets.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeComma": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeComma.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.afterComma": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.afterComma.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.removeAroundMemberOperators": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.removeAroundMemberOperators.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeInheritanceColon": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeInheritanceColon.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.beforeConstructorColon": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.beforeConstructorColon.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.removeBeforeSemicolon": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.removeBeforeSemicolon.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.insertAfterSemicolon": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.vcFormat.space.insertAfterSemicolon.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.removeAroundUnaryOperator": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.vcFormat.space.removeAroundUnaryOperator.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.aroundBinaryOperator": {
+          "type": "string",
+          "enum": [
+            "insert",
+            "remove",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description%"
+          ],
+          "default": "insert",
+          "description": "%c_cpp.configuration.vcFormat.space.aroundBinaryOperator.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.aroundAssignmentOperator": {
+          "type": "string",
+          "enum": [
+            "insert",
+            "remove",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description%"
+          ],
+          "default": "insert",
+          "description": "%c_cpp.configuration.vcFormat.space.aroundAssignmentOperator.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.pointerReferenceAlignment": {
+          "type": "string",
+          "enum": [
+            "left",
+            "center",
+            "right",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.left.description%",
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.center.description%",
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.right.description%",
+            "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.ignore.description%"
+          ],
+          "default": "left",
+          "description": "%c_cpp.configuration.vcFormat.space.pointerReferenceAlignment.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.space.aroundTernaryOperator": {
+          "type": "string",
+          "enum": [
+            "insert",
+            "remove",
+            "ignore"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.insert.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.remove.description%",
+            "%c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description%"
+          ],
+          "default": "insert",
+          "description": "%c_cpp.configuration.vcFormat.space.aroundTernaryOperator.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.vcFormat.wrap.preserveBlocks": {
+          "type": "string",
+          "enum": [
+            "oneLiners",
+            "allOneLineScopes",
+            "never"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.description%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.description%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.description%"
+          ],
+          "default": "oneLiners",
+          "description": "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.description%",
+          "scope": "resource"
+        },
         "C_Cpp.clang_format_fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
@@ -177,16 +691,6 @@
         "C_Cpp.inactiveRegionBackgroundColor": {
           "type": "string",
           "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
-          "scope": "resource"
-        },
-        "C_Cpp.formatting": {
-          "type": "string",
-          "enum": [
-            "Default",
-            "Disabled"
-          ],
-          "default": "Default",
-          "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
         "C_Cpp.loggingLevel": {
@@ -283,7 +787,7 @@
             ]
           },
           "description": "%c_cpp.configuration.commentContinuationPatterns.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.configurationWarnings": {
           "type": "string",
@@ -537,7 +1041,7 @@
           ],
           "default": "Enabled",
           "description": "%c_cpp.configuration.enhancedColorization.description%",
-          "scope": "resource"
+          "scope": "window"
         },
         "C_Cpp.vcpkg.enabled": {
           "type": "boolean",
@@ -565,7 +1069,7 @@
           ],
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
-          "scope": "resource"
+          "scope": "window"
         }
       }
     },
@@ -1703,6 +2207,7 @@
     "translations-import": "node ./tools/prepublish.js && gulp translations-import",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
+    "generatePackageHashes": "gulp generate-package-hashes",
     "pr-check": "gulp pr-check",
     "lint": "gulp lint",
     "unitTests": "tsc -p test.tsconfig.json && node ./out/test/unitTests/runTest.js",
@@ -1728,6 +2233,8 @@
     "@typescript-eslint/parser": "^2.19.2",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
+    "comment-json": "^3.0.3",
+    "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.1",
@@ -1744,7 +2251,6 @@
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.4",
-    "jsonc-parser": "^2.1.1",
     "minimatch": "^3.0.4",
     "minimist": "^1.2.5",
     "mkdirp": "^0.5.1",
@@ -1773,6 +2279,7 @@
   "resolutions": {
     "https-proxy-agent": "^2.2.4",
     "webpack/acorn": "^6.4.1",
+    "webpack/terser-webpack-plugin": "^1.4.5",
     "gulp-sourcemaps/acorn": "^5.7.4",
     "eslint/acorn": "^7.1.1",
     "gulp-eslint/acorn": "^7.1.1",
@@ -1783,7 +2290,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2131982",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135548",
       "platforms": [
         "linux"
       ],
@@ -1793,30 +2300,66 @@
       "binaries": [
         "./bin/cpptools",
         "./bin/cpptools-srv"
-      ]
+      ],
+      "integrity": "292D438B2573D17D18E30C4723702118BBCCB0049388C1B76879E9A15FE784FD"
+    },
+    {
+      "description": "C/C++ language components (Linux / armhf)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135628",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
+      ],
+      "integrity": "61C2656ABD3856A657D6103D169838528F9454D39E7DA36A92B272AC2A052067"
+    },
+    {
+      "description": "C/C++ language components (Linux / aarch64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135628",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
+      ],
+      "integrity": "61C2656ABD3856A657D6103D169838528F9454D39E7DA36A92B272AC2A052067"
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2132316",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135549",
       "platforms": [
         "darwin"
       ],
       "binaries": [
         "./bin/cpptools",
         "./bin/cpptools-srv"
-      ]
+      ],
+      "integrity": "3CAAFD3A5375F4F3EA2D7EA4B432C1917FDC3B548CA81C5D032041A07821B121"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2132317",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2135298",
       "platforms": [
         "win32"
       ],
-      "binaries": []
+      "binaries": [
+        "./bin/cpptools.exe",
+        "./bin/cpptools-srv.exe"
+      ],
+      "integrity": "F98CB4D80013A119EB0043BA1A85E1E5966E6F160264A28E19D9D57ABD7FD015"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117044",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135581",
       "platforms": [
         "linux"
       ],
@@ -1825,25 +2368,58 @@
       ],
       "binaries": [
         "./LLVM/bin/clang-format"
-      ]
+      ],
+      "integrity": "B8381B87B83EE1AF9088AA6679F2DA013DC23A21D9EC5603C58DEFC323ED9617"
+    },
+    {
+      "description": "ClangFormat (Linux / armhf)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135579",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format"
+      ],
+      "integrity": "F06D3741192FFD7BB96BF9327D9DE1BBF6A9DB9753DA971C727D20D38835C1A9"
+    },
+    {
+      "description": "ClangFormat (Linux / aarch64)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135579",
+      "platforms": [
+        "linux"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format"
+      ],
+      "integrity": "F06D3741192FFD7BB96BF9327D9DE1BBF6A9DB9753DA971C727D20D38835C1A9"
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117146",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135580",
       "platforms": [
         "darwin"
       ],
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
-      ]
+      ],
+      "integrity": "416D3B814A76E52D943B3372D517D6AADE0AB0BD9FD9921F871C1FB89D7B17B1"
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2117043",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2135627",
       "platforms": [
         "win32"
       ],
-      "binaries": []
+      "binaries": [
+        "./LLVM/bin/clang-format.exe"
+      ],
+      "integrity": "E5A2543FA2D45B964B43AE770A6D50F8698B592485E7E883005FFF52BFAD0CCD"
     },
     {
       "description": "Mono Framework Assemblies",
@@ -1852,7 +2428,8 @@
         "linux",
         "darwin"
       ],
-      "binaries": []
+      "binaries": [],
+      "integrity": "579295329C1825588B6251EEA56571D1B9555BD529AA1A319CDFE741BC22D786"
     },
     {
       "description": "Mono Runtime (Linux / x86_64)",
@@ -1865,7 +2442,8 @@
       ],
       "binaries": [
         "./debugAdapters/mono.linux-x86_64"
-      ]
+      ],
+      "integrity": "927C5094E83CE64EDC3A267EE1F13267CFA09FC1E9A5ADC870A752C05AD26F17"
     },
     {
       "description": "Mono Runtime (Linux / armhf)",
@@ -1878,7 +2456,8 @@
       ],
       "binaries": [
         "./debugAdapters/mono.linux-armhf"
-      ]
+      ],
+      "integrity": "D2D1FE7FB5CC5B2A60364F08829467509879D603FC951AC3805B530C8CEEF981"
     },
     {
       "description": "Mono Runtime (Linux / arm64)",
@@ -1891,7 +2470,8 @@
       ],
       "binaries": [
         "./debugAdapters/mono.linux-arm64"
-      ]
+      ],
+      "integrity": "946C54C8C6BF5BF79AC05D4E152F8D8647700FA786C21505832B3C79988339B4"
     },
     {
       "description": "Mono Runtime (OS X)",
@@ -1901,7 +2481,8 @@
       ],
       "binaries": [
         "./debugAdapters/mono.osx"
-      ]
+      ],
+      "integrity": "5D9E5AB3E921D138887BD12FF46B02BFC85B692B438EDFAAEB1E1E7837F1D40B"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",
@@ -1913,7 +2494,8 @@
       "matchVersion": false,
       "binaries": [
         "./debugAdapters/lldb-mi/bin/lldb-mi"
-      ]
+      ],
+      "integrity": "6C2CD2797380DE2F3EA2A991BA4DACE265920922C4E18A80FAC515B30C1D0B99"
     },
     {
       "description": "LLDB 3.8.0 (macOS High Sierra and lower)",
@@ -1928,7 +2510,8 @@
         "./debugAdapters/lldb/bin/lldb-mi",
         "./debugAdapters/lldb/bin/lldb-argdumper",
         "./debugAdapters/lldb/bin/lldb-launcher"
-      ]
+      ],
+      "integrity": "D4ACCD43F562E42CE30879AC15ADF5FB6AA50656795DCE8F3AD32FB108BB3B7E"
     },
     {
       "description": "Visual Studio Windows Debugger",
@@ -1936,7 +2519,10 @@
       "platforms": [
         "win32"
       ],
-      "binaries": []
+      "binaries": [
+        "./debugAdapters/vsdbg/bin/vsdbg.exe"
+      ],
+      "integrity": "CF1A01AA75275F76800F6BC1D289F2066DCEBCD983376D344ABF6B03FDB8FEA0"
     }
   ]
 }
