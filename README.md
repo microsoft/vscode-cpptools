@@ -52,7 +52,7 @@ The extension has platform-specific binary dependencies, therefore installation 
  Package | Platform
 :--- | :---
 `cpptools-linux.vsix` | Linux 64-bit
-`cpptools-linux-armhf.vsix` | Linux ARM
+`cpptools-linux-armhf.vsix` | Linux ARM 32-bit
 `cpptools-linux-aarch64.vsix` | Linux ARM 64-bit
 `cpptools-osx.vsix` | macOS
 `cpptools-win32.vsix` | Windows 64-bit & 32-bit
