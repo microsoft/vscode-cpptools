@@ -605,7 +605,6 @@ export class DefaultClient implements Client {
     public static renameRequestsPending: number = 0;
     public static renamePending: boolean = false;
 
-
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
 
