@@ -10,7 +10,6 @@ import { Position } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import * as util from '../../common';
 
-
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
