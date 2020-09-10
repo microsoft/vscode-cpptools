@@ -4,7 +4,7 @@
 
 [![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
 
-This preview release of the C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
+The C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
 
 ## Overview and tutorials
 * [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
@@ -52,7 +52,7 @@ The extension has platform-specific binary dependencies, therefore installation 
  Package | Platform
 :--- | :---
 `cpptools-linux.vsix` | Linux 64-bit
-`cpptools-linux-armhf.vsix` | Linux ARM
+`cpptools-linux-armhf.vsix` | Linux ARM 32-bit
 `cpptools-linux-aarch64.vsix` | Linux ARM 64-bit
 `cpptools-osx.vsix` | macOS
 `cpptools-win32.vsix` | Windows 64-bit & 32-bit
