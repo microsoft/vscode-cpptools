@@ -7,7 +7,6 @@ import { DefaultClient, FormatParams, FormatDocumentRequest, cachedEditorConfigS
 import { CppSettings } from '../settings';
 import * as editorConfig from 'editorconfig';
 
-
 export class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
     private client: DefaultClient;
     constructor(client: DefaultClient) {
