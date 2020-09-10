@@ -6,7 +6,6 @@ import * as vscode from 'vscode';
 import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest } from '../client';
 import * as util from '../../common';
 
-
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     private client: DefaultClient;
     constructor(client: DefaultClient) {
