@@ -9,7 +9,6 @@ import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachT
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
-import { failedToParseTasksJson } from '../LanguageServer/cppBuildTaskProvider';
 import * as util from '../common';
 import * as Telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
@@ -93,8 +92,8 @@ export function initialize(context: vscode.ExtensionContext): void {
                         await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                         Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
                     } catch (e) {
-                        if (e && e.message === failedToParseTasksJson) {
-                            vscode.window.showErrorMessage(failedToParseTasksJson);
+                        if (e && e.message === util.failedToParseJson) {
+                            vscode.window.showErrorMessage(util.failedToParseJson);
                         }
                         return Promise.resolve();
                     }
@@ -110,7 +109,7 @@ export function initialize(context: vscode.ExtensionContext): void {
 
             // Attempt to use the user's (possibly) modified configuration before using the generated one.
             try {
-                await util.ensureDebugConfigExists(selection.configuration.name);
+                await cppBuildTaskProvider.ensureDebugConfigExists(selection.configuration.name);
                 try {
                     await vscode.debug.startDebugging(folder, selection.configuration.name);
                     Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });

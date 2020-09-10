@@ -13,13 +13,8 @@ import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
 import * as ext from './extension';
-import * as nls from 'vscode-nls';
 import * as cp from "child_process";
 import { OtherSettings } from './settings';
-import * as jsonc from 'jsonc-parser';
-
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-export const failedToParseTasksJson: string = localize("failed.to.parse.tasks", "Failed to parse tasks.json, possibly due to comments or trailing commas.");
 
 export interface CppBuildTaskDefinition extends TaskDefinition {
     type: string;
@@ -206,8 +201,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         return task;
     };
 
-    async ensureBuildTaskExists(taskLabel: string): Promise<void> {
-        const rawTasksJson: any = await getRawTasksJson();
+    public async ensureBuildTaskExists(taskLabel: string): Promise<void> {
+        const rawTasksJson: any = await this.getRawTasksJson();
 
         // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
         if (!rawTasksJson.tasks) {
@@ -249,12 +244,48 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
         const settings: OtherSettings = new OtherSettings();
-        const tasksJsonPath: string | undefined = getTasksJsonPath();
+        const tasksJsonPath: string | undefined = this.getTasksJsonPath();
         if (!tasksJsonPath) {
             throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
         }
 
         await util.writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
+    }
+
+    public async ensureDebugConfigExists(configName: string): Promise<void> {
+        const launchJsonPath: string | undefined = this.getLaunchJsonPath();
+        if (!launchJsonPath) {
+            throw new Error("Failed to get launchJsonPath in ensureDebugConfigExists()");
+        }
+
+        const rawLaunchJson: any = await this.getRawLaunchJson();
+        // Ensure that the debug configurations exists in the user's launch.json. Config will not be found otherwise.
+        if (!rawLaunchJson || !rawLaunchJson.configurations) {
+            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+        }
+        const selectedConfig: Task | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
+        if (!selectedConfig) {
+            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+        }
+        return;
+    }
+
+    private getLaunchJsonPath(): string | undefined {
+        return util.getJsonPath("launch.json");
+    }
+
+    private getTasksJsonPath(): string | undefined {
+        return util.getJsonPath("tasks.json");
+    }
+
+    private getRawLaunchJson(): Promise<any> {
+        const path: string | undefined = this.getLaunchJsonPath();
+        return util.getRawJson(path);
+    }
+
+    private getRawTasksJson(): Promise<any> {
+        const path: string | undefined = this.getTasksJsonPath();
+        return util.getRawJson(path);
     }
 }
 
@@ -337,36 +368,4 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             "workspaceFolder": fileDir.uri.fsPath
         };
     }
-}
-
-export async function getRawTasksJson(): Promise<any> {
-    const path: string | undefined = getTasksJsonPath();
-    if (!path) {
-        return {};
-    }
-    const fileExists: boolean = await util.checkFileExists(path);
-    if (!fileExists) {
-        return {};
-    }
-
-    const fileContents: string = await util.readFileText(path);
-    let rawTasks: any = {};
-    try {
-        rawTasks = jsonc.parse(fileContents);
-    } catch (error) {
-        throw new Error(failedToParseTasksJson);
-    }
-    return rawTasks;
-}
-
-export function getTasksJsonPath(): string | undefined {
-    const editor: TextEditor | undefined = window.activeTextEditor;
-    if (!editor) {
-        return undefined;
-    }
-    const folder: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
-    if (!folder) {
-        return undefined;
-    }
-    return path.join(folder.uri.fsPath, ".vscode", "tasks.json");
 }
