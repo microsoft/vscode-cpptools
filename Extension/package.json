@@ -6,13 +6,12 @@
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
-  "enableProposedApi": true,
   "author": {
     "name": "Microsoft Corporation"
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.44.0"
+    "vscode": "^1.49.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -72,6 +71,10 @@
                 "description": "%c_cpp.taskDefinitions.options.cwd.description%"
               }
             }
+          },
+          "detail": {
+            "type": "string",
+            "description": "%c_cpp.taskDefinitions.detail.description%"
           }
         }
       }

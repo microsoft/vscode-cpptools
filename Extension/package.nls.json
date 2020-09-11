@@ -224,5 +224,6 @@
     "c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation.",
     "c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script.",
     "c_cpp.taskDefinitions.options.description": "Additional command options.",
-    "c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used."
+    "c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
+    "c_cpp.taskDefinitions.detail.description": "Additional details of the task."
 }

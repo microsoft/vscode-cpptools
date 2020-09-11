@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path';
 import {
-    TaskDefinition, Task2 as Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
+    TaskDefinition, Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
     TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
 } from 'vscode';
 import * as os from 'os';
@@ -24,14 +24,18 @@ export interface CppBuildTaskDefinition extends TaskDefinition {
     options: cp.ExecOptions | undefined;
 }
 
+export class CppBuildTask extends Task {
+    detail?: string;
+}
+
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
     static CppBuildSourceStr: string = "C/C++";
-    private tasks: Task[] | undefined;
+    private tasks: CppBuildTask[] | undefined;
 
     constructor() { }
 
-    public async provideTasks(): Promise<Task[]> {
+    public async provideTasks(): Promise<CppBuildTask[]> {
         if (this.tasks) {
             return this.tasks;
         }
@@ -39,7 +43,7 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     // Resolves a task that has no [`execution`](#Task.execution) set.
-    public resolveTask(_task: Task): Task | undefined {
+    public resolveTask(_task: CppBuildTask): CppBuildTask | undefined {
         const execution: ProcessExecution | ShellExecution | CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
@@ -50,12 +54,12 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
-    public async getTasks(appendSourceToName: boolean): Promise<Task[]> {
+    public async getTasks(appendSourceToName: boolean): Promise<CppBuildTask[]> {
         if (this.tasks !== undefined) {
             return this.tasks;
         }
         const editor: TextEditor | undefined = window.activeTextEditor;
-        const emptyTasks: Task[] = [];
+        const emptyTasks: CppBuildTask[] = [];
         if (!editor) {
             return emptyTasks;
         }
@@ -136,7 +140,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Create a build task per compiler path
-        let result: Task[] = [];
+        let result: CppBuildTask[] = [];
         // Tasks for known compiler paths
         if (knownCompilerPaths) {
             result = knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
@@ -189,7 +193,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const scope: TaskScope = TaskScope.Workspace;
-        const task: Task = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: CppBuildTask = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
                 new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
@@ -209,12 +213,12 @@ export class CppBuildTaskProvider implements TaskProvider {
             rawTasksJson.tasks = new Array();
         }
         // Find or create the task which should be created based on the selected "debug configuration".
-        let selectedTask: Task | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+        let selectedTask: CppBuildTask | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
         if (selectedTask) {
             return;
         }
 
-        const buildTasks: Task[] = await this.getTasks(true);
+        const buildTasks: CppBuildTask[] = await this.getTasks(true);
         selectedTask = buildTasks.find(task => task.name === taskLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
@@ -242,7 +246,6 @@ export class CppBuildTaskProvider implements TaskProvider {
             rawTasksJson.tasks.push(newTask);
         }
 
-        // TODO: It's dangerous to overwrite this file. We could be wiping out comments.
         const settings: OtherSettings = new OtherSettings();
         const tasksJsonPath: string | undefined = this.getTasksJsonPath();
         if (!tasksJsonPath) {
@@ -263,7 +266,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!rawLaunchJson || !rawLaunchJson.configurations) {
             throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
         }
-        const selectedConfig: Task | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
+        const selectedConfig: any | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
         if (!selectedConfig) {
             throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
         }
