@@ -175,5 +175,7 @@
 	"parameters_label": "Parameter:",
 	"returns_label": "Rückgabe:",
 	"deprecated_label": "Veraltet:",
-	"exceptions_label": "Ausnahmen:"
+	"exceptions_label": "Ausnahmen:",
+	"template_parameters_label": "Vorlagenparameter:",
+	"compiler_probe_command_line": "Befehlszeile des Compilertests: {0}"
 }

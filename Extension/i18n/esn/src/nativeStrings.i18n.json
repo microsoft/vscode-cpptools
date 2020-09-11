@@ -175,5 +175,7 @@
 	"parameters_label": "Parámetros:",
 	"returns_label": "Devuelve:",
 	"deprecated_label": "En desuso:",
-	"exceptions_label": "Excepciones:"
+	"exceptions_label": "Excepciones:",
+	"template_parameters_label": "Parámetros de plantilla:",
+	"compiler_probe_command_line": "Línea de comandos de sondeo del compilador: {0}"
 }

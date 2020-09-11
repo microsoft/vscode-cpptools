@@ -175,5 +175,7 @@
 	"parameters_label": "パラメーター:",
 	"returns_label": "戻り値:",
 	"deprecated_label": "非推奨:",
-	"exceptions_label": "例外:"
+	"exceptions_label": "例外:",
+	"template_parameters_label": "テンプレート パラメーター:",
+	"compiler_probe_command_line": "コンパイラ プローブ コマンド ライン: {0}"
 }

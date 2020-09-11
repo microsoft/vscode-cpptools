@@ -20,7 +20,7 @@ import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
-import { ChildProcess, spawn, execSync } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import * as configs from './configurations';
 import { PackageVersion } from '../packageVersion';
@@ -28,7 +28,9 @@ import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
+import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as nls from 'vscode-nls';
+import * as which from 'which';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -452,6 +454,7 @@ function realActivation(): void {
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
+    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
@@ -465,12 +468,12 @@ function realActivation(): void {
 
     PlatformInformation.GetPlatformInformation().then(info => {
         // Skip Insiders processing for 32-bit Linux.
-        if (info.platform !== "linux" || info.architecture === "x86_64") {
+        if (info.platform !== "linux" || info.architecture === "x86_64" || info.architecture === "arm" || info.architecture === "arm64") {
             // Skip Insiders processing for unsupported VS Code versions.
-            // TODO: Change this to not require the hardcoded version to be updated.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion("1.43.2");
-            if (vscodeVersion.isGreaterThan(minimumSupportedVersionForInsidersUpgrades, "insider")) {
+            const abTestSettings: ABTestSettings = getABTestSettings();
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
+            if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
                 insiderUpdateEnabled = true;
                 if (settings.updateChannel === 'Default') {
                     const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
@@ -496,8 +499,8 @@ export function updateLanguageConfigurations(): void {
     languageConfigurations.forEach(d => d.dispose());
     languageConfigurations = [];
 
-    languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c', clients.ActiveClient.RootUri)));
-    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp', clients.ActiveClient.RootUri)));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c')));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp')));
 }
 
 /**
@@ -621,7 +624,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
 
     // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
     const lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
-    if (userVersion.isGreaterThan(lastVersionWithoutInstallExtensionCommand, "insider")) {
+    if (userVersion.isVsCodeVersionGreaterThan(lastVersionWithoutInstallExtensionCommand)) {
         return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
     }
 
@@ -647,8 +650,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
                 try {
-                    const stdout: Buffer = execSync('which ' + vsCodeBinName);
-                    return stdout.toString().trim();
+                    return which.sync(vsCodeBinName);
                 } catch (error) {
                     return undefined;
                 }
@@ -660,7 +662,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
 
         // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
         const oldVersion: PackageVersion = new PackageVersion('1.27.2');
-        if (userVersion.isGreaterThan(oldVersion, "insider")) {
+        if (userVersion.isVsCodeVersionGreaterThan(oldVersion)) {
             return new Promise<void>((resolve, reject) => {
                 let process: ChildProcess;
                 try {

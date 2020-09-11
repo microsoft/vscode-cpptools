@@ -14,7 +14,7 @@
 	"include_errors_update_include_path_squiggles_disables": "检测到 #include 错误。请更新 includePath。已为此翻译单元({0})禁用波形曲线。",
 	"include_errors_update_include_path_intellisense_disabled": "检测到 #include 错误。请更新 includePath。此翻译单元({0})的 IntelliSense 功能将由标记分析器提供。",
 	"include_errors_update_compile_commands_or_include_path_intellisense_disabled": "检测到 #include 错误。请考虑更新 compile_commands.json 或 includePath。此翻译单元({0})的 IntelliSense 功能将由标记分析器提供。",
-	"could_not_parse_compile_commands": "无法分析“{0}”。将改用文件夹“{1}”中来自 c_cpp_properties.json 的 \"includePath\"。",
+	"could_not_parse_compile_commands": "无法分析“{0}”。将改用来自文件夹“{1}”中的 c_cpp_properties.json 的 \"includePath\"。",
 	"could_not_find_compile_commands": "找不到“{0}”。将改用文件夹“{1}”中来自 c_cpp_properties.json 的 \"includePath\"。",
 	"file_not_found_in_path": "在“{1}”中未找到“{0}”。此文件将改用文件夹“{2}”中来自 c_cpp_properties.json 的 \"includePath\"。",
 	"database_reset": "已成功重置 IntelliSense 数据库。",
@@ -175,5 +175,7 @@
 	"parameters_label": "参数:",
 	"returns_label": "返回:",
 	"deprecated_label": "已弃用:",
-	"exceptions_label": "异常:"
+	"exceptions_label": "异常:",
+	"template_parameters_label": "模板参数:",
+	"compiler_probe_command_line": "编译器探测命令行: {0}"
 }

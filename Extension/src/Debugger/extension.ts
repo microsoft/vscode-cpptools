@@ -108,11 +108,17 @@ export function initialize(context: vscode.ExtensionContext): void {
 
             // Attempt to use the user's (possibly) modified configuration before using the generated one.
             try {
-                await vscode.debug.startDebugging(folder, selection.configuration.name);
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
+                await util.ensureDebugConfigExists(selection.configuration.name);
+                try {
+                    await vscode.debug.startDebugging(folder, selection.configuration.name);
+                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
+                } catch (e) {
+                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+                }
             } catch (e) {
                 try {
                     vscode.debug.startDebugging(folder, selection.configuration);
+                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
                 } catch (e) {
                     Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
                 }

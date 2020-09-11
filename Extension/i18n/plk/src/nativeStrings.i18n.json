@@ -175,5 +175,7 @@
 	"parameters_label": "Parametry:",
 	"returns_label": "Zwraca:",
 	"deprecated_label": "Przestarzałe:",
-	"exceptions_label": "Wyjątki:"
+	"exceptions_label": "Wyjątki:",
+	"template_parameters_label": "Parametry szablonu:",
+	"compiler_probe_command_line": "Wiersz polecenia sondy kompilatora: {0}"
 }

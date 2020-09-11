@@ -8,10 +8,6 @@ import * as testHelpers from '../testHelpers';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 
-function delay(ms: number): Promise<void> {
-    return new Promise<void>(resolve => setTimeout(resolve, ms));
-}
-
 suite(`[Reference test]`, function(): void {
     let cpptools: apit.CppToolsTestApi;
     const disposables: vscode.Disposable[] = [];

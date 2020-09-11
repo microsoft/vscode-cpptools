@@ -10,7 +10,8 @@ server
 debugAdapters
 LLVM
 bin/cpptools*
-bin/vcmeta.dll
+bin/*.dll
+bin/.vs
 
 # ignore lock files
 install.lock
@@ -31,3 +32,4 @@ localized_string_ids.h
 
 # ignore generate files.  It will be generated when building
 src/nativeStrings.ts
+

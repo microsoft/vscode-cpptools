@@ -331,6 +331,31 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 -------------------------------------------------------------------
 
+lru-cache 4.1.5 - ISC
+https://github.com/isaacs/node-lru-cache#readme
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+-------------------------------------------------------------------
+
+-------------------------------------------------------------------
+
 minimatch 3.0.4 - ISC
 https://github.com/isaacs/minimatch#readme
 Copyright (c) Isaac Z. Schlueter and Contributors
@@ -410,6 +435,31 @@ semver 5.7.1 - ISC
 https://github.com/npm/node-semver#readme
 Copyright Isaac Z.
 Copyright Isaac Z. Schlueter
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+The ISC License
+
+Copyright (c) Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+-------------------------------------------------------------------
+
+-------------------------------------------------------------------
+
+sigmund 1.0.1 - ISC
+https://github.com/isaacs/sigmund#readme
 Copyright (c) Isaac Z. Schlueter and Contributors
 
 The ISC License
@@ -697,7 +747,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -------------------------------------------------------------------
 
-debug 3.1.0 - MIT
+debug 3.2.6 - MIT
 https://github.com/visionmedia/debug#readme
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>
 Copyright (c) 2014-2017 TJ Holowaychuk <tj@vision-media.ca>
@@ -727,7 +777,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -------------------------------------------------------------------
 
-debug 3.2.6 - MIT
+debug 3.1.0 - MIT
 https://github.com/visionmedia/debug#readme
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>
 Copyright (c) 2014-2017 TJ Holowaychuk <tj@vision-media.ca>
@@ -813,6 +863,35 @@ Copyright (c) Microsoft Corporation.
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
+
+
+-------------------------------------------------------------------
+
+-------------------------------------------------------------------
+
+editorconfig 0.15.3 - MIT
+https://github.com/editorconfig/editorconfig-core-js#readme
+Copyright (c) 2012 EditorConfig Team
+
+Copyright © 2012 EditorConfig Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 
 
 -------------------------------------------------------------------
@@ -948,37 +1027,60 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
+-------------------------------------------------------------------
+
+-------------------------------------------------------------------
+
+libiconv - Pre-installed on target platforms: Mac, Linux
+https://www.gnu.org/software/libiconv/
+/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
+
+The GNU C Library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+The GNU C Library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with the GNU C Library; if not, see
+https://www.gnu.org/licenses/. */
+
+http://www.gnu.org/licenses/lgpl.html
+
+
 -------------------------------------------------------------------
 
 -------------------------------------------------------------------
 
-jsonc-parser 2.2.0 - MIT
-https://github.com/microsoft/node-jsonc-parser#readme
-Copyright (c) Microsoft
-Copyright 2018, Microsoft
-Copyright (c) Microsoft Corporation.
+comment-json 3.0.0 - MIT
+https://github.com/kaelzhang/node-comment-json#readme
 
-The MIT License (MIT)
+Copyright (c) 2013 kaelzhang <>, contributors
+http://kael.me/
 
-Copyright (c) Microsoft
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 -------------------------------------------------------------------
@@ -1016,7 +1118,7 @@ THE SOFTWARE.
 
 -------------------------------------------------------------------
 
-ms 2.1.2 - MIT
+ms 2.0.0 - MIT
 https://github.com/zeit/ms#readme
 Copyright (c) 2016 Zeit, Inc.
 
@@ -1047,7 +1149,7 @@ SOFTWARE.
 
 -------------------------------------------------------------------
 
-ms 2.0.0 - MIT
+ms 2.1.2 - MIT
 https://github.com/zeit/ms#readme
 Copyright (c) 2016 Zeit, Inc.
 
@@ -1237,7 +1339,7 @@ SOFTWARE.
 
 -------------------------------------------------------------------
 
-vscode-cpptools 3.1.0 - MIT
+vscode-cpptools 4.0.1 - MIT
 https://github.com/Microsoft/vscode-cpptools-api#readme
 Copyright (c) Microsoft Corporation.
 

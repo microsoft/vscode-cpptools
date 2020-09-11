@@ -16,7 +16,9 @@ import { getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
+import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
+import which = require('which');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -306,7 +308,7 @@ export class CppProperties {
         if (isUnset(settings.defaultIncludePath)) {
             configuration.includePath = [rootFolder].concat(this.vcpkgIncludes);
         } else {
-            configuration.includePath = [rootFolder].concat(this.vcpkgIncludes).concat([defaultFolder]);
+            configuration.includePath = [defaultFolder];
         }
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
@@ -623,11 +625,59 @@ export class CppProperties {
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
             configuration.forcedInclude = this.updateConfigurationStringArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
             configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
-            configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
+            if (!configuration.compileCommands) {
+                // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
+                // don't set a default when compileCommands is in use.
+                configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
+                if (configuration.compilerPath === undefined && !!this.defaultCompilerPath) {
+                    configuration.compilerPath = this.defaultCompilerPath;
+                    if (!configuration.cStandard && !!this.defaultCStandard) {
+                        configuration.cStandard = this.defaultCStandard;
+                    }
+                    if (!configuration.cppStandard && !!this.defaultCppStandard) {
+                        configuration.cppStandard = this.defaultCppStandard;
+                    }
+                    if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
+                        configuration.intelliSenseMode = this.defaultIntelliSenseMode;
+                    }
+                    if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
+                        configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+                    }
+                    if (!configuration.includePath && !!this.defaultIncludes) {
+                        configuration.includePath = this.defaultIncludes;
+                    }
+                    if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
+                        configuration.macFrameworkPath = this.defaultFrameworks;
+                    }
+                }
+            } else {
+                // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
+                if (configuration.compilerPath === "${default}") {
+                    configuration.compilerPath = settings.defaultCompilerPath;
+                }
+                if (configuration.compilerPath === null) {
+                    configuration.compilerPath = undefined;
+                } else if (configuration.compilerPath !== undefined) {
+                    configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
+                }
+            }
+
+            if (configuration.compilerPath
+                && configuration.compilerPath.length > 0
+                && configuration.compilerPath[0] !== '/'
+                && !fs.existsSync(configuration.compilerPath)) {
+                // If a compiler path is specified, and it doesn't resolve to a file,
+                // try looking for it in the current path.
+                try {
+                    configuration.compilerPath = which.sync(configuration.compilerPath);
+                } catch {
+                }
+            }
+
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
@@ -900,7 +950,7 @@ export class CppProperties {
                     settings.update("default.configurationProvider", undefined); // delete the setting
                 }
 
-                await util.writeFileText(fullPathToFile, JSON.stringify(this.configurationJson, null, 4));
+                await util.writeFileText(fullPathToFile, jsonc.stringify(this.configurationJson, null, 4));
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
@@ -924,7 +974,7 @@ export class CppProperties {
             }
 
             // Try to use the same configuration as before the change.
-            const newJson: ConfigurationJson = JSON.parse(readResults);
+            const newJson: ConfigurationJson = jsonc.parse(readResults);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
                 throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
             }
@@ -1241,7 +1291,7 @@ export class CppProperties {
             // Replace all \<escape character> with \\<character>, except for \"
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
             const configurationsText: string = util.escapeForSquiggles(curText);
-            const configurations: ConfigurationJson = JSON.parse(configurationsText);
+            const configurations: ConfigurationJson = jsonc.parse(configurationsText);
             const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
             let curTextStartOffset: number = 0;
@@ -1373,6 +1423,10 @@ export class CppProperties {
                         && !resolvedPath.startsWith('"')
                         && compilerPathAndArgs.compilerPath.includes(" ");
                     resolvedPath = compilerPathAndArgs.compilerPath;
+
+                    if (!compilerPathNeedsQuotes && which.sync(resolvedPath, {nothrow: true})) {
+                        continue; // Don't squiggle if compiler path is resolving with environment path.
+                    }
                 }
 
                 const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
@@ -1563,7 +1617,7 @@ export class CppProperties {
     private writeToJson(): void {
         console.assert(this.propertiesFile);
         if (this.propertiesFile) {
-            fs.writeFileSync(this.propertiesFile.fsPath, JSON.stringify(this.configurationJson, null, 4));
+            fs.writeFileSync(this.propertiesFile.fsPath, jsonc.stringify(this.configurationJson, null, 4));
         }
     }
 

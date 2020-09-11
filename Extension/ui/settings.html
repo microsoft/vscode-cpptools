@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; img-src vscode-resource:; script-src 'nonce-{{nonce}}';">
+    <meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
 
     <style type="text/css">
         @media (max-width: 1140px) {
@@ -404,7 +404,7 @@
     <div style="height: 90px; display: block">
         <table>
             <td>
-              <img src="{{root}}/LanguageCCPP_color_128x.png" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px" data-loc-id-title="microsoft.c.cpp.extension">
+              <img src="{{cpp_image_uri}}" height="76" width="76" alt="Microsoft C/C++ Extension" title="Microsoft C/C++ Extension" style="padding-right: 10px" data-loc-id-title="microsoft.c.cpp.extension">
             </td>
             <td>
                 <div style="font-size: 20px; font-weight: 400; line-height: 24px">Microsoft<br><span data-loc-id="c.cpp.extension">C/C++ Extension</span></div>
@@ -423,6 +423,10 @@
 
         <span data-loc-id="switch.to.json">Switch to the <a href="command:C_Cpp.ConfigurationEditJSON" title="Edit configurations in JSON file" data-loc-id-title="edit.configurations.in.json">c_cpp_properties.json</a> file by clicking on the file link or using the command:</span><br> 
         <code data-loc-id="edit.configurations.json">C/C++: Edit configurations (JSON)</code>
+
+        <div style="height: 30px; display: block"></div>
+
+        <span data-loc-id="check.the.schema">Learn more about the C/C++ properties by going to <a href="https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference" title="Properties Schema Reference" data-loc-id-title="view.schema.reference">C/C++ Properties Schema Reference</a>.</span><br>
     </div>
 
   </div> <!-- sidebar end -->
@@ -525,7 +529,7 @@
     <div class="section">
         <div class="section-title" data-loc-id="include.path">Include path</div>
         <div class="section-text">
-            <span data-loc-id="include.path.description">An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. Specify a list paths for the IntelliSense engine to use while searching for included header files. If a path ends with <code>/**</code> the IntelliSense engine will do a recursive search for header files starting from that directory. If on Windows with Visual Studio installed, or if a compiler is specified in the <code>compilerPath</code> setting, it is not necessary to list the system include paths in this list.</span>
+            <span data-loc-id="include.path.description">An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. Specify a list paths for the IntelliSense engine to use while searching for included header files. Searching on these paths is not recursive. Specify <code>**</code> to indicate recursive search. For example, <code>${workspaceFolder}/**</code> will search through all subdirectories while <code>${workspaceFolder}</code> will not.  If on Windows with Visual Studio installed, or if a compiler is specified in the <code>compilerPath</code> setting, it is not necessary to list the system include paths in this list.</span>
         </div>
         <div>
           <div class="section-note" data-loc-id="one.include.path.per.line">One include path per line.</div>
@@ -552,7 +556,7 @@
                 <option value="c11">c11</option>
                 <option value="c99">c99</option>
                 <option value="c89">c89</option>
-                <option value="gnu17">gnu18</option>
+                <option value="gnu18">gnu18</option>
                 <option value="gnu11">gnu11</option>
                 <option value="gnu99">gnu99</option>
                 <option value="gnu89">gnu89</option>
@@ -672,7 +676,7 @@
 
   </div> <!-- main end -->
 
-  <script nonce="{{nonce}}" src="{{root}}/out/ui/settings.js"></script>
+  <script nonce="{{nonce}}" src="{{settings_js_uri}}"></script>
 
 </body>
 </html>

@@ -220,8 +220,8 @@ interface Rules {
     end: vscode.OnEnterRule[];
 }
 
-export function getLanguageConfig(languageId: string, resource?: vscode.Uri): vscode.LanguageConfiguration {
-    const settings: CppSettings = new CppSettings(resource);
+export function getLanguageConfig(languageId: string): vscode.LanguageConfiguration {
+    const settings: CppSettings = new CppSettings();
     const patterns: (string | CommentPattern)[] | undefined = settings.commentContinuationPatterns;
     return getLanguageConfigFromPatterns(languageId, patterns);
 }
