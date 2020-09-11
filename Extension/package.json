@@ -2320,7 +2320,7 @@
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2135628",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2143106",
       "platforms": [
         "linux"
       ],
@@ -2387,7 +2387,7 @@
     },
     {
       "description": "ClangFormat (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2135579",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2143107",
       "platforms": [
         "linux"
       ],
