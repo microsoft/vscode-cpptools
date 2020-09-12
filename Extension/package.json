@@ -2302,7 +2302,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "292D438B2573D17D18E30C4723702118BBCCB0049388C1B76879E9A15FE784FD"
+      "integrity": "1C38F099F1A0B7998AA3C96715D1E3122AF3B14E15F6F0DABFBC7EC189D6A9C3"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
@@ -2317,7 +2317,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "61C2656ABD3856A657D6103D169838528F9454D39E7DA36A92B272AC2A052067"
+      "integrity": "3888B34E283BD466B1BD967A4AEE3FFA7AF7DF800598B99DEAB524134A8F8DD3"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
@@ -2332,7 +2332,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "61C2656ABD3856A657D6103D169838528F9454D39E7DA36A92B272AC2A052067"
+      "integrity": "E42742E4E9963BF945C61AA60ED62D4A953174CDD1865E1496F8588A53A7C3DF"
     },
     {
       "description": "C/C++ language components (OS X)",
@@ -2344,7 +2344,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "3CAAFD3A5375F4F3EA2D7EA4B432C1917FDC3B548CA81C5D032041A07821B121"
+      "integrity": "2213A48C1C53763B4EA548D702171C8C0DDB33C684433F2707F23B9A4AEA6F72"
     },
     {
       "description": "C/C++ language components (Windows)",
@@ -2356,7 +2356,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "F98CB4D80013A119EB0043BA1A85E1E5966E6F160264A28E19D9D57ABD7FD015"
+      "integrity": "1C86575AD572B8EE1787F168BD7002B77091CA0079DEE054EB4E015B3CBBDC56"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2398,7 +2398,7 @@
       "binaries": [
         "./LLVM/bin/clang-format"
       ],
-      "integrity": "F06D3741192FFD7BB96BF9327D9DE1BBF6A9DB9753DA971C727D20D38835C1A9"
+      "integrity": "8CE17FA29582759418588CD1B63C91691C944CCED95E45593D4EA31834E20913"
     },
     {
       "description": "ClangFormat (OS X)",
