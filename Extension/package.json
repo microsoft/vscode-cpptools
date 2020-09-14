@@ -2285,7 +2285,8 @@
     "gulp-eslint/acorn": "^7.1.1",
     "**/mkdirp/minimist": "^0.2.1",
     "yargs-parser": "^15.0.1",
-    "mocha/diff": "^3.5.0"
+    "mocha/diff": "^3.5.0",
+    "node-fetch": "^2.6.1"
   },
   "runtimeDependencies": [
     {
