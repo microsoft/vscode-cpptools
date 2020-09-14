@@ -149,7 +149,7 @@
 ## Version 0.28.0: May 12, 2020
 ### New Features
 * Add C/C++ language-aware code folding. [#407](https://github.com/microsoft/vscode-cpptools/issues/407)
-* Add GNU (and C18) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
+* Add GNU (and C17) language standard options. [#2782](https://github.com/microsoft/vscode-cpptools/issues/2782)
 * Add ARM and ARM64 IntelliSense modes. [#4271](https://github.com/microsoft/vscode-cpptools/issues/4271), [PR #5250](https://github.com/microsoft/vscode-cpptools/pull/5250)
 
 ### Enhancements

@@ -67,7 +67,7 @@ export interface Configuration {
     windowsSdkVersion?: string;
     defines?: string[];
     intelliSenseMode?: string;
-    intelliSenseModeExplicit?: boolean;
+    intelliSenseModeIsExplicit?: boolean;
     compileCommands?: string;
     forcedInclude?: string[];
     configurationProvider?: string;
@@ -632,7 +632,7 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
-            configuration.intelliSenseModeExplicit = true;
+            configuration.intelliSenseModeIsExplicit = true;
             configuration.cStandardIsExplicit = true;
             configuration.cppStandardIsExplicit = true;
             if (!configuration.compileCommands) {
@@ -651,7 +651,7 @@ export class CppProperties {
                     }
                     if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
                         configuration.intelliSenseMode = this.defaultIntelliSenseMode;
-                        configuration.intelliSenseModeExplicit = false;
+                        configuration.intelliSenseModeIsExplicit = false;
                     }
                     if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
                         configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
