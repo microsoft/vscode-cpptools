@@ -71,7 +71,7 @@ module.exports = {
         "no-fallthrough": "error",
         "no-invalid-this": "error",
         "no-irregular-whitespace": "error",
-        "no-multiple-empty-lines": "error",
+        "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0}],
         "no-new-wrappers": "error",
         "no-redeclare": "error",
         "no-return-await": "error",
