@@ -3103,7 +3103,7 @@ export class DefaultClient implements Client {
     }
 
     public dispose(): Thenable<void> {
-        const promise: Thenable<void> = (this.languageClient && clientCollection.Count === 0) ? this.languageClient.stop() : Promise.resolve();
+        const promise: Thenable<void> = this.languageClient ? this.languageClient.stop() : Promise.resolve();
         return promise.then(() => {
             this.disposables.forEach((d) => d.dispose());
             this.disposables = [];
