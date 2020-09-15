@@ -559,7 +559,7 @@ export interface Client {
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
     onInterval(): void;
-    dispose(): Thenable<void>;
+    dispose(): void;
     addFileAssociations(fileAssociations: string, is_c: boolean): void;
     sendDidChangeSettings(settings: any): void;
 }
@@ -3102,33 +3102,34 @@ export class DefaultClient implements Client {
         }
     }
 
-    public dispose(): Thenable<void> {
-        const promise: Thenable<void> = this.languageClient ? this.languageClient.stop() : Promise.resolve();
-        return promise.then(() => {
-            this.disposables.forEach((d) => d.dispose());
-            this.disposables = [];
-            if (this.documentFormattingProviderDisposable) {
-                this.documentFormattingProviderDisposable.dispose();
-                this.documentFormattingProviderDisposable = undefined;
-            }
-            if (this.formattingRangeProviderDisposable) {
-                this.formattingRangeProviderDisposable.dispose();
-                this.formattingRangeProviderDisposable = undefined;
-            }
-            if (this.onTypeFormattingProviderDisposable) {
-                this.onTypeFormattingProviderDisposable.dispose();
-                this.onTypeFormattingProviderDisposable = undefined;
-            }
-            if (this.codeFoldingProviderDisposable) {
-                this.codeFoldingProviderDisposable.dispose();
-                this.codeFoldingProviderDisposable = undefined;
-            }
-            if (this.semanticTokensProviderDisposable) {
-                this.semanticTokensProviderDisposable.dispose();
-                this.semanticTokensProviderDisposable = undefined;
-            }
-            this.model.dispose();
-        });
+    public dispose(): void {
+        this.disposables.forEach((d) => d.dispose());
+        this.disposables = [];
+        if (this.documentFormattingProviderDisposable) {
+            this.documentFormattingProviderDisposable.dispose();
+            this.documentFormattingProviderDisposable = undefined;
+        }
+        if (this.formattingRangeProviderDisposable) {
+            this.formattingRangeProviderDisposable.dispose();
+            this.formattingRangeProviderDisposable = undefined;
+        }
+        if (this.onTypeFormattingProviderDisposable) {
+            this.onTypeFormattingProviderDisposable.dispose();
+            this.onTypeFormattingProviderDisposable = undefined;
+        }
+        if (this.codeFoldingProviderDisposable) {
+            this.codeFoldingProviderDisposable.dispose();
+            this.codeFoldingProviderDisposable = undefined;
+        }
+        if (this.semanticTokensProviderDisposable) {
+            this.semanticTokensProviderDisposable.dispose();
+            this.semanticTokensProviderDisposable = undefined;
+        }
+        this.model.dispose();
+    }
+
+    public static stopLanguageClient(): Thenable<void> {
+        return languageClient ? languageClient.stop() : Promise.resolve();
     }
 
     public handleReferencesIcon(): void {
@@ -3254,10 +3255,9 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void {}
     onInterval(): void {}
-    dispose(): Thenable<void> {
+    dispose(): void {
         this.booleanEvent.dispose();
         this.stringEvent.dispose();
-        return Promise.resolve();
     }
     addFileAssociations(fileAssociations: string, is_c: boolean): void {}
     sendDidChangeSettings(settings: any): void {}
