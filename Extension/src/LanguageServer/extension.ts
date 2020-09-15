@@ -168,6 +168,20 @@ export function activate(activationEventOccurred: boolean): void {
         tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
     }
 
+    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
+    let cppPropertiesExists: boolean = false;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            if (fs.existsSync(config)) {
+                vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
+                    vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                    cppPropertiesExists = true;
+                });
+            }
+        }
+    }
+
     // Check if an activation event has already occurred.
     if (activationEventOccurred) {
         onActivationEvent();
@@ -214,15 +228,9 @@ export function activate(activationEventOccurred: boolean): void {
         }
     });
 
-    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
-            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
-            if (fs.existsSync(config)) {
-                onActivationEvent();
-                return;
-            }
-        }
+    if (cppPropertiesExists) {
+        onActivationEvent();
+        return;
     }
 
     // handle "onLanguage:cpp" and "onLanguage:c" activation events.
