@@ -57,6 +57,7 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPath?: string;
+    compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     cStandard?: string;
     cStandardIsExplicit?: boolean;
@@ -635,32 +636,36 @@ export class CppProperties {
             configuration.intelliSenseModeIsExplicit = true;
             configuration.cStandardIsExplicit = true;
             configuration.cppStandardIsExplicit = true;
+            configuration.compilerPathIsExplicit = true;
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
-                if (configuration.compilerPath === undefined && !!this.defaultCompilerPath) {
-                    configuration.compilerPath = this.defaultCompilerPath;
-                    if (!configuration.cStandard && !!this.defaultCStandard) {
-                        configuration.cStandard = this.defaultCStandard;
-                        configuration.cStandardIsExplicit = false;
-                    }
-                    if (!configuration.cppStandard && !!this.defaultCppStandard) {
-                        configuration.cppStandard = this.defaultCppStandard;
-                        configuration.cppStandardIsExplicit = false;
-                    }
-                    if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
-                        configuration.intelliSenseMode = this.defaultIntelliSenseMode;
-                        configuration.intelliSenseModeIsExplicit = false;
-                    }
-                    if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
-                        configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
-                    }
-                    if (!configuration.includePath && !!this.defaultIncludes) {
-                        configuration.includePath = this.defaultIncludes;
-                    }
-                    if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
-                        configuration.macFrameworkPath = this.defaultFrameworks;
+                if (configuration.compilerPath === undefined) {
+                    configuration.compilerPathIsExplicit = false;
+                    if (!!this.defaultCompilerPath) {
+                        configuration.compilerPath = this.defaultCompilerPath;
+                        if (!configuration.cStandard && !!this.defaultCStandard) {
+                            configuration.cStandard = this.defaultCStandard;
+                            configuration.cStandardIsExplicit = false;
+                        }
+                        if (!configuration.cppStandard && !!this.defaultCppStandard) {
+                            configuration.cppStandard = this.defaultCppStandard;
+                            configuration.cppStandardIsExplicit = false;
+                        }
+                        if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
+                            configuration.intelliSenseMode = this.defaultIntelliSenseMode;
+                            configuration.intelliSenseModeIsExplicit = false;
+                        }
+                        if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
+                            configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+                        }
+                        if (!configuration.includePath && !!this.defaultIncludes) {
+                            configuration.includePath = this.defaultIncludes;
+                        }
+                        if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
+                            configuration.macFrameworkPath = this.defaultFrameworks;
+                        }
                     }
                 }
             } else {
