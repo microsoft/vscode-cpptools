@@ -590,8 +590,8 @@ export function writeFileText(filePath: string, content: string, encoding: strin
     const folders: string[] = filePath.split(path.sep).slice(0, -1);
     if (folders.length) {
         // create folder path if it doesn't exist
-        folders.reduce((last, folder) => {
-            const folderPath: string = last ? last + path.sep + folder : folder;
+        folders.reduce((previous, folder) => {
+            const folderPath: string = previous + path.sep + folder;
             if (!fs.existsSync(folderPath)) {
                 fs.mkdirSync(folderPath);
             }
