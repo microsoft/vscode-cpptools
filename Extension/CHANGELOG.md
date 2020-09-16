@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.0.1: September 17, 2020
+### Bug Fixes
+* IntelliSense breaks on linux/macOS when `#error` directives or certain attribute flags are present in the source code. [#6009](https://github.com/microsoft/vscode-cpptools/issues/6009), [#6114](https://github.com/microsoft/vscode-cpptools/issues/6114), [#6147](https://github.com/microsoft/vscode-cpptools/issues/6147)
+* Fix issue on Windows with the language server not shutting down properly which causes the IntelliSense database to become corrupted. [PR #6141](https://github.com/microsoft/vscode-cpptools/issues/6141)
+
 ## Version 1.0.0: September 14, 2020
 ### New Features
 * Support non-UTF-8 file encodings (GBK, UTF-16, etc.), excluding `files.autoGuessEncoding` support. [#414](https://github.com/microsoft/vscode-cpptools/issues/414)
