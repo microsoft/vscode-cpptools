@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.0.1: September 21, 2020
+### Bug Fixes
+* Fix "No IL available" IntelliSense error on Linux/macOS when `#error` directives are present in the source code. [#6009](https://github.com/microsoft/vscode-cpptools/issues/6009), [#6114](https://github.com/microsoft/vscode-cpptools/issues/6114)
+* Fix issue on Windows with the language server not shutting down properly which causes the IntelliSense database to become corrupted. [PR #6141](https://github.com/microsoft/vscode-cpptools/issues/6141)
+* Fix "No IL available" IntelliSense error when predefined macros are undefined. [#6147](https://github.com/microsoft/vscode-cpptools/issues/6147)
+* Fix infinite loop IntelliSense regression. [#6166](https://github.com/microsoft/vscode-cpptools/issues/6166)
+
 ## Version 1.0.0: September 14, 2020
 ### New Features
 * Support non-UTF-8 file encodings (GBK, UTF-16, etc.), excluding `files.autoGuessEncoding` support. [#414](https://github.com/microsoft/vscode-cpptools/issues/414)

@@ -206,14 +206,12 @@ export class ClientCollection {
     }
 
     public dispose(): Thenable<void> {
-        const promises: Thenable<void>[] = [];
         this.disposables.forEach((d: vscode.Disposable) => d.dispose());
 
         // this.defaultClient is already in this.languageClients, so do not call dispose() on it.
-
-        this.languageClients.forEach(client => promises.push(client.dispose()));
+        this.languageClients.forEach(client => client.dispose());
         this.languageClients.clear();
         cpptools.disposeWorkspaceData();
-        return Promise.all(promises).then(() => undefined);
+        return cpptools.DefaultClient.stopLanguageClient();
     }
 }
