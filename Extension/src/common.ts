@@ -17,7 +17,6 @@ import * as assert from 'assert';
 import * as https from 'https';
 import * as tmp from 'tmp';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
-
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
@@ -27,7 +26,6 @@ import * as jsonc from 'comment-json';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseJson: string = localize("failed.to.parse.json", "Failed to parse json file, possibly due to comments or trailing commas.");
-
 
 export type Mutable<T> = {
     // eslint-disable-next-line @typescript-eslint/array-type
