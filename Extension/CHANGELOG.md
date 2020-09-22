@@ -74,7 +74,6 @@
 * Add `quoteArgs` to `launch.json` schema. [PR #5639](https://github.com/microsoft/vscode-cpptools/pull/5639)
 * Add logs for a resolved `launch.json` if "engineLogging" is enabled. [PR #5644](https://github.com/microsoft/vscode-cpptools/pull/5644)
 * Add threadExit and processExit logging flags for 'cppvsdbg'. [PR #5652](https://github.com/microsoft/vscode-cpptools/pull/5652)
-* Add support to run cpp build tasks  (Tasks: Run Build Task) [#3674](https://github.com/microsoft/vscode-cpptools/issues/3674)
 
 ### Bug Fixes
 * Fix IntelliSense when using "import_" in a variable name. [#5272](https://github.com/microsoft/vscode-cpptools/issues/5272)
