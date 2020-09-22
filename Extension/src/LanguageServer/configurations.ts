@@ -680,18 +680,6 @@ export class CppProperties {
                 }
             }
 
-            if (configuration.compilerPath
-                && configuration.compilerPath.length > 0
-                && configuration.compilerPath[0] !== '/'
-                && !fs.existsSync(configuration.compilerPath)) {
-                // If a compiler path is specified, and it doesn't resolve to a file,
-                // try looking for it in the current path.
-                try {
-                    configuration.compilerPath = which.sync(configuration.compilerPath);
-                } catch {
-                }
-            }
-
             configuration.customConfigurationVariables = this.updateConfigurationStringDictionary(configuration.customConfigurationVariables, settings.defaultCustomConfigurationVariables, env);
             configuration.configurationProvider = this.updateConfigurationString(configuration.configurationProvider, settings.defaultConfigurationProvider, env);
 
