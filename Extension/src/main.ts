@@ -185,9 +185,6 @@ async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationStage('cleanUpUnusedBinaries');
     await cleanUpUnusedBinaries(info);
 
-    setInstallationStage('cleanUpUnusedBinaries');
-    await cleanUpUnusedBinaries(info);
-
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
 
