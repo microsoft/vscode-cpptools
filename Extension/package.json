@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.44.0"
+    "vscode": "^1.49.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -42,6 +42,43 @@
   ],
   "main": "./dist/main",
   "contributes": {
+    "taskDefinitions": [
+      {
+        "type": "cppbuild",
+        "required": [
+          "command",
+          "label"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "%c_cpp.taskDefinitions.name.description%"
+          },
+          "command": {
+            "type": "string",
+            "description": "%c_cpp.taskDefinitions.command.description%"
+          },
+          "args": {
+            "type": "array",
+            "description": "%c_cpp.taskDefinitions.args.description%"
+          },
+          "options": {
+            "type": "object",
+            "description": "%c_cpp.taskDefinitions.options.description%",
+            "properties": {
+              "cwd": {
+                "type": "string",
+                "description": "%c_cpp.taskDefinitions.options.cwd.description%"
+              }
+            }
+          },
+          "detail": {
+            "type": "string",
+            "description": "%c_cpp.taskDefinitions.detail.description%"
+          }
+        }
+      }
+    ],
     "views": {
       "references-view": [
         {
