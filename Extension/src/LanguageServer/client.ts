@@ -62,7 +62,6 @@ let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsChannel: vscode.OutputChannel;
 let outputChannel: vscode.OutputChannel;
 let debugChannel: vscode.OutputChannel;
-let warningChannel: vscode.OutputChannel;
 let diagnosticsCollection: vscode.DiagnosticCollection;
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -126,15 +125,6 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
             console.assert("Unrecognized type for showMessageWindow");
             break;
     }
-}
-
-function showWarning(params: ShowWarningParams): void {
-    const message: string = util.getLocalizedString(params.localizeStringParams);
-    if (!warningChannel) {
-        warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Warnings")}`);
-        workspaceDisposables.push(warningChannel);
-    }
-    warningChannel.appendLine(message);
 }
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
@@ -270,10 +260,6 @@ interface CodeActionCommand {
 
 interface ShowMessageWindowParams {
     type: number;
-    localizeStringParams: LocalizeStringParams;
-}
-
-interface ShowWarningParams {
     localizeStringParams: LocalizeStringParams;
 }
 
@@ -473,7 +459,6 @@ const ReportReferencesProgressNotification: NotificationType<refs.ReportReferenc
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
-const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
 
@@ -1880,7 +1865,6 @@ export class DefaultClient implements Client {
         });
         this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
-        this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         setupOutputHandlers();
