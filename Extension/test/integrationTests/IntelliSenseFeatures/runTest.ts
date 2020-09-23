@@ -21,7 +21,7 @@ async function main() {
             console.log("TESTS_WORKSPACE: " + testWorkspace);
         }
 
-        const launchArgs = [ "--disable-extensions --disable-gpu", testWorkspace ];
+        const launchArgs = [ "--disable-extensions", "--disable-gpu", "--no-sandbox", testWorkspace ];
 
         // Download VS Code, unzip it and run the integration test
         await runTests({ launchArgs, extensionDevelopmentPath, extensionTestsPath });
