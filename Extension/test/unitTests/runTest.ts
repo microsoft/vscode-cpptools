@@ -12,7 +12,7 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './index');
 
-        const launchArgs = [ "--disable-extensions" ];
+        const launchArgs = [ "--disable-extensions --disable-gpu" ];
 
         // Download VS Code, unzip it and run the integration test
         await runTests({ launchArgs, extensionDevelopmentPath, extensionTestsPath });
