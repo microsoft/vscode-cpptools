@@ -507,9 +507,6 @@ export function getInstalledBinaryPlatform(): string | undefined {
     } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
         installedPlatform = "linux";
     }
-    if (!installedPlatform) {
-        Telemetry.logLanguageServerEvent("missingBinary", { "source": "clang-format" });
-    }
     return installedPlatform;
 }
 

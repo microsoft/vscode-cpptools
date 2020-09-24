@@ -8,10 +8,11 @@ jobs:
     pool:
       vmImage: 'macOS-10.14'
 
-- template: Extension/jobs/build.yml
-  parameters:
-    name: Linux
-    pool:
-      vmImage: 'ubuntu-16.04'
+# Temporarility disable Linux tests
+#- template: Extension/jobs/build.yml
+#  parameters:
+#    name: Linux
+#    pool:
+#      vmImage: 'ubuntu-16.04'
 
 - template: Extension/jobs/build.windows.yml
