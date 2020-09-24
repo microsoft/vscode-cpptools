@@ -32,7 +32,7 @@
 	"intellisense.mode": "IntelliSense 模式",
 	"intellisense.mode.description": "要使用的 IntelliSense 模式，该模式映射到 MSVC、gcc 或 Clang 的体系结构专属变体。如果未设置或设置为 {0}，则扩展将选择该平台的默认值。Windows 默认为 {1}，Linux 默认为 {2}，macOS 默认为 {3}。选择特定 IntelliSense 模式以替代 {4} 模式。",
 	"include.path": "包含路径",
-	"include.path.description": "include 路径是包括源文件中随附的头文件(如 {0})的文件夹。指定 IntelliSense 引擎在搜索包含的头文件时要使用的列表路径。对这些路径的搜索不是递归搜索。指定 {1} 可指示递归搜索。例如，{2} 将搜索所有子目录，而 {3} 则不会。如果在安装了 Visual Studio 的 Windows 上，或者在 {4} 设置中指定了编译器，则无需在此列表中列出系统 include 路径。",
+	"include.path.description": "include 路径是包括源文件中随附的头文件(如 {0})的文件夹。指定 IntelliSense 引擎在搜索包含的头文件时要使用的列表路径。对这些路径进行的搜索不是递归搜索。指定 {1} 可指示递归搜索。例如，{2} 将搜索所有子目录，而 {3} 则不会。如果在安装了 Visual Studio 的 Windows 上，或者在 {4} 设置中指定了编译器，则无需在此列表中列出系统 include 路径。",
 	"one.include.path.per.line": "每行一个包含路径。",
 	"defines": "定义",
 	"defines.description": "分析文件时 IntelliSense 引擎要使用的预处理器定义的列表。(可选)使用 {0} 设置值，例如 {1}。",
