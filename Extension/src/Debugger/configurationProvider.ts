@@ -7,11 +7,12 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getBuildTasks, BuildTaskDefinition } from '../LanguageServer/extension';
+import { CppBuildTaskDefinition} from '../LanguageServer/cppBuildTaskProvider';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
 import { buildAndDebugActiveFileStr } from './extension';
+import { cppBuildTaskProvider} from '../LanguageServer/extension';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 
@@ -77,7 +78,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
             try {
-                await util.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                 await vscode.debug.startDebugging(folder, selection.configuration);
                 Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
             } catch (e) {
@@ -105,7 +106,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await getBuildTasks(true, true);
+        let buildTasks: vscode.Task[] = await cppBuildTaskProvider.getTasks(true);
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
         }
@@ -133,9 +134,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         const configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
-            const definition: BuildTaskDefinition = task.definition as BuildTaskDefinition;
-            const compilerName: string = path.basename(definition.compilerPath);
-
+            const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
+            const compilerPath: string = definition.command;
+            const compilerName: string = path.basename(compilerPath);
             const newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
@@ -166,7 +167,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                         debuggerName += ".exe";
                     }
 
-                    const compilerDirname: string = path.dirname(definition.compilerPath);
+                    const compilerDirname: string = path.dirname(compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
                     fs.stat(debuggerPath, (err, stats: fs.Stats) => {
                         if (!err && stats && stats.isFile) {
