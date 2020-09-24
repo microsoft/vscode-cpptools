@@ -86,7 +86,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                 vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
             }
         });
-    } else if (!installedPlatform || !(await util.checkInstallBinariesExist())) {
+    } else if (!(await util.checkInstallBinariesExist())) {
         errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
         const reload: string = localize("remove.extension", "Attempt to Repair");
         vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
