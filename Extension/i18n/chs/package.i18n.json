@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "如果为 true，则将加载所有 lib 的符号；否则不加载任何 solib 符号。默认值为 true。",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "以分号 \";\" 分隔的文件名列表(允许使用通配符)。修改 LoadAll 的行为。如果 LoadAll 为 true，则不加载与列表中任何名称匹配的 lib 的符号。否则，仅为匹配的 lib 加载符号。示例: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "可选标志，用于要求当前源代码与 pdb 匹配。",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "任务的名称",
+	"c_cpp.taskDefinitions.command.description": "执行编译的编译器或脚本的路径",
+	"c_cpp.taskDefinitions.args.description": "要传递给编译器或编译脚本的其他参数",
+	"c_cpp.taskDefinitions.options.description": "其他命令选项",
 	"c_cpp.taskDefinitions.options.cwd.description": "已执行程序或脚本的当前工作目录。如果省略，则使用代码的当前工作区根。",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "任务类型的其他详细信息"
 }
