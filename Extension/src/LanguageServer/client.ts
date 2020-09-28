@@ -131,7 +131,7 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
 function showWarning(params: ShowWarningParams): void {
     const message: string = util.getLocalizedString(params.localizeStringParams);
     if (!warningChannel) {
-        warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Warnings")}`);
+        warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Configuration Warnings")}`);
         workspaceDisposables.push(warningChannel);
     }
     warningChannel.appendLine(message);
