@@ -3335,5 +3335,21 @@
   "ters çevrilmiş parametrelere sahip örtük karşılaştırma işleci eşit olarak iyi bir eşleşme olduğundan karşılaştırma, standart C++20'de belirsizdir; bu genellikle karşılaştırma işlecinde eksik 'const' niteleyicisinden kaynaklanır; bkz. %nod",
   "kavram kimliği geçersiz",
   "requires yan tümcesi için %T bağımsız değişkenleri değiştirilemedi",
-  "%nd için kısıtlamalar karşılanmadı"
+  "%nd için kısıtlamalar karşılanmadı",
+  "constexpr işlevindeki %t değişken türü, sanal temel sınıflara sahip",
+  "sabit ifade bir sanal temel alt nesneyi ayıramaz (%t türü için)",
+  "sınıf türündeki bir şablon parametresi yapısal sınıf türünde olmalıdır",
+  "UTF-8 sabit değerleri desteği için u-literal desteği gerekir.",
+  "'%s' için modül dosyası eşlemesi birden çok kez belirtildi",
+  "'%s' için üst bilgi birimi eşlemesi birden çok kez belirtildi",
+  "'%s' için eşleme belirtilmedi",
+  "'%s' için modül dosyası eşlemesi geçersiz",
+  "içeri aktarılacak '%s' üst bilgisi bulunamıyor",
+  "modül dosyası listesinde birden fazla dosya '%s' ile eşleşiyor",
+  "'%s' için bulunan modül dosyası farklı bir modüle yönelik",
+  "herhangi bir türde modül dosyası",
+  "modül dosyası okunamıyor",
+  "char8_t türü geçerli seçeneklerle desteklenmediği için yerleşik işlev kullanılamıyor",
+  "C++20 eş yordamları etkinleştirilirse --ms_await komut satırı seçeneği belirtilemez",
+  "varsayılan toplama öğesi başlatma için açık oluşturucu %nod için standart olmayan kullanım"
 ]
