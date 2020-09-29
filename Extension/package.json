@@ -2450,7 +2450,7 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2135627",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2144203",
       "platforms": [
         "win32"
       ],
