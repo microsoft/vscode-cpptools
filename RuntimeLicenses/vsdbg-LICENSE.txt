@@ -1,9 +1,9 @@
-﻿MICROSOFT PRE-RELEASE SOFTWARE LICENSE TERMS
+﻿MICROSOFT SOFTWARE LICENSE TERMS
 MICROSOFT C/C++ EXTENSION FOR VISUAL STUDIO CODE
 
 These license terms are an agreement between Microsoft Corporation (or
 based on where you live, one of its affiliates) and you. They apply to
-the pre-release software named above. The terms also apply to any
+the software named above. The terms also apply to any
 Microsoft services or updates for the software, except to the extent
 those have additional terms.
 
@@ -48,19 +48,7 @@ IF YOU COMPLY WITH THESE LICENSE TERMS, YOU HAVE THE RIGHTS BELOW.
    customers effective May 25, 2018, at
    http://go.microsoft.com/?linkid=9840733.
 
-4. PRE-RELEASE SOFTWARE. This software is a pre-release version. It
-   may not work the way a final version of the software will. We may
-   change it for the final, commercial version. We also may not release a
-   commercial version.
-
-5. FEEDBACK. If you give feedback about the software to Microsoft, you
-   give to Microsoft, without charge, the right to use, share and
-   commercialize your feedback in any way and for any purpose. You will
-   not give feedback that is subject to a license that requires Microsoft
-   to license its software or documentation to third parties because we
-   include your feedback in them. These rights survive this agreement.
-
-6. SCOPE OF LICENSE. The software is licensed, not sold. This
+4. SCOPE OF LICENSE. The software is licensed, not sold. This
    agreement only gives you some rights to use the software. Microsoft
    reserves all other rights. Unless applicable law gives you more rights
    despite this limitation, you may use the software only as expressly
@@ -78,26 +66,26 @@ IF YOU COMPLY WITH THESE LICENSE TERMS, YOU HAVE THE RIGHTS BELOW.
       *  share, publish, rent, or lease the software, or provide the software
          as a stand-alone hosted solution for others to use.
 
-7. EXPORT RESTRICTIONS. You must comply with all domestic and
+5. EXPORT RESTRICTIONS. You must comply with all domestic and
    international export laws and regulations that apply to the software,
    which include restrictions on destinations, end users and end use.
    For further information on export restrictions, visit
    (aka.ms/exporting).
 
-8. SUPPORT SERVICES. Because this software is “as is,” we may not
+6. SUPPORT SERVICES. Because this software is “as is,” we may not
 provide support services for it.
 
-9. ENTIRE AGREEMENT. This agreement, and the terms for supplements,
+7. ENTIRE AGREEMENT. This agreement, and the terms for supplements,
    updates, Internet-based services and support services that you use,
    are the entire agreement for the software and support services.
 
-10. APPLICABLE LAW.  If you acquired the software in the United
+8. APPLICABLE LAW.  If you acquired the software in the United
    States, Washington law applies to interpretation of and claims for
    breach of this agreement, and the laws of the state where you live
    apply to all other claims. If you acquired the software in any other
    country, its laws apply.
 
-11. CONSUMER RIGHTS; REGIONAL VARIATIONS. This agreement describes
+9. CONSUMER RIGHTS; REGIONAL VARIATIONS. This agreement describes
    certain legal rights. You may have other rights, including consumer
    rights, under the laws of your state or country. Separate and apart
    from your relationship with Microsoft, you may also have rights with
@@ -137,13 +125,13 @@ provide support services for it.
             of slight negligence, Microsoft will not be liable for slight
             negligence.
 
-12. DISCLAIMER OF WARRANTY. THE SOFTWARE IS LICENSED “AS-IS.” YOU
+10. DISCLAIMER OF WARRANTY. THE SOFTWARE IS LICENSED “AS-IS.” YOU
    BEAR THE RISK OF USING IT. MICROSOFT GIVES NO EXPRESS WARRANTIES,
    GUARANTEES OR CONDITIONS. TO THE EXTENT PERMITTED UNDER YOUR LOCAL
    LAWS, MICROSOFT EXCLUDES THE IMPLIED WARRANTIES OF MERCHANTABILITY,
    FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
 
-13. LIMITATION ON AND EXCLUSION OF DAMAGES. YOU CAN RECOVER FROM
+11. LIMITATION ON AND EXCLUSION OF DAMAGES. YOU CAN RECOVER FROM
    MICROSOFT AND ITS SUPPLIERS ONLY DIRECT DAMAGES UP TO U.S. $5.00. YOU
    CANNOT RECOVER ANY OTHER DAMAGES, INCLUDING CONSEQUENTIAL, LOST
    PROFITS, SPECIAL, INDIRECT OR INCIDENTAL DAMAGES.
