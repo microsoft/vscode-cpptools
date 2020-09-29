@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "true の場合、すべてのライブラリのシンボルが読み込まれます。それ以外の場合、solib シンボルは読み込まれません。既定値は true です。",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "セミコロン '; ' で区切られたファイル名の一覧 (ワイルドカードも使用可能)。LoadAll の動作が変更されます。LoadAll が true の場合は、一覧内の名前に一致するライブラリのシンボルを読み込まないでください。それ以外の場合は、一致するライブラリのシンボルのみを読み込んでください。例: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "PDB に一致する現在のソース コードを必要とする省略可能なフラグです。",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "タスクの名前",
+	"c_cpp.taskDefinitions.command.description": "コンパイルを実行するコンパイラまたはスクリプトへのパス",
+	"c_cpp.taskDefinitions.args.description": "コンパイラまたはコンパイル スクリプトに渡す追加の引数",
+	"c_cpp.taskDefinitions.options.description": "追加のコマンド オプション",
 	"c_cpp.taskDefinitions.options.cwd.description": "実行されるプログラムまたはスクリプトの現在の作業ディレクトリ。省略すると、Code の現在のワークスペースのルートが使用されます。",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "タスクのその他の詳細"
 }
