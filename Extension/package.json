@@ -2450,14 +2450,14 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2135627",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2144203",
       "platforms": [
         "win32"
       ],
       "binaries": [
         "./LLVM/bin/clang-format.exe"
       ],
-      "integrity": "E5A2543FA2D45B964B43AE770A6D50F8698B592485E7E883005FFF52BFAD0CCD"
+      "integrity": "F943ADF0CE7C123C674F62F8F31FF0ADD8C54F974DD25CD01A8A1AA1532A130F"
     },
     {
       "description": "Mono Framework Assemblies",
