@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Si es true, se cargan los símbolos de todas las bibliotecas; de lo contrario, no se cargará ningún símbolo de la biblioteca compartida (solib). El valor predeterminado es true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Lista de nombres de archivo (se permiten comodines) separados por punto y coma \";\". Modifica el comportamiento de LoadAll. Si LoadAll es true, no se cargan los símbolos para las bibliotecas que coincidan con cualquier nombre de la lista. De lo contrario, solo se cargan los símbolos para las bibliotecas que coincidan. Ejemplo: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Marca opcional que requiere que el código fuente actual coincida con el archivo PDB.",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "Nombre de la tarea",
+	"c_cpp.taskDefinitions.command.description": "Ruta de acceso a un compilador o script que realiza la compilación.",
+	"c_cpp.taskDefinitions.args.description": "Argumentos adicionales que se pasan al compilador o al script de compilación",
+	"c_cpp.taskDefinitions.options.description": "Opciones de comando adicionales",
 	"c_cpp.taskDefinitions.options.cwd.description": "Directorio de trabajo actual del script o el programa ejecutado. Si se omite, se usa la raíz del área de trabajo actual de Code.",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "Detalles adicionales de la tarea"
 }

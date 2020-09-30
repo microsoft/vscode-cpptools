@@ -2328,7 +2328,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143240",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2144140",
       "platforms": [
         "linux"
       ],
@@ -2343,7 +2343,7 @@
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143241",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2144141",
       "platforms": [
         "linux"
       ],
@@ -2358,7 +2358,7 @@
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143080",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2143991",
       "platforms": [
         "linux"
       ],
@@ -2373,7 +2373,7 @@
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143079",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2143992",
       "platforms": [
         "darwin"
       ],
@@ -2385,7 +2385,7 @@
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143078",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
       "platforms": [
         "win32"
       ],
@@ -2450,14 +2450,14 @@
     },
     {
       "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2135627",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2144203",
       "platforms": [
         "win32"
       ],
       "binaries": [
         "./LLVM/bin/clang-format.exe"
       ],
-      "integrity": "E5A2543FA2D45B964B43AE770A6D50F8698B592485E7E883005FFF52BFAD0CCD"
+      "integrity": "F943ADF0CE7C123C674F62F8F31FF0ADD8C54F974DD25CD01A8A1AA1532A130F"
     },
     {
       "description": "Mono Framework Assemblies",
