@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Se è true, verranno caricati i simboli per tutte le librerie; in caso contrario, non verrà caricato alcun simbolo di solib. Il valore predefinito è true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Elenco di nomi di file (caratteri jolly consentiti) delimitati da punti e virgola ';'. Modifica il comportamento di LoadAll. Se LoadAll è true, non carica i simboli per le librerie corrispondenti a qualsiasi nome dell'elenco. In caso contrario, carica solo i simboli per le librerie corrispondenti. Esempio: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Flag facoltativo per richiedere che il codice sorgente corrente corrisponda al PDB.",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "Nome dell'attività",
+	"c_cpp.taskDefinitions.command.description": "Percorso di un compilatore o di uno script che esegue la compilazione",
+	"c_cpp.taskDefinitions.args.description": "Argomenti aggiuntivi da passare al compilatore o allo script di compilazione",
+	"c_cpp.taskDefinitions.options.description": "Opzioni aggiuntive del comando",
 	"c_cpp.taskDefinitions.options.cwd.description": "Directory di lavoro corrente del programma o dello script eseguito. Se omesso, viene usata la radice dell'area di lavoro corrente di Visual Studio Code.",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "Dettagli aggiuntivi dell'attività"
 }

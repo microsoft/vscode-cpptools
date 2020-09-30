@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "При значении true (истина) будут загружаться символы для всех библиотек. В противном случае символы общих библиотек (solib) загружаться не будут. По умолчанию: true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Список имен файлов (допустимы подстановочные знаки), разделенных точкой с запятой (\";\") изменяет работу LoadAll. Если LoadAll имеет значение true (истина), то для библиотек, имя которых соответствует какому-либо имени в списке, символы загружаться не будут. В противном случае символы будут загружаться только для библиотек с именами из списка. Пример: \"foo.so;bar.so\".",
 	"c_cpp.debuggers.requireExactSource.description": "Необязательный флаг, требующий соответствия текущего исходного кода PDB-файлу.",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "Имя задачи",
+	"c_cpp.taskDefinitions.command.description": "Путь к компилятору или скрипту, выполняющему компиляцию",
+	"c_cpp.taskDefinitions.args.description": "Дополнительные аргументы для передачи компилятору или скрипту компиляции",
+	"c_cpp.taskDefinitions.options.description": "Дополнительные параметры команды",
 	"c_cpp.taskDefinitions.options.cwd.description": "Текущий рабочий каталог выполняемой программы или сценария. Если этот параметр опущен, используется корневой каталог текущей рабочей области Code.",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "Дополнительные сведения о задаче"
 }
