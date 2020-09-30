@@ -42,7 +42,7 @@ If someone has already filed an issue that encompasses your feedback, please lea
 <br>
 
 **[Quick survey](https://www.research.net/r/VBVV6C6)**
-<br>
+<br>    //     extra comment line included by you reason because graphical user interface attractive and code readability very faster all done better code   //  
 Let us know what you think of the extension by taking the quick survey.
 
 ## Offline installation
