@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "Bei TRUE werden Symbole für alle Bibliotheken geladen, andernfalls werden keine solib-Symbole geladen. Der Standardwert ist TRUE.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Liste der Dateinamen (Platzhalter zulässig), durch Semikolons \";\" getrennt. Ändert das Verhalten von LoadAll. Wenn LoadAll auf TRUE festgelegt ist, werden keine Symbole für Bibliotheken geladen, die einem beliebigen Namen in der Liste entsprechen. Andernfalls werden nur Symbole für übereinstimmende Bibliotheken geladen. Beispiel: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Optionales Flag, um anzufordern, dass der aktuelle Quellcode mit der PDB-Datei übereinstimmt.",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "Der Name der Aufgabe",
+	"c_cpp.taskDefinitions.command.description": "Der Pfad zu einem Compiler oder einem Skript, über den/das die Kompilierung ausgeführt wird",
+	"c_cpp.taskDefinitions.args.description": "Zusätzliche Argumente, die an den Compiler oder das Kompilierungsskript übergeben werden sollen",
+	"c_cpp.taskDefinitions.options.description": "Zusätzliche Befehlsoptionen",
 	"c_cpp.taskDefinitions.options.cwd.description": "Das aktuelle Arbeitsverzeichnis des ausgeführten Programms oder Skripts. Wenn keine Angabe erfolgt, wird das aktuelle Arbeitsbereich-Stammverzeichnis des Codes verwendet.",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "Zusätzliche Details zur Aufgabe"
 }

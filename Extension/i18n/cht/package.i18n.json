@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "若為 true，將會載入所有程式庫的符號，否則不會載入任何 solib 符號。預設值為 true。",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "以分號 ';' 分隔的檔名清單 (允許使用萬用字元)。修改 LoadAll 的行為。如果 LoadAll 為 true，則不會載入與清單中任何名稱相符的程式庫符號。否則只會載入相符的程式庫符號。範例: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "要求目前原始程式碼與 pdb 相符的選用旗標。",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "工作的名稱",
+	"c_cpp.taskDefinitions.command.description": "執行編譯的編譯器或指令碼路徑",
+	"c_cpp.taskDefinitions.args.description": "要傳遞給編譯器或編譯指令碼的其他引數",
+	"c_cpp.taskDefinitions.options.description": "其他命令選項",
 	"c_cpp.taskDefinitions.options.cwd.description": "所執行程式或指令碼的目前工作目錄。如果省略，則會使用 Code 的目前工作區根目錄。",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料"
 }

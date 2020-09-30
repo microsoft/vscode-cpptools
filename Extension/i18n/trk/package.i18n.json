@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "True ise tüm kitaplıklar için semboller yüklenir, aksi halde hiçbir solib sembolü yüklenmez. Varsayılan değer: true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Noktalı virgülle ';' ayrılmış dosya adları listesi (joker karakterlere izin verilir). LoadAll davranışını değiştirir. LoadAll değeri true ise, listedeki herhangi bir adla eşleşen kitaplıklar için sembolleri yüklemeyin. Aksi takdirde yalnızca eşleşen kitaplıklar için sembolleri yükleyin. Örnek: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "Geçerli kaynak kodunun pdb ile eşleşmesini gerektiren isteğe bağlı bayrak.",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "Görevin adı",
+	"c_cpp.taskDefinitions.command.description": "Derlemeyi gerçekleştiren derleyici ya da betiğin yolu",
+	"c_cpp.taskDefinitions.args.description": "Derleyici veya derleme betiğine geçirilecek ek bağımsız değişkenler",
+	"c_cpp.taskDefinitions.options.description": "Ek komut seçenekleri",
 	"c_cpp.taskDefinitions.options.cwd.description": "Yürütülen program veya betiğin geçerli çalışma dizini. Atlanırsa Kodun geçerli çalışma alanının kökü kullanılır.",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "Görevin ek ayrıntıları"
 }

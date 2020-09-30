@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "V případě hodnoty true se načtou symboly pro všechny knihovny (lib), jinak se nenačtou žádné symboly solib. Výchozí hodnota je true.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "Seznam názvů souborů (s povolenými zástupnými znaky) oddělených středníky (;). Upraví chování pro LoadAll. Hodnota true pro LoadAll znamená, že se nemají načítat symboly pro knihovny (lib), které odpovídají libovolnému názvu v seznamu. V opačném případě se mají načíst symboly pro všechny odpovídající knihovny. Příklad: foo.so;bar.so",
 	"c_cpp.debuggers.requireExactSource.description": "Volitelný příznak, který vyžaduje, aby aktuální zdrojový kód odpovídal souboru pdb",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "Název úlohy",
+	"c_cpp.taskDefinitions.command.description": "Cesta ke kompilátoru nebo skriptu, který provádí kompilaci",
+	"c_cpp.taskDefinitions.args.description": "Další argumenty, které se mají předat kompilátoru nebo kompilačnímu skriptu",
+	"c_cpp.taskDefinitions.options.description": "Další možnosti příkazu",
 	"c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "Další podrobnosti o typu úlohy"
 }
