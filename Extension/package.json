@@ -848,6 +848,13 @@
           "scope": "machine-overridable",
           "minimum": 0
         },
+        "C_Cpp.intelliSenseMemoryLimit": {
+          "type": "number",
+          "default": 4096,
+          "description": "%c_cpp.configuration.intelliSenseMemoryLimit.description%",
+          "scope": "machine-overridable",
+          "minimum": 0
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
