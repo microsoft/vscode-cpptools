@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+
+int fun (int n){
+    if(n==1)
+        return 1;
+    else
+        return n+fun(n-1);
+}
+
+int main() {
+
+    int n,c;
+    scanf("%d",&n);
+    c=fun(n-1);
+    
+    int a[n],i,j,t;
+    int d=0;
+    
+    for (i=0;i<n;i++)
+       scanf("%d",&a[i]);
+    
+    for (i=1;i<=n-1;i++) {
+        t=a[i];
+        j=i-1;
+        while (j>=0&&a[j]>t) {
+            a[j+1]= a[j]; 
+            j=j-1; 
+            d++;
+        } 
+        a[j+1]=t; 
+    } 
+    
+    for (i=0;i<n;i++)
+        printf("%d ",a[i]);   
+    printf("\n%d %d",c,d);
+    return 0;
+}
