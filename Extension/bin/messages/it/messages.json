@@ -3335,5 +3335,21 @@
   "il confronto è ambiguo in C++20 standard perché l'operatore di confronto implicito con parametri invertiti è una corrispondenza altrettanto valida. In genere questo problema dipende dalla mancanza di un qualificatore 'const' nell'operatore di confronto. Vedere %nod",
   "ID concetto non valido",
   "la sostituzione degli argomenti %T per la clausola requires non è riuscita",
-  "i vincoli per %nd non sono soddisfatti"
+  "i vincoli per %nd non sono soddisfatti",
+  "il tipo di variabile %t nella funzione constexpr contiene classi di base virtuali",
+  "un'espressione costante non può allocare un sotto-oggetto di base virtuale (per il tipo %t)",
+  "un parametro di modello di tipo classe deve essere un tipo classe strutturale",
+  "per il supporto dei valori letterali UTF-8 è richiesto il supporto di valori letterali u",
+  "il mapping del file del modulo per '%s' è stato specificato più di una volta",
+  "il mapping dell'unità intestazione per '%s' è stato specificato più di una volta",
+  "non è stato specificato alcun mapping per '%s'",
+  "Il mapping del file del modulo per '%s' non è valido",
+  "non è possibile trovare l'intestazione '%s' da importare",
+  "più di un file nell'elenco file di modulo corrisponde a '%s'",
+  "il file di modulo trovato per '%s' è riferito a un modulo diverso",
+  "qualsiasi tipo di modulo",
+  "non è possibile leggere il file del modulo",
+  "la funzione predefinita non è disponibile perché il tipo char8_t non è supportato con le opzioni correnti",
+  "non è possibile specificare l'opzione della riga di comando --ms_await se le coroutine di C++20 sono abilitate",
+  "uso non standard del costruttore esplicito %nod per l'inizializzazione dell'elemento di aggregazione predefinito"
 ]
