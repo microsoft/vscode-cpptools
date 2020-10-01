@@ -1,0 +1,25 @@
+name: Needs More Info Closer
+on:
+  schedule:
+    - cron: 0 1 * * * # 1 AM (UTC?)
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+        with:
+          repository: 'microsoft/vscode-github-triage-actions'
+          path: ./actions
+          ref: v35
+      - name: Install Actions
+        run: npm install --production --prefix ./actions
+      - name: Run Needs More Info Closer
+        uses: ./actions/needs-more-info-closer
+        with:
+          label: more info needed
+          closeDays: 7
+          closeComment: "This issue has been closed automatically because it needs more information and has not had recent activity.\n\nHappy Coding!"
+          pingDays: 80
+          pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if the problem no longer exists, or adding more information."
