@@ -2,6 +2,7 @@ name: Locker
 on:
   schedule:
     - cron: 30 11 * * * # Run at 11:30 AM UTC (3:30 AM PST, 4:30 AM PDT)
+  workflow_dispatch:
 
 jobs:
   main:
@@ -9,15 +10,11 @@ jobs:
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v2
-        with:
-          repository: 'microsoft/vscode-github-triage-actions'
-          path: ./actions
-          ref: v35
       - name: Install Actions
-        run: npm install --production --prefix ./actions
+        run: cd ./.github/actions && npm install --production && cd ../..
       - name: Run Locker
-        uses: ./actions/locker
+        uses: ./.github/actions/Locker
         with:
           daysSinceClose: 45
           daysSinceUpdate: 3
-          ignoredLabel: "more votes needed"
+          ignoredLabels: more votes needed,debugger

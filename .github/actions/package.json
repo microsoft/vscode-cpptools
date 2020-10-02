@@ -1,0 +1,36 @@
+{
+  "name": "vscode-cpptools-github-triage-actions",
+  "version": "1.0.0",
+  "description": "GitHub Actions used by VS Code cpptools for triaging issues",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint -c .eslintrc --fix --ext .ts .",
+    "watch": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^2.1.1",
+    "axios": "^0.19.2"
+  },
+  "devDependencies": {
+    "@azure/storage-blob": "^12.1.1",
+    "@types/chai": "^4.2.10",
+    "@types/mocha": "^7.0.2",
+    "@types/yargs": "^15.0.4",
+    "@typescript-eslint/eslint-plugin": "^2.23.0",
+    "@typescript-eslint/parser": "^2.23.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.3",
+    "mocha": "^7.1.0",
+    "nock": "^12.0.2",
+    "prettier": "2.0.2",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3",
+    "yargs": "^15.3.1"
+  }
+}
