@@ -8,19 +8,21 @@ exports.StaleCloser = void 0;
 const ActionBase_1 = require("../common/ActionBase");
 const utils_1 = require("../common/utils");
 class StaleCloser extends ActionBase_1.ActionBase {
-    constructor(github, closeDays, labels, closeComment, pingComment, additionalTeam, pingDays, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds) {
-        super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds);
+    constructor(github, closeDays, labels, closeComment, pingDays, pingComment, additionalTeam, addLabels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
+        super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
         this.github = github;
         this.closeDays = closeDays;
         this.closeComment = closeComment;
+        this.pingDays = pingDays;
         this.pingComment = pingComment;
         this.additionalTeam = additionalTeam;
-        this.pingDays = pingDays;
+        this.addLabels = addLabels;
     }
     async run() {
         const updatedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.closeDays);
         const pingTimestamp = this.pingDays ? utils_1.daysAgoToTimestamp(this.pingDays) : undefined;
-        const query = this.buildQuery(`updated:<${updatedTimestamp} is:open is:unlocked`);
+        const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
+        const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
         for await (const page of this.github.query({ q: query })) {
             for (const issue of page) {
                 const hydrated = await issue.getIssue();
@@ -47,6 +49,15 @@ class StaleCloser extends ActionBase_1.ActionBase {
                         if (this.closeComment) {
                             await issue.postComment(this.closeComment);
                         }
+                        if (addLabelsSet.length > 0) {
+                            for (const addLabel of addLabelsSet) {
+                                if (addLabel && addLabel.length > 0) {
+                                    console.log(`Adding label on ${hydrated.number}: ${addLabel}`);
+                                    await issue.addLabel(addLabel);
+                                }
+                            }
+                        }
+                        console.log(`Closing ${hydrated.number}.`);
                         await issue.closeIssue();
                     }
                     else if (pingTimestamp != undefined) {

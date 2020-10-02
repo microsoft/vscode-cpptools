@@ -8,8 +8,8 @@ exports.Locker = void 0;
 const utils_1 = require("../common/utils");
 const ActionBase_1 = require("../common/ActionBase");
 class Locker extends ActionBase_1.ActionBase {
-    constructor(github, daysSinceClose, daysSinceUpdate, labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds) {
-        super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds);
+    constructor(github, daysSinceClose, daysSinceUpdate, labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
+        super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
         this.github = github;
         this.daysSinceClose = daysSinceClose;
         this.daysSinceUpdate = daysSinceUpdate;
@@ -17,7 +17,7 @@ class Locker extends ActionBase_1.ActionBase {
     async run() {
         const closedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.daysSinceClose);
         const updatedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.daysSinceUpdate);
-        const query = this.buildQuery(`closed:<${closedTimestamp} updated:<${updatedTimestamp} is:unlocked`);
+        const query = this.buildQuery((this.daysSinceClose ? `closed:<${updatedTimestamp} ` : "") + (this.daysSinceUpdate ? `updated:<${updatedTimestamp} ` : "") + "is:closed is:unlocked");
         for await (const page of this.github.query({ q: query })) {
             await Promise.all(page.map(async (issue) => {
                 const hydrated = await issue.getIssue();
