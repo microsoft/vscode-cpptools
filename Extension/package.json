@@ -853,7 +853,7 @@
           "default": 4096,
           "description": "%c_cpp.configuration.intelliSenseMemoryLimit.description%",
           "scope": "machine-overridable",
-          "minimum": 1024
+          "minimum": 256
         },
         "C_Cpp.default.includePath": {
           "type": [
