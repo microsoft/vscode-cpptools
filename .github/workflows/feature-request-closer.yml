@@ -18,6 +18,6 @@ jobs:
           labels: Feature Request
           ignoredLabels: debugger
           addLabels: more votes needed
-          closeDays: 14
+          closeDays: 60
           maximumVotes: 1
-          closeComment: "This feature request is being closed due to insufficient upvotes.  When at least 2 upvotes are received, this issue will be elidgable for our backlog."
+          closeComment: "This feature request is being closed due to insufficient upvotes.  When at least 2 upvotes are received, this issue will be elidgible for our backlog."
