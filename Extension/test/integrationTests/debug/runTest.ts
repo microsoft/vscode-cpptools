@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as os from 'os';
 
 import { runTests } from 'vscode-test';
 
@@ -12,10 +13,12 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './index');
 
-        const launchArgs = [ "--disable-extensions" ];
+        const launchArgs = ["--disable-extensions"];
+
+        const vscodeExecutablePath = os.platform() === "linux" ? "/snap/bin/code" : undefined;
 
         // Download VS Code, unzip it and run the integration test
-        await runTests({ launchArgs, extensionDevelopmentPath, extensionTestsPath });
+        await runTests({ launchArgs, extensionDevelopmentPath, extensionTestsPath, vscodeExecutablePath });
     } catch (err) {
         console.error('Failed to run tests');
         process.exit(1);

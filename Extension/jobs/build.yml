@@ -12,6 +12,9 @@ jobs:
     inputs:
       versionSpec: 10.16.x
 
+  - script: snap install --classic code
+    displayName: "Install VS Code via snap"
+
   - script: yarn install
     displayName: "Install Dependencies"
     workingDirectory: '$(Build.SourcesDirectory)/Extension'
