@@ -3335,5 +3335,21 @@
   "a comparação é ambígua no padrão de C++20 porque o operador de comparação implícito com parâmetros invertidos é uma correspondência igualmente boa. Isso geralmente é causado por um qualificador 'const' ausente no operador de comparação. Confira %nod",
   "ID do conceito inválida",
   "falha na substituição de argumentos %T da cláusula requires",
-  "as restrições de %nd não estão satisfeitas"
+  "as restrições de %nd não estão satisfeitas",
+  "o tipo de variável %t na função constexpr tem classes base virtuais",
+  "uma expressão de constante não pode alocar um subobjeto base virtual (para o tipo %t)",
+  "um parâmetro de modelo de tipo de classe precisa ser do tipo de classe estrutural",
+  "o suporte para literais UTF-8 exige o suporte para o literal u.",
+  "o mapeamento de arquivo de módulo de '%s' foi especificado mais de uma vez",
+  "o mapeamento de unidade de cabeçalho de '%s' foi especificado mais de uma vez",
+  "não foi especificado nenhum mapeamento para '%s'",
+  "o mapeamento de arquivo de módulo de '%s' é inválido",
+  "não é possível localizar o cabeçalho '%s' a ser importado",
+  "mais de um arquivo na lista de arquivos de módulo corresponde a '%s'",
+  "o arquivo de módulo encontrado para '%s' é de um módulo diferente",
+  "qualquer tipo de arquivo de módulo",
+  "não é possível ler o arquivo de módulo",
+  "a função interna não está disponível porque não há suporte para o tipo char8_t com as opções atuais",
+  "a opção da linha de comando --ms_await não poderá ser especificada se as corrotinas do C++20 estiverem habilitadas",
+  "o uso não padrão do construtor explícito %nod para inicialização do elemento de agregação padrão"
 ]

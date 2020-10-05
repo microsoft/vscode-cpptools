@@ -225,10 +225,10 @@
 	"c_cpp.debuggers.symbolLoadInfo.loadAll.description": "true이면 모든 라이브러리의 기호가 로드됩니다. true가 아니면 solib 기호가 로드되지 않습니다. 기본값은 true입니다.",
 	"c_cpp.debuggers.symbolLoadInfo.exceptionList.description": "세미콜론 ';'으로 구분된 파일 이름(와일드카드 허용) 목록이며, LoadAll의 동작을 수정합니다. LoadAll이 true이면 목록에 있는 이름과 일치하는 라이브러리의 기호를 로드하지 않습니다. true가 아니면 일치하는 라이브러리의 기호만 로드합니다. 예: \"foo.so;bar.so\"",
 	"c_cpp.debuggers.requireExactSource.description": "현재 소스 코드가 PDB와 일치하도록 하는 선택적 플래그입니다.",
-	"c_cpp.taskDefinitions.name.description": "The name of the task",
-	"c_cpp.taskDefinitions.command.description": "The path to either a compiler or script that performs compilation",
-	"c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
-	"c_cpp.taskDefinitions.options.description": "Additional command options",
+	"c_cpp.taskDefinitions.name.description": "작업의 이름",
+	"c_cpp.taskDefinitions.command.description": "컴파일을 수행하는 컴파일러 또는 스크립트의 경로",
+	"c_cpp.taskDefinitions.args.description": "컴파일러 또는 컴파일 스크립트에 전달할 추가 인수",
+	"c_cpp.taskDefinitions.options.description": "추가 명령 옵션",
 	"c_cpp.taskDefinitions.options.cwd.description": "실행된 프로그램 또는 스크립트의 현재 작업 디렉터리입니다. 생략된 경우 Code의 현재 작업 영역 루트가 사용됩니다.",
-	"c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+	"c_cpp.taskDefinitions.detail.description": "작업의 추가 세부 정보"
 }

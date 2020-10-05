@@ -3335,5 +3335,21 @@
   "porównanie jest niejednoznaczne w standardowym języku C++20, ponieważ implikowany operator porównania z odwróconymi parametrami jest równie dobrym dopasowaniem — jest to zwykle spowodowane brakującym kwalifikatorem „const” w operatorze porównania; zobacz %nod",
   "nieprawidłowy identyfikator koncepcji",
   "podstawianie argumentów %T dla klauzuli requires nie powiodło się",
-  "ograniczenia dla %nd nie są spełnione"
+  "ograniczenia dla %nd nie są spełnione",
+  "typ zmiennej %t w funkcji constexpr ma wirtualne klasy podstawowe",
+  "wyrażenie stałe nie może przydzielić wirtualnego podobiektu podstawowego (dla typu %t)",
+  "parametr szablonu typu klasy musi być typu klasy strukturalnej",
+  "obsługa literałów UTF-8 wymaga obsługi literału z prefiksem u.",
+  "mapowanie pliku modułu dla elementu „%s” zostało określone więcej niż raz",
+  "mapowanie jednostki nagłówka dla elementu „%s” zostało określone więcej niż raz",
+  "nie określono mapowania dla elementu „%s”",
+  "mapowanie pliku modułu dla elementu „%s” jest nieprawidłowe",
+  "nie można odnaleźć nagłówka „%s” do zaimportowania",
+  "więcej niż jeden plik na liście plików modułu pasuje do elementu „%s”",
+  "plik modułu znaleziony dla elementu „%s” jest dla innego modułu",
+  "dowolny rodzaj pliku modułu",
+  "nie można odczytać pliku modułu",
+  "wbudowana funkcja jest niedostępna, ponieważ typ char8_t nie jest obsługiwany z bieżącymi opcjami",
+  "nie można określić opcji wiersza polecenia --ms_await, jeśli włączono koprocedury języka C++20",
+  "niestandardowe użycie konstruktora jawnego %nod dla domyślnej inicjalizacji elementu agregacji"
 ]
