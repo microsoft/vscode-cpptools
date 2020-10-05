@@ -217,5 +217,6 @@
     "cpp_probing_compiler_default_standard": "Probing compiler for default C++ language standard using command line: {0}",
     "detected_language_standard_version": "Detected language standard version: {0}",
     "unhandled_default_target_detected": "Unhandled default compiler target value detected: {0}",
-    "unhandled_target_arg_detected": "Unhandled target argument value detected: {0}"
+    "unhandled_target_arg_detected": "Unhandled target argument value detected: {0}",
+    "memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
 }
