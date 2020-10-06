@@ -12,7 +12,7 @@ jobs:
     inputs:
       versionSpec: 10.16.x
 
-  - script: sudo snap install --classic code
+  - script: sudo snap install --classic code --devmode
     displayName: "Install VS Code via snap"
 
   - script: yarn install
