@@ -1,5 +1,35 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.0: October 8, 2020
+### Enhancements
+* Add support to run c/cpp build tasks. [#3674](https://github.com/microsoft/vscode-cpptools/issues/3674), [#4278](https://github.com/microsoft/vscode-cpptools/issues/4278), [#5270](https://github.com/microsoft/vscode-cpptools/issues/5270), [#5285](https://github.com/microsoft/vscode-cpptools/issues/5285)
+  * Tasks: Configure Task
+  * Tasks: Run Build Task
+  * C/C++: Build and debug active file.
+* Add logging around compiler probing, and the "C/C++ Configuration Warnings" output channel. [#5259](https://github.com/microsoft/vscode-cpptools/issues/5259)
+* Enable support for specifying a compiler by only the filename if it's in the environment path. [#6179](https://github.com/microsoft/vscode-cpptools/issues/6179)
+* Restart the IntelliSense process if its memory usage exceeds the `C_Cpp.intelliSenseMemoryLimit` setting. [#6230](https://github.com/microsoft/vscode-cpptools/issues/6230)
+* Add handling of the "-ansi" compiler arg when querying gcc/clang compilers.
+* Add support for inferring the IntelliSenseMode based on the "--target" compiler arg.
+* Add support for inferring the C standard based on new c11/c17 language standard args for cl.exe.
+* Allow custom config providers to omit IntelliSenseMode and C/C++ language standard, enabling them to be inferred from the `compilerPath` and `compilerArgs`.
+
+### Bug Fixes
+* Fix issues with IntelliSense for clang-cl.exe. [#6075](https://github.com/microsoft/vscode-cpptools/issues/6075)
+* Fix "Comments are not permitted in JSON" error when `c_cpp_properties.json` is open but not active. [#6132](https://github.com/microsoft/vscode-cpptools/issues/6132)
+* Rename the C language standard setting values from c18 and gnu18 to c17 and gnu17. [#6105](https://github.com/microsoft/vscode-cpptools/issues/6105)
+* Add more IntelliSense support for std ranges and concepts (__cpp_lib_concepts is now enabled). [#6173](https://github.com/microsoft/vscode-cpptools/issues/6173)
+* Add "-fnoblocks" when querying clang on Mac, as IntelliSense does not currently support blocks. [#6189](https://github.com/microsoft/vscode-cpptools/issues/6189)
+* Fix clang-format on 32-bit Windows. [#6195](https://github.com/microsoft/vscode-cpptools/issues/6195)
+* Fix incorrect formatting results when clang-format removes duplicate includes. [#6205](https://github.com/microsoft/vscode-cpptools/issues/6205)
+* Fix a case where the main process could get stuck. [#6207](https://github.com/microsoft/vscode-cpptools/issues/6207)
+* Fix issues with the handling of the standard version for clang-cl.exe.
+* Fix the handling of various compiler arg pairs when querying compilers.
+
+### Other Contributions
+* Refactoring provider classes.
+  * Abhishek Pal (@devabhishekpal) [PR #5998](https://github.com/microsoft/vscode-cpptools/pull/5998)
+
 ## Version 1.0.1: September 21, 2020
 ### Bug Fixes
 * Fix "No IL available" IntelliSense error on Linux/macOS when `#error` directives are present in the source code. [#6009](https://github.com/microsoft/vscode-cpptools/issues/6009), [#6114](https://github.com/microsoft/vscode-cpptools/issues/6114)
