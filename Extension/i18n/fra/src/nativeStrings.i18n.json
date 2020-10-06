@@ -203,5 +203,6 @@
 	"cpp_probing_compiler_default_standard": "Sondage du compilateur pour déterminer la norme de langage C++ par défaut via la ligne de commande : {0}",
 	"detected_language_standard_version": "Version de la norme de langage détectée : {0}",
 	"unhandled_default_target_detected": "Détection d'une valeur cible par défaut du compilateur non prise en charge : {0}",
-	"unhandled_target_arg_detected": "Détection d'une valeur d'argument cible non prise en charge : {0}"
+	"unhandled_target_arg_detected": "Détection d'une valeur d'argument cible non prise en charge : {0}",
+	"memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
 }
