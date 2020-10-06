@@ -15,7 +15,7 @@ async function main() {
 
         const launchArgs = ["--disable-extensions"];
 
-        const vscodeExecutablePath = os.platform() === "linux" ? "/snap/bin/code" : undefined;
+        const vscodeExecutablePath = os.platform() === "linux" ? "/snap/bin" : undefined;
 
         // Download VS Code, unzip it and run the integration test
         await runTests({ launchArgs, extensionDevelopmentPath, extensionTestsPath, vscodeExecutablePath });
