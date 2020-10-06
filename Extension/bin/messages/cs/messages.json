@@ -3335,5 +3335,21 @@
   "Porovnání je ve standardním C++20 nejednoznačné, protože implikovaný operátor porovnání se zaměněnými parametry je stejně dobrá shoda -- příčinou je obvykle chybějící kvalifikátor const u operátoru porovnání. Podívejte se na %nod.",
   "Neplatné concept-id",
   "Nepovedlo se nahradit argumenty %T pro klauzuli requires.",
-  "Omezení pro %nd se nesplnila."
+  "Omezení pro %nd se nesplnila.",
+  "typ proměnné %t ve funkci constexpr má virtuální základní třídy",
+  "konstantní výraz nemůže přidělit virtuální základní podobjekt (pro typ %t)",
+  "parametr šablony typu třídy musí být typu strukturální třídy",
+  "podpora pro literály UTF-8 vyžaduje podporu literálů u-literal.",
+  "mapování souborů modulu pro %s bylo zadané více než jednou",
+  "mapování jednotek záhlaví pro %s bylo zadané více než jednou",
+  "není zadané žádné mapování pro %s",
+  "mapování souborů modulu pro %s je neplatné",
+  "nejde najít záhlaví %s, které se má importovat",
+  "více než jeden soubor v seznamu souborů modulu odpovídá %s",
+  "soubor modulu, který se našel pro %s, je pro jiný modul",
+  "libovolný druh souboru modulu",
+  "nejde přečíst soubor modulu",
+  "předdefinovaná funkce není k dispozici, protože typ char8_t se nepodporuje s aktuálními možnostmi",
+  "možnost příkazového řádku --ms_await nejde zadat, pokud jsou povolené korutiny C++20",
+  "nestandardní použití explicitního konstruktoru %nod pro inicializaci výchozího agregačního elementu"
 ]

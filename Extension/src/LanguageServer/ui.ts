@@ -9,6 +9,7 @@ import { Client } from './client';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as nls from 'vscode-nls';
+import { setTimeout } from 'timers';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -163,9 +164,12 @@ export class UI {
         } else {
             const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
-            const isCppPropertiesJson: boolean = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
-            if (isCppPropertiesJson) {
-                vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
+            let isCppPropertiesJson: boolean = false;
+            if (activeEditor.document.languageId === "json") {
+                isCppPropertiesJson = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
+                if (isCppPropertiesJson) {
+                    vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
+                }
             }
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.

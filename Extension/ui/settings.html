@@ -529,7 +529,7 @@
     <div class="section">
         <div class="section-title" data-loc-id="include.path">Include path</div>
         <div class="section-text">
-            <span data-loc-id="include.path.description">An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. Specify a list paths for the IntelliSense engine to use while searching for included header files. Searching on these paths is not recursive. Specify <code>**</code> to indicate recursive search. For example, <code>${workspaceFolder}/**</code> will search through all subdirectories while <code>${workspaceFolder}</code> will not.  If on Windows with Visual Studio installed, or if a compiler is specified in the <code>compilerPath</code> setting, it is not necessary to list the system include paths in this list.</span>
+            <span data-loc-id="include.path.description">An include path is a folder that contains header files (such as <code>#include "myHeaderFile.h"</code>) that are included in a source file. Specify a list of paths for the IntelliSense engine to use while searching for included header files. Searching on these paths is not recursive. Specify <code>**</code> to indicate recursive search. For example, <code>${workspaceFolder}/**</code> will search through all subdirectories while <code>${workspaceFolder}</code> will not.  If on Windows with Visual Studio installed, or if a compiler is specified in the <code>compilerPath</code> setting, it is not necessary to list the system include paths in this list.</span>
         </div>
         <div>
           <div class="section-note" data-loc-id="one.include.path.per.line">One include path per line.</div>
@@ -552,7 +552,7 @@
         <div class="section-text" data-loc-id="c.standard.description">The version of the C language standard to use for IntelliSense. Note: GNU standards are only used to query the set compiler to get GNU defines, and IntelliSense will emulate the equivalent C standard version.</div>
         <div>
             <select name="inputValue" id="cStandard" class="select-default">
-                <option value="c18">c18</option>
+                <option value="c17">c17</option>
                 <option value="c11">c11</option>
                 <option value="c99">c99</option>
                 <option value="c89">c89</option>

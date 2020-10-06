@@ -18,7 +18,8 @@ import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
-import which = require('which');
+import { setTimeout } from 'timers';
+import * as which from 'which';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -57,14 +58,18 @@ export interface ConfigurationJson {
 export interface Configuration {
     name: string;
     compilerPath?: string;
+    compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
     cStandard?: string;
+    cStandardIsExplicit?: boolean;
     cppStandard?: string;
+    cppStandardIsExplicit?: boolean;
     includePath?: string[];
     macFrameworkPath?: string[];
     windowsSdkVersion?: string;
     defines?: string[];
     intelliSenseMode?: string;
+    intelliSenseModeIsExplicit?: boolean;
     compileCommands?: string;
     forcedInclude?: string[];
     configurationProvider?: string;
@@ -629,29 +634,39 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
+            configuration.intelliSenseModeIsExplicit = true;
+            configuration.cStandardIsExplicit = true;
+            configuration.cppStandardIsExplicit = true;
+            configuration.compilerPathIsExplicit = true;
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
-                if (configuration.compilerPath === undefined && !!this.defaultCompilerPath) {
-                    configuration.compilerPath = this.defaultCompilerPath;
-                    if (!configuration.cStandard && !!this.defaultCStandard) {
-                        configuration.cStandard = this.defaultCStandard;
-                    }
-                    if (!configuration.cppStandard && !!this.defaultCppStandard) {
-                        configuration.cppStandard = this.defaultCppStandard;
-                    }
-                    if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
-                        configuration.intelliSenseMode = this.defaultIntelliSenseMode;
-                    }
-                    if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
-                        configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
-                    }
-                    if (!configuration.includePath && !!this.defaultIncludes) {
-                        configuration.includePath = this.defaultIncludes;
-                    }
-                    if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
-                        configuration.macFrameworkPath = this.defaultFrameworks;
+                if (configuration.compilerPath === undefined) {
+                    configuration.compilerPathIsExplicit = false;
+                    if (!!this.defaultCompilerPath) {
+                        configuration.compilerPath = this.defaultCompilerPath;
+                        if (!configuration.cStandard && !!this.defaultCStandard) {
+                            configuration.cStandard = this.defaultCStandard;
+                            configuration.cStandardIsExplicit = false;
+                        }
+                        if (!configuration.cppStandard && !!this.defaultCppStandard) {
+                            configuration.cppStandard = this.defaultCppStandard;
+                            configuration.cppStandardIsExplicit = false;
+                        }
+                        if (!configuration.intelliSenseMode && !!this.defaultIntelliSenseMode) {
+                            configuration.intelliSenseMode = this.defaultIntelliSenseMode;
+                            configuration.intelliSenseModeIsExplicit = false;
+                        }
+                        if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
+                            configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
+                        }
+                        if (!configuration.includePath && !!this.defaultIncludes) {
+                            configuration.includePath = this.defaultIncludes;
+                        }
+                        if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
+                            configuration.macFrameworkPath = this.defaultFrameworks;
+                        }
                     }
                 }
             } else {
@@ -663,18 +678,6 @@ export class CppProperties {
                     configuration.compilerPath = undefined;
                 } else if (configuration.compilerPath !== undefined) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
-                }
-            }
-
-            if (configuration.compilerPath
-                && configuration.compilerPath.length > 0
-                && configuration.compilerPath[0] !== '/'
-                && !fs.existsSync(configuration.compilerPath)) {
-                // If a compiler path is specified, and it doesn't resolve to a file,
-                // try looking for it in the current path.
-                try {
-                    configuration.compilerPath = which.sync(configuration.compilerPath);
-                } catch {
                 }
             }
 

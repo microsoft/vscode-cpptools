@@ -12,6 +12,7 @@ LLVM
 bin/cpptools*
 bin/*.dll
 bin/.vs
+bin/LICENSE.txt
 
 # ignore lock files
 install.lock

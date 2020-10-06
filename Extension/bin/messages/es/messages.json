@@ -3335,5 +3335,21 @@
   "la comparación es ambigua en C++ 20 estándar porque el operador de comparación implicado con los parámetros inversos es una coincidencia igualmente buena. Esto suele deberse a que falta un calificador \"const\" en el operador de comparación; vea %nod",
   "identificador de concepto no válido",
   "error de sustitución de los argumentos %T para la cláusula requires",
-  "no se cumplen las restricciones de %nd"
+  "no se cumplen las restricciones de %nd",
+  "el tipo de variable %t de la función constexpr tiene clases base virtuales",
+  "una expresión constante no puede asignar un subobjeto base virtual (para el tipo %t)",
+  "un parámetro de plantilla de tipo de clase debe ser un tipo de clase estructural",
+  "la compatibilidad con los literales UTF-8 requiere compatibilidad con u-literal.",
+  "la asignación de archivos de módulo para \"%s\" se especificó más de una vez",
+  "la asignación de unidades de encabezado para \"%s\" se especificó más de una vez",
+  "no se especificó ninguna asignación para \"%s\"",
+  "la asignación del archivo de módulo para \"%s\" no es válida",
+  "no se encuentra el encabezado \"%s\" para importar",
+  "hay más de un archivo de la lista de archivos de módulo que coincide con \"%s\"",
+  "el archivo de módulo que se encontró para \"%s\" es para otro módulo",
+  "cualquier tipo de archivo de módulo",
+  "no se puede leer el archivo de módulo",
+  "la función integrada no está disponible porque no se admite el tipo char8_t con las opciones actuales",
+  "no se puede especificar la opción de línea de comandos --ms_await si están habilitadas las corrutinas de C++ 20",
+  "uso no estándar de %nod de constructor explícito para la inicialización predeterminada del elemento de agregado"
 ]
