@@ -203,5 +203,6 @@
 	"cpp_probing_compiler_default_standard": "Sondowanie kompilatora domyślnego standardu języka C++ przy użyciu wiersza polecenia: {0}",
 	"detected_language_standard_version": "Wykryta wersja standardowa języka: {0}",
 	"unhandled_default_target_detected": "Wykryto nieobsługiwaną domyślną wartość docelową kompilatora: {0}",
-	"unhandled_target_arg_detected": "Wykryto nieobsługiwaną docelową wartość argumentu: {0}"
+	"unhandled_target_arg_detected": "Wykryto nieobsługiwaną docelową wartość argumentu: {0}",
+	"memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
 }
