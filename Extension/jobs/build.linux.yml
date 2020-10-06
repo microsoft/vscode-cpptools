@@ -12,11 +12,8 @@ jobs:
     inputs:
       versionSpec: 10.16.x
 
-  - script: sudo snap install --classic code
+  - script: sudo snap install --classic vscode
     displayName: "Install VS Code via snap"
-
-  - script: sudo snap connect code:removable-media
-    displayName: "Fix snap app permission issue"
 
   - script: yarn install
     displayName: "Install Dependencies"
