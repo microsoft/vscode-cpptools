@@ -2,17 +2,16 @@ name: $(Date:yyyyMMdd).$(Rev:r)
 pr: 
 - 'master'
 jobs:
-- template: Extension/jobs/build.yml
+- template: Extension/jobs/build.mac.yml
   parameters:
     name: macOS
     pool:
       vmImage: 'macOS-10.14'
 
-# Temporarility disable Linux tests
-#- template: Extension/jobs/build.yml
-#  parameters:
-#    name: Linux
-#    pool:
-#      vmImage: 'ubuntu-16.04'
+- template: Extension/jobs/build.linux.yml
+  parameters:
+    name: Linux
+    pool:
+      vmImage: 'ubuntu-16.04'
 
 - template: Extension/jobs/build.windows.yml
