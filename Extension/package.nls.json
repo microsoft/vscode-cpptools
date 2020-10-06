@@ -17,6 +17,7 @@
     "c_cpp.command.rescanWorkspace.title": "Rescan Workspace",
     "c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copy vcpkg install command to clipboard",
     "c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visit the vcpkg help page",
+    "c_cpp.command.generateEditorConfig.title": "Generate '.editorconfig' file with VC Format settings",
     "c_cpp.configuration.formatting.description": "Configures the formatting engine",
     "c_cpp.configuration.formatting.clangFormat.description": "clang-format will be used to format code.",
     "c_cpp.configuration.formatting.vcFormat.description": "The Visual C++ formatting engine will be used to format code.",
@@ -226,5 +227,5 @@
     "c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
     "c_cpp.taskDefinitions.options.description": "Additional command options",
     "c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
-    "c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+    "c_cpp.taskDefinitions.detail.description": "Additional details of the task",
 }

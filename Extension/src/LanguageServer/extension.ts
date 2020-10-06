@@ -739,6 +739,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -1015,6 +1016,12 @@ function onLogDiagnostics(): void {
 function onRescanWorkspace(): void {
     onActivationEvent();
     clients.ActiveClient.rescanFolder();
+}
+
+function onGenerateEditorConfig(): void {
+    onActivationEvent();
+    // If multi-root, which settings to use?
+    clients.ActiveClient.generateEditorConfig();
 }
 
 function onShowRefCommand(arg?: TreeNode): void {
