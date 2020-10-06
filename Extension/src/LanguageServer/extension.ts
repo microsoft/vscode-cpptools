@@ -331,6 +331,9 @@ function realActivation(): void {
     clients.ActiveClient.notifyWhenReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
+
+    // Log cold start.
+    clients.timeTelemetryCollector.setFirstFile();
 }
 
 export function updateLanguageConfigurations(): void {
@@ -1161,6 +1164,8 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
 }
 
 export function deactivate(): Thenable<void> {
+    // Log timestamps telemetry.
+    clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
