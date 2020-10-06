@@ -203,5 +203,6 @@
 	"cpp_probing_compiler_default_standard": "Investigando o compilador para obter o padrão de linguagem C++ padrão usando a linha de comando: {0}",
 	"detected_language_standard_version": "Versão padrão da linguagem detectada: {0}",
 	"unhandled_default_target_detected": "Foi detectado um valor de destino do compilador padrão não tratado: {0}",
-	"unhandled_target_arg_detected": "Foi detectado um valor de argumento de destino não tratado: {0}"
+	"unhandled_target_arg_detected": "Foi detectado um valor de argumento de destino não tratado: {0}",
+	"memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
 }
