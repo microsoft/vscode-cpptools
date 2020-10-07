@@ -927,7 +927,6 @@ function generateEditorConfig(rootUri?: vscode.Uri): void {
     content += "\ncpp_wap_preserve_blocks = " + settings.vcFormatWrapPreserveBlocks;
     content += "\n";
 
-    //vscode.window.showSaveDialog({}).then((saveUri) => {
     vscode.workspace.openTextDocument({ content }).then((document) => {
         vscode.window.showTextDocument(document, 1, false)
     });
@@ -935,7 +934,6 @@ function generateEditorConfig(rootUri?: vscode.Uri): void {
 
 function onGenerateEditorConfig(): void {
     onActivationEvent();
-    let settings: CppSettings;
     if (!isFolderOpen()) {
         generateEditorConfig();
     } else {

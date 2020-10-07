@@ -239,7 +239,7 @@ export class CppSettings extends Settings {
     }
 
     public get vcFormatNewlineBeforeOpenBraceLambda(): string | undefined {
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.lamda");
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.lambda");
     }
 
     public get vcFormatNewlineScopeBracesOnSeparateLines(): boolean {
