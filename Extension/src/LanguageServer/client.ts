@@ -989,7 +989,7 @@ export class DefaultClient implements Client {
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
-                settings_indentPreserveWithinParentheses.push(setting.vcFormatindentPreserveWithinParentheses);
+                settings_indentPreserveWithinParentheses.push(setting.vcFormatIndentPreserveWithinParentheses);
                 settings_indentMultiLine.push(setting.vcFormatIndentMultiLineRelativeTo);
                 settings_indentCaseLabels.push(setting.vcFormatIndentCaseLabels);
                 settings_indentCaseContents.push(setting.vcFormatIndentCaseContents);
@@ -1619,7 +1619,6 @@ export class DefaultClient implements Client {
     public async generateEditorConfig(): Promise<void> {
         // TBD
     }
-
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
         const onFinished: () => void = () => {
