@@ -918,7 +918,6 @@ function mapWrapToEditorConfig(value: string | undefined): string {
 function generateEditorConfig(rootUri?: vscode.Uri): void {
     const settings: CppSettings = new CppSettings(rootUri);
 
-    
     let content: string = "[*]";
     content += "\ncpp_indent_braces = " + settings.vcFormatIndentBraces;
     content += "\ncpp_indent_multi_line_relative_to = " + mapIndentationReferenceToEditorConfig(settings.vcFormatIndentMultiLineRelativeTo);
@@ -981,7 +980,7 @@ function generateEditorConfig(rootUri?: vscode.Uri): void {
     content += "\n";
 
     vscode.workspace.openTextDocument({ content }).then((document) => {
-        vscode.window.showTextDocument(document, 1, false)
+        vscode.window.showTextDocument(document, 1, false);
     });
 }
 
