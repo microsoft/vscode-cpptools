@@ -218,8 +218,8 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.indent.namespaceContents") === true;
     }
 
-    public get vcFormatIndentPreserveComment(): boolean {
-        return super.Section.get<boolean>("vcFormat.indent.preserveComment") === true;
+    public get vcFormatIndentPreserveComments(): boolean {
+        return super.Section.get<boolean>("vcFormat.indent.preserveComments") === true;
     }
 
     public get vcFormatNewlineBeforeOpenBraceNamespace(): string | undefined {

@@ -225,7 +225,7 @@
             "%c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.description%",
             "%c_cpp.configuration.vcFormat.indent.gotoLabels.none.description%"
           ],
-          "default": "none",
+          "default": "oneLeft",
           "description": "%c_cpp.configuration.vcFormat.indent.gotoLabels.description%",
           "scope": "resource"
         },
@@ -257,10 +257,10 @@
           "description": "%c_cpp.configuration.vcFormat.indent.namespaceContents.description%",
           "scope": "resource"
         },
-        "C_Cpp.vcFormat.indent.preserveComment": {
+        "C_Cpp.vcFormat.indent.preserveComments": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.preserveComment.description%",
+          "description": "%c_cpp.configuration.vcFormat.indent.preserveComments.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": {

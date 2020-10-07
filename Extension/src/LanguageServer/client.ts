@@ -921,7 +921,7 @@ export class DefaultClient implements Client {
         const settings_indentPreprocessor: (string | undefined)[] = [];
         const settings_indentAccessSpecifiers: boolean[] = [];
         const settings_indentNamespaceContents: boolean[] = [];
-        const settings_indentPreserveComment: boolean[] = [];
+        const settings_indentPreserveComments: boolean[] = [];
         const settings_formattingEngine: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceNamespace: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceType: (string | undefined)[] = [];
@@ -998,7 +998,7 @@ export class DefaultClient implements Client {
                 settings_indentPreprocessor.push(setting.vcFormatIndentPreprocessor);
                 settings_indentAccessSpecifiers.push(setting.vcFormatIndentAccessSpecifiers);
                 settings_indentNamespaceContents.push(setting.vcFormatIndentNamespaceContents);
-                settings_indentPreserveComment.push(setting.vcFormatIndentPreserveComment);
+                settings_indentPreserveComments.push(setting.vcFormatIndentPreserveComments);
                 settings_newLineBeforeOpenBraceNamespace.push(setting.vcFormatNewlineBeforeOpenBraceNamespace);
                 settings_newLineBeforeOpenBraceType.push(setting.vcFormatNewlineBeforeOpenBraceType);
                 settings_newLineBeforeOpenBraceFunction.push(setting.vcFormatNewlineBeforeOpenBraceFunction);
@@ -1108,7 +1108,7 @@ export class DefaultClient implements Client {
                         preprocessor : settings_indentPreprocessor,
                         accesSpecifiers : settings_indentAccessSpecifiers,
                         namespaceContents : settings_indentNamespaceContents,
-                        preserveComment : settings_indentPreserveComment
+                        preserveComments : settings_indentPreserveComments
                     },
                     newLine: {
                         beforeOpenBrace: {

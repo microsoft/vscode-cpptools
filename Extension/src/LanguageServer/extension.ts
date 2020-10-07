@@ -863,28 +863,81 @@ function onEditConfiguration(): void {
     }
 }
 
+function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "statementBegin") {
+            return "statement_begin";
+        }
+        if (value === "outermostParenthesis") {
+            return "outermost_parenthesis";
+        }
+    }
+    return "innermost_parenthesis";
+}
+
+function mapIndentToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "leftmostColumn") {
+            return "leftmost_column";
+        }
+        if (value === "oneLeft") {
+            return "one_left";
+        }
+    }
+    return "none";
+}
+
+function mapNewOrSameLineToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "newLine") {
+            return "new_line";
+        }
+        if (value === "sameLine") {
+            return "same_line";
+        }
+    }
+    return "ignore";
+}
+
+function mapWrapToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "allOneLineScopes") {
+            return "all_one_line_scopes";
+        }
+        if (value === "oneLiners") {
+            return "one_liners";
+        }
+    }
+    return "never";
+}
+
 function generateEditorConfig(rootUri?: vscode.Uri): void {
     const settings: CppSettings = new CppSettings(rootUri);
 
+    
     let content: string = "[*]";
     content += "\ncpp_indent_braces = " + settings.vcFormatIndentBraces;
-    content += "\ncpp_indent_multi_line_relative_to = " + settings.vcFormatIndentMultiLineRelativeTo;
+    content += "\ncpp_indent_multi_line_relative_to = " + mapIndentationReferenceToEditorConfig(settings.vcFormatIndentMultiLineRelativeTo);
     content += "\ncpp_indent_within_parentheses = " + settings.vcFormatIndentWithinParentheses;
     content += "\ncpp_indent_preserve_within_parentheses = " + settings.vcFormatIndentPreserveWithinParentheses;
     content += "\ncpp_indent_case_labels = " + settings.vcFormatIndentCaseLabels;
     content += "\ncpp_indent_case_contents = " + settings.vcFormatIndentCaseContents;
     content += "\ncpp_indent_case_contents_when_block = " + settings.vcFormatIndentCaseContentsWhenBlock;
     content += "\ncpp_indent_lambda_braces_when_parameter = " + settings.vcFormatIndentLambdaBracesWhenParameter;
-    content += "\ncpp_indent_goto_labels = " + settings.vcFormatIndentGotoLables;
-    content += "\ncpp_indent_preprocessor = " + settings.vcFormatIndentPreprocessor;
+    content += "\ncpp_indent_goto_labels = " + mapIndentToEditorConfig(settings.vcFormatIndentGotoLables);
+    content += "\ncpp_indent_preprocessor = " + mapIndentToEditorConfig(settings.vcFormatIndentPreprocessor);
     content += "\ncpp_indent_access_specifiers = " + settings.vcFormatIndentAccessSpecifiers;
     content += "\ncpp_indent_namespace_contents = " + settings.vcFormatIndentNamespaceContents;
-    content += "\ncpp_indent_preserve_comment = " + settings.vcFormatIndentPreserveComment;
-    content += "\ncpp_new_line_before_open_brace_namespace = " + settings.vcFormatNewlineBeforeOpenBraceNamespace;
-    content += "\ncpp_new_line_before_open_brace_type = " + settings.vcFormatNewlineBeforeOpenBraceType;
-    content += "\ncpp_new_line_before_open_brace_function = " + settings.vcFormatNewlineBeforeOpenBraceFunction;
-    content += "\ncpp_new_line_before_open_brace_block = " + settings.vcFormatNewlineBeforeOpenBraceBlock;
-    content += "\ncpp_new_line_before_open_brace_lambda = " + settings.vcFormatNewlineBeforeOpenBraceLambda;
+    content += "\ncpp_indent_preserve_comments = " + settings.vcFormatIndentPreserveComments;
+    content += "\ncpp_new_line_before_open_brace_namespace = " + mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceNamespace);
+    content += "\ncpp_new_line_before_open_brace_type = " + mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceType);
+    content += "\ncpp_new_line_before_open_brace_function = " + mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceFunction);
+    content += "\ncpp_new_line_before_open_brace_block = " + mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceBlock);
+    content += "\ncpp_new_line_before_open_brace_lambda = " + mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceLambda);
     content += "\ncpp_new_line_scope_braces_on_separate_lines = " + settings.vcFormatNewlineScopeBracesOnSeparateLines;
     content += "\ncpp_new_line_close_brace_same_line_empty_type = " + settings.vcFormatNewlineCloseBraceSameLineEmptyType;
     content += "\ncpp_new_line_close_brace_same_line_empty_function = " + settings.vcFormatNewlineCloseBraceSameLineEmptyFunction;
@@ -918,13 +971,13 @@ function generateEditorConfig(rootUri?: vscode.Uri): void {
     content += "\ncpp_space_before_inheritance_colon = " + settings.vcFormatSpaceBeforeInheritanceColon;
     content += "\ncpp_space_before_constructor_colon = " + settings.vcFormatSpaceBeforeConstructorColon;
     content += "\ncpp_space_remove_before_semicolon = " + settings.vcFormatSpaceRemoveBeforeSemicolon;
-    content += "\ncpp_space_insert_after_semicolon = " + settings.vcFormatSpaceInsertAfterSemicolon;
+    content += "\ncpp_space_after_semicolon = " + settings.vcFormatSpaceInsertAfterSemicolon;
     content += "\ncpp_space_remove_around_unary_operator = " + settings.vcFormatSpaceRemoveAroundUnaryOperator;
     content += "\ncpp_space_around_binary_operator = " + settings.vcFormatSpaceAroundBinaryOperator;
     content += "\ncpp_space_around_assignment_operator = " + settings.vcFormatSpaceAroundAssignmentOperator;
     content += "\ncpp_space_pointer_reference_alignment = " + settings.vcFormatSpacePointerReferenceAlignment;
     content += "\ncpp_space_around_ternary_operator = " + settings.vcFormatSpaceAroundTernaryOperator;
-    content += "\ncpp_wap_preserve_blocks = " + settings.vcFormatWrapPreserveBlocks;
+    content += "\ncpp_wrap_preserve_blocks = " + mapWrapToEditorConfig(settings.vcFormatWrapPreserveBlocks);
     content += "\n";
 
     vscode.workspace.openTextDocument({ content }).then((document) => {
