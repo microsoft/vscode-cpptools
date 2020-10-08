@@ -421,9 +421,8 @@ enum SemanticTokenModifiers {
     local = (1 << 2)
 }
 
-interface SetUpTimeStamp {
+interface IntellisenseSetup {
     uri: string;
-    fileVersion: number;
 }
 
 // Requests
@@ -484,7 +483,7 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
-const IntellisenseSetupNotification:  NotificationType<SetUpTimeStamp, void> = new NotificationType<SetUpTimeStamp, void>('cpptools/intellisenseSetupTime');
+const IntellisenseSetupNotification:  NotificationType<IntellisenseSetup, void> = new NotificationType<IntellisenseSetup, void>('cpptools/intellisenseSetup');
 
 let failureMessageShown: boolean = false;
 
@@ -1897,7 +1896,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
-        this.languageClient.onNotification(IntellisenseSetupNotification, (e) => this.LogIntellisenseSetup(e));
+        this.languageClient.onNotification(IntellisenseSetupNotification, (e) => this.LogIntellisenseSetupTime(e));
         setupOutputHandlers();
     }
 
@@ -2160,9 +2159,8 @@ export class DefaultClient implements Client {
         }
     }
 
-    public LogIntellisenseSetup(notification: SetUpTimeStamp): void {
+    public LogIntellisenseSetupTime(notification: IntellisenseSetup): void {
         clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri).fsPath);
-        return;
     }
 
     private promptCompileCommands(params: CompileCommandsPaths): void {
