@@ -1,0 +1,39 @@
+name: Stale Issue Closer
+description: Close issues that are marked with a specified label and were last interacted with by a contributor or bot
+inputs:
+  token:
+    description: GitHub token with issue, comment, and label read/write permissions
+    default: ${{ github.token }}
+  closeDays:
+    description: Days to wait before closing the issue
+    required: true
+  closeComment:
+    description: Comment to add upon closing the issue
+  pingDays:
+    description: Days to wait before pinging the assignee, if any.  If set, issue is not closed if there is an assignee.
+  additionalTeam:
+    description: Pipe-separated list of additional users to treat as team members
+  pingComment:
+    description: Comment to add when pinging assignee. ${assignee} and ${author} are replaced.
+  milestoneName:
+    description: items with these milestones will be considered (name only, must match ID)
+  milestoneId:
+    description: items with these milestones will be considered (id only, must match name)
+  labels:
+    description: items with these labels will not be considered.  May be "*".
+    required: true
+  ignoredMilestoneNames:
+    description: items with these milestones will not be considered (names only, must match IDs).  May be "*".
+  ignoredMilestoneIds:
+    description: items with these milestones will not be considered (IDs only, must match names)
+  ignoredLabels:
+    description: items with these labels will not be considered
+  addLabels:
+    description: Labels to add to issue as it is closed.
+  minimumVotes:
+    descriptions: Only issues with at least this many votes will be considered.
+  maximumVotes:
+    descriptions: Only issues fewer or equal to this many votes will be considered.
+runs:
+  using: 'node12'
+  main: 'index.js'
