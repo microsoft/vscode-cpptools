@@ -80,10 +80,8 @@ export const getRateLimit = async (token: string) => {
 export const errorLoggingIssue = (() => {
 	try {
 		const repo = context.repo.owner.toLowerCase() + '/' + context.repo.repo.toLowerCase()
-		if (repo === 'microsoft/vscode' || repo === 'microsoft/vscode-remote-release') {
-			return { repo: 'vscode', owner: 'Microsoft', issue: 93814 }
-		} else if (/microsoft\//.test(repo)) {
-			return { repo: 'vscode-internalbacklog', owner: 'Microsoft', issue: 974 }
+		if (repo === 'microsoft/vscode-cpptools') {
+			return { repo: 'vscode-cpptools', owner: 'Microsoft', issue: 6282 }
 		} else if (getInput('errorLogIssueNumber')) {
 			return { ...context.repo, issue: +getRequiredInput('errorLogIssueNumber') }
 		} else {
