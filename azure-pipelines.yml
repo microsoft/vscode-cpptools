@@ -12,6 +12,6 @@ jobs:
   parameters:
     name: Linux
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
 
 - template: Extension/jobs/build.windows.yml
