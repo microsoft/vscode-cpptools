@@ -204,5 +204,5 @@
 	"detected_language_standard_version": "已偵測到語言標準版本: {0}",
 	"unhandled_default_target_detected": "偵測到未處理的預設編譯器目標值: {0}",
 	"unhandled_target_arg_detected": "偵測到未處理的目標引數值: {0}",
-	"memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
+	"memory_limit_shutting_down_intellisense": "IntelliSense 伺服器即將關機: {0}。記憶體使用量為 {1} MB，超過了 {2} MB 的限制。"
 }
