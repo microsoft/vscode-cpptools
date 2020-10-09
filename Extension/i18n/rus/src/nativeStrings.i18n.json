@@ -204,5 +204,5 @@
 	"detected_language_standard_version": "Обнаруженная версия стандарта языка: {0}",
 	"unhandled_default_target_detected": "Обнаружено необработанное целевое значение компилятора по умолчанию: {0}",
 	"unhandled_target_arg_detected": "Обнаружено необработанное значение целевого аргумента: {0}",
-	"memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
+	"memory_limit_shutting_down_intellisense": "Завершение работы сервера IntelliSense: {0}. Используемый объем памяти ({1} МБ) превысил ограничение ({2} МБ)."
 }
