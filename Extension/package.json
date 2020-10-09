@@ -967,7 +967,7 @@
             "gnu89",
             "gnu99",
             "gnu11",
-            "gnu18"
+            "gnu17"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
           "scope": "machine-overridable"
