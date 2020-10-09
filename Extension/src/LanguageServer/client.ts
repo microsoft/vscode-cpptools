@@ -1400,7 +1400,7 @@ export class DefaultClient implements Client {
             openFileVersions.set(document.uri.toString(), document.version);
         }
         // Log warm start.
-        clientCollection.timeTelemetryCollector.setActivationTime(document.uri.fsPath);
+        clientCollection.timeTelemetryCollector.setDidOpenTime(document.uri.fsPath);
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {

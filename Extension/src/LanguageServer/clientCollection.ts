@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import * as util from '../common';
 import * as cpptools from './client';
+import * as telemetry from '../telemetry';
 import { getCustomConfigProviders } from './customProviders';
 import { TimeTelemetryCollector } from './timeTelemetryCollector'
 
