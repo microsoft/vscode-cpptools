@@ -204,5 +204,5 @@
 	"detected_language_standard_version": "Version de la norme de langage détectée : {0}",
 	"unhandled_default_target_detected": "Détection d'une valeur cible par défaut du compilateur non prise en charge : {0}",
 	"unhandled_target_arg_detected": "Détection d'une valeur d'argument cible non prise en charge : {0}",
-	"memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
+	"memory_limit_shutting_down_intellisense": "Arrêt du serveur IntelliSense : {0}. L'utilisation de la mémoire est de {1} Mo et a dépassé la limite fixée à {2} Mo."
 }
