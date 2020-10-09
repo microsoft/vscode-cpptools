@@ -1,4 +1,4 @@
-name: By Design Closer
+name: Duplicate Closer
 on:
   schedule:
     - cron: 10 12 * * * # Run at 12:10 PM UTC (4:10 AM PST, 5:10 AM PDT)
