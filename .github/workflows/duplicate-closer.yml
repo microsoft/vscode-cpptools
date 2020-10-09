@@ -1,7 +1,7 @@
 name: By Design Closer
 on:
   schedule:
-    - cron: 0 12 * * * # Run at 12:00 PM UTC (4:00 AM PST, 5:00 AM PDT)
+    - cron: 10 12 * * * # Run at 12:10 PM UTC (4:10 AM PST, 5:10 AM PDT)
   workflow_dispatch:
 
 jobs:
@@ -15,9 +15,9 @@ jobs:
       - name: Stale Closer
         uses: ./.github/actions/StaleCloser
         with:
-          labels: by design
-          ignoredLabels: debugger,Feature Request,more info needed
+          labels: duplicate
+          ignoredLabels: debugger,Feature Request,more info needed,by design
           closeDays: 60
-          closeComment: "This issue has been closed automatically because it's labeled as a 'by design' and has not had recent activity."
+          closeComment: "This issue has been closed automatically because it's labeled as a 'duplicate' and has not had recent activity."
           pingDays: 80
           pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if it is no longer relevant."
