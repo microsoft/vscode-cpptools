@@ -1,18 +1,21 @@
-
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 import * as telemetry from '../telemetry';
+import * as util from '../common';
+import * as vscode from 'vscode';
 
 interface TimeStampSequence {
-    didOpenTime: number; // when the file appears in the editor. Defined for both "cold/warm" start cases.
-    setupTime: number; // when the Intellisense_client constructor is completed
-    updateRangeTime: number; // when publishDiagnostics & provideSemanticTokens is completed
-    totalTime: number;
+    firstFile: number | undefined; // when the extension is activated by realActivation. Defined only for "cold" start cases.
+    didOpen: number; // when the file appears in the editor. Defined for both "warm" start cases.
+    setup: number; // when the Intellisense_client constructor is completed
+    updateRange: number; // when publishDiagnostics & provideSemanticTokens is completed
 }
 
 export class TimeTelemetryCollector {
 
     private cachedTimeStamps: Map<string, any> = new Map<string, any>(); // a map of uri's string to TimeStampSequence
-    private extensionStartTime: number; // when the extension starts to activate.
-    private firstFile: number; // when the extension is activated. Defined only for "cold" start cases.
 
     private getTimeStamp(uri: string) {
         return this.cachedTimeStamps.get(uri) ? this.cachedTimeStamps.get(uri) :
@@ -24,43 +27,40 @@ export class TimeTelemetryCollector {
         this.cachedTimeStamps.clear();
     }
 
-    constructor() {
-        this.extensionStartTime = new Date().getTime();
-        this.firstFile = 0;
-    }
-
-    public setFirstFile() {
-        if (!this.firstFile){
-            this.firstFile = new Date().getTime();
+    public setFirstFile(uri: vscode.Uri) {
+        if (util.fileIsCOrCppSource(uri.path)) {
+            let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
+            curTimeStamps.firstFile = new Date().getTime();
+            this.cachedTimeStamps.set(uri.path, curTimeStamps);
         }
-        telemetry.logLanguageServerEvent("firstFile", {}, { "firstFile": (this.firstFile - this.extensionStartTime) });
     }
 
-    public setDidOpenTime(uri: string) {
-        let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri);
-        curTimeStamps.didOpenTime = new Date().getTime();
-        this.cachedTimeStamps.set(uri, curTimeStamps);
+    public setDidOpenTime(uri: vscode.Uri) {
+        let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
+        curTimeStamps.didOpen = new Date().getTime();
+        this.cachedTimeStamps.set(uri.path, curTimeStamps);
     }
 
     public setSetupTime(uri: string) {
         let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri);
-        curTimeStamps.setupTime = new Date().getTime();
+        curTimeStamps.setup = new Date().getTime();
         this.cachedTimeStamps.set(uri, curTimeStamps);
     }
 
-    public setUpdateRangeTime(uri: string) {
-        let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri);
-        if (!curTimeStamps.updateRangeTime) {
-            curTimeStamps.updateRangeTime = new Date().getTime();
-            this.cachedTimeStamps.set(uri, curTimeStamps);
+    public setUpdateRangeTime(uri: vscode.Uri) {
+        let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
+        if (!curTimeStamps.updateRange) {
+            curTimeStamps.updateRange = new Date().getTime();
+            this.cachedTimeStamps.set(uri.path, curTimeStamps);
         }
-        if (!curTimeStamps.totalTime && curTimeStamps.didOpenTime && curTimeStamps.setupTime){
-            curTimeStamps.totalTime = curTimeStamps.updateRangeTime - curTimeStamps.didOpenTime;
-            telemetry.logLanguageServerEvent("timeStamps", {}, {
-                "didOpenTime": (curTimeStamps.didOpenTime),
-                "setupTime": (curTimeStamps.setupTime - curTimeStamps.didOpenTime),
-                "updateRangeTime": (curTimeStamps.updateRangeTime - curTimeStamps.setupTime),
-                "totalTime": (curTimeStamps.totalTime)
+        if (curTimeStamps.didOpen && curTimeStamps.setup){
+            const startTime: number = curTimeStamps.firstFile ? curTimeStamps.firstFile : curTimeStamps.didOpen;
+            telemetry.logLanguageServerEvent("timeStamps",
+                curTimeStamps.firstFile ? { "coldstart": "true" } : {}, {
+                "activationTime": (curTimeStamps.didOpen - startTime),
+                "setupTime": (curTimeStamps.setup - startTime),
+                "updateRangeTime": (curTimeStamps.updateRange - curTimeStamps.setup),
+                "totalTime": (curTimeStamps.updateRange - startTime)
             });
         }
     }

@@ -157,7 +157,7 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
     diagnosticsCollection.set(realUri, diagnostics);
 
-    clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri.fsPath);
+    clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri);
 }
 
 interface WorkspaceFolderParams {
@@ -1400,7 +1400,7 @@ export class DefaultClient implements Client {
             openFileVersions.set(document.uri.toString(), document.version);
         }
         // Log warm start.
-        clientCollection.timeTelemetryCollector.setDidOpenTime(document.uri.fsPath);
+        clientCollection.timeTelemetryCollector.setDidOpenTime(document.uri);
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {

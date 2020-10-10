@@ -284,6 +284,12 @@ function realActivation(): void {
     clients = new ClientCollection();
     ui = getUI();
 
+    // Log cold start.
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (activeEditor) {
+        clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
+    }
+
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
     clients.forEach(client => {
@@ -331,9 +337,6 @@ function realActivation(): void {
     clients.ActiveClient.notifyWhenReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
-
-    // Log cold start.
-    clients.timeTelemetryCollector.setFirstFile();
 }
 
 export function updateLanguageConfigurations(): void {
