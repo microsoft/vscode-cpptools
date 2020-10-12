@@ -17,7 +17,7 @@ export class TimeTelemetryCollector {
 
     private cachedTimeStamps: Map<string, any> = new Map<string, any>(); // a map of uri's string to TimeStampSequence
 
-    public setFirstFile(uri: vscode.Uri) {
+    public setFirstFile(uri: vscode.Uri): void {
         if (util.fileIsCOrCppSource(uri.path)) {
             let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
             curTimeStamps.firstFile = new Date().getTime();
@@ -25,47 +25,47 @@ export class TimeTelemetryCollector {
         }
     }
 
-    public setDidOpenTime(uri: vscode.Uri) {
+    public setDidOpenTime(uri: vscode.Uri): void {
         let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
         curTimeStamps.didOpen = new Date().getTime();
         this.cachedTimeStamps.set(uri.path, curTimeStamps);
     }
 
-    public setSetupTime(uri: string) {
+    public setSetupTime(uri: string): void {
         let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri);
         curTimeStamps.setup = new Date().getTime();
         this.cachedTimeStamps.set(uri, curTimeStamps);
-        if (curTimeStamps.didOpen && curTimeStamps.updateRange){
+        if (curTimeStamps.didOpen && curTimeStamps.updateRange) {
             this.logTelemetry(uri, curTimeStamps);
         }
     }
 
-    public setUpdateRangeTime(uri: vscode.Uri) {
+    public setUpdateRangeTime(uri: vscode.Uri): void {
         let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
         if (!curTimeStamps.updateRange) {
             curTimeStamps.updateRange = new Date().getTime();
             this.cachedTimeStamps.set(uri.path, curTimeStamps);
         }
-        if (curTimeStamps.didOpen && curTimeStamps.setup){
+        if (curTimeStamps.didOpen && curTimeStamps.setup) {
             this.logTelemetry(uri.path, curTimeStamps);
         }
     }
 
-    public clear() {
+    public clear(): void {
         console.log("clearing timestamp log");
         this.cachedTimeStamps.clear();
     }
 
-    private getTimeStamp(uri: string) {
+    private getTimeStamp(uri: string): TimeStampSequence {
         return this.cachedTimeStamps.get(uri) ? this.cachedTimeStamps.get(uri) :
             { firstFile: 0, didOpen: 0, setup: 0, updateRange: 0 };
     }
 
-    private removeTimeStamp(uri: string) {
+    private removeTimeStamp(uri: string): void {
         this.cachedTimeStamps.delete(uri);
     }
 
-    private logTelemetry(uri: string, timeStamps: TimeStampSequence) {
+    private logTelemetry(uri: string, timeStamps: TimeStampSequence): void {
         const startTime: number = timeStamps.firstFile ? timeStamps.firstFile : timeStamps.didOpen;
         telemetry.logLanguageServerEvent("timeStamps",
             timeStamps.firstFile ? { "coldstart": "true" } : {}, {
