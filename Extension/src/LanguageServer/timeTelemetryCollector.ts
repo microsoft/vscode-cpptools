@@ -19,20 +19,20 @@ export class TimeTelemetryCollector {
 
     public setFirstFile(uri: vscode.Uri): void {
         if (util.fileIsCOrCppSource(uri.path)) {
-            let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
+            const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
             curTimeStamps.firstFile = new Date().getTime();
             this.cachedTimeStamps.set(uri.path, curTimeStamps);
         }
     }
 
     public setDidOpenTime(uri: vscode.Uri): void {
-        let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
+        const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
         curTimeStamps.didOpen = new Date().getTime();
         this.cachedTimeStamps.set(uri.path, curTimeStamps);
     }
 
     public setSetupTime(uri: string): void {
-        let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri);
+        const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri);
         curTimeStamps.setup = new Date().getTime();
         this.cachedTimeStamps.set(uri, curTimeStamps);
         if (curTimeStamps.didOpen && curTimeStamps.updateRange) {
@@ -41,7 +41,7 @@ export class TimeTelemetryCollector {
     }
 
     public setUpdateRangeTime(uri: vscode.Uri): void {
-        let curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
+        const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
         if (!curTimeStamps.updateRange) {
             curTimeStamps.updateRange = new Date().getTime();
             this.cachedTimeStamps.set(uri.path, curTimeStamps);
@@ -69,11 +69,11 @@ export class TimeTelemetryCollector {
         const startTime: number = timeStamps.firstFile ? timeStamps.firstFile : timeStamps.didOpen;
         telemetry.logLanguageServerEvent("timeStamps",
             timeStamps.firstFile ? { "coldstart": "true" } : {}, {
-            "activationTime": (timeStamps.didOpen - startTime),
-            "setupTime": (timeStamps.setup - startTime),
-            "updateRangeTime": (timeStamps.updateRange - timeStamps.setup),
-            "totalTime": (timeStamps.updateRange - startTime)
-        });
+                "activationTime": (timeStamps.didOpen - startTime),
+                "setupTime": (timeStamps.setup - startTime),
+                "updateRangeTime": (timeStamps.updateRange - timeStamps.setup),
+                "totalTime": (timeStamps.updateRange - startTime)
+                });
         this.removeTimeStamp(uri);
     }
 }
