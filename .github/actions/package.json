@@ -1,0 +1,21 @@
+{
+  "name": "vscode-cpptools-github-triage-actions",
+  "version": "1.0.0",
+  "description": "GitHub Actions used by VS Code cpptools for triaging issues",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint -c .eslintrc --fix --ext .ts .",
+    "watch": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^2.1.1",
+    "axios": "^0.19.2"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "typescript": "^3.8.3"
+  }
+}

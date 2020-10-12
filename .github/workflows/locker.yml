@@ -1,0 +1,20 @@
+name: Locker
+on:
+  schedule:
+    - cron: 30 11 * * * # Run at 11:30 AM UTC (3:30 AM PST, 4:30 AM PDT)
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Run Locker
+        uses: ./.github/actions/Locker
+        with:
+          daysSinceClose: 45
+          daysSinceUpdate: 3
+          ignoredLabels: more votes needed,debugger
