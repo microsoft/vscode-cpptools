@@ -2160,7 +2160,7 @@ export class DefaultClient implements Client {
     }
 
     public LogIntellisenseSetupTime(notification: IntellisenseSetup): void {
-        clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri).fsPath);
+        clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri).path);
     }
 
     private promptCompileCommands(params: CompileCommandsPaths): void {
