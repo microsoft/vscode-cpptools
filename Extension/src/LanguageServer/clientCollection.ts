@@ -9,7 +9,7 @@ import * as util from '../common';
 import * as cpptools from './client';
 import * as telemetry from '../telemetry';
 import { getCustomConfigProviders } from './customProviders';
-import { TimeTelemetryCollector } from './timeTelemetryCollector'
+import { TimeTelemetryCollector } from './timeTelemetryCollector';
 
 const defaultClientKey: string = "@@default@@";
 export interface ClientKey {

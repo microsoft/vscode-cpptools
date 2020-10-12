@@ -73,7 +73,7 @@ export class TimeTelemetryCollector {
                 "setupTime": (timeStamps.setup - startTime),
                 "updateRangeTime": (timeStamps.updateRange - timeStamps.setup),
                 "totalTime": (timeStamps.updateRange - startTime)
-                });
+            });
         this.removeTimeStamp(uri);
     }
 }
