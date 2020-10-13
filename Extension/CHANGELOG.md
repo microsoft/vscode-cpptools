@@ -16,7 +16,6 @@
 * Allow custom config providers to omit IntelliSenseMode and C/C++ language standard, enabling them to be inferred from the `compilerPath` and `compilerArgs`.
 
 ### Bug Fixes
-* Fix Windows SDK path detection if the um folder doesn't exist. [#5817](https://github.com/microsoft/vscode-cpptools/issues/5817)
 * Fix issues with IntelliSense for clang-cl.exe. [#6075](https://github.com/microsoft/vscode-cpptools/issues/6075)
 * Fix "Comments are not permitted in JSON" error when `c_cpp_properties.json` is open but not active. [#6132](https://github.com/microsoft/vscode-cpptools/issues/6132)
 * Rename the C language standard setting values from c18 and gnu18 to c17 and gnu17. [#6105](https://github.com/microsoft/vscode-cpptools/issues/6105)
