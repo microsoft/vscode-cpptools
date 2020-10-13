@@ -274,6 +274,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const outputChannel: logger.Logger = logger.getOutputChannelLogger();
             outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
+	    // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
+	    // logger.showOutputChannel();
         }
 
         return config;
