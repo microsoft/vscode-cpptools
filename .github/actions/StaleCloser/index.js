@@ -14,7 +14,7 @@ class StaleCloserAction extends Action_1.Action {
     }
     async onTriggered(github) {
         var _a;
-        await new StaleCloser_1.StaleCloser(github, +utils_1.getRequiredInput('closeDays'), utils_1.getRequiredInput('labels'), utils_1.getInput('closeComment') || '', +(utils_1.getInput('pingDays') || 0), utils_1.getInput('pingComment') || '', ((_a = utils_1.getInput('additionalTeam')) !== null && _a !== void 0 ? _a : '').split(','), utils_1.getInput('addLabels') || undefined, utils_1.getInput('milestoneName') || undefined, utils_1.getInput('milestoneId') || undefined, utils_1.getInput('ignoredLabels') || undefined, utils_1.getInput('ignoredMilestoneNames') || undefined, utils_1.getInput('ignoredMilestoneIds') || undefined, +(utils_1.getInput('minimumVotes') || 0), +(utils_1.getInput('maximumVotes') || 9999999)).run();
+        await new StaleCloser_1.StaleCloser(github, +utils_1.getRequiredInput('closeDays'), utils_1.getRequiredInput('labels'), utils_1.getInput('closeComment') || '', +(utils_1.getInput('pingDays') || 0), utils_1.getInput('pingComment') || '', ((_a = utils_1.getInput('additionalTeam')) !== null && _a !== void 0 ? _a : '').split(','), utils_1.getInput('addLabels') || undefined, utils_1.getInput('removeLabels') || undefined, utils_1.getInput('setMilestoneId') || undefined, utils_1.getInput('milestoneName') || undefined, utils_1.getInput('milestoneId') || undefined, utils_1.getInput('ignoredLabels') || undefined, utils_1.getInput('ignoredMilestoneNames') || undefined, utils_1.getInput('ignoredMilestoneIds') || undefined, +(utils_1.getInput('minimumVotes') || 0), +(utils_1.getInput('maximumVotes') || 9999999)).run();
     }
 }
 new StaleCloserAction().run(); // eslint-disable-line

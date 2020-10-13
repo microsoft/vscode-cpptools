@@ -17,7 +17,7 @@ class Locker extends ActionBase_1.ActionBase {
     async run() {
         const closedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.daysSinceClose);
         const updatedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.daysSinceUpdate);
-        const query = this.buildQuery((this.daysSinceClose ? `closed:<${updatedTimestamp} ` : "") + (this.daysSinceUpdate ? `updated:<${updatedTimestamp} ` : "") + "is:closed is:unlocked");
+        const query = this.buildQuery((this.daysSinceClose ? `closed:<${closedTimestamp} ` : "") + (this.daysSinceUpdate ? `updated:<${updatedTimestamp} ` : "") + "is:closed is:unlocked");
         for await (const page of this.github.query({ q: query })) {
             await Promise.all(page.map(async (issue) => {
                 const hydrated = await issue.getIssue();

@@ -1,0 +1,26 @@
+name: Reopener
+on:
+  schedule:
+    - cron: 20 12 * * * # Run at 12:20 PM UTC (4:20 AM PST, 5:20 AM PDT)
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Run Reopener
+        uses: ./.github/actions/Reopener
+        with:
+          alsoApplyToOpenIssues: true
+          reopenComment: This feature request has received enough votes to be added to our backlog.
+          labels: more votes needed,Feature Request
+          minimumVotes: 5
+          ignoredLabels: debugger
+          milestoneId: 30
+          milestoneName: Triage
+          setMilestoneId: 28
+          removeLabels: more votes needed

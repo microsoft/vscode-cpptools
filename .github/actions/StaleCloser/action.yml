@@ -30,6 +30,8 @@ inputs:
     description: items with these labels will not be considered
   addLabels:
     description: Labels to add to issue as it is closed.
+  removeLabels:
+    description: Labels to remove from issue as it is closed.
   minimumVotes:
     descriptions: Only issues with at least this many votes will be considered.
   maximumVotes:

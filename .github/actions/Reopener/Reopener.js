@@ -7,9 +7,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Reopener = void 0;
 const ActionBase_1 = require("../common/ActionBase");
 class Reopener extends ActionBase_1.ActionBase {
-    constructor(github, addLabels, removeLabels, reopenComment, setMilestoneId, labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
+    constructor(github, alsoApplyToOpenIssues, addLabels, removeLabels, reopenComment, setMilestoneId, labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
         super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
         this.github = github;
+        this.alsoApplyToOpenIssues = alsoApplyToOpenIssues;
         this.addLabels = addLabels;
         this.removeLabels = removeLabels;
         this.reopenComment = reopenComment;
@@ -18,7 +19,7 @@ class Reopener extends ActionBase_1.ActionBase {
     async run() {
         const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
         const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
-        const query = this.buildQuery("is:closed is:unlocked");
+        const query = this.buildQuery((this.alsoApplyToOpenIssues ? "" : "is:closed ") + "is:unlocked");
         for await (const page of this.github.query({ q: query })) {
             await Promise.all(page.map(async (issue) => {
                 const hydrated = await issue.getIssue();

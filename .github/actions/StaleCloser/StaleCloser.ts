@@ -17,6 +17,8 @@ export class StaleCloser extends ActionBase {
 		private pingComment: string,
 		private additionalTeam: string[],
 		private addLabels?: string,
+		private removeLabels?: string,
+		private setMilestoneId?: string,
 		milestoneName?: string,
 		milestoneId?: string,
 		ignoreLabels?: string,
@@ -36,6 +38,7 @@ export class StaleCloser extends ActionBase {
 		const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
 
 		const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
+		const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
 
 		for await (const page of this.github.query({ q: query })) {
 			for (const issue of page) {
@@ -67,6 +70,14 @@ export class StaleCloser extends ActionBase {
 						if (this.closeComment) {
 							await issue.postComment(this.closeComment)
 						}
+						if (removeLabelsSet.length > 0) {
+							for (const removeLabel of removeLabelsSet) {
+								if (removeLabel && removeLabel.length > 0) {
+									console.log(`Removing label on ${hydrated.number}: ${removeLabel}`)
+									await issue.removeLabel(removeLabel)
+								}
+							}
+						}
 						if (addLabelsSet.length > 0) {
 							for (const addLabel of addLabelsSet) {
 								if (addLabel && addLabel.length > 0) {
@@ -75,8 +86,12 @@ export class StaleCloser extends ActionBase {
 								}
 							}
 						}
-						console.log(`Closing ${hydrated.number}.`)
 						await issue.closeIssue()
+						if (this.setMilestoneId != undefined) {
+							console.log(`Setting MilestoneId ${+this.setMilestoneId}.`)
+							await issue.setMilestone(+this.setMilestoneId)
+						}
+						console.log(`Closing ${hydrated.number}.`)
 					} else if (pingTimestamp != undefined) {
 						// Ping 
 						if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {

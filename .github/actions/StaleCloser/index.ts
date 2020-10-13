@@ -21,6 +21,8 @@ class StaleCloserAction extends Action {
 			getInput('pingComment') || '',
 			(getInput('additionalTeam') ?? '').split(','),
 			getInput('addLabels') || undefined,
+			getInput('removeLabels') || undefined,
+			getInput('setMilestoneId') || undefined,
 			getInput('milestoneName') || undefined,
 			getInput('milestoneId') || undefined,
 			getInput('ignoredLabels') || undefined,

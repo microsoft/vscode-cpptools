@@ -8,7 +8,7 @@ exports.StaleCloser = void 0;
 const ActionBase_1 = require("../common/ActionBase");
 const utils_1 = require("../common/utils");
 class StaleCloser extends ActionBase_1.ActionBase {
-    constructor(github, closeDays, labels, closeComment, pingDays, pingComment, additionalTeam, addLabels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
+    constructor(github, closeDays, labels, closeComment, pingDays, pingComment, additionalTeam, addLabels, removeLabels, setMilestoneId, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
         super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
         this.github = github;
         this.closeDays = closeDays;
@@ -17,12 +17,15 @@ class StaleCloser extends ActionBase_1.ActionBase {
         this.pingComment = pingComment;
         this.additionalTeam = additionalTeam;
         this.addLabels = addLabels;
+        this.removeLabels = removeLabels;
+        this.setMilestoneId = setMilestoneId;
     }
     async run() {
         const updatedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.closeDays);
         const pingTimestamp = this.pingDays ? utils_1.daysAgoToTimestamp(this.pingDays) : undefined;
         const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
         const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
+        const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
         for await (const page of this.github.query({ q: query })) {
             for (const issue of page) {
                 const hydrated = await issue.getIssue();
@@ -49,6 +52,14 @@ class StaleCloser extends ActionBase_1.ActionBase {
                         if (this.closeComment) {
                             await issue.postComment(this.closeComment);
                         }
+                        if (removeLabelsSet.length > 0) {
+                            for (const removeLabel of removeLabelsSet) {
+                                if (removeLabel && removeLabel.length > 0) {
+                                    console.log(`Removing label on ${hydrated.number}: ${removeLabel}`);
+                                    await issue.removeLabel(removeLabel);
+                                }
+                            }
+                        }
                         if (addLabelsSet.length > 0) {
                             for (const addLabel of addLabelsSet) {
                                 if (addLabel && addLabel.length > 0) {
@@ -57,8 +68,12 @@ class StaleCloser extends ActionBase_1.ActionBase {
                                 }
                             }
                         }
-                        console.log(`Closing ${hydrated.number}.`);
                         await issue.closeIssue();
+                        if (this.setMilestoneId != undefined) {
+                            console.log(`Setting MilestoneId ${+this.setMilestoneId}.`);
+                            await issue.setMilestone(+this.setMilestoneId);
+                        }
+                        console.log(`Closing ${hydrated.number}.`);
                     }
                     else if (pingTimestamp != undefined) {
                         // Ping 
