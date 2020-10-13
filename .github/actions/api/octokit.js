@@ -200,6 +200,15 @@ class OctoKitIssue extends OctoKit {
                 state: 'closed',
             });
     }
+    async reopenIssue() {
+        core_1.debug('Reopening issue ' + this.issueData.number);
+        if (!this.options.readonly)
+            await this.octokit.issues.update({
+                ...this.params,
+                issue_number: this.issueData.number,
+                state: 'open',
+            });
+    }
     async lockIssue() {
         core_1.debug('Locking issue ' + this.issueData.number);
         if (!this.options.readonly)

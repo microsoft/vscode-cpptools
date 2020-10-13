@@ -224,6 +224,16 @@ export class OctoKitIssue extends OctoKit implements GitHubIssue {
 			})
 	}
 
+	async reopenIssue(): Promise<void> {
+		debug('Reopening issue ' + this.issueData.number)
+		if (!this.options.readonly)
+			await this.octokit.issues.update({
+				...this.params,
+				issue_number: this.issueData.number,
+				state: 'open',
+			})
+	}
+
 	async lockIssue(): Promise<void> {
 		debug('Locking issue ' + this.issueData.number)
 		if (!this.options.readonly)
