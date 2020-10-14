@@ -1,0 +1,55 @@
+name: CI (Mac)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 10.16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.16.x
+
+      - name: Install Dependencies
+        run: yarn install
+        working-directory: Extension
+
+      - name: Generate hashes for runtime dependency packages
+        run: yarn run generatePackageHashes
+        working-directory: Extension
+
+      - name: Compile Sources
+        run: yarn run compile
+        working-directory: Extension
+
+      - name: Validate Extension/package.json
+        run: yarn run pr-check
+        working-directory: Extension
+
+      - name: Run Linter
+        run: yarn run lint
+        working-directory: Extension
+
+      - name: Compile Test Sources
+        run: yarn run pretest
+        working-directory: Extension
+
+      - name: Run unit tests
+        uses: GabrielBB/xvfb-action@v1.4
+        with:
+          run: yarn run unitTests
+          working-directory: Extension
+
+      - name: Run languageServer integration tests
+        uses: GabrielBB/xvfb-action@v1.4
+        with:
+          run: yarn run integrationTests
+          working-directory: Extension
