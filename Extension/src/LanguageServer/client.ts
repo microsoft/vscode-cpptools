@@ -135,7 +135,7 @@ function showWarning(params: ShowWarningParams): void {
         workspaceDisposables.push(warningChannel);
     }
     warningChannel.appendLine(`[${new Date().toLocaleString()}] ${message}`);
-    warningChannel.show(false);
+    warningChannel.show(true);
 }
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
