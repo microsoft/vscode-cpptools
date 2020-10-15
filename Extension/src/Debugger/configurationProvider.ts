@@ -88,8 +88,8 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         return [selection.configuration];
     }
 
-    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        return this.underlyingProvider.resolveDebugConfiguration ? this.underlyingProvider.resolveDebugConfiguration(folder, config, token) : undefined;
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        return this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables ? this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables(folder, config, token) : undefined;
     }
 }
 
@@ -188,7 +188,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     /**
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
-    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to open a configuration file.
         if (!config || !config.type) {
             return null;
@@ -274,8 +274,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const outputChannel: logger.Logger = logger.getOutputChannelLogger();
             outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
-	    // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
-	    // logger.showOutputChannel();
+            logger.showOutputChannel();
         }
 
         return config;
