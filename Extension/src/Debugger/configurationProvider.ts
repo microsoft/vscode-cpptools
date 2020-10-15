@@ -355,8 +355,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     source = newSourceFileMapSource;
                 }
 
-                if (util.isString(sourceFileMapTarget))
-                {
+                if (util.isString(sourceFileMapTarget)) {
                     const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
@@ -364,9 +363,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                         message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
                         target = newSourceFileMapTarget;
                     }
-                }
-                else if (util.isObject(sourceFileMapTarget)) {
-                    const newSourceFileMapTarget: {"editorPath": string, "useForBreakpoints": boolean } = sourceFileMapTarget;
+                } else if (util.isObject(sourceFileMapTarget)) {
+                    const newSourceFileMapTarget: {"editorPath": string; "useForBreakpoints": boolean } = sourceFileMapTarget;
                     newSourceFileMapTarget["editorPath"] = util.resolveVariables(sourceFileMapTarget["editorPath"], undefined);
 
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
