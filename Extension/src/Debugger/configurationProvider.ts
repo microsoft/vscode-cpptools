@@ -344,24 +344,37 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 let message: string = "";
                 const sourceFileMapTarget: string = config.sourceFileMap[sourceFileMapSource];
 
+                let source: string = sourceFileMapSource;
+                let target: string | object = sourceFileMapTarget;
+
                 // TODO: pass config.environment as 'additionalEnvironment' to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
-                const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
-
-                let source: string = sourceFileMapSource;
-                let target: string = sourceFileMapTarget;
-
                 if (sourceFileMapSource !== newSourceFileMapSource) {
                     message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
 
-                if (sourceFileMapTarget !== newSourceFileMapTarget) {
-                    // Add a space if source was changed, else just tab the target message.
-                    message +=  (message ? ' ' : '\t');
-                    message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
-                    target = newSourceFileMapTarget;
+                if (util.isString(sourceFileMapTarget))
+                {
+                    const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
+                    if (sourceFileMapTarget !== newSourceFileMapTarget) {
+                        // Add a space if source was changed, else just tab the target message.
+                        message +=  (message ? ' ' : '\t');
+                        message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
+                        target = newSourceFileMapTarget;
+                    }
+                }
+                else if (util.isObject(sourceFileMapTarget)) {
+                    const newSourceFileMapTarget: {"editorPath": string, "useForBreakpoints": boolean } = sourceFileMapTarget;
+                    newSourceFileMapTarget["editorPath"] = util.resolveVariables(sourceFileMapTarget["editorPath"], undefined);
+
+                    if (sourceFileMapTarget !== newSourceFileMapTarget) {
+                        // Add a space if source was changed, else just tab the target message.
+                        message +=  (message ? ' ' : '\t');
+                        message += localize("replacing.editorPath", "Replacing {0} '{1}' with '{2}'.", "editorPath", sourceFileMapTarget, newSourceFileMapTarget["editorPath"]);
+                        target = newSourceFileMapTarget;
+                    }
                 }
 
                 if (message) {

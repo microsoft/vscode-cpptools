@@ -1447,11 +1447,46 @@
                 "default": false
               },
               "sourceFileMap": {
-                "type": "object",
-                "description": "%c_cpp.debuggers.sourceFileMap.description%",
-                "default": {
-                  "<source-path>": "<target-path>"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                    "default": {
+                      "<source-path>": "<target-path>"
+                    }
+                  },
+                  {
+                    "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
+                    "type": "object",
+                    "default": {
+                      "<source-path>": {
+                        "editorPath": "",
+                        "useForBreakpoints": true
+                      }
+                    },
+                    "properties": {
+                      "<source-path>": {
+                        "type": "object",
+                        "default": {
+                          "editorPath": "",
+                          "useForBreakpoints": true
+                        },
+                        "properties": {
+                          "editorPath": {
+                            "type": "string",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                            "default": ""
+                          },
+                          "useForBreakpoints": {
+                            "type": "boolean",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                            "default": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               "logging": {
                 "description": "%c_cpp.debuggers.logging.description%",
@@ -1640,11 +1675,46 @@
                 "default": false
               },
               "sourceFileMap": {
-                "type": "object",
-                "description": "%c_cpp.debuggers.sourceFileMap.description%",
-                "default": {
-                  "<source-path>": "<target-path>"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                    "default": {
+                      "<source-path>": "<target-path>"
+                    }
+                  },
+                  {
+                    "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
+                    "type": "object",
+                    "default": {
+                      "<source-path>": {
+                        "editorPath": "",
+                        "useForBreakpoints": true
+                      }
+                    },
+                    "properties": {
+                      "<source-path>": {
+                        "type": "object",
+                        "default": {
+                          "editorPath": "",
+                          "useForBreakpoints": true
+                        },
+                        "properties": {
+                          "editorPath": {
+                            "type": "string",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                            "default": ""
+                          },
+                          "useForBreakpoints": {
+                            "type": "boolean",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                            "default": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               "logging": {
                 "description": "%c_cpp.debuggers.logging.description%",

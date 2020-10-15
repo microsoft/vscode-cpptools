@@ -145,6 +145,37 @@
         }
       }
     },
+    "SourceFileMapEntry": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
+      "default": {
+        "<source-path>": {
+          "editorPath": "",
+          "useForBreakpoints": true
+        }
+      },
+      "properties": {
+        "<source-path>": {
+          "type": "object",
+          "default": {
+            "editorPath": "",
+            "useForBreakpoints": true
+          },
+          "properties": {
+            "editorPath": {
+              "type": "string",
+              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+              "default": "<editor-path>"
+            },
+            "useForBreakpoints": {
+              "type": "boolean",
+              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+              "default": true
+            }
+          }
+        }
+      }
+    },
     "CppdbgLaunchOptions": {
       "type": "object",
       "default": {},
@@ -304,11 +335,19 @@
           "default": false
         },
         "sourceFileMap": {
-          "type": "object",
-          "description": "%c_cpp.debuggers.sourceFileMap.description%",
-          "default": {
-            "<source-path>": "<target-path>"
-          }
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "%c_cpp.debuggers.sourceFileMap.description%",
+              "default": {
+                "<source-path>": "<target-path>"
+              }
+            },
+            {
+              "$ref": "#/definitions/SourceFileMapEntry",
+              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%"
+            }
+          ]
         },
         "logging": {
           "$ref": "#/definitions/Logging",
@@ -402,11 +441,19 @@
           "default": false
         },
         "sourceFileMap": {
-          "type": "object",
-          "description": "%c_cpp.debuggers.sourceFileMap.description%",
-          "default": {
-            "<source-path>": "<target-path>"
-          }
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "%c_cpp.debuggers.sourceFileMap.description%",
+              "default": {
+                "<source-path>": "<target-path>"
+              }
+            },
+            {
+              "$ref": "#/definitions/SourceFileMapEntry",
+              "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%"
+            }
+          ]
         },
         "logging": {
           "$ref": "#/definitions/Logging",
