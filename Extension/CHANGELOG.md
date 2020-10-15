@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.0-insiders2: October 15, 2020
+### Bug Fixes
+* Fix `Build and Debug Active File` race condition with EngineLogs. [#6304](https://github.com/microsoft/vscode-cpptools/pull/6304)
+* Prevent configuration warnings from stealing focus. [#6308](https://github.com/microsoft/vscode-cpptools/issues/6308)
+* Fix `/std:c++latest` downgrading to `/std:c++17` when set via `compilerArgs` with cl.exe. [#6323](https://github.com/microsoft/vscode-cpptools/issues/6323)
+* Fix `cStandard` not being used. [#6324](https://github.com/microsoft/vscode-cpptools/issues/6324)
+
 ## Version 1.1.0-insiders: October 13, 2020
 ### Enhancements
 * Add support to run c/cpp build tasks. [#3674](https://github.com/microsoft/vscode-cpptools/issues/3674), [#5270](https://github.com/microsoft/vscode-cpptools/issues/5270), [#5285](https://github.com/microsoft/vscode-cpptools/issues/5285)
