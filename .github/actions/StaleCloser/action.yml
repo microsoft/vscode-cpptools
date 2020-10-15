@@ -22,11 +22,11 @@ inputs:
   labels:
     description: items with these labels will not be considered.  May be "*".
     required: true
-  ignoredMilestoneNames:
+  ignoreMilestoneNames:
     description: items with these milestones will not be considered (names only, must match IDs).  May be "*".
-  ignoredMilestoneIds:
+  ignoreMilestoneIds:
     description: items with these milestones will not be considered (IDs only, must match names)
-  ignoredLabels:
+  ignoreLabels:
     description: items with these labels will not be considered
   addLabels:
     description: Labels to add to issue as it is closed.

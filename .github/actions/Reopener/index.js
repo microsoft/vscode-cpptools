@@ -14,7 +14,7 @@ class ReopenerAction extends Action_1.Action {
     }
     async onTriggered(github) {
         const alsoApplyToOpenIssues = utils_1.getInput('alsoApplyToOpenIssues');
-        await new Reopener_1.Reopener(github, alsoApplyToOpenIssues != undefined && alsoApplyToOpenIssues.toLowerCase() == 'true', utils_1.getInput('addLabels') || undefined, utils_1.getInput('removeLabels') || undefined, utils_1.getInput('reopenComment') || '', utils_1.getInput('setMilestoneId') || undefined, utils_1.getInput('labels') || undefined, utils_1.getInput('milestoneName') || undefined, utils_1.getInput('milestoneId') || undefined, utils_1.getInput('ignoredLabels') || undefined, utils_1.getInput('ignoredMilestoneNames') || undefined, utils_1.getInput('ignoredMilestoneIds') || undefined, +(utils_1.getInput('minimumVotes') || 0), +(utils_1.getInput('maximumVotes') || 9999999)).run();
+        await new Reopener_1.Reopener(github, alsoApplyToOpenIssues != undefined && alsoApplyToOpenIssues.toLowerCase() == 'true', utils_1.getInput('addLabels') || undefined, utils_1.getInput('removeLabels') || undefined, utils_1.getInput('reopenComment') || '', utils_1.getInput('setMilestoneId') || undefined, utils_1.getInput('labels') || undefined, utils_1.getInput('milestoneName') || undefined, utils_1.getInput('milestoneId') || undefined, utils_1.getInput('ignoreLabels') || undefined, utils_1.getInput('ignoreMilestoneNames') || undefined, utils_1.getInput('ignoreMilestoneIds') || undefined, +(utils_1.getInput('minimumVotes') || 0), +(utils_1.getInput('maximumVotes') || 9999999)).run();
     }
 }
 new ReopenerAction().run(); // eslint-disable-line

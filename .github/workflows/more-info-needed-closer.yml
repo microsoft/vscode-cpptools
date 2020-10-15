@@ -16,7 +16,7 @@ jobs:
         uses: ./.github/actions/StaleCloser
         with:
           labels: more info needed
-          ignoredLabels: debugger
+          ignoreLabels: debugger,internal
           closeDays: 60
           closeComment: "This issue has been closed automatically because it needs more information and has not had recent activity."
           pingDays: 80

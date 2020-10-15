@@ -16,7 +16,7 @@ jobs:
         uses: ./.github/actions/StaleCloser
         with:
           labels: question
-          ignoredLabels: debugger
+          ignoreLabels: debugger,internal
           closeDays: 60
           closeComment: "This issue has been closed automatically because it's labeled as a 'question' and has not had recent activity."
           pingDays: 80

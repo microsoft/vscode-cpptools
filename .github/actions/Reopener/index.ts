@@ -23,9 +23,9 @@ class ReopenerAction extends Action {
 			getInput('labels') || undefined,
 			getInput('milestoneName') || undefined,
 			getInput('milestoneId') || undefined,
-			getInput('ignoredLabels') || undefined,
-			getInput('ignoredMilestoneNames') || undefined,
-			getInput('ignoredMilestoneIds') || undefined,
+			getInput('ignoreLabels') || undefined,
+			getInput('ignoreMilestoneNames') || undefined,
+			getInput('ignoreMilestoneIds') || undefined,
 			+(getInput('minimumVotes') || 0),
 			+(getInput('maximumVotes') || 9999999)
 		).run()

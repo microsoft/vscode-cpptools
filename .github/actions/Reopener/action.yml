@@ -20,11 +20,11 @@ inputs:
     description: items with these milestones will be considered (id only, must match name)
   labels:
     description: items with these labels will not be considered.  May be "*".
-  ignoredMilestoneNames:
+  ignoreMilestoneNames:
     description: items with these milestones will not be considered (names only, must match IDs).  May be "*".
-  ignoredMilestoneIds:
+  ignoreMilestoneIds:
     description: items with these milestones will not be considered (IDs only, must match names)
-  ignoredLabels:
+  ignoreLabels:
     description: items with these labels will not be considered
   minimumVotes:
     descriptions: Only issues with at least this many votes will be considered.

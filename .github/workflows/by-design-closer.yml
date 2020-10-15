@@ -16,7 +16,7 @@ jobs:
         uses: ./.github/actions/StaleCloser
         with:
           labels: by design
-          ignoredLabels: debugger,Feature Request,more info needed
+          ignoreLabels: debugger,Feature Request,more info needed,internal
           closeDays: 60
           closeComment: "This issue has been closed automatically because it's labeled as 'by design' and has not had recent activity."
           pingDays: 80

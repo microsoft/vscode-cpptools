@@ -17,4 +17,4 @@ jobs:
         with:
           daysSinceClose: 45
           daysSinceUpdate: 3
-          ignoredLabels: more votes needed,debugger
+          ignoreLabels: more votes needed,debugger,internal
