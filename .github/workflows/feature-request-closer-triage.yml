@@ -26,6 +26,5 @@ jobs:
           closeDays: 60
           maximumVotes: 2
           closeComment: "This feature request is being closed due to insufficient upvotes.  When enough upvotes are received, this issue will be eligible for our backlog."
-          setMilestoneId: 28
           milestoneName: Triage
           milestoneId: 30
