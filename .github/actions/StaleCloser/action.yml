@@ -38,6 +38,8 @@ inputs:
     descriptions: Only issues with at least this many votes will be considered.
   maximumVotes:
     descriptions: Only issues fewer or equal to this many votes will be considered.
+  readonly:
+    description: If true, changes are not applied.
 runs:
   using: 'node12'
   main: 'index.js'

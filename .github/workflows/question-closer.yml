@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: 20 11 * * * # Run at 11:20 AM UTC (3:20 AM PST, 4:20 AM PDT)
   workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
 
 jobs:
   main:
@@ -15,6 +19,7 @@ jobs:
       - name: Stale Closer
         uses: ./.github/actions/StaleCloser
         with:
+          readonly: ${{ github.event.inputs.readonly }}
           labels: question
           ignoreLabels: debugger,internal
           closeDays: 60

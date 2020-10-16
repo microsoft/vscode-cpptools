@@ -71,11 +71,11 @@ export class ActionBase {
 			}
 		}
 
-		if (this.ignoreMilestoneNames && this.ignoreMilestoneIds) {
+		if (this.ignoreMilestoneNames) {
 			if (this.ignoreMilestoneNames == "*" && !this.milestoneName) { // only if no milestone
 				query = query.concat(` no:milestone`)
 				this.ignoreAllWithMilestones = true;
-			} else {
+			} else if (this.ignoreMilestoneIds) {
 				this.ignoreMilestoneNamesSet = this.ignoreMilestoneNames.split(',');
 				this.ignoreMilestoneIdsSet = this.ignoreMilestoneIds.split(',');
 				for (const str of this.ignoreMilestoneNamesSet) {
