@@ -133,9 +133,9 @@ function showWarning(params: ShowWarningParams): void {
     if (!warningChannel) {
         warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Configuration Warnings")}`);
         workspaceDisposables.push(warningChannel);
+        warningChannel.show(true);
     }
     warningChannel.appendLine(`[${new Date().toLocaleString()}] ${message}`);
-    warningChannel.show(true);
 }
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
