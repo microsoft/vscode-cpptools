@@ -7,7 +7,7 @@ import * as util from '../common';
 import * as vscode from 'vscode';
 
 interface TimeStampSequence {
-    firstFile: number | undefined; // when the extension is activated by realActivation. Defined only for "cold" start cases.
+    firstFile?: number; // when the extension is activated by realActivation. Defined only for "cold" start cases.
     didOpen: number; // when the file appears in the editor. Defined for both "warm" start cases.
     setup: number; // when the Intellisense_client constructor is completed
     updateRange: number; // when publishDiagnostics & provideSemanticTokens is completed
@@ -31,12 +31,12 @@ export class TimeTelemetryCollector {
         this.cachedTimeStamps.set(uri.path, curTimeStamps);
     }
 
-    public setSetupTime(uri: string): void {
-        const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri);
+    public setSetupTime(uri: vscode.Uri): void {
+        const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
         curTimeStamps.setup = new Date().getTime();
-        this.cachedTimeStamps.set(uri, curTimeStamps);
+        this.cachedTimeStamps.set(uri.path, curTimeStamps);
         if (curTimeStamps.didOpen && curTimeStamps.updateRange) {
-            this.logTelemetry(uri, curTimeStamps);
+            this.logTelemetry(uri.path, curTimeStamps);
         }
     }
 
@@ -67,13 +67,18 @@ export class TimeTelemetryCollector {
 
     private logTelemetry(uri: string, timeStamps: TimeStampSequence): void {
         const startTime: number = timeStamps.firstFile ? timeStamps.firstFile : timeStamps.didOpen;
-        telemetry.logLanguageServerEvent("timeStamps",
-            timeStamps.firstFile ? { "coldstart": "true" } : {}, {
-                "activationTime": (timeStamps.didOpen - startTime),
-                "setupTime": (timeStamps.setup - startTime),
-                "updateRangeTime": (timeStamps.updateRange - timeStamps.setup),
-                "totalTime": (timeStamps.updateRange - startTime)
-            });
+        let properties: any = {};
+        let metrics: any = {
+            "setupTime": (timeStamps.setup - startTime),
+            "updateRangeTime": (timeStamps.updateRange - timeStamps.setup),
+            "totalTime": (timeStamps.updateRange - startTime)
+        };
+        if (timeStamps.firstFile) {
+            properties = { "coldstart": "true" };
+            metrics = { "activationTime": (timeStamps.didOpen - startTime), ...metrics };
+        }
+        telemetry.logLanguageServerEvent("timeStamps", properties, metrics);
+
         this.removeTimeStamp(uri);
     }
 }

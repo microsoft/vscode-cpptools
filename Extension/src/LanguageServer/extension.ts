@@ -442,6 +442,8 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 }
             }
         }
+        // Log warm start.
+        clients.timeTelemetryCollector.setDidOpenTime(document.uri);
     }
 }
 

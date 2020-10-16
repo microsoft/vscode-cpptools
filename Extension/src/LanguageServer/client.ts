@@ -1399,8 +1399,6 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             openFileVersions.set(document.uri.toString(), document.version);
         }
-        // Log warm start.
-        clientCollection.timeTelemetryCollector.setDidOpenTime(document.uri);
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
@@ -2160,7 +2158,7 @@ export class DefaultClient implements Client {
     }
 
     public LogIntellisenseSetupTime(notification: IntellisenseSetup): void {
-        clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri).path);
+        clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
     }
 
     private promptCompileCommands(params: CompileCommandsPaths): void {
