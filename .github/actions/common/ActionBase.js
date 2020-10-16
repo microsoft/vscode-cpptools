@@ -64,12 +64,12 @@ class ActionBase {
                 }
             }
         }
-        if (this.ignoreMilestoneNames) {
+        if (this.ignoreMilestoneNames && this.ignoreMilestoneIds) {
             if (this.ignoreMilestoneNames == "*" && !this.milestoneName) { // only if no milestone
                 query = query.concat(` no:milestone`);
                 this.ignoreAllWithMilestones = true;
             }
-            else if (this.ignoreMilestoneIds) {
+            else {
                 this.ignoreMilestoneNamesSet = this.ignoreMilestoneNames.split(',');
                 this.ignoreMilestoneIdsSet = this.ignoreMilestoneIds.split(',');
                 for (const str of this.ignoreMilestoneNamesSet) {
