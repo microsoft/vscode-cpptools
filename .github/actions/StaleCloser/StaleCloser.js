@@ -44,18 +44,19 @@ class StaleCloser extends ActionBase_1.ActionBase {
                             (this.additionalTeam.includes(lastComment.author.name) ||
                                 (await issue.hasWriteAccess(lastComment.author))))) {
                         if (lastComment) {
-                            console.log(`Last comment on ${hydrated.number} by ${lastComment.author.name}. Closing.`);
+                            console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`);
                         }
                         else {
-                            console.log(`No comments on ${hydrated.number}. Closing.`);
+                            console.log(`No comments on issue ${hydrated.number}. Closing.`);
                         }
                         if (this.closeComment) {
+                            console.log(`Posting comment on issue ${hydrated.number}`);
                             await issue.postComment(this.closeComment);
                         }
                         if (removeLabelsSet.length > 0) {
                             for (const removeLabel of removeLabelsSet) {
                                 if (removeLabel && removeLabel.length > 0) {
-                                    console.log(`Removing label on ${hydrated.number}: ${removeLabel}`);
+                                    console.log(`Removing label on issue ${hydrated.number}: ${removeLabel}`);
                                     await issue.removeLabel(removeLabel);
                                 }
                             }
@@ -63,22 +64,22 @@ class StaleCloser extends ActionBase_1.ActionBase {
                         if (addLabelsSet.length > 0) {
                             for (const addLabel of addLabelsSet) {
                                 if (addLabel && addLabel.length > 0) {
-                                    console.log(`Adding label on ${hydrated.number}: ${addLabel}`);
+                                    console.log(`Adding label on issue ${hydrated.number}: ${addLabel}`);
                                     await issue.addLabel(addLabel);
                                 }
                             }
                         }
                         await issue.closeIssue();
                         if (this.setMilestoneId != undefined) {
-                            console.log(`Setting MilestoneId ${+this.setMilestoneId}.`);
+                            console.log(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`);
                             await issue.setMilestone(+this.setMilestoneId);
                         }
-                        console.log(`Closing ${hydrated.number}.`);
+                        console.log(`Closing issue ${hydrated.number}.`);
                     }
                     else if (pingTimestamp != undefined) {
                         // Ping 
                         if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {
-                            console.log(`Last comment on ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`);
+                            console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`);
                             if (this.pingComment) {
                                 await issue.postComment(this.pingComment
                                     .replace('${assignee}', hydrated.assignee)
@@ -86,13 +87,14 @@ class StaleCloser extends ActionBase_1.ActionBase {
                             }
                         }
                         else {
-                            console.log(`Last comment on ${hydrated.number} by ${lastComment.author.name}. Skipping.${hydrated.assignee ? ' cc @' + hydrated.assignee : ''}`);
+                            console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Skipping.${hydrated.assignee ? ' cc @' + hydrated.assignee : ''}`);
                         }
                     }
                 }
                 else {
-                    console.log('Query returned an invalid issue:' +
-                        JSON.stringify({ ...hydrated, body: 'stripped' }));
+                    if (!hydrated.open) {
+                        console.log(`Issue ${hydrated.number} is not open. Ignoring`);
+                    }
                 }
             }
         }

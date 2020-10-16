@@ -22,7 +22,7 @@ jobs:
           readonly: ${{ github.event.inputs.readonly }}
           alsoApplyToOpenIssues: true
           reopenComment: This feature request has received enough votes to be added to our backlog.
-          labels: more votes needed,Feature Request
+          labels: Feature Request
           minimumVotes: 3
           ignoreLabels: debugger,internal
           milestoneId: 30
