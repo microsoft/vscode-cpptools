@@ -1169,7 +1169,6 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
 }
 
 export function deactivate(): Thenable<void> {
-    // Log timestamps telemetry.
     clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
