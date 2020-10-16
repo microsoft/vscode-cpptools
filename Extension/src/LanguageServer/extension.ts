@@ -411,6 +411,8 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 export function processDelayedDidOpen(document: vscode.TextDocument): void {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
+        // Log warm start.
+        clients.timeTelemetryCollector.setDidOpenTime(document.uri);
         if (clients.checkOwnership(client, document)) {
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
@@ -442,8 +444,6 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 }
             }
         }
-        // Log warm start.
-        clients.timeTelemetryCollector.setDidOpenTime(document.uri);
     }
 }
 
