@@ -37,8 +37,9 @@ class ActionBase {
         // The name is used to construct the query, which does not accept ID.
         // The ID is used for comparisons with issue data, which does not include the name.
         // TODO: Figure out a way to convert either from milestone name to ID, or vice versa.
-        // If inclusion and exclusion are mixed, exclusion will take precedence.
+        // If label inclusion and exclusion are mixed, exclusion will take precedence.
         // For example, an issue with both labels A and B will not match if B is excluded, even if A is included.
+        // If a milestoneName/milestoneId are set, ignoreMilenameName/ignoreMilestoneIds are ignored.
         // GitHub does not appear to support searching for all issues with milestones (not lacking a milestone).  "-no:milestone" does not work.
         // GitHub does not appear to support searching for all issues with labels (not lacking a label).  "-no:label" does not work.
         // All indicated labels must be present
@@ -64,8 +65,11 @@ class ActionBase {
                 }
             }
         }
-        if (this.ignoreMilestoneNames) {
-            if (this.ignoreMilestoneNames == "*" && !this.milestoneName) { // only if no milestone
+        if (this.milestoneName) {
+            query = query.concat(` milestone:"${this.milestoneName}"`);
+        }
+        else if (this.ignoreMilestoneNames) {
+            if (this.ignoreMilestoneNames == "*") {
                 query = query.concat(` no:milestone`);
                 this.ignoreAllWithMilestones = true;
             }
