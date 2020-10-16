@@ -1,12 +1,20 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.1.0: October 8, 2020
+## Version 1.1.0-insiders2: October 15, 2020
+### Bug Fixes
+* Fix `Build and Debug Active File` race condition with EngineLogs. [#6304](https://github.com/microsoft/vscode-cpptools/pull/6304)
+* Prevent configuration warnings from stealing focus. [#6308](https://github.com/microsoft/vscode-cpptools/issues/6308)
+* Fix `/std:c++latest` downgrading to `/std:c++17` when set via `compilerArgs` with cl.exe. [#6323](https://github.com/microsoft/vscode-cpptools/issues/6323)
+* Fix `cStandard` not being used. [#6324](https://github.com/microsoft/vscode-cpptools/issues/6324)
+
+## Version 1.1.0-insiders: October 13, 2020
 ### Enhancements
-* Add support to run c/cpp build tasks. [#3674](https://github.com/microsoft/vscode-cpptools/issues/3674), [#4278](https://github.com/microsoft/vscode-cpptools/issues/4278), [#5270](https://github.com/microsoft/vscode-cpptools/issues/5270), [#5285](https://github.com/microsoft/vscode-cpptools/issues/5285)
+* Add support to run c/cpp build tasks. [#3674](https://github.com/microsoft/vscode-cpptools/issues/3674), [#5270](https://github.com/microsoft/vscode-cpptools/issues/5270), [#5285](https://github.com/microsoft/vscode-cpptools/issues/5285)
   * Tasks: Configure Task
   * Tasks: Run Build Task
   * C/C++: Build and debug active file.
 * Add logging around compiler probing, and the "C/C++ Configuration Warnings" output channel. [#5259](https://github.com/microsoft/vscode-cpptools/issues/5259)
+* Add compile commands info to Log Diagnostics. [#5761](https://github.com/microsoft/vscode-cpptools/issues/5761)
 * Enable support for specifying a compiler by only the filename if it's in the environment path. [#6179](https://github.com/microsoft/vscode-cpptools/issues/6179)
 * Restart the IntelliSense process if its memory usage exceeds the `C_Cpp.intelliSenseMemoryLimit` setting. [#6230](https://github.com/microsoft/vscode-cpptools/issues/6230)
 * Add handling of the "-ansi" compiler arg when querying gcc/clang compilers.
@@ -18,13 +26,16 @@
 * Fix issues with IntelliSense for clang-cl.exe. [#6075](https://github.com/microsoft/vscode-cpptools/issues/6075)
 * Fix "Comments are not permitted in JSON" error when `c_cpp_properties.json` is open but not active. [#6132](https://github.com/microsoft/vscode-cpptools/issues/6132)
 * Rename the C language standard setting values from c18 and gnu18 to c17 and gnu17. [#6105](https://github.com/microsoft/vscode-cpptools/issues/6105)
-* Add more IntelliSense support for std ranges and concepts (__cpp_lib_concepts is now enabled). [#6173](https://github.com/microsoft/vscode-cpptools/issues/6173)
+* Add more IntelliSense support for std ranges, concepts, and modules exports (__cpp_lib_concepts is now enabled). [#6173](https://github.com/microsoft/vscode-cpptools/issues/6173)
 * Add "-fnoblocks" when querying clang on Mac, as IntelliSense does not currently support blocks. [#6189](https://github.com/microsoft/vscode-cpptools/issues/6189)
 * Fix clang-format on 32-bit Windows. [#6195](https://github.com/microsoft/vscode-cpptools/issues/6195)
 * Fix incorrect formatting results when clang-format removes duplicate includes. [#6205](https://github.com/microsoft/vscode-cpptools/issues/6205)
 * Fix a case where the main process could get stuck. [#6207](https://github.com/microsoft/vscode-cpptools/issues/6207)
+* Fix C files being treated as C++ files with compile_commands.json. [#6279](https://github.com/microsoft/vscode-cpptools/issues/6279)
 * Fix issues with the handling of the standard version for clang-cl.exe.
 * Fix the handling of various compiler arg pairs when querying compilers.
+* Avoid parsing entries in compile_commands.json for file types that we do not support.
+* Fixed an issue in which only C or C++ system headers were added to the browse path, rather than both.
 
 ### Other Contributions
 * Refactoring provider classes.

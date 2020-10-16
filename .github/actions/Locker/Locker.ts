@@ -29,7 +29,7 @@ export class Locker extends ActionBase {
 		const closedTimestamp = daysAgoToHumanReadbleDate(this.daysSinceClose)
 		const updatedTimestamp = daysAgoToHumanReadbleDate(this.daysSinceUpdate)
 
-		const query = this.buildQuery((this.daysSinceClose ? `closed:<${updatedTimestamp} ` : "") + (this.daysSinceUpdate ? `updated:<${updatedTimestamp} ` : "") + "is:closed is:unlocked");
+		const query = this.buildQuery((this.daysSinceClose ? `closed:<${closedTimestamp} ` : "") + (this.daysSinceUpdate ? `updated:<${updatedTimestamp} ` : "") + "is:closed is:unlocked");
 
 		for await (const page of this.github.query({ q: query })) {
 			await Promise.all(
@@ -44,11 +44,8 @@ export class Locker extends ActionBase {
 					} else {
 						if (hydrated.locked) {
 							console.log(`Issue ${hydrated.number} is already locked. Ignoring`)
-						} else {
-							console.log(
-								'Query returned an invalid issue:' +
-									JSON.stringify({ ...hydrated, body: 'stripped' }),
-							)
+						} else if (hydrated.open) {
+							console.log(`Issue ${hydrated.number} is open. Ignoring`)
 						}
 					}
 				}),

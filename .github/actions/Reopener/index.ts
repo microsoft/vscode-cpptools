@@ -5,24 +5,22 @@
 
 import { OctoKit } from '../api/octokit'
 import { getInput, getRequiredInput } from '../common/utils'
-import { StaleCloser } from './StaleCloser'
+import { Reopener } from './Reopener'
 import { Action } from '../common/Action'
 
-class StaleCloserAction extends Action {
-	id = 'StaleCloser'
+class ReopenerAction extends Action {
+	id = 'Locker'
 
 	async onTriggered(github: OctoKit) {
-		await new StaleCloser(
+		const alsoApplyToOpenIssues: string | undefined = getInput('alsoApplyToOpenIssues');
+		await new Reopener(
 			github,
-			+getRequiredInput('closeDays'),
-			getRequiredInput('labels'),
-			getInput('closeComment') || '',
-			+(getInput('pingDays') || 0),
-			getInput('pingComment') || '',
-			(getInput('additionalTeam') ?? '').split(','),
+			alsoApplyToOpenIssues != undefined && alsoApplyToOpenIssues.toLowerCase() == 'true',
 			getInput('addLabels') || undefined,
 			getInput('removeLabels') || undefined,
+			getInput('reopenComment') || '',
 			getInput('setMilestoneId') || undefined,
+			getInput('labels') || undefined,
 			getInput('milestoneName') || undefined,
 			getInput('milestoneId') || undefined,
 			getInput('ignoreLabels') || undefined,
@@ -34,4 +32,4 @@ class StaleCloserAction extends Action {
 	}
 }
 
-new StaleCloserAction().run() // eslint-disable-line
+new ReopenerAction().run() // eslint-disable-line
