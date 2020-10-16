@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: 0 12 * * * # Run at 12:00 PM UTC (4:00 AM PST, 5:00 AM PDT)
   workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
 
 jobs:
   main:
@@ -15,8 +19,9 @@ jobs:
       - name: Stale Closer
         uses: ./.github/actions/StaleCloser
         with:
+          readonly: ${{ github.event.inputs.readonly }}
           labels: by design
-          ignoredLabels: debugger,Feature Request,more info needed
+          ignoreLabels: debugger,Feature Request,more info needed,internal
           closeDays: 60
           closeComment: "This issue has been closed automatically because it's labeled as 'by design' and has not had recent activity."
           pingDays: 80

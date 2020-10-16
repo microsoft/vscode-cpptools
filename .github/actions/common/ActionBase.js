@@ -64,12 +64,12 @@ class ActionBase {
                 }
             }
         }
-        if (this.ignoreMilestoneNames && this.ignoreMilestoneIds) {
+        if (this.ignoreMilestoneNames) {
             if (this.ignoreMilestoneNames == "*" && !this.milestoneName) { // only if no milestone
                 query = query.concat(` no:milestone`);
                 this.ignoreAllWithMilestones = true;
             }
-            else {
+            else if (this.ignoreMilestoneIds) {
                 this.ignoreMilestoneNamesSet = this.ignoreMilestoneNames.split(',');
                 this.ignoreMilestoneIdsSet = this.ignoreMilestoneIds.split(',');
                 for (const str of this.ignoreMilestoneNamesSet) {
@@ -87,16 +87,19 @@ class ActionBase {
         if (this.ignoreAllWithLabels) {
             // Validate that the issue does not have labels
             if (issue.labels && issue.labels.length !== 0) {
+                console.log(`Issue ${issue.number} skipped due to label found after querying for no:label.`);
                 return false;
             }
         }
         else {
             // Make sure all labels we wanted are present.
             if ((!issue.labels || issue.labels.length == 0) && this.labelsSet.length > 0) {
+                console.log(`Issue ${issue.number} skipped due to not having a required label set.  No labels found.`);
                 return false;
             }
             for (const str of this.labelsSet) {
                 if (!issue.labels.includes(str)) {
+                    console.log(`Issue ${issue.number} skipped due to not having a required label set.`);
                     return false;
                 }
             }
@@ -104,6 +107,7 @@ class ActionBase {
             if (issue.labels && issue.labels.length > 0) {
                 for (const str of this.ignoreLabelsSet) {
                     if (issue.labels.includes(str)) {
+                        console.log(`Issue ${issue.number} skipped due to having an ignore label set: ${str}`);
                         return false;
                     }
                 }
@@ -112,32 +116,41 @@ class ActionBase {
         if (this.ignoreAllWithMilestones) {
             // Validate that the issue does not have a milestone.
             if (issue.milestoneId != null) {
+                console.log(`Issue ${issue.number} skipped due to milestone found after querying for no:milestone.`);
                 return false;
             }
         }
         else {
             // Make sure milestone is present, if required.
             if (this.milestoneId != undefined && issue.milestoneId != +this.milestoneId) {
+                console.log(`Issue ${issue.number} skipped due to not having required milsetone id ${this.milestoneId}.  Had: ${issue.milestoneId}`);
                 return false;
             }
             // Make sure a milestones we wanted to ignore is not present.
             if (issue.milestoneId != null) {
                 for (const str of this.ignoreMilestoneIdsSet) {
                     if (issue.milestoneId == +str) {
+                        console.log(`Issue ${issue.number} skipped due to milestone ${issue.milestoneId} found in list of ignored milestone IDs.`);
                         return false;
                     }
                 }
             }
         }
         // Verify the issue has a sufficient number of upvotes
+        let upvotes = 0;
+        if (issue.reactions) {
+            upvotes = issue.reactions['+1'];
+        }
         if (this.minimumVotes != undefined) {
-            if (issue.reactions['+1'] < this.minimumVotes) {
+            if (upvotes < this.minimumVotes) {
+                console.log(`Issue ${issue.number} skipped due to not having at least ${this.minimumVotes} upvotes.  Had: ${upvotes}`);
                 return false;
             }
         }
         // Verify the issue does not have too many upvotes
         if (this.maximumVotes != undefined) {
-            if (issue.reactions && issue.reactions['+1'] && issue.reactions['+1'] > this.maximumVotes) {
+            if (upvotes > this.maximumVotes) {
+                console.log(`Issue ${issue.number} skipped due to having more than ${this.maximumVotes} upvotes.  Had: ${upvotes}`);
                 return false;
             }
         }

@@ -17,6 +17,8 @@ export class StaleCloser extends ActionBase {
 		private pingComment: string,
 		private additionalTeam: string[],
 		private addLabels?: string,
+		private removeLabels?: string,
+		private setMilestoneId?: string,
 		milestoneName?: string,
 		milestoneId?: string,
 		ignoreLabels?: string,
@@ -36,6 +38,7 @@ export class StaleCloser extends ActionBase {
 		const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
 
 		const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
+		const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
 
 		for await (const page of this.github.query({ q: query })) {
 			for (const issue of page) {
@@ -59,29 +62,42 @@ export class StaleCloser extends ActionBase {
 					) {
 						if (lastComment) {
 							console.log(
-								`Last comment on ${hydrated.number} by ${lastComment.author.name}. Closing.`,
+								`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`,
 							)
 						} else {
-							console.log(`No comments on ${hydrated.number}. Closing.`)
+							console.log(`No comments on issue ${hydrated.number}. Closing.`)
 						}
 						if (this.closeComment) {
+							console.log(`Posting comment on issue ${hydrated.number}`)
 							await issue.postComment(this.closeComment)
+						}
+						if (removeLabelsSet.length > 0) {
+							for (const removeLabel of removeLabelsSet) {
+								if (removeLabel && removeLabel.length > 0) {
+									console.log(`Removing label on issue ${hydrated.number}: ${removeLabel}`)
+									await issue.removeLabel(removeLabel)
+								}
+							}
 						}
 						if (addLabelsSet.length > 0) {
 							for (const addLabel of addLabelsSet) {
 								if (addLabel && addLabel.length > 0) {
-									console.log(`Adding label on ${hydrated.number}: ${addLabel}`)
+									console.log(`Adding label on issue ${hydrated.number}: ${addLabel}`)
 									await issue.addLabel(addLabel)
 								}
 							}
 						}
-						console.log(`Closing ${hydrated.number}.`)
 						await issue.closeIssue()
+						if (this.setMilestoneId != undefined) {
+							console.log(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`)
+							await issue.setMilestone(+this.setMilestoneId)
+						}
+						console.log(`Closing issue ${hydrated.number}.`)
 					} else if (pingTimestamp != undefined) {
 						// Ping 
 						if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {
 							console.log(
-								`Last comment on ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`,
+								`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`,
 							)
 							if (this.pingComment) {
 								await issue.postComment(
@@ -92,17 +108,16 @@ export class StaleCloser extends ActionBase {
 							}
 						} else {
 							console.log(
-								`Last comment on ${hydrated.number} by ${lastComment.author.name}. Skipping.${
+								`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Skipping.${
 									hydrated.assignee ? ' cc @' + hydrated.assignee : ''
 								}`,
 							)
 						}
 					}
 				} else {
-					console.log(
-						'Query returned an invalid issue:' +
-							JSON.stringify({ ...hydrated, body: 'stripped' }),
-					)
+					if (!hydrated.open) {
+						console.log(`Issue ${hydrated.number} is not open. Ignoring`)
+					}
 				}
 			}
 		}

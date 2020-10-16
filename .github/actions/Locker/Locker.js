@@ -31,9 +31,8 @@ class Locker extends ActionBase_1.ActionBase {
                     if (hydrated.locked) {
                         console.log(`Issue ${hydrated.number} is already locked. Ignoring`);
                     }
-                    else {
-                        console.log('Query returned an invalid issue:' +
-                            JSON.stringify({ ...hydrated, body: 'stripped' }));
+                    else if (hydrated.open) {
+                        console.log(`Issue ${hydrated.number} is open. Ignoring`);
                     }
                 }
             }));

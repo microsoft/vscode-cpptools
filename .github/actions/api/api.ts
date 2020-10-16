@@ -30,6 +30,7 @@ export interface GitHubIssue extends GitHub {
 
 	closeIssue(): Promise<void>
 	lockIssue(): Promise<void>
+	reopenIssue(): Promise<void>
 
 	setMilestone(milestoneId: number): Promise<void>
 
