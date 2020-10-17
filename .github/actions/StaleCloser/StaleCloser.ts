@@ -55,17 +55,19 @@ export class StaleCloser extends ActionBase {
 					if (
 						!lastComment ||
 						lastComment.author.isGitHubApp ||
+						pingTimestamp == undefined ||
 						// TODO: List the collaborators once per go rather than checking a single user each issue
-						(pingTimestamp != undefined &&
-							(this.additionalTeam.includes(lastComment.author.name) ||
-							(await issue.hasWriteAccess(lastComment.author))))
+						this.additionalTeam.includes(lastComment.author.name) ||
+						await issue.hasWriteAccess(lastComment.author)
 					) {
-						if (lastComment) {
-							console.log(
-								`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`,
-							)
-						} else {
-							console.log(`No comments on issue ${hydrated.number}. Closing.`)
+						if (pingTimestamp != undefined) {
+							if (lastComment) {
+								console.log(
+									`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`,
+								)
+							} else {
+								console.log(`No comments on issue ${hydrated.number}. Closing.`)
+							}
 						}
 						if (this.closeComment) {
 							console.log(`Posting comment on issue ${hydrated.number}`)
@@ -93,7 +95,7 @@ export class StaleCloser extends ActionBase {
 							await issue.setMilestone(+this.setMilestoneId)
 						}
 						console.log(`Closing issue ${hydrated.number}.`)
-					} else if (pingTimestamp != undefined) {
+					} else {
 						// Ping 
 						if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {
 							console.log(
