@@ -114,7 +114,13 @@ function getArrayOfBuilds(input: any): Build[] {
 export function vsixNameForPlatform(info: PlatformInformation): string {
     const vsixName: string | undefined = function(platformInfo): string | undefined {
         switch (platformInfo.platform) {
-            case 'win32': return 'cpptools-win32.vsix';
+            case 'win32':
+                switch (platformInfo.architecture) {
+                    case 'x64': return 'cpptool-win32.vsix'; // TODO: Change to cpptools-win64?
+                    case 'ia32': return 'cpptools-win32.vsix';
+                    case 'arm64': return 'cpptools-win-arm64.vsix';
+                    default: throw new Error(`Unexpected Windows architecture: ${platformInfo.architecture}`);
+                }
             case 'darwin': return 'cpptools-osx.vsix';
             default: {
                 switch (platformInfo.architecture) {
