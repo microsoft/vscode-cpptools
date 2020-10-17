@@ -2399,7 +2399,9 @@
       ],
       "architecture": [
         "x86_64",
-        "x86"
+        "x86",
+        "i686",
+        "i386"
       ],
       "binaries": [
         "./bin/cpptools.exe",
