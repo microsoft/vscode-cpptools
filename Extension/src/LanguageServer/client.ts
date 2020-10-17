@@ -161,6 +161,8 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
 
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
     diagnosticsCollection.set(realUri, diagnostics);
+
+    clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri);
 }
 
 interface WorkspaceFolderParams {
@@ -424,6 +426,10 @@ enum SemanticTokenModifiers {
     local = (1 << 2)
 }
 
+interface IntelliSenseSetup {
+    uri: string;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -482,6 +488,7 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
+const IntelliSenseSetupNotification:  NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
 
 let failureMessageShown: boolean = false;
 
@@ -1892,6 +1899,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
+        this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
         setupOutputHandlers();
     }
 
@@ -2152,6 +2160,10 @@ export class DefaultClient implements Client {
                 }
             }
         }
+    }
+
+    public logIntellisenseSetupTime(notification: IntelliSenseSetup): void {
+        clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
     }
 
     private promptCompileCommands(params: CompileCommandsPaths): void {

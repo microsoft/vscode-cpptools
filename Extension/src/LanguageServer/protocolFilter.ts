@@ -26,6 +26,8 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         didOpen: (document, sendMessage) => {
             const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
+                // Log warm start.
+                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
