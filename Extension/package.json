@@ -856,6 +856,12 @@
           "minimum": 256,
           "maximum": 16384
         },
+        "C_Cpp.intelliSenseUpdateDelay": {
+          "type": "number",
+          "default": 2000,
+          "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
+          "scope": "resource"
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
