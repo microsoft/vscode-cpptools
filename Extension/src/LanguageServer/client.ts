@@ -950,7 +950,7 @@ export class DefaultClient implements Client {
         const settings_spaceWithinInitializerListBraces:  boolean[] = [];
         const settings_spacePreserveInInitializerList:  boolean[] = [];
         const settings_spaceBeforeOpenSquareBracket:  boolean[] = [];
-        const settings_spaceWithinSquareBracketse:  boolean[] = [];
+        const settings_spaceWithinSquareBrackets:  boolean[] = [];
         const settings_spaceBeforeEmptySquareBrackets:  boolean[] = [];
         const settings_spaceBetweenEmptySquareBrackets:  boolean[] = [];
         const settings_spaceGroupSquareBrackets:  boolean[] = [];
@@ -1026,7 +1026,7 @@ export class DefaultClient implements Client {
                 settings_spaceWithinInitializerListBraces.push(setting.vcFormatSpaceWithinInitializerListBraces);
                 settings_spacePreserveInInitializerList.push(setting.vcFormatSpacePreserveInInitializerList);
                 settings_spaceBeforeOpenSquareBracket.push(setting.vcFormatSpaceBeforeOpenSquareBracket);
-                settings_spaceWithinSquareBracketse.push(setting.vcFormatSpaceWithinSquareBrackets);
+                settings_spaceWithinSquareBrackets.push(setting.vcFormatSpaceWithinSquareBrackets);
                 settings_spaceBeforeEmptySquareBrackets.push(setting.vcFormatSpaceBeforeEmptySquareBrackets);
                 settings_spaceBetweenEmptySquareBrackets.push(setting.vcFormatSpaceBetweenEmptySquareBrackets);
                 settings_spaceGroupSquareBrackets.push(setting.vcFormatSpaceGroupSquareBrackets);
@@ -1146,7 +1146,7 @@ export class DefaultClient implements Client {
                         withinInitializerListBraces : settings_spaceWithinInitializerListBraces,
                         preserveInInitializerList : settings_spacePreserveInInitializerList,
                         beforeOpenSquareBracket : settings_spaceBeforeOpenSquareBracket,
-                        withinSquareBrackets : settings_spaceWithinSquareBracketse,
+                        withinSquareBrackets : settings_spaceWithinSquareBrackets,
                         beforeEmptySquareBrackets : settings_spaceBeforeEmptySquareBrackets,
                         betweenEmptySquareBrackets : settings_spaceBetweenEmptySquareBrackets,
                         groupSquareBrackets : settings_spaceGroupSquareBrackets,
