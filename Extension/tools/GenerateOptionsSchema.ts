@@ -82,10 +82,8 @@ function replaceReferences(definitions: any, objects: any): any {
 
         // Handle 'anyOf' with references
         if (objects[key].hasOwnProperty('anyOf')) {
-            for (const index in objects[key].anyOf)
-            {
-                if (objects[key].anyOf[index].hasOwnProperty('$ref'))
-                {
+            for (const index in objects[key].anyOf) {
+                if (objects[key].anyOf[index].hasOwnProperty('$ref')) {
                     objects[key].anyOf[index] = refReplace(definitions, objects[key].anyOf[index]);
                 }
             }
