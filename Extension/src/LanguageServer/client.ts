@@ -906,7 +906,6 @@ export class DefaultClient implements Client {
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
         const settings_intelliSenseMemoryLimit: (number | undefined)[] = [];
-        const settings_intelliSenseUpdateDelay: (number | undefined)[] = [];
         const settings_autoComplete: (string | undefined)[] = [];
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
@@ -1060,7 +1059,6 @@ export class DefaultClient implements Client {
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
                 settings_intelliSenseMemoryLimit.push(setting.intelliSenseMemoryLimit);
-                settings_intelliSenseUpdateDelay.push(setting.intelliSenseUpdateDelay);
                 settings_autoComplete.push(setting.autoComplete);
             }
 
@@ -1186,7 +1184,7 @@ export class DefaultClient implements Client {
                 intelliSenseCachePath : settings_intelliSenseCachePath,
                 intelliSenseCacheSize : settings_intelliSenseCacheSize,
                 intelliSenseMemoryLimit : settings_intelliSenseMemoryLimit,
-                intelliSenseUpdateDelay: settings_intelliSenseUpdateDelay,
+                intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
                 autocomplete: settings_autoComplete,
                 errorSquiggles: settings_errorSquiggles,
                 dimInactiveRegions: settings_dimInactiveRegions,

@@ -860,7 +860,9 @@
           "type": "number",
           "default": 2000,
           "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-          "scope": "resource"
+          "scope": "application",
+          "minimum": 500,
+          "maximum": 3000
         },
         "C_Cpp.default.includePath": {
           "type": [
