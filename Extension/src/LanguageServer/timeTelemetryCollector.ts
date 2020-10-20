@@ -69,7 +69,7 @@ export class TimeTelemetryCollector {
         const startTime: number = timeStamps.firstFile ? timeStamps.firstFile : timeStamps.didOpen;
         let properties: any = {};
         let metrics: any = {
-            "setupTime": (timeStamps.setup - startTime),
+            "setupTime": (timeStamps.setup - timeStamps.didOpen),
             "updateRangeTime": (timeStamps.updateRange - timeStamps.setup),
             "totalTime": (timeStamps.updateRange - startTime)
         };
