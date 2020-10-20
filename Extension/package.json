@@ -2405,7 +2405,7 @@
       "platforms": [
         "win32"
       ],
-      "architecture": [
+      "architectures": [
         "x86_64",
         "x86",
         "i686",
@@ -2423,7 +2423,7 @@
       "platforms": [
         "win32"
       ],
-      "architecture": [
+      "architectures": [
         "arm64"
       ],
       "binaries": [
@@ -2594,7 +2594,7 @@
       "platforms": [
         "win32"
       ],
-      "architecture": [
+      "architectures": [
         "x86_64",
         "x86",
         "i686",
