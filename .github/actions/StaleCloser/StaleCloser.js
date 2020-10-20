@@ -8,7 +8,7 @@ exports.StaleCloser = void 0;
 const ActionBase_1 = require("../common/ActionBase");
 const utils_1 = require("../common/utils");
 class StaleCloser extends ActionBase_1.ActionBase {
-    constructor(github, closeDays, labels, closeComment, pingDays, pingComment, additionalTeam, addLabels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
+    constructor(github, closeDays, labels, closeComment, pingDays, pingComment, additionalTeam, addLabels, removeLabels, setMilestoneId, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
         super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
         this.github = github;
         this.closeDays = closeDays;
@@ -17,12 +17,15 @@ class StaleCloser extends ActionBase_1.ActionBase {
         this.pingComment = pingComment;
         this.additionalTeam = additionalTeam;
         this.addLabels = addLabels;
+        this.removeLabels = removeLabels;
+        this.setMilestoneId = setMilestoneId;
     }
     async run() {
         const updatedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.closeDays);
         const pingTimestamp = this.pingDays ? utils_1.daysAgoToTimestamp(this.pingDays) : undefined;
         const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
         const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
+        const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
         for await (const page of this.github.query({ q: query })) {
             for (const issue of page) {
                 const hydrated = await issue.getIssue();
@@ -36,34 +39,49 @@ class StaleCloser extends ActionBase_1.ActionBase {
                 ) {
                     if (!lastComment ||
                         lastComment.author.isGitHubApp ||
+                        pingTimestamp == undefined ||
                         // TODO: List the collaborators once per go rather than checking a single user each issue
-                        (pingTimestamp != undefined &&
-                            (this.additionalTeam.includes(lastComment.author.name) ||
-                                (await issue.hasWriteAccess(lastComment.author))))) {
-                        if (lastComment) {
-                            console.log(`Last comment on ${hydrated.number} by ${lastComment.author.name}. Closing.`);
-                        }
-                        else {
-                            console.log(`No comments on ${hydrated.number}. Closing.`);
+                        this.additionalTeam.includes(lastComment.author.name) ||
+                        await issue.hasWriteAccess(lastComment.author)) {
+                        if (pingTimestamp != undefined) {
+                            if (lastComment) {
+                                console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`);
+                            }
+                            else {
+                                console.log(`No comments on issue ${hydrated.number}. Closing.`);
+                            }
                         }
                         if (this.closeComment) {
+                            console.log(`Posting comment on issue ${hydrated.number}`);
                             await issue.postComment(this.closeComment);
+                        }
+                        if (removeLabelsSet.length > 0) {
+                            for (const removeLabel of removeLabelsSet) {
+                                if (removeLabel && removeLabel.length > 0) {
+                                    console.log(`Removing label on issue ${hydrated.number}: ${removeLabel}`);
+                                    await issue.removeLabel(removeLabel);
+                                }
+                            }
                         }
                         if (addLabelsSet.length > 0) {
                             for (const addLabel of addLabelsSet) {
                                 if (addLabel && addLabel.length > 0) {
-                                    console.log(`Adding label on ${hydrated.number}: ${addLabel}`);
+                                    console.log(`Adding label on issue ${hydrated.number}: ${addLabel}`);
                                     await issue.addLabel(addLabel);
                                 }
                             }
                         }
-                        console.log(`Closing ${hydrated.number}.`);
                         await issue.closeIssue();
+                        if (this.setMilestoneId != undefined) {
+                            console.log(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`);
+                            await issue.setMilestone(+this.setMilestoneId);
+                        }
+                        console.log(`Closing issue ${hydrated.number}.`);
                     }
-                    else if (pingTimestamp != undefined) {
+                    else {
                         // Ping 
                         if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {
-                            console.log(`Last comment on ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`);
+                            console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`);
                             if (this.pingComment) {
                                 await issue.postComment(this.pingComment
                                     .replace('${assignee}', hydrated.assignee)
@@ -71,13 +89,14 @@ class StaleCloser extends ActionBase_1.ActionBase {
                             }
                         }
                         else {
-                            console.log(`Last comment on ${hydrated.number} by ${lastComment.author.name}. Skipping.${hydrated.assignee ? ' cc @' + hydrated.assignee : ''}`);
+                            console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Skipping.${hydrated.assignee ? ' cc @' + hydrated.assignee : ''}`);
                         }
                     }
                 }
                 else {
-                    console.log('Query returned an invalid issue:' +
-                        JSON.stringify({ ...hydrated, body: 'stripped' }));
+                    if (!hydrated.open) {
+                        console.log(`Issue ${hydrated.number} is not open. Ignoring`);
+                    }
                 }
             }
         }

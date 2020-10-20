@@ -1,7 +1,7 @@
-name: Feature Request Closer (Triage)
+name: Feature Request Reopener
 on:
   schedule:
-    - cron: 40 11 * * * # Run at 11:40 AM UTC (3:40 AM PST, 4:40 AM PDT)
+    - cron: 20 12 * * * # Run at 12:20 PM UTC (4:20 AM PST, 5:20 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:
@@ -16,15 +16,16 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Actions
         run: cd ./.github/actions && npm install --production && cd ../..
-      - name: Stale Closer
-        uses: ./.github/actions/StaleCloser
+      - name: Run Reopener
+        uses: ./.github/actions/Reopener
         with:
           readonly: ${{ github.event.inputs.readonly }}
+          alsoApplyToOpenIssues: true
+          reopenComment: This feature request has received enough votes to be added to our backlog.
           labels: Feature Request
+          minimumVotes: 3
           ignoreLabels: debugger,internal
-          addLabels: more votes needed
-          closeDays: 60
-          maximumVotes: 2
-          closeComment: "This feature request is being closed due to insufficient upvotes.  When enough upvotes are received, this issue will be eligible for our backlog."
-          milestoneName: Triage
           milestoneId: 30
+          milestoneName: Triage
+          setMilestoneId: 28
+          removeLabels: more votes needed

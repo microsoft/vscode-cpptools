@@ -78,7 +78,7 @@ exports.logErrorToIssue = async (message, ping, token) => {
     const dest = exports.errorLoggingIssue;
     if (!dest)
         return console.log('no error logging repo defined. swallowing error:', message);
-    return new octokit_1.OctoKitIssue(token, { owner: dest.owner, repo: dest.repo }, { number: dest.issue })
+    return new octokit_1.OctoKitIssue(token, { owner: dest.owner, repo: dest.repo }, { number: dest.issue }, { readonly: !!exports.getInput('readonly') })
         .postComment(`
 Workflow: ${github_1.context.workflow}
 

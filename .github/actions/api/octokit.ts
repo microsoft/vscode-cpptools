@@ -60,7 +60,7 @@ export class OctoKit implements GitHub {
 			const page: Array<Octokit.SearchIssuesAndPullRequestsResponseItemsItem> = pageResponse.data
 			console.log(`Page ${++pageNum}: ${page.map(({ number }) => number).join(' ')}`)
 			yield page.map(
-				(issue) => new OctoKitIssue(this.token, this.params, this.octokitIssueToIssue(issue)),
+				(issue) => new OctoKitIssue(this.token, this.params, this.octokitIssueToIssue(issue), this.options),
 			)
 		}
 	}
@@ -221,6 +221,16 @@ export class OctoKitIssue extends OctoKit implements GitHubIssue {
 				...this.params,
 				issue_number: this.issueData.number,
 				state: 'closed',
+			})
+	}
+
+	async reopenIssue(): Promise<void> {
+		debug('Reopening issue ' + this.issueData.number)
+		if (!this.options.readonly)
+			await this.octokit.issues.update({
+				...this.params,
+				issue_number: this.issueData.number,
+				state: 'open',
 			})
 	}
 
@@ -427,7 +437,7 @@ export class OctoKitIssue extends OctoKit implements GitHubIssue {
 			for (const id of crossReferencing.reverse()) {
 				const closed = await new OctoKitIssue(this.token, this.params, {
 					number: id,
-				}).getClosingInfo(alreadyChecked)
+				}, this.options).getClosingInfo(alreadyChecked)
 
 				if (closed) {
 					if (Math.abs(closed.timestamp - ((await this.getIssue()).closedAt ?? 0)) < 5000) {

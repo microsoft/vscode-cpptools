@@ -1,7 +1,7 @@
-name: More Info Needed Closer
+name: Feature Request Closer (no milestone)
 on:
   schedule:
-    - cron: 10 11 * * * # Run at 11:10 AM UTC (3:10 AM PST, 4:10 AM PDT)
+    - cron: 50 11 * * * # Run at 11:50 AM UTC (3:50 AM PST, 4:50 AM PDT)
   workflow_dispatch:
    inputs:
      readonly:
@@ -20,9 +20,11 @@ jobs:
         uses: ./.github/actions/StaleCloser
         with:
           readonly: ${{ github.event.inputs.readonly }}
-          labels: more info needed
+          labels: Feature Request
           ignoreLabels: debugger,internal
+          addLabels: more votes needed
           closeDays: 60
-          closeComment: "This issue has been closed automatically because it needs more information and has not had recent activity."
-          pingDays: 80
-          pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if the problem no longer exists, or adding more information."
+          maximumVotes: 2
+          closeComment: "This feature request is being closed due to insufficient upvotes.  When enough upvotes are received, this issue will be eligible for our backlog."
+          setMilestoneId: 30
+          ignoreMilestoneNames: "*"

@@ -6,9 +6,10 @@
 
 import * as vscode from 'vscode';
 import * as util from '../common';
-import * as telemetry from '../telemetry';
 import * as cpptools from './client';
+import * as telemetry from '../telemetry';
 import { getCustomConfigProviders } from './customProviders';
+import { TimeTelemetryCollector } from './timeTelemetryCollector';
 
 const defaultClientKey: string = "@@default@@";
 export interface ClientKey {
@@ -22,6 +23,7 @@ export class ClientCollection {
     private defaultClient: cpptools.Client;
     private activeClient: cpptools.Client;
     private activeDocument?: vscode.TextDocument;
+    public timeTelemetryCollector: TimeTelemetryCollector;
 
     public get ActiveClient(): cpptools.Client { return this.activeClient; }
     public get Names(): ClientKey[] {
@@ -60,6 +62,8 @@ export class ClientCollection {
 
         this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e => this.onDidChangeWorkspaceFolders(e)));
         this.disposables.push(vscode.workspace.onDidCloseTextDocument(d => this.onDidCloseTextDocument(d)));
+
+        this.timeTelemetryCollector = new TimeTelemetryCollector();
     }
 
     public activeDocumentChanged(document: vscode.TextDocument): void {

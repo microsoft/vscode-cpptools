@@ -51,7 +51,7 @@ class OctoKit {
             numRequests++;
             const page = pageResponse.data;
             console.log(`Page ${++pageNum}: ${page.map(({ number }) => number).join(' ')}`);
-            yield page.map((issue) => new OctoKitIssue(this.token, this.params, this.octokitIssueToIssue(issue)));
+            yield page.map((issue) => new OctoKitIssue(this.token, this.params, this.octokitIssueToIssue(issue), this.options));
         }
     }
     async createIssue(owner, repo, title, body) {
@@ -198,6 +198,15 @@ class OctoKitIssue extends OctoKit {
                 ...this.params,
                 issue_number: this.issueData.number,
                 state: 'closed',
+            });
+    }
+    async reopenIssue() {
+        core_1.debug('Reopening issue ' + this.issueData.number);
+        if (!this.options.readonly)
+            await this.octokit.issues.update({
+                ...this.params,
+                issue_number: this.issueData.number,
+                state: 'open',
             });
     }
     async lockIssue() {
@@ -366,7 +375,7 @@ class OctoKitIssue extends OctoKit {
             for (const id of crossReferencing.reverse()) {
                 const closed = await new OctoKitIssue(this.token, this.params, {
                     number: id,
-                }).getClosingInfo(alreadyChecked);
+                }, this.options).getClosingInfo(alreadyChecked);
                 if (closed) {
                     if (Math.abs(closed.timestamp - ((_g = (await this.getIssue()).closedAt) !== null && _g !== void 0 ? _g : 0)) < 5000) {
                         closingCommit = closed;
