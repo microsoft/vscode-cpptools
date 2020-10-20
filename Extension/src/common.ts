@@ -581,7 +581,7 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
 }
 
 /** Writes content to a text file */
-export function writeFileText(filePath: string, content: string, encoding: string = "utf8"): Promise<void> {
+export function writeFileText(filePath: string, content: string, encoding: BufferEncoding = "utf8"): Promise<void> {
     const folders: string[] = filePath.split(path.sep).slice(0, -1);
     if (folders.length) {
         // create folder path if it doesn't exist
