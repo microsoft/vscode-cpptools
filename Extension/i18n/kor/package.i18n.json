@@ -139,6 +139,7 @@
 	"c_cpp.configuration.intelliSenseCachePath.description": "IntelliSense에서 사용하는 캐시되고 미리 컴파일된 헤더의 폴더 경로를 정의합니다. 기본 캐시 경로는 Windows의 \"%LocalAppData%/Microsoft/vscode-cpptools\", Linux의 \"$XDG_CACHE_HOME/vscode-cpptools/\"(또는 XDG_CACHE_HOME이 정의되지 않은 경우 \"$HOME/.cache/vscode-cpptools/\"), Mac의 \"$HOME/Library/Caches/vscode-cpptools/\"입니다. 경로를 지정하지 않거나 지정한 경로가 잘못된 경우 기본 경로를 사용합니다.",
 	"c_cpp.configuration.intelliSenseCacheSize.description": "캐시된 미리 컴파일된 헤더에 대한 작업 영역당 하드 드라이브 공간의 최대 크기(MB)입니다. 실제 사용량은 이 값을 기준으로 변동될 수 있습니다. 기본 크기는 5,120MB입니다. 크기가 0이면 미리 컴파일된 헤더 캐싱이 사용하지 않도록 설정됩니다.",
 	"c_cpp.configuration.intelliSenseMemoryLimit.description": "IntelliSense 프로세스의 메모리 사용량 제한(MB)입니다. 기본 제한은 4,096MB이며 최대 제한은 16GB입니다. 확장은 IntelliSense 프로세스가 제한을 초과하면 해당 프로세스를 종료했다가 다시 시작합니다.",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Controls the delay in milliseconds before IntelliSense starts updating after a modification.",
 	"c_cpp.configuration.default.includePath.description": "c_cpp_properties.json에 \"includePath\"가 지정되지 않은 경우 구성에 사용할 값입니다. \"includePath\"가 지정된 경우 배열에 \"${default}\"를 추가하여 이 설정의 값을 삽입합니다.",
 	"c_cpp.configuration.default.defines.description": "\"defines\"가 지정되지 않은 경우 구성에서 사용할 값 또는 \"${default}\"가 \"defines\"에 있는 경우 삽입할 값입니다.",
 	"c_cpp.configuration.default.macFrameworkPath.description": "\"macFrameworkPath\"가 지정되지 않은 경우 구성에서 사용할 값 또는 \"${default}\"가 \"macFrameworkPath\"에 있는 경우 삽입할 값입니다.",
