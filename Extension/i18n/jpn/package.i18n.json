@@ -139,6 +139,7 @@
 	"c_cpp.configuration.intelliSenseCachePath.description": "IntelliSense が使用する、キャッシュされたプリコンパイル済みヘッダーのフォルダー パスを定義します。既定のキャッシュ パスは、Windows では \"%LocalAppData%/Microsoft/vscode-cpptools\"、Linux では \"$XDG_CACHE_HOME/vscode-cpptools/\" (XDG_CACHE_HOME が定義されていない場合は、\"$HOME/.cache/vscode-cpptools/\" )、Mac では \"$HOME/Library/Caches/vscode-cpptools/\" です。パスが指定されていない場合、または指定したパスが無効な場合は、既定のパスが使用されます。",
 	"c_cpp.configuration.intelliSenseCacheSize.description": "キャッシュされたプリコンパイル済みヘッダーの、ワークスペースごとのハード ドライブ領域の最大サイズ (MB 単位)。実際の使用量には多少の誤差があります。既定のサイズは 5120 MB です。サイズが 0 の場合、プリコンパイル済みヘッダーのキャッシュは無効になります。",
 	"c_cpp.configuration.intelliSenseMemoryLimit.description": "IntelliSense プロセスのメモリ使用量の制限 (MB)。既定の制限は 4096 MB で、上限は 16 GB です。拡張機能は、制限を超えると IntelliSense プロセスをシャットダウンして再起動します。",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Controls the delay in milliseconds before IntelliSense starts updating after a modification.",
 	"c_cpp.configuration.default.includePath.description": "c_cpp_properties.json で \"includePath\" が指定されていない場合に構成で使用する値です。\"includePath\" が指定されている場合に、この設定から値を挿入するには、配列に \"${default}\" を追加します。",
 	"c_cpp.configuration.default.defines.description": "\"defines\" が指定されていない場合に構成で使用される値、または \"defines\" 内に \"${default}\" が存在する場合に挿入される値です。",
 	"c_cpp.configuration.default.macFrameworkPath.description": "\"macFrameworkPath\" が指定されていない場合に構成で使用される値、または \"macFrameworkPath\" 内に \"${default}\" が存在する場合に挿入される値です。",
