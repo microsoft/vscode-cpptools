@@ -1,5 +1,29 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.0-insiders3: October 22, 2020
+### New Features
+* Add language server support for Windows ARM64 (no debugging yet). [#5583](https://github.com/microsoft/vscode-cpptools/issues/5583)
+* [cppdbg] Debugger Protocol Updates:
+  * ReadMemoryRequest [PR MIEngine#1028](https://github.com/microsoft/MIEngine/pull/1028)
+  * ModulesRequest and ModuleEvent [PR MIEngine#1054](https://github.com/microsoft/MIEngine/pull/1054)
+* [cppdbg] Support new SourceFileMap schema [PR #6319](https://github.com/microsoft/vscode-cpptools/pull/6319)
+
+### Enhancement
+* Add `intelliSenseUpdateDelay` setting. [#6142](https://github.com/microsoft/vscode-cpptools/issues/6142)
+  * YuTengjing (@tjx666) [PR #6344](https://github.com/microsoft/vscode-cpptools/pull/6344)
+* [cppdbg] Stepping out of a function will display '$ReturnValue'. 
+  * @Trass3r [PR MIEngine#1036](https://github.com/microsoft/MIEngine/pull/1036)
+* [cppdbg] Support composite expressions in natvis ArrayItems
+  * @Trass3r [PR MIEngine#1044](https://github.com/microsoft/MIEngine/pull/1044)
+
+### Bug Fixes
+* Fix incorrect signature help active argument with multiple template parameters. [#4786](https://github.com/microsoft/vscode-cpptools/issues/4786)
+* Fix changes to some `c_cpp_properties.json` properties not taking effect (until a reload) if `compileCommands` is set. [#6332](https://github.com/microsoft/vscode-cpptools/issues/6332)
+* Fix compiler querying when `compileCommands` is used with a file name with spaces. [#6339](https://github.com/microsoft/vscode-cpptools/issues/6339)
+* Fix issue with compiler querying not handling various clang command line options correctly. [6359](https://github.com/microsoft/vscode-cpptools/issues/6356)
+* Fix issue where std change warnings were not generated if IntelliSense mode was not set.
+* Fix issue macOS Framework search to only parse the "Current" framework folder when the "Headers" folder is not found. [#2046](https://github.com/microsoft/vscode-cpptools/issues/2046)
+
 ## Version 1.1.0-insiders2: October 15, 2020
 ### Bug Fixes
 * Fix `Build and Debug Active File` race condition with EngineLogs. [#6304](https://github.com/microsoft/vscode-cpptools/pull/6304)
