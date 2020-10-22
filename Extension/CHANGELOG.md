@@ -8,7 +8,7 @@
   * ModulesRequest and ModuleEvent [PR MIEngine#1054](https://github.com/microsoft/MIEngine/pull/1054)
 * [cppdbg] Support new SourceFileMap schema [PR #6319](https://github.com/microsoft/vscode-cpptools/pull/6319)
 
-### Enhancement
+### Enhancements
 * Add `intelliSenseUpdateDelay` setting. [#6142](https://github.com/microsoft/vscode-cpptools/issues/6142)
   * YuTengjing (@tjx666) [PR #6344](https://github.com/microsoft/vscode-cpptools/pull/6344)
 * [cppdbg] Stepping out of a function will display '$ReturnValue'. 
