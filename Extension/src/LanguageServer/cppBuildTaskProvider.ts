@@ -154,26 +154,25 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
-        const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
             CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
-        const isWindows: boolean = os.platform() === 'win32';
-        const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
-        let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
-        if (!definition && compilerArgs && compilerArgs.length > 0) {
-            args = args.concat(compilerArgs);
-        }
-        const options: cp.ExecOptions | undefined = { cwd: cwd };
-
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
         if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
             resolvedcompilerPath = "\"" + resolvedcompilerPath + "\"";
         }
-
+        
         if (!definition) {
+            const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+            const isWindows: boolean = os.platform() === 'win32';
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            if (compilerArgs && compilerArgs.length > 0) {
+                args = args.concat(compilerArgs);
+            }
+            const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
+            const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskLabel,
@@ -196,7 +195,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const task: CppBuildTask = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, definition ? definition.args : [], definition ? definition.options : undefined)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
