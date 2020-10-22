@@ -262,6 +262,10 @@ export function isBoolean(input: any): input is boolean {
     return typeof(input) === "boolean";
 }
 
+export function isObject(input: any): input is object {
+    return typeof(input) === "object";
+}
+
 export function isArray(input: any): input is any[] {
     return input instanceof Array;
 }
