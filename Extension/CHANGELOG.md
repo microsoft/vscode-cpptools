@@ -23,6 +23,7 @@
 * Fix issue with compiler querying not handling various clang command line options correctly. [6359](https://github.com/microsoft/vscode-cpptools/issues/6356)
 * Fix issue where std change warnings were not generated if IntelliSense mode was not set.
 * Fix issue macOS Framework search to only parse the "Current" framework folder when the "Headers" folder is not found. [#2046](https://github.com/microsoft/vscode-cpptools/issues/2046)
+* Fix issue to not overwrite the compiler options and args when building from a custom defined task. [#6366](https://github.com/microsoft/vscode-cpptools/issues/6366)
 
 ## Version 1.1.0-insiders2: October 15, 2020
 ### Bug Fixes
