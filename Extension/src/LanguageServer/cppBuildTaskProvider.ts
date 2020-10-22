@@ -163,7 +163,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
             resolvedcompilerPath = "\"" + resolvedcompilerPath + "\"";
         }
-        
+
         if (!definition) {
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const isWindows: boolean = os.platform() === 'win32';
