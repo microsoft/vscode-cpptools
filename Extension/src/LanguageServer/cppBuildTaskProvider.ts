@@ -326,12 +326,13 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
         }
 
-        let splitWriteEmitter = (lines: string | Buffer) => {
+        const splitWriteEmitter = (lines: string | Buffer) => {
             for (const line of lines.toString().replace("\r\n", "\n").split("\n")) {
-                if (line.length)
+                if (line.length) {
                     this.writeEmitter.fire(line + this.endOfLine);
+                }
             }
-        }
+        };
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
