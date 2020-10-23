@@ -296,6 +296,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     private closeEmitter = new EventEmitter<number>();
     public get onDidWrite(): Event<string> { return this.writeEmitter.event; }
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
+    private endOfLine: string = os.platform() === 'win32' ? "\r\n" : "\n";
 
     constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
@@ -303,7 +304,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
-        this.writeEmitter.fire("Starting build...\r\n");
+        this.writeEmitter.fire(`Starting build...${this.endOfLine}`);
         await this.doBuild();
     }
 
@@ -325,23 +326,25 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
         }
 
+        let splitWriteEmitter = (lines: string | Buffer) => {
+            for (const line of lines.toString().replace("\r\n", "\n").split("\n")) {
+                if (line.length)
+                    this.writeEmitter.fire(line + this.endOfLine);
+            }
+        }
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
-                    const endOfLine: string = os.platform() === 'win32' ? "\r\n" : "\n";
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
                         const dot: string = (stdout || _stderr) ? ":" : ".";
-                        this.writeEmitter.fire("Build finished with error" + dot + endOfLine);
-                        this.writeEmitter.fire(stdout.toString());
-                        for (const line of _stderr.toString().split(endOfLine)) {
-                            this.writeEmitter.fire(line);
-                            this.writeEmitter.fire(endOfLine);
-                        }
+                        this.writeEmitter.fire(`Build finished with error${dot}${this.endOfLine}`);
+                        splitWriteEmitter(stdout);
+                        splitWriteEmitter(_stderr);
                         resolve(-1);
                     } else {
-                        this.writeEmitter.fire(stdout.toString());
-                        this.writeEmitter.fire(endOfLine + "Build finished successfully." + endOfLine);
+                        splitWriteEmitter(stdout);
+                        this.writeEmitter.fire(`Build finished successfully.${this.endOfLine}`);
                         resolve(0);
                     }
                 });
