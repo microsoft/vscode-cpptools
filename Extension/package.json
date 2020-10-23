@@ -1602,6 +1602,10 @@
                     "default": ""
                   }
                 }
+              },
+              "detail": {
+                "type": "string",
+                "description":"%c_cpp.debuggers.configuration.detail.description%"
               }
             }
           },
@@ -2003,6 +2007,10 @@
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.requireExactSource.description%",
                 "default": true
+              },
+              "detail": {
+                "type": "string",
+                "description":"%c_cpp.debuggers.configuration.detail.description%"
               }
             }
           },

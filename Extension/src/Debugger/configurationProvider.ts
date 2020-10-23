@@ -58,7 +58,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            const menuItem: MenuItem = {label: config.name, configuration: config};
+            const menuItem: MenuItem = {label: config.name, configuration: config, description: config.detail};
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -144,6 +144,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.externalConsole = false;
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
+            newConfig.detail = definition.command;
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
