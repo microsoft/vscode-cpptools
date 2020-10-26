@@ -17,6 +17,7 @@
 	"envfale.failed": "Nepovedlo se použít {0}. Příčina: {1}",
 	"replacing.sourcepath": "{1} v {0} se nahrazuje za {2}.",
 	"replacing.targetpath": "{1} v {0} se nahrazuje za {2}.",
+	"replacing.editorPath": "Nahrazuje se {0} {1} za {2}.",
 	"resolving.variables.in.sourcefilemap": "Překládají se proměnné v {0}...",
 	"open.envfile": "Otevřít {0}",
 	"unexpected.os": "Neočekávaný typ operačního systému",
