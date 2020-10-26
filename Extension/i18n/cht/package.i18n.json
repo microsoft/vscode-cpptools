@@ -232,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "要傳遞給編譯器或編譯指令碼的其他引數",
 	"c_cpp.taskDefinitions.options.description": "其他命令選項",
 	"c_cpp.taskDefinitions.options.cwd.description": "所執行程式或指令碼的目前工作目錄。如果省略，則會使用 Code 的目前工作區根目錄。",
-	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料"
+	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
 }

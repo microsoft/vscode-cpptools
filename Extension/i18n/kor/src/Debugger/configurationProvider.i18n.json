@@ -17,6 +17,7 @@
 	"envfale.failed": "{0}을(를) 사용하지 못했습니다. 이유: {1}",
 	"replacing.sourcepath": "{0} '{1}'을(를) '{2}'(으)로 바꾸는 중입니다.",
 	"replacing.targetpath": "{0} '{1}'을(를) '{2}'(으)로 바꾸는 중입니다.",
+	"replacing.editorPath": "{0} '{1}'을(를) '{2}'(으)로 바꾸는 중입니다.",
 	"resolving.variables.in.sourcefilemap": "{0}에서 변수를 확인하는 중...",
 	"open.envfile": "{0} 열기",
 	"unexpected.os": "예기치 않은 OS 유형",

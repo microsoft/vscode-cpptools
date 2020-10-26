@@ -71,7 +71,7 @@
 	"c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.ignore.description": "Boşluklar girildiği gibi bırakılır.",
 	"c_cpp.configuration.vcFormat.space.withinParameterListParentheses.description": "İşlev parametre listelerinde açma parantezinden sonra ve kapatma parantezinden önce bir boşluk eklenir.",
 	"c_cpp.configuration.vcFormat.space.betweenEmptyParameterListParentheses.description": "İşlev parametresi listesi boş olduğunda, parantezlerinin arasına bir boşluk eklenir.",
-	"c_cpp.configuration.vcFormat.space.afterKeywordsInControlFlowStatements.description": "Denetim akış deyimlerindeki anahtar sözcüklerle açma parantezleri arasına bir boşluk eklenir.",
+	"c_cpp.configuration.vcFormat.space.afterKeywordsInControlFlowStatements.description": "Denetim akış deyimlerindeki anahtar sözcükle açma parantezi arasına bir boşluk eklenir.",
 	"c_cpp.configuration.vcFormat.space.withinControlFlowStatementParentheses.description": "Denetim akış bildirimlerinde açma parantezinden sonra ve kapatma parantezinden önce bir boşluk eklenir.",
 	"c_cpp.configuration.vcFormat.space.beforeLambdaOpenParenthesis.description": "Lambda bağımsız değişken listelerinin açma parantezinden önce bir boşluk eklenir.",
 	"c_cpp.configuration.vcFormat.space.withinCastParentheses.description": "C stili tür dönüştürme işleminin açma parantezinden sonra ve kapatma parantezinden önce bir boşluk eklenir.",
@@ -232,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "Derleyici veya derleme betiğine geçirilecek ek bağımsız değişkenler",
 	"c_cpp.taskDefinitions.options.description": "Ek komut seçenekleri",
 	"c_cpp.taskDefinitions.options.cwd.description": "Yürütülen program veya betiğin geçerli çalışma dizini. Atlanırsa Kodun geçerli çalışma alanının kökü kullanılır.",
-	"c_cpp.taskDefinitions.detail.description": "Görevin ek ayrıntıları"
+	"c_cpp.taskDefinitions.detail.description": "Görevin ek ayrıntıları",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
 }

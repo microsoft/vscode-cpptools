@@ -139,7 +139,7 @@
 	"c_cpp.configuration.intelliSenseCachePath.description": "Define o caminho da pasta para os cabeçalhos pré-compilados armazenados em cache usados pelo IntelliSense. O caminho do cache padrão é \"%LocalAppData%/Microsoft/vscode-cpptools\" no Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" no Linux (ou \"~/.cache/vscode-cpptools/\", quando XDG_CACHE_HOME não está definido) e \"$HOME/Library/Caches/vscode-cpptools/\" no Mac. O caminho padrão será usado se nenhum outro for especificado ou se o caminho definido for inválido.",
 	"c_cpp.configuration.intelliSenseCacheSize.description": "Tamanho máximo do espaço em disco rígido por workspace, em MBs (megabytes), para cabeçalhos pré-compilados armazenados em cache. O uso real pode flutuar em torno desse valor. O tamanho padrão é 5120 MB. O caching de cabeçalho pré-compilado é desabilitado quando o tamanho é 0.",
 	"c_cpp.configuration.intelliSenseMemoryLimit.description": "Limite de uso de memória em MBs (megabytes) de um processo do IntelliSense. O limite padrão é 4096 MB e o limite máximo é 16 GB. Quando um processo do IntelliSense exceder o limite, a extensão o desligará e o reinicializará.",
-	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Controls the delay in milliseconds before IntelliSense starts updating after a modification.",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Controla o atraso em milissegundos até que o IntelliSense comece a ser atualizado após uma modificação.",
 	"c_cpp.configuration.default.includePath.description": "O valor a ser usado em uma configuração se \"includePath\" não estiver especificado em c_cpp_properties.json. Se \"includePath\" estiver especificado, adicione \"${default}\" à matriz para inserir os valores dessa configuração.",
 	"c_cpp.configuration.default.defines.description": "O valor a ser usado em uma configuração se \"defines\" não for especificado ou os valores a serem inseridos se \"${default}\" estiver presente em \"defines\".",
 	"c_cpp.configuration.default.macFrameworkPath.description": "O valor a ser usado em uma configuração se \"macFrameworkPath\" não for especificado ou os valores a serem inseridos se \"${default}\" estiver presente em \"macFrameworkPath\".",
@@ -232,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "Argumentos adicionais a serem passados para o compilador ou para o script de compilação",
 	"c_cpp.taskDefinitions.options.description": "Opções de comando adicionais",
 	"c_cpp.taskDefinitions.options.cwd.description": "O diretório de trabalho atual do programa executado ou do script. Se omitido raiz de espaço de trabalho atual do código é usado.",
-	"c_cpp.taskDefinitions.detail.description": "Detalhes adicionais da tarefa"
+	"c_cpp.taskDefinitions.detail.description": "Detalhes adicionais da tarefa",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
 }

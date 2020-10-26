@@ -17,6 +17,7 @@
 	"envfale.failed": "No se pudo usar {0}. Motivo: {1}",
 	"replacing.sourcepath": "Reemplazando {0} \"{1}\" por \"{2}\".",
 	"replacing.targetpath": "Reemplazando {0} \"{1}\" por \"{2}\".",
+	"replacing.editorPath": "Reemplazando el {0} \"{1}\" por \"{2}\".",
 	"resolving.variables.in.sourcefilemap": "Resolviendo las variables de {0}...",
 	"open.envfile": "Abrir {0}",
 	"unexpected.os": "Tipo de sistema operativo no esperado",
