@@ -17,6 +17,7 @@
 	"envfale.failed": "Nie można użyć elementu {0}. Przyczyna: {1}",
 	"replacing.sourcepath": "Zamienianie wartości zmiennej {0} z „{1}” na „{2}”.",
 	"replacing.targetpath": "Zamienianie wartości zmiennej {0} z „{1}” na „{2}”.",
+	"replacing.editorPath": "Zamienianie elementu {0} „{1}” na element „{2}”.",
 	"resolving.variables.in.sourcefilemap": "Trwa rozpoznawanie zmiennych w {0}...",
 	"open.envfile": "Otwórz element {0}",
 	"unexpected.os": "Nieoczekiwany typ systemu operacyjnego",
