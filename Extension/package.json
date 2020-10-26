@@ -2664,12 +2664,6 @@
       "platforms": [
         "win32"
       ],
-      "architectures": [
-        "x86_64",
-        "x86",
-        "i686",
-        "i386"
-      ],
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
