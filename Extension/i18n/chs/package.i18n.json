@@ -28,7 +28,7 @@
 	"c_cpp.configuration.formatting.Default.description": "将使用 clang-format 设置代码的格式。",
 	"c_cpp.configuration.formatting.Disabled.description": "将禁用代码格式设置。",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "按照在“编辑器: 制表符大小”设置中指定的量缩进大括号。",
-	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "确定新行缩进的相关对象",
+	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "确定新行缩进的基准",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.outermostParenthesis.description": "相对于最外侧的左括号缩进新行。",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.innermostParenthesis.description": "相对于最内侧的左括号缩进新行。",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.statementBegin.description": "相对于当前语句的开头缩进新行。",
@@ -45,7 +45,7 @@
 	"c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.description": "将 goto 标签置于代码的最左侧边缘。",
 	"c_cpp.configuration.vcFormat.indent.gotoLabels.none.description": "不会格式化 goto 标签。",
 	"c_cpp.configuration.vcFormat.indent.preprocessor.description": "预处理器指令的位置",
-	"c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.description": "按照在“编辑器: 制表符大小”设置中指定的量，预处理器指令位于当前代码缩进的左侧",
+	"c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.description": "按照在“编辑器: 制表符大小”设置中指定的量，将预处理器指令置于当前代码缩进的左侧",
 	"c_cpp.configuration.vcFormat.indent.preprocessor.leftmostColumn.description": "预处理器指令位于代码的最左侧边缘。",
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "不会格式化预处理器指令。",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "按照在“编辑器: 制表符大小”设置中指定的量，相对于类或结构定义缩进访问说明符",
@@ -110,7 +110,7 @@
 	"c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description": "保留输入的空格。",
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.description": "块的换行选项",
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.description": "无论任何“VC 格式: 新行”设置的值如何，在一行输入的完整代码块都保留在一行上",
-	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.description": "无论任何“VC 格式: 新行”设置的值如何，在一行输入左大括号和右大括号的任何代码都保留在一行上",
+	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.description": "无论任何“VC 格式: 新行”设置的值如何，在同一行输入左大括号和右大括号的任何代码都保留在同一行上",
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.description": "始终根据“VC 格式: 新行”设置来设定代码块的格式",
 	"c_cpp.configuration.clang_format_path.description": "clang-format 可执行文件的完整路径。如果未指定，并且 Clang 格式在环境路径中可用，则使用 Clang 格式。如果在环境路径中找不到 Clang 格式，则将使用与该扩展绑定的 clang-format 的副本。",
 	"c_cpp.configuration.clang_format_style.description": "编码样式，当前支持: Visual Studio、LLVM、Google、Chromium、Mozilla、WebKit。使用 \"file\" 从当前目录或父目录中的 .clang 格式文件中加载样式。使用 {键: 值, ...} 设置特定参数。例如，\"Visual Studio\" 样式类似于: { BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All }",
@@ -232,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "要传递给编译器或编译脚本的其他参数",
 	"c_cpp.taskDefinitions.options.description": "其他命令选项",
 	"c_cpp.taskDefinitions.options.cwd.description": "已执行程序或脚本的当前工作目录。如果省略，则使用代码的当前工作区根。",
-	"c_cpp.taskDefinitions.detail.description": "任务类型的其他详细信息"
+	"c_cpp.taskDefinitions.detail.description": "任务类型的其他详细信息",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
 }

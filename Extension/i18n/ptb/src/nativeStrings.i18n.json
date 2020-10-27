@@ -195,7 +195,7 @@
 	"compiler_path_changed": "Não é possível resolver a configuração com compilerPath \"{0}\".  Em vez disso, use \"{1}\".",
 	"compiler_path_invalid": "Não é possível resolver a configuração com compilerPath: \"{0}\"",
 	"compiler_path_empty": "Ignorando a investigação do compilador devido a um compilerPath explicitamente vazio",
-	"msvc_intellisense_specified": "O intelliSenseMode do MSVC foi especificado.  Configurando para cl.exe do compilador.",
+	"msvc_intellisense_specified": "O intelliSenseMode do MSVC foi especificado. Configurando para cl.exe do compilador.",
 	"unable_to_configure_cl_exe": "Não é possível configurar o compilador cl.exe.",
 	"probing_compiler_default_target": "Investigando o destino padrão do compilador usando a linha de comando: \"{0}\" {1}",
 	"compiler_default_target": "O compilador retornou o valor de destino padrão: {0}",

@@ -232,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "Argomenti aggiuntivi da passare al compilatore o allo script di compilazione",
 	"c_cpp.taskDefinitions.options.description": "Opzioni aggiuntive del comando",
 	"c_cpp.taskDefinitions.options.cwd.description": "Directory di lavoro corrente del programma o dello script eseguito. Se omesso, viene usata la radice dell'area di lavoro corrente di Visual Studio Code.",
-	"c_cpp.taskDefinitions.detail.description": "Dettagli aggiuntivi dell'attività"
+	"c_cpp.taskDefinitions.detail.description": "Dettagli aggiuntivi dell'attività",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
 }
