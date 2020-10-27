@@ -91,6 +91,10 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         return this.underlyingProvider.resolveDebugConfiguration ? this.underlyingProvider.resolveDebugConfiguration(folder, config, token) : undefined;
     }
+
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        return this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables ? this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables(folder, config, token) : undefined;
+    }
 }
 
 class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
@@ -186,10 +190,10 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     }
 
     /**
-	 * Try to add all missing attributes to the debug configuration being launched.
+	 * Error checks the provided 'config' without any variables substituted.
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to open a configuration file.
+        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
         if (!config || !config.type) {
             return null;
         }
@@ -198,9 +202,26 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             // Fail if cppvsdbg type is running on non-Windows
             if (os.platform() !== 'win32') {
                 logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
-                return undefined;
+                return undefined; // Stop debugging
             }
+        }
 
+        return config;
+    }
+
+    /**
+     * This hook is directly called after 'resolveDebugConfiguration' but with all variables substituted.
+     * This is also ran after the tasks.json has completed.
+     *
+	 * Try to add all missing attributes to the debug configuration being launched.
+	 */
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
+        if (!config || !config.type) {
+            return null;
+        }
+
+        if (config.type === 'cppvsdbg') {
             // Disable debug heap by default, enable if 'enableDebugHeap' is set.
             if (!config.enableDebugHeap) {
                 const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
@@ -274,8 +295,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const outputChannel: logger.Logger = logger.getOutputChannelLogger();
             outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
-	    // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
-	    // logger.showOutputChannel();
+            // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
+            // logger.showOutputChannel();
         }
 
         return config;
