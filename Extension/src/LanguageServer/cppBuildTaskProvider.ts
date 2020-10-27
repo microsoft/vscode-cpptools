@@ -296,7 +296,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     private closeEmitter = new EventEmitter<number>();
     public get onDidWrite(): Event<string> { return this.writeEmitter.event; }
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
-    private endOfLine: string = os.platform() === 'win32' ? "\r\n" : "\n";
+    private endOfLine: string = "\r\n";
 
     constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
@@ -327,10 +327,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
-            for (const line of lines.toString().replace("\r\n", "\n").split("\n")) {
-                if (line.length) {
-                    this.writeEmitter.fire(line + this.endOfLine);
-                }
+            for (const line of lines.toString().split(/\r?\n/g)) {
+                this.writeEmitter.fire(line + this.endOfLine);
             }
         };
         try {
