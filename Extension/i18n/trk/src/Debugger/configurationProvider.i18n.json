@@ -17,6 +17,7 @@
 	"envfale.failed": "{0} kullanılamadı. Neden: {1}",
 	"replacing.sourcepath": "{0} değişkeninin '{1}' olan değeri '{2}' olarak değiştiriliyor.",
 	"replacing.targetpath": "{0} değişkeninin '{1}' olan değeri '{2}' olarak değiştiriliyor.",
+	"replacing.editorPath": "'{1}' adlı {0}, '{2}' ile değiştiriliyor.",
 	"resolving.variables.in.sourcefilemap": "{0} değişkenleri çözümleniyor...",
 	"open.envfile": "{0} öğesini aç",
 	"unexpected.os": "Beklenmeyen işletim sistemi türü",
