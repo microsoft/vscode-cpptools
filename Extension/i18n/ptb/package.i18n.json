@@ -233,7 +233,7 @@
 	"c_cpp.taskDefinitions.options.description": "Opções de comando adicionais",
 	"c_cpp.taskDefinitions.options.cwd.description": "O diretório de trabalho atual do programa executado ou do script. Se omitido raiz de espaço de trabalho atual do código é usado.",
 	"c_cpp.taskDefinitions.detail.description": "Detalhes adicionais da tarefa",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Os caminhos atual e do tempo de compilação são mapeados para as mesmas árvores de origem. Os arquivos encontrados em EditorPath são mapeados para o caminho CompileTimePath para correspondência de ponto de interrupção e mapeados de CompileTimePath para EditorPath ao exibir os locais de rastreamento de pilha.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "O caminho para a árvore de origem que o editor usará.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False quando esta entrada é usada apenas para o mapeamento de local de registro de ativação. True quando esta entrada também deve ser usada ao especificar locais de ponto de interrupção."
 }
