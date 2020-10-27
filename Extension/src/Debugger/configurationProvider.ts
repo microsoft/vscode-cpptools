@@ -58,7 +58,9 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            const menuItem: MenuItem = {label: config.name, configuration: config, description: config.detail};
+            let removedDetailConfig: vscode.DebugConfiguration = config;
+            removedDetailConfig.detail = undefined;
+            const menuItem: MenuItem = { label: config.name, configuration: removedDetailConfig, description: config.detail };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
