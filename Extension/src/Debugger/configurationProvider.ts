@@ -59,6 +59,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
             const noDetailConfig: vscode.DebugConfiguration = {...config};
+            // Remove the "detail" property from the DebugConfiguration that will be written in launch.json.
             noDetailConfig.detail = undefined;
             const menuItem: MenuItem = { label: config.name, configuration: noDetailConfig, description: config.detail };
             // Rename the menu item for the default configuration as its name is non-descriptive.
@@ -150,6 +151,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.externalConsole = false;
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
+            // Add the "detail" property to show the compiler path in QuickPickItem.
+            // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = definition.command;
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
