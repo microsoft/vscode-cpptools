@@ -233,7 +233,7 @@
 	"c_cpp.taskDefinitions.options.description": "추가 명령 옵션",
 	"c_cpp.taskDefinitions.options.cwd.description": "실행된 프로그램 또는 스크립트의 현재 작업 디렉터리입니다. 생략된 경우 Code의 현재 작업 영역 루트가 사용됩니다.",
 	"c_cpp.taskDefinitions.detail.description": "작업의 추가 세부 정보",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "같은 소스 트리의 현재 및 컴파일 시간 경로입니다. EditorPath에 있는 파일은 중단점 일치를 위해 CompileTimePath 경로에 매핑되고 stacktrace 위치를 표시할 때 CompileTimePath에서 EditorPath로 매핑됩니다.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "편집기가 사용할 소스 트리의 경로입니다.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "이 항목이 스택 프레임 위치 매핑에만 사용되면 False입니다. 이 항목이 중단점 위치를 지정할 때도 사용되어야 하면 True입니다."
 }
