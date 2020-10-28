@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "전처리기 지시문에 서식이 지정되지 않습니다.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "클래스 또는 구조체 정의를 기준으로 편집기: 탭 크기 설정에 지정된 수만큼 액세스 지정자를 들여 씁니다.",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "바깥쪽 네임스페이스를 기준으로 편집기: 탭 크기 설정에 지정된 수만큼 코드를 들여 씁니다.",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "주석의 들여쓰기는 서식 작업을 수행하는 동안 변경되지 않습니다.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "주석의 들여쓰기는 서식 작업을 수행하는 동안 변경되지 않습니다.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "네임스페이스의 여는 중괄호 위치",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "형식 정의의 여는 중괄호 위치",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "람다 함수의 여는 중괄호 위치",
