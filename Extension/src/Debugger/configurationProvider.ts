@@ -58,7 +58,10 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            const menuItem: MenuItem = {label: config.name, configuration: config};
+            const noDetailConfig: vscode.DebugConfiguration = {...config};
+            // Remove the "detail" property from the DebugConfiguration that will be written in launch.json.
+            noDetailConfig.detail = undefined;
+            const menuItem: MenuItem = { label: config.name, configuration: noDetailConfig, description: config.detail };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -90,6 +93,10 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         return this.underlyingProvider.resolveDebugConfiguration ? this.underlyingProvider.resolveDebugConfiguration(folder, config, token) : undefined;
+    }
+
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        return this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables ? this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables(folder, config, token) : undefined;
     }
 }
 
@@ -144,6 +151,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.externalConsole = false;
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
+            // Add the "detail" property to show the compiler path in QuickPickItem.
+            // This property will be removed before writing the DebugConfiguration in launch.json.
+            newConfig.detail = definition.command;
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
@@ -186,10 +196,10 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     }
 
     /**
-	 * Try to add all missing attributes to the debug configuration being launched.
+	 * Error checks the provided 'config' without any variables substituted.
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to open a configuration file.
+        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
         if (!config || !config.type) {
             return null;
         }
@@ -198,9 +208,26 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             // Fail if cppvsdbg type is running on non-Windows
             if (os.platform() !== 'win32') {
                 logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
-                return undefined;
+                return undefined; // Stop debugging
             }
+        }
 
+        return config;
+    }
+
+    /**
+     * This hook is directly called after 'resolveDebugConfiguration' but with all variables substituted.
+     * This is also ran after the tasks.json has completed.
+     *
+	 * Try to add all missing attributes to the debug configuration being launched.
+	 */
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
+        if (!config || !config.type) {
+            return null;
+        }
+
+        if (config.type === 'cppvsdbg') {
             // Disable debug heap by default, enable if 'enableDebugHeap' is set.
             if (!config.enableDebugHeap) {
                 const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
@@ -274,7 +301,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const outputChannel: logger.Logger = logger.getOutputChannelLogger();
             outputChannel.appendLine(localize("debugger.launchConfig", "Launch configuration:"));
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
-            logger.showOutputChannel();
+            // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
+            // logger.showOutputChannel();
         }
 
         return config;
@@ -343,24 +371,35 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 let message: string = "";
                 const sourceFileMapTarget: string = config.sourceFileMap[sourceFileMapSource];
 
+                let source: string = sourceFileMapSource;
+                let target: string | object = sourceFileMapTarget;
+
                 // TODO: pass config.environment as 'additionalEnvironment' to resolveVariables when it is { key: value } instead of { "key": key, "value": value }
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
-                const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
-
-                let source: string = sourceFileMapSource;
-                let target: string = sourceFileMapTarget;
-
                 if (sourceFileMapSource !== newSourceFileMapSource) {
                     message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
 
-                if (sourceFileMapTarget !== newSourceFileMapTarget) {
-                    // Add a space if source was changed, else just tab the target message.
-                    message +=  (message ? ' ' : '\t');
-                    message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
-                    target = newSourceFileMapTarget;
+                if (util.isString(sourceFileMapTarget)) {
+                    const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
+                    if (sourceFileMapTarget !== newSourceFileMapTarget) {
+                        // Add a space if source was changed, else just tab the target message.
+                        message +=  (message ? ' ' : '\t');
+                        message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
+                        target = newSourceFileMapTarget;
+                    }
+                } else if (util.isObject(sourceFileMapTarget)) {
+                    const newSourceFileMapTarget: {"editorPath": string; "useForBreakpoints": boolean } = sourceFileMapTarget;
+                    newSourceFileMapTarget["editorPath"] = util.resolveVariables(sourceFileMapTarget["editorPath"], undefined);
+
+                    if (sourceFileMapTarget !== newSourceFileMapTarget) {
+                        // Add a space if source was changed, else just tab the target message.
+                        message +=  (message ? ' ' : '\t');
+                        message += localize("replacing.editorPath", "Replacing {0} '{1}' with '{2}'.", "editorPath", sourceFileMapTarget, newSourceFileMapTarget["editorPath"]);
+                        target = newSourceFileMapTarget;
+                    }
                 }
 
                 if (message) {

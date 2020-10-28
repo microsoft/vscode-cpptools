@@ -154,19 +154,10 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
-        const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
         const compilerPathBase: string = path.basename(compilerPath);
         const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
             CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
-        const isWindows: boolean = os.platform() === 'win32';
-        const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
-        let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
-        if (!definition && compilerArgs && compilerArgs.length > 0) {
-            args = args.concat(compilerArgs);
-        }
-        const options: cp.ExecOptions | undefined = { cwd: cwd };
-
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
         if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
@@ -174,6 +165,14 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         if (!definition) {
+            const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+            const isWindows: boolean = os.platform() === 'win32';
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            if (compilerArgs && compilerArgs.length > 0) {
+                args = args.concat(compilerArgs);
+            }
+            const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
+            const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskLabel,
@@ -196,7 +195,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const task: CppBuildTask = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, definition ? definition.args : [], definition ? definition.options : undefined)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -297,6 +296,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     private closeEmitter = new EventEmitter<number>();
     public get onDidWrite(): Event<string> { return this.writeEmitter.event; }
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
+    private endOfLine: string = "\r\n";
 
     constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
@@ -304,7 +304,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
-        this.writeEmitter.fire("Starting build...\r\n");
+        this.writeEmitter.fire(`Starting build...${this.endOfLine}`);
         await this.doBuild();
     }
 
@@ -326,23 +326,24 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
         }
 
+        const splitWriteEmitter = (lines: string | Buffer) => {
+            for (const line of lines.toString().split(/\r?\n/g)) {
+                this.writeEmitter.fire(line + this.endOfLine);
+            }
+        };
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
-                    const endOfLine: string = os.platform() === 'win32' ? "\r\n" : "\n";
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
                         const dot: string = (stdout || _stderr) ? ":" : ".";
-                        this.writeEmitter.fire("Build finished with error" + dot + endOfLine);
-                        this.writeEmitter.fire(stdout.toString());
-                        for (const line of _stderr.toString().split(endOfLine)) {
-                            this.writeEmitter.fire(line);
-                            this.writeEmitter.fire(endOfLine);
-                        }
+                        this.writeEmitter.fire(`Build finished with error${dot}${this.endOfLine}`);
+                        splitWriteEmitter(stdout);
+                        splitWriteEmitter(_stderr);
                         resolve(-1);
                     } else {
-                        this.writeEmitter.fire(stdout.toString());
-                        this.writeEmitter.fire(endOfLine + "Build finished successfully." + endOfLine);
+                        splitWriteEmitter(stdout);
+                        this.writeEmitter.fire(`Build finished successfully.${this.endOfLine}`);
                         resolve(0);
                     }
                 });

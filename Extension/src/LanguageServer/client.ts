@@ -130,12 +130,17 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
 
 function showWarning(params: ShowWarningParams): void {
     const message: string = util.getLocalizedString(params.localizeStringParams);
+    let showChannel: boolean = false;
     if (!warningChannel) {
         warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Configuration Warnings")}`);
         workspaceDisposables.push(warningChannel);
+        showChannel = true;
     }
-    warningChannel.appendLine(message);
-    warningChannel.show(false);
+    // Append before showing the channel, to avoid a delay.
+    warningChannel.appendLine(`[${new Date().toLocaleString()}] ${message}`);
+    if (showChannel) {
+        warningChannel.show(true);
+    }
 }
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
@@ -156,6 +161,8 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
 
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
     diagnosticsCollection.set(realUri, diagnostics);
+
+    clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri);
 }
 
 interface WorkspaceFolderParams {
@@ -419,6 +426,10 @@ enum SemanticTokenModifiers {
     local = (1 << 2)
 }
 
+interface IntelliSenseSetup {
+    uri: string;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -477,6 +488,7 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
+const IntelliSenseSetupNotification:  NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
 
 let failureMessageShown: boolean = false;
 
@@ -949,7 +961,7 @@ export class DefaultClient implements Client {
         const settings_spaceWithinInitializerListBraces:  boolean[] = [];
         const settings_spacePreserveInInitializerList:  boolean[] = [];
         const settings_spaceBeforeOpenSquareBracket:  boolean[] = [];
-        const settings_spaceWithinSquareBracketse:  boolean[] = [];
+        const settings_spaceWithinSquareBrackets:  boolean[] = [];
         const settings_spaceBeforeEmptySquareBrackets:  boolean[] = [];
         const settings_spaceBetweenEmptySquareBrackets:  boolean[] = [];
         const settings_spaceGroupSquareBrackets:  boolean[] = [];
@@ -1025,7 +1037,7 @@ export class DefaultClient implements Client {
                 settings_spaceWithinInitializerListBraces.push(setting.vcFormatSpaceWithinInitializerListBraces);
                 settings_spacePreserveInInitializerList.push(setting.vcFormatSpacePreserveInInitializerList);
                 settings_spaceBeforeOpenSquareBracket.push(setting.vcFormatSpaceBeforeOpenSquareBracket);
-                settings_spaceWithinSquareBracketse.push(setting.vcFormatSpaceWithinSquareBrackets);
+                settings_spaceWithinSquareBrackets.push(setting.vcFormatSpaceWithinSquareBrackets);
                 settings_spaceBeforeEmptySquareBrackets.push(setting.vcFormatSpaceBeforeEmptySquareBrackets);
                 settings_spaceBetweenEmptySquareBrackets.push(setting.vcFormatSpaceBetweenEmptySquareBrackets);
                 settings_spaceGroupSquareBrackets.push(setting.vcFormatSpaceGroupSquareBrackets);
@@ -1144,7 +1156,7 @@ export class DefaultClient implements Client {
                         withinInitializerListBraces : settings_spaceWithinInitializerListBraces,
                         preserveInInitializerList : settings_spacePreserveInInitializerList,
                         beforeOpenSquareBracket : settings_spaceBeforeOpenSquareBracket,
-                        withinSquareBrackets : settings_spaceWithinSquareBracketse,
+                        withinSquareBrackets : settings_spaceWithinSquareBrackets,
                         beforeEmptySquareBrackets : settings_spaceBeforeEmptySquareBrackets,
                         betweenEmptySquareBrackets : settings_spaceBetweenEmptySquareBrackets,
                         groupSquareBrackets : settings_spaceGroupSquareBrackets,
@@ -1184,6 +1196,7 @@ export class DefaultClient implements Client {
                 intelliSenseCachePath : settings_intelliSenseCachePath,
                 intelliSenseCacheSize : settings_intelliSenseCacheSize,
                 intelliSenseMemoryLimit : settings_intelliSenseMemoryLimit,
+                intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
                 autocomplete: settings_autoComplete,
                 errorSquiggles: settings_errorSquiggles,
                 dimInactiveRegions: settings_dimInactiveRegions,
@@ -1887,6 +1900,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
+        this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
         setupOutputHandlers();
     }
 
@@ -2147,6 +2161,10 @@ export class DefaultClient implements Client {
                 }
             }
         }
+    }
+
+    public logIntellisenseSetupTime(notification: IntelliSenseSetup): void {
+        clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
     }
 
     private promptCompileCommands(params: CompileCommandsPaths): void {

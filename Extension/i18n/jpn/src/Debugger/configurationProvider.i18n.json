@@ -17,6 +17,7 @@
 	"envfale.failed": "{0} を使用できませんでした。理由: {1}",
 	"replacing.sourcepath": "{0} '{1}' を '{2}' と置き換えています。",
 	"replacing.targetpath": "{0} '{1}' を '{2}' と置き換えています。",
+	"replacing.editorPath": "{0} の '{1}' を '{2}' と置き換えています。",
 	"resolving.variables.in.sourcefilemap": "{0} の変数を解決しています...",
 	"open.envfile": "{0} を開く",
 	"unexpected.os": "予期しない OS の種類",

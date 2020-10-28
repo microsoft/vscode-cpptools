@@ -1,0 +1,30 @@
+name: Feature Request Closer (no milestone)
+on:
+  schedule:
+    - cron: 50 11 * * * # Run at 11:50 AM UTC (3:50 AM PST, 4:50 AM PDT)
+  workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Stale Closer
+        uses: ./.github/actions/StaleCloser
+        with:
+          readonly: ${{ github.event.inputs.readonly }}
+          labels: Feature Request
+          ignoreLabels: debugger,internal
+          addLabels: more votes needed
+          closeDays: 60
+          maximumVotes: 2
+          closeComment: "This feature request is being closed due to insufficient upvotes.  When enough upvotes are received, this issue will be eligible for our backlog."
+          setMilestoneId: 30
+          ignoreMilestoneNames: "*"

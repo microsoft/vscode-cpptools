@@ -856,6 +856,14 @@
           "minimum": 256,
           "maximum": 16384
         },
+        "C_Cpp.intelliSenseUpdateDelay": {
+          "type": "number",
+          "default": 2000,
+          "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
+          "scope": "application",
+          "minimum": 500,
+          "maximum": 3000
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
@@ -967,7 +975,7 @@
             "gnu89",
             "gnu99",
             "gnu11",
-            "gnu18"
+            "gnu17"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
           "scope": "machine-overridable"
@@ -1452,11 +1460,46 @@
                 "default": false
               },
               "sourceFileMap": {
-                "type": "object",
-                "description": "%c_cpp.debuggers.sourceFileMap.description%",
-                "default": {
-                  "<source-path>": "<target-path>"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                    "default": {
+                      "<source-path>": "<target-path>"
+                    }
+                  },
+                  {
+                    "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
+                    "type": "object",
+                    "default": {
+                      "<source-path>": {
+                        "editorPath": "",
+                        "useForBreakpoints": true
+                      }
+                    },
+                    "properties": {
+                      "<source-path>": {
+                        "type": "object",
+                        "default": {
+                          "editorPath": "",
+                          "useForBreakpoints": true
+                        },
+                        "properties": {
+                          "editorPath": {
+                            "type": "string",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                            "default": ""
+                          },
+                          "useForBreakpoints": {
+                            "type": "boolean",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                            "default": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               "logging": {
                 "description": "%c_cpp.debuggers.logging.description%",
@@ -1645,11 +1688,46 @@
                 "default": false
               },
               "sourceFileMap": {
-                "type": "object",
-                "description": "%c_cpp.debuggers.sourceFileMap.description%",
-                "default": {
-                  "<source-path>": "<target-path>"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                    "default": {
+                      "<source-path>": "<target-path>"
+                    }
+                  },
+                  {
+                    "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
+                    "type": "object",
+                    "default": {
+                      "<source-path>": {
+                        "editorPath": "",
+                        "useForBreakpoints": true
+                      }
+                    },
+                    "properties": {
+                      "<source-path>": {
+                        "type": "object",
+                        "default": {
+                          "editorPath": "",
+                          "useForBreakpoints": true
+                        },
+                        "properties": {
+                          "editorPath": {
+                            "type": "string",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                            "default": ""
+                          },
+                          "useForBreakpoints": {
+                            "type": "boolean",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                            "default": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               "logging": {
                 "description": "%c_cpp.debuggers.logging.description%",
@@ -2270,7 +2348,7 @@
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.2",
+    "@types/node": "^14.14.0",
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
@@ -2401,6 +2479,27 @@
       "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
       "platforms": [
         "win32"
+      ],
+      "architectures": [
+        "x86_64",
+        "x86",
+        "i686",
+        "i386"
+      ],
+      "binaries": [
+        "./bin/cpptools.exe",
+        "./bin/cpptools-srv.exe"
+      ],
+      "integrity": "BA67FC5F787552BE73F6613E08D1374FE3E3C3501417CF03E1D871A46DE4224A"
+    },
+    {
+      "description": "C/C++ language components (Windows ARM64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
       ],
       "binaries": [
         "./bin/cpptools.exe",
@@ -2569,6 +2668,12 @@
       "url": "https://go.microsoft.com/fwlink/?linkid=2082216",
       "platforms": [
         "win32"
+      ],
+      "architectures": [
+        "x86_64",
+        "x86",
+        "i686",
+        "i386"
       ],
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"

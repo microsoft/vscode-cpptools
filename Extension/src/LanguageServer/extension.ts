@@ -284,6 +284,12 @@ function realActivation(): void {
     clients = new ClientCollection();
     ui = getUI();
 
+    // Log cold start.
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (activeEditor) {
+        clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
+    }
+
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
     clients.forEach(client => {
@@ -405,6 +411,8 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
 export function processDelayedDidOpen(document: vscode.TextDocument): void {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
+        // Log warm start.
+        clients.timeTelemetryCollector.setDidOpenTime(document.uri);
         if (clients.checkOwnership(client, document)) {
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
@@ -1292,6 +1300,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
 }
 
 export function deactivate(): Thenable<void> {
+    clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);

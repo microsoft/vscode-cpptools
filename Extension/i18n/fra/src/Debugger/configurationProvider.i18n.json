@@ -17,6 +17,7 @@
 	"envfale.failed": "L'utilisation de {0} a échoué. Motif : {1}",
 	"replacing.sourcepath": "Remplacement de {0} '{1}' par '{2}'.",
 	"replacing.targetpath": "Remplacement de {0} '{1}' par '{2}'.",
+	"replacing.editorPath": "Remplacement de {0} '{1}' par '{2}'.",
 	"resolving.variables.in.sourcefilemap": "Résolution des variables dans {0}...",
 	"open.envfile": "Ouvrir {0}",
 	"unexpected.os": "Type de système d'exploitation inattendu",

@@ -204,5 +204,5 @@
 	"detected_language_standard_version": "Algılanan dil standart sürümü: {0}",
 	"unhandled_default_target_detected": "İşlenmemiş varsayılan derleyici hedefi değeri saptandı: {0}",
 	"unhandled_target_arg_detected": "İşlenmemiş hedef bağımsız değişken değeri algılandı: {0}",
-	"memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit."
+	"memory_limit_shutting_down_intellisense": "IntelliSense sunucusu kapatılıyor: {0}. Bellek kullanımı {1} MB olduğundan {2} MB sınırını aştı."
 }
