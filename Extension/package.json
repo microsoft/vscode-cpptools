@@ -1208,11 +1208,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.GenerateEditorConfig",
-        "title": "%c_cpp.command.generateEditorConfig.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.referencesViewGroupByType",
         "category": "C/C++",
         "title": "%c_cpp.command.referencesViewGroupByType.title%",
