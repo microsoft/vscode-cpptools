@@ -45,7 +45,7 @@
     "c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Preprocessor directives will not be formatted.",
     "c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Access specifiers are indented relative to class or struct definitions by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Code is indented relative to its enclosing namespace by the amount specified in the Editor: Tab Size setting",
-    "c_cpp.configuration.vcFormat.indent.preserveComment.description": "Indentation of comments is not changed during formatting operations.",
+    "c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "The position of opening braces for namespaces",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "The position of opening braces for type definitions",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "The position of opening braces for lambda functions",
