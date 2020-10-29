@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Direktivy preprocesoru se nebudou formátovat.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Specifikátory přístupu jsou odsazené relativně k definicím tříd nebo struktur mezerou zadanou v nastavení Editor: Velikost tabulátoru.",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Kód se odsazuje relativně ke svému uzavírajícímu oboru názvů mezerou zadanou v nastavení Editor: Velikost tabulátoru.",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "Při formátovacích operacích se nezmění odsazení komentářů.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Při formátovacích operacích se nezmění odsazení komentářů.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Pozice levých složených závorek pro obory názvů",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Pozice levých složených závorek pro definice typů",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Pozice levých složených závorek pro funkce lambda",

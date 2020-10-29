@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Dyrektywy preprocesora nie będą formatowane.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Dla specyfikatorów dostępu jest stosowane wcięcie względem definicji klasy lub struktury według liczby określonej w ustawieniu Edytor: rozmiar tabulatora",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Dla kodu tworzone jest wcięcie względem otaczającej go przestrzeni nazw o szerokości określonej w ustawieniu Edytor: rozmiar tabulatora",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "Wcięcia komentarzy nie zostaną zmienione podczas operacji formatowania.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Wcięcia komentarzy nie zostaną zmienione podczas operacji formatowania.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Pozycja otwierających nawiasów klamrowych dla przestrzeni nazw",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Pozycja otwierających nawiasów klamrowych dla definicji typów",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Pozycja otwierających nawiasów klamrowych dla funkcji lambda",
