@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Präprozessoranweisungen werden nicht formatiert.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Zugriffsspezifizierer werden relativ zu Klassen- oder Strukturdefinitionen um den im Editor in der Einstellung für die Tabstoppgröße angegebenen Wert eingerückt.",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Der Code wird relativ zu seinem einschließenden Namespace um den im Editor in der Einstellung für die Tabstoppgröße angegebenen Wert eingerückt.",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "Der Einzug von Kommentaren wird bei Formatierungsvorgängen nicht geändert.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Der Einzug von Kommentaren wird bei Formatierungsvorgängen nicht geändert.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Die Position der öffnenden geschweiften Klammern für Namespaces",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Die Position der öffnenden geschweiften Klammern für Typdefinitionen",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Die Position der öffnenden geschweiften Klammern für Lambda-Funktionen",

@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Le direttive del preprocessore non verranno formattate.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Gli identificatori di accesso sono rientrati rispetto alle definizioni di classe o struct in base al valore specificato nell'impostazione Editor: Dimensione tabulazione",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Il codice viene rientrato rispetto allo spazio dei nomi che lo contiene in base al valore specificato nell'impostazione Editor: Dimensione tabulazione",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "I rientri dei commenti non vengono modificati durante le operazioni di formattazione.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "I rientri dei commenti non vengono modificati durante le operazioni di formattazione.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Posizione delle parentesi graffe di apertura per gli spazi dei nomi",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Posizione delle parentesi graffe di apertura per le definizioni di tipo",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Posizione delle parentesi graffe di apertura per le funzioni lambda",
