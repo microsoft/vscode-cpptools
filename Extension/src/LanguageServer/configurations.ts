@@ -246,7 +246,9 @@ export class CppProperties {
     }
 
     private onConfigurationsChanged(): void {
-        this.configurationsChanged.fire(this.Configurations);
+        if (this.Configurations) {
+            this.configurationsChanged.fire(this.Configurations);
+        }
     }
 
     private onSelectionChanged(): void {
