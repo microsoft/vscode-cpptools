@@ -74,7 +74,7 @@ export class CppSettings extends Settings {
     public get clangFormatPath(): string | undefined {
         let path: string | undefined | null = super.Section.get<string>("clang_format_path");
         if (!path) {
-            path = which.sync('clang-format', {nothrow: true});
+            path = which.sync('clang-format', { nothrow: true });
             if (!path) {
                 return undefined;
             } else {
@@ -157,7 +157,7 @@ export class CppSettings extends Settings {
     public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
-    public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get< { [key: string]: string } >("default.customConfigurationVariables"); }
+    public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
 
@@ -543,7 +543,7 @@ function mapWrapToEditorConfig(value: string | undefined): string {
 
 function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): void {
     // Set up a map of setting names and values. Parse through the document line-by-line, looking for
-    // existing occurances to replace. Replaced occurances are removed from the map. If any remain when
+    // existing occurences to replace. Replaced occurences are removed from the map. If any remain when
     // done, they are added as a new section at the end of the file. The file is opened with unsaved
     // edits, so the user may edit or undo if we made a mistake.
     const settings: CppSettings = new CppSettings(rootUri);
@@ -689,8 +689,7 @@ export function generateEditorConfig(rootUri?: vscode.Uri): void {
             vscode.workspace.openTextDocument(uri).then(
                 (document) => populateEditorConfig(rootUri, document),
                 () => vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document)));
-        },
-        () => vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document)));
+        }, () => vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document)));
     } else {
         vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document));
     }
