@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "As diretivas de pré-processador não serão formatadas.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Os especificadores de acesso são recuados em relação às definições de classe ou struct pelo valor especificado na configuração Editor: Tamanho da Tabulação",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "O código é recuado em relação ao namespace delimitador com o valor especificado no Editor: configuração do Tamanho da Guia",
-	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "O recuo dos comentários não é alterado durante as operações de formatação.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "A posição das chaves de abertura para namespaces",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "A posição das chaves de abertura para definições de tipo",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "A posição das chaves de abertura para funções lambda",
