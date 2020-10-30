@@ -812,6 +812,20 @@ export class DefaultClient implements Client {
                     this.semanticTokensLegend = new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 
                     if (firstClient) {
+                        // Don't log telemetry for machineId if it's a special value used by the dev host: someValue.machineid
+                        if (vscode.env.machineId !== "someValue.machineId") {
+                            const machineIdPersistentState: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.machineId", undefined);
+                            if (!machineIdPersistentState.Value) {
+                                telemetry.logLanguageServerEvent("NewMachineID", { "machineId": vscode.env.machineId });
+                            } else if (machineIdPersistentState.Value !== vscode.env.machineId) {
+                                telemetry.logLanguageServerEvent("MachineIDChanged", { "machineId": vscode.env.machineId });
+                            }
+                            machineIdPersistentState.Value = vscode.env.machineId;
+                        }
+                        if (vscode.env.remoteName) {
+                            telemetry.logLanguageServerEvent("RemoteName", { "remoteName": vscode.env.remoteName });
+                        }
+
                         workspaceReferences = new refs.ReferencesManager(this);
 
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
