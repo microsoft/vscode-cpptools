@@ -613,26 +613,50 @@ function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.
 
     // Cycle through lines using document.lineAt(), to avoid issues mapping edits back to lines.
     for (let i: number = 0; i < document.lineCount; ++i) {
-        const textLine: vscode.TextLine = document.lineAt(i);
-        const text: string = textLine.text.trim();
+        let textLine: vscode.TextLine = document.lineAt(i);
+        if (textLine.range.end.character === 0) {
+            trailingBlankLines++;
+            continue;
+        }
+        trailingBlankLines = 0;
+        // Keep track of whether we left off in a wildcard section, so we don't output a redundant one.
+        let text: string = textLine.text.trim();
+        if (text.startsWith("[")) {
+            isInWildcardSection = text.startsWith("[*]");
+            continue;
+        }
         for (const setting of settingMap) {
             if (text.startsWith(setting[0])) {
+                // The next character must be white space or '=', otherwise it's a partial match.
+                if (text.length > setting[0].length) {
+                    const c: string = text[setting[0].length];
+                    if (c !== '=' && c.trim() !== "") {
+                        continue;
+                    }
+                }
                 edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
+                // Because we're going to remove this setting from the map,
+                // scan ahead to update any other sections it may need to be updated in.
+                for (let j: number = i + 1; j < document.lineCount; ++j) {
+                    textLine = document.lineAt(j);
+                    text = textLine.text.trim();
+                    if (text.startsWith(setting[0])) {
+                        // The next character must be white space or '=', otherwise it's a partial match.
+                        if (text.length > setting[0].length) {
+                            const c: string = text[setting[0].length];
+                            if (c !== '=' && c.trim() !== "") {
+                                continue;
+                            }
+                        }
+                        edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
+                    }
+                }
                 settingMap.delete(setting[0]);
                 break;
             }
         }
         if (settingMap.size === 0) {
             break;
-        }
-        // Keep track of whether we left off in a wildcard section, so we don't output a redundant one.
-        if (text.startsWith("[")) {
-            isInWildcardSection = text.startsWith("[*]");
-        }
-        if (textLine.range.end.character === 0) {
-            trailingBlankLines++;
-        } else {
-            trailingBlankLines = 0;
         }
     }
 
@@ -652,8 +676,7 @@ function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.
         const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
         edits.insert(document.uri, lastPosition, remainingSettingsText);
     }
-    vscode.workspace.applyEdit(edits);
-    vscode.window.showTextDocument(document);
+    vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
 }
 
 export function generateEditorConfig(rootUri?: vscode.Uri): void {
