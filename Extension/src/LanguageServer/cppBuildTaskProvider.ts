@@ -280,12 +280,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         return util.getJsonPath("tasks.json");
     }
 
-    private getRawLaunchJson(): Promise<any> {
+    public getRawLaunchJson(): Promise<any> {
         const path: string | undefined = this.getLaunchJsonPath();
         return util.getRawJson(path);
     }
 
-    private getRawTasksJson(): Promise<any> {
+    public getRawTasksJson(): Promise<any> {
         const path: string | undefined = this.getTasksJsonPath();
         return util.getRawJson(path);
     }

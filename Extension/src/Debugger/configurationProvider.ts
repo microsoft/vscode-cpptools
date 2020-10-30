@@ -7,7 +7,7 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CppBuildTaskDefinition} from '../LanguageServer/cppBuildTaskProvider';
+import { CppBuildTask, CppBuildTaskDefinition} from '../LanguageServer/cppBuildTaskProvider';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
@@ -113,10 +113,6 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await cppBuildTaskProvider.getTasks(true);
-        if (buildTasks.length === 0) {
-            return Promise.resolve(this.provider.getInitialConfigurations(this.type));
-        }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find((config: any) =>
             isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig, "Could not find default debug configuration.");
@@ -124,14 +120,41 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
 
+        let buildTasks: CppBuildTask[]  = [];
+        let temp: any = await cppBuildTaskProvider.getRawTasksJson();
+        const rawTasksJson: any = (!temp.tasks)? new Array() : temp.tasks;
+
+        const rawTasks1: CppBuildTask[] = rawTasksJson.map((task: any) => {
+            const def: CppBuildTaskDefinition = {
+                type: task.type,
+                label: task.label,
+                command: task.command,
+                args: task.args,
+                options: task.options,
+            };
+            const temp2 : CppBuildTask = new vscode.Task(def, vscode.TaskScope.Workspace, task.label, "C/C++");
+            temp2.detail = task.detail;
+            return temp2;
+        });
+
+        const rawTasks2: CppBuildTask[] = await cppBuildTaskProvider.getTasks(true);
+        buildTasks = buildTasks.concat(rawTasks1, rawTasks2);
+
+        if (buildTasks.length === 0) {
+            return Promise.resolve(this.provider.getInitialConfigurations(this.type));
+        }
+
+        if (buildTasks.length === 0) {
+            return Promise.resolve(this.provider.getInitialConfigurations(this.type));
+        }
         // Filter out build tasks that don't match the currently selected debug configuration type.
-        buildTasks = buildTasks.filter((task: vscode.Task) => {
+        buildTasks = buildTasks.filter((task: CppBuildTask) => {
             if (defaultConfig.name.startsWith("(Windows) ")) {
-                if (task.name.startsWith("C/C++: cl.exe")) {
+                if ((task.definition.command as string).includes("cl.exe")) {
                     return true;
                 }
             } else {
-                if (!task.name.startsWith("C/C++: cl.exe")) {
+                if (!(task.definition.command as string).includes("cl.exe")) {
                     return true;
                 }
             }
@@ -153,7 +176,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
-            newConfig.detail = definition.command;
+            newConfig.detail = task.detail ? task.detail : definition.command;
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
