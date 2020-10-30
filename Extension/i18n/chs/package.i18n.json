@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "不会格式化预处理器指令。",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "按照在“编辑器: 制表符大小”设置中指定的量，相对于类或结构定义缩进访问说明符",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "按照在“编辑器: 制表符大小”设置中指定的量，相对于封闭命名空间缩进代码",
-	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "在格式设置操作过程中未更改注释的缩进。",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "用于命名空间的左大括号的位置",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "用于类型定义的左大括号的位置",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "用于 lambda 函数的左大括号的位置",

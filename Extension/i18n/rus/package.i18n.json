@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Директивы препроцессора форматироваться не будут.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Добавление отступа для описателей доступа относительно определений классов или структур на величину, указанную параметром \"Редактор: Размер табуляции\".",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Код располагается относительно вмещающего пространства имен с отступом, размер которого определяется параметром редактора \"Размер шага табуляции\".",
-	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Отступ комментариев не был изменен во время операций форматирования.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Положение открывающих фигурных скобок для пространств имен.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Положение открывающих фигурных скобок для определений типов.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Положение открывающих фигурных скобок для лямбда-функций.",

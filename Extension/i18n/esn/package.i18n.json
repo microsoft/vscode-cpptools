@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Las directivas de preprocesador no se formatearán.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Se aplica sangría a los especificadores de acceso en relación con las definiciones de clase o struct, según lo especificado en la configuración de Editor: Tamaño de tabulación.",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Se aplica sangría al código en relación con su espacio de nombres envolvente, según lo especificado en la configuración de Editor: Tamaño de tabulación.",
-	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "La sangría de los comentarios no se cambia durante las operaciones de formato.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "La posición de las llaves de apertura para los espacios de nombres",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "La posición de las llaves de apertura para las definiciones de tipo",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "La posición de las llaves de apertura para las funciones lambda",
