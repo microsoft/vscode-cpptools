@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "將不會格式化前置處理器指示詞。",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "存取指定名稱會依據 [Editor: Tab Size] 設定中指定的數量，按照類別或結構定義的相對位置縮排",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "程式碼會依據 [Editor: Tab Size] 設定中指定的數量，按照其封入之命名空間的相對位置縮排",
-	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "格式化作業期間，註解的縮排未變更。",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "命名空間之左大括弧的位置",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "型別定義之左大括弧的位置",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Lambda 函式之左大括弧的位置",

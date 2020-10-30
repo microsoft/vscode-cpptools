@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Les directives de préprocesseur ne sont pas mises en forme.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Les spécificateurs d'accès sont mis en retrait par rapport aux définitions de classe ou de struct en fonction de la valeur spécifiée dans le paramètre Éditeur : Taille des tabulations",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Le code est mis en retrait par rapport à son espace de noms englobant, en fonction de la valeur spécifiée dans le paramètre Éditeur : Taille des tabulations",
-	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "La mise en retrait des commentaires ne change pas pendant les opérations de mise en forme.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Position des accolades ouvrantes pour les espaces de noms",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Position des accolades ouvrantes pour les définitions de type",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Position des accolades ouvrantes pour les fonctions lambda",

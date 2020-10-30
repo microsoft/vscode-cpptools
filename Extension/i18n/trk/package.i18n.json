@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Ön işlemci yönergeleri biçimlendirilmeyecek.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Erişim belirticileri, sınıfa veya yapı tanımlarına göreli olarak, Düzenleyici: Sekme Boyutu ayarında belirtilen miktara göre girintilenir",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Kod, kendisini çevreleyen ad alanına göre, Düzenleyici: Sekme Boyutu ayarında belirtilen miktarda girintilenir",
-	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Açıklama girintileri, biçimlendirme işlemleri sırasında değiştirilmedi.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Ad alanları için açma küme ayraçlarının konumu",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Tür tanımları için açma küme ayraçlarının konumu",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Lambda işlevleri için açma küme ayraçlarının konumu",
