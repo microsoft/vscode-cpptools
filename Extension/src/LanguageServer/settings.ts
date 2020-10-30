@@ -543,7 +543,7 @@ function mapWrapToEditorConfig(value: string | undefined): string {
 
 function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): void {
     // Set up a map of setting names and values. Parse through the document line-by-line, looking for
-    // existing occurences to replace. Replaced occurences are removed from the map. If any remain when
+    // existing occurrences to replace. Replaced occurrences are removed from the map. If any remain when
     // done, they are added as a new section at the end of the file. The file is opened with unsaved
     // edits, so the user may edit or undo if we made a mistake.
     const settings: CppSettings = new CppSettings(rootUri);
