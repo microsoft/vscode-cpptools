@@ -120,25 +120,39 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
 
-        let buildTasks: CppBuildTask[]  = [];
-        let temp: any = await cppBuildTaskProvider.getRawTasksJson();
-        const rawTasksJson: any = (!temp.tasks)? new Array() : temp.tasks;
-
-        const rawTasks1: CppBuildTask[] = rawTasksJson.map((task: any) => {
-            const def: CppBuildTaskDefinition = {
+        // Import the tasks from tasks.json file.
+        let rawJson: any = await cppBuildTaskProvider.getRawTasksJson();
+        const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
+        const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
+            const definition: CppBuildTaskDefinition = {
                 type: task.type,
                 label: task.label,
                 command: task.command,
                 args: task.args,
                 options: task.options,
             };
-            const temp2 : CppBuildTask = new vscode.Task(def, vscode.TaskScope.Workspace, task.label, "C/C++");
-            temp2.detail = task.detail;
-            return temp2;
+            const cppBuildTask: CppBuildTask = new vscode.Task(definition, vscode.TaskScope.Workspace, task.label, "C/C++");
+            cppBuildTask.detail = task.detail;
+            return cppBuildTask;
         });
 
-        const rawTasks2: CppBuildTask[] = await cppBuildTaskProvider.getTasks(true);
-        buildTasks = buildTasks.concat(rawTasks1, rawTasks2);
+        // Provide detected tasks by cppBuildTaskProvider.
+        const buildTasksDetected: CppBuildTask[] = await cppBuildTaskProvider.getTasks(true);
+
+        // Rename the provided tasks that has same name as tasks in tasks.json.
+        const buildTasksDetectedRename: CppBuildTask[] = buildTasksDetected.map(taskDetected => {
+            for (let taskJson of buildTasksJson) {
+                if ((taskDetected.definition.label as string) === (taskJson.definition.label as string)) {
+                    taskDetected.name = taskDetected.name.concat("_copy");
+                    taskDetected.definition.label = taskDetected.name;
+                    break;
+                }
+            }
+            return taskDetected;
+        });
+
+        let buildTasks: CppBuildTask[] = [];
+        buildTasks = buildTasks.concat(buildTasksJson, buildTasksDetectedRename);
 
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));

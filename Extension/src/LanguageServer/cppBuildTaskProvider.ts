@@ -218,12 +218,14 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        selectedTask = buildTasks.find(task => task.name === taskLabel);
+        selectedTask = buildTasks.find(task => task.name === (taskLabel.replace(/_copy/g,'')));
         console.assert(selectedTask);
         if (!selectedTask) {
             throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
+        } else {
+            selectedTask.definition.label = taskLabel;
+            selectedTask.name = taskLabel;
         }
-
         rawTasksJson.version = "2.0.0";
 
         // Modify the current default task
