@@ -263,11 +263,31 @@ function onActivationEvent(): void {
     activatedPreviously.Value = true;
 }
 
+function sendActivationTelemetry(): void {
+    const activateEvent: { [key: string]: string } = {};
+    // Don't log telemetry for machineId if it's a special value used by the dev host: someValue.machineid
+    if (vscode.env.machineId !== "someValue.machineId") {
+        const machineIdPersistentState: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.machineId", undefined);
+        if (!machineIdPersistentState.Value) {
+            activateEvent["newMachineId"] = vscode.env.machineId;
+        } else if (machineIdPersistentState.Value !== vscode.env.machineId) {
+            activateEvent["newMachineId"] = vscode.env.machineId;
+            activateEvent["oldMachineId"] = machineIdPersistentState.Value;
+        }
+        machineIdPersistentState.Value = vscode.env.machineId;
+    }
+    if (vscode.env.remoteName) {
+        activateEvent["remoteName"] = vscode.env.remoteName;
+    }
+    telemetry.logLanguageServerEvent("Activate", activateEvent);
+}
+
 function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
+        sendActivationTelemetry();
         const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
