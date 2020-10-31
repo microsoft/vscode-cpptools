@@ -283,11 +283,11 @@ function sendActivationTelemetry(): void {
 }
 
 function realActivation(): void {
-    sendActivationTelemetry();
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
+        sendActivationTelemetry();
         const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
