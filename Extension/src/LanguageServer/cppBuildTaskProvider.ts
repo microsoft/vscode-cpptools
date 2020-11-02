@@ -204,7 +204,7 @@ export class CppBuildTaskProvider implements TaskProvider {
     };
 
     public async getJsonTasks(): Promise<CppBuildTask[]> {
-        let rawJson: any = await this.getRawTasksJson();
+        const rawJson: any = await this.getRawTasksJson();
         const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
         const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
             const definition: CppBuildTaskDefinition = {
@@ -212,7 +212,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 label: task.label,
                 command: task.command,
                 args: task.args,
-                options: task.options,
+                options: task.options
             };
             const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, "C/C++");
             cppBuildTask.detail = task.detail;
@@ -234,7 +234,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         // Create the task which should be created based on the selected "debug configuration".
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        const normalizedLabel: string = taskLabel.slice(0, taskLabel.indexOf("ver(")).trim();
+        const normalizedLabel: string = (taskLabel.indexOf("ver(") != -1) ? taskLabel.slice(0, taskLabel.indexOf("ver(")).trim() : taskLabel;
         selectedTask = buildTasks.find(task => task.name === normalizedLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
@@ -293,15 +293,15 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     // Provide a unique name for a newly defined tasks, which is different from tasks' names in tasks.json.
     public provideUniqueTaskLabel(label: string, buildTasksJson: CppBuildTask[]): string {
-        let taskNameDictionary: {[key: string]: any} = {};
+        const taskNameDictionary: {[key: string]: any} = {};
         buildTasksJson.forEach(task => {
             taskNameDictionary[task.definition.label] = {};
         });
-        let newLabel = label;
-        let version = 0;
+        let newLabel: string = label;
+        let version: number = 0;
         do {
             version = version + 1;
-            newLabel = label + ` ver(${version})`
+            newLabel = label + ` ver(${version})`;
 
         } while (taskNameDictionary[newLabel]);
 
