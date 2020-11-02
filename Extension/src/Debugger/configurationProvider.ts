@@ -121,20 +121,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platform: string = platformInfo.platform;
 
         // Import the tasks from tasks.json file.
-        let rawJson: any = await cppBuildTaskProvider.getRawTasksJson();
-        const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
-        const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
-            const definition: CppBuildTaskDefinition = {
-                type: task.type,
-                label: task.label,
-                command: task.command,
-                args: task.args,
-                options: task.options,
-            };
-            const cppBuildTask: CppBuildTask = new vscode.Task(definition, vscode.TaskScope.Workspace, task.label, "C/C++");
-            cppBuildTask.detail = task.detail;
-            return cppBuildTask;
-        });
+        const buildTasksJson: CppBuildTask[] = await cppBuildTaskProvider.getJsonTasks();
 
         // Provide detected tasks by cppBuildTaskProvider.
         const buildTasksDetected: CppBuildTask[] = await cppBuildTaskProvider.getTasks(true);
@@ -143,7 +130,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const buildTasksDetectedRename: CppBuildTask[] = buildTasksDetected.map(taskDetected => {
             for (let taskJson of buildTasksJson) {
                 if ((taskDetected.definition.label as string) === (taskJson.definition.label as string)) {
-                    taskDetected.name = taskDetected.name.concat("_copy");
+                    taskDetected.name = cppBuildTaskProvider.provideUniqueTaskLabel(taskJson.definition.label, buildTasksJson);
                     taskDetected.definition.label = taskDetected.name;
                     break;
                 }

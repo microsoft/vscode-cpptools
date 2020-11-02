@@ -149,7 +149,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (userCompilerPath) {
             result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
         }
-
         return result;
     }
 
@@ -204,21 +203,39 @@ export class CppBuildTaskProvider implements TaskProvider {
         return task;
     };
 
+    public async getJsonTasks(): Promise<CppBuildTask[]> {
+        let rawJson: any = await this.getRawTasksJson();
+        const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
+        const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
+            const definition: CppBuildTaskDefinition = {
+                type: task.type,
+                label: task.label,
+                command: task.command,
+                args: task.args,
+                options: task.options,
+            };
+            const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, "C/C++");
+            cppBuildTask.detail = task.detail;
+            return cppBuildTask;
+        });
+        return buildTasksJson;
+    }
+
     public async ensureBuildTaskExists(taskLabel: string): Promise<void> {
         const rawTasksJson: any = await this.getRawTasksJson();
-
-        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
-        // Find or create the task which should be created based on the selected "debug configuration".
-        let selectedTask: CppBuildTask | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+        let selectedTask: any = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
         if (selectedTask) {
             return;
         }
 
+        // Create the task which should be created based on the selected "debug configuration".
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        selectedTask = buildTasks.find(task => task.name === (taskLabel.replace(/_copy/g,'')));
+        const normalizedLabel: string = taskLabel.slice(0, taskLabel.indexOf("ver(")).trim();
+        selectedTask = buildTasks.find(task => task.name === normalizedLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
             throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
@@ -272,6 +289,23 @@ export class CppBuildTaskProvider implements TaskProvider {
             throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
         }
         return;
+    }
+
+    // Provide a unique name for a newly defined tasks, which is different from tasks' names in tasks.json.
+    public provideUniqueTaskLabel(label: string, buildTasksJson: CppBuildTask[]): string {
+        let taskNameDictionary: {[key: string]: any} = {};
+        buildTasksJson.forEach(task => {
+            taskNameDictionary[task.definition.label] = {};
+        });
+        let newLabel = label;
+        let version = 0;
+        do {
+            version = version + 1;
+            newLabel = label + ` ver(${version})`
+
+        } while (taskNameDictionary[newLabel]);
+
+        return newLabel;
     }
 
     private getLaunchJsonPath(): string | undefined {
