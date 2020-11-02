@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Dodatkowe argumenty dla debugera MI (takiego jak gdb).",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Adres sieciowy serwera debugera MI, z którym ma zostać nawiązane połączenie (przykład: localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "Parametr opcjonalny. Jeśli wartość to true, debuger powinien zostać zatrzymany w punkcie wejścia obiektu docelowego. W przypadku przekazania identyfikatora procesu parametr ten nie ma żadnego efektu.",
-	"c_cpp.debuggers.debugServerPath.description": "Opcjonalna pełna ścieżka do serwera debugowania do uruchomienia. Wartość domyślna to null.",
+	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
 	"c_cpp.debuggers.debugServerArgs.description": "Opcjonalne argumenty serwera debugowania. Wartość domyślna to null.",
 	"c_cpp.debuggers.serverStarted.description": "Opcjonalny wzorzec uruchomiony przez serwer do wyszukania w danych wyjściowych serwera debugowania. Wartością domyślną jest null.",
 	"c_cpp.debuggers.filterStdout.description": "Wyszukiwanie strumienia stdout dla wzorca uruchomionego przez serwer i rejestrowanie strumienia stdout w danych wyjściowych debugowania. Wartością domyślną jest true.",

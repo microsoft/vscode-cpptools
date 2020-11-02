@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Argumentos adicionales para el depurador MI (como gdb).",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Dirección de red del servidor del depurador MI al que debe conectarse (ejemplo: localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "Parámetro opcional. Si se establece en true, el depurador debe detenerse en el punto de entrada del destino. Si se pasa processId, no tiene efecto.",
-	"c_cpp.debuggers.debugServerPath.description": "Ruta de acceso completa opcional al servidor de depuración que se va a iniciar. El valor predeterminado es NULL.",
+	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
 	"c_cpp.debuggers.debugServerArgs.description": "Argumentos opcionales del servidor de depuración. El valor predeterminado es NULL.",
 	"c_cpp.debuggers.serverStarted.description": "Patrón opcional iniciado por el servidor que debe buscarse en la salida del servidor de depuración. El valor predeterminado es NULL.",
 	"c_cpp.debuggers.filterStdout.description": "Busca la secuencia stdout para el patrón iniciado por el servidor y registra stdout en la salida de depuración. El valor predeterminado es true.",

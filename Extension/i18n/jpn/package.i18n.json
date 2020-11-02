@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "MI デバッガー (gdb など) の追加の引数。",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "接続先の MI デバッガー サーバーのネットワークアドレスです (例: localhost: 1234)。",
 	"c_cpp.debuggers.stopAtEntry.description": "オプションのパラメーターです。true の場合、デバッガーはターゲットのエントリポイントで停止します。processId が渡された場合は効果はありません。",
-	"c_cpp.debuggers.debugServerPath.description": "起動するデバッグ サーバーの完全なパス (省略可能)。既定値は null です。",
+	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
 	"c_cpp.debuggers.debugServerArgs.description": "デバッグ サーバー引数 (省略可能)。既定値は null です。",
 	"c_cpp.debuggers.serverStarted.description": "デバッグ サーバー出力から検索する、サーバー開始のパターン (省略可能)。既定値は null です。",
 	"c_cpp.debuggers.filterStdout.description": "サーバー開始のパターンを stdout ストリームから検索し、stdout をデバッグ出力にログ記録します。既定値は true です。",

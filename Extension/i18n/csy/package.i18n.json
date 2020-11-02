@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Další argumenty pro ladicí program MI (třeba gdb)",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Síťová adresa MI Debugger Serveru, ke kterému se má připojit (příklad: localhost:1234)",
 	"c_cpp.debuggers.stopAtEntry.description": "Nepovinný parametr. Když se nastaví na true, ladicí program by se měl zastavit u vstupního bodu cíle. Pokud se předá processId, nemá parametr žádný vliv.",
-	"c_cpp.debuggers.debugServerPath.description": "Volitelná úplná cesta k ladicímu serveru, který se má spustit. Výchozí hodnota je null.",
+	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
 	"c_cpp.debuggers.debugServerArgs.description": "Volitelné argumenty ladicího serveru. Výchozí hodnota je null.",
 	"c_cpp.debuggers.serverStarted.description": "Volitelný vzorek spuštěný na serveru, který se má vyhledat ve výstupu ladicího serveru. Výchozí hodnota je null.",
 	"c_cpp.debuggers.filterStdout.description": "Vyhledá ve vzorku spuštěném na serveru stream stdout a zaznamená stdout do výstupu ladění. Výchozí hodnota je true.",

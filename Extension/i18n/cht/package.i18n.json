@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "MI 偵錯工具 (例如 gdb) 的其他引數。",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "MI 偵錯工具伺服器要連線至的網路位址 (範例: localhost:1234)。",
 	"c_cpp.debuggers.stopAtEntry.description": "選擇性參數。若為 true，則偵錯工具應該在目標的進入點停止。如果已傳遞 processId。就沒有效果。",
-	"c_cpp.debuggers.debugServerPath.description": "要啟動的偵錯伺服器選擇性完整路徑。預設為 null。",
+	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
 	"c_cpp.debuggers.debugServerArgs.description": "選擇性偵錯伺服器引數。預設為 null。",
 	"c_cpp.debuggers.serverStarted.description": "要在偵錯伺服器輸出中尋找的選擇性伺服器啟動模式。預設為 null。",
 	"c_cpp.debuggers.filterStdout.description": "搜尋 stdout 資料流以取得伺服器啟動的模式，並將 stdout 記錄到偵錯輸出。預設為 true。",

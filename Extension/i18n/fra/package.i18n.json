@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Arguments supplémentaires pour le débogueur MI (par exemple gdb).",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Adresse réseau du serveur du débogueur MI auquel se connecter (par exemple : localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "Paramètre facultatif. Si la valeur est true, le débogueur doit s'arrêter au point d'entrée de la cible. Si processId est passé, le paramètre n'a aucun effet.",
-	"c_cpp.debuggers.debugServerPath.description": "Chemin complet facultatif du serveur de débogage à lancer. La valeur par défaut est null.",
+	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
 	"c_cpp.debuggers.debugServerArgs.description": "Arguments facultatifs du serveur de débogage. La valeur par défaut est null.",
 	"c_cpp.debuggers.serverStarted.description": "Modèle facultatif de démarrage du serveur à rechercher dans la sortie du serveur de débogage. La valeur par défaut est null.",
 	"c_cpp.debuggers.filterStdout.description": "Permet de rechercher dans le flux stdout le modèle correspondant au démarrage du serveur, et de journaliser stdout dans la sortie de débogage. La valeur par défaut est true.",
