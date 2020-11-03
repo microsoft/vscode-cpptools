@@ -31,14 +31,10 @@ export class CppBuildTask extends Task {
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
     static CppBuildSourceStr: string = "C/C++";
-    private tasks: CppBuildTask[] | undefined;
 
     constructor() { }
 
     public async provideTasks(): Promise<CppBuildTask[]> {
-        if (this.tasks) {
-            return this.tasks;
-        }
         return this.getTasks(false);
     }
 
@@ -47,9 +43,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const execution: ProcessExecution | ShellExecution | CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
-            const detail: string | undefined = _task.detail;
-            _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
-            _task.detail = detail;
+            _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
             return _task;
         }
         return undefined;
@@ -57,9 +51,6 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
     public async getTasks(appendSourceToName: boolean): Promise<CppBuildTask[]> {
-        if (this.tasks !== undefined) {
-            return this.tasks;
-        }
         const editor: TextEditor | undefined = window.activeTextEditor;
         const emptyTasks: CppBuildTask[] = [];
         if (!editor) {
@@ -154,7 +145,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         return result;
     }
 
-    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
+    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => {
         const compilerPathBase: string = path.basename(compilerPath);
         const isCl: boolean = compilerPathBase === "cl.exe";
         // Double-quote the command if it is not already double-quoted.
@@ -200,7 +191,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
-        task.detail = "compiler: " + resolvedcompilerPath;
+        task.detail = detail ? detail : "compiler: " + resolvedcompilerPath;
 
         return task;
     };
