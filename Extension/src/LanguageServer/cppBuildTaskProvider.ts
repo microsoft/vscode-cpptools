@@ -47,7 +47,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         const execution: ProcessExecution | ShellExecution | CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
+            const detail: string | undefined = _task.detail;
             _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
+            _task.detail = detail;
             return _task;
         }
         return undefined;
@@ -154,8 +156,6 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
         const compilerPathBase: string = path.basename(compilerPath);
-        const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
-            CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
@@ -164,6 +164,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         if (!definition) {
+            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
+                CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const isWindows: boolean = os.platform() === 'win32';
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
@@ -191,7 +193,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const scope: TaskScope = TaskScope.Workspace;
-        const task: CppBuildTask = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
                 new CustomBuildTaskTerminal(resolvedcompilerPath, definition ? definition.args : [], definition ? definition.options : undefined)
