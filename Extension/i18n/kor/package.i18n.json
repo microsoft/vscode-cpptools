@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "MI 디버거(예: gdb)의 추가 인수입니다.",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "연결할 MI 디버거 서버의 네트워크 주소입니다(예: localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "선택적 매개 변수입니다. True이면 디버거가 대상의 진입점에서 중지됩니다. processId가 전달되는 경우 영향을 주지 않습니다.",
-	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
+	"c_cpp.debuggers.debugServerPath.description": "시작할 디버그 서버의 전체 경로입니다(선택 사항). 기본값은 null입니다. 이 옵션은 \"miDebugServerAddress\"와 함께 사용되거나 \"-target-select remote <server:port>\"를 실행하는 \"customSetupCommand\"와 자체 서버와 함께 사용됩니다.",
 	"c_cpp.debuggers.debugServerArgs.description": "선택적 디버그 서버 인수입니다. 기본값은 null입니다.",
 	"c_cpp.debuggers.serverStarted.description": "디버그 서버 출력에서 찾을 서버에서 시작한 패턴(선택 사항)입니다. 기본값은 null입니다.",
 	"c_cpp.debuggers.filterStdout.description": "서버에서 시작한 패턴을 stdout 스트림에서 검색하고, stdout를 디버그 출력에 기록합니다. 기본값은 true입니다.",
