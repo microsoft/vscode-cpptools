@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "MI hata ayıklayıcısı için ek bağımsız değişkenler (gdb gibi).",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Bağlanılacak MI Hata Ayıklayıcısı Sunucusunun ağ adresi (örnek: localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "İsteğe bağlı parametre. Değeri true ise, hata ayıklayıcısının hedefin giriş noktasında durması gerekir. processId geçirilirse hiçbir etkisi olmaz.",
-	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
+	"c_cpp.debuggers.debugServerPath.description": "Başlatılacak sunucuda hata ayıklama için isteğe bağlı tam yol. Varsayılan değeri null. \"miDebugServerAddress\" ya da kendi sunucunuzun \"-target-select remote <server:port>\" çalıştıran bir \"customSetupCommand\" ile birlikte kullanılır.",
 	"c_cpp.debuggers.debugServerArgs.description": "İsteğe bağlı hata ayıklama sunucusu bağımsız değişkenleri. Varsayılan olarak şu değeri alır: null.",
 	"c_cpp.debuggers.serverStarted.description": "Hata ayıklama sunucusu çıktısında aranacak, sunucu tarafından başlatılan isteğe bağlı model. Varsayılan olarak şu değeri alır: null.",
 	"c_cpp.debuggers.filterStdout.description": "Sunucu tarafından başlatılan model için stdout akışını arar ve çıktıda hata ayıklamak için stdout'u günlüğe kaydeder. Varsayılan olarak şu değeri alır: true.",
