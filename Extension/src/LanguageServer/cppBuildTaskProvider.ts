@@ -234,7 +234,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         // Create the task which should be created based on the selected "debug configuration".
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        const normalizedLabel: string = (taskLabel.indexOf("ver(") != -1) ? taskLabel.slice(0, taskLabel.indexOf("ver(")).trim() : taskLabel;
+        const normalizedLabel: string = (taskLabel.indexOf("ver(") !== -1) ? taskLabel.slice(0, taskLabel.indexOf("ver(")).trim() : taskLabel;
         selectedTask = buildTasks.find(task => task.name === normalizedLabel);
         console.assert(selectedTask);
         if (!selectedTask) {

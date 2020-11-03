@@ -128,7 +128,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
         // Rename the provided tasks that has same name as tasks in tasks.json.
         const buildTasksDetectedRename: CppBuildTask[] = buildTasksDetected.map(taskDetected => {
-            for (let taskJson of buildTasksJson) {
+            for (const taskJson of buildTasksJson) {
                 if ((taskDetected.definition.label as string) === (taskJson.definition.label as string)) {
                     taskDetected.name = cppBuildTaskProvider.provideUniqueTaskLabel(taskJson.definition.label, buildTasksJson);
                     taskDetected.definition.label = taskDetected.name;
