@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.1.0-insiders4: November 2, 2020
+## Version 1.1.0-insiders4: November 3, 2020
 ### Bug Fixes
 * Show the compiler path in the `Build and Debug Active File` dropdown. [#4278](https://github.com/microsoft/vscode-cpptools/issues/4278)
 * Allow the debug configuration to wait for the preLaunchTask to complete before continuing on and resolving environment variables or processes that may have been set in the 'tasks.json'. [#5287](https://github.com/microsoft/vscode-cpptools/issues/5287)
@@ -15,7 +15,7 @@
   * [MIEngine PR #1070](https://github.com/microsoft/MIEngine/pull/1070)
 * 1.1.0-insiders3: Setup commands do not work when attaching [#6417](https://github.com/microsoft/vscode-cpptools/issues/6417)
   * [MIEngine PR #1072](https://github.com/microsoft/MIEngine/pull/1072)
-* Fix issue causing zh-cn and zh-tw language files not to be used. [PR6418](https://github.com/microsoft/vscode-cpptools/pull/6418)
+* Fix issue causing zh-cn and zh-tw language files not to be used. [PR #6418](https://github.com/microsoft/vscode-cpptools/pull/6418)
 * Fix issue causing some localized messages to be displayed incorrectly.
 * Fixed issue with shipping an older version of vsdbg in offline packages.
 
