@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "建置及偵錯使用中的檔案",
 	"cannot.build.non.cpp": "因為作用中的檔案不是 C 或 C++ 來源檔案，所以無法建立和偵錯。",
 	"no.compiler.found": "找不到任何編譯器",
-	"select.compiler": "選取編譯器",
+	"select.configuration": "Select a configuration",
 	"cl.exe.not.available": "只有從 VS 的開發人員命令提示字元執行 VS Code 時，才可使用 {0} 組建和偵錯。"
 }

@@ -208,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Дополнительные аргументы для отладчика MI (например, GDB).",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Сетевой адрес сервера отладчика MI, к которому требуется подключиться (пример: localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "Необязательный параметр. Если задано значение true, отладчик должен остановиться на точке входа целевого объекта. Если передается идентификатор процесса (processId), он не оказывает никакого влияния.",
-	"c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
+	"c_cpp.debuggers.debugServerPath.description": "Необязательный полный путь к запускаемому серверу отладки. По умолчанию имеет значение NULL. Применяется с параметром \"miDebugServerAddress\" или с вашим собственным сервером через команду \"customSetupCommand\", использующую \"-target-select remote <server:port>\".",
 	"c_cpp.debuggers.debugServerArgs.description": "Необязательные аргументы сервера отладки. Значение по умолчанию: null.",
 	"c_cpp.debuggers.serverStarted.description": "Дополнительный запускаемый сервером шаблон для поиска в выходных данных сервера отладки. Значение по умолчанию: null.",
 	"c_cpp.debuggers.filterStdout.description": "Поиск запущенного сервером шаблона в потоке stdout и регистрация stdout в выходных данных отладки. Значение по умолчанию: true.",

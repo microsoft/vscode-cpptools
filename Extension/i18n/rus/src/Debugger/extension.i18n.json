@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Сборка и отладка активного файла",
 	"cannot.build.non.cpp": "Не удается выполнить сборку и отладку, так как активный файл не является исходным файлом C или C++.",
 	"no.compiler.found": "Компилятор не найден",
-	"select.compiler": "Выберите компилятор",
+	"select.configuration": "Select a configuration",
 	"cl.exe.not.available": "Сборку и отладку {0} можно использовать только при запуске VS Code из Командной строки разработчика для VS."
 }
