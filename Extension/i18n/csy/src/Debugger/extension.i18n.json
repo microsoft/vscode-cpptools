@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Sestavit a ladit aktivní soubor",
 	"cannot.build.non.cpp": "Sestavení a ladění není možné, protože aktivní soubor není zdrojový soubor jazyka C ani C++.",
 	"no.compiler.found": "Nenašel se žádný kompilátor.",
-	"select.compiler": "Vyberte kompilátor.",
+	"select.configuration": "Select a configuration",
 	"cl.exe.not.available": "Sestavení a ladění {0} je k dispozici jen v případě, že se nástroj VS Code spustil z nástroje Developer Command Prompt pro VS."
 }
