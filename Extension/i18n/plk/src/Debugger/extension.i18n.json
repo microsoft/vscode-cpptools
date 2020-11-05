@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Kompiluj i debuguj aktywny plik",
 	"cannot.build.non.cpp": "Nie można skompilować i debugować, ponieważ aktywny plik nie jest plikiem źródłowym języka C lub C++.",
 	"no.compiler.found": "Nie znaleziono kompilatora",
-	"select.compiler": "Wybierz kompilator",
+	"select.configuration": "Select a configuration",
 	"cl.exe.not.available": "{0} — funkcji kompilacji i debugowania można używać tylko wtedy, gdy program VS Code został uruchomiony z wiersza polecenia dla deweloperów w programie VS."
 }

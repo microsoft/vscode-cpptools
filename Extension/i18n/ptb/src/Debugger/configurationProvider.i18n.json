@@ -17,6 +17,7 @@
 	"envfale.failed": "Falha ao usar {0}. Motivo: {1}",
 	"replacing.sourcepath": "Substituindo {0} '{1}' por '{2}'.",
 	"replacing.targetpath": "Substituindo {0} '{1}' por '{2}'.",
+	"replacing.editorPath": "Substituindo '{1}' do {0} por '{2}'.",
 	"resolving.variables.in.sourcefilemap": "Resolvendo variáveis em {0}...",
 	"open.envfile": "Abrir {0}",
 	"unexpected.os": "Tipo de SO inesperado",

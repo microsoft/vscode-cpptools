@@ -45,7 +45,7 @@
     "c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Preprocessor directives will not be formatted.",
     "c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Access specifiers are indented relative to class or struct definitions by the amount specified in the Editor: Tab Size setting",
     "c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Code is indented relative to its enclosing namespace by the amount specified in the Editor: Tab Size setting",
-    "c_cpp.configuration.vcFormat.indent.preserveComment.description": "Indentation of comments is not changed during formatting operations.",
+    "c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "The position of opening braces for namespaces",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "The position of opening braces for type definitions",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "The position of opening braces for lambda functions",
@@ -134,6 +134,7 @@
     "c_cpp.configuration.intelliSenseCachePath.description": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is \"%LocalAppData%/Microsoft/vscode-cpptools\" on Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" on Linux (or \"$HOME/.cache/vscode-cpptools/\" if XDG_CACHE_HOME is not defined), and \"$HOME/Library/Caches/vscode-cpptools/\" on Mac. The default path will be used if no path is specified or if a specified path is invalid.",
     "c_cpp.configuration.intelliSenseCacheSize.description": "Maximum size of the per-workspace hard drive space in megabytes (MB) for cached precompiled headers; the actual usage may fluctuate around this value. The default size is 5120 MB. Precompiled header caching is disabled when the size is 0.",
     "c_cpp.configuration.intelliSenseMemoryLimit.description": "Memory usage limit in megabytes (MB) of an IntelliSense process. The default limit is 4096 MB and the maximum limit is 16 GB. The extension will shutdown and restart an IntelliSense process when it exceeds the limit.",
+    "c_cpp.configuration.intelliSenseUpdateDelay.description": "Controls the delay in milliseconds before IntelliSense starts updating after a modification.",
     "c_cpp.configuration.default.includePath.description": "The value to use in a configuration if \"includePath\" is not specified in c_cpp_properties.json. If \"includePath\" is specified, add \"${default}\" to the array to insert the values from this setting.",
     "c_cpp.configuration.default.defines.description": "The value to use in a configuration if \"defines\" is not specified, or the values to insert if \"${default}\" is present in \"defines\".",
     "c_cpp.configuration.default.macFrameworkPath.description": "The value to use in a configuration if \"macFrameworkPath\" is not specified, or the values to insert if \"${default}\" is present in \"macFrameworkPath\".",
@@ -202,7 +203,7 @@
     "c_cpp.debuggers.miDebuggerArgs.description": "Additional arguments for the MI debugger (such as gdb).",
     "c_cpp.debuggers.miDebuggerServerAddress.description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
     "c_cpp.debuggers.stopAtEntry.description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
-    "c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null.",
+    "c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
     "c_cpp.debuggers.debugServerArgs.description": "Optional debug server args. Defaults to null.",
     "c_cpp.debuggers.serverStarted.description": "Optional server-started pattern to look for in the debug server output. Defaults to null.",
     "c_cpp.debuggers.filterStdout.description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
@@ -226,5 +227,8 @@
     "c_cpp.taskDefinitions.args.description": "Additional arguments to pass to the compiler or compilation script",
     "c_cpp.taskDefinitions.options.description": "Additional command options",
     "c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
-    "c_cpp.taskDefinitions.detail.description": "Additional details of the task"
+    "c_cpp.taskDefinitions.detail.description": "Additional details of the task",
+    "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
+    "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
+    "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
 }

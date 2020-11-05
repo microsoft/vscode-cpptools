@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Le direttive del preprocessore non verranno formattate.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Gli identificatori di accesso sono rientrati rispetto alle definizioni di classe o struct in base al valore specificato nell'impostazione Editor: Dimensione tabulazione",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Il codice viene rientrato rispetto allo spazio dei nomi che lo contiene in base al valore specificato nell'impostazione Editor: Dimensione tabulazione",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "I rientri dei commenti non vengono modificati durante le operazioni di formattazione.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "I rientri dei commenti non vengono modificati durante le operazioni di formattazione.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Posizione delle parentesi graffe di apertura per gli spazi dei nomi",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Posizione delle parentesi graffe di apertura per le definizioni di tipo",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Posizione delle parentesi graffe di apertura per le funzioni lambda",
@@ -137,7 +137,9 @@
 	"c_cpp.configuration.commentContinuationPatterns.description": "Definisce il comportamento dell'editor quando si preme il tasto INVIO all'interno di un blocco di commento su più righe o su una sola riga.",
 	"c_cpp.configuration.configurationWarnings.description": "Determina se verranno visualizzate le notifiche popup quando un'estensione del provider di configurazione non riesce a fornire una configurazione per un file di origine.",
 	"c_cpp.configuration.intelliSenseCachePath.description": "Definisce il percorso della cartella per le intestazioni precompilate memorizzate nella cache usate da IntelliSense. Il percorso predefinito della cache è \"%LocalAppData%/Microsoft/vscode-cpptools\" in Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" in Linux (o \"$HOME/.cache/vscode-cpptools/\" se XDG_CACHE_HOME non è definito) e \"$HOME/Library/Caches/vscode-cpptools/\" in Mac. Verrà usato il percorso predefinito se non ne viene specificato nessuno o se ne viene specificato uno non valido.",
-	"c_cpp.configuration.intelliSenseCacheSize.description": "Dimensioni massime dello spazio su disco rigido per area di lavoro in MB per le intestazioni precompilate memorizzate nella cache. L'utilizzo effettivo potrebbe aggirarsi intorno a questo valore. Le dimensioni predefinite sono pari a 5120 MB. La memorizzazione nella cache dell'intestazione precompilata è disabilitata quando le dimensioni sono pari a 0.",
+	"c_cpp.configuration.intelliSenseCacheSize.description": "Dimensioni massime dello spazio su disco rigido per area di lavoro in megabyte (MB) per le intestazioni precompilate memorizzate nella cache. L'utilizzo effettivo potrebbe aggirarsi intorno a questo valore. Le dimensioni predefinite sono pari a 5120 MB. La memorizzazione nella cache dell'intestazione precompilata è disabilitata quando le dimensioni sono pari a 0.",
+	"c_cpp.configuration.intelliSenseMemoryLimit.description": "Limite di utilizzo della memoria in megabyte (MB) di un processo IntelliSense. Il limite predefinito è 4096 MB e il limite massimo è 16 GB. Quando viene superato il limite, l'estensione verrà arrestata e riavvierà un processo IntelliSense.",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Controlla il ritardo in millisecondi prima che IntelliSense avvii l'aggiornamento dopo una modifica.",
 	"c_cpp.configuration.default.includePath.description": "Valore da usare in una configurazione se \"includePath\" non è specificato in c_cpp_properties.json. Se \"includePath\" è specificato, aggiungere \"${default}\" alla matrice per inserire i valori da questa impostazione.",
 	"c_cpp.configuration.default.defines.description": "Valore da usare in una configurazione se \"defines\" non è specificato oppure valori da inserire se \"${default}\" è presente in \"defines\".",
 	"c_cpp.configuration.default.macFrameworkPath.description": "Valore da usare in una configurazione se \"macFrameworkPath\" non è specificato oppure valori da inserire se \"${default}\" è presente in \"macFrameworkPath\".",
@@ -206,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Argomenti aggiuntivi per il debugger MI, ad esempio gdb.",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Indirizzo di rete del server del debugger MI a cui connettersi. Esempio: localhost:1234.",
 	"c_cpp.debuggers.stopAtEntry.description": "Parametro facoltativo. Se è true, il debugger deve arrestarsi in corrispondenza del punto di ingresso della destinazione. Se viene passato ProcessId, non ha alcun effetto.",
-	"c_cpp.debuggers.debugServerPath.description": "Percorso completo facoltativo del server di debug da avviare. L'impostazione predefinita è null.",
+	"c_cpp.debuggers.debugServerPath.description": "Percorso completo facoltativo del server di debug da avviare. L'impostazione predefinita è Null. Viene usata insieme a \"miDebugServerAddress\" o al proprio server con un comando \"customSetupCommand\" che esegue \"-target-select remote <server:porta>\"`.",
 	"c_cpp.debuggers.debugServerArgs.description": "Argomenti facoltativi del server di debug. L'impostazione predefinita è null.",
 	"c_cpp.debuggers.serverStarted.description": "Criterio facoltativo avviato dal server per cercare nell'output del server di debug. L'impostazione predefinita è null.",
 	"c_cpp.debuggers.filterStdout.description": "Cerca il criterio avviato dal server nel flusso stdout e registra stdout nell'output di debug. L'impostazione predefinita è true.",
@@ -230,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "Argomenti aggiuntivi da passare al compilatore o allo script di compilazione",
 	"c_cpp.taskDefinitions.options.description": "Opzioni aggiuntive del comando",
 	"c_cpp.taskDefinitions.options.cwd.description": "Directory di lavoro corrente del programma o dello script eseguito. Se omesso, viene usata la radice dell'area di lavoro corrente di Visual Studio Code.",
-	"c_cpp.taskDefinitions.detail.description": "Dettagli aggiuntivi dell'attività"
+	"c_cpp.taskDefinitions.detail.description": "Dettagli aggiuntivi dell'attività",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Percorsi correnti e della fase di compilazione degli stessi alberi di origine. I file trovati in EditorPath vengono associati al percorso CompileTimePath per la corrispondenza dei punti di interruzione e associati da CompileTimePath a EditorPath durante la visualizzazione dei percorsi delle analisi dello stack.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "Percorso dell'albero di origine che verrà usato dall'editor.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False se questa voce viene usata solo per il mapping dei percorsi dello stack frame. True se questa voce deve essere usata anche quando si specificano i percorsi dei punti di interruzione."
 }

@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "アクティブ ファイルのビルドとデバッグ",
 	"cannot.build.non.cpp": "アクティブ ファイルが C または C++ ソース ファイルではないため、ビルドおよびデバッグできません。",
 	"no.compiler.found": "コンパイラが見つかりませんでした",
-	"select.compiler": "コンパイラを選択する",
+	"select.configuration": "Select a configuration",
 	"cl.exe.not.available": "{0} のビルドとデバッグを使用できるのは、VS 用開発者コマンド プロンプトから VS Code を実行する場合のみです。"
 }

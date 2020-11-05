@@ -1,5 +1,66 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.0: November 5, 2020
+### New Features
+* Add language server support for Windows ARM64 (no debugging yet). [#5583](https://github.com/microsoft/vscode-cpptools/issues/5583)
+* [cppdbg] Debugger Protocol Updates:
+  * ReadMemoryRequest [PR MIEngine#1028](https://github.com/microsoft/MIEngine/pull/1028)
+  * ModulesRequest and ModuleEvent [PR MIEngine#1054](https://github.com/microsoft/MIEngine/pull/1054)
+* [cppdbg] Support new SourceFileMap schema [PR #6319](https://github.com/microsoft/vscode-cpptools/pull/6319)
+
+### Enhancements
+* Add support to run c/cpp build tasks. [#3674](https://github.com/microsoft/vscode-cpptools/issues/3674), [#5270](https://github.com/microsoft/vscode-cpptools/issues/5270), [#5285](https://github.com/microsoft/vscode-cpptools/issues/5285)
+  * Tasks: Configure Task
+  * Tasks: Run Build Task
+  * C/C++: Build and debug active file.
+* Add logging around compiler probing, and the "C/C++ Configuration Warnings" output channel. [#5259](https://github.com/microsoft/vscode-cpptools/issues/5259)
+* Add compile commands info to Log Diagnostics. [#5761](https://github.com/microsoft/vscode-cpptools/issues/5761)
+* Add `intelliSenseUpdateDelay` setting. [#6142](https://github.com/microsoft/vscode-cpptools/issues/6142)
+  * YuTengjing (@tjx666) [PR #6344](https://github.com/microsoft/vscode-cpptools/pull/6344)
+* Enable support for specifying a compiler by only the filename if it's in the environment path. [#6179](https://github.com/microsoft/vscode-cpptools/issues/6179)
+* Restart the IntelliSense process if its memory usage exceeds the `C_Cpp.intelliSenseMemoryLimit` setting. [#6230](https://github.com/microsoft/vscode-cpptools/issues/6230)
+* [cppdbg] Stepping out of a function will display '$ReturnValue'. 
+  * @Trass3r [PR MIEngine#1036](https://github.com/microsoft/MIEngine/pull/1036)
+* [cppdbg] Support composite expressions in natvis ArrayItems
+  * @Trass3r [PR MIEngine#1044](https://github.com/microsoft/MIEngine/pull/1044)
+* Add handling of the "-ansi" compiler arg when querying gcc/clang compilers.
+* Add support for inferring the IntelliSenseMode based on the "--target" compiler arg.
+* Add support for inferring the C standard based on new c11/c17 language standard args for cl.exe.
+* Allow custom config providers to omit IntelliSenseMode and C/C++ language standard, enabling them to be inferred from the `compilerPath` and `compilerArgs`.
+
+### Bug Fixes
+* Change macOS Framework searching to only parse the "Current" framework folder when the "Headers" folder is not found. [#2046](https://github.com/microsoft/vscode-cpptools/issues/2046)
+* Show the compiler path in the `Build and Debug Active File` dropdown. [#4278](https://github.com/microsoft/vscode-cpptools/issues/4278)
+* Fix incorrect signature help active argument with multiple template parameters. [#4786](https://github.com/microsoft/vscode-cpptools/issues/4786)
+* Fix bug with directories not getting created for browse.databaseFilename. [#5181](https://github.com/microsoft/vscode-cpptools/issues/5181)
+* Allow the debug configuration to wait for the preLaunchTask to complete before continuing on and resolving environment variables or processes that may have been set in the 'tasks.json'. [#5287](https://github.com/microsoft/vscode-cpptools/issues/5287)
+* Change the Windows SDK detection to require the shared, ucrt, and um folders. [#5817](https://github.com/microsoft/vscode-cpptools/issues/5817)
+* Fix issues with IntelliSense for clang-cl.exe. [#6075](https://github.com/microsoft/vscode-cpptools/issues/6075)
+* Fix "Comments are not permitted in JSON" error when `c_cpp_properties.json` is open but not active. [#6132](https://github.com/microsoft/vscode-cpptools/issues/6132)
+* Rename the C language standard setting values from c18 and gnu18 to c17 and gnu17. [#6105](https://github.com/microsoft/vscode-cpptools/issues/6105)
+* Add more IntelliSense support for std ranges, concepts, and modules exports (__cpp_lib_concepts is now enabled). [#6173](https://github.com/microsoft/vscode-cpptools/issues/6173)
+* Add "-fnoblocks" when querying clang on Mac, as IntelliSense does not currently support blocks. [#6189](https://github.com/microsoft/vscode-cpptools/issues/6189)
+* Fix clang-format on 32-bit Windows. [#6195](https://github.com/microsoft/vscode-cpptools/issues/6195)
+* Fix incorrect formatting results when clang-format removes duplicate includes. [#6205](https://github.com/microsoft/vscode-cpptools/issues/6205)
+* Fix a case where the main process could get stuck. [#6207](https://github.com/microsoft/vscode-cpptools/issues/6207)
+* Fix C files being treated as C++ files with compile_commands.json. [#6279](https://github.com/microsoft/vscode-cpptools/issues/6279)
+* Fix `Build and Debug Active File` race condition with EngineLogs. [#6304](https://github.com/microsoft/vscode-cpptools/pull/6304)
+* Fix changes to some `c_cpp_properties.json` properties not taking effect (until a reload) if `compileCommands` is set. [#6332](https://github.com/microsoft/vscode-cpptools/issues/6332)
+* Fix issue with compiler querying not handling various clang command line options correctly. [6359](https://github.com/microsoft/vscode-cpptools/issues/6356)
+* Fix multiroot workspace tag parsing when `compileCommands` is set. [#6383](https://github.com/microsoft/vscode-cpptools/issues/6383)
+* Fix mingw32 compilers not being detected. [#6394](https://github.com/microsoft/vscode-cpptools/issues/6394)
+* Various bug fixes for vcFormat. [PR #6408](https://github.com/microsoft/vscode-cpptools/pull/6408)
+* Fix issue causing zh-cn and zh-tw language files not to be used. [PR #6418](https://github.com/microsoft/vscode-cpptools/pull/6418)
+* Fix the handling of various compiler arg pairs when querying compilers.
+* Avoid parsing entries in compile_commands.json for file types that we do not support.
+* Fixed an issue in which only C or C++ system headers were added to the browse path, rather than both.
+* Fix issue causing some localized messages to be displayed incorrectly.
+* Fixed issue with shipping an older version of vsdbg in offline packages.
+
+### Other Contributions
+* Refactoring provider classes.
+  * Abhishek Pal (@devabhishekpal) [PR #5998](https://github.com/microsoft/vscode-cpptools/pull/5998)
+
 ## Version 1.0.1: September 21, 2020
 ### Bug Fixes
 * Fix "No IL available" IntelliSense error on Linux/macOS when `#error` directives are present in the source code. [#6009](https://github.com/microsoft/vscode-cpptools/issues/6009), [#6114](https://github.com/microsoft/vscode-cpptools/issues/6114)

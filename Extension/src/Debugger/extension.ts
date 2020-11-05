@@ -37,7 +37,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
     // This will cause it to not show up on the dropdown list.
     let vsdbgProvider: CppVsDbgConfigurationProvider | null = null;
-    if (os.platform() === 'win32') {
+    if (os.platform() === 'win32' && os.arch() !== 'arm64') {
         vsdbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
         disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(vsdbgProvider)));
     }
@@ -74,9 +74,9 @@ export function initialize(context: vscode.ExtensionContext): void {
             configuration: vscode.DebugConfiguration;
         }
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => ({label: config.name, configuration: config}));
+        const items: MenuItem[] = configs.map<MenuItem>(config => ({ label: config.name, configuration: config, description: config.detail }));
 
-        vscode.window.showQuickPick(items, {placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.compiler", "Select a compiler"))}).then(async selection => {
+        vscode.window.showQuickPick(items, { placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.configuration", "Select a configuration")) }).then(async selection => {
             if (!selection) {
                 return; // User canceled it.
             }

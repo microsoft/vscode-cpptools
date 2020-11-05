@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Direktivy preprocesoru se nebudou formátovat.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Specifikátory přístupu jsou odsazené relativně k definicím tříd nebo struktur mezerou zadanou v nastavení Editor: Velikost tabulátoru.",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Kód se odsazuje relativně ke svému uzavírajícímu oboru názvů mezerou zadanou v nastavení Editor: Velikost tabulátoru.",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "Při formátovacích operacích se nezmění odsazení komentářů.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Při formátovacích operacích se nezmění odsazení komentářů.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Pozice levých složených závorek pro obory názvů",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Pozice levých složených závorek pro definice typů",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Pozice levých složených závorek pro funkce lambda",
@@ -137,7 +137,9 @@
 	"c_cpp.configuration.commentContinuationPatterns.description": "Definuje chování editoru, když se ve víceřádkovém nebo jednořádkovém bloku komentáře stiskne klávesa Enter.",
 	"c_cpp.configuration.configurationWarnings.description": "Určuje, jestli se budou zobrazovat automaticky otevíraná oznámení, když rozšíření poskytovatele konfigurací nebude moct poskytnout konfiguraci pro určitý zdrojový soubor.",
 	"c_cpp.configuration.intelliSenseCachePath.description": "Definuje cestu ke složce pro předkompilované hlavičky uložené do mezipaměti, které používá IntelliSense. Výchozí cesta k mezipaměti je %LocalAppData%/Microsoft/vscode-cpptools ve Windows, $XDG_CACHE_HOME/vscode-cpptools/ v Linuxu (případně $HOME/.cache/vscode-cpptools/, pokud se nedefinovalo XDG_CACHE_HOME) a $HOME/Library/Caches/vscode-cpptools/ na Macu. Výchozí cesta se použije, když se nezadá žádná cesta nebo když zadaná cesta nebude platná.",
-	"c_cpp.configuration.intelliSenseCacheSize.description": "Maximální velikost místa na pevném disku pro předkompilované hlavičky uložené do mezipaměti na jeden pracovní prostor v megabajtech. Skutečné využití se může pohybovat kolem této hodnoty. Výchozí velikost je 5120 MB. Když se velikost nastaví na 0, ukládání předkompilovaných hlaviček do mezipaměti se zakáže.",
+	"c_cpp.configuration.intelliSenseCacheSize.description": "Maximální velikost místa na pevném disku pro předkompilované hlavičky uložené do mezipaměti na jeden pracovní prostor v megabajtech (MB). Skutečné využití se může pohybovat kolem této hodnoty. Výchozí velikost je 5120 MB. Když se velikost nastaví na 0, ukládání předkompilovaných hlaviček do mezipaměti se zakáže.",
+	"c_cpp.configuration.intelliSenseMemoryLimit.description": "Omezení využití paměti v megabajtech (MB) procesu IntelliSense. Výchozí limit je 4096 MB a maximální velikost je 16 GB. Rozšíření se vypne a restartuje proces IntelliSense, pokud limit překročí.",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Určuje prodlevu v milisekundách, než se po úpravě začne aktualizovat IntelliSense.",
 	"c_cpp.configuration.default.includePath.description": "Hodnota, která se použije v konfiguraci, když se v souboru c_cpp_properties.json nezadá includePath. Pokud se includePath zadá, přidejte do pole ${default}, aby se vložily hodnoty z tohoto nastavení.",
 	"c_cpp.configuration.default.defines.description": "Hodnota, která se použije v konfiguraci, pokud se nezadá defines, nebo hodnoty, které se mají vložit, pokud se v defines nachází ${default}",
 	"c_cpp.configuration.default.macFrameworkPath.description": "Hodnota, která se použije v konfiguraci, pokud se nezadá macFrameworkPath, nebo hodnoty, které se mají vložit, pokud se ve macFrameworkPath nachází ${default}",
@@ -206,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Další argumenty pro ladicí program MI (třeba gdb)",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Síťová adresa MI Debugger Serveru, ke kterému se má připojit (příklad: localhost:1234)",
 	"c_cpp.debuggers.stopAtEntry.description": "Nepovinný parametr. Když se nastaví na true, ladicí program by se měl zastavit u vstupního bodu cíle. Pokud se předá processId, nemá parametr žádný vliv.",
-	"c_cpp.debuggers.debugServerPath.description": "Volitelná úplná cesta k ladicímu serveru, který se má spustit. Výchozí hodnota je null.",
+	"c_cpp.debuggers.debugServerPath.description": "Nepovinná úplná cesta k ladicímu serveru, který se má spustit. Výchozí hodnota je null. Používá se ve spojení buď s miDebugServerAddress, nebo s vlastním serverem s customSetupCommand, na kterém běží -target-select remote <server:port>.",
 	"c_cpp.debuggers.debugServerArgs.description": "Volitelné argumenty ladicího serveru. Výchozí hodnota je null.",
 	"c_cpp.debuggers.serverStarted.description": "Volitelný vzorek spuštěný na serveru, který se má vyhledat ve výstupu ladicího serveru. Výchozí hodnota je null.",
 	"c_cpp.debuggers.filterStdout.description": "Vyhledá ve vzorku spuštěném na serveru stream stdout a zaznamená stdout do výstupu ladění. Výchozí hodnota je true.",
@@ -230,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "Další argumenty, které se mají předat kompilátoru nebo kompilačnímu skriptu",
 	"c_cpp.taskDefinitions.options.description": "Další možnosti příkazu",
 	"c_cpp.taskDefinitions.options.cwd.description": "The current working directory of the executed program or script. If omitted Code's current workspace root is used.",
-	"c_cpp.taskDefinitions.detail.description": "Další podrobnosti o typu úlohy"
+	"c_cpp.taskDefinitions.detail.description": "Další podrobnosti o typu úlohy",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Aktuální cesta a cesta při kompilaci ke stejným zdrojovým stromům. Soubory, které se najdou na cestě EditorPath, se namapují na cestu CompileTimePath pro odpovídající zarážku, která se při zobrazování umístění stacktrace mapuje z CompileTimePath na EditorPath.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "Cesta ke zdrojovému souboru, který se použije v editoru",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False, pokud se tato položka používá jen k mapování umístění bloku zásobníku. True, pokud se tato entita má použít i při zadávání umístění zarážek"
 }
