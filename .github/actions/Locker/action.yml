@@ -1,0 +1,33 @@
+name: Locker
+description: Lock closed issues and PRs after some time has passed
+inputs:
+  token:
+    description: GitHub token with issue, comment, and label read/write permissions
+    default: ${{ github.token }}
+  daysSinceClose:
+    description: Days to wait since closing before locking the item
+    required: true
+  daysSinceUpdate:
+    description: days to wait since the last interaction before locking the item
+    required: true
+  milestoneName:
+    description: items with these milestones will be considered (name only, must match ID)
+  milestoneId:
+    description: items with these milestones will be considered (id only, must match name)
+  labels:
+    description: items with these labels will not be considered.  May be "*".
+  ignoreMilestoneNames:
+    description: items with these milestones will not be considered (names only, must match IDs).  May be "*".
+  ignoreMilestoneIds:
+    description: items with these milestones will not be considered (IDs only, must match names)
+  ignoreLabels:
+    description: items with these labels will not be considered
+  minimumVotes:
+    descriptions: Only issues with at least this many votes will be considered.
+  maximumVotes:
+    descriptions: Only issues fewer or equal to this many votes will be considered.
+  readonly:
+    description: If true, changes are not applied.
+runs:
+  using: 'node12'
+  main: 'index.js'

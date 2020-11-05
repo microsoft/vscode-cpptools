@@ -17,6 +17,7 @@
 	"envfale.failed": "未能使用 {0}。原因: {1}",
 	"replacing.sourcepath": "正在将 {0}“{1}”替换为“{2}”。",
 	"replacing.targetpath": "正在将 {0}“{1}”替换为“{2}”。",
+	"replacing.editorPath": "正在将 {0}“{1}”替换为“{2}”。",
 	"resolving.variables.in.sourcefilemap": "正在解析 {0} 中的变量...",
 	"open.envfile": "打开 {0}",
 	"unexpected.os": "意外的 OS 类型",

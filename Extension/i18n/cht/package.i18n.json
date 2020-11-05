@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "將不會格式化前置處理器指示詞。",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "存取指定名稱會依據 [Editor: Tab Size] 設定中指定的數量，按照類別或結構定義的相對位置縮排",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "程式碼會依據 [Editor: Tab Size] 設定中指定的數量，按照其封入之命名空間的相對位置縮排",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "格式化作業期間，註解的縮排未變更。",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "格式化作業期間，註解的縮排未變更。",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "命名空間之左大括弧的位置",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "型別定義之左大括弧的位置",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Lambda 函式之左大括弧的位置",
@@ -137,7 +137,9 @@
 	"c_cpp.configuration.commentContinuationPatterns.description": "定義在多行或單行註解區塊按下 ENTER 的編輯器行為。",
 	"c_cpp.configuration.configurationWarnings.description": "決定當組態提供者延伸模組無法提供來源檔案的組態時，是否會顯示快顯通知。",
 	"c_cpp.configuration.intelliSenseCachePath.description": "定義 IntelliSense 使用之快取先行編譯標頭檔的資料夾路徑。預設快取路徑在 Windows 上為 \"%LocalAppData%/Microsoft/vscode-cpptools\"，在 Linux 上為 \"$XDG_CACHE_HOME/vscode-cpptools/\" (若未定義 XDG_CACHE_HOME，則為 \"$HOME/.cache/vscode-cpptools/\")，在 Mac 上則為 \"$HOME/Library/Caches/vscode-cpptools/\"。如果未指定路徑或指定的路徑無效，就會使用預設路徑。",
-	"c_cpp.configuration.intelliSenseCacheSize.description": "快取先行編譯標頭檔的每個工作區硬碟空間大小上限 (mb); 實際使用量可能會在此值周圍波動。預設大小為 5120 MB。當大小為 0 時，會停用先行編譯的標頭快取。",
+	"c_cpp.configuration.intelliSenseCacheSize.description": "快取之先行編譯標頭檔可使用的每個工作區硬碟空間大小上限 (MB); 實際使用量會在此值附近波動。預設大小為 5120 MB。若大小為 0，將會停用先行編譯標頭檔快取。",
+	"c_cpp.configuration.intelliSenseMemoryLimit.description": "IntelliSense 處理序所能使用的記憶體上限 (MB)。預設限制為 4096 MB，上限為 16 GB。當超過此限制時，此延伸模組將會關閉再重新啟動 IntelliSense 處理序。",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "控制 IntelliSense 在修改之後，開始更新前的延遲 (毫秒)。",
 	"c_cpp.configuration.default.includePath.description": "若 c_cpp_properties.json 中未指定 \"includePath\" 時，要在設定中使用的值。如有指定 \"includePath\"，請將 \"${default}\" 新增到陣列中，以插入此設定的值。",
 	"c_cpp.configuration.default.defines.description": "當 \"defines\" 未指定時，要在設定中使用的值，或 \"defines\" 中有 \"${default}\" 時要插入的值。",
 	"c_cpp.configuration.default.macFrameworkPath.description": "當 \"macFrameworkPath\" 未指定時，要在設定中使用的值，或 \"macFrameworkPath\" 中有 \"${default}\" 時要插入的值。",
@@ -206,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "MI 偵錯工具 (例如 gdb) 的其他引數。",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "MI 偵錯工具伺服器要連線至的網路位址 (範例: localhost:1234)。",
 	"c_cpp.debuggers.stopAtEntry.description": "選擇性參數。若為 true，則偵錯工具應該在目標的進入點停止。如果已傳遞 processId。就沒有效果。",
-	"c_cpp.debuggers.debugServerPath.description": "要啟動的偵錯伺服器選擇性完整路徑。預設為 null。",
+	"c_cpp.debuggers.debugServerPath.description": "要啟動的偵錯伺服器選用完整路徑。預設為 Null。使用時，會將 \"miDebugServerAddress\" 或您自己的伺服器與 \"customSetupCommand\" 連接，以執行 \"-target-select remote <伺服器:連接埠>\"`。",
 	"c_cpp.debuggers.debugServerArgs.description": "選擇性偵錯伺服器引數。預設為 null。",
 	"c_cpp.debuggers.serverStarted.description": "要在偵錯伺服器輸出中尋找的選擇性伺服器啟動模式。預設為 null。",
 	"c_cpp.debuggers.filterStdout.description": "搜尋 stdout 資料流以取得伺服器啟動的模式，並將 stdout 記錄到偵錯輸出。預設為 true。",
@@ -230,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "要傳遞給編譯器或編譯指令碼的其他引數",
 	"c_cpp.taskDefinitions.options.description": "其他命令選項",
 	"c_cpp.taskDefinitions.options.cwd.description": "所執行程式或指令碼的目前工作目錄。如果省略，則會使用 Code 的目前工作區根目錄。",
-	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料"
+	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "相同來源樹狀的目前路徑和編譯時間路徑。在顯示 stacktrace 位置時，在 EditorPath 下找到的檔案會對應到 CompileTimePath 路徑，以進行中斷點必對，並會從 CompileTimePath 對應到 EditorPath。",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "編輯器要使用的來源樹狀路徑。",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "若此項目只用於堆疊框架位置對應，則為 False; 若在指定中斷點位置時也應該使用此項目，則為 True。"
 }

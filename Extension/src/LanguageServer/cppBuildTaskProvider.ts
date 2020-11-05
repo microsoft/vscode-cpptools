@@ -31,14 +31,10 @@ export class CppBuildTask extends Task {
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
     static CppBuildSourceStr: string = "C/C++";
-    private tasks: CppBuildTask[] | undefined;
 
     constructor() { }
 
     public async provideTasks(): Promise<CppBuildTask[]> {
-        if (this.tasks) {
-            return this.tasks;
-        }
         return this.getTasks(false);
     }
 
@@ -47,7 +43,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const execution: ProcessExecution | ShellExecution | CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
-            _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition);
+            _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
             return _task;
         }
         return undefined;
@@ -55,9 +51,6 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
     public async getTasks(appendSourceToName: boolean): Promise<CppBuildTask[]> {
-        if (this.tasks !== undefined) {
-            return this.tasks;
-        }
         const editor: TextEditor | undefined = window.activeTextEditor;
         const emptyTasks: CppBuildTask[] = [];
         if (!editor) {
@@ -149,24 +142,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (userCompilerPath) {
             result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
         }
-
         return result;
     }
 
-    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition) => {
-        const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => {
         const compilerPathBase: string = path.basename(compilerPath);
-        const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
-            CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
         const isCl: boolean = compilerPathBase === "cl.exe";
-        const isWindows: boolean = os.platform() === 'win32';
-        const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
-        let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
-        if (!definition && compilerArgs && compilerArgs.length > 0) {
-            args = args.concat(compilerArgs);
-        }
-        const options: cp.ExecOptions | undefined = { cwd: cwd };
-
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
         if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
@@ -174,6 +155,16 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         if (!definition) {
+            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
+                CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
+            const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+            const isWindows: boolean = os.platform() === 'win32';
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            if (compilerArgs && compilerArgs.length > 0) {
+                args = args.concat(compilerArgs);
+            }
+            const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
+            const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskLabel,
@@ -193,38 +184,58 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const scope: TaskScope = TaskScope.Workspace;
-        const task: CppBuildTask = new Task(definition, scope, taskLabel, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, args, options)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, definition ? definition.args : [], definition ? definition.options : undefined)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
-        task.detail = "compiler: " + resolvedcompilerPath;
+        task.detail = detail ? detail : "compiler: " + resolvedcompilerPath;
 
         return task;
     };
 
+    public async getJsonTasks(): Promise<CppBuildTask[]> {
+        const rawJson: any = await this.getRawTasksJson();
+        const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
+        const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
+            const definition: CppBuildTaskDefinition = {
+                type: task.type,
+                label: task.label,
+                command: task.command,
+                args: task.args,
+                options: task.options
+            };
+            const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, "C/C++");
+            cppBuildTask.detail = task.detail;
+            return cppBuildTask;
+        });
+        return buildTasksJson;
+    }
+
     public async ensureBuildTaskExists(taskLabel: string): Promise<void> {
         const rawTasksJson: any = await this.getRawTasksJson();
-
-        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
-        // Find or create the task which should be created based on the selected "debug configuration".
-        let selectedTask: CppBuildTask | undefined = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+        let selectedTask: any = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
         if (selectedTask) {
             return;
         }
 
+        // Create the task which should be created based on the selected "debug configuration".
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        selectedTask = buildTasks.find(task => task.name === taskLabel);
+        const normalizedLabel: string = (taskLabel.indexOf("ver(") !== -1) ? taskLabel.slice(0, taskLabel.indexOf("ver(")).trim() : taskLabel;
+        selectedTask = buildTasks.find(task => task.name === normalizedLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
             throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
+        } else {
+            selectedTask.definition.label = taskLabel;
+            selectedTask.name = taskLabel;
         }
-
         rawTasksJson.version = "2.0.0";
 
         // Modify the current default task
@@ -273,6 +284,23 @@ export class CppBuildTaskProvider implements TaskProvider {
         return;
     }
 
+    // Provide a unique name for a newly defined tasks, which is different from tasks' names in tasks.json.
+    public provideUniqueTaskLabel(label: string, buildTasksJson: CppBuildTask[]): string {
+        const taskNameDictionary: {[key: string]: any} = {};
+        buildTasksJson.forEach(task => {
+            taskNameDictionary[task.definition.label] = {};
+        });
+        let newLabel: string = label;
+        let version: number = 0;
+        do {
+            version = version + 1;
+            newLabel = label + ` ver(${version})`;
+
+        } while (taskNameDictionary[newLabel]);
+
+        return newLabel;
+    }
+
     private getLaunchJsonPath(): string | undefined {
         return util.getJsonPath("launch.json");
     }
@@ -281,12 +309,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         return util.getJsonPath("tasks.json");
     }
 
-    private getRawLaunchJson(): Promise<any> {
+    public getRawLaunchJson(): Promise<any> {
         const path: string | undefined = this.getLaunchJsonPath();
         return util.getRawJson(path);
     }
 
-    private getRawTasksJson(): Promise<any> {
+    public getRawTasksJson(): Promise<any> {
         const path: string | undefined = this.getTasksJsonPath();
         return util.getRawJson(path);
     }
@@ -297,6 +325,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     private closeEmitter = new EventEmitter<number>();
     public get onDidWrite(): Event<string> { return this.writeEmitter.event; }
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
+    private endOfLine: string = "\r\n";
 
     constructor(private command: string, private args: string[], private options: cp.ExecOptions | undefined) {
     }
@@ -304,7 +333,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
-        this.writeEmitter.fire("Starting build...\r\n");
+        this.writeEmitter.fire(`Starting build...${this.endOfLine}`);
         await this.doBuild();
     }
 
@@ -326,23 +355,24 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
         }
 
+        const splitWriteEmitter = (lines: string | Buffer) => {
+            for (const line of lines.toString().split(/\r?\n/g)) {
+                this.writeEmitter.fire(line + this.endOfLine);
+            }
+        };
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
-                    const endOfLine: string = os.platform() === 'win32' ? "\r\n" : "\n";
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
                         const dot: string = (stdout || _stderr) ? ":" : ".";
-                        this.writeEmitter.fire("Build finished with error" + dot + endOfLine);
-                        this.writeEmitter.fire(stdout.toString());
-                        for (const line of _stderr.toString().split(endOfLine)) {
-                            this.writeEmitter.fire(line);
-                            this.writeEmitter.fire(endOfLine);
-                        }
+                        this.writeEmitter.fire(`Build finished with error${dot}${this.endOfLine}`);
+                        splitWriteEmitter(stdout);
+                        splitWriteEmitter(_stderr);
                         resolve(-1);
                     } else {
-                        this.writeEmitter.fire(stdout.toString());
-                        this.writeEmitter.fire(endOfLine + "Build finished successfully." + endOfLine);
+                        splitWriteEmitter(stdout);
+                        this.writeEmitter.fire(`Build finished successfully.${this.endOfLine}`);
                         resolve(0);
                     }
                 });

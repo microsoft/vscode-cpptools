@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Etkin dosyayı derle ve dosyada hata ayıkla",
 	"cannot.build.non.cpp": "Etkin dosya bir C ya da C++ kaynak dosyası olmadığından derleme veya hata ayıklama yapılamıyor.",
 	"no.compiler.found": "Derleyici bulunamadı",
-	"select.compiler": "Derleyici seçin",
+	"select.configuration": "Select a configuration",
 	"cl.exe.not.available": "{0} derlemesi ve hata ayıklama yalnızca VS Code, VS için Geliştirici Komut İstemi'nden çalıştırıldığında kullanılabilir."
 }

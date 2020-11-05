@@ -1,0 +1,28 @@
+name: By Design Closer
+on:
+  schedule:
+    - cron: 0 12 * * * # Run at 12:00 PM UTC (4:00 AM PST, 5:00 AM PDT)
+  workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Stale Closer
+        uses: ./.github/actions/StaleCloser
+        with:
+          readonly: ${{ github.event.inputs.readonly }}
+          labels: by design
+          ignoreLabels: debugger,Feature Request,more info needed,internal
+          closeDays: 60
+          closeComment: "This issue has been closed automatically because it's labeled as 'by design' and has not had recent activity."
+          pingDays: 80
+          pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if it is no longer relevant."

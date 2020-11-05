@@ -262,6 +262,10 @@ export function isBoolean(input: any): input is boolean {
     return typeof(input) === "boolean";
 }
 
+export function isObject(input: any): input is object {
+    return typeof(input) === "object";
+}
+
 export function isArray(input: any): input is any[] {
     return input instanceof Array;
 }
@@ -581,7 +585,7 @@ export function readFileText(filePath: string, encoding: string = "utf8"): Promi
 }
 
 /** Writes content to a text file */
-export function writeFileText(filePath: string, content: string, encoding: string = "utf8"): Promise<void> {
+export function writeFileText(filePath: string, content: string, encoding: BufferEncoding = "utf8"): Promise<void> {
     const folders: string[] = filePath.split(path.sep).slice(0, -1);
     if (folders.length) {
         // create folder path if it doesn't exist

@@ -225,7 +225,7 @@
             "%c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.description%",
             "%c_cpp.configuration.vcFormat.indent.gotoLabels.none.description%"
           ],
-          "default": "none",
+          "default": "oneLeft",
           "description": "%c_cpp.configuration.vcFormat.indent.gotoLabels.description%",
           "scope": "resource"
         },
@@ -257,10 +257,10 @@
           "description": "%c_cpp.configuration.vcFormat.indent.namespaceContents.description%",
           "scope": "resource"
         },
-        "C_Cpp.vcFormat.indent.preserveComment": {
+        "C_Cpp.vcFormat.indent.preserveComments": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.preserveComment.description%",
+          "description": "%c_cpp.configuration.vcFormat.indent.preserveComments.description%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": {
@@ -856,6 +856,14 @@
           "minimum": 256,
           "maximum": 16384
         },
+        "C_Cpp.intelliSenseUpdateDelay": {
+          "type": "number",
+          "default": 2000,
+          "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
+          "scope": "application",
+          "minimum": 500,
+          "maximum": 3000
+        },
         "C_Cpp.default.includePath": {
           "type": [
             "array",
@@ -967,7 +975,7 @@
             "gnu89",
             "gnu99",
             "gnu11",
-            "gnu18"
+            "gnu17"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
           "scope": "machine-overridable"
@@ -1447,11 +1455,46 @@
                 "default": false
               },
               "sourceFileMap": {
-                "type": "object",
-                "description": "%c_cpp.debuggers.sourceFileMap.description%",
-                "default": {
-                  "<source-path>": "<target-path>"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                    "default": {
+                      "<source-path>": "<target-path>"
+                    }
+                  },
+                  {
+                    "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
+                    "type": "object",
+                    "default": {
+                      "<source-path>": {
+                        "editorPath": "",
+                        "useForBreakpoints": true
+                      }
+                    },
+                    "properties": {
+                      "<source-path>": {
+                        "type": "object",
+                        "default": {
+                          "editorPath": "",
+                          "useForBreakpoints": true
+                        },
+                        "properties": {
+                          "editorPath": {
+                            "type": "string",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                            "default": ""
+                          },
+                          "useForBreakpoints": {
+                            "type": "boolean",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                            "default": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               "logging": {
                 "description": "%c_cpp.debuggers.logging.description%",
@@ -1640,11 +1683,46 @@
                 "default": false
               },
               "sourceFileMap": {
-                "type": "object",
-                "description": "%c_cpp.debuggers.sourceFileMap.description%",
-                "default": {
-                  "<source-path>": "<target-path>"
-                }
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "description": "%c_cpp.debuggers.sourceFileMap.description%",
+                    "default": {
+                      "<source-path>": "<target-path>"
+                    }
+                  },
+                  {
+                    "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description%",
+                    "type": "object",
+                    "default": {
+                      "<source-path>": {
+                        "editorPath": "",
+                        "useForBreakpoints": true
+                      }
+                    },
+                    "properties": {
+                      "<source-path>": {
+                        "type": "object",
+                        "default": {
+                          "editorPath": "",
+                          "useForBreakpoints": true
+                        },
+                        "properties": {
+                          "editorPath": {
+                            "type": "string",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description%",
+                            "default": ""
+                          },
+                          "useForBreakpoints": {
+                            "type": "boolean",
+                            "description": "%c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description%",
+                            "default": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               "logging": {
                 "description": "%c_cpp.debuggers.logging.description%",
@@ -2265,7 +2343,7 @@
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.2",
+    "@types/node": "^14.14.0",
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
@@ -2347,7 +2425,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "EE9F56D1F6499B606BAC390505C88C0B5CC749A00B410C67E20269A9F60FA9E4"
+      "integrity": "B5030E8762BE43D7864536FE8C8A6253036523D9E0C350750D5874963DA42F2F"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
@@ -2362,7 +2440,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "3C37FD864ED5F7CECED0D9487DA3EEEC30A3BA973C9B943A5B93B11960B18761"
+      "integrity": "5F0F29B2D59D8453A072D433324C68E0819923AFAC85D0CD1987F7AA275D7516"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
@@ -2377,7 +2455,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "E83B2522E2EC9EE14E0A0E8E95DE1DE1C816A1BED128189C6F4DD8B99D4E4AC9"
+      "integrity": "099A94F440BB570B4CDCA07D5FE813657E8B7CBB3915F64C5C8A681DFBB28D3C"
     },
     {
       "description": "C/C++ language components (OS X)",
@@ -2389,7 +2467,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "5FE3F5D8FB3B05246104BCC76659EA4B1E7F585D6147FB583BAFF561F4907193"
+      "integrity": "AEC6509B1667DE9B0C0BF867BB5A3B79F1F47C1B8D5A728C1FD8CA6E9240CEA7"
     },
     {
       "description": "C/C++ language components (Windows)",
@@ -2397,11 +2475,32 @@
       "platforms": [
         "win32"
       ],
+      "architectures": [
+        "x86_64",
+        "x86",
+        "i686",
+        "i386"
+      ],
       "binaries": [
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "BA67FC5F787552BE73F6613E08D1374FE3E3C3501417CF03E1D871A46DE4224A"
+      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
+    },
+    {
+      "description": "C/C++ language components (Windows ARM64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./bin/cpptools.exe",
+        "./bin/cpptools-srv.exe"
+      ],
+      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2564,6 +2663,12 @@
       "url": "https://go.microsoft.com/fwlink/?linkid=2082216",
       "platforms": [
         "win32"
+      ],
+      "architectures": [
+        "x86_64",
+        "x86",
+        "i686",
+        "i386"
       ],
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
