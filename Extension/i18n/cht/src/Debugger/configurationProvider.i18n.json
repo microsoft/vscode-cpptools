@@ -17,6 +17,7 @@
 	"envfale.failed": "無法使用 {0}。原因: {1}",
 	"replacing.sourcepath": "正在以 '{2}' 取代 {0} '{1}'。",
 	"replacing.targetpath": "正在以 '{2}' 取代 {0} '{1}'。",
+	"replacing.editorPath": "正在以 '{2}' 取代 {0} '{1}'。",
 	"resolving.variables.in.sourcefilemap": "正在解析 {0} 中的變數...",
 	"open.envfile": "開啟 {0}",
 	"unexpected.os": "未預期的 OS 類型",

@@ -17,6 +17,7 @@
 	"envfale.failed": "Fehler beim Verwenden von \"{0}\". Grund: {1}",
 	"replacing.sourcepath": "{0} \"{1}\" wird durch \"{2}\" ersetzt.",
 	"replacing.targetpath": "{0} \"{1}\" wird durch \"{2}\" ersetzt.",
+	"replacing.editorPath": "{0} \"{1}\" wird durch \"{2}\" ersetzt.",
 	"resolving.variables.in.sourcefilemap": "Variablen in \"{0}\" werden aufgelöst...",
 	"open.envfile": "{0} öffnen",
 	"unexpected.os": "Unerwarteter Betriebssystemtyp",

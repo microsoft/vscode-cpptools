@@ -17,6 +17,7 @@
 	"envfale.failed": "Не удалось использовать {0}. Причина: {1}",
 	"replacing.sourcepath": "Выполняется замена значения {0} с \"{1}\" на \"{2}\".",
 	"replacing.targetpath": "Выполняется замена значения {0} с \"{1}\" на \"{2}\".",
+	"replacing.editorPath": "Выполняется замена {0} \"{1}\" на \"{2}\".",
 	"resolving.variables.in.sourcefilemap": "Разрешение переменных в {0}...",
 	"open.envfile": "Открыть {0}",
 	"unexpected.os": "Непредвиденный тип ОС",

@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Las directivas de preprocesador no se formatearán.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Se aplica sangría a los especificadores de acceso en relación con las definiciones de clase o struct, según lo especificado en la configuración de Editor: Tamaño de tabulación.",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Se aplica sangría al código en relación con su espacio de nombres envolvente, según lo especificado en la configuración de Editor: Tamaño de tabulación.",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "La sangría de los comentarios no se cambia durante las operaciones de formato.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "La sangría de los comentarios no se cambia durante las operaciones de formato.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "La posición de las llaves de apertura para los espacios de nombres",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "La posición de las llaves de apertura para las definiciones de tipo",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "La posición de las llaves de apertura para las funciones lambda",
@@ -137,7 +137,9 @@
 	"c_cpp.configuration.commentContinuationPatterns.description": "Define el comportamiento del editor para cuando se presiona la tecla Entrar dentro de un bloque de comentario de una o varias líneas.",
 	"c_cpp.configuration.configurationWarnings.description": "Determina si se muestran notificaciones emergentes cuando una extensión del proveedor de configuración no puede proporcionar una configuración para un archivo de código fuente.",
 	"c_cpp.configuration.intelliSenseCachePath.description": "Define la ruta de acceso de la carpeta para los encabezados precompilados almacenados en caché que usa IntelliSense. La ruta de acceso de caché predeterminada es \"%LocalAppData%/Microsoft/vscode-cpptools\" en Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" en Linux (o \"$HOME/.cache/vscode-cpptools\" si XDG_CACHE_HOME no se ha definido) y \"$HOME/Library/Caches/vscode-cpptools/\" en Mac. La ruta de acceso predeterminada se utiliza si no se especifica ninguna ruta de acceso o se especifica una que no es válida.",
-	"c_cpp.configuration.intelliSenseCacheSize.description": "Tamaño máximo del espacio del disco duro por área de trabajo en megabytes para los encabezados precompilados almacenados en caché. El uso real puede fluctuar en torno a este valor. El tamaño predeterminado es 5120 MB. El almacenamiento en caché de encabezados precompilados está deshabilitado cuando el tamaño es 0.",
+	"c_cpp.configuration.intelliSenseCacheSize.description": "Tamaño máximo del espacio del disco duro por área de trabajo en megabytes (MB) para los encabezados precompilados almacenados en caché. El uso real puede fluctuar en torno a este valor. El tamaño predeterminado es 5120 MB. El almacenamiento en caché de encabezados precompilados está deshabilitado cuando el tamaño es 0.",
+	"c_cpp.configuration.intelliSenseMemoryLimit.description": "Límite de uso de memoria en megabytes (MB) de un proceso de IntelliSense. El límite predeterminado es de 4096 MB y el límite máximo es de 16 GB. La extensión se cerrará y reiniciará un proceso de IntelliSense cuando supere el límite.",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Controla el retraso en milisegundos antes de que IntelliSense inicie la actualización después de una modificación.",
 	"c_cpp.configuration.default.includePath.description": "Valor que se va a usar en una configuración si \"includePath\" no se especifica en c_cpp_properties.json. Si se especifica \"includePath\", agregue \"${default}\" a la matriz para insertar los valores de esta configuración.",
 	"c_cpp.configuration.default.defines.description": "Valor que debe usarse en una configuración si no se especifica \"defines\", o bien los valores que se deben insertar si se especifica \"${default}\" en \"defines\".",
 	"c_cpp.configuration.default.macFrameworkPath.description": "Valor que debe usarse en una configuración si no se especifica \"macFrameworkPath\", o bien los valores que deben insertarse si se especifica \"${default}\" en \"macFrameworkPath\".",
@@ -206,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Argumentos adicionales para el depurador MI (como gdb).",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Dirección de red del servidor del depurador MI al que debe conectarse (ejemplo: localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "Parámetro opcional. Si se establece en true, el depurador debe detenerse en el punto de entrada del destino. Si se pasa processId, no tiene efecto.",
-	"c_cpp.debuggers.debugServerPath.description": "Ruta de acceso completa opcional al servidor de depuración que se va a iniciar. El valor predeterminado es NULL.",
+	"c_cpp.debuggers.debugServerPath.description": "Ruta de acceso completa opcional al servidor de depuración que se va a iniciar. El valor predeterminado es NULL. Se usa junto con \"miDebugServerAddress\" o su servidor propio con un comando \"customSetupCommand\" que ejecuta \"-target-select remote <server:port>\".",
 	"c_cpp.debuggers.debugServerArgs.description": "Argumentos opcionales del servidor de depuración. El valor predeterminado es NULL.",
 	"c_cpp.debuggers.serverStarted.description": "Patrón opcional iniciado por el servidor que debe buscarse en la salida del servidor de depuración. El valor predeterminado es NULL.",
 	"c_cpp.debuggers.filterStdout.description": "Busca la secuencia stdout para el patrón iniciado por el servidor y registra stdout en la salida de depuración. El valor predeterminado es true.",
@@ -230,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "Argumentos adicionales que se pasan al compilador o al script de compilación",
 	"c_cpp.taskDefinitions.options.description": "Opciones de comando adicionales",
 	"c_cpp.taskDefinitions.options.cwd.description": "Directorio de trabajo actual del script o el programa ejecutado. Si se omite, se usa la raíz del área de trabajo actual de Code.",
-	"c_cpp.taskDefinitions.detail.description": "Detalles adicionales de la tarea"
+	"c_cpp.taskDefinitions.detail.description": "Detalles adicionales de la tarea",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Rutas de acceso actuales y en tiempo de compilación a los mismos árboles de origen. Los archivos que se encuentran en EditorPath se asignan a la ruta de acceso CompileTimePath para la coincidencia de los puntos de interrupción y se asignan de CompileTimePath a EditorPath al mostrar ubicaciones de seguimiento de la pila.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "La ruta de acceso al árbol de origen que el editor va a usar.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False si la entrada solo se usa para la asignación de ubicación del marco de pila. True si la entrada debe usarse también al especificar ubicaciones de los puntos de interrupción."
 }

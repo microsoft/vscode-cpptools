@@ -50,7 +50,7 @@
 	"c_cpp.configuration.vcFormat.indent.preprocessor.none.description": "Директивы препроцессора форматироваться не будут.",
 	"c_cpp.configuration.vcFormat.indent.accessSpecifiers.description": "Добавление отступа для описателей доступа относительно определений классов или структур на величину, указанную параметром \"Редактор: Размер табуляции\".",
 	"c_cpp.configuration.vcFormat.indent.namespaceContents.description": "Код располагается относительно вмещающего пространства имен с отступом, размер которого определяется параметром редактора \"Размер шага табуляции\".",
-	"c_cpp.configuration.vcFormat.indent.preserveComment.description": "Отступ комментариев не был изменен во время операций форматирования.",
+	"c_cpp.configuration.vcFormat.indent.preserveComments.description": "Отступ комментариев не был изменен во время операций форматирования.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "Положение открывающих фигурных скобок для пространств имен.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "Положение открывающих фигурных скобок для определений типов.",
 	"c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.lambda.description": "Положение открывающих фигурных скобок для лямбда-функций.",
@@ -137,7 +137,9 @@
 	"c_cpp.configuration.commentContinuationPatterns.description": "Определяет поведение редактора при нажатии клавиши ВВОД внутри многострочного или однострочного примечания.",
 	"c_cpp.configuration.configurationWarnings.description": "Определяет, будут ли отображаться всплывающие уведомления, если расширение поставщика конфигурации не может предоставить конфигурацию для исходного файла.",
 	"c_cpp.configuration.intelliSenseCachePath.description": "Определяет путь к папке для кэшированных предварительно скомпилированных заголовков, используемых IntelliSense. Путь к кэшу по умолчанию: \"%LocalAppData%/Microsoft/vscode-cpptools\" в Windows, \"$XDG_CACHE_HOME/vscode-cpptools/\" в Linux (или \"$HOME/.cache/vscode-cpptools/\", если переменная среды XDG_CACHE_HOME не определена) и \"$HOME/Library/Caches/vscode-cpptools/\" в Mac. Если путь не указан или не является допустимым, используется путь по умолчанию.",
-	"c_cpp.configuration.intelliSenseCacheSize.description": "Максимальный размер (в мегабайтах) пространства на жестком диске для каждой рабочей области, предназначенный для кэшированных предкомпилированных заголовков; фактическое использование может колебаться в районе этого значения. Размер по умолчанию — 5120 МБ. Кэширование предкомпилированных заголовков отключено, если размер равен 0.",
+	"c_cpp.configuration.intelliSenseCacheSize.description": "Максимальный размер пространства на жестком диске для каждой рабочей области в мегабайтах (МБ), предназначенный для кэшированных предкомпилированных заголовков; фактическое использование может колебаться в районе этого значения. Размер по умолчанию — 5120 МБ. Кэширование предкомпилированных заголовков отключено, если размер равен 0.",
+	"c_cpp.configuration.intelliSenseMemoryLimit.description": "Ограничение на использование памяти в мегабайтах (МБ) для процесса IntelliSense. По умолчанию ограничение равно 4096 МБ, максимальное ограничение — 16 ГБ. При превышении ограничения расширение завершит работу и перезапустит процесс IntelliSense.",
+	"c_cpp.configuration.intelliSenseUpdateDelay.description": "Управляет задержкой в миллисекундах, прежде чем IntelliSense начнет обновление после изменения.",
 	"c_cpp.configuration.default.includePath.description": "Значение, используемое в конфигурации, если путь includePath не указан в файле c_cpp_properties.js. Если путь includePath задан, добавьте \"${default}\" в массив, чтобы вставить значения из этого параметра.",
 	"c_cpp.configuration.default.defines.description": "Значение, используемое в конфигурации, если параметр \"defines\" не указан, или вставляемые значения, если в \"defines\" присутствует значение \"${default}\".",
 	"c_cpp.configuration.default.macFrameworkPath.description": "Значение, используемое в конфигурации, если параметр \"macFrameworkPath\" не указан, или вставляемые значения, если в \"macFrameworkPath\" присутствует значение \"${default}\".",
@@ -206,7 +208,7 @@
 	"c_cpp.debuggers.miDebuggerArgs.description": "Дополнительные аргументы для отладчика MI (например, GDB).",
 	"c_cpp.debuggers.miDebuggerServerAddress.description": "Сетевой адрес сервера отладчика MI, к которому требуется подключиться (пример: localhost:1234).",
 	"c_cpp.debuggers.stopAtEntry.description": "Необязательный параметр. Если задано значение true, отладчик должен остановиться на точке входа целевого объекта. Если передается идентификатор процесса (processId), он не оказывает никакого влияния.",
-	"c_cpp.debuggers.debugServerPath.description": "Необязательный полный путь к серверу отладки для запуска. Значение по умолчанию: null.",
+	"c_cpp.debuggers.debugServerPath.description": "Необязательный полный путь к запускаемому серверу отладки. По умолчанию имеет значение NULL. Применяется с параметром \"miDebugServerAddress\" или с вашим собственным сервером через команду \"customSetupCommand\", использующую \"-target-select remote <server:port>\".",
 	"c_cpp.debuggers.debugServerArgs.description": "Необязательные аргументы сервера отладки. Значение по умолчанию: null.",
 	"c_cpp.debuggers.serverStarted.description": "Дополнительный запускаемый сервером шаблон для поиска в выходных данных сервера отладки. Значение по умолчанию: null.",
 	"c_cpp.debuggers.filterStdout.description": "Поиск запущенного сервером шаблона в потоке stdout и регистрация stdout в выходных данных отладки. Значение по умолчанию: true.",
@@ -230,5 +232,8 @@
 	"c_cpp.taskDefinitions.args.description": "Дополнительные аргументы для передачи компилятору или скрипту компиляции",
 	"c_cpp.taskDefinitions.options.description": "Дополнительные параметры команды",
 	"c_cpp.taskDefinitions.options.cwd.description": "Текущий рабочий каталог выполняемой программы или сценария. Если этот параметр опущен, используется корневой каталог текущей рабочей области Code.",
-	"c_cpp.taskDefinitions.detail.description": "Дополнительные сведения о задаче"
+	"c_cpp.taskDefinitions.detail.description": "Дополнительные сведения о задаче",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Текущие пути и пути времени компиляции к одним и тем же деревьям SourceTree. Файлы по пути EditorPath сопоставляются с путем CompileTimePath для сопоставления точек останова, а также сопоставляются из пути CompileTimePath с путем EditorPath при отображении расположений трассировки стека.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "Путь к дереву SourceTree, которое будет использоваться редактором.",
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "Значение false, если эта запись используется только для сопоставления расположений кадра стека. Значение true, если эта запись также должна использоваться при указании расположений точек останова."
 }

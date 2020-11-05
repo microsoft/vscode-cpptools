@@ -197,11 +197,12 @@
 	"compiler_path_empty": "Der Compilertest wird aufgrund eines explizit leeren compilerPath-Werts übersprungen.",
 	"msvc_intellisense_specified": "Es wurde der MSVC-IntelliSenseMode angegeben. Der Compiler (cl.exe) wird konfiguriert.",
 	"unable_to_configure_cl_exe": "Der Compiler (cl.exe) kann nicht konfiguriert werden.",
-	"probing_compiler_default_target": "Test des Standardziels für den Compiler über die Befehlszeile: \"{0}\" {1}",
+	"probing_compiler_default_target": "Das Standardziel des Compilers wird über die Befehlszeile getestet: \"{0}\" {1}",
 	"compiler_default_target": "Der Compiler hat den Standardzielwert zurückgegeben: {0}",
-	"c_probing_compiler_default_standard": "Compilertest auf den C-Sprachstandard über die Befehlszeile: {0}",
-	"cpp_probing_compiler_default_standard": "Compilertest auf den C++-Sprachstandard über die Befehlszeile: {0}",
+	"c_probing_compiler_default_standard": "Der Compiler für den Standard-C-Sprachstandard wird über die Befehlszeile getestet: {0}",
+	"cpp_probing_compiler_default_standard": "Der Compiler für den Standard-C++-Sprachstandard wird über die Befehlszeile getestet: {0}",
 	"detected_language_standard_version": "Erkannte Sprachstandardversion: {0}",
 	"unhandled_default_target_detected": "Unbehandelter Standardzielwert für Compiler erkannt: {0}",
-	"unhandled_target_arg_detected": "Unbehandelter Zielargumentwert erkannt: {0}"
+	"unhandled_target_arg_detected": "Unbehandelter Zielargumentwert erkannt: {0}",
+	"memory_limit_shutting_down_intellisense": "IntelliSense-Server wird heruntergefahren: {0}. Die Arbeitsspeicherauslastung beträgt {1} MB und hat das Limit von {2} MB überschritten."
 }

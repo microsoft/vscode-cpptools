@@ -1,0 +1,25 @@
+name: Locker
+on:
+  schedule:
+    - cron: 30 11 * * * # Run at 11:30 AM UTC (3:30 AM PST, 4:30 AM PDT)
+  workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Run Locker
+        uses: ./.github/actions/Locker
+        with:
+          readonly: ${{ github.event.inputs.readonly }}
+          daysSinceClose: 45
+          daysSinceUpdate: 3
+          ignoreLabels: more votes needed,debugger,internal
