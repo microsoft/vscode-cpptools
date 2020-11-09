@@ -352,9 +352,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
 
     // Resolve '~' at the start of the path.
     regexp = () => /^\~/g;
-    ret = ret.replace(regexp(), (match: string, name: string) => {
-        return os.homedir();
-    });
+    ret = ret.replace(regexp(), (match: string, name: string) => os.homedir());
 
     return ret;
 }
