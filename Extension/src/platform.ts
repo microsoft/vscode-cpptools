@@ -54,11 +54,12 @@ export class PlatformInformation {
     }
 
     public static GetArchitecture(): string {
-        switch (process.arch) {
+        const arch: string = os.arch();
+        switch (arch) {
             case "x64":
             case "arm64":
             case "arm":
-                return process.arch;
+                return arch;
             case "x32":
             case "ia32":
                 return "x86";
