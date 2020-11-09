@@ -116,17 +116,15 @@ export function vsixNameForPlatform(info: PlatformInformation): string {
         switch (platformInfo.platform) {
             case 'win32':
                 switch (platformInfo.architecture) {
-                    case 'x86_64': return 'cpptools-win32.vsix'; // TODO: Change to cpptools-win64?
-                    case 'x86':
-                    case 'i386':
-                    case 'i686': return 'cpptools-win32.vsix';
+                    case 'x64': return 'cpptools-win32.vsix'; // TODO: Change to cpptools-win64?
+                    case 'x86': return 'cpptools-win32.vsix';
                     case 'arm64': return 'cpptools-win-arm64.vsix';
                     default: throw new Error(`Unexpected Windows architecture: ${platformInfo.architecture}`);
                 }
             case 'darwin': return 'cpptools-osx.vsix';
             default: {
                 switch (platformInfo.architecture) {
-                    case 'x86_64': return 'cpptools-linux.vsix';
+                    case 'x64': return 'cpptools-linux.vsix';
                     case 'arm': return 'cpptools-linux-armhf.vsix';
                     case 'arm64': return 'cpptools-linux-aarch64.vsix';
                     default: throw new Error(`Unexpected Linux architecture: ${platformInfo.architecture}`);

@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.1.0-master",
+  "version": "1.1.1-master",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2419,7 +2419,7 @@
         "linux"
       ],
       "architectures": [
-        "x86_64"
+        "x64"
       ],
       "binaries": [
         "./bin/cpptools",
@@ -2476,10 +2476,8 @@
         "win32"
       ],
       "architectures": [
-        "x86_64",
-        "x86",
-        "i686",
-        "i386"
+        "x64",
+        "x86"
       ],
       "binaries": [
         "./bin/cpptools.exe",
@@ -2509,7 +2507,7 @@
         "linux"
       ],
       "architectures": [
-        "x86_64"
+        "x64"
       ],
       "binaries": [
         "./LLVM/bin/clang-format"
@@ -2583,7 +2581,7 @@
         "linux"
       ],
       "architectures": [
-        "x86_64"
+        "x64"
       ],
       "binaries": [
         "./debugAdapters/mono.linux-x86_64"
@@ -2665,10 +2663,8 @@
         "win32"
       ],
       "architectures": [
-        "x86_64",
-        "x86",
-        "i686",
-        "i386"
+        "x64",
+        "x86"
       ],
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
