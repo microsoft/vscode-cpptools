@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.1: November 9, 2020
+### Bug Fixes
+* Fix cpptools binaries sometimes not getting installed on Windows. [#6453](https://github.com/microsoft/vscode-cpptools/issues/6453)
+
 ## Version 1.1.0: November 5, 2020
 ### New Features
 * Add language server support for Windows ARM64 (no debugging yet). [#5583](https://github.com/microsoft/vscode-cpptools/issues/5583)

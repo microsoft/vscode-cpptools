@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as os from 'os';
-import * as util from './common';
 import { LinuxDistribution } from './linuxDistribution';
 import * as plist from 'plist';
 import * as fs from 'fs';
@@ -24,26 +23,23 @@ export function GetOSName(processPlatform: string | undefined): string | undefin
 }
 
 export class PlatformInformation {
-    constructor(public platform: string, public architecture?: string, public distribution?: LinuxDistribution, public version?: string) { }
+    constructor(public platform: string, public architecture: string, public distribution?: LinuxDistribution, public version?: string) { }
 
     public static GetPlatformInformation(): Promise<PlatformInformation> {
         const platform: string = os.platform();
-        let architecturePromise: Promise<string | undefined>;
+        const architecture: string = PlatformInformation.GetArchitecture();
         let distributionPromise: Promise<LinuxDistribution | undefined> = Promise.resolve<LinuxDistribution | undefined>(undefined);
         let versionPromise: Promise<string | undefined> = Promise.resolve<string | undefined>(undefined);
 
         switch (platform) {
             case "win32":
-                architecturePromise = PlatformInformation.GetWindowsArchitecture();
                 break;
 
             case "linux":
-                architecturePromise = PlatformInformation.GetUnixArchitecture();
                 distributionPromise = LinuxDistribution.GetDistroInformation();
                 break;
 
             case "darwin":
-                architecturePromise = PlatformInformation.GetUnixArchitecture();
                 versionPromise = PlatformInformation.GetDarwinVersion();
                 break;
 
@@ -51,50 +47,29 @@ export class PlatformInformation {
                 throw new Error(localize("unknown.os.platform", "Unknown OS platform"));
         }
 
-        return Promise.all([architecturePromise, distributionPromise, versionPromise])
-            .then(([arch, distro, version]) =>
-                new PlatformInformation(platform, arch, distro, version)
+        return Promise.all([distributionPromise, versionPromise])
+            .then(([distro, version]) =>
+                new PlatformInformation(platform, architecture, distro, version)
             );
     }
 
-    public static GetUnknownArchitecture(): string { return "Unknown"; }
-
-    private static GetWindowsArchitecture(): Promise<string> {
-        return util.execChildProcess('wmic os get osarchitecture', util.extensionPath)
-            .then((architecture) => {
-                if (architecture) {
-                    const archArray: string[] = architecture.split(os.EOL);
-                    if (archArray.length >= 2) {
-                        const arch: string = archArray[1].trim();
-
-                        // Note: This string can be localized. So, we'll just check to see if it contains 32 or 64.
-                        if (arch.indexOf('64') >= 0) {
-                            if (arch.indexOf('ARM') >= 0) {
-                                return "arm64";
-                            }
-                            return "x86_64";
-                        } else if (arch.indexOf('32') >= 0) {
-                            return "x86";
-                        }
-                    }
+    public static GetArchitecture(): string {
+        const arch: string = os.arch();
+        switch (arch) {
+            case "x64":
+            case "arm64":
+            case "arm":
+                return arch;
+            case "x32":
+            case "ia32":
+                return "x86";
+            default:
+                if (os.platform() === "win32") {
+                    return "x86";
+                } else {
+                    return "x64";
                 }
-                return PlatformInformation.GetUnknownArchitecture();
-            }).catch((error) => PlatformInformation.GetUnknownArchitecture());
-    }
-
-    private static GetUnixArchitecture(): Promise<string | undefined> {
-        return util.execChildProcess('uname -m', util.packageJson.extensionFolderPath)
-            .then((architecture) => {
-                if (architecture) {
-                    if (architecture.startsWith('arm64') || architecture.startsWith('aarch64')) {
-                        return 'arm64';
-                    } else if (architecture.startsWith('armv')) {
-                        return 'arm';
-                    }
-                    return architecture.trim();
-                }
-                return undefined;
-            });
+        }
     }
 
     private static GetDarwinVersion(): Promise<string> {

@@ -204,5 +204,7 @@
 	"detected_language_standard_version": "Erkannte Sprachstandardversion: {0}",
 	"unhandled_default_target_detected": "Unbehandelter Standardzielwert für Compiler erkannt: {0}",
 	"unhandled_target_arg_detected": "Unbehandelter Zielargumentwert erkannt: {0}",
-	"memory_limit_shutting_down_intellisense": "IntelliSense-Server wird heruntergefahren: {0}. Die Arbeitsspeicherauslastung beträgt {1} MB und hat das Limit von {2} MB überschritten."
+	"memory_limit_shutting_down_intellisense": "IntelliSense-Server wird heruntergefahren: {0}. Die Arbeitsspeicherauslastung beträgt {1} MB und hat das Limit von {2} MB überschritten.",
+	"failed_to_probe_for_standard_version": "Failed to probe compilerPath \"{0}\" for default standard versions.  Probing is disabled for this compiler.",
+	"unrecognized_language_standard_version": "Compiler probe returned an unrecognized language standard version.  The latest supported version will be used instead."
 }
