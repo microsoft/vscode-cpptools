@@ -332,7 +332,7 @@ function realActivation(): void {
 
     PlatformInformation.GetPlatformInformation().then(info => {
         // Skip Insiders processing for 32-bit Linux.
-        if (info.platform !== "linux" || info.architecture === "x86_64" || info.architecture === "arm" || info.architecture === "arm64") {
+        if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
             // Skip Insiders processing for unsupported VS Code versions.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
             const abTestSettings: ABTestSettings = getABTestSettings();

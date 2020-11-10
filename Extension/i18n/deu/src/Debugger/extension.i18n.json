@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Aktive Datei erstellen und debuggen",
 	"cannot.build.non.cpp": "Erstellen und Debuggen nicht möglich, da die aktive Datei keine C- oder C++-Quelldatei ist.",
 	"no.compiler.found": "Kein Compiler gefunden.",
-	"select.configuration": "Select a configuration",
+	"select.configuration": "Konfiguration auswählen",
 	"cl.exe.not.available": "{0}-Build und -Debuggen können nur verwendet werden, wenn VS Code von der Developer-Eingabeaufforderung für VS ausgeführt wird."
 }
