@@ -204,5 +204,7 @@
 	"detected_language_standard_version": "Versão padrão da linguagem detectada: {0}",
 	"unhandled_default_target_detected": "Foi detectado um valor de destino do compilador padrão não tratado: {0}",
 	"unhandled_target_arg_detected": "Foi detectado um valor de argumento de destino não tratado: {0}",
-	"memory_limit_shutting_down_intellisense": "Desligando o servidor do IntelliSense: {0}. O uso de memória é {1} MB e excedeu o limite de {2} MB."
+	"memory_limit_shutting_down_intellisense": "Desligando o servidor do IntelliSense: {0}. O uso de memória é {1} MB e excedeu o limite de {2} MB.",
+	"failed_to_probe_for_standard_version": "Failed to probe compilerPath \"{0}\" for default standard versions.  Probing is disabled for this compiler.",
+	"unrecognized_language_standard_version": "Compiler probe returned an unrecognized language standard version.  The latest supported version will be used instead."
 }

@@ -204,5 +204,7 @@
 	"detected_language_standard_version": "检测到的语言标准版本: {0}",
 	"unhandled_default_target_detected": "检测到未处理的默认编译器目标值: {0}",
 	"unhandled_target_arg_detected": "检测到未处理的目标参数值: {0}",
-	"memory_limit_shutting_down_intellisense": "正在关闭 IntelliSense 服务器: {0}。内存使用量为 {1} MB，已超过 {2} MB 的限制。"
+	"memory_limit_shutting_down_intellisense": "正在关闭 IntelliSense 服务器: {0}。内存使用量为 {1} MB，已超过 {2} MB 的限制。",
+	"failed_to_probe_for_standard_version": "Failed to probe compilerPath \"{0}\" for default standard versions.  Probing is disabled for this compiler.",
+	"unrecognized_language_standard_version": "Compiler probe returned an unrecognized language standard version.  The latest supported version will be used instead."
 }
