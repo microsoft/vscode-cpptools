@@ -74,7 +74,7 @@ export class CppSettings extends Settings {
     public get clangFormatPath(): string | undefined {
         let path: string | undefined | null = super.Section.get<string>("clang_format_path");
         if (!path) {
-            path = which.sync('clang-format', {nothrow: true});
+            path = which.sync('clang-format', { nothrow: true });
             if (!path) {
                 return undefined;
             } else {
@@ -157,7 +157,7 @@ export class CppSettings extends Settings {
     public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
-    public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get< { [key: string]: string } >("default.customConfigurationVariables"); }
+    public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
 
@@ -175,12 +175,16 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.indent.braces") === true;
     }
 
-    public get vcFormatIndentMultiLineRelativeTo(): string | undefined {
-        return super.Section.get<string>("vcFormat.indent.multiLineRelativeTo");
+    public get vcFormatIndentMultiLineRelativeTo(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.indent.multiLineRelativeTo")!;
     }
 
-    public get vcFormatIndentWithinParentheses(): string | undefined {
-        return super.Section.get<string>("vcFormat.indent.withinParentheses");
+    public get vcFormatIndentWithinParentheses(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.indent.withinParentheses")!;
     }
 
     public get vcFormatIndentPreserveWithinParentheses(): boolean {
@@ -203,12 +207,16 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.indent.lambdaBracesWhenParameter") === true;
     }
 
-    public get vcFormatIndentGotoLables(): string | undefined {
-        return super.Section.get<string>("vcFormat.indent.gotoLabels");
+    public get vcFormatIndentGotoLables(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.indent.gotoLabels")!;
     }
 
-    public get vcFormatIndentPreprocessor(): string | undefined {
-        return super.Section.get<string>("vcFormat.indent.preprocessor");
+    public get vcFormatIndentPreprocessor(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.indent.preprocessor")!;
     }
 
     public get vcFormatIndentAccessSpecifiers(): boolean {
@@ -223,24 +231,34 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.indent.preserveComments") === true;
     }
 
-    public get vcFormatNewlineBeforeOpenBraceNamespace(): string | undefined {
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.namespace");
+    public get vcFormatNewlineBeforeOpenBraceNamespace(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.namespace")!;
     }
 
-    public get vcFormatNewlineBeforeOpenBraceType(): string | undefined {
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.type");
+    public get vcFormatNewlineBeforeOpenBraceType(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.type")!;
     }
 
-    public get vcFormatNewlineBeforeOpenBraceFunction(): string | undefined {
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.function");
+    public get vcFormatNewlineBeforeOpenBraceFunction(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.function")!;
     }
 
-    public get vcFormatNewlineBeforeOpenBraceBlock(): string | undefined {
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.block");
+    public get vcFormatNewlineBeforeOpenBraceBlock(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.block")!;
     }
 
-    public get vcFormatNewlineBeforeOpenBraceLambda(): string | undefined {
-        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.lambda");
+    public get vcFormatNewlineBeforeOpenBraceLambda(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.newLine.beforeOpenBrace.lambda")!;
     }
 
     public get vcFormatNewlineScopeBracesOnSeparateLines(): boolean {
@@ -267,8 +285,10 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.newLine.beforeWhileInDoWhile") === true;
     }
 
-    public get vcFormatSpaceBeforeFunctionOpenParenthesis(): string | undefined {
-        return super.Section.get<string>("vcFormat.space.beforeFunctionOpenParenthesis");
+    public get vcFormatSpaceBeforeFunctionOpenParenthesis(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.space.beforeFunctionOpenParenthesis")!;
     }
 
     public get vcFormatSpaceWithinParameterListParentheses(): boolean {
@@ -383,24 +403,34 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.space.removeAroundUnaryOperator") === true;
     }
 
-    public get vcFormatSpaceAroundBinaryOperator(): string | undefined {
-        return super.Section.get<string>("vcFormat.space.aroundBinaryOperator");
+    public get vcFormatSpaceAroundBinaryOperator(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.space.aroundBinaryOperator")!;
     }
 
-    public get vcFormatSpaceAroundAssignmentOperator(): string | undefined {
-        return super.Section.get<string>("vcFormat.space.aroundAssignmentOperator");
+    public get vcFormatSpaceAroundAssignmentOperator(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.space.aroundAssignmentOperator")!;
     }
 
-    public get vcFormatSpacePointerReferenceAlignment(): string | undefined {
-        return super.Section.get<string>("vcFormat.space.pointerReferenceAlignment");
+    public get vcFormatSpacePointerReferenceAlignment(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.space.pointerReferenceAlignment")!;
     }
 
-    public get vcFormatSpaceAroundTernaryOperator(): string | undefined {
-        return super.Section.get<string>("vcFormat.space.aroundTernaryOperator");
+    public get vcFormatSpaceAroundTernaryOperator(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.space.aroundTernaryOperator")!;
     }
 
-    public get vcFormatWrapPreserveBlocks(): string | undefined {
-        return super.Section.get<string>("vcFormat.wrap.preserveBlocks");
+    public get vcFormatWrapPreserveBlocks(): string {
+        // These strings have default values in package.json, so should never be undefined.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return super.Section.get<string>("vcFormat.wrap.preserveBlocks")!;
     }
 
     public get dimInactiveRegions(): boolean {
@@ -457,4 +487,210 @@ export class OtherSettings {
 
     public get customTextMateRules(): TextMateRule[] | undefined { return vscode.workspace.getConfiguration("editor.tokenColorCustomizations").get<TextMateRule[]>("textMateRules"); }
     public getCustomThemeSpecificTextMateRules(themeName: string): TextMateRule[] | undefined { return vscode.workspace.getConfiguration(`editor.tokenColorCustomizations.[${themeName}]`, this.resource).get<TextMateRule[]>("textMateRules"); }
+}
+
+function mapIndentationReferenceToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "statementBegin") {
+            return "statement_begin";
+        }
+        if (value === "outermostParenthesis") {
+            return "outermost_parenthesis";
+        }
+    }
+    return "innermost_parenthesis";
+}
+
+function mapIndentToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "leftmostColumn") {
+            return "leftmost_column";
+        }
+        if (value === "oneLeft") {
+            return "one_left";
+        }
+    }
+    return "none";
+}
+
+function mapNewOrSameLineToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "newLine") {
+            return "new_line";
+        }
+        if (value === "sameLine") {
+            return "same_line";
+        }
+    }
+    return "ignore";
+}
+
+function mapWrapToEditorConfig(value: string | undefined): string {
+    if (value !== undefined) {
+        // Will never actually be undefined, as these settings have default values.
+        if (value === "allOneLineScopes") {
+            return "all_one_line_scopes";
+        }
+        if (value === "oneLiners") {
+            return "one_liners";
+        }
+    }
+    return "never";
+}
+
+function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): void {
+    // Set up a map of setting names and values. Parse through the document line-by-line, looking for
+    // existing occurrences to replace. Replaced occurrences are removed from the map. If any remain when
+    // done, they are added as a new section at the end of the file. The file is opened with unsaved
+    // edits, so the user may edit or undo if we made a mistake.
+    const settings: CppSettings = new CppSettings(rootUri);
+    const settingMap: Map<string, string> = new Map<string, string>();
+    settingMap.set("cpp_indent_braces", settings.vcFormatIndentBraces.toString());
+    settingMap.set("cpp_indent_multi_line_relative_to", mapIndentationReferenceToEditorConfig(settings.vcFormatIndentMultiLineRelativeTo));
+    settingMap.set("cpp_indent_within_parentheses", settings.vcFormatIndentWithinParentheses.toString());
+    settingMap.set("cpp_indent_preserve_within_parentheses", settings.vcFormatIndentPreserveWithinParentheses.toString());
+    settingMap.set("cpp_indent_case_labels", settings.vcFormatIndentCaseLabels.toString());
+    settingMap.set("cpp_indent_case_contents", settings.vcFormatIndentCaseContents.toString());
+    settingMap.set("cpp_indent_case_contents_when_block", settings.vcFormatIndentCaseContentsWhenBlock.toString());
+    settingMap.set("cpp_indent_lambda_braces_when_parameter", settings.vcFormatIndentLambdaBracesWhenParameter.toString());
+    settingMap.set("cpp_indent_goto_labels", mapIndentToEditorConfig(settings.vcFormatIndentGotoLables));
+    settingMap.set("cpp_indent_preprocessor", mapIndentToEditorConfig(settings.vcFormatIndentPreprocessor));
+    settingMap.set("cpp_indent_access_specifiers", settings.vcFormatIndentAccessSpecifiers.toString());
+    settingMap.set("cpp_indent_namespace_contents", settings.vcFormatIndentNamespaceContents.toString());
+    settingMap.set("cpp_indent_preserve_comments", settings.vcFormatIndentPreserveComments.toString());
+    settingMap.set("cpp_new_line_before_open_brace_namespace", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceNamespace));
+    settingMap.set("cpp_new_line_before_open_brace_type", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceType));
+    settingMap.set("cpp_new_line_before_open_brace_function", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceFunction));
+    settingMap.set("cpp_new_line_before_open_brace_block", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceBlock));
+    settingMap.set("cpp_new_line_before_open_brace_lambda", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceLambda));
+    settingMap.set("cpp_new_line_scope_braces_on_separate_lines", settings.vcFormatNewlineScopeBracesOnSeparateLines.toString());
+    settingMap.set("cpp_new_line_close_brace_same_line_empty_type", settings.vcFormatNewlineCloseBraceSameLineEmptyType.toString());
+    settingMap.set("cpp_new_line_close_brace_same_line_empty_function", settings.vcFormatNewlineCloseBraceSameLineEmptyFunction.toString());
+    settingMap.set("cpp_new_line_before_catch", settings.vcFormatNewlineBeforeCatch.toString().toString());
+    settingMap.set("cpp_new_line_before_else", settings.vcFormatNewlineBeforeElse.toString().toString());
+    settingMap.set("cpp_new_line_before_while_in_do_while", settings.vcFormatNewlineBeforeWhileInDoWhile.toString());
+    settingMap.set("cpp_space_before_function_open_parenthesis", settings.vcFormatSpaceBeforeFunctionOpenParenthesis.toString());
+    settingMap.set("cpp_space_within_parameter_list_parentheses", settings.vcFormatSpaceWithinParameterListParentheses.toString());
+    settingMap.set("cpp_space_between_empty_parameter_list_parentheses", settings.vcFormatSpaceBetweenEmptyParameterListParentheses.toString());
+    settingMap.set("cpp_space_after_keywords_in_control_flow_statements", settings.vcFormatSpaceAfterKeywordsInControlFlowStatements.toString());
+    settingMap.set("cpp_space_within_control_flow_statement_parentheses", settings.vcFormatSpaceWithinControlFlowStatementParentheses.toString());
+    settingMap.set("cpp_space_before_lambda_open_parenthesis", settings.vcFormatSpaceBeforeLambdaOpenParenthesis.toString());
+    settingMap.set("cpp_space_within_cast_parentheses", settings.vcFormatSpaceWithinCastParentheses.toString());
+    settingMap.set("cpp_space_after_cast_close_parenthesis", settings.vcFormatSpaceAfterCastCloseParenthesis.toString());
+    settingMap.set("cpp_space_within_expression_parentheses", settings.vcFormatSpaceWithinExpressionParentheses.toString());
+    settingMap.set("cpp_space_before_block_open_brace", settings.vcFormatSpaceBeforeBlockOpenBrace.toString());
+    settingMap.set("cpp_space_between_empty_braces", settings.vcFormatSpaceBetweenEmptyBraces.toString());
+    settingMap.set("cpp_space_before_initializer_list_open_brace", settings.vcFormatSpaceBeforeInitializerListOpenBrace.toString());
+    settingMap.set("cpp_space_within_initializer_list_braces", settings.vcFormatSpaceWithinInitializerListBraces.toString());
+    settingMap.set("cpp_space_preserve_in_initializer_list", settings.vcFormatSpacePreserveInInitializerList.toString());
+    settingMap.set("cpp_space_before_open_square_bracket", settings.vcFormatSpaceBeforeOpenSquareBracket.toString());
+    settingMap.set("cpp_space_within_square_brackets", settings.vcFormatSpaceWithinSquareBrackets.toString());
+    settingMap.set("cpp_space_before_empty_square_brackets", settings.vcFormatSpaceBeforeEmptySquareBrackets.toString());
+    settingMap.set("cpp_space_between_empty_square_brackets", settings.vcFormatSpaceBetweenEmptySquareBrackets.toString());
+    settingMap.set("cpp_space_group_square_brackets", settings.vcFormatSpaceGroupSquareBrackets.toString());
+    settingMap.set("cpp_space_within_lambda_brackets", settings.vcFormatSpaceWithinLambdaBrackets.toString());
+    settingMap.set("cpp_space_between_empty_lambda_brackets", settings.vcFormatSpaceBetweenEmptyLambdaBrackets.toString());
+    settingMap.set("cpp_space_before_comma", settings.vcFormatSpaceBeforeComma.toString());
+    settingMap.set("cpp_space_after_comma", settings.vcFormatSpaceAfterComma.toString());
+    settingMap.set("cpp_space_remove_around_member_operators", settings.vcFormatSpaceRemoveAroundMemberOperators.toString());
+    settingMap.set("cpp_space_before_inheritance_colon", settings.vcFormatSpaceBeforeInheritanceColon.toString());
+    settingMap.set("cpp_space_before_constructor_colon", settings.vcFormatSpaceBeforeConstructorColon.toString());
+    settingMap.set("cpp_space_remove_before_semicolon", settings.vcFormatSpaceRemoveBeforeSemicolon.toString());
+    settingMap.set("cpp_space_after_semicolon", settings.vcFormatSpaceInsertAfterSemicolon.toString());
+    settingMap.set("cpp_space_remove_around_unary_operator", settings.vcFormatSpaceRemoveAroundUnaryOperator.toString());
+    settingMap.set("cpp_space_around_binary_operator", settings.vcFormatSpaceAroundBinaryOperator.toString());
+    settingMap.set("cpp_space_around_assignment_operator", settings.vcFormatSpaceAroundAssignmentOperator.toString());
+    settingMap.set("cpp_space_pointer_reference_alignment", settings.vcFormatSpacePointerReferenceAlignment.toString());
+    settingMap.set("cpp_space_around_ternary_operator", settings.vcFormatSpaceAroundTernaryOperator.toString());
+    settingMap.set("cpp_wrap_preserve_blocks", mapWrapToEditorConfig(settings.vcFormatWrapPreserveBlocks));
+
+    const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+    let isInWildcardSection: boolean = false;
+    let trailingBlankLines: number = 0;
+
+    // Cycle through lines using document.lineAt(), to avoid issues mapping edits back to lines.
+    for (let i: number = 0; i < document.lineCount; ++i) {
+        let textLine: vscode.TextLine = document.lineAt(i);
+        if (textLine.range.end.character === 0) {
+            trailingBlankLines++;
+            continue;
+        }
+        trailingBlankLines = 0;
+        // Keep track of whether we left off in a wildcard section, so we don't output a redundant one.
+        let text: string = textLine.text.trim();
+        if (text.startsWith("[")) {
+            isInWildcardSection = text.startsWith("[*]");
+            continue;
+        }
+        for (const setting of settingMap) {
+            if (text.startsWith(setting[0])) {
+                // The next character must be white space or '=', otherwise it's a partial match.
+                if (text.length > setting[0].length) {
+                    const c: string = text[setting[0].length];
+                    if (c !== '=' && c.trim() !== "") {
+                        continue;
+                    }
+                }
+                edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
+                // Because we're going to remove this setting from the map,
+                // scan ahead to update any other sections it may need to be updated in.
+                for (let j: number = i + 1; j < document.lineCount; ++j) {
+                    textLine = document.lineAt(j);
+                    text = textLine.text.trim();
+                    if (text.startsWith(setting[0])) {
+                        // The next character must be white space or '=', otherwise it's a partial match.
+                        if (text.length > setting[0].length) {
+                            const c: string = text[setting[0].length];
+                            if (c !== '=' && c.trim() !== "") {
+                                continue;
+                            }
+                        }
+                        edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
+                    }
+                }
+                settingMap.delete(setting[0]);
+                break;
+            }
+        }
+        if (settingMap.size === 0) {
+            break;
+        }
+    }
+
+    if (settingMap.size > 0) {
+        let remainingSettingsText: string = "";
+        if (document.lineCount > 0) {
+            while (++trailingBlankLines < 2) {
+                remainingSettingsText += "\n";
+            }
+        }
+        if (!isInWildcardSection) {
+            remainingSettingsText += "[*]\n";
+        }
+        for (const setting of settingMap) {
+            remainingSettingsText += setting[0] + "=" + setting[1] + "\n";
+        }
+        const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
+        edits.insert(document.uri, lastPosition, remainingSettingsText);
+    }
+    vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
+}
+
+export function generateEditorConfig(rootUri?: vscode.Uri): void {
+    if (rootUri !== undefined) {
+        // If a folder is open and '.editorconfig' exists at the root, use that.
+        const uri: vscode.Uri = vscode.Uri.joinPath(rootUri, ".editorconfig");
+        const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        edits.createFile(uri, { ignoreIfExists: true, overwrite: false });
+        vscode.workspace.applyEdit(edits).then(() => {
+            vscode.workspace.openTextDocument(uri).then(
+                (document) => populateEditorConfig(rootUri, document),
+                () => vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document)));
+        }, () => vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document)));
+    } else {
+        vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document));
+    }
 }

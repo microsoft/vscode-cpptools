@@ -14,7 +14,7 @@ import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings, generateEditorConfig, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -767,6 +767,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -887,6 +888,15 @@ function onEditConfiguration(): void {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+    }
+}
+
+function onGenerateEditorConfig(): void {
+    onActivationEvent();
+    if (!isFolderOpen()) {
+        generateEditorConfig();
+    } else {
+        selectClient().then(client => generateEditorConfig(client.RootUri));
     }
 }
 
