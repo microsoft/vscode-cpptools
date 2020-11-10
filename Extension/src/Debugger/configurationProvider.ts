@@ -7,12 +7,12 @@ import * as debugUtils from './utils';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CppBuildTaskDefinition} from '../LanguageServer/cppBuildTaskProvider';
+import { CppBuildTask, CppBuildTaskDefinition } from '../LanguageServer/cppBuildTaskProvider';
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
 import { buildAndDebugActiveFileStr } from './extension';
-import { cppBuildTaskProvider} from '../LanguageServer/extension';
+import { cppBuildTaskProvider } from '../LanguageServer/extension';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 
@@ -113,10 +113,6 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let buildTasks: vscode.Task[] = await cppBuildTaskProvider.getTasks(true);
-        if (buildTasks.length === 0) {
-            return Promise.resolve(this.provider.getInitialConfigurations(this.type));
-        }
         const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find((config: any) =>
             isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig, "Could not find default debug configuration.");
@@ -124,14 +120,42 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const platform: string = platformInfo.platform;
 
+        // Import the tasks from tasks.json file.
+        const buildTasksJson: CppBuildTask[] = await cppBuildTaskProvider.getJsonTasks();
+
+        // Provide detected tasks by cppBuildTaskProvider.
+        const buildTasksDetected: CppBuildTask[] = await cppBuildTaskProvider.getTasks(true);
+
+        // Rename the provided tasks that has same name as tasks in tasks.json.
+        const buildTasksDetectedRename: CppBuildTask[] = buildTasksDetected.map(taskDetected => {
+            for (const taskJson of buildTasksJson) {
+                if ((taskDetected.definition.label as string) === (taskJson.definition.label as string)) {
+                    taskDetected.name = cppBuildTaskProvider.provideUniqueTaskLabel(taskJson.definition.label, buildTasksJson);
+                    taskDetected.definition.label = taskDetected.name;
+                    break;
+                }
+            }
+            return taskDetected;
+        });
+
+        let buildTasks: CppBuildTask[] = [];
+        buildTasks = buildTasks.concat(buildTasksJson, buildTasksDetectedRename);
+
+        if (buildTasks.length === 0) {
+            return Promise.resolve(this.provider.getInitialConfigurations(this.type));
+        }
+
+        if (buildTasks.length === 0) {
+            return Promise.resolve(this.provider.getInitialConfigurations(this.type));
+        }
         // Filter out build tasks that don't match the currently selected debug configuration type.
-        buildTasks = buildTasks.filter((task: vscode.Task) => {
+        buildTasks = buildTasks.filter((task: CppBuildTask) => {
             if (defaultConfig.name.startsWith("(Windows) ")) {
-                if (task.name.startsWith("C/C++: cl.exe")) {
+                if ((task.definition.command as string).includes("cl.exe")) {
                     return true;
                 }
             } else {
-                if (!task.name.startsWith("C/C++: cl.exe")) {
+                if (!(task.definition.command as string).includes("cl.exe")) {
                     return true;
                 }
             }
@@ -153,7 +177,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
-            newConfig.detail = definition.command;
+            newConfig.detail = task.detail ? task.detail : definition.command;
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {

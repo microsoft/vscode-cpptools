@@ -263,11 +263,31 @@ function onActivationEvent(): void {
     activatedPreviously.Value = true;
 }
 
+function sendActivationTelemetry(): void {
+    const activateEvent: { [key: string]: string } = {};
+    // Don't log telemetry for machineId if it's a special value used by the dev host: someValue.machineid
+    if (vscode.env.machineId !== "someValue.machineId") {
+        const machineIdPersistentState: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.machineId", undefined);
+        if (!machineIdPersistentState.Value) {
+            activateEvent["newMachineId"] = vscode.env.machineId;
+        } else if (machineIdPersistentState.Value !== vscode.env.machineId) {
+            activateEvent["newMachineId"] = vscode.env.machineId;
+            activateEvent["oldMachineId"] = machineIdPersistentState.Value;
+        }
+        machineIdPersistentState.Value = vscode.env.machineId;
+    }
+    if (vscode.env.remoteName) {
+        activateEvent["remoteName"] = vscode.env.remoteName;
+    }
+    telemetry.logLanguageServerEvent("Activate", activateEvent);
+}
+
 function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
+        sendActivationTelemetry();
         const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
         if (checkForConflictingExtensions.Value) {
             checkForConflictingExtensions.Value = false;
@@ -312,7 +332,7 @@ function realActivation(): void {
 
     PlatformInformation.GetPlatformInformation().then(info => {
         // Skip Insiders processing for 32-bit Linux.
-        if (info.platform !== "linux" || info.architecture === "x86_64" || info.architecture === "arm" || info.architecture === "arm64") {
+        if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
             // Skip Insiders processing for unsupported VS Code versions.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
             const abTestSettings: ABTestSettings = getABTestSettings();
@@ -1058,10 +1078,7 @@ function onShowRefCommand(arg?: TreeNode): void {
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
         prevCrashFile = "";
-        const home: string | undefined = process.env.HOME;
-        if (!home) {
-            return;
-        }
+        const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
             const crashObject: { [key: string]: string } = {};
