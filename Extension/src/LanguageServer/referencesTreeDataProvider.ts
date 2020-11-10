@@ -13,8 +13,8 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     private referencesModel: ReferencesModel | undefined;
-    private readonly _onDidChangeTreeData = new vscode.EventEmitter<TreeNode>();
-    readonly onDidChangeTreeData: vscode.Event<TreeNode>;
+    private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
+    readonly onDidChangeTreeData: vscode.Event<void>;
 
     constructor() {
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
