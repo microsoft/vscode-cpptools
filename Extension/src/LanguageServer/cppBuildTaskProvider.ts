@@ -396,7 +396,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         const file: string = editor.document.fileName;
         return {
             "file": file,
-            "fileDirname": fileDir.uri.fsPath,
+            "fileDirname": path.parse(file).dir,
             "fileBasenameNoExtension": path.parse(file).name,
             "workspaceFolder": fileDir.uri.fsPath
         };
