@@ -126,10 +126,7 @@ export function getVcpkgPathDescriptorFile(): string {
         }
         return path.join(pathPrefix, "vcpkg/vcpkg.path.txt");
     } else {
-        const pathPrefix: string | undefined = process.env.HOME;
-        if (!pathPrefix) {
-            throw new Error("Unable to read process.env.HOME");
-        }
+        const pathPrefix: string = os.homedir();
         return path.join(pathPrefix, ".vcpkg/vcpkg.path.txt");
     }
 }
@@ -355,10 +352,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
 
     // Resolve '~' at the start of the path.
     regexp = () => /^\~/g;
-    ret = ret.replace(regexp(), (match: string, name: string) => {
-        const newValue: string | undefined = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
-        return newValue ? newValue : match;
-    });
+    ret = ret.replace(regexp(), (match: string, name: string) => os.homedir());
 
     return ret;
 }
