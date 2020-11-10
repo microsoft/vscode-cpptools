@@ -204,5 +204,7 @@
 	"detected_language_standard_version": "検出された言語標準バージョン: {0}",
 	"unhandled_default_target_detected": "ハンドルされていない既定のコンパイラ ターゲット値が検出されました: {0}",
 	"unhandled_target_arg_detected": "ハンドルされていないターゲット引数値が検出されました: {0}",
-	"memory_limit_shutting_down_intellisense": "IntelliSense サーバーをシャットダウンしています: {0}。メモリ使用量は {1} MB で、{2} MB の制限を超えました。"
+	"memory_limit_shutting_down_intellisense": "IntelliSense サーバーをシャットダウンしています: {0}。メモリ使用量は {1} MB で、{2} MB の制限を超えました。",
+	"failed_to_probe_for_standard_version": "Failed to probe compilerPath \"{0}\" for default standard versions.  Probing is disabled for this compiler.",
+	"unrecognized_language_standard_version": "Compiler probe returned an unrecognized language standard version.  The latest supported version will be used instead."
 }
