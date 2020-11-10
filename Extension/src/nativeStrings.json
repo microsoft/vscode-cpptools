@@ -32,7 +32,6 @@
     "database_add_file_failed": "Unable to add file to database, error = {0}: {1}",
     "reset_timestamp_failed": "Failed to reset timestamp during abort, error = {0}: {1}",
     "update_timestamp_failed": "Unable to update timestamp, error = {0}: {1}",
-    "symbol_add_failed": "Unable to begin adding code symbols for file, error = {0}: {1}",
     "finalize_updates_failed": "Unable to finalize updates for file, error = {0}: {1}",
     "not_directory_with_mode": "{0} is not a directory (st_mode={1})",
     "retrieve_fs_info_failed": "Unable to retrieve file system information for {0}. error = {1}",
@@ -222,3 +221,4 @@
     "failed_to_probe_for_standard_version": "Failed to probe compilerPath \"{0}\" for default standard versions.  Probing is disabled for this compiler.",
     "unrecognized_language_standard_version": "Compiler probe returned an unrecognized language standard version.  The latest supported version will be used instead."
 }
+
