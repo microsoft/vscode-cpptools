@@ -1068,10 +1068,7 @@ function onShowRefCommand(arg?: TreeNode): void {
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
         prevCrashFile = "";
-        const home: string | undefined = process.env.HOME;
-        if (!home) {
-            return;
-        }
+        const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
             const crashObject: { [key: string]: string } = {};
