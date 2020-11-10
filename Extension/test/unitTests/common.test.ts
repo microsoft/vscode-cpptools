@@ -3,12 +3,13 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
+import * as os from "os";
 import { envDelimiter, resolveVariables, escapeForSquiggles } from "../../src/common";
 
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
         const success: string = "success";
-        const home: string = process.env.HOME || process.env.USERPROFILE;
+        const home: string = os.homedir();
 
         test("raw input", () => {
             const input: string = "test";
