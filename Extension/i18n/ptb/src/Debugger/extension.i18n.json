@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Criar e depurar o arquivo ativo",
 	"cannot.build.non.cpp": "Não é possível criar e depurar porque o arquivo ativo não é um arquivo de origem C ou C++.",
 	"no.compiler.found": "Nenhum compilador encontrado",
-	"select.configuration": "Select a configuration",
+	"select.configuration": "Selecionar uma configuração",
 	"cl.exe.not.available": "A criação e a depuração de {0} só podem ser usadas quando o VS Code é executado por meio do Prompt de Comando do Desenvolvedor para VS."
 }
