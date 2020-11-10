@@ -204,5 +204,7 @@
 	"detected_language_standard_version": "Algılanan dil standart sürümü: {0}",
 	"unhandled_default_target_detected": "İşlenmemiş varsayılan derleyici hedefi değeri saptandı: {0}",
 	"unhandled_target_arg_detected": "İşlenmemiş hedef bağımsız değişken değeri algılandı: {0}",
-	"memory_limit_shutting_down_intellisense": "IntelliSense sunucusu kapatılıyor: {0}. Bellek kullanımı {1} MB olduğundan {2} MB sınırını aştı."
+	"memory_limit_shutting_down_intellisense": "IntelliSense sunucusu kapatılıyor: {0}. Bellek kullanımı {1} MB olduğundan {2} MB sınırını aştı.",
+	"failed_to_probe_for_standard_version": "Failed to probe compilerPath \"{0}\" for default standard versions.  Probing is disabled for this compiler.",
+	"unrecognized_language_standard_version": "Compiler probe returned an unrecognized language standard version.  The latest supported version will be used instead."
 }
