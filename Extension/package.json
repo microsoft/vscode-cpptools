@@ -1208,6 +1208,11 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.GenerateEditorConfig",
+        "title": "%c_cpp.command.generateEditorConfig.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.referencesViewGroupByType",
         "category": "C/C++",
         "title": "%c_cpp.command.referencesViewGroupByType.title%",
@@ -2347,7 +2352,7 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.44.0",
+    "@types/vscode": "1.49.0",
     "@types/webpack": "^4.39.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",

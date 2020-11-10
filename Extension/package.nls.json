@@ -17,6 +17,7 @@
     "c_cpp.command.rescanWorkspace.title": "Rescan Workspace",
     "c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copy vcpkg install command to clipboard",
     "c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visit the vcpkg help page",
+    "c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
     "c_cpp.configuration.formatting.description": "Configures the formatting engine",
     "c_cpp.configuration.formatting.clangFormat.description": "clang-format will be used to format code.",
     "c_cpp.configuration.formatting.vcFormat.description": "The Visual C++ formatting engine will be used to format code.",
