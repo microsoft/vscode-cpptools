@@ -22,6 +22,7 @@
 	"c_cpp.command.rescanWorkspace.title": "Réanalyser l'espace de travail",
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copier la commande vcpkg install dans le Presse-papiers",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visiter la page d'aide de vcpkg",
+	"c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
 	"c_cpp.configuration.formatting.description": "Configure le moteur de mise en forme",
 	"c_cpp.configuration.formatting.clangFormat.description": "clang-format est utilisé pour la mise en forme du code.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Le moteur de mise en forme de Visual C++ est utilisé pour la mise en forme du code.",

@@ -22,6 +22,7 @@
 	"c_cpp.command.rescanWorkspace.title": "Ponowne skanowanie obszaru roboczego",
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "Kopiowanie polecenia instalowania menedżera vcpkg do schowka",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "Odwiedź stronę pomocy menedżera vcpkg",
+	"c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
 	"c_cpp.configuration.formatting.description": "Konfiguruje aparat formatowania",
 	"c_cpp.configuration.formatting.clangFormat.description": "Do formatowania kodu będzie używane narzędzie clang-format.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Do formatowania kodu będzie używany aparat formatowania języka Visual C++.",
