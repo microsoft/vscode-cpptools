@@ -12,7 +12,7 @@ import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
-import { getCustomConfigProviders } from './customProviders';
+import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
@@ -708,6 +708,26 @@ export class CppProperties {
 
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
             configuration.browse.databaseFilename = this.updateConfigurationString(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
+
+            // If there is no c_cpp_properties.json, there are no relevant C_Cpp.default.* settings set,
+            // and there is only 1 registered custom config provider, default to using that provider.
+            const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+            if (providers.size === 1
+                && !this.propertiesFile
+                && !settings.defaultCompilerPath
+                && !settings.defaultIncludePath
+                && !settings.defaultDefines
+                && !settings.defaultMacFrameworkPath
+                && settings.defaultWindowsSdkVersion === ''
+                && !settings.defaultForcedInclude
+                && settings.defaultCompileCommands === ''
+                && !settings.defaultCompilerArgs
+                && settings.defaultCStandard === ''
+                && settings.defaultCppStandard === ''
+                && settings.defaultIntelliSenseMode === ''
+                && settings.defaultConfigurationProvider === '') {
+                providers.forEach(provider => { configuration.configurationProvider = provider.extensionId; });
+            }
         }
 
         this.updateCompileCommandsFileWatchers();
@@ -898,7 +918,7 @@ export class CppProperties {
         }
     }
 
-    private handleConfigurationChange(): void {
+    public handleConfigurationChange(): void {
         if (this.propertiesFile === undefined) {
             return; // Occurs when propertiesFile hasn't been checked yet.
         }
