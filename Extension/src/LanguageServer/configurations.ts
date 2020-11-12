@@ -715,17 +715,18 @@ export class CppProperties {
             if (providers.size === 1
                 && !this.propertiesFile
                 && !settings.defaultCompilerPath
+                && settings.defaultCompilerPath !== ""
                 && !settings.defaultIncludePath
                 && !settings.defaultDefines
                 && !settings.defaultMacFrameworkPath
-                && settings.defaultWindowsSdkVersion === ''
+                && settings.defaultWindowsSdkVersion === ""
                 && !settings.defaultForcedInclude
-                && settings.defaultCompileCommands === ''
+                && settings.defaultCompileCommands === ""
                 && !settings.defaultCompilerArgs
-                && settings.defaultCStandard === ''
-                && settings.defaultCppStandard === ''
-                && settings.defaultIntelliSenseMode === ''
-                && settings.defaultConfigurationProvider === '') {
+                && settings.defaultCStandard === ""
+                && settings.defaultCppStandard === ""
+                && settings.defaultIntelliSenseMode === ""
+                && settings.defaultConfigurationProvider === "") {
                 providers.forEach(provider => { configuration.configurationProvider = provider.extensionId; });
             }
         }
