@@ -483,12 +483,6 @@ export class CppProperties {
                     resolve();
                 }, () => {});
             } else {
-                const settings: CppSettings = new CppSettings(this.rootUri);
-                if (providerId) {
-                    settings.update("default.configurationProvider", providerId);
-                } else {
-                    settings.update("default.configurationProvider", undefined); // delete the setting
-                }
                 const config: Configuration | undefined = this.CurrentConfiguration;
                 if (config) {
                     config.configurationProvider = providerId;
@@ -962,18 +956,18 @@ export class CppProperties {
                 }
 
                 const fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
+                // Since the properties files does not exist, there will be exactly 1 configuration.
+                // If we have decided to use a custom config provider, propagate that to the new config.
+                let providerId: string | undefined;
                 if (this.configurationJson) {
+                    providerId = this.configurationJson.configurations[0].configurationProvider;
                     this.resetToDefaultSettings(true);
                 }
                 this.applyDefaultIncludePathsAndFrameworks();
-                const settings: CppSettings = new CppSettings(this.rootUri);
-                if (settings.defaultConfigurationProvider) {
+                if (providerId) {
                     if (this.configurationJson) {
-                        this.configurationJson.configurations.forEach(config => {
-                            config.configurationProvider = settings.defaultConfigurationProvider ? settings.defaultConfigurationProvider : undefined;
-                        });
+                        this.configurationJson.configurations[0].configurationProvider = providerId;
                     }
-                    settings.update("default.configurationProvider", undefined); // delete the setting
                 }
 
                 await util.writeFileText(fullPathToFile, jsonc.stringify(this.configurationJson, null, 4));
