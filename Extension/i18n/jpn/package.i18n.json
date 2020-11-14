@@ -22,6 +22,7 @@
 	"c_cpp.command.rescanWorkspace.title": "ワークスペースの再スキャン",
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "vcpkg インストール コマンドをクリップボードにコピーする",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "vcpkg のヘルプ ページへのアクセス",
+	"c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
 	"c_cpp.configuration.formatting.description": "書式設定エンジンを構成します",
 	"c_cpp.configuration.formatting.clangFormat.description": "clang-format を使用してコードがフォーマットされます。",
 	"c_cpp.configuration.formatting.vcFormat.description": "コードの書式設定に Visual C++ の書式設定エンジンが使用されます。",
