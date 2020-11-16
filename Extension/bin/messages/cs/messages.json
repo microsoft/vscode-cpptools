@@ -3351,5 +3351,11 @@
   "nejde přečíst soubor modulu",
   "předdefinovaná funkce není k dispozici, protože typ char8_t se nepodporuje s aktuálními možnostmi",
   "možnost příkazového řádku --ms_await nejde zadat, pokud jsou povolené korutiny C++20",
-  "nestandardní použití explicitního konstruktoru %nod pro inicializaci výchozího agregačního elementu"
+  "nestandardní použití explicitního konstruktoru %nod pro inicializaci výchozího agregačního elementu",
+  "zdroj nebo cíl vnitřní funkce memcpy-like neukazuje na objekt",
+  "vnitřní funkce memcpy-like se pokouší o kopírování reprezentačně odlišných typů %t1 a %t2",
+  "vnitřní funkce memcpy-like se pokouší o kopírování netriviálně kopírovatelného typu %t",
+  "vnitřní funkce memcpy-like se pokouší o kopírování částečného objektu",
+  "vnitřní funkce memcpy-like se pokouší o kopírování hranice za polem",
+  "vnitřní funkce memcpy-like se pokouší o kopírování překrývajících se bajtových rozsahů (místo toho se použije odpovídající operace memmove)"
 ]
