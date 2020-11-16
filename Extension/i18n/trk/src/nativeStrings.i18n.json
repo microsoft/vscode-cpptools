@@ -205,5 +205,5 @@
 	"unhandled_target_arg_detected": "İşlenmemiş hedef bağımsız değişken değeri algılandı: {0}",
 	"memory_limit_shutting_down_intellisense": "IntelliSense sunucusu kapatılıyor: {0}. Bellek kullanımı {1} MB olduğundan {2} MB sınırını aştı.",
 	"failed_to_query_for_standard_version": "Failed to query compiler at path \"{0}\" for default standard versions.  Compiler querying is disabled for this compiler.",
-	"unrecognized_language_standard_version": "Compiler query returned an unrecognized language standard version.  The latest supported version will be used instead."
+	"unrecognized_language_standard_version": "Derleyici yoklaması, tanınmayan bir dil standardı sürümü döndürdü. Bunun yerine desteklenen en güncel sürüm kullanılacak."
 }
