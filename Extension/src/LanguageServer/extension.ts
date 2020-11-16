@@ -608,6 +608,10 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!suggestInsiders.Value) {
         return;
     }
+    if (vscode.env.uiKind === vscode.UIKind.Web) {
+        // Do not prompt users of Web-based Codespaces to join Insiders.
+        return;
+    }
     let buildInfo: BuildInfo | undefined;
     try {
         buildInfo = await getTargetBuildInfo("Insiders", false);
