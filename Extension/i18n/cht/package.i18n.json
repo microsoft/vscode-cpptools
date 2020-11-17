@@ -22,7 +22,7 @@
 	"c_cpp.command.rescanWorkspace.title": "重新掃描工作區",
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "將 vcpkg 安裝命令複製到剪貼簿",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "瀏覽 vcpkg 說明頁面",
-	"c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
+	"c_cpp.command.generateEditorConfig.title": "從 VC 格式設定產生 EditorConfig 內容",
 	"c_cpp.configuration.formatting.description": "選擇格式設定引擎",
 	"c_cpp.configuration.formatting.clangFormat.description": "將使用 clang-format 來格式化程式碼。",
 	"c_cpp.configuration.formatting.vcFormat.description": "將使用 Visual C++ 格式化引擎來格式化程式碼。",
