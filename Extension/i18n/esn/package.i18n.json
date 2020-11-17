@@ -22,7 +22,7 @@
 	"c_cpp.command.rescanWorkspace.title": "Volver a examinar el área de trabajo",
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copiar el comando vcpkg install en el Portapapeles",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visitar la página de ayuda de vcpkg",
-	"c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
+	"c_cpp.command.generateEditorConfig.title": "Generar contenido de EditorConfig a partir de la configuración de formato de VC",
 	"c_cpp.configuration.formatting.description": "Configura el motor de formato",
 	"c_cpp.configuration.formatting.clangFormat.description": "El archivo clang-format se usará para formatear el código.",
 	"c_cpp.configuration.formatting.vcFormat.description": "El motor de formato de Visual C++ se usará para formatear el código.",
