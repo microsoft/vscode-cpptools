@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.2: November 17, 2020
+### Bug Fix
+* Fix resolution of `${fileDirname}` with `cppbuild` tasks. [#6386](https://github.com/microsoft/vscode-cpptools/issues/6386)
+
 ## Version 1.1.1: November 9, 2020
 ### Bug Fixes
 * Fix cpptools binaries sometimes not getting installed on Windows. [#6453](https://github.com/microsoft/vscode-cpptools/issues/6453)
