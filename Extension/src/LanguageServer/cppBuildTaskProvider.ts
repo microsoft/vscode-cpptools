@@ -394,7 +394,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
         const fileDir: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
         if (!fileDir) {
-            window.showErrorMessage('This command is not yet available for single-file mode.');
+            window.showErrorMessage(localize("single_file_mode_not_available", "This command is not yet available for single-file mode."));
             return undefined;
         }
         const file: string = editor.document.fileName;
