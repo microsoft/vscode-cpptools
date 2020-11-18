@@ -397,11 +397,19 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             return undefined;
         }
         const file: string = editor.document.fileName;
+        const workspaceFolder: string = fileDir.uri.fsPath;
+        const relativeFile: string = path.relative(workspaceFolder, file);
+        const parsedPath: path.ParsedPath = path.parse(file);
         return {
+            "workspaceFolder": workspaceFolder,
+            "workspaceFolderBasename": path.basename(workspaceFolder),
             "file": file,
-            "fileDirname": path.parse(file).dir,
-            "fileBasenameNoExtension": path.parse(file).name,
-            "workspaceFolder": fileDir.uri.fsPath
+            "relativeFile": relativeFile,
+            "relativeFileDirname": path.parse(relativeFile).dir,
+            "fileBasename": parsedPath.base,
+            "fileBasenameNoExtension": parsedPath.name,
+            "fileDirname": parsedPath.dir,
+            "fileExtname": parsedPath.ext
         };
     }
 }
