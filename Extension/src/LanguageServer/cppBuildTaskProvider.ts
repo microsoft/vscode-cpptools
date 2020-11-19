@@ -187,7 +187,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition ? resolvedDefinition.args : [], resolvedDefinition ? resolvedDefinition.options : undefined)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
