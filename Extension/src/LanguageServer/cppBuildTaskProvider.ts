@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path';
 import {
-    TaskDefinition, Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
+    TaskDefinition, Task, TaskGroup, ShellExecution, Uri, workspace,
     TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
 } from 'vscode';
 import * as os from 'os';
@@ -185,9 +185,9 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         const scope: TaskScope = TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
-            new CustomExecution(async (): Promise<Pseudoterminal> =>
+            new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, definition ? definition.args : [], definition ? definition.options : undefined)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition ? resolvedDefinition.args : [], resolvedDefinition ? resolvedDefinition.options : undefined)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -346,16 +346,16 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private async doBuild(): Promise<any> {
         // Do build.
-        let activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
+        let activeCommand: string = util.resolveVariables(this.command);
         this.args.forEach(value => {
-            let temp: string = util.resolveVariables(value, this.AdditionalEnvironment);
+            let temp: string = util.resolveVariables(value);
             if (temp && temp.includes(" ")) {
                 temp = "\"" + temp + "\"";
             }
             activeCommand = activeCommand + " " + temp;
         });
         if (this.options?.cwd) {
-            this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
+            this.options.cwd = util.resolveVariables(this.options.cwd);
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
@@ -384,32 +384,5 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         } catch {
             this.closeEmitter.fire(-1);
         }
-    }
-
-    private get AdditionalEnvironment(): { [key: string]: string | string[] } | undefined {
-        const editor: TextEditor | undefined = window.activeTextEditor;
-        if (!editor) {
-            return undefined;
-        }
-        const fileDir: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
-        if (!fileDir) {
-            window.showErrorMessage('This command is not yet available for single-file mode.');
-            return undefined;
-        }
-        const file: string = editor.document.fileName;
-        const workspaceFolder: string = fileDir.uri.fsPath;
-        const relativeFile: string = path.relative(workspaceFolder, file);
-        const parsedPath: path.ParsedPath = path.parse(file);
-        return {
-            "workspaceFolder": workspaceFolder,
-            "workspaceFolderBasename": path.basename(workspaceFolder),
-            "file": file,
-            "relativeFile": relativeFile,
-            "relativeFileDirname": path.parse(relativeFile).dir,
-            "fileBasename": parsedPath.base,
-            "fileBasenameNoExtension": parsedPath.name,
-            "fileDirname": parsedPath.dir,
-            "fileExtname": parsedPath.ext
-        };
     }
 }
