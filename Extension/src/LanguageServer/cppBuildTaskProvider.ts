@@ -337,7 +337,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
-        this.writeEmitter.fire(localize("starting_build", "Starting build...{0}", this.endOfLine));
+        this.writeEmitter.fire(localize("starting_build", "Starting build...") + this.endOfLine);
         await this.doBuild();
     }
 
@@ -370,13 +370,13 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
                         const dot: string = (stdout || _stderr) ? ":" : ".";
-                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error{0}{1}", dot, this.endOfLine));
+                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error") + dot + this.endOfLine);
                         splitWriteEmitter(stdout);
                         splitWriteEmitter(_stderr);
                         resolve(-1);
                     } else {
                         splitWriteEmitter(stdout);
-                        this.writeEmitter.fire(localize("build_finished_successfully", "Build finished successfully.{0}", this.endOfLine));
+                        this.writeEmitter.fire(localize("build_finished_successfully", "Build finished successfully.") + this.endOfLine);
                         resolve(0);
                     }
                 });
@@ -394,7 +394,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
         const fileDir: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
         if (!fileDir) {
-            window.showErrorMessage(localize("single_file_mode_not_available", "This command is not yet available for single-file mode."));
+            window.showErrorMessage(localize("single_file_mode_not_available", "This command is not available for single-file mode."));
             return undefined;
         }
         const file: string = editor.document.fileName;
