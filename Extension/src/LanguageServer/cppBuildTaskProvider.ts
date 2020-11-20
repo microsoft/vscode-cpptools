@@ -373,6 +373,12 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                         splitWriteEmitter(stdout);
                         splitWriteEmitter(_stderr);
                         resolve(-1);
+                    } else if (_stderr) {
+                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+                        this.writeEmitter.fire(`Build finished with warnings:${this.endOfLine}`);
+                        splitWriteEmitter(stdout);
+                        splitWriteEmitter(_stderr);
+                        resolve(0);
                     } else {
                         splitWriteEmitter(stdout);
                         this.writeEmitter.fire(`Build finished successfully.${this.endOfLine}`);
