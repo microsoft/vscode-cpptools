@@ -3351,5 +3351,11 @@
   "impossible de lire le fichier de module",
   "la fonction intégrée n'est pas disponible, car le type char8_t n'est pas pris en charge avec les options actuelles",
   "l'option de ligne de commande --ms_await ne peut pas être spécifiée si les coroutines C++20 sont activées",
-  "utilisation non standard du constructeur explicite %nod pour l'initialisation de l'élément d'agrégation par défaut"
+  "utilisation non standard du constructeur explicite %nod pour l'initialisation de l'élément d'agrégation par défaut",
+  "la source ou la destination de l'intrinsèque de type memcpy ne pointe pas vers un objet",
+  "l'intrinsèque de type memcpy tente de copier les types représentatifs distincts %t1 et %t2",
+  "l'intrinsèque de type memcpy tente de copier le type non trivialement copiable %t",
+  "l'intrinsèque de type memcpy tente de copier un objet partiel",
+  "l'intrinsèque de type memcpy tente de copier au-delà de la limite du tableau",
+  "l'intrinsèque de type memcpy tente de copier des plages d'octets qui se chevauchent (en utilisant plutôt l'opération memmove correspondante)"
 ]

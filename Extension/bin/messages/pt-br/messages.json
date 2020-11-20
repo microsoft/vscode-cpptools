@@ -3351,5 +3351,11 @@
   "não é possível ler o arquivo de módulo",
   "a função interna não está disponível porque não há suporte para o tipo char8_t com as opções atuais",
   "a opção da linha de comando --ms_await não poderá ser especificada se as corrotinas do C++20 estiverem habilitadas",
-  "o uso não padrão do construtor explícito %nod para inicialização do elemento de agregação padrão"
+  "o uso não padrão do construtor explícito %nod para inicialização do elemento de agregação padrão",
+  "a origem ou o destino do intrínseco similar a memcpy não aponta para um objeto",
+  "tentativas intrínsecas similares a memcpy de copiar tipos representacionalmente distintos %t1 e %t2",
+  "tentativas intrínsecas similares a memcpy de copiar o tipo não trivialmente copiável %t",
+  "tentativas intrínsecas similares a memcpy de copiar objetos parciais",
+  "tentativas intrínsecas similares a memcpy de copiar o limite de matriz passado",
+  "tentativas intrínsecas similares a memcpy de copiar intervalos de bytes sobrepostos (usando a operação de memmove correspondente, em vez disso)"
 ]
