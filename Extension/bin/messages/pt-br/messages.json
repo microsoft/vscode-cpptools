@@ -3300,7 +3300,7 @@
   "uso inválido do conceito",
   "um operador de comparação de membros usado como padrão não pode ser qualificado por '&&'",
   "a função de comparação constexpr padrão chama a função não constexpr %nd",
-  "só há suporte para a comparação de memória constexpr para os objetos inteiros de nível superior ou matriz de inteiro",
+  "Só há suporte para a comparação de memória constexpr para os objetos inteiros ou matriz de inteiro",
   "um modelo de conceito não pode ter restrições associadas",
   "'export' não é permitido",
   "a exportação de membros de classe individuais não é permitida",

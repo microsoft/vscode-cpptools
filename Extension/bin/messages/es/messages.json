@@ -3300,7 +3300,7 @@
   "uso no válido del concepto",
   "un operador de comparación de miembros con valores predeterminados no puede estar calificado con \"&&\"",
   "la función de comparación constexpr predeterminada llama a una función %nd que no es constexpr",
-  "la comparación de memoria de constexpr solo se admite para objetos de matriz de enteros o enteros de nivel superior",
+  "la comparación de memoria de constexpr solo se admite para objetos de matriz de enteros o enteros",
   "una plantilla de concepto no puede tener restricciones asociadas",
   "no se permite \"export\"",
   "no se permite la exportación de miembros de clases individuales",

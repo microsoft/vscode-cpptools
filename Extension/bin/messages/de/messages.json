@@ -3300,7 +3300,7 @@
   "Ungültige Verwendung von \"concept\".",
   "Ein standardmäßiger Membervergleichsoperator kann nicht &&-qualifiziert sein.",
   "Die constexpr-Standardvergleichsfunktion ruft die Nicht-constexpr-Funktion \"%nd\" auf.",
-  "Der constexpr-Speichervergleich wird nur für integer-Objekte oder array-of-integer-Objekte oberster Ebene unterstützt.",
+  "Der constexpr-Speichervergleich wird nur für integer-Objekte oder array-of-integer-Objekte unterstützt.",
   "Einer Konzeptvorlage können keine Einschränkungen zugeordnet sein.",
   "\"export\" ist nicht zulässig.",
   "Das Exportieren einzelner Klassenmember ist nicht zulässig.",
