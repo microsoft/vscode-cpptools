@@ -50,7 +50,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             // Not enabled because we do not react to single-file mode correctly yet.
             // We get an ENOENT when the user's c_cpp_properties.json is attempted to be parsed.
             // The DefaultClient will also have its configuration accessed, but since it doesn't exist it errors out.
-            vscode.window.showErrorMessage('This command is not yet available for single-file mode.');
+            vscode.window.showErrorMessage(localize("single_file_mode_not_available", "This command is not available for single-file mode."));
             return Promise.resolve();
         }
 
