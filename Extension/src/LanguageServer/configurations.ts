@@ -12,7 +12,7 @@ import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
 import { ABTestSettings, getABTestSettings } from '../abTesting';
-import { getCustomConfigProviders } from './customProviders';
+import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
@@ -246,7 +246,9 @@ export class CppProperties {
     }
 
     private onConfigurationsChanged(): void {
-        this.configurationsChanged.fire(this.Configurations);
+        if (this.Configurations) {
+            this.configurationsChanged.fire(this.Configurations);
+        }
     }
 
     private onSelectionChanged(): void {
@@ -706,6 +708,27 @@ export class CppProperties {
 
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
             configuration.browse.databaseFilename = this.updateConfigurationString(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
+
+            // If there is no c_cpp_properties.json, there are no relevant C_Cpp.default.* settings set,
+            // and there is only 1 registered custom config provider, default to using that provider.
+            const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+            if (providers.size === 1
+                && !this.propertiesFile
+                && !settings.defaultCompilerPath
+                && settings.defaultCompilerPath !== ""
+                && !settings.defaultIncludePath
+                && !settings.defaultDefines
+                && !settings.defaultMacFrameworkPath
+                && settings.defaultWindowsSdkVersion === ""
+                && !settings.defaultForcedInclude
+                && settings.defaultCompileCommands === ""
+                && !settings.defaultCompilerArgs
+                && settings.defaultCStandard === ""
+                && settings.defaultCppStandard === ""
+                && settings.defaultIntelliSenseMode === ""
+                && settings.defaultConfigurationProvider === "") {
+                providers.forEach(provider => { configuration.configurationProvider = provider.extensionId; });
+            }
         }
 
         this.updateCompileCommandsFileWatchers();
@@ -896,7 +919,7 @@ export class CppProperties {
         }
     }
 
-    private handleConfigurationChange(): void {
+    public handleConfigurationChange(): void {
         if (this.propertiesFile === undefined) {
             return; // Occurs when propertiesFile hasn't been checked yet.
         }
@@ -939,18 +962,21 @@ export class CppProperties {
                 }
 
                 const fullPathToFile: string = path.join(this.configFolder, "c_cpp_properties.json");
+                // Since the properties files does not exist, there will be exactly 1 configuration.
+                // If we have decided to use a custom config provider, propagate that to the new config.
+                const settings: CppSettings = new CppSettings(this.rootUri);
+                let providerId: string | undefined = settings.defaultConfigurationProvider;
                 if (this.configurationJson) {
+                    if (!providerId) {
+                        providerId = this.configurationJson.configurations[0].configurationProvider;
+                    }
                     this.resetToDefaultSettings(true);
                 }
                 this.applyDefaultIncludePathsAndFrameworks();
-                const settings: CppSettings = new CppSettings(this.rootUri);
-                if (settings.defaultConfigurationProvider) {
+                if (providerId) {
                     if (this.configurationJson) {
-                        this.configurationJson.configurations.forEach(config => {
-                            config.configurationProvider = settings.defaultConfigurationProvider ? settings.defaultConfigurationProvider : undefined;
-                        });
+                        this.configurationJson.configurations[0].configurationProvider = providerId;
                     }
-                    settings.update("default.configurationProvider", undefined); // delete the setting
                 }
 
                 await util.writeFileText(fullPathToFile, jsonc.stringify(this.configurationJson, null, 4));

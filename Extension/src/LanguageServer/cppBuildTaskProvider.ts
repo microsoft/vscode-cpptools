@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path';
 import {
-    TaskDefinition, Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
+    TaskDefinition, Task, TaskGroup, ShellExecution, Uri, workspace,
     TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
 } from 'vscode';
 import * as os from 'os';
@@ -189,9 +189,9 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         const scope: TaskScope = TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
-            new CustomExecution(async (): Promise<Pseudoterminal> =>
+            new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, definition ? definition.args : [], definition ? definition.options : undefined)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -204,6 +204,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         const rawJson: any = await this.getRawTasksJson();
         const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
         const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
+            if (!task.label) {
+                return null;
+            }
             const definition: CppBuildTaskDefinition = {
                 type: task.type,
                 label: task.label,
@@ -215,7 +218,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             cppBuildTask.detail = task.detail;
             return cppBuildTask;
         });
-        return buildTasksJson;
+        return buildTasksJson.filter((task: CppBuildTask) => task !== null);
     }
 
     public async ensureBuildTaskExists(taskLabel: string): Promise<void> {
@@ -347,16 +350,16 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private async doBuild(): Promise<any> {
         // Do build.
-        let activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
+        let activeCommand: string = util.resolveVariables(this.command);
         this.args.forEach(value => {
-            let temp: string = util.resolveVariables(value, this.AdditionalEnvironment);
+            let temp: string = util.resolveVariables(value);
             if (temp && temp.includes(" ")) {
                 temp = "\"" + temp + "\"";
             }
             activeCommand = activeCommand + " " + temp;
         });
         if (this.options?.cwd) {
-            this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
+            this.options.cwd = util.resolveVariables(this.options.cwd);
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
@@ -385,24 +388,5 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         } catch {
             this.closeEmitter.fire(-1);
         }
-    }
-
-    private get AdditionalEnvironment(): { [key: string]: string | string[] } | undefined {
-        const editor: TextEditor | undefined = window.activeTextEditor;
-        if (!editor) {
-            return undefined;
-        }
-        const fileDir: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
-        if (!fileDir) {
-            window.showErrorMessage(localize("single_file_mode_not_available", "This command is not available for single-file mode."));
-            return undefined;
-        }
-        const file: string = editor.document.fileName;
-        return {
-            "file": file,
-            "fileDirname": fileDir.uri.fsPath,
-            "fileBasenameNoExtension": path.parse(file).name,
-            "workspaceFolder": fileDir.uri.fsPath
-        };
     }
 }

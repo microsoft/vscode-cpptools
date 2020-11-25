@@ -14,7 +14,7 @@ import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings, generateEditorConfig, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -276,9 +276,6 @@ function sendActivationTelemetry(): void {
         }
         machineIdPersistentState.Value = vscode.env.machineId;
     }
-    if (vscode.env.remoteName) {
-        activateEvent["remoteName"] = vscode.env.remoteName;
-    }
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
 
@@ -332,7 +329,7 @@ function realActivation(): void {
 
     PlatformInformation.GetPlatformInformation().then(info => {
         // Skip Insiders processing for 32-bit Linux.
-        if (info.platform !== "linux" || info.architecture === "x86_64" || info.architecture === "arm" || info.architecture === "arm64") {
+        if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
             // Skip Insiders processing for unsupported VS Code versions.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
             const abTestSettings: ABTestSettings = getABTestSettings();
@@ -608,6 +605,10 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!suggestInsiders.Value) {
         return;
     }
+    if (vscode.env.uiKind === vscode.UIKind.Web) {
+        // Do not prompt users of Web-based Codespaces to join Insiders.
+        return;
+    }
     let buildInfo: BuildInfo | undefined;
     try {
         buildInfo = await getTargetBuildInfo("Insiders", false);
@@ -767,6 +768,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -887,6 +889,15 @@ function onEditConfiguration(): void {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+    }
+}
+
+function onGenerateEditorConfig(): void {
+    onActivationEvent();
+    if (!isFolderOpen()) {
+        generateEditorConfig();
+    } else {
+        selectClient().then(client => generateEditorConfig(client.RootUri));
     }
 }
 
@@ -1068,10 +1079,7 @@ function onShowRefCommand(arg?: TreeNode): void {
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
         prevCrashFile = "";
-        const home: string | undefined = process.env.HOME;
-        if (!home) {
-            return;
-        }
+        const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
             const crashObject: { [key: string]: string } = {};

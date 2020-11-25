@@ -3351,5 +3351,11 @@
   "no se puede leer el archivo de módulo",
   "la función integrada no está disponible porque no se admite el tipo char8_t con las opciones actuales",
   "no se puede especificar la opción de línea de comandos --ms_await si están habilitadas las corrutinas de C++ 20",
-  "uso no estándar de %nod de constructor explícito para la inicialización predeterminada del elemento de agregado"
+  "uso no estándar de %nod de constructor explícito para la inicialización predeterminada del elemento de agregado",
+  "el origen o el destino del intento intrínseco de tipo memcpy no apunta a un objeto",
+  "intentos intrínsecos de tipo memcpy para copiar los tipos %t1 y %t2 diferentes de forma representativa",
+  "intentos intrínsecos de tipo memcpy para copiar el tipo %t que no se puede copiar de forma trivial",
+  "intentos intrínsecos de tipo memcpy para copiar el objeto parcial",
+  "intentos intrínsecos de tipo memcpy para copiar más allá del límite de matriz",
+  "intentos intrínsecos de tipo memcpy para copiar los intervalos de bytes solapados (con la operación memmove correspondiente en su lugar)"
 ]

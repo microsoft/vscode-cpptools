@@ -1432,6 +1432,7 @@ export class DefaultClient implements Client {
             if (!rootFolder) {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
             }
+            this.configuration.handleConfigurationChange();
             const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
                 const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);

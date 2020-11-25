@@ -150,12 +150,16 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         }
         // Filter out build tasks that don't match the currently selected debug configuration type.
         buildTasks = buildTasks.filter((task: CppBuildTask) => {
+            const command: string = task.definition.command as string;
+            if (!command) {
+                return false;
+            }
             if (defaultConfig.name.startsWith("(Windows) ")) {
-                if ((task.definition.command as string).includes("cl.exe")) {
+                if (command.includes("cl.exe")) {
                     return true;
                 }
             } else {
-                if (!(task.definition.command as string).includes("cl.exe")) {
+                if (!command.includes("cl.exe")) {
                     return true;
                 }
             }

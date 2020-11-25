@@ -3351,5 +3351,11 @@
   "nie można odczytać pliku modułu",
   "wbudowana funkcja jest niedostępna, ponieważ typ char8_t nie jest obsługiwany z bieżącymi opcjami",
   "nie można określić opcji wiersza polecenia --ms_await, jeśli włączono koprocedury języka C++20",
-  "niestandardowe użycie konstruktora jawnego %nod dla domyślnej inicjalizacji elementu agregacji"
+  "niestandardowe użycie konstruktora jawnego %nod dla domyślnej inicjalizacji elementu agregacji",
+  "element źródłowy lub docelowy funkcji wewnętrznej podobnej do memcpy nie wskazuje obiektu",
+  "Funkcja wewnętrzna podobna do memcpy próbuje skopiować reprezentacyjnie odrębne typy %t1 i %t2",
+  "Funkcja wewnętrzna podobna do memcpy próbuje skopiować typ %t, którego nie można skopiować w sposób trywialny",
+  "Funkcja wewnętrzna podobna do memcpy próbuje skopiować częściowy obiekt",
+  "Funkcja wewnętrzna podobna do memcpy próbuje skopiować dane spoza granicy tablicy",
+  "Funkcja wewnętrzna podobna do memcpy próbuje skopiować nakładające się na siebie zakresy bajtów (zamiast tego zostanie użyta odpowiednia operacja memmove)"
 ]

@@ -491,7 +491,7 @@ export function VersionsMatch(pkg: IPackage, info: PlatformInformation): boolean
 }
 
 export function ArchitecturesMatch(value: IPackage, info: PlatformInformation): boolean {
-    return !value.architectures || (info.architecture !== undefined && value.architectures.indexOf(info.architecture) !== -1);
+    return !value.architectures || (value.architectures.indexOf(info.architecture) !== -1);
 }
 
 export function PlatformsMatch(value: IPackage, info: PlatformInformation): boolean {

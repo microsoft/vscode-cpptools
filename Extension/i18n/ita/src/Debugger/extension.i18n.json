@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Compila ed esegui il debug del file attivo",
 	"cannot.build.non.cpp": "Non è possibile compilare ed eseguire il debug perché il file attivo non è un file di origine C o C++.",
 	"no.compiler.found": "Non è stato trovato alcun compilatore",
-	"select.compiler": "Selezionare un compilatore",
+	"select.configuration": "Seleziona una configurazione",
 	"cl.exe.not.available": "La compilazione e il debug di {0} sono utilizzabili solo quando VS Code viene eseguito da Prompt dei comandi per gli sviluppatori per Visual Studio."
 }
