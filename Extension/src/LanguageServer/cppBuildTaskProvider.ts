@@ -370,7 +370,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
                         const dot: string = (stdout || _stderr) ? ":" : ".";
-                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error") + dot + this.endOfLine);
+                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error(s)") + dot + this.endOfLine);
                         splitWriteEmitter(stdout);
                         splitWriteEmitter(_stderr);
                         resolve(-1);
