@@ -195,7 +195,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
-        task.detail = detail ? detail : localize("compiler_details", "compiler: ") + resolvedcompilerPath;
+        task.detail = detail ? detail : localize("compiler_details", "compiler:") + " " + resolvedcompilerPath;
 
         return task;
     };
