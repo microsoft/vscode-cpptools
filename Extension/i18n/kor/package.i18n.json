@@ -22,6 +22,7 @@
 	"c_cpp.command.rescanWorkspace.title": "작업 영역 다시 검사",
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "vcpkg install 명령을 클립보드에 복사",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "vcpkg 도움말 페이지 방문",
+	"c_cpp.command.generateEditorConfig.title": "VC 형식 설정에서 EditorConfig 콘텐츠 생성",
 	"c_cpp.configuration.formatting.description": "서식 엔진을 구성합니다.",
 	"c_cpp.configuration.formatting.clangFormat.description": "코드 서식을 지정하는 데 clang-format이 사용됩니다.",
 	"c_cpp.configuration.formatting.vcFormat.description": "코드 서식을 지정하는 데 Visual C++ 서식 엔진이 사용됩니다.",

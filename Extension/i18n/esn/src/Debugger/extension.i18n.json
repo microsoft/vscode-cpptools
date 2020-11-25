@@ -7,6 +7,6 @@
 	"build.and.debug.active.file": "Compilar y depurar el archivo activo",
 	"cannot.build.non.cpp": "No se puede compilar y depurar código porque el archivo activo no es un archivo de código fuente de C o C++.",
 	"no.compiler.found": "No se encontró ningún compilador",
-	"select.compiler": "Seleccione un compilador",
+	"select.configuration": "Seleccionar una configuración",
 	"cl.exe.not.available": "La compilación y depuración de {0} solo se puede usar cuando VS Code se ejecuta desde el Símbolo del sistema para desarrolladores de Visual Studio."
 }

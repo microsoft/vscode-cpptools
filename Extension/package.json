@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.1.0-master",
+  "version": "1.1.3-master",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -105,7 +105,7 @@
           "${workspaceFolder}"
         ],
         "pattern": {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
+          "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
@@ -1205,6 +1205,11 @@
       {
         "command": "C_Cpp.VcpkgOnlineHelpSuggested",
         "title": "%c_cpp.command.vcpkgOnlineHelpSuggested.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.GenerateEditorConfig",
+        "title": "%c_cpp.command.generateEditorConfig.title%",
         "category": "C/C++"
       },
       {
@@ -2347,7 +2352,7 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.44.0",
+    "@types/vscode": "1.49.0",
     "@types/webpack": "^4.39.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
@@ -2419,13 +2424,13 @@
         "linux"
       ],
       "architectures": [
-        "x86_64"
+        "x64"
       ],
       "binaries": [
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "EE9F56D1F6499B606BAC390505C88C0B5CC749A00B410C67E20269A9F60FA9E4"
+      "integrity": "B5030E8762BE43D7864536FE8C8A6253036523D9E0C350750D5874963DA42F2F"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
@@ -2440,7 +2445,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "3C37FD864ED5F7CECED0D9487DA3EEEC30A3BA973C9B943A5B93B11960B18761"
+      "integrity": "5F0F29B2D59D8453A072D433324C68E0819923AFAC85D0CD1987F7AA275D7516"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
@@ -2455,7 +2460,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "E83B2522E2EC9EE14E0A0E8E95DE1DE1C816A1BED128189C6F4DD8B99D4E4AC9"
+      "integrity": "099A94F440BB570B4CDCA07D5FE813657E8B7CBB3915F64C5C8A681DFBB28D3C"
     },
     {
       "description": "C/C++ language components (OS X)",
@@ -2467,7 +2472,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "5FE3F5D8FB3B05246104BCC76659EA4B1E7F585D6147FB583BAFF561F4907193"
+      "integrity": "AEC6509B1667DE9B0C0BF867BB5A3B79F1F47C1B8D5A728C1FD8CA6E9240CEA7"
     },
     {
       "description": "C/C++ language components (Windows)",
@@ -2476,16 +2481,14 @@
         "win32"
       ],
       "architectures": [
-        "x86_64",
-        "x86",
-        "i686",
-        "i386"
+        "x64",
+        "x86"
       ],
       "binaries": [
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "BA67FC5F787552BE73F6613E08D1374FE3E3C3501417CF03E1D871A46DE4224A"
+      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
@@ -2500,7 +2503,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "BA67FC5F787552BE73F6613E08D1374FE3E3C3501417CF03E1D871A46DE4224A"
+      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2509,7 +2512,7 @@
         "linux"
       ],
       "architectures": [
-        "x86_64"
+        "x64"
       ],
       "binaries": [
         "./LLVM/bin/clang-format"
@@ -2583,7 +2586,7 @@
         "linux"
       ],
       "architectures": [
-        "x86_64"
+        "x64"
       ],
       "binaries": [
         "./debugAdapters/mono.linux-x86_64"
@@ -2665,10 +2668,8 @@
         "win32"
       ],
       "architectures": [
-        "x86_64",
-        "x86",
-        "i686",
-        "i386"
+        "x64",
+        "x86"
       ],
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
