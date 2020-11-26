@@ -3300,7 +3300,7 @@
   "Neplatné použití konceptu",
   "Výchozí operátor porovnání členů nemůže být kvalifikovaný jako &&.",
   "Výchozí funkce pro porovnání constexpr volá funkci %nd, která constexpr není.",
-  "Porovnání paměti constexpr se podporuje jen pro celé číslo nejvyšší úrovně nebo objekty polí celých čísel.",
+  "Porovnání paměti constexpr se podporuje jen pro celé číslo nebo objekty polí celých čísel.",
   "Šablona konceptu nemůže mít přidružená omezení.",
   "export se nepovoluje.",
   "Export jednotlivých členů třídy se nepodporuje.",

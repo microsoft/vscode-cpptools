@@ -3300,7 +3300,7 @@
   "kavram kullanımı geçersiz",
   "varsayılan olarak ayarlanan üye karşılaştırma işleci tam '&&' ile nitelenemez",
   "varsayılan constexpr karşılaştırma işlevi constexpr olmayan %nd işlevini çağırıyor",
-  "constexpr bellek karşılaştırması yalnızca üst düzey tamsayı veya tamsayı dizisi nesneleri için desteklenir",
+  "constexpr bellek karşılaştırması yalnızca tamsayı veya tamsayı dizisi nesneleri için desteklenir",
   "kavram şablonunda ilişkili kısıtlamalar olamaz",
   "'export'a izin verilmiyor",
   "sınıf üyelerini tek tek dışarı aktarmaya izin verilmiyor",

@@ -3300,7 +3300,7 @@
   "uso del concetto non valido",
   "un operatore di confronto membri impostato come predefinito non può essere qualificato con '&&'",
   "la funzione di confronto constexpr predefinita chiama la funzione non constexpr %nd",
-  "il confronto di memoria constexpr è supportato solo per gli oggetti intero o matrice di intero di primo livello",
+  "il confronto di memoria constexpr è supportato solo per gli oggetti intero o matrice di interi",
   "un modello di concetto non può avere vincoli associati",
   "'export' non è consentito",
   "l'esportazione di singoli membri di classe non è consentita",
