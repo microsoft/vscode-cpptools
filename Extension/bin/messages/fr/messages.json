@@ -3300,7 +3300,7 @@
   "utilisation non valide du concept",
   "un opérateur de comparaison de membres par défaut ne peut pas être qualifié en tant que '&&'",
   "la fonction de comparaison constexpr par défaut appelle la fonction non constexpr %nd",
-  "la comparaison de mémoire constexpr est prise en charge uniquement pour les objets d'entiers de niveau supérieur ou les objets de tableaux d'entiers",
+  "la comparaison de mémoire constexpr est prise en charge uniquement pour les objets d'entiers ou les objets de tableaux d'entiers",
   "un modèle de concept ne peut pas avoir de contraintes associées",
   "'export' n'est pas autorisé",
   "l'exportation de membres de classe individuels n'est pas autorisée",
