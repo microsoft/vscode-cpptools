@@ -94,7 +94,7 @@ export class ClientCollection {
         // Copy this.languageClients to languageClients to avoid an infinite foreach loop
         // when callback modifies this.languageClients (e.g. when cpptools crashes).
         const languageClients: cpptools.Client[] = [];
-        this.languageClients.forEach((client) => languageClients.push(client));
+        this.languageClients.forEach(client => languageClients.push(client));
         languageClients.forEach(callback);
     }
 
