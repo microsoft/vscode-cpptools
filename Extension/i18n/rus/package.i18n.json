@@ -22,7 +22,7 @@
 	"c_cpp.command.rescanWorkspace.title": "Повторное сканирование рабочей области",
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "Копировать команду vcpkg install в буфер обмена",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "Посетите страницу справки по vcpkg",
-	"c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
+	"c_cpp.command.generateEditorConfig.title": "Создание содержимого EditorConfig из параметров формата VC",
 	"c_cpp.configuration.formatting.description": "Настраивает подсистему форматирования.",
 	"c_cpp.configuration.formatting.clangFormat.description": "Для форматирования кода будет использоваться clang-format.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Для форматирования кода будет использоваться подсистема форматирования Visual C++.",
