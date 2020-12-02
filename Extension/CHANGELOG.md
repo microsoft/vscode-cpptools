@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.3: December 3, 2020
+### Bug Fixes
+* Disable the "join Insiders" prompt for Linux CodeSpaces. [#6491](https://github.com/microsoft/vscode-cpptools/issues/6491)
+* Fix "shell" tasks giving error "Cannot read property `includes` of undefined". [#6538](https://github.com/microsoft/vscode-cpptools/issues/6538)
+* Fix various task variables not getting resolved with `cppbuild` tasks. [#6538](https://github.com/microsoft/vscode-cpptools/issues/6538)
+* Fix warnings not appearing with `cppbuild` tasks. [#6556](https://github.com/microsoft/vscode-cpptools/issues/6556)
+* Fix endless CPU/memory usage if the cpptools process crashes. [#6603](https://github.com/microsoft/vscode-cpptools/issues/6603)
+
 ## Version 1.1.2: November 17, 2020
 ### Bug Fix
 * Fix resolution of `${fileDirname}` with `cppbuild` tasks. [#6386](https://github.com/microsoft/vscode-cpptools/issues/6386)
