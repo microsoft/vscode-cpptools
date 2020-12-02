@@ -1669,6 +1669,25 @@ export class CppProperties {
         });
     }
 
+    public checkCompileCommands(): void {
+        // Check for changes in case of file watcher failure.
+        const CompileCommandsFile: string | undefined = this.CurrentConfiguration?.compileCommands;
+        if (!CompileCommandsFile) {
+            return;
+        }
+        fs.stat(CompileCommandsFile, (err, stats) => {
+            if (err) {
+                if (err.code === "ENOENT" && this.CurrentConfiguration?.compileCommands) {
+                    this.CurrentConfiguration.compileCommands = undefined; // File deleted.
+                    this.setCompileCommands("")
+                }
+            } else if (stats.mtime > this.configFileWatcherFallbackTime) {
+
+                this.onCompileCommandsChanged(CompileCommandsFile)
+            }
+        });
+    }
+
     dispose(): void {
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];

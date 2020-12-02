@@ -2590,6 +2590,7 @@ export class DefaultClient implements Client {
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
+            this.configuration.checkCompileCommands();
         }
     }
 
