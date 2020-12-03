@@ -7,6 +7,7 @@
 * Fix various task variables not getting resolved with `cppbuild` tasks. [#6538](https://github.com/microsoft/vscode-cpptools/issues/6538)
 * Fix warnings not appearing with `cppbuild` tasks. [#6556](https://github.com/microsoft/vscode-cpptools/issues/6556)
 * Fix endless CPU/memory usage if the cpptools process crashes. [#6603](https://github.com/microsoft/vscode-cpptools/issues/6603)
+* Fix the default `cwd` for `cppbuild` tasks. [#6618](https://github.com/microsoft/vscode-cpptools/issues/6618)
 
 ## Version 1.1.2: November 17, 2020
 ### Bug Fix
