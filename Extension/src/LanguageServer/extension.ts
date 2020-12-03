@@ -276,8 +276,8 @@ function sendActivationTelemetry(): void {
         }
         machineIdPersistentState.Value = vscode.env.machineId;
     }
-    if (vscode.env.remoteName) {
-        activateEvent["remoteName"] = vscode.env.remoteName;
+    if (vscode.env.uiKind === vscode.UIKind.Web) {
+        activateEvent["WebUI"] = "1";
     }
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
