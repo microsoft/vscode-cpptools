@@ -178,10 +178,13 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.preLaunchTask = task.name;
             newConfig.externalConsole = false;
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
-            newConfig.program = platform === "win32" ? exeName + ".exe" : exeName;
+            const isWindows: boolean = platform === 'win32';
+            newConfig.program = isWindows ? exeName + ".exe" : exeName;
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = task.detail ? task.detail : definition.command;
+            const isCl: boolean = compilerName === "cl.exe";
+            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(compilerPath) ? path.dirname(compilerPath) : "${workspaceFolder}";
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
@@ -201,7 +204,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                         debuggerName = "gdb";
                     }
 
-                    if (platform === "win32") {
+                    if (isWindows) {
                         debuggerName += ".exe";
                     }
 
