@@ -167,7 +167,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
-            const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
+            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(compilerPath) ? path.dirname(compilerPath) : "${workspaceFolder}";
             const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
@@ -370,16 +370,34 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
+                    const dot: string = (stdout || _stderr) ? ":" : ".";
                     if (_error) {
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
-                        const dot: string = (stdout || _stderr) ? ":" : ".";
-                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error(s)") + dot + this.endOfLine);
-                        splitWriteEmitter(stdout);
-                        splitWriteEmitter(_stderr);
+                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with errors(s)") + dot + this.endOfLine);
+                        if (stdout) {
+                            splitWriteEmitter(stdout); // cl.exe
+                        } else if (_stderr) {
+                            splitWriteEmitter(_stderr); // gcc/clang
+                        } else {
+                            splitWriteEmitter(_error.message); // e.g. command executable not found
+                        }
                         resolve(-1);
-                    } else {
+                        return;
+                    } else if (_stderr && !stdout) { // gcc/clang
+                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+                        this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
+                        splitWriteEmitter(_stderr);
+                        resolve(0);
+                    } else if (stdout && stdout.includes("warning C")) { // cl.exe
+                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+                        this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
                         splitWriteEmitter(stdout);
-                        this.writeEmitter.fire(localize("build_finished_successfully", "Build finished successfully.") + this.endOfLine);
+                        resolve(0);
+                    } else {
+                        if (stdout) {
+                            splitWriteEmitter(stdout); // cl.exe
+                        }
+                        this.writeEmitter.fire(localize("build finished successfully", "Build finished successfully.") + this.endOfLine);
                         resolve(0);
                     }
                 });
