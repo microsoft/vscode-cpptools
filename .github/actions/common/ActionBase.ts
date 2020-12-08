@@ -54,6 +54,9 @@ export class ActionBase {
 
 		// All indicated labels must be present
 		if (this.labels) {
+			if (this.labels?.length > 2  && this.labels?.startsWith('"') && this.labels?.endsWith('"')) {
+				this.labels = this.labels.substring(1, this.labels.length - 2);
+			}
 			this.labelsSet = this.labels?.split(',');
 			for (const str of this.labelsSet) {
 				if (str != "") {

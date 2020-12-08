@@ -20,7 +20,7 @@ jobs:
         uses: ./.github/actions/StaleCloser
         with:
           readonly: ${{ github.event.inputs.readonly }}
-          labels: by design, debugger
-          ignoreLabels: language service, internal
+          labels: by design,debugger
+          ignoreLabels: language service,internal
           closeDays: 0
           closeComment: "This issue has been closed automatically because it's labeled as 'by design'."
