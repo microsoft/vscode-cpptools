@@ -38,6 +38,8 @@ inputs:
     descriptions: Only issues with at least this many votes will be considered.
   maximumVotes:
     descriptions: Only issues fewer or equal to this many votes will be considered.
+  involves:
+    descriptions: Qualifier to find issues that in some way involve a certain user either as an author, assignee, or mentions.
   readonly:
     description: If true, changes are not applied.
 runs:

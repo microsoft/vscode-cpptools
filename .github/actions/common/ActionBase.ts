@@ -14,7 +14,8 @@ export class ActionBase {
 		private ignoreMilestoneNames?: string,
 		private ignoreMilestoneIds?: string,
 		private minimumVotes?: number,
-		private maximumVotes?: number
+		private maximumVotes?: number,
+		private involves?: string,
 	) {}
 
 	private labelsSet: string[] = [];
@@ -23,6 +24,7 @@ export class ActionBase {
 	private ignoreMilestoneIdsSet: string[] = [];
 	private ignoreAllWithLabels: boolean = false;
 	private ignoreAllWithMilestones: boolean = false;
+	private involvesSet: string[] = [];
 
 	buildQuery(baseQuery: string): string {
 		let query = baseQuery;
@@ -35,6 +37,7 @@ export class ActionBase {
 		console.log(`ignoreMilestoneIds: ${this.ignoreMilestoneIds}`);
 		console.log(`minimumVotes: ${this.minimumVotes}`);
 		console.log(`maximumVotes: ${this.maximumVotes}`);
+		console.log(`involves: ${this.involves}`);
 
 		// Both milestone name and milestone Id must be provided and must match.
 		// The name is used to construct the query, which does not accept ID.
@@ -55,6 +58,17 @@ export class ActionBase {
 			for (const str of this.labelsSet) {
 				if (str != "") {
 					query = query.concat(` label:"${str}"`)
+				}
+			}
+		}
+
+		// The "involves" qualifier to find issues that in some way involve a certain user.
+		// It is a logical OR between the author, assignee, and mentions.
+		if (this.involves) {
+			this.involvesSet = this.involves?.split(',');
+			for (const str of this.involvesSet) {
+				if (str != "") {
+					query = query.concat(` involves:"${str}"`)
 				}
 			}
 		}

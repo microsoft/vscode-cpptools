@@ -6,7 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ActionBase = void 0;
 class ActionBase {
-    constructor(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
+    constructor(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves) {
         this.labels = labels;
         this.milestoneName = milestoneName;
         this.milestoneId = milestoneId;
@@ -15,15 +15,17 @@ class ActionBase {
         this.ignoreMilestoneIds = ignoreMilestoneIds;
         this.minimumVotes = minimumVotes;
         this.maximumVotes = maximumVotes;
+        this.involves = involves;
         this.labelsSet = [];
         this.ignoreLabelsSet = [];
         this.ignoreMilestoneNamesSet = [];
         this.ignoreMilestoneIdsSet = [];
         this.ignoreAllWithLabels = false;
         this.ignoreAllWithMilestones = false;
+        this.involvesSet = [];
     }
     buildQuery(baseQuery) {
-        var _a, _b;
+        var _a, _b, _c;
         let query = baseQuery;
         console.log(`labels: ${this.labels}`);
         console.log(`milestoneName: ${this.milestoneName}`);
@@ -33,6 +35,7 @@ class ActionBase {
         console.log(`ignoreMilestoneIds: ${this.ignoreMilestoneIds}`);
         console.log(`minimumVotes: ${this.minimumVotes}`);
         console.log(`maximumVotes: ${this.maximumVotes}`);
+        console.log(`involves: ${this.involves}`);
         // Both milestone name and milestone Id must be provided and must match.
         // The name is used to construct the query, which does not accept ID.
         // The ID is used for comparisons with issue data, which does not include the name.
@@ -51,13 +54,23 @@ class ActionBase {
                 }
             }
         }
+        // The "involves" qualifier to find issues that in some way involve a certain user.
+        // It is a logical OR between the author, assignee, and mentions.
+        if (this.involves) {
+            this.involvesSet = (_b = this.involves) === null || _b === void 0 ? void 0 : _b.split(',');
+            for (const str of this.involvesSet) {
+                if (str != "") {
+                    query = query.concat(` involves:"${str}"`);
+                }
+            }
+        }
         if (this.ignoreLabels) {
             if (this.ignoreLabels == "*" && !this.labels) { // only if unlabeled
                 query = query.concat(` no:label`);
                 this.ignoreAllWithLabels = true;
             }
             else {
-                this.ignoreLabelsSet = (_b = this.ignoreLabels) === null || _b === void 0 ? void 0 : _b.split(',');
+                this.ignoreLabelsSet = (_c = this.ignoreLabels) === null || _c === void 0 ? void 0 : _c.split(',');
                 for (const str of this.ignoreLabelsSet) {
                     if (str != "") {
                         query = query.concat(` -label:"${str}"`);
