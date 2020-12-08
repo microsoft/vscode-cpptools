@@ -50,7 +50,7 @@ class ActionBase {
             this.labelsSet = (_a = this.labels) === null || _a === void 0 ? void 0 : _a.split(',');
             for (const str of this.labelsSet) {
                 if (str != "") {
-                    query = query.concat(` label:"${str}"`);
+                    query = str.startsWith("\"") ? query.concat(` label:${str}`) : query.concat(` label:"${str}"`);
                 }
             }
         }
