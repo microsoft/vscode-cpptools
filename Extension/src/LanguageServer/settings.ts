@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
@@ -74,7 +74,15 @@ export class CppSettings extends Settings {
     public get clangFormatPath(): string | undefined {
         let path: string | undefined | null = super.Section.get<string>("clang_format_path");
         if (!path) {
+            const cachedClangFormatPath: string | null | undefined = getCachedClangFormatPath();
+            if (cachedClangFormatPath !== undefined) {
+                if (cachedClangFormatPath === null) {
+                    return undefined;
+                }
+                return cachedClangFormatPath;
+            }
             path = which.sync('clang-format', { nothrow: true });
+            setCachedClangFormatPath(path);
             if (!path) {
                 return undefined;
             } else {
