@@ -25,7 +25,7 @@ class ActionBase {
         this.involvesSet = [];
     }
     buildQuery(baseQuery) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e, _f;
         let query = baseQuery;
         console.log(`labels: ${this.labels}`);
         console.log(`milestoneName: ${this.milestoneName}`);
@@ -47,7 +47,10 @@ class ActionBase {
         // GitHub does not appear to support searching for all issues with labels (not lacking a label).  "-no:label" does not work.
         // All indicated labels must be present
         if (this.labels) {
-            this.labelsSet = (_a = this.labels) === null || _a === void 0 ? void 0 : _a.split(',');
+            if (((_a = this.labels) === null || _a === void 0 ? void 0 : _a.length) > 2 && ((_b = this.labels) === null || _b === void 0 ? void 0 : _b.startsWith('"')) && ((_c = this.labels) === null || _c === void 0 ? void 0 : _c.endsWith('"'))) {
+                this.labels = this.labels.substring(1, this.labels.length - 2);
+            }
+            this.labelsSet = (_d = this.labels) === null || _d === void 0 ? void 0 : _d.split(',');
             for (const str of this.labelsSet) {
                 if (str != "") {
                     query = query.concat(` label:"${str}"`);
@@ -57,7 +60,7 @@ class ActionBase {
         // The "involves" qualifier to find issues that in some way involve a certain user.
         // It is a logical OR between the author, assignee, and mentions.
         if (this.involves) {
-            this.involvesSet = (_b = this.involves) === null || _b === void 0 ? void 0 : _b.split(',');
+            this.involvesSet = (_e = this.involves) === null || _e === void 0 ? void 0 : _e.split(',');
             for (const str of this.involvesSet) {
                 if (str != "") {
                     query = query.concat(` involves:"${str}"`);
@@ -70,7 +73,7 @@ class ActionBase {
                 this.ignoreAllWithLabels = true;
             }
             else {
-                this.ignoreLabelsSet = (_c = this.ignoreLabels) === null || _c === void 0 ? void 0 : _c.split(',');
+                this.ignoreLabelsSet = (_f = this.ignoreLabels) === null || _f === void 0 ? void 0 : _f.split(',');
                 for (const str of this.ignoreLabelsSet) {
                     if (str != "") {
                         query = query.concat(` -label:"${str}"`);
