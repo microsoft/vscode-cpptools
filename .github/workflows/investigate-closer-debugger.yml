@@ -20,7 +20,7 @@ jobs:
         uses: ./.github/actions/StaleCloser
         with:
           readonly: ${{ github.event.inputs.readonly }}
-          labels: investigate, "investigate: costing", debugger
+          labels: "investigate, investigate: costing, debugger"
           ignoreLabels: language service, internal
           closeDays: 180
           closeComment: "This issue has been closed automatically because it has not had recent activity."
