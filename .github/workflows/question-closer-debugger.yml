@@ -22,7 +22,7 @@ jobs:
           readonly: ${{ github.event.inputs.readonly }}
           labels: question, debugger
           ignoreLabels: language service, internal
-          involves: wardengnaw, pieandcakes
+          involves: wardengnaw, pieandcakes, calgagi
           closeDays: 14
           closeComment: "This issue has been closed automatically because it's labeled as a 'question' and has not had recent activity."
           pingDays: 7
