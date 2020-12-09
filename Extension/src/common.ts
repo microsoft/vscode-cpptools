@@ -45,6 +45,14 @@ export function setExtensionPath(path: string): void {
     extensionPath = path;
 }
 
+let cachedClangFormatPath: string | null | undefined;
+export function getCachedClangFormatPath(): string | null | undefined {
+    return cachedClangFormatPath;
+}
+export function setCachedClangFormatPath(path: string | null): void {
+    cachedClangFormatPath = path;
+}
+
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
