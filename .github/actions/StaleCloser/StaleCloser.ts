@@ -25,10 +25,11 @@ export class StaleCloser extends ActionBase {
 		ignoreMilestoneNames?: string,
 		ignoreMilestoneIds?: string,
 		minimumVotes?: number,
-		maximumVotes?: number
+		maximumVotes?: number,
+		involves?: string
 	)
 	{
-		super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
+		super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves);
 	}
 
 	async run() {
