@@ -142,9 +142,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (knownCompilerPaths) {
             result = knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
         }
-        // Task for user compiler path setting
+        // Task for valid user compiler path setting
         if (userCompilerPath) {
-            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            const isCompilerValid: boolean = await util.checkFileExists(userCompilerPath);
+            if (isCompilerValid) {
+                result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            }
         }
         return result;
     }
