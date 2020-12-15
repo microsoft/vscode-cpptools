@@ -7,8 +7,11 @@ import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, Folding
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;
+    public onDidChangeFoldingRangesEvent = new vscode.EventEmitter<void>();
+    public onDidChangeFoldingRanges?: vscode.Event<void>;
     constructor(client: DefaultClient) {
         this.client = client;
+        this.onDidChangeFoldingRanges = this.onDidChangeFoldingRangesEvent.event;
     }
     provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
         token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
@@ -51,5 +54,9 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
                 token.onCancellationRequested(e => this.client.abortRequest(id));
             });
         });
+    }
+
+    public refresh(): void {
+        this.onDidChangeFoldingRangesEvent.fire();
     }
 }

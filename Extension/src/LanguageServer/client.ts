@@ -399,7 +399,7 @@ enum SemanticTokenTypes {
     referenceType = 5,
     valueType = 6,
     function = 7,
-    member = 8,
+    method = 8,
     property = 9,
     cliProperty = 10,
     event = 11,
@@ -606,6 +606,7 @@ export class DefaultClient implements Client {
     private documentFormattingProviderDisposable: vscode.Disposable | undefined;
     private formattingRangeProviderDisposable: vscode.Disposable | undefined;
     private onTypeFormattingProviderDisposable: vscode.Disposable | undefined;
+    private codeFoldingProvider: FoldingRangeProvider | undefined;
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
@@ -838,7 +839,8 @@ export class DefaultClient implements Client {
                                 this.onTypeFormattingProviderDisposable  = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
                             }
                             if (settings.codeFolding) {
-                                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                                this.codeFoldingProvider = new FoldingRangeProvider(this);
+                                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
                             }
                             if (settings.enhancedColorization && this.semanticTokensLegend) {
                                 this.semanticTokensProvider = new SemanticTokensProvider(this);
@@ -1347,16 +1349,18 @@ export class DefaultClient implements Client {
                     }
                     if (changedSettings["codeFolding"]) {
                         if (settings.codeFolding) {
-                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                            this.codeFoldingProvider = new FoldingRangeProvider(this);
+                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
                         } else if (this.codeFoldingProviderDisposable) {
                             this.codeFoldingProviderDisposable.dispose();
                             this.codeFoldingProviderDisposable = undefined;
+                            this.codeFoldingProvider = undefined;
                         }
                     }
                     if (changedSettings["enhancedColorization"]) {
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);                        ;
                         } else if (this.semanticTokensProviderDisposable) {
                             this.semanticTokensProviderDisposable.dispose();
                             this.semanticTokensProviderDisposable = undefined;
@@ -2161,6 +2165,9 @@ export class DefaultClient implements Client {
                     e.setDecorations(decoration, ranges);
                 }
             }
+        }
+        if (this.codeFoldingProvider) {
+            this.codeFoldingProvider.refresh();
         }
     }
 
