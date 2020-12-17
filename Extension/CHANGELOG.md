@@ -444,7 +444,7 @@
 
 ## Version 0.24.0: July 3, 2019
 ### New Features
-* Semantic colorization [Documentation](https://github.com/microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/colorization.md) [#230](https://github.com/microsoft/vscode-cpptools/issues/230)
+* Semantic colorization [Documentation](https://github.com/microsoft/vscode-cpptools/blob/main/Documentation/LanguageServer/colorization.md) [#230](https://github.com/microsoft/vscode-cpptools/issues/230)
 * Add `Rescan Workspace` command. [microsoft/vscode-cpptools-api#11](https://github.com/microsoft/vscode-cpptools-api/issues/11)
 
 ### Enhancements
