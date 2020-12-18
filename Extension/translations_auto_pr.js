@@ -6,7 +6,7 @@ const Octokit = require('@octokit/rest')
 const path = require('path');
 
 const branchName = 'localization';
-const mergeTo = 'master';
+const mergeTo = 'main';
 const commitComment = 'Localization - Translated Strings';
 const pullRequestTitle = '[Auto] Localization - Translated Strings';
 
@@ -92,7 +92,7 @@ if (!hasAnyChanges()) {
 
 console.log("Changes detected");
 
-console.log(`Ensure master ref is up to date locally (git fetch)`);
+console.log(`Ensure main ref is up to date locally (git fetch)`);
 cp.execSync('git fetch');
 
 // Remove old localization branch, if any
@@ -151,8 +151,8 @@ octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     cp.execSync('git remote remove origin');
     cp.execSync(`git remote add origin https://github.com/${repoOwner}/${repoName}.git`);
     
-    console.log(`Switching back to master (git checkout master)`);
-    cp.execSync('git checkout master');
+    console.log(`Switching back to main (git checkout main)`);
+    cp.execSync('git checkout main');
 
     console.log(`Remove localization branch (git branch -D localization)`);
     cp.execSync('git branch -D localization');
