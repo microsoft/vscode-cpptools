@@ -131,7 +131,7 @@ export class RemoteAttachPicker {
             outerQuote = "";
         }
 
-        return `${outerQuote}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
+        return `${outerQuote}/bin/sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
         `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
         `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
