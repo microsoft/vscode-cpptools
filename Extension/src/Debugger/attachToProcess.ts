@@ -90,7 +90,7 @@ export class RemoteAttachPicker {
 
                 const pipeCmd: string = `"${pipeProgram}" ${argList}`;
 
-                return this.getRemoteOSAndProcesses(pipeCmd)
+                return this.getRemoteOSAndProcesses(pipeCmd, config.quoteArgs)
                     .then(processes => {
                         const attachPickOptions: vscode.QuickPickOptions = {
                             matchOnDetail: true,
@@ -106,7 +106,7 @@ export class RemoteAttachPicker {
     }
 
     // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
-    private getRemoteProcessCommand(): string {
+    private getRemoteProcessCommand(quoteArgs: boolean): string {
         let innerQuote: string = `'`;
         let outerQuote: string = `"`;
         let parameterBegin: string = `$(`;
@@ -127,14 +127,18 @@ export class RemoteAttachPicker {
             outerQuote = `'`;
         }
 
+        if (!quoteArgs) {
+            outerQuote = "";
+        }
+
         return `${outerQuote}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
         `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
         `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
-    private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
+    private getRemoteOSAndProcesses(pipeCmd: string, quoteArgs: boolean): Promise<AttachItem[]> {
         // Do not add any quoting in execCommand.
-        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
+        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand(quoteArgs)}`;
 
         return util.execChildProcess(execCommand, undefined, this._channel).then(output => {
             // OS will be on first line
