@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-##  Version 1.2.0-experimental: Decemeber 21, 2020
+##  Version 1.2.0-preview: Decemeber 21, 2020
 ### Enhancements
 * Add command `Generate EditorConfig contents from VC Format settings`. [#6018](https://github.com/microsoft/vscode-cpptools/issues/6018)
 
