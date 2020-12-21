@@ -23,7 +23,7 @@
 * Fix IntelliSense crash with coroutines. [#6363](https://github.com/microsoft/vscode-cpptools/issues/6363)
 * Add localized strings for `cppbuild` tasks. [#6436](https://github.com/microsoft/vscode-cpptools/issues/6436)
 * Fix IntelliSense squiggle with C++20 non-type templates. [#6462](https://github.com/microsoft/vscode-cpptools/issues/6462)
-* Fix `compilerArg` processing with `-MF` and other multi-arg arguments. [#6478](https://github.com/microsoft/vscode-cpptools/issues/6478)
+* Fix `compilerArgs` processing with `-MF` and other multi-arg arguments. [#6478](https://github.com/microsoft/vscode-cpptools/issues/6478)
 * Fix bug causing `Unable to read process.env.HOME`. [#6468](https://github.com/microsoft/vscode-cpptools/issues/6468)
 * Fix gcc problem matcher when the column is missing.
   * @guntern [PR #6490](https://github.com/microsoft/vscode-cpptools/pull/6490)
@@ -33,7 +33,7 @@
 * Fix IntelliSense updating after pasting multi-line code. [#6565](https://github.com/microsoft/vscode-cpptools/issues/6565)
 * Use "method" instead of "method" for semantic tokens. [#6569](https://github.com/microsoft/vscode-cpptools/issues/6569)
 * Fix `__builtin_coro_*` methods not recognized by IntelliSense in gcc mode with `-fcoroutines`. [#6575](https://github.com/microsoft/vscode-cpptools/issues/6575)
-* Fix the `else` snippet interferring with entering one line `else` statements. [#6582](https://github.com/microsoft/vscode-cpptools/issues/6582)
+* Fix the `else` snippet interfering with entering one line `else` statements. [#6582](https://github.com/microsoft/vscode-cpptools/issues/6582)
 * Fix hover doc comments not working if there's a selection. [#6583](https://github.com/microsoft/vscode-cpptools/issues/6583)
 * Fix a cpptools crash and a multiple deadlocks.
 
