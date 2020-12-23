@@ -210,15 +210,19 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
                     const compilerDirname: string = path.dirname(compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
-                    fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                        if (!err && stats && stats.isFile) {
-                            newConfig.miDebuggerPath = debuggerPath;
-                        } else {
-                            // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
-                            newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
-                        }
+                    if (isWindows) {
+                        newConfig.miDebuggerPath = debuggerPath;
                         return resolve(newConfig);
-                    });
+                    } else {
+                        fs.stat(debuggerPath, (err, stats: fs.Stats) => {
+                            if (!err && stats && stats.isFile) {
+                                newConfig.miDebuggerPath = debuggerPath;
+                            } else {
+                                newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
+                            }
+                            return resolve(newConfig);
+                        });
+                    }
                 }
             });
         }));
