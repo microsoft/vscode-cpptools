@@ -370,6 +370,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                 this.writeEmitter.fire(line + this.endOfLine);
             }
         };
+        this.writeEmitter.fire(activeCommand + this.endOfLine);
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
@@ -391,10 +392,15 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                         this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
                         splitWriteEmitter(_stderr);
                         resolve(0);
-                    } else if (stdout && stdout.includes("warning C")) { // cl.exe
+                    } else if (stdout && stdout.includes("warning C")) { // cl.exe, compiler warnings
                         telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
                         this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
                         splitWriteEmitter(stdout);
+                        resolve(0);
+                    } else if (_stderr && _stderr.includes("warning D")) { // cl.exe, command line warnings
+                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+                        this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
+                        splitWriteEmitter(_stderr);
                         resolve(0);
                     } else {
                         if (stdout) {
