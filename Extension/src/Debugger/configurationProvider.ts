@@ -82,6 +82,12 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
             try {
                 await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                if (selection.configuration.miDebuggerPath) {
+                    if (!fs.existsSync(selection.configuration.miDebuggerPath)) {
+                        vscode.window.showErrorMessage(localize("miDebuggerPath.not.available", "miDebuggerPath does not exist: {0}. Has a debugger been installed?", selection.configuration.miDebuggerPath));
+                        throw new Error();
+                    }
+                }
                 await vscode.debug.startDebugging(folder, selection.configuration);
                 Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
             } catch (e) {
