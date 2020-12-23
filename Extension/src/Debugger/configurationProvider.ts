@@ -71,12 +71,12 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
         const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
-            throw new Error(); // User canceled it.
+            return []; // User canceled it.
         }
         if (selection.label.startsWith("cl.exe")) {
-            if (!process.env.DevEnvDir) {
+            if (process.env.DevEnvDir) {
                 vscode.window.showErrorMessage(localize("cl.exe.not.available", "{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.", "cl.exe"));
-                throw new Error();
+                return [selection.configuration];
             }
         }
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
