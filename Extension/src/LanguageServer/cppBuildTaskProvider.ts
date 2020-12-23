@@ -379,7 +379,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                     if (is_cl) {
                         // cl.exe, header info may not appear if /nologo is used.
                         if (_stderr) {
-                            splitWriteEmitter(_stderr); // compiler header info and command line D warnings
+                            splitWriteEmitter(_stderr); // compiler header info and command line D warnings (e.g. when /MTd and /MDd are both used)
                         }
                         splitWriteEmitter(stdout); // linker header info and potentially compiler C warnings
                     }
