@@ -166,7 +166,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const isWindows: boolean = os.platform() === 'win32';
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
