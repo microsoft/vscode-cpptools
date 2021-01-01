@@ -21,6 +21,8 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 
+const pfs = fs.promises;
+
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -130,6 +132,8 @@ export class CppProperties {
     private defaultWindowsSdkVersion: string | null = null;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
+    private nodeAddonIncludes: string[] = [];
+    private nodeAddonIncludePathsReady: boolean = false;
     private defaultIntelliSenseMode?: string;
     private defaultCustomConfigurationVariables?: { [key: string]: string };
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
@@ -155,6 +159,7 @@ export class CppProperties {
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();
+        this.addNodeAddonIncludeLocations(rootPath);
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
@@ -288,7 +293,8 @@ export class CppProperties {
     }
 
     private applyDefaultIncludePathsAndFrameworks(): void {
-        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
+        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady
+            && this.nodeAddonIncludePathsReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
                 this.applyDefaultConfigurationValues(configuration);
@@ -317,6 +323,9 @@ export class CppProperties {
         } else {
             configuration.includePath = [defaultFolder];
         }
+        // check settings.addNodeAddonIncludePaths?
+        configuration.includePath = configuration.includePath.concat(this.nodeAddonIncludes);
+
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
             configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
@@ -382,6 +391,46 @@ export class CppProperties {
             }
         } catch (error) {} finally {
             this.vcpkgPathReady = true;
+            this.handleConfigurationChange();
+        }
+    }
+
+    private nodeAddonMap: {[dependency: string]: string} = {
+      "nan": "node --no-warnings -e \"require('nan')\"",
+      "node-addon-api": "node --no-warnings -p \"require('node-addon-api').include\"",
+    };
+
+    private async addNodeAddonIncludeLocations(rootPath: string) : Promise<void> {
+        try {
+
+            const settings: CppSettings = new CppSettings(this.rootUri);
+            if (settings.addNodeAddonIncludePaths) {
+                const package_json = JSON.parse(await pfs.readFile(path.join(rootPath, "package.json"), "utf8"));
+                dependencyLoop:
+                for (const dep in this.nodeAddonMap) {
+                  if (dep in package_json.dependencies) {
+                      const execCmd: string = this.nodeAddonMap[dep];
+                      let stdout = await util.execChildProcess(execCmd, rootPath);
+                      if (!stdout) continue dependencyLoop;
+
+                      // cleanup newlines
+                      if (stdout[stdout.length - 1] === "\n") {
+                          stdout = stdout.slice(0, -1);
+                      }
+                      // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
+                      if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
+                          stdout = stdout.slice(1, -1);
+                      }
+                      if (stdout) {
+                          this.nodeAddonIncludes.push(stdout);
+                      }
+                    }
+                }
+            }
+        } catch (error) {
+          console.log(error);
+        } finally {
+            this.nodeAddonIncludePathsReady = true;
             this.handleConfigurationChange();
         }
     }
