@@ -10,31 +10,33 @@ import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../../src/LanguageServer/configurations';
 import * as testHelpers from '../testHelpers';
+import { TsRules } from '../../../src/LanguageServer/languageConfig'
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
     });
 
-    const defaultRules: vscode.OnEnterRule[] = [
-        {
+    const defaultRules: TsRules[] = [
+        {   // e.g. /** | */
             beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             afterText: /^\s*\*\/$/,
             action: { indentAction: vscode.IndentAction.IndentOutdent, appendText: ' * ' }
         },
-        {
+        {   // e.g. /** ...|
             beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
         },
-        {
+        {   // e.g.  * ...|
             beforeText: /^\s*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
+            oneLineAboveText: /(?=^(\s*(\/\*\*|\*)).*)(?=(?!(\s*\*\/)))/,
             action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
         },
-        {
+        {   // e.g.  */|
             beforeText: /^\s*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         },
-        {
+        {   // e.g.  *-----*/|
             beforeText: /^\s*\*[^/]*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         }

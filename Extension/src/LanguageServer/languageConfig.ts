@@ -20,13 +20,9 @@ export interface CommentPattern {
 
 const escapeChars: RegExp = /[\\\^\$\*\+\?\{\}\(\)\.\!\=\|\[\]\ \/]/;  // characters that should be escaped.
 
-interface TsRules extends vscode.OnEnterRule {
+export interface TsRules extends vscode.OnEnterRule {
+    // This rule will only execute if the text above the line matches this regular expression.
     oneLineAboveText?: RegExp;
-}
-interface Rules {
-    begin: TsRules[];
-    continue: TsRules[];
-    end: TsRules[];
 }
 
 // Insert '\\' in front of regexp escape chars.
@@ -276,6 +272,12 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         getOutputChannel().appendLine(localize("duplicate.multiline.patterns", "Duplicate multiline comment patterns detected."));
     }
     return { onEnterRules: beginRules.concat(continueRules).concat(endRules).filter(e => (e)) };    // Remove any 'undefined' entries
+}
+
+interface Rules {
+    begin: TsRules[];
+    continue: TsRules[];
+    end: TsRules[];
 }
 
 function constructCommentRules(comment: CommentPattern, languageId: string): Rules {
