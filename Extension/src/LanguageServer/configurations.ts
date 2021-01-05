@@ -1679,11 +1679,11 @@ export class CppProperties {
             if (err) {
                 if (err.code === "ENOENT" && this.CurrentConfiguration?.compileCommands) {
                     this.CurrentConfiguration.compileCommands = undefined; // File deleted.
-                    this.setCompileCommands("")
+                    // this.setCompileCommands("");
+                    this.onCompileCommandsChanged("");
                 }
             } else if (stats.mtime > this.configFileWatcherFallbackTime) {
-
-                this.onCompileCommandsChanged(CompileCommandsFile)
+                this.onCompileCommandsChanged(CompileCommandsFile);
             }
         });
     }
