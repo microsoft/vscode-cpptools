@@ -302,15 +302,10 @@ export interface LocalizeDocumentSymbol {
     children: LocalizeDocumentSymbol[];
 }
 
-interface Location {
-    uri: string;
-    range: Range;
-}
-
 interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
-    location: Location;
+    location: vscode.Location;
     containerName: string;
     suffix: LocalizeStringParams;
 }
@@ -701,7 +696,7 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         let storagePath: string | undefined;
         if (util.extensionContext) {
-            const path: string | undefined = util.extensionContext.storagePath;
+            const path: string | undefined = util.extensionContext.storageUri?.fsPath;
             if (path) {
                 storagePath = path;
             }
