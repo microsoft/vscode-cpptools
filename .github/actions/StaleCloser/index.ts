@@ -29,7 +29,8 @@ class StaleCloserAction extends Action {
 			getInput('ignoreMilestoneNames') || undefined,
 			getInput('ignoreMilestoneIds') || undefined,
 			+(getInput('minimumVotes') || 0),
-			+(getInput('maximumVotes') || 9999999)
+			+(getInput('maximumVotes') || 9999999),
+			getInput('involves') || undefined
 		).run()
 	}
 }

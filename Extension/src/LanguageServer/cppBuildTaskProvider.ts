@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path';
 import {
-    TaskDefinition, Task, TaskGroup, WorkspaceFolder, ShellExecution, Uri, workspace,
+    TaskDefinition, Task, TaskGroup, ShellExecution, Uri, workspace,
     TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
 } from 'vscode';
 import * as os from 'os';
@@ -15,6 +15,10 @@ import * as configs from './configurations';
 import * as ext from './extension';
 import * as cp from "child_process";
 import { OtherSettings } from './settings';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface CppBuildTaskDefinition extends TaskDefinition {
     type: string;
@@ -138,9 +142,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (knownCompilerPaths) {
             result = knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
         }
-        // Task for user compiler path setting
+        // Task for valid user compiler path setting
         if (userCompilerPath) {
-            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            const isCompilerValid: boolean = await util.checkFileExists(userCompilerPath);
+            if (isCompilerValid) {
+                result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            }
         }
         return result;
     }
@@ -156,14 +163,14 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         if (!definition) {
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
-                CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " build active file";
+                CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const isWindows: boolean = os.platform() === 'win32';
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
-            const cwd: string = isCl ? "${workspaceFolder}" : path.dirname(compilerPath);
+            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(compilerPath) ? path.dirname(compilerPath) : "${workspaceFolder}";
             const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
@@ -185,13 +192,13 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         const scope: TaskScope = TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
-            new CustomExecution(async (): Promise<Pseudoterminal> =>
+            new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, definition ? definition.args : [], definition ? definition.options : undefined)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
-        task.detail = detail ? detail : "compiler: " + resolvedcompilerPath;
+        task.detail = detail ? detail : localize("compiler_details", "compiler:") + " " + resolvedcompilerPath;
 
         return task;
     };
@@ -200,6 +207,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         const rawJson: any = await this.getRawTasksJson();
         const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
         const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
+            if (!task.label) {
+                return null;
+            }
             const definition: CppBuildTaskDefinition = {
                 type: task.type,
                 label: task.label,
@@ -211,7 +221,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             cppBuildTask.detail = task.detail;
             return cppBuildTask;
         });
-        return buildTasksJson;
+        return buildTasksJson.filter((task: CppBuildTask) => task !== null);
     }
 
     public async ensureBuildTaskExists(taskLabel: string): Promise<void> {
@@ -252,7 +262,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 ...selectedTask.definition,
                 problemMatcher: selectedTask.problemMatchers,
                 group: { kind: "build", "isDefault": true },
-                detail: "Generated task by Debugger"
+                detail: localize("task_generated_by_debugger", "Task generated by Debugger.")
             };
             rawTasksJson.tasks.push(newTask);
         }
@@ -333,7 +343,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
-        this.writeEmitter.fire(`Starting build...${this.endOfLine}`);
+        this.writeEmitter.fire(localize("starting_build", "Starting build...") + this.endOfLine);
         await this.doBuild();
     }
 
@@ -343,16 +353,16 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private async doBuild(): Promise<any> {
         // Do build.
-        let activeCommand: string = util.resolveVariables(this.command, this.AdditionalEnvironment);
+        let activeCommand: string = util.resolveVariables(this.command);
         this.args.forEach(value => {
-            let temp: string = util.resolveVariables(value, this.AdditionalEnvironment);
+            let temp: string = util.resolveVariables(value);
             if (temp && temp.includes(" ")) {
                 temp = "\"" + temp + "\"";
             }
             activeCommand = activeCommand + " " + temp;
         });
         if (this.options?.cwd) {
-            this.options.cwd = util.resolveVariables(this.options.cwd, this.AdditionalEnvironment);
+            this.options.cwd = util.resolveVariables(this.options.cwd);
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
@@ -360,19 +370,41 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                 this.writeEmitter.fire(line + this.endOfLine);
             }
         };
+        this.writeEmitter.fire(activeCommand + this.endOfLine);
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
+                    const dot: string = ".";
+                    const is_cl: boolean = (_stderr || _stderr === '') && stdout ? true : false;
+                    if (is_cl) {
+                        // cl.exe, header info may not appear if /nologo is used.
+                        if (_stderr) {
+                            splitWriteEmitter(_stderr); // compiler header info and command line D warnings (e.g. when /MTd and /MDd are both used)
+                        }
+                        splitWriteEmitter(stdout); // linker header info and potentially compiler C warnings
+                    }
                     if (_error) {
+                        if (stdout) {
+                            // cl.exe
+                        } else if (_stderr) {
+                            splitWriteEmitter(_stderr); // gcc/clang
+                        } else {
+                            splitWriteEmitter(_error.message); // e.g. command executable not found
+                        }
                         telemetry.logLanguageServerEvent("cppBuildTaskError");
-                        const dot: string = (stdout || _stderr) ? ":" : ".";
-                        this.writeEmitter.fire(`Build finished with error${dot}${this.endOfLine}`);
-                        splitWriteEmitter(stdout);
-                        splitWriteEmitter(_stderr);
+                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error(s)") + dot + this.endOfLine);
                         resolve(-1);
+                    } else if (_stderr && !stdout) { // gcc/clang
+                        splitWriteEmitter(_stderr);
+                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+                        this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
+                        resolve(0);
+                    } else if (stdout && stdout.includes("warning C")) { // cl.exe, compiler warnings
+                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+                        this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
+                        resolve(0);
                     } else {
-                        splitWriteEmitter(stdout);
-                        this.writeEmitter.fire(`Build finished successfully.${this.endOfLine}`);
+                        this.writeEmitter.fire(localize("build finished successfully", "Build finished successfully.") + this.endOfLine);
                         resolve(0);
                     }
                 });
@@ -381,24 +413,5 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         } catch {
             this.closeEmitter.fire(-1);
         }
-    }
-
-    private get AdditionalEnvironment(): { [key: string]: string | string[] } | undefined {
-        const editor: TextEditor | undefined = window.activeTextEditor;
-        if (!editor) {
-            return undefined;
-        }
-        const fileDir: WorkspaceFolder | undefined = workspace.getWorkspaceFolder(editor.document.uri);
-        if (!fileDir) {
-            window.showErrorMessage('This command is not yet available for single-file mode.');
-            return undefined;
-        }
-        const file: string = editor.document.fileName;
-        return {
-            "file": file,
-            "fileDirname": path.parse(file).dir,
-            "fileBasenameNoExtension": path.parse(file).name,
-            "workspaceFolder": fileDir.uri.fsPath
-        };
     }
 }
