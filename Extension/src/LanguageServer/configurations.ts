@@ -78,6 +78,7 @@ export interface Configuration {
 }
 
 export interface ConfigurationErrors {
+    name?: string;
     compilerPath?: string;
     includePath?: string;
     intelliSenseMode?: string;
@@ -1146,6 +1147,9 @@ export class CppProperties {
         const isWindows: boolean = os.platform() === 'win32';
         const config: Configuration = this.configurationJson.configurations[configIndex];
 
+        // Check if config name is unique.
+        errors.name = this.isConfigNameUnique(config.name);
+
         // Validate compilerPath
         let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
@@ -1291,6 +1295,15 @@ export class CppProperties {
             errorMsg = errors.join('\n');
         }
 
+        return errorMsg;
+    }
+
+    private isConfigNameUnique(configName: string): string | undefined {
+        let errorMsg: string | undefined;
+        const occurances: number | undefined = this.ConfigurationNames?.filter(function (name) { return name === configName; }).length;
+        if (occurances) {
+            errorMsg = localize('duplicate.name', "The configuration name is a duplicate: {0}", configName);
+        }
         return errorMsg;
     }
 
