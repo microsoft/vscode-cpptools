@@ -1,8 +1,0 @@
-  {
-    "defaults": [
-      "--pack_alignment",
-      "8",
-      "__MACH__"
-    ],
-    "defaults_op" :  "merge"
-  }

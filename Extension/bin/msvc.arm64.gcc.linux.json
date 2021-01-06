@@ -1,0 +1,11 @@
+{
+  "defaults": [
+    "--pack_alignment",
+    "8",
+    "-D__unix__=1",
+    "-D__linux__=1",
+    "-D__ARM_64BIT_STATE=1",
+    "-D__aarch64__=1"
+  ],
+  "defaults_op" :  "merge"
+}

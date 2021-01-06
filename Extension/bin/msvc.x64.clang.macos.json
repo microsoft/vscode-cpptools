@@ -1,0 +1,10 @@
+{
+  "defaults": [
+    "--pack_alignment",
+    "8",
+    "-D__APPLE__=1",
+    "-D__MACH__=1",
+    "-D__x86_64=1"
+  ],
+  "defaults_op" :  "merge"
+}
