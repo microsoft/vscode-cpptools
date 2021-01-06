@@ -120,7 +120,9 @@ export class CppProperties {
     private currentConfigurationIndex: PersistentFolderState<number> | undefined;
     private configFileWatcher: vscode.FileSystemWatcher | null = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
-    private compileCommandFileWatchers: fs.FSWatcher[] = [];
+    private compileCommandsFile: vscode.Uri | undefined | null = undefined;
+    private compileCommandsFileWatchers: fs.FSWatcher[] = [];
+    private compileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private defaultCompilerPath: string | null = null;
     private knownCompilers?: KnownCompiler[];
     private defaultCStandard: string | null = null;
@@ -744,8 +746,8 @@ export class CppProperties {
     // paths are expected to have variables resolved already
     public updateCompileCommandsFileWatchers(): void {
         if (this.configurationJson) {
-            this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-            this.compileCommandFileWatchers = []; // reset it
+            this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
+            this.compileCommandsFileWatchers = []; // reset it
             const filePaths: Set<string> = new Set<string>();
             this.configurationJson.configurations.forEach(c => {
                 if (c.compileCommands) {
@@ -757,7 +759,7 @@ export class CppProperties {
             });
             try {
                 filePaths.forEach((path: string) => {
-                    this.compileCommandFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
+                    this.compileCommandsFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
                         // Wait 1 second after a change to allow time for the write to finish.
                         if (this.compileCommandsFileWatcherTimer) {
                             clearInterval(this.compileCommandsFileWatcherTimer);
@@ -1671,19 +1673,21 @@ export class CppProperties {
 
     public checkCompileCommands(): void {
         // Check for changes in case of file watcher failure.
-        const CompileCommandsFile: string | undefined = this.CurrentConfiguration?.compileCommands;
-        if (!CompileCommandsFile) {
+        const compileCommandsFile: string | undefined = this.CurrentConfiguration?.compileCommands;
+        if (!compileCommandsFile) {
             return;
         }
-        fs.stat(CompileCommandsFile, (err, stats) => {
+        fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
-                if (err.code === "ENOENT" && this.CurrentConfiguration?.compileCommands) {
-                    this.CurrentConfiguration.compileCommands = undefined; // File deleted.
-                    // this.setCompileCommands("");
-                    this.onCompileCommandsChanged("");
+                if (err.code === "ENOENT" && this.compileCommandsFile) {
+                    this.compileCommandsFileWatchers = []; // reset file watchers
+                    this.onCompileCommandsChanged(compileCommandsFile);
+                    this.compileCommandsFile = null; // File deleted
                 }
-            } else if (stats.mtime > this.configFileWatcherFallbackTime) {
-                this.onCompileCommandsChanged(CompileCommandsFile);
+            } else if (stats.mtime > this.compileCommandsFileWatcherFallbackTime) {
+                this.compileCommandsFileWatcherFallbackTime = new Date();
+                this.onCompileCommandsChanged(compileCommandsFile);
+                this.compileCommandsFile = vscode.Uri.file(compileCommandsFile); // File created.
             }
         });
     }
@@ -1692,8 +1696,8 @@ export class CppProperties {
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
 
-        this.compileCommandFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
-        this.compileCommandFileWatchers = []; // reset it
+        this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
+        this.compileCommandsFileWatchers = []; // reset it
 
         this.diagnosticCollection.dispose();
     }
