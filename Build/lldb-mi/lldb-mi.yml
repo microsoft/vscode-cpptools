@@ -6,7 +6,7 @@ variables:
   llvm_additional_parameters: "-DLLDB_RELOCATABLE_PYTHON=1 -DLLDB_INCLUDE_TESTS=OFF -DLLDB_BUILD_FRAMEWORK=1"
   # TODO: fix lldb_mi_repo and lldb_mi_branch (https://github.com/lldb-tools/lldb-mi/pull/37 and https://github.com/lldb-tools/lldb-mi/pull/39)
   lldb_mi_repo: https://github.com/WardenGnaw/lldb-mi # TODO: Change to lldb-tools
-  lldb_mi_branch: release/cpptools # TODO: Change to master
+  lldb_mi_branch: release/cpptools # TODO: Change to main
   lldb_mi_additional_parameters: "-DUSE_LLDB_FRAMEWORK=1"
 
 jobs:
