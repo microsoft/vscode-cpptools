@@ -1,4 +1,6 @@
- 
+The binaries downloaded at runtime after the initial installation are governed
+by the more restrictive proprietary license terms found at [RuntimeLicenses](RuntimeLicenses)
+
 MIT License
 
 Copyright (c) 2020 Microsoft
