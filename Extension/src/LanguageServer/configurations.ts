@@ -442,7 +442,7 @@ export class CppProperties {
         // 1. compiler is cl/clang-cl and IntelliSenseMode is MSVC
         // 2. compiler is not cl/clang-cl and IntelliSenseMode is not MSVC
         const isValid: boolean = compilerPathAndArgs.compilerName.endsWith("cl.exe") ===
-            (configuration.intelliSenseMode.startsWith("msvc") 
+            (configuration.intelliSenseMode.startsWith("msvc")
             || configuration.intelliSenseMode.startsWith("windows-msvc")
             || configuration.intelliSenseMode.startsWith("windows-clang"));
         if (isValid) {
