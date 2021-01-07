@@ -2665,7 +2665,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2082216",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2152353",
       "platforms": [
         "win32"
       ],
@@ -2676,7 +2676,7 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "CF1A01AA75275F76800F6BC1D289F2066DCEBCD983376D344ABF6B03FDB8FEA0"
+      "integrity": "8299A112D1260C2CEA53AC74D18FA73DE8533C058AAAB254571B503FBAC37297"
     }
   ]
 }
