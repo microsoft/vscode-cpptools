@@ -21,7 +21,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 
-const pfs = fs.promises;
+const pfs: any = fs.promises;
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -323,8 +323,9 @@ export class CppProperties {
         } else {
             configuration.includePath = [defaultFolder];
         }
-        // check settings.addNodeAddonIncludePaths?
-        configuration.includePath = configuration.includePath.concat(this.nodeAddonIncludes);
+        if (isUnset(settings.addNodeAddonIncludePaths)) {
+            configuration.includePath = configuration.includePath.concat(this.nodeAddonIncludes);
+        }
 
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
@@ -396,39 +397,45 @@ export class CppProperties {
     }
 
     private nodeAddonMap: {[dependency: string]: string} = {
-      "nan": "node --no-warnings -e \"require('nan')\"",
-      "node-addon-api": "node --no-warnings -p \"require('node-addon-api').include\"",
+        "nan": "node --no-warnings -e \"require('nan')\"",
+        "node-addon-api": "node --no-warnings -p \"require('node-addon-api').include\""
     };
 
-    private async addNodeAddonIncludeLocations(rootPath: string) : Promise<void> {
+    private async addNodeAddonIncludeLocations(rootPath: string): Promise<void> {
         try {
 
             const settings: CppSettings = new CppSettings(this.rootUri);
             if (settings.addNodeAddonIncludePaths) {
-                const package_json = JSON.parse(await pfs.readFile(path.join(rootPath, "package.json"), "utf8"));
-                dependencyLoop:
+                const package_json: any = JSON.parse(await pfs.readFile(path.join(rootPath, "package.json"), "utf8"));
                 for (const dep in this.nodeAddonMap) {
-                  if (dep in package_json.dependencies) {
-                      const execCmd: string = this.nodeAddonMap[dep];
-                      let stdout = await util.execChildProcess(execCmd, rootPath);
-                      if (!stdout) continue dependencyLoop;
+                    if (dep in package_json.dependencies) {
+                        const execCmd: string = this.nodeAddonMap[dep];
+                        let stdout: string = await util.execChildProcess(execCmd, rootPath);
+                        if (!stdout) {
+                            continue;
+                        }
 
-                      // cleanup newlines
-                      if (stdout[stdout.length - 1] === "\n") {
-                          stdout = stdout.slice(0, -1);
-                      }
-                      // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
-                      if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
-                          stdout = stdout.slice(1, -1);
-                      }
-                      if (stdout) {
-                          this.nodeAddonIncludes.push(stdout);
-                      }
+                        // cleanup newlines
+                        if (stdout[stdout.length - 1] === "\n") {
+                            stdout = stdout.slice(0, -1);
+                        }
+                        // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
+                        if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
+                            stdout = stdout.slice(1, -1);
+                        }
+                        if (stdout) {
+                            // nan returns the path relative to the working directory
+                            stdout = path.resolve(stdout);
+                            if (!await util.checkDirectoryExists(stdout)) {
+                                continue;
+                            }
+                            this.nodeAddonIncludes.push(stdout);
+                        }
                     }
                 }
             }
         } catch (error) {
-          console.log(error);
+            console.log(error);
         } finally {
             this.nodeAddonIncludePathsReady = true;
             this.handleConfigurationChange();
