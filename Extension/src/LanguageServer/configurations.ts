@@ -1356,9 +1356,28 @@ export class CppProperties {
             }
             curTextStartOffset = configStart + 1;
             curText = curText.substr(curTextStartOffset); // Remove earlier configs.
-            const nameEnd: number = curText.indexOf(":");
+            let nameEnd: number = curText.indexOf(":");
             curTextStartOffset += nameEnd + 1;
             curText = curText.substr(nameEnd + 1);
+            // Check if the conig name is unique, before removing later configs
+            let tailText: string = curText;
+            let tailTextStartOffset: number = curTextStartOffset;
+            let dupliacteNameStart: number = tailText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+            const dupErrorMsg: string | undefined = localize('duplicate.name', "The configuration name is a duplicate: {0}", currentConfiguration.name);
+            while (dupliacteNameStart !== -1) {
+                tailText = tailText.substr(dupliacteNameStart);
+                nameEnd = tailText.indexOf(":");
+                tailText = tailText.substr(nameEnd + 1);
+                tailTextStartOffset += dupliacteNameStart + nameEnd + 1;
+                const dupNameValueStart: number = tailText.indexOf('"');
+                const dupNameValueEnd: number = tailText.indexOf('"', dupNameValueStart + 1) + 1;
+                const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                    new vscode.Range(document.positionAt(tailTextStartOffset + dupNameValueStart),
+                        document.positionAt(tailTextStartOffset + dupNameValueEnd)),
+                        dupErrorMsg, vscode.DiagnosticSeverity.Warning);
+                diagnostics.push(diagnostic);
+                dupliacteNameStart = tailText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+            }
             const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
             if (nextNameStart !== -1) {
                 curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
