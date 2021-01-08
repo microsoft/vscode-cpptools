@@ -120,6 +120,7 @@ export class CppProperties {
     private configFileWatcher: vscode.FileSystemWatcher | null = null;
     private configFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private compileCommandsFile: vscode.Uri | undefined | null = undefined;
+    private compileCommandsFileWatchers: fs.FSWatcher[] = [];
     private compileCommandsFileWatcherFallbackTime: Date = new Date(); // Used when file watching fails.
     private defaultCompilerPath: string | null = null;
     private knownCompilers?: KnownCompiler[];
@@ -1632,6 +1633,7 @@ export class CppProperties {
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
+                    this.compileCommandsFileWatchers = []; // reset file watchers
                     this.onCompileCommandsChanged(compileCommandsFile);
                     this.compileCommandsFile = null; // File deleted
                 }
@@ -1646,6 +1648,10 @@ export class CppProperties {
     dispose(): void {
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
+
+        this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
+        this.compileCommandsFileWatchers = []; // reset it
+
         this.diagnosticCollection.dispose();
     }
 }
