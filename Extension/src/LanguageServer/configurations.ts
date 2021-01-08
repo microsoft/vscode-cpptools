@@ -1300,7 +1300,7 @@ export class CppProperties {
 
     private isConfigNameUnique(configName: string): string | undefined {
         let errorMsg: string | undefined;
-        const occurances: number | undefined = this.ConfigurationNames?.filter(function (name) { return name === configName; }).length;
+        const occurances: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
         if (occurances) {
             errorMsg = localize('duplicate.name', "The configuration name is a duplicate: {0}", configName);
         }
@@ -1359,24 +1359,25 @@ export class CppProperties {
             let nameEnd: number = curText.indexOf(":");
             curTextStartOffset += nameEnd + 1;
             curText = curText.substr(nameEnd + 1);
-            // Check if the conig name is unique, before removing later configs
+            // Check if the config name is unique, before removing later configs
+            const nameRegex: RegExp = new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`);
             let tailText: string = curText;
             let tailTextStartOffset: number = curTextStartOffset;
-            let dupliacteNameStart: number = tailText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+            let duplicateNameStart: number = tailText.search(nameRegex);
             const dupErrorMsg: string | undefined = localize('duplicate.name', "The configuration name is a duplicate: {0}", currentConfiguration.name);
-            while (dupliacteNameStart !== -1) {
-                tailText = tailText.substr(dupliacteNameStart);
+            while (duplicateNameStart !== -1) {
+                tailText = tailText.substr(duplicateNameStart);
                 nameEnd = tailText.indexOf(":");
                 tailText = tailText.substr(nameEnd + 1);
-                tailTextStartOffset += dupliacteNameStart + nameEnd + 1;
+                tailTextStartOffset += duplicateNameStart + nameEnd + 1;
                 const dupNameValueStart: number = tailText.indexOf('"');
                 const dupNameValueEnd: number = tailText.indexOf('"', dupNameValueStart + 1) + 1;
                 const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                     new vscode.Range(document.positionAt(tailTextStartOffset + dupNameValueStart),
                         document.positionAt(tailTextStartOffset + dupNameValueEnd)),
-                        dupErrorMsg, vscode.DiagnosticSeverity.Warning);
+                    dupErrorMsg, vscode.DiagnosticSeverity.Warning);
                 diagnostics.push(diagnostic);
-                dupliacteNameStart = tailText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+                duplicateNameStart = tailText.search(nameRegex);
             }
             const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
             if (nextNameStart !== -1) {
