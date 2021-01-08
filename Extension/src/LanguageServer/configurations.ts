@@ -18,6 +18,7 @@ import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
+import { setTimeout } from 'timers';
 import * as which from 'which';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -732,8 +733,54 @@ export class CppProperties {
             }
         }
 
+        this.updateCompileCommandsFileWatchers();
         if (!this.configurationIncomplete) {
             this.onConfigurationsChanged();
+        }
+    }
+
+    private compileCommandsFileWatcherTimer?: NodeJS.Timer;
+    private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
+
+    // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
+    // paths are expected to have variables resolved already
+    public updateCompileCommandsFileWatchers(): void {
+        if (this.configurationJson) {
+            this.compileCommandsFileWatchers.forEach((watcher: fs.FSWatcher) => watcher.close());
+            this.compileCommandsFileWatchers = []; // reset it
+            const filePaths: Set<string> = new Set<string>();
+            this.configurationJson.configurations.forEach(c => {
+                if (c.compileCommands) {
+                    const fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands, os.platform() === "win32");
+                    if (fs.existsSync(fileSystemCompileCommandsPath)) {
+                        filePaths.add(fileSystemCompileCommandsPath);
+                    }
+                }
+            });
+            try {
+                filePaths.forEach((path: string) => {
+                    this.compileCommandsFileWatchers.push(fs.watch(path, (event: string, filename: string) => {
+                        // Wait 1 second after a change to allow time for the write to finish.
+                        if (this.compileCommandsFileWatcherTimer) {
+                            clearInterval(this.compileCommandsFileWatcherTimer);
+                        }
+                        this.compileCommandsFileWatcherFiles.add(path);
+                        this.compileCommandsFileWatcherTimer = setTimeout(() => {
+                            this.compileCommandsFileWatcherFiles.forEach((path: string) => {
+                                this.onCompileCommandsChanged(path);
+                            });
+                            if (this.compileCommandsFileWatcherTimer) {
+                                clearInterval(this.compileCommandsFileWatcherTimer);
+                            }
+                            this.compileCommandsFileWatcherFiles.clear();
+                            this.compileCommandsFileWatcherTimer = undefined;
+                        }, 1000);
+                    }));
+                });
+            } catch (e) {
+                // The file watcher limit is hit.
+                // TODO: Check if the compile commands file has a higher timestamp during the interval timer.
+            }
         }
     }
 
