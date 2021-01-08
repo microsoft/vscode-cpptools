@@ -71,17 +71,23 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
         const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
-            throw new Error(); // User canceled it.
+            return []; // User canceled it.
         }
         if (selection.label.startsWith("cl.exe")) {
             if (!process.env.DevEnvDir) {
                 vscode.window.showErrorMessage(localize("cl.exe.not.available", "{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.", "cl.exe"));
-                throw new Error();
+                return [selection.configuration];
             }
         }
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
             try {
                 await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                if (selection.configuration.miDebuggerPath) {
+                    if (!fs.existsSync(selection.configuration.miDebuggerPath)) {
+                        vscode.window.showErrorMessage(localize("miDebuggerPath.not.available", "miDebuggerPath does not exist: {0}. Has a debugger been installed?", selection.configuration.miDebuggerPath));
+                        throw new Error();
+                    }
+                }
                 await vscode.debug.startDebugging(folder, selection.configuration);
                 Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
             } catch (e) {
@@ -210,15 +216,19 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
                     const compilerDirname: string = path.dirname(compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
-                    fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                        if (!err && stats && stats.isFile) {
-                            newConfig.miDebuggerPath = debuggerPath;
-                        } else {
-                            // TODO should probably resolve a missing debugger in a more graceful fashion for win32.
-                            newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
-                        }
+                    if (isWindows) {
+                        newConfig.miDebuggerPath = debuggerPath;
                         return resolve(newConfig);
-                    });
+                    } else {
+                        fs.stat(debuggerPath, (err, stats: fs.Stats) => {
+                            if (!err && stats && stats.isFile) {
+                                newConfig.miDebuggerPath = debuggerPath;
+                            } else {
+                                newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
+                            }
+                            return resolve(newConfig);
+                        });
+                    }
                 }
             });
         }));
