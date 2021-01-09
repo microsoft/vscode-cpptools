@@ -806,14 +806,9 @@ function onSwitchHeaderSource(): void {
                     vscode.window.showTextDocument(document, editor.viewColumn);
                 }
             });
-            // TODO: Handle non-visibleTextEditor...not sure how yet.
+
             if (!foundEditor) {
-                if (vscode.window.activeTextEditor !== undefined) {
-                    // TODO: Change to show it in a different column?
-                    vscode.window.showTextDocument(document, vscode.window.activeTextEditor.viewColumn);
-                } else {
-                    vscode.window.showTextDocument(document);
-                }
+                vscode.window.showTextDocument(document);
             }
         });
     });
