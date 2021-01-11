@@ -401,36 +401,57 @@ export class CppProperties {
     };
 
     private async addNodeAddonIncludeLocations(rootPath: string): Promise<void> {
-        try {
+        let error: Error | undefined;
+        const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8")
+            .then(pdj => JSON.parse(pdj))
+            .catch(e => (error = e));
 
-            const package_json: any = JSON.parse(await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8"));
-            for (const dep in this.nodeAddonMap) {
-                if (dep in package_json.dependencies) {
-                    const execCmd: string = this.nodeAddonMap[dep];
-                    let stdout: string = await util.execChildProcess(execCmd, rootPath);
-                    if (!stdout) {
-                        continue;
-                    }
+        if (!error) {
+            try {
+                for (const dep in this.nodeAddonMap) {
+                    if (dep in package_json.dependencies) {
+                        const execCmd: string = this.nodeAddonMap[dep];
+                        let stdout: string = await util.execChildProcess(execCmd, rootPath);
+                        if (!stdout) {
+                            continue;
+                        }
 
-                    // cleanup newlines
-                    if (stdout[stdout.length - 1] === "\n") {
-                        stdout = stdout.slice(0, -1);
-                    }
-                    // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
-                    if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
-                        stdout = stdout.slice(1, -1);
-                    }
-                    if (stdout) {
-                        this.nodeAddonIncludes.push(stdout);
+                        // cleanup newlines
+                        if (stdout[stdout.length - 1] === "\n") {
+                            stdout = stdout.slice(0, -1);
+                        }
+                        // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
+                        if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
+                            stdout = stdout.slice(1, -1);
+                        }
+
+                        // at this time both node-addon-api and nan return "node_modules/<module-name>" so this test is
+                        // not needed. but this future proofs the code.
+                        if (!await util.checkDirectoryExists(stdout)) {
+                            // convert the path to an absolute path because nan returns a relative path causing the previous test
+                            // to fail because this executes in vscode's working directory.
+                            stdout = path.join(rootPath, stdout);
+                            if (!await util.checkDirectoryExists(stdout)) {
+                                error = new Error(`${dep} directory ${stdout} doesn't exist`);
+                                stdout = '';
+                            }
+                        }
+                        if (stdout) {
+                            this.nodeAddonIncludes.push(stdout);
+                        }
                     }
                 }
+            } catch (e) {
+                error = e;
             }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            this.nodeAddonIncludePathsReady = true;
-            this.handleConfigurationChange();
         }
+        if (error) {
+            vscode.window.showErrorMessage('error.adding.node.addon.includes', error.message);
+        }
+        this.nodeAddonIncludePathsReady = true;
+        // it's possible that only one of two include paths failed, so proceed with the
+        // configuration change.
+        this.handleConfigurationChange();
     }
 
     private getConfigIndexForPlatform(config: any): number | undefined {
