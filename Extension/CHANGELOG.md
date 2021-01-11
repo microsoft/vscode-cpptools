@@ -11,7 +11,7 @@
 * Fix #include completion not sorting _ last. [#3465](https://github.com/microsoft/vscode-cpptools/issues/3465)
 * Fix crash when certain JavaScript files are parsed as C++. [#3858](https://github.com/microsoft/vscode-cpptools/issues/3858)
 * Fix IntelliSense squiggle about not being able to assign to an object of its own type. [#3883](https://github.com/microsoft/vscode-cpptools/issues/3883)
-* Fix hover and Find All References for template function overloads. [#4044[(https://github.com/microsoft/vscode-cpptools/issues/4044), [#4249](https://github.com/microsoft/vscode-cpptools/issues/4249)
+* Fix hover and Find All References for template function overloads. [#4044](https://github.com/microsoft/vscode-cpptools/issues/4044), [#4249](https://github.com/microsoft/vscode-cpptools/issues/4249)
 * Fix the Outline view for nested namespaces. [#4456](https://github.com/microsoft/vscode-cpptools/issues/4456)
 * Fix Outline view with`"**/.*"` in `files.exclude`. [#4602](https://github.com/microsoft/vscode-cpptools/issues/4602)
 * Fix the Outline view for nested structs/classes. [#4781](https://github.com/microsoft/vscode-cpptools/issues/4871)
