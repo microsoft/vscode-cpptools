@@ -1300,8 +1300,8 @@ export class CppProperties {
 
     private isConfigNameUnique(configName: string): string | undefined {
         let errorMsg: string | undefined;
-        const occurances: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
-        if (occurances) {
+        const occurrences: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
+        if (occurrences) {
             errorMsg = localize('duplicate.name', "The configuration name is a duplicate: {0}", configName);
         }
         return errorMsg;
