@@ -966,12 +966,12 @@ function extractArgs(argsString: string): string[] {
 }
 
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined = inputCompilerPath?.toLowerCase();
+    let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let additionalArgs: string[] = [];
     const isWindows: boolean = os.platform() === 'win32';
     if (compilerPath) {
-        if (compilerPath.endsWith("\\cl.exe") || compilerPath.endsWith("/cl.exe") || compilerPath === "cl.exe") {
+        if (compilerPath.toLowerCase().endsWith("\\cl.exe") || compilerPath.toLowerCase().endsWith("/cl.exe") || compilerPath.toLowerCase() === "cl.exe") {
             // Input is only compiler name, this is only for cl.exe
             compilerName = path.basename(compilerPath);
 
@@ -987,9 +987,9 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
             // Input has no quotes but can have a compiler path with spaces and args.
             // Go from right to left checking if a valid path is to the left of a space.
             let spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (spaceStart !== -1 && (!isWindows || !compilerPath.endsWith("cl.exe")) && !checkFileExistsSync(compilerPath)) {
+            if (spaceStart !== -1 && (!isWindows || !compilerPath.toLowerCase().endsWith("cl.exe")) && !checkFileExistsSync(compilerPath)) {
                 let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
-                while ((!isWindows || !potentialCompilerPath.endsWith("cl.exe")) && !checkFileExistsSync(potentialCompilerPath)) {
+                while ((!isWindows || !potentialCompilerPath.toLowerCase().endsWith("cl.exe")) && !checkFileExistsSync(potentialCompilerPath)) {
                     spaceStart = potentialCompilerPath.lastIndexOf(" ");
                     if (spaceStart === -1) {
                         // Reached the start without finding a valid path. Use the original value.
@@ -1006,7 +1006,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                 compilerName = path.basename(compilerPath);
             }
             // Get compiler name if there are no args but path is valid or a valid path was found with args.
-            if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {
+            if (compilerPath.toLowerCase() === "cl.exe" || checkFileExistsSync(compilerPath)) {
                 compilerName = path.basename(compilerPath);
             }
         }
