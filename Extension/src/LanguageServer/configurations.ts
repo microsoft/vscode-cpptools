@@ -21,8 +21,6 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 
-const pfs: any = fs.promises;
-
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -323,7 +321,8 @@ export class CppProperties {
         } else {
             configuration.includePath = [defaultFolder];
         }
-        if (isUnset(settings.addNodeAddonIncludePaths)) {
+
+        if (settings.addNodeAddonIncludePaths) {
             configuration.includePath = configuration.includePath.concat(this.nodeAddonIncludes);
         }
 
@@ -404,33 +403,25 @@ export class CppProperties {
     private async addNodeAddonIncludeLocations(rootPath: string): Promise<void> {
         try {
 
-            const settings: CppSettings = new CppSettings(this.rootUri);
-            if (settings.addNodeAddonIncludePaths) {
-                const package_json: any = JSON.parse(await pfs.readFile(path.join(rootPath, "package.json"), "utf8"));
-                for (const dep in this.nodeAddonMap) {
-                    if (dep in package_json.dependencies) {
-                        const execCmd: string = this.nodeAddonMap[dep];
-                        let stdout: string = await util.execChildProcess(execCmd, rootPath);
-                        if (!stdout) {
-                            continue;
-                        }
+            const package_json: any = JSON.parse(await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8"));
+            for (const dep in this.nodeAddonMap) {
+                if (dep in package_json.dependencies) {
+                    const execCmd: string = this.nodeAddonMap[dep];
+                    let stdout: string = await util.execChildProcess(execCmd, rootPath);
+                    if (!stdout) {
+                        continue;
+                    }
 
-                        // cleanup newlines
-                        if (stdout[stdout.length - 1] === "\n") {
-                            stdout = stdout.slice(0, -1);
-                        }
-                        // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
-                        if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
-                            stdout = stdout.slice(1, -1);
-                        }
-                        if (stdout) {
-                            // nan returns the path relative to the working directory
-                            stdout = path.resolve(stdout);
-                            if (!await util.checkDirectoryExists(stdout)) {
-                                continue;
-                            }
-                            this.nodeAddonIncludes.push(stdout);
-                        }
+                    // cleanup newlines
+                    if (stdout[stdout.length - 1] === "\n") {
+                        stdout = stdout.slice(0, -1);
+                    }
+                    // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
+                    if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
+                        stdout = stdout.slice(1, -1);
+                    }
+                    if (stdout) {
+                        this.nodeAddonIncludes.push(stdout);
                     }
                 }
             }
@@ -683,6 +674,9 @@ export class CppProperties {
             const configuration: Configuration = this.configurationJson.configurations[i];
 
             configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
+            if (settings.addNodeAddonIncludePaths) {
+                configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, this.nodeAddonIncludes, env);
+            }
             configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
