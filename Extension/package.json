@@ -1106,7 +1106,7 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.description%",
-          "scope": "resource"
+          "scope": "application"
         },
         "C_Cpp.renameRequiresIdentifier": {
           "type": "boolean",
