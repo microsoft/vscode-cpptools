@@ -15,6 +15,7 @@ import * as telemetry from '../telemetry';
 const elementId: { [key: string]: string } = {
     // Basic settings
     configName: "configName",
+    configNameInvalid: "configNameInvalid",
     configSelection: "configSelection",
     addConfigBtn: "addConfigBtn",
     addConfigOk: "addConfigOk",
