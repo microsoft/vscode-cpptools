@@ -153,7 +153,7 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => {
-        const compilerPathBase: string = path.basename(compilerPath);
+        const compilerPathBase: string = path.basename(compilerPath).toLowerCase();
         const isCl: boolean = compilerPathBase === "cl.exe";
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;

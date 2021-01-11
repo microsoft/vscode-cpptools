@@ -439,12 +439,10 @@ export class CppProperties {
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
 
         // Valid compiler + IntelliSenseMode combinations:
-        // 1. compiler is cl/clang-cl and IntelliSenseMode is MSVC
-        // 2. compiler is not cl/clang-cl and IntelliSenseMode is not MSVC
-        const isValid: boolean = compilerPathAndArgs.compilerName.endsWith("cl.exe") ===
-            (configuration.intelliSenseMode.startsWith("msvc")
-            || configuration.intelliSenseMode.startsWith("windows-msvc")
-            || configuration.intelliSenseMode.startsWith("windows-clang"));
+        // 1. compiler is cl.exe and IntelliSenseMode is MSVC
+        // 2. compiler is not cl.exe and IntelliSenseMode is not MSVC
+        const isValid: boolean = (compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") ===
+            configuration.intelliSenseMode.includes("msvc");
         if (isValid) {
             return "";
         } else {
@@ -1154,7 +1152,7 @@ export class CppProperties {
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         if (resolvedCompilerPath &&
             // Don't error cl.exe paths because it could be for an older preview build.
-            !(isWindows && compilerPathAndArgs.compilerName === "cl.exe")) {
+            !(isWindows && compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe")) {
             resolvedCompilerPath = resolvedCompilerPath.trim();
 
             // Error when the compiler's path has spaces without quotes but args are used.
@@ -1444,7 +1442,7 @@ export class CppProperties {
                 if (isCompilerPath) {
                     resolvedPath = resolvedPath.trim();
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedPath);
-                    if (isWindows && compilerPathAndArgs.compilerName === "cl.exe") {
+                    if (isWindows && compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") {
                         continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
                     }
                     if (compilerPathAndArgs.compilerPath === undefined) {

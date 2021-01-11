@@ -966,7 +966,7 @@ function extractArgs(argsString: string): string[] {
 }
 
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined = inputCompilerPath;
+    let compilerPath: string | undefined = inputCompilerPath?.toLowerCase();
     let compilerName: string = "";
     let additionalArgs: string[] = [];
     const isWindows: boolean = os.platform() === 'win32';
