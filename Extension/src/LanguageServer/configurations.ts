@@ -401,8 +401,9 @@ export class CppProperties {
 
     private async readNodeAddonIncludeLocations(rootPath: string): Promise<void> {
         let error: Error | undefined;
+        let pdjFound: boolean = false;
         const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8")
-            .then(pdj => JSON.parse(pdj))
+            .then(pdj => {pdjFound = true; return JSON.parse(pdj); })
             .catch(e => (error = e));
 
         const nodeAddonMap: { [dependency: string]: string } = {
@@ -410,7 +411,6 @@ export class CppProperties {
             "node-addon-api": "node --no-warnings -p \"require('node-addon-api').include\""
         };
 
-        let added: number = 0;
         if (!error) {
             try {
                 for (const dep in nodeAddonMap) {
@@ -442,7 +442,6 @@ export class CppProperties {
                             }
                         }
                         if (stdout) {
-                            added += 1;
                             this.nodeAddonIncludes.push(stdout);
                         }
                     }
@@ -451,10 +450,9 @@ export class CppProperties {
                 error = e;
             }
         }
-        if (error) {
-            // if it's possible for the directories returned by nan or node-addon-api to fail then
-            // this should be uncommented.
-            // console.log('readNodeAddonIncludeLocations', error.message);
+        if (error && pdjFound) {
+            // only log an error if package.json exists.
+            console.log('readNodeAddonIncludeLocations', error.message);
         }
         this.nodeAddonIncludePathsReady = true;
         this.handleConfigurationChange();
