@@ -913,6 +913,7 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
     });
 }
 
+/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
 export interface CompilerPathAndArgs {
     compilerPath?: string;
     compilerName: string;
@@ -1017,9 +1018,6 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
             function (item: string): boolean {
                 return inputCompilerArgs.indexOf(item) < 0;
             }));
-    }
-    if (compilerName) {
-        compilerName = compilerName.toLowerCase();
     }
     return { compilerPath, compilerName, additionalArgs };
 }
