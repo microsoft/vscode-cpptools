@@ -406,9 +406,10 @@ export class CppProperties {
             .then(pdj => {pdjFound = true; return JSON.parse(pdj); })
             .catch(e => (error = e));
 
+        const pathToNode: string = which.sync("node");
         const nodeAddonMap: { [dependency: string]: string } = {
-            "nan": "node --no-warnings -e \"require('nan')\"",
-            "node-addon-api": "node --no-warnings -p \"require('node-addon-api').include\""
+            "nan": `${pathToNode} --no-warnings -e "require('nan')"`,
+            "node-addon-api": `${pathToNode} --no-warnings -p "require('node-addon-api').include"`
         };
 
         if (!error) {
