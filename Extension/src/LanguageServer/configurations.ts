@@ -157,7 +157,7 @@ export class CppProperties {
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();
-        this.addNodeAddonIncludeLocations(rootPath);
+        this.readNodeAddonIncludeLocations(rootPath);
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
@@ -395,22 +395,27 @@ export class CppProperties {
         }
     }
 
-    private nodeAddonMap: {[dependency: string]: string} = {
-        "nan": "node --no-warnings -e \"require('nan')\"",
-        "node-addon-api": "node --no-warnings -p \"require('node-addon-api').include\""
-    };
+    public nodeAddonIncludesFound(): number {
+        return this.nodeAddonIncludes.length;
+    }
 
-    private async addNodeAddonIncludeLocations(rootPath: string): Promise<void> {
+    private async readNodeAddonIncludeLocations(rootPath: string): Promise<void> {
         let error: Error | undefined;
         const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8")
             .then(pdj => JSON.parse(pdj))
             .catch(e => (error = e));
 
+        const nodeAddonMap: { [dependency: string]: string } = {
+            "nan": "node --no-warnings -e \"require('nan')\"",
+            "node-addon-api": "node --no-warnings -p \"require('node-addon-api').include\""
+        };
+
+        let added: number = 0;
         if (!error) {
             try {
-                for (const dep in this.nodeAddonMap) {
+                for (const dep in nodeAddonMap) {
                     if (dep in package_json.dependencies) {
-                        const execCmd: string = this.nodeAddonMap[dep];
+                        const execCmd: string = nodeAddonMap[dep];
                         let stdout: string = await util.execChildProcess(execCmd, rootPath);
                         if (!stdout) {
                             continue;
@@ -425,11 +430,11 @@ export class CppProperties {
                             stdout = stdout.slice(1, -1);
                         }
 
-                        // at this time both node-addon-api and nan return "node_modules/<module-name>" so this test is
-                        // not needed. but this future proofs the code.
+                        // at this time both node-addon-api and nan return their own directory so this test is not really
+                        // needed. but it does future proof the code.
                         if (!await util.checkDirectoryExists(stdout)) {
-                            // convert the path to an absolute path because nan returns a relative path causing the previous test
-                            // to fail because this executes in vscode's working directory.
+                            // nan returns a path relative to rootPath causing the previous check to fail because this code
+                            // is executing in vscode's working directory.
                             stdout = path.join(rootPath, stdout);
                             if (!await util.checkDirectoryExists(stdout)) {
                                 error = new Error(`${dep} directory ${stdout} doesn't exist`);
@@ -437,6 +442,7 @@ export class CppProperties {
                             }
                         }
                         if (stdout) {
+                            added += 1;
                             this.nodeAddonIncludes.push(stdout);
                         }
                     }
@@ -446,11 +452,11 @@ export class CppProperties {
             }
         }
         if (error) {
-            vscode.window.showErrorMessage('error.adding.node.addon.includes', error.message);
+            // if it's possible for the directories returned by nan or node-addon-api to fail then
+            // this should be uncommented.
+            // console.log('readNodeAddonIncludeLocations', error.message);
         }
         this.nodeAddonIncludePathsReady = true;
-        // it's possible that only one of two include paths failed, so proceed with the
-        // configuration change.
         this.handleConfigurationChange();
     }
 
