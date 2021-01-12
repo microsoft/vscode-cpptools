@@ -968,7 +968,7 @@ function extractArgs(argsString: string): string[] {
 
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
-    let compilerPathLowercase: string | undefined = inputCompilerPath?.toLowerCase();
+    const compilerPathLowercase: string | undefined = inputCompilerPath?.toLowerCase();
     let compilerName: string = "";
     let additionalArgs: string[] = [];
 
