@@ -411,18 +411,18 @@ export class CppProperties {
     private getIntelliSenseModeForPlatform(name?: string): string {
         // Do the built-in configs first.
         if (name === "Linux") {
-            return "gcc-x64";
+            return "linux-gcc-x64";
         } else if (name === "Mac") {
-            return "clang-x64";
+            return "macos-clang-x64";
         } else if (name === "Win32") {
-            return "msvc-x64";
+            return "windows-msvc-x64";
         } else if (process.platform === 'win32') {
             // Custom configs default to the OS's preference.
-            return "msvc-x64";
+            return "windows-msvc-x64";
         } else if (process.platform === 'darwin') {
-            return "clang-x64";
+            return "macos-clang-x64";
         } else {
-            return "gcc-x64";
+            return "linux-gcc-x64";
         }
     }
 
@@ -443,8 +443,7 @@ export class CppProperties {
         // Valid compiler + IntelliSenseMode combinations:
         // 1. compiler is cl.exe and IntelliSenseMode is MSVC
         // 2. compiler is not cl.exe and IntelliSenseMode is not MSVC
-        const isValid: boolean = (compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") ===
-            configuration.intelliSenseMode.includes("msvc");
+        const isValid: boolean = (compilerPathAndArgs.compilerName === "cl.exe") === configuration.intelliSenseMode.includes("msvc");
         if (isValid) {
             return "";
         } else {
@@ -1154,7 +1153,7 @@ export class CppProperties {
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
         if (resolvedCompilerPath &&
             // Don't error cl.exe paths because it could be for an older preview build.
-            !(isWindows && compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe")) {
+            compilerPathAndArgs.compilerName !== "cl.exe") {
             resolvedCompilerPath = resolvedCompilerPath.trim();
 
             // Error when the compiler's path has spaces without quotes but args are used.
@@ -1444,7 +1443,7 @@ export class CppProperties {
                 if (isCompilerPath) {
                     resolvedPath = resolvedPath.trim();
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedPath);
-                    if (isWindows && compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") {
+                    if (compilerPathAndArgs.compilerName === "cl.exe") {
                         continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
                     }
                     if (compilerPathAndArgs.compilerPath === undefined) {
