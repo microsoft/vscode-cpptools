@@ -544,6 +544,7 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
 export async function checkInstallJsonsExist(): Promise<boolean> {
     let installJsonsExist: boolean = true;
     const jsonFiles: string[] = [
+        "bin/common.json",
         "bin/linux.clang.arm.json",
         "bin/linux.clang.arm64.json",
         "bin/linux.clang.x64.json",
