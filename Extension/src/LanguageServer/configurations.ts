@@ -1302,7 +1302,7 @@ export class CppProperties {
         let errorMsg: string | undefined;
         const occurrences: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
         if (occurrences) {
-            errorMsg = localize('duplicate.name', "The configuration name is a duplicate: {0}", configName);
+            errorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
         }
         return errorMsg;
     }
@@ -1348,8 +1348,39 @@ export class CppProperties {
             envText = curText.substr(envStart, envEnd);
             const envTextStartOffSet: number = envStart + 1;
 
+            // Check if all config names are unique.
+            let allConfigText: string = curText;
+            let allConfigTextOffset: number = envTextStartOffSet;
+            const nameRegex: RegExp = new RegExp(`{\\s*"name"\\s*:\\s*".*"`);
+            let configStart: number = allConfigText.search(new RegExp(nameRegex));
+            let configNameStart: number;
+            let configNameEnd: number;
+            let configName: string;
+            let configNamesSet: Set<string> = new Set();
+            let dupErrorMsg: string | undefined;
+            while (configStart !== -1) {
+                allConfigText = allConfigText.substr(configStart);
+                allConfigTextOffset += configStart;
+                configNameStart = allConfigText.indexOf('"', allConfigText.indexOf(':') + 1) + 1;
+                configNameEnd = allConfigText.indexOf('"', configNameStart);
+                configName = allConfigText.substr(configNameStart, configNameEnd - configNameStart);
+                if (configNamesSet.has(configName)) {
+                    dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(document.positionAt(allConfigTextOffset + configNameStart),
+                            document.positionAt(allConfigTextOffset + configNameEnd)),
+                        dupErrorMsg, vscode.DiagnosticSeverity.Warning);
+                    diagnostics.push(diagnostic);
+                } else {
+                    configNamesSet.add(configName);
+                }
+                allConfigText = allConfigText.substr(configNameEnd + 1);
+                allConfigTextOffset += configNameEnd + 1;
+                configStart = allConfigText.search(new RegExp(nameRegex));
+            }
+
             // Get current config text
-            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+            configStart = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
                 return;
@@ -1359,26 +1390,6 @@ export class CppProperties {
             let nameEnd: number = curText.indexOf(":");
             curTextStartOffset += nameEnd + 1;
             curText = curText.substr(nameEnd + 1);
-            // Check if the config name is unique, before removing later configs
-            const nameRegex: RegExp = new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`);
-            let tailText: string = curText;
-            let tailTextStartOffset: number = curTextStartOffset;
-            let duplicateNameStart: number = tailText.search(nameRegex);
-            const dupErrorMsg: string | undefined = localize('duplicate.name', "The configuration name is a duplicate: {0}", currentConfiguration.name);
-            while (duplicateNameStart !== -1) {
-                tailText = tailText.substr(duplicateNameStart);
-                nameEnd = tailText.indexOf(":");
-                tailText = tailText.substr(nameEnd + 1);
-                tailTextStartOffset += duplicateNameStart + nameEnd + 1;
-                const dupNameValueStart: number = tailText.indexOf('"');
-                const dupNameValueEnd: number = tailText.indexOf('"', dupNameValueStart + 1) + 1;
-                const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                    new vscode.Range(document.positionAt(tailTextStartOffset + dupNameValueStart),
-                        document.positionAt(tailTextStartOffset + dupNameValueEnd)),
-                    dupErrorMsg, vscode.DiagnosticSeverity.Warning);
-                diagnostics.push(diagnostic);
-                duplicateNameStart = tailText.search(nameRegex);
-            }
             const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
             if (nextNameStart !== -1) {
                 curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
