@@ -404,8 +404,8 @@ export class CppProperties {
 
         const pathToNode: string = which.sync("node");
         const nodeAddonMap: { [dependency: string]: string } = {
-            "nan": `${pathToNode} --no-warnings -e "require('nan')"`,
-            "node-addon-api": `${pathToNode} --no-warnings -p "require('node-addon-api').include"`
+            "nan": `"${pathToNode}" --no-warnings -e "require('nan')"`,
+            "node-addon-api": `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`
         };
 
         if (!error) {
