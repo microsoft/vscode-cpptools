@@ -1356,7 +1356,7 @@ export class CppProperties {
             let configNameStart: number;
             let configNameEnd: number;
             let configName: string;
-            let configNamesSet: Set<string> = new Set();
+            const configNamesSet: Set<string> = new Set();
             let dupErrorMsg: string | undefined;
             while (configStart !== -1) {
                 allConfigText = allConfigText.substr(configStart);
@@ -1387,7 +1387,7 @@ export class CppProperties {
             }
             curTextStartOffset = configStart + 1;
             curText = curText.substr(curTextStartOffset); // Remove earlier configs.
-            let nameEnd: number = curText.indexOf(":");
+            const nameEnd: number = curText.indexOf(":");
             curTextStartOffset += nameEnd + 1;
             curText = curText.substr(nameEnd + 1);
             const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
