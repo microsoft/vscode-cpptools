@@ -322,10 +322,6 @@ export class CppProperties {
             configuration.includePath = [defaultFolder];
         }
 
-        if (settings.addNodeAddonIncludePaths) {
-            configuration.includePath = configuration.includePath.concat(this.nodeAddonIncludes);
-        }
-
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
             configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
@@ -701,7 +697,8 @@ export class CppProperties {
 
             configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
             if (settings.addNodeAddonIncludePaths) {
-                configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, this.nodeAddonIncludes, env);
+                const includePath: string[] = configuration.includePath || [];
+                configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
             }
             configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
