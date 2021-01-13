@@ -131,7 +131,6 @@ export class CppProperties {
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private nodeAddonIncludes: string[] = [];
-    private nodeAddonIncludePathsReady: boolean = false;
     private defaultIntelliSenseMode?: string;
     private defaultCustomConfigurationVariables?: { [key: string]: string };
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
@@ -291,8 +290,7 @@ export class CppProperties {
     }
 
     private applyDefaultIncludePathsAndFrameworks(): void {
-        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady
-            && this.nodeAddonIncludePathsReady) {
+        if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
                 this.applyDefaultConfigurationValues(configuration);
@@ -402,14 +400,14 @@ export class CppProperties {
             .then(pdj => {pdjFound = true; return JSON.parse(pdj); })
             .catch(e => (error = e));
 
-        const pathToNode: string = which.sync("node");
-        const nodeAddonMap: { [dependency: string]: string } = {
-            "nan": `"${pathToNode}" --no-warnings -e "require('nan')"`,
-            "node-addon-api": `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`
-        };
-
         if (!error) {
             try {
+                const pathToNode: string = which.sync("node");
+                const nodeAddonMap: { [dependency: string]: string } = {
+                    "nan": `"${pathToNode}" --no-warnings -e "require('nan')"`,
+                    "node-addon-api": `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`
+                };
+
                 for (const dep in nodeAddonMap) {
                     if (dep in package_json.dependencies) {
                         const execCmd: string = nodeAddonMap[dep];
@@ -447,12 +445,14 @@ export class CppProperties {
                 error = e;
             }
         }
-        if (error && pdjFound) {
-            // only log an error if package.json exists.
-            console.log('readNodeAddonIncludeLocations', error.message);
+        if (error) {
+            if (pdjFound) {
+                // only log an error if package.json exists.
+                console.log('readNodeAddonIncludeLocations', error.message);
+            }
+        } else {
+            this.handleConfigurationChange();
         }
-        this.nodeAddonIncludePathsReady = true;
-        this.handleConfigurationChange();
     }
 
     private getConfigIndexForPlatform(config: any): number | undefined {
@@ -696,8 +696,10 @@ export class CppProperties {
             const configuration: Configuration = this.configurationJson.configurations[i];
 
             configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
+            // in case includePath is reset below
+            const origIncludePath: string[] | undefined = configuration.includePath;
             if (settings.addNodeAddonIncludePaths) {
-                const includePath: string[] = configuration.includePath || [];
+                const includePath: string[] = origIncludePath || [];
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
             }
             configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
@@ -736,8 +738,9 @@ export class CppProperties {
                         if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
                             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
                         }
-                        if (!configuration.includePath && !!this.defaultIncludes) {
-                            configuration.includePath = this.defaultIncludes;
+                        if (!origIncludePath && !!this.defaultIncludes) {
+                            const includePath: string[] = configuration.includePath || [];
+                            configuration.includePath = includePath.concat(this.defaultIncludes);
                         }
                         if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
                             configuration.macFrameworkPath = this.defaultFrameworks;
