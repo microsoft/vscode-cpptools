@@ -505,11 +505,39 @@
     <div class="section">
         <div class="section-title" data-loc-id="intellisense.mode">IntelliSense mode</div>
         <div class="section-text">
-            <span data-loc-id="intellisense.mode.description">The IntelliSense mode to use that maps to an architecture-specific variant of MSVC, gcc, or Clang. If not set or if set to <code>${default}</code>, the extension will choose the default for that platform. Windows defaults to <code>msvc-x64</code>, Linux defaults to <code>gcc-x64</code>, and macOS defaults to <code>clang-x64</code>. Select a specific IntelliSense mode to override the <code>${default}</code> mode.</span>
+            <span data-loc-id="intellisense.mode.description">The IntelliSense mode to use that maps to a platform and architecture variant of MSVC, gcc, or Clang. If not set or if set to <code>${default}</code>, the extension will choose the default for that platform. Windows defaults to <code>windows-msvc-x64</code>, Linux defaults to <code>linux-gcc-x64</code>, and macOS defaults to <code>macos-clang-x64</code>. Select a specific IntelliSense mode to override the <code>${default}</code> mode.</span>
         </div>
         <div>
           <select name="inputValue" id="intelliSenseMode" class="select-default">
             <option value="${default}">${default}</option>
+            <option value="macos-clang-x86">macos-clang-x86</option>
+            <option value="macos-clang-x64">macos-clang-x64</option>
+            <option value="macos-clang-arm">macos-clang-arm</option>
+            <option value="macos-clang-arm64">macos-clang-arm64</option>
+            <option value="macos-gcc-x86">macos-gcc-x86</option>
+            <option value="macos-gcc-x64">macos-gcc-x64</option>
+            <option value="macos-gcc-arm">macos-gcc-arm</option>
+            <option value="macos-gcc-arm64">macos-gcc-arm64</option>
+            <option value="linux-clang-x86">linux-clang-x86</option>
+            <option value="linux-clang-x64">linux-clang-x64</option>
+            <option value="linux-clang-arm">linux-clang-arm</option>
+            <option value="linux-clang-arm64">linux-clang-arm64</option>
+            <option value="linux-gcc-x86">linux-gcc-x86</option>
+            <option value="linux-gcc-x64">linux-gcc-x64</option>
+            <option value="linux-gcc-arm">linux-gcc-arm</option>
+            <option value="linux-gcc-arm64">linux-gcc-arm64</option>
+            <option value="windows-clang-x86">windows-clang-x86</option>
+            <option value="windows-clang-x64">windows-clang-x64</option>
+            <option value="windows-clang-arm">windows-clang-arm</option>
+            <option value="windows-clang-arm64">windows-clang-arm64</option>
+            <option value="windows-gcc-x86">windows-gcc-x86</option>
+            <option value="windows-gcc-x64">windows-gcc-x64</option>
+            <option value="windows-gcc-arm">windows-gcc-arm</option>
+            <option value="windows-gcc-arm64">windows-gcc-arm64</option>
+            <option value="windows-msvc-x86">windows-msvc-x86</option>
+            <option value="windows-msvc-x64">windows-msvc-x64</option>
+            <option value="windows-msvc-arm">windows-msvc-arm</option>
+            <option value="windows-msvc-arm64">windows-msvc-arm64</option>
             <option value="clang-x86">clang-x86</option>
             <option value="clang-x64">clang-x64</option>
             <option value="clang-arm">clang-arm</option>
