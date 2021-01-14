@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-##  Version 1.2.0-insiders: January 14, 2021
+## Version 1.2.0-insiders: January 14, 2021
 ### New Features
 * Add support for cross-compilation configurations for IntelliSense. For example, `intelliSenseMode` value "linux-gcc-x64" could be used on a Mac host machine. [#1083](https://github.com/microsoft/vscode-cpptools/issues/1083)
 * Add `C_Cpp.addNodeAddonIncludePaths` setting to add include paths from `nan` and `node-addon-api` when they're dependencies. [#4854](https://github.com/microsoft/vscode-cpptools/issues/4854)
@@ -45,6 +45,7 @@
 * Fix gcc problem matcher when the column is missing.
   * @guntern [PR #6490](https://github.com/microsoft/vscode-cpptools/pull/6490)
 * Disable Insiders prompt for Codespaces. [#6491](https://github.com/microsoft/vscode-cpptools/issues/6491)
+* Add `clang-format.exe` built for Windows ARM64. [#6494](https://github.com/microsoft/vscode-cpptools/issues/6494)
 * Fix `compile_commands.json` not working correctly for `*.C` files. [#6497](https://github.com/microsoft/vscode-cpptools/issues/6497)
 * Show an error message when gdb can't be found when generating a `launch.json` (instead of using an invalid `miDebuggerPath`). [#6511](https://github.com/microsoft/vscode-cpptools/issues/6511)
 * Fix IntelliSense crash with a parenthesized type followed by an initializer list. [#6554](https://github.com/microsoft/vscode-cpptools/issues/6554), [#6624](https://github.com/microsoft/vscode-cpptools/issues/6624)
