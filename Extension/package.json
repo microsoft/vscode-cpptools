@@ -1130,6 +1130,12 @@
           "markdownDescription": "%c_cpp.configuration.vcpkg.enabled.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.addNodeAddonIncludePaths": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.description%",
+          "scope": "application"
+        },
         "C_Cpp.renameRequiresIdentifier": {
           "type": "boolean",
           "default": true,
