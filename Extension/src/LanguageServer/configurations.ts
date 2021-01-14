@@ -1358,27 +1358,37 @@ export class CppProperties {
             let configNameStart: number;
             let configNameEnd: number;
             let configName: string;
-            const configNamesSet: Set<string> = new Set();
-            let dupErrorMsg: string | undefined;
+            const configNames: Map<string, vscode.Range[]> = new Map<string, []>();
+            let dupErrorMsg: string;
             while (configStart !== -1) {
                 allConfigText = allConfigText.substr(configStart);
                 allConfigTextOffset += configStart;
                 configNameStart = allConfigText.indexOf('"', allConfigText.indexOf(':') + 1) + 1;
                 configNameEnd = allConfigText.indexOf('"', configNameStart);
                 configName = allConfigText.substr(configNameStart, configNameEnd - configNameStart);
-                if (configNamesSet.has(configName)) {
-                    dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
-                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(allConfigTextOffset + configNameStart),
-                            document.positionAt(allConfigTextOffset + configNameEnd)),
-                        dupErrorMsg, vscode.DiagnosticSeverity.Warning);
-                    diagnostics.push(diagnostic);
+                const newRange: vscode.Range = new vscode.Range(0, allConfigTextOffset + configNameStart, 0, allConfigTextOffset + configNameEnd);
+                const allRanges: vscode.Range[] | undefined = configNames.get(configName);
+                if (allRanges) {
+                    allRanges.push(newRange);
+                    configNames.set(configName, allRanges);
                 } else {
-                    configNamesSet.add(configName);
+                    configNames.set(configName, [newRange]);
                 }
                 allConfigText = allConfigText.substr(configNameEnd + 1);
                 allConfigTextOffset += configNameEnd + 1;
                 configStart = allConfigText.search(new RegExp(nameRegex));
+            }
+            for (let [configName, allRanges] of configNames) {
+                if (allRanges && allRanges.length > 1) {
+                    dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+                    allRanges.forEach(nameRange => {
+                        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(nameRange.start.character),
+                                document.positionAt(nameRange.end.character)),
+                            dupErrorMsg, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                    });
+                }
             }
 
             // Get current config text
