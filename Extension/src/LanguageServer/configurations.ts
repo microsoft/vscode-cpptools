@@ -1378,7 +1378,7 @@ export class CppProperties {
                 allConfigTextOffset += configNameEnd + 1;
                 configStart = allConfigText.search(new RegExp(nameRegex));
             }
-            for (let [configName, allRanges] of configNames) {
+            for (const [configName, allRanges] of configNames) {
                 if (allRanges && allRanges.length > 1) {
                     dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
                     allRanges.forEach(nameRange => {
