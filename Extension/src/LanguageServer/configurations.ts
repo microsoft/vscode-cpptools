@@ -78,6 +78,7 @@ export interface Configuration {
 }
 
 export interface ConfigurationErrors {
+    name?: string;
     compilerPath?: string;
     includePath?: string;
     intelliSenseMode?: string;
@@ -1145,6 +1146,9 @@ export class CppProperties {
         const isWindows: boolean = os.platform() === 'win32';
         const config: Configuration = this.configurationJson.configurations[configIndex];
 
+        // Check if config name is unique.
+        errors.name = this.isConfigNameUnique(config.name);
+
         // Validate compilerPath
         let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
@@ -1293,6 +1297,15 @@ export class CppProperties {
         return errorMsg;
     }
 
+    private isConfigNameUnique(configName: string): string | undefined {
+        let errorMsg: string | undefined;
+        const occurrences: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
+        if (occurrences) {
+            errorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+        }
+        return errorMsg;
+    }
+
     private handleSquiggles(): void {
         if (!this.propertiesFile) {
             return;
@@ -1334,8 +1347,49 @@ export class CppProperties {
             envText = curText.substr(envStart, envEnd);
             const envTextStartOffSet: number = envStart + 1;
 
+            // Check if all config names are unique.
+            let allConfigText: string = curText;
+            let allConfigTextOffset: number = envTextStartOffSet;
+            const nameRegex: RegExp = new RegExp(`{\\s*"name"\\s*:\\s*".*"`);
+            let configStart: number = allConfigText.search(new RegExp(nameRegex));
+            let configNameStart: number;
+            let configNameEnd: number;
+            let configName: string;
+            const configNames: Map<string, vscode.Range[]> = new Map<string, []>();
+            let dupErrorMsg: string;
+            while (configStart !== -1) {
+                allConfigText = allConfigText.substr(configStart);
+                allConfigTextOffset += configStart;
+                configNameStart = allConfigText.indexOf('"', allConfigText.indexOf(':') + 1) + 1;
+                configNameEnd = allConfigText.indexOf('"', configNameStart);
+                configName = allConfigText.substr(configNameStart, configNameEnd - configNameStart);
+                const newRange: vscode.Range = new vscode.Range(0, allConfigTextOffset + configNameStart, 0, allConfigTextOffset + configNameEnd);
+                const allRanges: vscode.Range[] | undefined = configNames.get(configName);
+                if (allRanges) {
+                    allRanges.push(newRange);
+                    configNames.set(configName, allRanges);
+                } else {
+                    configNames.set(configName, [newRange]);
+                }
+                allConfigText = allConfigText.substr(configNameEnd + 1);
+                allConfigTextOffset += configNameEnd + 1;
+                configStart = allConfigText.search(new RegExp(nameRegex));
+            }
+            for (const [configName, allRanges] of configNames) {
+                if (allRanges && allRanges.length > 1) {
+                    dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+                    allRanges.forEach(nameRange => {
+                        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(nameRange.start.character),
+                                document.positionAt(nameRange.end.character)),
+                            dupErrorMsg, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                    });
+                }
+            }
+
             // Get current config text
-            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+            configStart = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
                 return;
