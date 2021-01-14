@@ -78,6 +78,7 @@ export interface Configuration {
 }
 
 export interface ConfigurationErrors {
+    name?: string;
     compilerPath?: string;
     includePath?: string;
     intelliSenseMode?: string;
@@ -132,6 +133,7 @@ export class CppProperties {
     private defaultWindowsSdkVersion: string | null = null;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
+    private nodeAddonIncludes: string[] = [];
     private defaultIntelliSenseMode?: string;
     private defaultCustomConfigurationVariables?: { [key: string]: string };
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
@@ -157,6 +159,7 @@ export class CppProperties {
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();
+        this.readNodeAddonIncludeLocations(rootPath);
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
@@ -319,6 +322,7 @@ export class CppProperties {
         } else {
             configuration.includePath = [defaultFolder];
         }
+
         // browse.path is not set by default anymore. When it is not set, the includePath will be used instead.
         if (isUnset(settings.defaultDefines)) {
             configuration.defines = (process.platform === 'win32') ? ["_DEBUG", "UNICODE", "_UNICODE"] : [];
@@ -384,6 +388,72 @@ export class CppProperties {
             }
         } catch (error) {} finally {
             this.vcpkgPathReady = true;
+            this.handleConfigurationChange();
+        }
+    }
+
+    public nodeAddonIncludesFound(): number {
+        return this.nodeAddonIncludes.length;
+    }
+
+    private async readNodeAddonIncludeLocations(rootPath: string): Promise<void> {
+        let error: Error | undefined;
+        let pdjFound: boolean = false;
+        const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8")
+            .then(pdj => {pdjFound = true; return JSON.parse(pdj); })
+            .catch(e => (error = e));
+
+        if (!error) {
+            try {
+                const pathToNode: string = which.sync("node");
+                const nodeAddonMap: { [dependency: string]: string } = {
+                    "nan": `"${pathToNode}" --no-warnings -e "require('nan')"`,
+                    "node-addon-api": `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`
+                };
+
+                for (const dep in nodeAddonMap) {
+                    if (dep in package_json.dependencies) {
+                        const execCmd: string = nodeAddonMap[dep];
+                        let stdout: string = await util.execChildProcess(execCmd, rootPath);
+                        if (!stdout) {
+                            continue;
+                        }
+
+                        // cleanup newlines
+                        if (stdout[stdout.length - 1] === "\n") {
+                            stdout = stdout.slice(0, -1);
+                        }
+                        // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
+                        if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
+                            stdout = stdout.slice(1, -1);
+                        }
+
+                        // at this time both node-addon-api and nan return their own directory so this test is not really
+                        // needed. but it does future proof the code.
+                        if (!await util.checkDirectoryExists(stdout)) {
+                            // nan returns a path relative to rootPath causing the previous check to fail because this code
+                            // is executing in vscode's working directory.
+                            stdout = path.join(rootPath, stdout);
+                            if (!await util.checkDirectoryExists(stdout)) {
+                                error = new Error(`${dep} directory ${stdout} doesn't exist`);
+                                stdout = '';
+                            }
+                        }
+                        if (stdout) {
+                            this.nodeAddonIncludes.push(stdout);
+                        }
+                    }
+                }
+            } catch (e) {
+                error = e;
+            }
+        }
+        if (error) {
+            if (pdjFound) {
+                // only log an error if package.json exists.
+                console.log('readNodeAddonIncludeLocations', error.message);
+            }
+        } else {
             this.handleConfigurationChange();
         }
     }
@@ -626,6 +696,12 @@ export class CppProperties {
             const configuration: Configuration = this.configurationJson.configurations[i];
 
             configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
+            // in case includePath is reset below
+            const origIncludePath: string[] | undefined = configuration.includePath;
+            if (settings.addNodeAddonIncludePaths) {
+                const includePath: string[] = origIncludePath || [];
+                configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
+            }
             configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
@@ -662,8 +738,9 @@ export class CppProperties {
                         if (!configuration.windowsSdkVersion && !!this.defaultWindowsSdkVersion) {
                             configuration.windowsSdkVersion = this.defaultWindowsSdkVersion;
                         }
-                        if (!configuration.includePath && !!this.defaultIncludes) {
-                            configuration.includePath = this.defaultIncludes;
+                        if (!origIncludePath && !!this.defaultIncludes) {
+                            const includePath: string[] = configuration.includePath || [];
+                            configuration.includePath = includePath.concat(this.defaultIncludes);
                         }
                         if (!configuration.macFrameworkPath && !!this.defaultFrameworks) {
                             configuration.macFrameworkPath = this.defaultFrameworks;
@@ -1145,6 +1222,9 @@ export class CppProperties {
         const isWindows: boolean = os.platform() === 'win32';
         const config: Configuration = this.configurationJson.configurations[configIndex];
 
+        // Check if config name is unique.
+        errors.name = this.isConfigNameUnique(config.name);
+
         // Validate compilerPath
         let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
@@ -1293,6 +1373,15 @@ export class CppProperties {
         return errorMsg;
     }
 
+    private isConfigNameUnique(configName: string): string | undefined {
+        let errorMsg: string | undefined;
+        const occurrences: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
+        if (occurrences) {
+            errorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+        }
+        return errorMsg;
+    }
+
     private handleSquiggles(): void {
         if (!this.propertiesFile) {
             return;
@@ -1334,8 +1423,49 @@ export class CppProperties {
             envText = curText.substr(envStart, envEnd);
             const envTextStartOffSet: number = envStart + 1;
 
+            // Check if all config names are unique.
+            let allConfigText: string = curText;
+            let allConfigTextOffset: number = envTextStartOffSet;
+            const nameRegex: RegExp = new RegExp(`{\\s*"name"\\s*:\\s*".*"`);
+            let configStart: number = allConfigText.search(new RegExp(nameRegex));
+            let configNameStart: number;
+            let configNameEnd: number;
+            let configName: string;
+            const configNames: Map<string, vscode.Range[]> = new Map<string, []>();
+            let dupErrorMsg: string;
+            while (configStart !== -1) {
+                allConfigText = allConfigText.substr(configStart);
+                allConfigTextOffset += configStart;
+                configNameStart = allConfigText.indexOf('"', allConfigText.indexOf(':') + 1) + 1;
+                configNameEnd = allConfigText.indexOf('"', configNameStart);
+                configName = allConfigText.substr(configNameStart, configNameEnd - configNameStart);
+                const newRange: vscode.Range = new vscode.Range(0, allConfigTextOffset + configNameStart, 0, allConfigTextOffset + configNameEnd);
+                const allRanges: vscode.Range[] | undefined = configNames.get(configName);
+                if (allRanges) {
+                    allRanges.push(newRange);
+                    configNames.set(configName, allRanges);
+                } else {
+                    configNames.set(configName, [newRange]);
+                }
+                allConfigText = allConfigText.substr(configNameEnd + 1);
+                allConfigTextOffset += configNameEnd + 1;
+                configStart = allConfigText.search(new RegExp(nameRegex));
+            }
+            for (const [configName, allRanges] of configNames) {
+                if (allRanges && allRanges.length > 1) {
+                    dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+                    allRanges.forEach(nameRange => {
+                        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(nameRange.start.character),
+                                document.positionAt(nameRange.end.character)),
+                            dupErrorMsg, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                    });
+                }
+            }
+
             // Get current config text
-            const configStart: number = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+            configStart = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
             if (configStart === -1) {
                 telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
                 return;
