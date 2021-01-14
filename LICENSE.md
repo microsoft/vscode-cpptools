@@ -1,4 +1,7 @@
- 
+Additional binary files may be downloaded at runtime after the initial
+installation; these are governed by the more restrictive proprietary license
+terms found at [RuntimeLicenses](RuntimeLicenses).
+
 MIT License
 
 Copyright (c) 2020 Microsoft

@@ -154,7 +154,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => {
         const compilerPathBase: string = path.basename(compilerPath);
-        const isCl: boolean = compilerPathBase === "cl.exe";
+        const isCl: boolean = compilerPathBase.toLowerCase() === "cl.exe";
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
         if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
@@ -166,7 +166,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const isWindows: boolean = os.platform() === 'win32';
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', filePath + '.exe', '${file}'] : ['-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
@@ -370,36 +370,40 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                 this.writeEmitter.fire(line + this.endOfLine);
             }
         };
+        this.writeEmitter.fire(activeCommand + this.endOfLine);
         try {
             const result: number = await new Promise<number>((resolve, reject) => {
                 cp.exec(activeCommand, this.options, (_error, stdout, _stderr) => {
-                    const dot: string = (stdout || _stderr) ? ":" : ".";
+                    const dot: string = ".";
+                    const is_cl: boolean = (_stderr || _stderr === '') && stdout ? true : false;
+                    if (is_cl) {
+                        // cl.exe, header info may not appear if /nologo is used.
+                        if (_stderr) {
+                            splitWriteEmitter(_stderr); // compiler header info and command line D warnings (e.g. when /MTd and /MDd are both used)
+                        }
+                        splitWriteEmitter(stdout); // linker header info and potentially compiler C warnings
+                    }
                     if (_error) {
-                        telemetry.logLanguageServerEvent("cppBuildTaskError");
-                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with errors(s)") + dot + this.endOfLine);
                         if (stdout) {
-                            splitWriteEmitter(stdout); // cl.exe
+                            // cl.exe
                         } else if (_stderr) {
                             splitWriteEmitter(_stderr); // gcc/clang
                         } else {
                             splitWriteEmitter(_error.message); // e.g. command executable not found
                         }
+                        telemetry.logLanguageServerEvent("cppBuildTaskError");
+                        this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error(s)") + dot + this.endOfLine);
                         resolve(-1);
-                        return;
                     } else if (_stderr && !stdout) { // gcc/clang
-                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
-                        this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
                         splitWriteEmitter(_stderr);
-                        resolve(0);
-                    } else if (stdout && stdout.includes("warning C")) { // cl.exe
                         telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
                         this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
-                        splitWriteEmitter(stdout);
+                        resolve(0);
+                    } else if (stdout && stdout.includes("warning C")) { // cl.exe, compiler warnings
+                        telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+                        this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
                         resolve(0);
                     } else {
-                        if (stdout) {
-                            splitWriteEmitter(stdout); // cl.exe
-                        }
                         this.writeEmitter.fire(localize("build finished successfully", "Build finished successfully.") + this.endOfLine);
                         resolve(0);
                     }
