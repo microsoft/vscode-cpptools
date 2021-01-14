@@ -1362,6 +1362,11 @@ export class DefaultClient implements Client {
                             this.semanticTokensProvider = undefined;
                         }
                     }
+                    // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan
+                    // or node-addon-api was installed so prompt for reload.
+                    if (changedSettings["addNodeAddonIncludePaths"] && settings.addNodeAddonIncludePaths && this.configuration.nodeAddonIncludesFound() === 0) {
+                        util.promptForReloadWindowDueToSettingsChange();
+                    }
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2592,6 +2597,7 @@ export class DefaultClient implements Client {
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
+            this.configuration.checkCompileCommands();
         }
     }
 
