@@ -182,7 +182,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
-            newConfig.externalConsole = false;
+            newConfig.console = "internalConsole"
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             const isWindows: boolean = platform === 'win32';
             newConfig.program = isWindows ? exeName + ".exe" : exeName;
@@ -246,6 +246,12 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         }
 
         if (config.type === 'cppvsdbg') {
+            // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
+            if (config.externalConsole && !config.console)
+            {
+                config.console = "externalTerminal"
+            }
+
             // Fail if cppvsdbg type is running on non-Windows
             if (os.platform() !== 'win32') {
                 logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));

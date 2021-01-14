@@ -1984,10 +1984,22 @@
                 "description": "%c_cpp.debuggers.cppvsdbg.visualizerFile.description%",
                 "default": ""
               },
-              "externalConsole": {
-                "type": "boolean",
-                "description": "%c_cpp.debuggers.cppvsdbg.externalConsole.description%",
-                "default": false
+              "console": {
+                "type": "string",
+                "enum": [
+                  "internalConsole",
+                  "integratedTerminal",
+                  "externalTerminal",
+                  "newExternalWindow"
+                ],
+                "enumDescriptions": [
+                  "%c_cpp.debuggers.cppvsdbg.console.internalConsole.description%",
+                  "%c_cpp.debuggers.cppvsdbg.console.integratedTerminal.description%",
+                  "%c_cpp.debuggers.cppvsdbg.console.externalTerminal.description%",
+                  "%c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description%"
+                ],
+                "description": "%c_cpp.debuggers.cppvsdbg.console.description%",
+                "default": "internalConsole"
               },
               "sourceFileMap": {
                 "type": "object",
@@ -2730,7 +2742,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2152353",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153010",
       "platforms": [
         "win32"
       ],
@@ -2741,7 +2753,7 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "8299A112D1260C2CEA53AC74D18FA73DE8533C058AAAB254571B503FBAC37297"
+      "integrity": "52C4234976D527A7BF02EB2E8844F3C605DC4BD1D3847F83C8675CD23967BAB3"
     }
   ]
 }
