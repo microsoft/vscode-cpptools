@@ -432,10 +432,10 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
-        clients.timeTelemetryCollector.setDidOpenTime(document.uri);
         if (clients.checkOwnership(client, document)) {
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
+                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 client.TrackedDocuments.add(document);
                 const finishDidOpen = (doc: vscode.TextDocument) => {
                     client.provideCustomConfiguration(doc.uri, undefined);
