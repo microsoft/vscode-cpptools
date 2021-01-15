@@ -10,6 +10,7 @@
 * Show configuration squiggles when configurations with the same name exist. [#3412](https://github.com/microsoft/vscode-cpptools/issues/3412)
 * Add command `Generate EditorConfig contents from VC Format settings`. [#6018](https://github.com/microsoft/vscode-cpptools/issues/6018)
 * Update to clang-format 11.1. [#6326](https://github.com/microsoft/vscode-cpptools/issues/6326)
+* Add clang-format built for Windows ARM64. [#6494](https://github.com/microsoft/vscode-cpptools/issues/6494)
 * Add support for the `/await` flag with msvc IntelliSense. [#6596](https://github.com/microsoft/vscode-cpptools/issues/6596)
 * Increase document/workspace symbol limit from 1000 to 10000. [#6766](https://github.com/microsoft/vscode-cpptools/issues/6766)
 
@@ -62,6 +63,7 @@
 * Fix `.` to `->` completion with multiple cursors. [#6720](https://github.com/microsoft/vscode-cpptools/issues/6720)
 * Fix bug with configured cl.exe path not being used to choose appropriate system include paths, or cl.exe not being used at all if it's not also installed via the VS Installer. [#6746](https://github.com/microsoft/vscode-cpptools/issues/6746)
 * Fix bugs with parsing of quotes and escape sequences in compiler args. [#6761](https://github.com/microsoft/vscode-cpptools/issues/6761)
+* Fix the configuration not showing in the status bar when `c_cpp_properties.json` is active. [#6765](https://github.com/microsoft/vscode-cpptools/issues/6765)
 * Fix "D" command line warnings not appearing with cl.exe cppbuild build tasks.
 * Fix cl.exe cppbuild tasks when `/nologo` is used (and make /nologo a default arg).
 * Fix a cpptools crash and multiple deadlocks.
