@@ -247,8 +247,12 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
         if (config.type === 'cppvsdbg') {
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
-            if (config.externalConsole && !config.console) {
-                config.console = "externalTerminal";
+            if (config.hasOwnProperty("externalConsole")) {
+                logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
+                if (config.externalConsole && !config.console) {
+                    config.console = "externalTerminal";
+                }
+                delete config.externalConsole;
             }
 
             // Fail if cppvsdbg type is running on non-Windows

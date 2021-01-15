@@ -541,6 +541,11 @@
           "description": "%c_cpp.debuggers.cppvsdbg.visualizerFile.description%",
           "default": ""
         },
+        "externalConsole": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.cppvsdbg.externalConsole.description%",
+          "default": false
+        },
         "console": {
           "type": "string",
           "enum": [
