@@ -311,7 +311,7 @@ interface Location {
 interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
-    location: Location
+    location: Location;
     containerName: string;
     suffix: LocalizeStringParams;
 }
