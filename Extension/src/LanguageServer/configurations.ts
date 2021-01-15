@@ -1375,8 +1375,9 @@ export class CppProperties {
 
     private isConfigNameUnique(configName: string): string | undefined {
         let errorMsg: string | undefined;
+        // TODO: make configName non-case sensitive.
         const occurrences: number | undefined = this.ConfigurationNames?.filter(function (name): boolean { return name === configName; }).length;
-        if (occurrences) {
+        if (occurrences && occurrences > 1) {
             errorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
         }
         return errorMsg;
