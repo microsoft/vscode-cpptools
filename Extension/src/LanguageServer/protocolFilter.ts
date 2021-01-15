@@ -26,40 +26,42 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         didOpen: (document, sendMessage) => {
             const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
-                // Log warm start.
-                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
                 const me: Client = clients.getClientFor(document.uri);
-                if (clients.checkOwnership(me, document)) {
-                    me.TrackedDocuments.add(document);
-                    const finishDidOpen = (doc: vscode.TextDocument) => {
-                        me.provideCustomConfiguration(doc.uri, undefined);
-                        me.notifyWhenReady(() => {
-                            sendMessage(doc);
-                            me.onDidOpenTextDocument(doc);
-                            if (editor && editor === vscode.window.activeTextEditor) {
-                                onDidChangeActiveTextEditor(editor);
-                            }
-                        });
-                    };
-                    let languageChanged: boolean = false;
-                    if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
-                        const cppSettings: CppSettings = new CppSettings();
-                        if (cppSettings.autoAddFileAssociations) {
-                            const fileName: string = path.basename(document.uri.fsPath);
-                            const mappingString: string = fileName + "@" + document.uri.fsPath;
-                            me.addFileAssociations(mappingString, false);
-                            me.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
-                            vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
-                                finishDidOpen(newDoc);
+                if (!me.TrackedDocuments.has(document)) {
+                    // Log warm start.
+                    clients.timeTelemetryCollector.setDidOpenTime(document.uri);
+                    if (clients.checkOwnership(me, document)) {
+                        me.TrackedDocuments.add(document);
+                        const finishDidOpen = (doc: vscode.TextDocument) => {
+                            me.provideCustomConfiguration(doc.uri, undefined);
+                            me.notifyWhenReady(() => {
+                                sendMessage(doc);
+                                me.onDidOpenTextDocument(doc);
+                                if (editor && editor === vscode.window.activeTextEditor) {
+                                    onDidChangeActiveTextEditor(editor);
+                                }
                             });
-                            languageChanged = true;
+                        };
+                        let languageChanged: boolean = false;
+                        if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
+                            const cppSettings: CppSettings = new CppSettings();
+                            if (cppSettings.autoAddFileAssociations) {
+                                const fileName: string = path.basename(document.uri.fsPath);
+                                const mappingString: string = fileName + "@" + document.uri.fsPath;
+                                me.addFileAssociations(mappingString, false);
+                                me.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                                vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
+                                    finishDidOpen(newDoc);
+                                });
+                                languageChanged = true;
+                            }
                         }
-                    }
-                    if (!languageChanged) {
-                        finishDidOpen(document);
+                        if (!languageChanged) {
+                            finishDidOpen(document);
+                        }
                     }
                 }
             } else {
