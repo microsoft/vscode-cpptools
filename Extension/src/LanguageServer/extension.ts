@@ -339,16 +339,25 @@ function realActivation(): void {
             const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
             if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
                 insiderUpdateEnabled = true;
-                if (settings.updateChannel === 'Default') {
-                    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-                    if (userVersion.suffix === "insiders") {
-                        checkAndApplyUpdate(settings.updateChannel, false);
-                    } else {
-                        suggestInsidersChannel();
+                if (os.platform() === "darwin") {
+                    const releaseParts: string[] = os.release().split(".");
+                    if (releaseParts.length >= 1) {
+                        // 1.2.0-insiders doesn't work with 17.7 or older Mac OS's.
+                        insiderUpdateEnabled = parseInt(releaseParts[0]) >= 18;
                     }
-                } else if (settings.updateChannel === 'Insiders') {
-                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
-                    checkAndApplyUpdate(settings.updateChannel, false);
+                }
+                if (insiderUpdateEnabled) {
+                    if (settings.updateChannel === 'Default') {
+                        const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+                        if (userVersion.suffix === "insiders") {
+                            checkAndApplyUpdate(settings.updateChannel, false);
+                        } else {
+                            suggestInsidersChannel();
+                        }
+                    } else if (settings.updateChannel === 'Insiders') {
+                        insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+                        checkAndApplyUpdate(settings.updateChannel, false);
+                    }
                 }
             }
         }

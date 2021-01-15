@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.1.4: Janurary 15, 2021
+### Bug Fix
+* Disable the Insiders update channel for Mac versions less than 18 due to bug [#6787](https://github.com/microsoft/vscode-cpptools/issues/6787).
+
 ## Version 1.1.3: December 3, 2020
 ### Bug Fixes
 * Disable the "join Insiders" prompt for Linux CodeSpaces. [#6491](https://github.com/microsoft/vscode-cpptools/issues/6491)
