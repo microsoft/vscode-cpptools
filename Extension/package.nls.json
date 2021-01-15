@@ -215,7 +215,7 @@
     "c_cpp.debuggers.cppdbg.externalConsole.description": "If true, a console is launched for the debuggee. If false, on Linux and Windows, it will appear in the Integrated Console.",
     "c_cpp.debuggers.cppvsdbg.externalConsole.description": "[Deprecated by 'console'] If true, a console is launched for the debuggee. If false, no console is launched.",
     "c_cpp.debuggers.cppvsdbg.console.description": "Where to launch the debug target.",
-    "c_cpp.debuggers.cppvsdbg.console.internalConsole.description": "Output to the VS Code Debug Console. This doesn't support reading console input (ex:Console.ReadLine)",
+    "c_cpp.debuggers.cppvsdbg.console.internalConsole.description": "Output to the VS Code Debug Console. This doesn't support reading console input (ex:'std::cin' or 'scanf')",
     "c_cpp.debuggers.cppvsdbg.console.integratedTerminal.description": "VS Code's integrated terminal",
     "c_cpp.debuggers.cppvsdbg.console.externalTerminal.description": "External terminal that can be configured via user settings",
     "c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description": "Console applications will be launched in their own external console window which will end when the application stops. Non-console applications will run without a terminal, and stdout/stderr will be ignored.",
