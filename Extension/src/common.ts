@@ -516,7 +516,7 @@ export function getInstalledBinaryPlatform(): string | undefined {
     return installedPlatform;
 }
 
-/* Check if the core binaries exists in extension's installation folder */
+/** Check if the core binaries exists in extension's installation folder */
 export async function checkInstallBinariesExist(): Promise<boolean> {
     if (!checkInstallLockFile()) {
         return false;
@@ -540,7 +540,7 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
     return installBinariesExist;
 }
 
-/* Check if the core Json files exists in extension's installation folder */
+/** Check if the core Json files exists in extension's installation folder */
 export async function checkInstallJsonsExist(): Promise<boolean> {
     let installJsonsExist: boolean = true;
     const jsonFiles: string[] = [
