@@ -1179,7 +1179,9 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
     const lines: string[] = data.split("\n");
     data = "";
     lines.forEach((line: string) => {
-        if (!line.includes(".dylib") && !line.includes("???")) {
+        if (// Temporarily (?) remove .dylib filtering.
+            // !line.includes(".dylib") &&
+            !line.includes("???")) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
             line = line.replace(/std::__1::/g, "std::");  // __1:: is not helpful.
             data += (line + "\n");
