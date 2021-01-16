@@ -182,7 +182,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
-            newConfig.console = "internalConsole";
+            newConfig.console = "externalTerminal";
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             const isWindows: boolean = platform === 'win32';
             newConfig.program = isWindows ? exeName + ".exe" : exeName;
