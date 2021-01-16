@@ -302,10 +302,16 @@ export interface LocalizeDocumentSymbol {
     children: LocalizeDocumentSymbol[];
 }
 
+/** Differs from vscode.Location, which has a uri of type vscode.Uri. */
+interface Location {
+    uri: string;
+    range: Range;
+}
+
 interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
-    location: vscode.Location;
+    location: Location;
     containerName: string;
     suffix: LocalizeStringParams;
 }
