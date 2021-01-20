@@ -8,7 +8,7 @@
 * Fix IntelliSense errors with C++20 std::range in gcc/clang modes. [#6342](https://github.com/microsoft/vscode-cpptools/issues/6342)
 * Fix `compile_commands.json` not working correctly for `*.C` files. [#6497](https://github.com/microsoft/vscode-cpptools/issues/6497)
 * Fix IntelliSense errors when "module" is used as a variable name with C++20. [#6719](https://github.com/microsoft/vscode-cpptools/issues/6719)
-* Fix runtime failure on macOS 10.13 or older. [#6787](https://github.com/microsoft/vscode-cpptools/issues/6787)
+* Fix a runtime failure on macOS 10.13 or older. [#6787](https://github.com/microsoft/vscode-cpptools/issues/6787)
 * Fix `Go to Symbol in Workspace`. [#6793](https://github.com/microsoft/vscode-cpptools/issues/6793)
 
 ## Version 1.2.0-insiders: January 14, 2021
