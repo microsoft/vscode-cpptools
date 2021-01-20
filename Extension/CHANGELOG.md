@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 
-## Version 1.2.0-insiders2: January 19, 2021
+## Version 1.2.0-insiders2: January 20, 2021
 ### Enhancement
 * Add new "console" launch config for cppvsdbg. [PR #6794](https://github.com/microsoft/vscode-cpptools/pull/6794)
 
