@@ -8,7 +8,7 @@
 ### Bug Fixes
 * Fix autocomplete not working with `for` loop variables with C code. [#2946](https://github.com/microsoft/vscode-cpptools/issues/2946)
 * Fix an entry not found error for files in `compile_commands.json` that didn't initially exist. [#6311](https://github.com/microsoft/vscode-cpptools/issues/6311)
-* Fix IntelliSense errors with C++20 std::range in gcc/clang modes. [#6342](https://github.com/microsoft/vscode-cpptools/issues/6342)
+* Fix IntelliSense errors with C++20 std::ranges in gcc/clang modes. [#6342](https://github.com/microsoft/vscode-cpptools/issues/6342)
 * Fix `compile_commands.json` not working correctly for `*.C` files. [#6497](https://github.com/microsoft/vscode-cpptools/issues/6497)
 * Fix IntelliSense errors when "module" is used as a variable name with C++20. [#6719](https://github.com/microsoft/vscode-cpptools/issues/6719)
 * Fix a runtime failure on macOS 10.13 or older. [#6787](https://github.com/microsoft/vscode-cpptools/issues/6787)
