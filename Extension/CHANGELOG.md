@@ -2,6 +2,9 @@
 
 
 ## Version 1.2.0-insiders2: January 19, 2021
+### Enhancement
+* Add new "console" launch config for cppvsdbg. [PR #6794](https://github.com/microsoft/vscode-cpptools/pull/6794)
+
 ### Bug Fixes
 * Fix autocomplete not working with `for` loop variables with C code. [#2946](https://github.com/microsoft/vscode-cpptools/issues/2946)
 * Fix an entry not found error for files in `compile_commands.json` that didn't initially exist. [#6311](https://github.com/microsoft/vscode-cpptools/issues/6311)
